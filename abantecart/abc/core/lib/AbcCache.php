@@ -10,6 +10,7 @@ use abc\core\ABC;
 use abc\core\engine\Registry;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Container\Container;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Filesystem\Cache;
 use Illuminate\Filesystem\Filesystem;
 
@@ -25,7 +26,6 @@ use Illuminate\Filesystem\Filesystem;
  * @method static mixed sear(string $key, \Closure $callback)
  * @method static mixed rememberForever(string $key, \Closure $callback)
  * @method static bool forget(string $key)
- * @method static \Illuminate\Contracts\Cache\Store getStore()
  *
  * @package abc\core\lib
  */
@@ -50,7 +50,16 @@ class AbcCache
         static::$currentStore = $driver;
         $this->manager = $this->initManager();
         if (!$this->manager) {
-            Registry::log()->write(__CLASS__.':  '.$store.' not found!');
+            Registry::log()->write(__CLASS__.':  Cannot to initiate cache manager.');
+        }
+
+        $config = Registry::config();
+        if (!$config) {
+            $this->enableCache();
+        } elseif ($config->get('config_cache_enable')) {
+            $this->enableCache();
+        } else {
+            $this->enableCache();
         }
     }
 
@@ -59,7 +68,6 @@ class AbcCache
      *
      * @return  void
      *
-     * @since  1.2.7
      */
     public function enableCache()
     {
@@ -88,7 +96,11 @@ class AbcCache
         return $this->enabled;
     }
 
+    /**
+     * @return CacheManager
+     */
     public function initManager(){
+        /** @var Application $app */
         $app = new Container();
         Container::setInstance($app);
         $app->singleton('files', function(){
@@ -107,6 +119,45 @@ class AbcCache
         });
 
         return new CacheManager($app);
+    }
+
+    /**
+     * @return string
+     */
+    public function getCurrentStore()
+    {
+        return static::$currentStore;
+    }
+
+    /**
+     * @return \Illuminate\Contracts\Cache\Repository
+     */
+    public function getCurrentStorage()
+    {
+        return $this->getStorage();
+    }
+
+    /**
+     * @param string $store
+     *
+     * @throws \Exception
+     */
+    public function setCurrentStore(string $store)
+    {
+        if ($store && in_array($store, $this->getAvailableStores())) {
+            static::$currentStore = $store;
+        } else {
+            throw new \Exception('Storage '.$store
+                .' not found in the configuration. See abc/config/*/config.php file for details');
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function getAvailableStores()
+    {
+        return array_keys(ABC::env('CACHE')['stores']);
     }
 
     /**
@@ -158,8 +209,7 @@ class AbcCache
             return null;
         }
 
-        $result = $storage->get($key);
-        return $result === null ? false : $result;
+        return $storage->get($key);
     }
 
 
@@ -249,7 +299,6 @@ class AbcCache
         $store = !$store ? static::$currentStore : $store;
         $store = !$store ? ABC::env('CACHE')['driver'] : $store;
         $output = $this->manager->store($store);
-        Registry::log()->write(__CLASS__.': Storage '.$store.' not found!');
         return $output;
     }
 

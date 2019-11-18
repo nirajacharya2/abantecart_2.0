@@ -82,7 +82,10 @@ final class ARouter
     {
         $this->rt = $rt;
         if (empty($this->rt)) {
-            throw new AException(AC_ERR_LOAD, 'Error: Route is undefined!');
+            throw new AException(
+                'Error: Route is undefined!',
+                AC_ERR_LOAD
+            );
         }
 
         $this->_route();

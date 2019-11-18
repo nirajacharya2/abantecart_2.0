@@ -15,6 +15,7 @@ use abc\models\system\Audit;
 use abc\models\system\Store;
 use H;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Validation\Rule;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
@@ -54,7 +55,6 @@ use Illuminate\Support\Collection;
  * @property \Illuminate\Database\Eloquent\Collection $orders
  *
  * @method static Customer find(int $customer_id) Customer
- * @method static Customer select(mixed $select = '*') Builder
  * @package abc\models
  */
 class Customer extends BaseModel
@@ -323,7 +323,7 @@ class Customer extends BaseModel
 
         'status' => [
             'checks'   => [
-                'boolean'
+                'boolean',
             ],
             'messages' => [
                 '*' => [
@@ -346,7 +346,7 @@ class Customer extends BaseModel
 
         'approved' => [
             'checks'   => [
-                'boolean'
+                'boolean',
             ],
             'messages' => [
                 '*' => [
@@ -802,6 +802,7 @@ class Customer extends BaseModel
             if (H::has_value($filter['email'])) {
                 $emails = (array)$filter['email'];
                 $query->where(function ($query) use ($emails, $filter) {
+                    /** @var $query QueryBuilder */
                     foreach ($emails as $email) {
                         if ($filter['search_operator'] == 'equal') {
                             $query->orWhere('customers.email', '=', mb_strtolower($email));
@@ -830,19 +831,22 @@ class Customer extends BaseModel
 
         if (H::has_value($filter['only_subscribers'])) {
             $query->where(function ($subQuery) use ($subscriberGroupId) {
+                /** @var $subQuery QueryBuilder */
                 $subQuery->where('customer_groups.customer_group_id', '=', $subscriberGroupId);
             });
         } elseif (H::has_value($filter['all_subscribers'])) {
             $query->where(function ($subQuery) {
+                /** @var $subQuery QueryBuilder */
                 $subQuery->where(
                     [
                         'customers.newsletter' => 1,
-                        'customers.status' => 1,
-                        'customers.approved' => 1
+                        'customers.status'     => 1,
+                        'customers.approved'   => 1,
                     ]
                 );
             })
                   ->orWhere(function ($subQuery) use ($subscriberGroupId) {
+                      /** @var $subQuery QueryBuilder */
                       $subQuery->where('customers.newsletter', '=', 1)
                             ->where('customer_groups.customer_group_id', '=', $subscriberGroupId);
                   });
@@ -894,13 +898,14 @@ class Customer extends BaseModel
         if (($filter['all_subscribers'] || $filter['only_subscribers']) && $filter['newsletter_protocol']) {
             $query->join('customer_notifications',
                 function ($join) use ($filter) {
+                    /** @var JoinClause $join */
                     $join->on('customer_notifications.customer_id', '=', 'customers.customer_id')
                          ->where('customer_notifications.sendpoint', '=', 'newsletter');
                 });
             $query->where(
                 [
-                    'customer_notifications.status' => 1,
-                    'customer_notifications.protocol' => $filter['newsletter_protocol']
+                    'customer_notifications.status'   => 1,
+                    'customer_notifications.protocol' => $filter['newsletter_protocol'],
                 ]
             );
         }
@@ -953,6 +958,14 @@ class Customer extends BaseModel
         }
         //allow to extends this method from extensions
         Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query, $inputData);
+
+        if ($filter['include'] && count($filter['include']) == 1) {
+            //do not use cache when only one customer were asked
+        } else {
+            //use caching only when returns collection
+            $query->useCache('customer');
+        }
+
         $result_rows = $query->get();
 
 //???? TODO need to check when encrypted
@@ -1083,9 +1096,11 @@ class Customer extends BaseModel
          */
         $query->selectRaw($db->raw_sql_row_count().' '.$db->table_name('customers').'.*');
         $query->join('orders', function ($join) {
+            /** @var JoinClause $join */
             $join->on('orders.order_id', '=', 'order_products.order_id');
         });
         $query->join('customers', function ($join) {
+            /** @var JoinClause $join */
             $join->on('orders.customer_id', '=', 'customers.customer_id');
         })
               ->where('orders.order_status_id', '>', 0)
@@ -1094,7 +1109,8 @@ class Customer extends BaseModel
         //allow to extends this method from extensions
         Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
 
-        $result_rows = $query->get();
+        $result_rows = $query->useCache('customer')->get();
+
         $totalNumRows = $db->sql_get_row_count();
         for ($i = 0; $i < count($result_rows); $i++) {
             $result_rows[$i] = $dcrypt->decrypt_data($result_rows[$i], 'customers');

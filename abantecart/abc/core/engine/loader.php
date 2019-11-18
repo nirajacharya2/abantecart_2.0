@@ -88,7 +88,10 @@ final class ALoader
         if ($file) {
             include_once($file);
         } else {
-            throw new AException(AC_ERR_LOAD, 'Error: Could not load library '.$library.'!');
+            throw new AException(
+                'Error: Could not load library '.$library.'!',
+                AC_ERR_LOAD
+            );
         }
     }
 
@@ -186,7 +189,10 @@ final class ALoader
         if (file_exists($file)) {
             include_once($file);
         } else {
-            throw new AException(AC_ERR_LOAD, 'Error: Could not load helper '.$helper.'!');
+            throw new AException(
+                'Error: Could not load helper '.$helper.'!',
+                AC_ERR_LOAD
+            );
         }
     }
 

@@ -89,7 +89,7 @@ class ALayoutManager
     public function __construct($tmpl_id = '', $page_id = '', $layout_id = '')
     {
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to change page layout');
+            throw new AException ('Error: permission denied to change page layout', AC_ERR_LOAD);
         }
 
         $this->registry = Registry::getInstance();
@@ -157,7 +157,7 @@ class ALayoutManager
                 $message_text .= ' Requested data: template: '.$tmpl_id.', page_id: '.$page_id.', layout_id: '
                     .$layout_id;
                 $message_text .= '  '.H::genExecTrace('full');
-                throw new AException (AC_ERR_LOAD_LAYOUT, $message_text);
+                throw new AException ($message_text, AC_ERR_LOAD_LAYOUT, );
             }
         }
 
@@ -1069,10 +1069,12 @@ class ALayoutManager
     public function deleteLayoutBlocks($layout_id = 0, $parent_instance_id = 0)
     {
         if (!$parent_instance_id && !$layout_id) {
-            throw new AException (AC_ERR_LOAD,
+            throw new AException (
                 'Error: Cannot to delete layout block, parent_instance_id "'
                 .$parent_instance_id.'" and layout_id "'.$layout_id.
-                '" does not exists.');
+                '" does not exists.',
+                AC_ERR_LOAD
+            );
         } else {
             $this->db->query("DELETE FROM ".$this->db->table_name("block_layouts")." 
                                 WHERE layout_id = '".( int )$layout_id."' 
@@ -1095,7 +1097,10 @@ class ALayoutManager
     public function deleteAllLayoutBlocks($layout_id = 0)
     {
         if (!$layout_id) {
-            throw new AException (AC_ERR_LOAD, 'Error: Cannot to delete layout blocks. Missing layout ID!');
+            throw new AException (
+                'Error: Cannot to delete layout blocks. Missing layout ID!',
+                AC_ERR_LOAD
+            );
         } else {
             $this->db->query("DELETE FROM ".$this->db->table_name("block_layouts")." 
                                 WHERE layout_id = '".( int )$layout_id."'");
@@ -1641,8 +1646,10 @@ class ALayoutManager
     public function deleteBlockTemplates($block_id = 0, $parent_block_id = 0)
     {
         if (!$block_id) {
-            throw new AException (AC_ERR_LOAD,
-                'Error: Cannot to delete block template, block_id "'.$block_id.'" does not exists.');
+            throw new AException (
+                'Error: Cannot to delete block template, block_id "'.$block_id.'" does not exists.',
+                AC_ERR_LOAD
+            );
         } else {
             $sql = "DELETE FROM ".$this->db->table_name("block_templates")." 
                     WHERE block_id = '".( int )$block_id."'";

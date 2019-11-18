@@ -49,7 +49,7 @@ class UserGroup extends BaseModel
     {
         parent::__construct($attributes = []);
         if (!$this->isUser()) {
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access '.__CLASS__);
+            throw new AException ('Error: permission denied to access '.__CLASS__, AC_ERR_LOAD);
         }
     }
 

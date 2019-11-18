@@ -2165,7 +2165,7 @@ class Product extends BaseModel
             .'_'.md5($limit.$order.$start.$sort.$total);
 
         $product_data = $cache->get($cache_key);
-        if ($product_data === false) {
+        if ($product_data === null) {
             $product_data = [];
 
             $aliasP = $db->table_name('products');

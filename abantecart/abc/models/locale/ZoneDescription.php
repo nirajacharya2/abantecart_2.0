@@ -27,8 +27,7 @@ class ZoneDescription extends BaseModel
         'language_id',
     ];
 
-    public $timestamps = false;
-
+    protected $touches = ['zone'];
     protected $casts = [
         'zone_id'     => 'int',
         'language_id' => 'int',

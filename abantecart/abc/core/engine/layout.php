@@ -166,9 +166,11 @@ class ALayout
             $layouts = $this->getDefaultLayout();
             if (sizeof($layouts) == 0) {
                 // ????? How to terminate ????
-                throw new AException(AC_ERR_LOAD_LAYOUT,
+                throw new AException(
                     'No layout found for page_id/controller '.$this->page_id.'::'.$this->page['controller'].'! '
-                    .H::genExecTrace('full'));
+                    .H::genExecTrace('full'),
+                    AC_ERR_LOAD_LAYOUT
+                );
             }
         }
 
@@ -285,7 +287,7 @@ class ALayout
         $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id;
         $layouts = $this->cache->get($cache_key);
 
-        if ($layouts === false) {
+        if ($layouts === null) {
             $where = "WHERE template_id = 'default' AND layout_type = '0' ";
 
             $sql = "SELECT layout_id, layout_type, layout_name, date_added, date_modified
@@ -316,9 +318,10 @@ class ALayout
             return null;
         }
         $store_id = (int)$this->config->get('config_store_id');
-        $cache_key = 'layout.layouts.'.$this->tmpl_id.'.'.$this->page_id
-            .(!empty($layout_type) ? '.'.$layout_type : '');
+        $cache_key = 'layout.layouts.'.$this->tmpl_id.'.'
+            .$this->page_id.(!empty($layout_type) ? '.'.$layout_type : '');
         $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id;
+
         $layouts = $this->cache->get($cache_key);
         if ($layouts === null) {
             $where = 'WHERE l.template_id = "'.$this->db->escape($this->tmpl_id).'" ';
@@ -341,10 +344,11 @@ class ALayout
                 .$where
                 ." ORDER BY "
                 ."l.layout_id Asc";
-
             $query = $this->db->query($sql);
             $layouts = $query->rows;
-            $this->cache->put($cache_key, $layouts);
+            if ($layouts) {
+                $this->cache->put($cache_key, $layouts);
+            }
         }
         return $layouts;
     }
@@ -359,7 +363,7 @@ class ALayout
     public function getLayoutBlocks($layout_id)
     {
         if (empty($layout_id)) {
-            throw new AException(AC_ERR_LOAD_LAYOUT, 'No layout specified for getLayoutBlocks!'.$layout_id);
+            throw new AException('No layout specified for getLayoutBlocks!'.$layout_id, AC_ERR_LOAD_LAYOUT);
         }
         $store_id = (int)$this->config->get('config_store_id');
         $cache_key = 'layout.blocks.'.$layout_id;

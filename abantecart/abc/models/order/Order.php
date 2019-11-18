@@ -94,9 +94,7 @@ use Illuminate\Database\Query\JoinClause;
  * @property \Illuminate\Database\Eloquent\Collection $order_products
  * @property \Illuminate\Database\Eloquent\Collection $order_totals
  *
- * @method static QueryBuilder where(string | array $column, string $operator = '=', mixed $value = null, string $boolean = 'and') QueryBuilder
  * @method static Order find(int $order_id) Order
- * @method static Order select(mixed $select) Builder
  *
  * @package abc\models
  */
@@ -798,6 +796,7 @@ class Order extends BaseModel
         }
 
         $this->attributes = $data;
+        Registry::cache()->flush('order');
         return parent::save($options);
     }
 
@@ -879,13 +878,9 @@ class Order extends BaseModel
                     )->get();
                     if ($orderOptions) {
                         foreach ($orderOptions as $orderOption) {
-                            $option = ProductOptionValue::where(
-                                [
-                                    'product_option_value_id' => $orderOption['product_option_value_id'],
-                                    'subtract'                => 1,
-                                ]
-                            )->get();
-                            if ($option) {
+                            /** @var ProductOptionValue $option */
+                            $option = ProductOptionValue::find($orderOption['product_option_value_id']);
+                            if ($option->subtract) {
                                 $option->update(
                                     [
                                         'quantity' => $option->quantity + $orderProduct['quantity'],
@@ -898,6 +893,8 @@ class Order extends BaseModel
             }
         }
         parent::delete();
+        Registry::cache()->flush('order');
+
     }
 
     /**
@@ -1078,7 +1075,7 @@ class Order extends BaseModel
     /**
      * @param int $order_id
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Support\Collection
      */
     public static function getOrderHistories($order_id)
     {
@@ -1183,6 +1180,7 @@ class Order extends BaseModel
      *
      * @return bool
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public static function editOrder(int $order_id, array $data)
     {
@@ -1228,6 +1226,7 @@ class Order extends BaseModel
             }
 
             Registry::db()->commit();
+            Registry::cache()->flush('order');
             //revert language for model back
             Product::setCurrentLanguageID($old_language);
 
@@ -1248,12 +1247,14 @@ class Order extends BaseModel
      *
      * @return bool
      * @throws Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
 
     protected static function editOrderProducts(array $orderInfo, array $data, $language = null)
     {
         $language_id = $language ? $language->getLanguageID() : Registry::language()->getLanguageID();
         $order_id = $orderInfo['order_id'];
+        $qnt_diff = 0;
 
         if (!$order_id) {
             return false;
@@ -1523,6 +1524,7 @@ class Order extends BaseModel
 
         //allow to extends this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
+        $query->useCache('order');
         return $query->get();
     }
 
@@ -1729,6 +1731,7 @@ class Order extends BaseModel
 
         //allow to extends this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $inputData);
+        $query->useCache('order');
         $result_rows = $query->get();
 
         //finally decrypt data and return result
@@ -1772,7 +1775,7 @@ class Order extends BaseModel
             ->groupBy('customer_id');
         //allow to extends this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $customers_ids);
-        return $query->get()->pluck('count', 'customer_id');
+        return $query->get()->pluck('count', 'customer_id')->toArray();
     }
 
 }

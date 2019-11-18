@@ -57,7 +57,10 @@ class AExtensionManager
     public function __construct()
     {
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access extension manager');
+            throw new AException (
+                'Error: permission denied to access extension manager',
+                AC_ERR_LOAD
+            );
         }
         $this->registry = Registry::getInstance();
     }

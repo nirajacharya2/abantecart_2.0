@@ -44,7 +44,10 @@ class ALanguageManager extends ALanguage
     {
         parent::__construct($registry, $code, $section);
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access class ALanguageManager');
+            throw new AException (
+                'Error: permission denied to access class ALanguageManager',
+                AC_ERR_LOAD
+            );
         }
     }
 
@@ -930,7 +933,7 @@ class ALanguageManager extends ALanguage
                 /** @noinspection PhpIncludeInspection */
                 require_once($ex_class);
             } else {
-                throw new AException(AC_ERR_LOAD, 'Error: Could not load translations class '.$ex_class.'!');
+                throw new AException('Error: Could not load translations class '.$ex_class.'!', AC_ERR_LOAD);
             }
 
             $translate_driver = new Translator($this->registry->get('config'));

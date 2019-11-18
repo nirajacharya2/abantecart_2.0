@@ -1239,8 +1239,9 @@ class ExtensionsApi
         if ($this->extensions->$property !== false) {
             return $this->extensions->$property;
         }
-        throw new AException(AC_ERR_LOAD,
-            'Extensions of name "'.$property.'" not found in ExtensionsApi '
+        throw new AException(
+            'Extensions of name "'.$property.'" not found in ExtensionsApi ',
+            AC_ERR_LOAD
         );
     }
 

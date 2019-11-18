@@ -118,7 +118,7 @@ class ControllerApiCatalogCategory extends AControllerAPI
                     }
                 }
             }
-            Registry::cache()->remove('*');
+            Registry::cache()->flush();
         } catch (\Exception $e) {
             $this->rest->setResponseData(['Error' => 'Create Error: '.$e->getMessage()]);
             $this->rest->sendResponse(200);
@@ -224,7 +224,7 @@ class ControllerApiCatalogCategory extends AControllerAPI
             return null;
         }
 
-        Registry::cache()->remove('*');
+        Registry::cache()->flush();
 
         $this->data['result'] = [
             'status'      => $updateBy ? 'updated' : 'created',
@@ -257,7 +257,7 @@ class ControllerApiCatalogCategory extends AControllerAPI
             if ($deleteBy) {
                 Category::withTrashed()->where($deleteBy, $request[$deleteBy])
                     ->forceDelete();
-                Registry::cache()->remove('*');
+                Registry::cache()->flush();
 
             } else {
                 $this->rest->setResponseData(['Error' => 'Not correct request, Category_ID not found']);

@@ -50,12 +50,12 @@ class AssetPublisher
     {
         // forbid for non admin calls
         if (!ABC::env('IS_ADMIN')) {
-            throw new AException(AC_ERR_LOAD, 'Error: permission denied. ');
+            throw new AException('Error: permission denied. ', AC_ERR_LOAD);
         }
         $this->registry = Registry::getInstance();
 
         if (!$this->validate()) {
-            throw new AException(AC_ERR_LOAD, 'Error: '.implode("\n", $this->errors));
+            throw new AException('Error: '.implode("\n", $this->errors), AC_ERR_LOAD);
         }
     }
 

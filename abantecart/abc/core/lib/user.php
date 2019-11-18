@@ -119,7 +119,6 @@ final class AUser
                 'users.status'   => 1,
             ]
         )->whereRaw(Registry::db()->table_name('users').'.password = '.$sqlString)
-                    ->noCache()
                     ->first();
         if ($user) {
             $this->userId = $this->session->data['user_id'] = (int)$user->user_id;

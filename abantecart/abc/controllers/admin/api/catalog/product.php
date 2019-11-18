@@ -179,7 +179,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
             return null;
         }
 
-        Registry::cache()->remove('*');
+        Registry::cache()->flush();
 
         $this->data['result'] = [
             'status'     => $updateBy ? 'updated' : 'created',

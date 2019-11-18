@@ -381,7 +381,10 @@ final class ADataEncryption
                     ." in the encryption_keys table. Attempt to locate default keys! ";
                 $this->log->write($error);
                 $this->message->saveError('Data decryption error', $error);
-                throw new AException (AC_ERR_LOAD, $error);
+                throw new AException(
+                    $error,
+                    AC_ERR_LOAD
+                );
             }
         }
 
@@ -390,7 +393,10 @@ final class ADataEncryption
                 "Error: Can not locate default key in configuration file. Refer to data encryption configuration help!";
             $this->log->write($error);
             $this->message->saveError('Data encryption error', $error);
-            throw new AException (AC_ERR_LOAD, $error);
+            throw new AException (
+                $error,
+                AC_ERR_LOAD
+            );
         }
 
         return $key_name;
@@ -416,7 +422,7 @@ final class ADataEncryption
                     ." in the encryption_keys table. Record data might not be decrypted! ";
                 $this->log->write($error);
                 $this->message->saveError('Data decryption error', $error);
-                throw new AException (AC_ERR_LOAD, $error);
+                throw new AException($error, AC_ERR_LOAD);
             }
         }
 

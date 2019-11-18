@@ -455,7 +455,7 @@ class Category extends BaseModel
                     .'_side_'.(int)ABC::env('IS_ADMIN');
         $cache = Registry::cache()->get($cacheKey);
 
-        if ($cache === false) {
+        if ($cache === null) {
             $category_data = [];
 
             /**

@@ -20,17 +20,14 @@ namespace abc\models;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
-use abc\core\lib\AbcCache;
-use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Query\Builder;
-use Illuminate\Database\Query\Grammars\Grammar;
-use Illuminate\Database\Query\Processors\Processor;
-use Illuminate\Support\Facades\Cache;
 
 class QueryBuilder extends Builder
 {
 
-    protected $cacheStatus = true;
+    protected $cacheStatus = false;
+    protected $cacheStore = '';
+    protected $cacheTags = [];
 
     /**
     * Returns a Unique String that can identify this Query.
@@ -58,13 +55,21 @@ class QueryBuilder extends Builder
             return parent::runSelect();
         }
 
-        return $cache->remember(
+        $ttl = (int)ABC::env('CACHE')['stores'][$cache::$currentStore]['ttl'];
+        if (!$ttl) {
+            $ttl = 5;
+        }
+        $output = $cache->remember(
             $this->getCacheKey(),
-            1,
+            $ttl,
             function() {
                  return parent::runSelect();
-            }
+            },
+            $this->cacheStore
         );
+
+        $this->cacheStatus = false;
+        return $output;
     }
 
     public function setGridRequest($data = [])
@@ -112,6 +117,22 @@ class QueryBuilder extends Builder
     public function noCache()
     {
         $this->cacheStatus = false;
+        return $this;
+    }
+
+    /**
+     * @param array | string $tags
+     * @param string $store
+     *
+     * @return $this
+     */
+    public function useCache($tags, $store = '')
+    {
+        $this->cacheTags = $tags ? $tags : [];
+        $this->cacheTags = is_string($this->cacheTags) ? [$this->cacheTags] : $this->cacheTags;
+
+        $this->cacheStore = $store ? $store : Registry::cache()->getCurrentStore();
+        $this->cacheStatus = true;
         return $this;
     }
 }

@@ -5,6 +5,7 @@ namespace abc\models\locale;
 use abc\models\BaseModel;
 use abc\models\customer\Address;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -17,10 +18,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $status
  * @property int $sort_order
  *
- * @property \Illuminate\Database\Eloquent\Collection $addresses
- * @property \Illuminate\Database\Eloquent\Collection $country_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $zones
- * @property \Illuminate\Database\Eloquent\Collection $zones_to_locations
+ * @property Collection $addresses
+ * @property CountryDescription $description
+ * @property Collection $descriptions
+ * @property Collection $zones
+ * @property Collection $zones_to_locations
  *
  * @method static Country find(int $country_id) Country
  *
@@ -33,8 +35,6 @@ class Country extends BaseModel
     protected $cascadeDeletes = ['descriptions', 'zones', 'zones_to_locations'];
 
     protected $primaryKey = 'country_id';
-    public $timestamps = false;
-
     protected $casts = [
         'status'     => 'int',
         'sort_order' => 'int',

@@ -224,7 +224,7 @@ class ModelLocalisationLocation extends Model
         } else {
             $location_data = $this->cache->get('localization.location');
 
-            if ($location_data === false) {
+            if ($location_data === null) {
                 $query = $this->db->query("SELECT * FROM ".$this->db->table_name("locations")." ORDER BY name ASC");
                 $location_data = $query->rows;
                 $this->cache->put('localization.location', $location_data);

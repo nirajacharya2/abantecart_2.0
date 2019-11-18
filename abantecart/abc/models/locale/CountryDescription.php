@@ -27,7 +27,7 @@ class CountryDescription extends BaseModel
         'language_id',
     ];
 
-    public $timestamps = false;
+    protected $touches = ['country'];
 
     protected $casts = [
         'country_id'  => 'int',

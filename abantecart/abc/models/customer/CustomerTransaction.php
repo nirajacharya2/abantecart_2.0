@@ -249,7 +249,7 @@ class CustomerTransaction extends BaseModel
      * @param $data
      * @param string $mode
      *
-     * @return \Illuminate\Support\Collection
+     * @return \Illuminate\Support\Collection | integer
      */
     public static function getTransactions($data, $mode = 'default')
     {
@@ -361,6 +361,7 @@ class CustomerTransaction extends BaseModel
 
         //allow to extends this method from extensions
         Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query, $data);
+        $query->useCache('customer_transactions');
         $result_rows = $query->get();
 
         //finally decrypt data and return result
@@ -377,10 +378,12 @@ class CustomerTransaction extends BaseModel
      */
     public static function getTransactionTypes()
     {
-        $query = self::select(['transaction_type'])
-            ->distinct(['transaction_type'])
-            ->orderBy('transaction_type')
-            ->withTrashed();
+        /** @var QueryBuilder $query */
+        $query = self::withTrashed()
+                     ->select(['transaction_type'])
+                     ->distinct(['transaction_type'])
+                     ->orderBy('transaction_type')
+                     ->useCache('customer_transaction');
         //allow to extends this method from extensions
         Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
         $result_rows = $query->get();

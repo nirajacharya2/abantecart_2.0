@@ -117,7 +117,7 @@ final class AConfig
 
             $this->data = array_merge($this->data, $cfg);
         } else {
-            throw new AException(AC_ERR_LOAD, 'Error: Could not load config '.$filename.'!');
+            throw new AException('Error: Could not load config '.$filename.'!', AC_ERR_LOAD);
         }
     }
 

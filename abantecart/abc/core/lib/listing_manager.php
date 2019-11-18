@@ -53,7 +53,10 @@ class AListingManager extends AListing
     {
         parent::__construct($custom_block_id);
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access class AListingManager');
+            throw new AException (
+                'Error: permission denied to access class AListingManager',
+                AC_ERR_LOAD
+            );
         }
     }
 

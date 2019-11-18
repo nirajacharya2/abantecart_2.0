@@ -46,7 +46,7 @@ class AContentManager
     public function __construct()
     {
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to change custom content');
+            throw new AException ('Error: permission denied to change custom content', AC_ERR_LOAD);
         }
         $this->registry = Registry::getInstance();
     }

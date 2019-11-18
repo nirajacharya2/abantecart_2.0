@@ -213,6 +213,7 @@ class OrderStatus extends BaseModel
 
         //allow to extends this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $inputData);
+        $query->useCache('order_status');
         $result_rows = $query->get();
 
         return $result_rows;

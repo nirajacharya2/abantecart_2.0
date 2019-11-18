@@ -25,7 +25,6 @@ use abc\core\engine\Registry;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\Event;
 
 /**
  * Class ADB
@@ -105,7 +104,7 @@ class ADB
             }
 
         } catch (\PDOException $e) {
-            throw new AException($e->getCode(), $e->getTraceAsString(), $e->getFile(), $e->getLine());
+            throw new AException($e->getTraceAsString(), $e->getCode(), $e->getFile(), $e->getLine());
         } catch (\Error $e) {
             exit($e->getTraceAsString());
         }

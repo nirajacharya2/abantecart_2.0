@@ -141,7 +141,7 @@ class AMenu_Storefront extends AMenu
     public function insertMenuItem($item = [])
     {
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to change menu');
+            throw new AException('Error: permission denied to change menu', AC_ERR_LOAD);
         }
 
         //clean text id
@@ -221,7 +221,7 @@ class AMenu_Storefront extends AMenu
     public function deleteMenuItem($item_id)
     {
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to change menu');
+            throw new AException('Error: permission denied to change menu', AC_ERR_LOAD);
         }
         //
         $this->dataset->deleteRows(["column_name" => "item_id", "operator" => "=", "value" => $item_id]);
@@ -241,7 +241,7 @@ class AMenu_Storefront extends AMenu
     {
 
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to change menu');
+            throw new AException('Error: permission denied to change menu', AC_ERR_LOAD);
         }
 
         if (empty ($new_values) || !$item_id) {
@@ -302,7 +302,7 @@ class AMenu_Storefront extends AMenu
         $data = !is_array($data) ? [] : $data;
 
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to change menu');
+            throw new AException('Error: permission denied to change menu', AC_ERR_LOAD);
         }
 
         $config = $this->registry->get('config');
@@ -343,7 +343,7 @@ class AMenu_Storefront extends AMenu
     public function deleteLanguage($language_id)
     {
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to change menu');
+            throw new AException('Error: permission denied to change menu', AC_ERR_LOAD);
         }
         $this->dataset_description->deleteRows([
             "column_name" => "language_id",

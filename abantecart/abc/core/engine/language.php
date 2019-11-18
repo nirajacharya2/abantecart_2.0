@@ -94,7 +94,10 @@ class ALanguage
             //problem no languages available
             $err = new AError('Error: no languages available in AbanteCart !', AC_ERR_LOAD);
             $err->toLog()->toDebug();
-            throw new AException(AC_ERR_LOAD, 'Error: Can not Load any language!');
+            throw new AException(
+                'Error: Can not Load any language!',
+                AC_ERR_LOAD
+            );
         }
 
         //If No language code, we need to detect language, set site language to use and set content language separately

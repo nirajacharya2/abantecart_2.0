@@ -53,7 +53,10 @@ use ReflectionMethod;
  * @method static QueryBuilder|Builder whereIn(string $column, array $keys) QueryBuilder
  * @method static QueryBuilder select(string|array $select = '*' ) QueryBuilder
  * @method static QueryBuilder selectRaw(string $sql) QueryBuilder
+ * @method static QueryBuilder distinct(array $columns) QueryBuilder
+ * @method static QueryBuilder|Builder withTrashed()
  * @method static QueryBuilder active() QueryBuilder
+ * @method static int max()
  * @method static QueryBuilder join( string $table, \Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
  * @method static QueryBuilder leftJoin( string $table, \Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
  * @method static QueryBuilder rightJoin( string $table, \Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder

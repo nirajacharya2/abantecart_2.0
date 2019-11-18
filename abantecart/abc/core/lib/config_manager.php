@@ -58,7 +58,7 @@ class AConfigManager
     public function __construct()
     {
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access class AConfigManager');
+            throw new AException ('Error: permission denied to access class AConfigManager', AC_ERR_LOAD);
         }
         $this->registry = Registry::getInstance();
         $this->load->model('setting/extension');
@@ -1578,14 +1578,14 @@ class AConfigManager
             'value' => $data['config_compression'],
         ]);
 
-        $all_cache_drivers = array_keys(ABC::env('CACHE')['stores']);
+        $all_cache_drivers = Registry::cache()->getAvailableStores();
         $cache_drivers = [];
         foreach ($all_cache_drivers as $drv) {
             $name = strtoupper($drv['driver_name']);
             $cache_drivers[$name] = $name;
         }
         sort($cache_drivers, SORT_STRING);
-        $current_cache_driver = strtoupper(ABC::env('CACHE')['CACHE_DRIVER'] ?? 'file');
+        $current_cache_driver = strtoupper(Registry::cache()->getCurrentStore());
         unset($cache_drivers[$current_cache_driver]);
 
         $fields['cache_enable'] = $form->getFieldHtml($props[] = [

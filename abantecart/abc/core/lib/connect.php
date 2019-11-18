@@ -363,7 +363,7 @@ final class AConnect
                 if ($this->silent_mode) {
                     return false;
                 } else {
-                    throw new AException(AC_ERR_CONNECT_METHOD, 'No connect method available ( curl | socket )');
+                    throw new AException('No connect method available ( curl | socket )', AC_ERR_CONNECT_METHOD);
                 }
                 break;
         }

@@ -29,37 +29,37 @@ if (!class_exists('abc\core\ABC')) {
 
 /**
  * @property \abc\core\lib\ALanguageManager $language
- * @property ADB                            $db
+ * @property ADB $db
  */
 class AFormManager
 {
     protected $registry;
     public $errors = 0; // errors during process
     private $form_id;
-    private $form_fields = array();
-    private $form_field_groups = array();
-    private $field_types = array('I', 'T', 'C', 'H', 'S', 'M', 'R', 'G'); // array for check field element type
+    private $form_fields = [];
+    private $form_field_groups = [];
+    private $field_types = ['I', 'T', 'C', 'H', 'S', 'M', 'R', 'G']; // array for check field element type
 
     public function __construct($form_name = '')
     {
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to change forms');
+            throw new AException ('Error: permission denied to change forms', AC_ERR_LOAD);
         }
 
         $this->registry = Registry::getInstance();
 
         //check if form with same name exists
         $sql = "SELECT form_id 
-				FROM ".$this->db->table_name("forms")." 
-				WHERE form_name='".$this->db->escape($form_name)."'";
+                FROM ".$this->db->table_name("forms")." 
+                WHERE form_name='".$this->db->escape($form_name)."'";
         $result = $this->db->query($sql);
         $this->form_id = ( int )$result->row ['form_id'];
 
         if ($this->form_id) {
             // field groups of form
             $sql = "SELECT group_id 
-					FROM ".$this->db->table_name("form_groups")." 
-					WHERE form_id='".$this->form_id."'";
+                    FROM ".$this->db->table_name("form_groups")." 
+                    WHERE form_id='".$this->form_id."'";
             $result = $this->db->query($sql);
             if ($result->num_rows) {
                 $this->form_field_groups [] = ( int )$result->row ['group_id'];
@@ -67,8 +67,8 @@ class AFormManager
 
             // fields of form
             $sql = "SELECT field_id 
-					FROM ".$this->db->table_name("fields")." 
-					WHERE form_id='".$this->form_id."'";
+                    FROM ".$this->db->table_name("fields")." 
+                    WHERE form_id='".$this->form_id."'";
             $result = $this->db->query($sql);
             if ($result->num_rows) {
                 $this->form_fields [] = ( int )$result->row ['field_id'];
@@ -94,17 +94,18 @@ class AFormManager
             return null;
         }
         $sql = "SELECT group_id 
-				FROM ".$this->db->table_name("form_groups")." 
-				WHERE group_name = '".$this->db->escape($group_name)."' AND form_id = '".$this->form_id."'";
+                FROM ".$this->db->table_name("form_groups")." 
+                WHERE group_name = '".$this->db->escape($group_name)."' AND form_id = '".$this->form_id."'";
         $result = $this->db->query($sql);
         return ( int )$result->row ['group_id'];
     }
 
     /**
      * @param string $field_group_id
-     * @param int    $language_id
+     * @param int $language_id
      *
      * @return null|array
+     * @throws \Exception
      */
     private function _getFieldGroupDescription($field_group_id = '', $language_id = 0)
     {
@@ -114,8 +115,8 @@ class AFormManager
             return null;
         }
         $sql = "SELECT * 
-				FROM ".$this->db->table_name("fields_group_descriptions")." 
-				WHERE group_id = '".$field_group_id."' AND language_id = '".$language_id."'";
+                FROM ".$this->db->table_name("fields_group_descriptions")." 
+                WHERE group_id = '".$field_group_id."' AND language_id = '".$language_id."'";
         $result = $this->db->query($sql);
         return $result->row;
     }
@@ -126,8 +127,8 @@ class AFormManager
             return null;
         }
         $sql = "SELECT field_id 
-				FROM ".$this->db->table_name("fields")." 
-				WHERE field_name = '".$this->db->escape($field_name)."' AND form_id= '".$this->form_id."'";
+                FROM ".$this->db->table_name("fields")." 
+                WHERE field_name = '".$this->db->escape($field_name)."' AND form_id= '".$this->form_id."'";
         $result = $this->db->query($sql);
         return ( int )$result->row ['field_id'];
     }
@@ -140,8 +141,8 @@ class AFormManager
             return null;
         }
         $sql = "SELECT * 
-				FROM ".$this->db->table_name("field_descriptions")." 
-				WHERE field_id = '".$field_id."' AND language_id = '".$language_id."'";
+                FROM ".$this->db->table_name("field_descriptions")." 
+                WHERE field_id = '".$field_id."' AND language_id = '".$language_id."'";
         $result = $this->db->query($sql);
         return $result->row;
     }
@@ -153,8 +154,8 @@ class AFormManager
             return null;
         }
         $sql = "SELECT * 
-				FROM ".$this->db->table_name("form_descriptions")." 
-				WHERE form_id = '".$this->form_id."' AND language_id = '".$language_id."'";
+                FROM ".$this->db->table_name("form_descriptions")." 
+                WHERE form_id = '".$this->form_id."' AND language_id = '".$language_id."'";
         $result = $this->db->query($sql);
         return $result->row;
     }
@@ -164,18 +165,19 @@ class AFormManager
      * @param int $language_id
      *
      * @return array
+     * @throws \Exception
      */
     private function _getFieldValues($field_id = 0, $language_id = 0)
     {
         $field_id = (int)$field_id;
         $language_id = (int)$language_id;
         if (!$field_id) {
-            return array();
+            return [];
         }
 
         $sql = "SELECT *
-				FROM ".$this->db->table_name("field_values")."
-				WHERE field_id = '".( int )$field_id."' AND language_id = '".$language_id."'";
+                FROM ".$this->db->table_name("field_values")."
+                WHERE field_id = '".( int )$field_id."' AND language_id = '".$language_id."'";
         $result = $this->db->query($sql);
         return $result->row;
     }
@@ -184,8 +186,8 @@ class AFormManager
     {
         $language_name = mb_strtolower($language_name, ABC::env('APP_CHARSET'));
         $query = "SELECT language_id
-				FROM ".$this->db->table_name("languages")."
-				WHERE LOWER(name) = '".$this->db->escape($language_name)."'";
+                FROM ".$this->db->table_name("languages")."
+                WHERE LOWER(name) = '".$this->db->escape($language_name)."'";
         $result = $this->db->query($query);
         return $result->row ? $result->row ['language_id'] : 0;
     }
@@ -230,6 +232,8 @@ class AFormManager
      * @param \SimpleXmlElement $xml_obj
      *
      * @return null
+     * @throws AException
+     * @throws \ReflectionException
      */
     private function _processXML($xml_obj)
     {
@@ -257,7 +261,7 @@ class AFormManager
             //check if form with same name exists
             $this->__construct($form->form_name);
 
-            if (!$this->form_id && in_array($form->action, array("", null, "update"))) {
+            if (!$this->form_id && in_array($form->action, ["", null, "update"])) {
                 $form->action = 'insert';
             }
 
@@ -265,7 +269,7 @@ class AFormManager
 
             if ($form->action == "delete") {
                 if ($this->form_id) {
-                    $sql = array();
+                    $sql = [];
                     $sql [] = "DELETE FROM ".$this->db->table_name("field_values")
                         ." WHERE field_id IN ( SELECT field_id FROM ".$this->db->table_name("fields")
                         ." WHERE form_id = '".$this->form_id."')";
@@ -306,7 +310,7 @@ class AFormManager
                 }
 
                 $query = "INSERT INTO ".$this->db->table_name("forms")." (`form_name`, `controller`, `success_page`, `status`) 
-							VALUES ('".$this->db->escape($form->form_name)."','".$this->db->escape($form->controller)
+                            VALUES ('".$this->db->escape($form->form_name)."','".$this->db->escape($form->controller)
                     ."','".$this->db->escape($form->success_page)."','".$this->db->escape($form->status)."')";
                 $this->db->query($query);
                 $this->form_id = $this->db->getLastId();
@@ -323,12 +327,12 @@ class AFormManager
                             continue 2;
                         }
                         $this->language->replaceDescriptions('form_descriptions',
-                            array('form_id' => (int)$this->form_id),
-                            array(
-                                $language_id => array(
+                            ['form_id' => (int)$this->form_id],
+                            [
+                                $language_id => [
                                     'description' => (string)$form_description->description,
-                                ),
-                            ));
+                                ],
+                            ]);
                     }
                 }
 
@@ -346,11 +350,11 @@ class AFormManager
             } else { // update form info
 
                 $query = "UPDATE ".$this->db->table_name("forms")."
-							SET `form_name` = '".$this->db->escape($form->form_name)."',
-								 `controller`='".$this->db->escape($form->controller)."',
-								 `success_page` = '".$this->db->escape($form->success_page)."',
-								 `status` = '".$this->db->escape($form->status)."'
-						WHERE form_id = '".$this->form_id."'";
+                            SET `form_name` = '".$this->db->escape($form->form_name)."',
+                                 `controller`='".$this->db->escape($form->controller)."',
+                                 `success_page` = '".$this->db->escape($form->success_page)."',
+                                 `status` = '".$this->db->escape($form->status)."'
+                        WHERE form_id = '".$this->form_id."'";
                 $this->db->query($query);
 
                 if ($form->form_descriptions->form_description) {
@@ -366,12 +370,12 @@ class AFormManager
                         }
 
                         $this->language->replaceDescriptions('form_descriptions',
-                            array('form_id' => (int)$this->form_id),
-                            array(
-                                $language_id => array(
+                            ['form_id' => (int)$this->form_id],
+                            [
+                                $language_id => [
                                     'description' => (string)$form_description->description,
-                                ),
-                            ));
+                                ],
+                            ]);
                     }
                 }
 
@@ -413,7 +417,7 @@ class AFormManager
                 return null;
             }
 
-            $sql = array();
+            $sql = [];
             $sql [] = "DELETE FROM ".$this->db->table_name("field_values")." WHERE field_id = '".$field_id."'";
             $sql [] = "DELETE FROM ".$this->db->table_name("field_descriptions")." WHERE field_id = '".$field_id."'";
             $sql [] = "DELETE FROM ".$this->db->table_name("fields_groups")." WHERE field_id = '".$field_id."'";
@@ -434,21 +438,21 @@ class AFormManager
         }
 
         if (!$field_id) { // if new field
-            $sql = array();
+            $sql = [];
             $query = "INSERT INTO ".$this->db->table_name("fields")." (form_id, field_name, element_type, sort_order, attributes, required, status) 
-						VALUES ('".$this->form_id."', 
-								'".$this->db->escape($field->field_name)."',
-								'".$this->db->escape($field->element_type)."',
-								'".( int )$field->sort_order."',
-								'".$this->db->escape($field->attributes)."',
-								'".$this->db->escape($field->required)."',
-								'".$this->db->escape($field->status)."')";
+                        VALUES ('".$this->form_id."', 
+                                '".$this->db->escape($field->field_name)."',
+                                '".$this->db->escape($field->element_type)."',
+                                '".( int )$field->sort_order."',
+                                '".$this->db->escape($field->attributes)."',
+                                '".$this->db->escape($field->required)."',
+                                '".$this->db->escape($field->status)."')";
             $this->db->query($query);
             $field_id = $this->db->getLastId();
 
             if ($field_group_id) {
                 $sql [] = "INSERT INTO ".$this->db->table_name("fields_groups")." (field_id, group_id, sort_order) 
-						VALUES ('".$field_id."', '".$field_group_id."',	'".$field_group_sort_order."')";
+                        VALUES ('".$field_id."', '".$field_group_id."',	'".$field_group_sort_order."')";
 
             }
 
@@ -465,10 +469,10 @@ class AFormManager
                         continue;
                     }
                     $sql [] = "INSERT INTO ".$this->db->table_name("field_descriptions")." (field_id,language_id,name,description) 
-								VALUES ('".$field_id."',
-										'".$language_id."',
-										'".$this->db->escape($field_description->name)."',
-										'".$this->db->escape($field_description->description)."')";
+                                VALUES ('".$field_id."',
+                                        '".$language_id."',
+                                        '".$this->db->escape($field_description->name)."',
+                                        '".$this->db->escape($field_description->description)."')";
                 }
             }
 
@@ -484,12 +488,12 @@ class AFormManager
                         continue;
                     }
                     $sql [] = "INSERT INTO ".$this->db->table_name("field_values")." (`field_id`, `opt_value`, `value`, `default`, `sort_order`, `language_id`) 
-								VALUES ('".$field_id."',
-										'".$this->db->escape($field_value->opt_value)."',
-										'".$this->db->escape($field_value->value)."',
-										'".$this->db->escape($field_value->default)."',
-										'".( int )$field_value->sort_order."',
-										'".$language_id."')";
+                                VALUES ('".$field_id."',
+                                        '".$this->db->escape($field_value->opt_value)."',
+                                        '".$this->db->escape($field_value->value)."',
+                                        '".$this->db->escape($field_value->default)."',
+                                        '".( int )$field_value->sort_order."',
+                                        '".$language_id."')";
                 }
 
             }
@@ -499,14 +503,14 @@ class AFormManager
             }
 
         } else { //if need to update field
-            $sql = array();
+            $sql = [];
             $sql [] = "UPDATE ".$this->db->table_name("fields")." SET    
-						 		element_type = '".$this->db->escape($field->element_type)."',
-								sort_order = '".( int )$field->sort_order."',
-								attributes = '".$this->db->escape($field->attributes)."',
-								required = '".$this->db->escape($field->required)."',
-								status = '".$this->db->escape($field->status)."'
-						WHERE form_id = '".$this->form_id."' and field_id = '".$field_id."'";
+                                element_type = '".$this->db->escape($field->element_type)."',
+                                sort_order = '".( int )$field->sort_order."',
+                                attributes = '".$this->db->escape($field->attributes)."',
+                                required = '".$this->db->escape($field->required)."',
+                                status = '".$this->db->escape($field->status)."'
+                        WHERE form_id = '".$this->form_id."' and field_id = '".$field_id."'";
 
             if ($field_group_id) {
                 // check is field in group
@@ -518,10 +522,10 @@ class AFormManager
                 if ($exists) {
                     $sql [] = "UPDATE ".$this->db->table_name("fields_groups")." SET group_id = '".$field_group_id
                         ."', sort_order = '".$field_group_sort_order."'
-								WHERE field_id = '".$field_id."'";
+                                WHERE field_id = '".$field_id."'";
                 } else {
                     $sql [] = "INSERT INTO ".$this->db->table_name("fields_groups")." (field_id, group_id, sort_order) 
-								VALUES ('".$field_id."', '".$field_group_id."',	'".$field_group_sort_order."')";
+                                VALUES ('".$field_id."', '".$field_group_id."',	'".$field_group_sort_order."')";
                 }
             }
 
@@ -541,15 +545,15 @@ class AFormManager
                     $exists = $this->_getFieldDescription($field_id, $language_id);
                     if (!$exists) {
                         $sql [] = "INSERT INTO ".$this->db->table_name("field_descriptions")." (field_id, language_id, name, description) 
-									VALUES ('".$field_id."',
-											'".$language_id."',
-											'".$this->db->escape($field_description->name)."',
-											'".$this->db->escape($field_description->description)."')";
+                                    VALUES ('".$field_id."',
+                                            '".$language_id."',
+                                            '".$this->db->escape($field_description->name)."',
+                                            '".$this->db->escape($field_description->description)."')";
                     } else {
                         $sql [] = "UPDATE ".$this->db->table_name("field_descriptions")." 
-										SET name = '".$this->db->escape($field_description->name)."',
-											description = '".$this->db->escape($field_description->description)."'
-										WHERE language_id = '".$language_id."'AND field_id = '".$field_id."'";
+                                        SET name = '".$this->db->escape($field_description->name)."',
+                                            description = '".$this->db->escape($field_description->description)."'
+                                        WHERE language_id = '".$language_id."'AND field_id = '".$field_id."'";
                     }
                 }
             }
@@ -567,12 +571,12 @@ class AFormManager
                         continue;
                     }
                     $sql [] = "INSERT INTO ".$this->db->table_name("field_values")." (`field_id`, `opt_value`, `value`, `default`, `sort_order`, `language_id`) 
-								VALUES ('".$field_id."',
-										'".$this->db->escape($field_value->opt_value)."',
-										'".$this->db->escape($field_value->value)."',
-										'".$this->db->escape($field_value->default)."',
-										'".( int )$field_value->sort_order."',
-										'".$language_id."')";
+                                VALUES ('".$field_id."',
+                                        '".$this->db->escape($field_value->opt_value)."',
+                                        '".$this->db->escape($field_value->value)."',
+                                        '".$this->db->escape($field_value->default)."',
+                                        '".( int )$field_value->sort_order."',
+                                        '".$language_id."')";
                 }
 
             }
@@ -589,13 +593,13 @@ class AFormManager
 
         // get group_id
         $field_group_id = $this->_getFieldGroupIdByName($field_group->name);
-        if (!$field_group_id && in_array($field_group->action, array("", null, "update"))) {
+        if (!$field_group_id && in_array($field_group->action, ["", null, "update"])) {
             $field_group->action = 'insert';
         }
 
         if ($field_group->action == 'delete') {
             if ($field_group_id) {
-                $sql = array();
+                $sql = [];
                 $sql [] = "DELETE FROM ".$this->db->table_name("fields_group_descriptions")." WHERE group_id  = '"
                     .$field_group_id."'";
                 $sql [] = "DELETE FROM ".$this->db->table_name("fields")." WHERE field_id IN ( SELECT field_id FROM "
@@ -625,23 +629,23 @@ class AFormManager
 
         if ($field_group->action == 'insert') {
             $query = "INSERT INTO ".$this->db->table_name("form_groups")." (`form_id`, `group_name`, `sort_order`, `status`)
-					    VALUES ('".$this->form_id."',
-					  			'".$this->db->escape($field_group->name)."',
-					  			'".( int )$field_group->sort_order."',
-					  			'".( int )$field_group->status."')";
+                        VALUES ('".$this->form_id."',
+                                '".$this->db->escape($field_group->name)."',
+                                '".( int )$field_group->sort_order."',
+                                '".( int )$field_group->status."')";
             $this->db->query($query);
             $field_group_id = $this->db->getLastId();
         } else {
             $query = "UPDATE ".$this->db->table_name("form_groups")." 
-						SET `sort_order`='".( int )$field_group->sort_order."',
-							`status`='".( int )$field_group->status."'
-							WHERE group_id = '".( int )$field_group_id."'";
+                        SET `sort_order`='".( int )$field_group->sort_order."',
+                            `status`='".( int )$field_group->status."'
+                            WHERE group_id = '".( int )$field_group_id."'";
             $this->db->query($query);
         }
 
         // process group description
         if ($field_group->field_group_descriptions->field_group_description) {
-            $sql = array();
+            $sql = [];
             foreach ($field_group->field_group_descriptions->field_group_description as $field_group_description) {
                 $language_id = $this->_getLanguageIdByName($field_group_description->language);
                 if (!$language_id) {
@@ -655,13 +659,13 @@ class AFormManager
                 // TODO need to check in the future what way is correct: with replaceDescription or direct insert
                 //$exists = $this->_getFieldGroupDescription ( $field_group_id, $language_id );
                 $this->language->replaceDescriptions('fields_group_descriptions',
-                    array('group_id' => (int)$field_group_id),
-                    array(
-                        $language_id => array(
+                    ['group_id' => (int)$field_group_id],
+                    [
+                        $language_id => [
                             'name'        => $field_group_description->name,
                             'description' => $field_group_description->description,
-                        ),
-                    )
+                        ],
+                    ]
                 );
             }
             foreach ($sql as $query) {

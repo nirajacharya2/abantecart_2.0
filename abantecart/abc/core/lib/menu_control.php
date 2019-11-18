@@ -21,12 +21,9 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
+use H;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 class AMenu
 {
@@ -40,6 +37,8 @@ class AMenu
      * @var object
      */
     protected $dataset;
+    /** @var ADB */
+    protected $db;
     /**
      * @var integer
      */
@@ -47,19 +46,19 @@ class AMenu
     /**
      * @var array
      */
-    protected $menu_items = array();
+    protected $menu_items = [];
     /**
      * array form quick search menu item without dig in menu levels
      *
      * @var array
      */
-    protected $dataset_rows = array();
+    protected $dataset_rows = [];
     /**
      * array for checking for unique menu item id
      *
      * @var array
      */
-    protected $item_ids = array();
+    protected $item_ids = [];
 
     public function __construct($menu_name = '')
     {
@@ -71,9 +70,11 @@ class AMenu
         $this->registry = Registry::getInstance();
         $this->db = $this->registry->get('db');
         //check for correct menu name
-        if (!in_array($menu_name, array('admin', 'storefront'))) {
-            throw new AException (AC_ERR_LOAD,
-                'Error: Could not initialize AMenu class! Unknown menu name: "'.$menu_name.'"');
+        if (!in_array($menu_name, ['admin', 'storefront'])) {
+            throw new AException (
+                'Error: Could not initialize AMenu class! Unknown menu name: "'.$menu_name.'"',
+                AC_ERR_LOAD
+            );
         }
 
         $this->dataset = new ADataset ('menu', $menu_name);
@@ -86,7 +87,7 @@ class AMenu
 
         // need to resort by sort_order property
         $offset = 0; // it needs for process repeating sort numbers
-        $tmp = $this->item_ids = array();
+        $tmp = $this->item_ids = [];
         if (is_array($values)) {
             $rm = new AResourceManager();
             $rm->setType('image');
@@ -108,7 +109,7 @@ class AMenu
 
         $this->dataset_rows = $values;
 
-        $menu = array();
+        $menu = [];
         foreach ($tmp as $key => $item) {
             ksort($item);
             $menu [$key] = $item;
@@ -192,7 +193,7 @@ class AMenu
         if (!$this->dataset_rows) {
             return false;
         }
-        $result = array();
+        $result = [];
         foreach ($this->dataset_rows as $item) {
             if ($item ['parent_id'] == $parent_id) {
                 $result [] = $item;
@@ -211,7 +212,7 @@ class AMenu
         if (!$this->dataset_rows) {
             return false;
         }
-        $result = array();
+        $result = [];
         foreach ($this->dataset_rows as $item) {
             if (!in_array($item ['parent_id'], $result)) {
                 $result [] = $item ['parent_id'];
@@ -226,15 +227,16 @@ class AMenu
      * @param array $item ("item_id"=>"","parent_id"=>"","item_text"=>,"rt"=>"","sort_order"=>"", "item_type" => "")
      *
      * @return boolean
+     * @throws AException
      */
-    public function insertMenuItem($item = array())
+    public function insertMenuItem($item = [])
     {
 
         $check_array =
-            array("item_id", "item_text", "item_url", "parent_id", "sort_order", "item_type", "item_icon_rl_id");
+            ["item_id", "item_text", "item_url", "parent_id", "sort_order", "item_type", "item_icon_rl_id"];
 
         //clean text id
-        $item ["item_id"] = AHelperUtils::preformatTextID($item ["item_id"]);
+        $item ["item_id"] = H::preformatTextID($item ["item_id"]);
 
         if (!$item ['item_type']) {
             $item ['item_type'] = 'extension';
@@ -271,10 +273,10 @@ class AMenu
             return 'Error: Cannot to add menu item because item with item_id "'.$item ["item_id"]
                 .'" is already exists.';
         }
-        $result = $this->dataset->addRows(array($item));
+        $result = $this->dataset->addRows([$item]);
         // rebuild menu var after changing
         $this->_build_menu($this->dataset->getRows());
-        $this->registry->get('cache')->remove('admin_menu');
+        Registry::cache()->flush('admin_menu');
         return $result;
     }
 
@@ -287,9 +289,9 @@ class AMenu
     public function deleteMenuItem($item_id)
     {
         //
-        $this->dataset->deleteRows(array("column_name" => "item_id", "operator" => "=", "value" => $item_id));
+        $this->dataset->deleteRows(["column_name" => "item_id", "operator" => "=", "value" => $item_id]);
         $this->_build_menu($this->dataset->getRows());
-        $this->registry->get('cache')->remove('admin_menu');
+        Registry::cache()->flush('admin_menu');
         return true;
     }
 
@@ -306,10 +308,10 @@ class AMenu
             return false;
         }
 
-        $this->dataset->updateRows(array("column_name" => "item_id", "operator" => "=", "value" => $item_id),
+        $this->dataset->updateRows(["column_name" => "item_id", "operator" => "=", "value" => $item_id],
             $new_values);
         $this->_build_menu($this->dataset->getRows());
-        $this->registry->get('cache')->remove('admin_menu');
+        Registry::cache()->flush('admin_menu');
         return true;
     }
 }

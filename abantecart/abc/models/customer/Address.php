@@ -327,10 +327,10 @@ class Address extends BaseModel
              * @var Country $country
              */
             if( (int)$row['country_id'] ) {
-                $country = Country::find($row['country_id']);
+                $country = Country::with('description')->find($row['country_id']);
             }
             if ($country) {
-                $country_name = $country->name;
+                $country_name = $country->description->name;
                 $iso_code_2 = $country->iso_code_2;
                 $iso_code_3 = $country->iso_code_3;
                 $address_format = $country->address_format;
@@ -346,10 +346,10 @@ class Address extends BaseModel
              * @var Zone $zone
              */
             if( (int)$row['zone_id'] ) {
-                $zone = Zone::find($row['zone_id']);
+                $zone = Zone::with('description')->find($row['zone_id']);
             }
             if ($zone) {
-                $zone_name = $zone->name;
+                $zone_name = $zone->description->name;
                 $zone_code = $zone->code;
             } else {
                 $zone_name = '';
@@ -381,10 +381,9 @@ class Address extends BaseModel
     /**
      * @param int $customer_id
      * @param int $language_id
+     * @param int|null $address_id
      *
-     * @param int $address_id
-     *
-     * @return \Illuminate\Support\Collection|Address
+     * @return mixed
      */
     public static function getAddresses(int $customer_id, int $language_id, int $address_id = null)
     {
@@ -445,7 +444,10 @@ class Address extends BaseModel
             }
         );
 
-        return $address_id ? $query->first() : $query->get();
+        //allow to extends this method from extensions
+        Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
+
+        return $address_id ? $query->first() : $query->useCache('customer')->get();
     }
 
 }

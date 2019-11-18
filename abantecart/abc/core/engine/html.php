@@ -99,6 +99,7 @@ class AHtml
      *
      * @return null|string
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function __call($function_name, $args)
     {
@@ -286,7 +287,7 @@ class AHtml
      * @param string $encode
      *
      * @return string
-     * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getSEOURL($rt, $params = '', $encode = '')
     {
@@ -312,7 +313,6 @@ class AHtml
      * @param string $encode
      *
      * @return string
-     * @throws AException
      */
     public function getSecureSEOURL($rt, $params = '', $encode = '')
     {
@@ -528,6 +528,7 @@ class AHtml
     /**
      * @return string
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getStoreSwitcher()
     {
@@ -578,6 +579,7 @@ class AHtml
     /**
      * @return string
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getContentLanguageSwitcher()
     {
@@ -620,6 +622,7 @@ class AHtml
     /**
      * @return string
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getContentLanguageFlags()
     {
@@ -939,7 +942,10 @@ class HtmlElementFactory
 
         $class = 'abc\core\engine\\'.ucfirst($data['type'].'HtmlElement');
         if ( ! class_exists($class)) {
-            throw new AException(AC_ERR_LOAD, 'Error: Could not load HTML element '.$data['type'].'!');
+            throw new AException(
+                'Error: Could not load HTML element '.$data['type'].'!',
+                AC_ERR_LOAD
+            );
         }
 
         return new $class($data);
@@ -1142,6 +1148,7 @@ class MultivalueListHtmlElement extends HtmlElement
     /**
      * @return string
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getHtml()
     {
@@ -1444,6 +1451,7 @@ class TextEditorHtmlElement extends HtmlElement
     /**
      * @return string
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getHtml()
     {
@@ -1501,6 +1509,7 @@ class SelectboxHtmlElement extends HtmlElement
     /**
      * @return string
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getHtml()
     {
@@ -1599,6 +1608,7 @@ class MultiSelectboxHtmlElement extends HtmlElement
     /**
      * @return string
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getHtml()
     {
@@ -1668,6 +1678,7 @@ class CheckboxHtmlElement extends HtmlElement
     /**
      * @return string
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getHtml()
     {
@@ -1792,6 +1803,7 @@ class FileHtmlElement extends HtmlElement
     /**
      * @return string
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getHtml()
     {
@@ -2109,8 +2121,10 @@ class ResourceHtmlElement extends HtmlElement
     public function getHtml()
     {
         if (empty($this->rl_type)) {
-            throw new AException(AC_ERR_LOAD,
-                'Error: Could not load HTML element of resource library. Resource type not given!');
+            throw new AException(
+                'Error: Could not load HTML element of resource library. Resource type not given!',
+                AC_ERR_LOAD
+            );
         }
         $data = [
             'id'            => $this->element_id,
@@ -2212,6 +2226,7 @@ class DateHtmlElement extends HtmlElement
     /**
      * @return string
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getHtml()
     {

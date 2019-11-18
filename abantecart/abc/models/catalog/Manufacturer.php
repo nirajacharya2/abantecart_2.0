@@ -97,7 +97,7 @@ class Manufacturer extends BaseModel
             UrlAlias::replaceKeywords($data['keywords'], $manufacturer->getKeyName(), $manufacturer->getKey());
         }
 
-        Registry::cache()->remove('manufacturer');
+        Registry::cache()->flush('manufacturer');
 
         return $manufacturerId;
     }

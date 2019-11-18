@@ -60,10 +60,11 @@ class Install extends BaseCommand
      * @param string $action
      * @param array $options
      *
-     * @return array|bool|null|void
+     * @return array|bool|null
      * @throws AException
      * @throws \DebugBar\DebugBarException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function run(string $action, array $options)
     {
@@ -143,6 +144,7 @@ class Install extends BaseCommand
      *
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function installPackage($options)
     {
@@ -154,12 +156,12 @@ class Install extends BaseCommand
         if (!isset($options['force'])) {
             echo 'Do you really want to install package?'."\n\n";
             echo "Continue? (Y/N) : ";
-            $stdin = fopen('php://stdin', 'r');
-            $user_response = fgetc($stdin);
+            $stdIn = fopen('php://stdin', 'r');
+            $user_response = fgetc($stdIn);
             if (!in_array($user_response, ['Y', 'YES', 'y', 'yes'])) {
                 $this->stopRun(new APackageManager([]), 'Aborted.');
             }
-            @fclose($stdin);
+            @fclose($stdIn);
         }
 
         $temp_dir = $archive_filename = '';
@@ -231,12 +233,12 @@ class Install extends BaseCommand
                     ."\tThis is not a problem, but if you notice issues"
                     ." or incompatibility, please contact extension developer.\n\n"
                     ."Continue? (Y/N) : ";
-                $stdin = fopen('php://stdin', 'r');
-                $user_response = fgetc($stdin);
+                $stdIn = fopen('php://stdin', 'r');
+                $user_response = fgetc($stdIn);
                 if (!in_array($user_response, ['Y', 'YES', 'y', 'yes'])) {
                     $this->stopRun($pm, 'Aborted.');
                 }
-                @fclose($stdin);
+                @fclose($stdIn);
             }
         }
 
@@ -272,7 +274,7 @@ class Install extends BaseCommand
         }
         if ($pm->errors) {
             $error_text .= implode("\n", $pm->errors)."\n";
-            throw new AException(AC_ERR_LOAD, $error_text);
+            throw new AException($error_text, AC_ERR_LOAD);
         }
     }
 
@@ -296,12 +298,12 @@ class Install extends BaseCommand
             if ($agreement_text) {
                 echo $agreement_text."\n\n";
                 echo "I Agree/ Not Agree (Y/N) : ";
-                $stdin = fopen('php://stdin', 'r');
-                $user_response = fgetc($stdin);
+                $stdIn = fopen('php://stdin', 'r');
+                $user_response = fgetc($stdIn);
                 if (!in_array($user_response, ['Y', 'YES', 'y', 'yes'])) {
                     $this->stopRun(new APackageManager([]), 'Aborted.');
                 }
-                @fclose($stdin);
+                @fclose($stdIn);
             }
         }
     }
@@ -312,6 +314,7 @@ class Install extends BaseCommand
      * @return bool|null
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function uninstallExtension($options)
     {
@@ -322,12 +325,12 @@ class Install extends BaseCommand
         if (!isset($options['force'])) {
             echo "\n\nUninstall extension {$options['extension_text_id']}?\n"
                 ."Continue? (Y/N) : ";
-            $stdin = fopen('php://stdin', 'r');
-            $user_response = fgetc($stdin);
+            $stdIn = fopen('php://stdin', 'r');
+            $user_response = fgetc($stdIn);
             if (!in_array($user_response, ['Y', 'YES', 'y', 'yes'])) {
                 $this->stopRun($pm, 'Aborted');
             }
-            @fclose($stdin);
+            @fclose($stdIn);
         }
         $em = new AExtensionManager();
         $all_installed = $em->getInstalled('exts');
@@ -348,6 +351,7 @@ class Install extends BaseCommand
      * @return bool
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function installExtension($options)
     {
@@ -358,12 +362,12 @@ class Install extends BaseCommand
         if (!isset($options['force'])) {
             echo "\n\nDo you want to install extension {$options['extension_text_id']}?\n"
                 ."Continue? (Y/N) : ";
-            $stdin = fopen('php://stdin', 'r');
-            $user_response = fgetc($stdin);
+            $stdIn = fopen('php://stdin', 'r');
+            $user_response = fgetc($stdIn);
             if (!in_array($user_response, ['Y', 'YES', 'y', 'yes'])) {
                 $this->stopRun($pm, 'Aborted');
             }
-            @fclose($stdin);
+            @fclose($stdIn);
         }
         $em = new AExtensionManager();
         $all_installed = $em->getInstalled('exts');
@@ -385,6 +389,7 @@ class Install extends BaseCommand
      * @return bool|null
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function removeExtension($options)
     {
@@ -395,12 +400,12 @@ class Install extends BaseCommand
         if (!isset($options['force'])) {
             echo "\n\nPlease confirm extension {$options['extension_text_id']} removing.\n"
                 ."Continue? (Y/N) : ";
-            $stdin = fopen('php://stdin', 'r');
-            $user_response = fgetc($stdin);
+            $stdIn = fopen('php://stdin', 'r');
+            $user_response = fgetc($stdIn);
             if (!in_array($user_response, ['Y', 'YES', 'y', 'yes'])) {
                 $this->stopRun($pm, 'Aborted');
             }
-            @fclose($stdin);
+            @fclose($stdIn);
         }
 
         //uninstall first without confirmation
@@ -433,7 +438,7 @@ class Install extends BaseCommand
     {
         $pm->removeDir($pm->package_info['tmp_dir']);
         $error_text = $error_text ? $error_text : implode("\n", $pm->errors);
-        throw new AException(AC_ERR_USER_ERROR, $error_text);
+        throw new AException($error_text, AC_ERR_USER_ERROR);
     }
 
     /**
@@ -512,7 +517,7 @@ class Install extends BaseCommand
         $dirs = [
             ABC::env('DIR_CONFIG'),
             ABC::env('DIR_SYSTEM'),
-            ABC::env('CACHE')['DIR_CACHE'],
+            ABC::env('CACHE')['stores']['file']['path'],
             ABC::env('DIR_LOGS'),
             ABC::env('DIR_PUBLIC').'images',
             ABC::env('DIR_PUBLIC').'images/thumbnails',
@@ -575,9 +580,9 @@ class Install extends BaseCommand
                 .' and all its children files/directories need to be writable for AbanteCart to work!';
         }
 
-        if (!is_writable(ABC::env('CACHE')['DIR_CACHE'])) {
+        if (!is_writable(ABC::env('CACHE')['stores']['file']['path'])) {
             $errors['warning'] =
-                'Warning: Cache directory '.ABC::env('CACHE')['DIR_CACHE']
+                'Warning: Cache directory '.ABC::env('CACHE')['stores']['file']['path']
                 .' needs to be writable for AbanteCart to work!';
         }
 
@@ -703,11 +708,10 @@ return [
 
         'CACHE' => 
                     [
-                        'CACHE_DRIVER' => '{$options['cache_driver']}',
-                        'DIR_CACHE'    => '{$dirs['cache']}',
                         'driver' => '{$options['cache_driver']}',
                         'stores' => [
                             '{$options['cache_driver']}' => [
+                                //folder where we storing cache files
                                 'path'   => '{$dirs['cache']}',
                                 //time-to-live in minutes
                                 //also can be Datetime Object
@@ -790,7 +794,7 @@ EOD;
         ABC::env('DB_CURRENT_DRIVER', $options['db_driver']);
         ABC::env('DATABASES', $db_config);
         $registry->set('db', new ADB($db_config[$options['db_driver']]));
-        ABC::env('CACHE', ['CACHE_DRIVER' => $options['cache_driver']]);
+        ABC::env('CACHE', ['driver' => $options['cache_driver']]);
         return $result;
     }
 
@@ -1262,6 +1266,7 @@ EOD;
      *
      * @return array
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function validateExtensionOptions($options)
     {
