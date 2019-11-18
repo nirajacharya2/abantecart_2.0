@@ -76,8 +76,9 @@ final class AUser
         $this->request = $registry->get('request');
         $this->session = $registry->get('session');
 
-        if (isset($this->session->data['user_id'])) {
+        if ((int)$this->session->data['user_id']) {
             $user = User::find((int)$this->session->data['user_id']);
+
             if ($user) {
                 $this->userId = (int)$user->user_id;
                 $this->userGroupId = (int)$user->user_group_id;
@@ -118,8 +119,8 @@ final class AUser
                 'users.status'   => 1,
             ]
         )->whereRaw(Registry::db()->table_name('users').'.password = '.$sqlString)
-         ->first();
-
+                    ->noCache()
+                    ->first();
         if ($user) {
             $this->userId = $this->session->data['user_id'] = (int)$user->user_id;
             $this->userGroupId = (int)$user->user_group_id;
@@ -202,6 +203,7 @@ final class AUser
      */
     public function hasPermission($key, $value)
     {
+
         //If top_admin allow all permission. Make sure Top Admin Group is set to ID 1
         if ($this->userGroupId == 1) {
             return true;

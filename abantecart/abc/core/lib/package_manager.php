@@ -811,7 +811,7 @@ class APackageManager
     public function upgradeCore()
     {
         //clear all cache
-        $this->registry->get('cache')->remove('*');
+        Registry::cache()->flush();
 
         $package_dirname = $this->package_info['package_dir'];
         $config_file = $package_dirname.'package.xml';
@@ -842,7 +842,7 @@ class APackageManager
                 /** @noinspection PhpIncludeInspection */
                 try {
                     include($file);
-                } catch (AException $e) {
+                } catch (\Exception $e) {
                     $this->errors[] = $e->getMessage();
                     return false;
                 }

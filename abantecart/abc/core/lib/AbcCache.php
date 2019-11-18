@@ -7,6 +7,7 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
+use abc\core\engine\Registry;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Container\Container;
 use Illuminate\Filesystem\Cache;
@@ -48,6 +49,9 @@ class AbcCache
         }
         static::$currentStore = $driver;
         $this->manager = $this->initManager();
+        if (!$this->manager) {
+            Registry::log()->write(__CLASS__.':  '.$store.' not found!');
+        }
     }
 
     /**
@@ -65,10 +69,8 @@ class AbcCache
     /**
      *Disable caching is storage. Note, persistent in memory cache is always enabled
      *
-     *
      * @return  void
      *
-     * @since  1.2.7
      */
     public function disableCache()
     {
@@ -80,7 +82,6 @@ class AbcCache
      *
      * @return  boolean  Caching state
      *
-     * @since  1.2.7
      */
     public function isCacheEnabled()
     {
@@ -149,12 +150,12 @@ class AbcCache
         }
 
         if(!$this->manager){
-            return false;
+            return null;
         }
 
         $storage = $this->getStorage($store);
         if(!$storage){
-            return false;
+            return null;
         }
 
         $result = $storage->get($key);
@@ -175,13 +176,13 @@ class AbcCache
     {
 
         if( !$this->enabled || !$this->manager){
-            return false;
+            return null;
         }
 
         $storage = $this->getStorage($store);
         $ttl = $ttl === null ? static::$storeConfig['ttl'] : $ttl;
         if(!$storage){
-            return false;
+            return null;
         }
 
         return $storage->add($key, $value, $ttl);
@@ -199,7 +200,7 @@ class AbcCache
     public function remember(string $key, $ttl, \Closure $callback, string $store = '')
     {
         if( !$this->enabled || !$this->manager ){
-            return false;
+            return null;
         }
 
         $storage = $this->getStorage($store);
@@ -247,7 +248,9 @@ class AbcCache
     {
         $store = !$store ? static::$currentStore : $store;
         $store = !$store ? ABC::env('CACHE')['driver'] : $store;
-        return $this->manager->store($store);
+        $output = $this->manager->store($store);
+        Registry::log()->write(__CLASS__.': Storage '.$store.' not found!');
+        return $output;
     }
 
     public function paramsToString($data = [])

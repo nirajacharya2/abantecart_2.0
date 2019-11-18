@@ -1578,7 +1578,7 @@ class AConfigManager
             'value' => $data['config_compression'],
         ]);
 
-        $all_cache_drivers = $this->registry->get('cache')->getCacheStorageDrivers();
+        $all_cache_drivers = array_keys(ABC::env('CACHE')['stores']);
         $cache_drivers = [];
         foreach ($all_cache_drivers as $drv) {
             $name = strtoupper($drv['driver_name']);

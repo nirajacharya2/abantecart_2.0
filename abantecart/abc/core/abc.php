@@ -493,8 +493,10 @@ class ABC extends ABCBase
 
         //Show cache stats if debugging
         if ($registry->get('config')->get('config_debug')) {
+            /*
+            //TODO. how to collect statistic for laravel cache???
             ADebug::variable('Cache statistics: ',
-                $registry->get('cache')->stats()."\n");
+                 $registry->get('cache')->stats()."\n");*/
         }
 
         ADebug::checkpoint('app end');

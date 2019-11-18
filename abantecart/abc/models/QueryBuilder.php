@@ -30,13 +30,7 @@ use Illuminate\Support\Facades\Cache;
 class QueryBuilder extends Builder
 {
 
-    protected $cacheStorage = null;
-
-    public function __construct(ConnectionInterface $connection, Grammar $grammar = null, Processor $processor = null)
-    {
-        parent::__construct($connection, $grammar, $processor);
-        $this->cacheStorage = ABC::env('CACHE')['cache.default'];
-    }
+    protected $cacheStatus = true;
 
     /**
     * Returns a Unique String that can identify this Query.
@@ -50,16 +44,20 @@ class QueryBuilder extends Builder
          ]);
     }
 
-    public function useCacheStorage($storage = ''){
-        if($storage) {
-            $this->cacheStorage = $storage;
-        }
-    }
-
+    /**
+     * Wrapper to use cache for some generated queries
+     * See also noCache() method to use it in the controllers
+     *
+     * @return array|mixed
+     */
     protected function runSelect()
     {
-        /** @var AbcCache $cache */
         $cache = Registry::cache();
+
+        if (!$this->cacheStatus) {
+            return parent::runSelect();
+        }
+
         return $cache->remember(
             $this->getCacheKey(),
             1,
@@ -108,6 +106,12 @@ class QueryBuilder extends Builder
             $fieldName = $tableName.'.'.$fieldName;
         }
         $this->where($fieldName, '=',1);
+        return $this;
+    }
+
+    public function noCache()
+    {
+        $this->cacheStatus = false;
         return $this;
     }
 }

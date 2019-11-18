@@ -228,8 +228,8 @@ class BaseModel extends OrmModel
                                             : $this->registry->get('language')->getLanguageID();
         }
         $this->config = $this->registry->get('config');
-        $this->cache = $this->registry->get('cache');
-        $this->db = $this->registry->get('db');
+        $this->cache = Registry::cache();
+        $this->db = Registry::db();
 
         $called_class = $this->getClass();
         if (static::$env['FORCE_DELETING']
