@@ -31,9 +31,12 @@ use Illuminate\Database\QueryException;
  *
  * @package abc\core\lib
  *
+ * @method transaction(\Closure $function) Capsule
  * @method beginTransaction() Capsule
  * @method commit() Capsule
  * @method rollback() Capsule
+ * @method enableQueryLog() void
+ * @method getQueryLog() array
  */
 class ADB
 {

@@ -9,6 +9,7 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use Illuminate\Cache\CacheManager;
+use Illuminate\Cache\FileStore;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Filesystem\Cache;
@@ -39,19 +40,21 @@ class AbcCache
     protected $enabled;
     static $currentStore = '';
 
-    public function __construct(string $driver = 'file', $config = [])
+    public function __construct(string $defaultDriver = 'file', $config = [])
     {
-        static::$storeConfig = $config ?: ABC::env('CACHE')['stores'][$driver];
+        static::$storeConfig = $config ?: ABC::env('CACHE')['stores'][$defaultDriver];
         if(!static::$storeConfig){
             throw new \Exception(__CLASS__.': Configuration of cache-driver '
-                .$driver.' not found!. '
+                .$defaultDriver.' not found!. '
                 .'Please check your environment and file config/'.ABC::getStageName().'/config.php');
         }
-        static::$currentStore = $driver;
+        static::$currentStore = $defaultDriver;
         $this->manager = $this->initManager();
         if (!$this->manager) {
             Registry::log()->write(__CLASS__.':  Cannot to initiate cache manager.');
         }
+
+        $this->manager->setDefaultDriver(static::$currentStore);
 
         $config = Registry::config();
         if (!$config) {
@@ -103,23 +106,66 @@ class AbcCache
         /** @var Application $app */
         $app = new Container();
         Container::setInstance($app);
+        $this->initFileApp($app);
+        $this->initMemcachedApp($app);
+
+        $config = $this->getConfig();
+        $output['cache.default'] = static::$currentStore;
+
+        $app['config'] = function () use ($config) {
+            return $config;
+        };
+        $cm = new CacheManager($app);
+        return $cm;
+    }
+
+    /**
+     * @param Application $app
+     *
+     */
+    protected function initFileApp(&$app)
+    {
+
         $app->singleton('files', function(){
             return new Filesystem();
         });
 
-        $app->singleton('config', function(){
-            return [
-                'path.storage' => __DIR__.'/storage',
-                'cache.default' => 'file',
+    }
+
+    /**
+     * @param Application $app
+     *
+     */
+    protected function initMemcachedApp(&$app)
+    {
+
+        $app['memcached.connector'] = new \Illuminate\Cache\MemcachedConnector();
+    }
+
+    protected function getConfig()
+    {
+        $output = [];
+        if (isset(ABC::env('CACHE')['stores']['file'])) {
+            $output = [
                 'cache.stores.file' => [
                     'driver' => 'file',
-                    'path' => static::$storeConfig['path']
-                ]
+                    'path'   => AbcCache::$storeConfig['path'],
+                ],
             ];
-        });
+        }
 
-        return new CacheManager($app);
+        if (isset(ABC::env('CACHE')['stores']['memcached'])) {
+            $output['cache.stores.memcached'] =
+                array_merge(
+                    ['driver' => 'memcached'],
+                    ABC::env('CACHE')['stores']['memcached']
+                );
+        }
+
+        return $output;
     }
+
+
 
     /**
      * @return string
@@ -146,6 +192,7 @@ class AbcCache
     {
         if ($store && in_array($store, $this->getAvailableStores())) {
             static::$currentStore = $store;
+            $this->manager->setDefaultDriver($store);
         } else {
             throw new \Exception('Storage '.$store
                 .' not found in the configuration. See abc/config/*/config.php file for details');
@@ -168,11 +215,11 @@ class AbcCache
      * @param  \DateTimeInterface|\DateInterval|int|null $ttl
      * @param string $store - storage name, if empty - will use default
      *
+     *
      * @return bool
      */
     public function put(string $key, $value, $ttl = null, string $store = '')
     {
-
         if( !$this->enabled || !$this->manager){
             return false;
         }
@@ -181,6 +228,12 @@ class AbcCache
         $ttl = $ttl === null ? static::$storeConfig['ttl'] : $ttl;
         if(!$storage){
             return false;
+        }
+
+        //use first word in the key as tag
+        $parts = explode(".", $key);
+        if (count($parts) > 1 && $storage instanceof \Illuminate\Cache\TaggableStore) {
+            $storage = $storage->tags($parts[0]);
         }
         return $storage->put($key, $value, $ttl);
     }
@@ -258,10 +311,13 @@ class AbcCache
         return $storage->remember($key, $ttl, $callback);
     }
 
-
-    public function flush(string $tag = '', string $store = '')
+    public function flush($tags = '', string $store = '')
     {
+        $tags = is_array($tags) ? $tags : func_get_args();
         $storage = $this->getStorage($store);
+        if ($storage instanceof \Illuminate\Cache\TaggableStore && $tags) {
+            $storage = $storage->tags($tags);
+        }
         return $storage->flush();
     }
 
@@ -294,12 +350,27 @@ class AbcCache
         return call_user_func_array([$storage, $name], $arguments);
     }
 
+    /**
+     * @param string $store
+     *
+     * @return \Illuminate\Contracts\Cache\Repository|FileStore
+     */
     protected function getStorage(string $store = '')
     {
         $store = !$store ? static::$currentStore : $store;
         $store = !$store ? ABC::env('CACHE')['driver'] : $store;
         $output = $this->manager->store($store);
         return $output;
+    }
+
+    public function tags($tags, $store = '')
+    {
+        $tags = is_array($tags) ? $tags : func_get_args();
+        $storage = $this->getStorage($store);
+        if ($storage instanceof \Illuminate\Cache\TaggableStore && $tags) {
+            $storage = $storage->tags($tags);
+        }
+        return $storage;
     }
 
     public function paramsToString($data = [])

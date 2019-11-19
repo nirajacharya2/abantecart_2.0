@@ -713,10 +713,17 @@ return [
                             '{$options['cache_driver']}' => [
                                 //folder where we storing cache files
                                 'path'   => '{$dirs['cache']}',
-                                //time-to-live in minutes
+                                //time-to-live in seconds
                                 //also can be Datetime Object
-                                'ttl'    => 1440
-                            ]
+                                'ttl'    => 86400
+                            ],
+                            /*'memcached' => [ 
+                                               'servers' => [
+                                                    'host' => '127.0.0.1',
+                                                    'port' => 11211,
+                                                    'weight' => 100
+                                               ]
+                                            ]*/
                         ]
                     ],
         //enable debug info collection
