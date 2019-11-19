@@ -43,7 +43,7 @@ use Illuminate\Validation\Rule;
  * @property int $required
  * @property string $regexp_pattern
  * @property string $settings
- * @property ProductOptionValue $option_values
+ * @property ProductOptionValue $values
  * @property Product $product
  * @property \Illuminate\Database\Eloquent\Collection $product_option_descriptions
  * @property \Illuminate\Database\Eloquent\Collection $product_option_values
@@ -233,6 +233,7 @@ class ProductOption extends BaseModel
 
     /**
      * @return false|array
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getAllData()
     {

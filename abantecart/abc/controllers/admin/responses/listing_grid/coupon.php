@@ -21,18 +21,14 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
+use H;
 use stdClass;
-
-if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 class ControllerResponsesListingGridCoupon extends AController
 {
-    public $data = array();
+    public $data = [];
     public $error;
 
     public function main()
@@ -46,7 +42,7 @@ class ControllerResponsesListingGridCoupon extends AController
 
         $limit = $this->request->post['rows']; // get how many rows we want to have into the grid
 
-        $total = $this->model_sale_coupon->getTotalCoupons(array());
+        $total = $this->model_sale_coupon->getTotalCoupons([]);
         if ($total > 0) {
             $total_pages = ceil($total / $limit);
         } else {
@@ -58,28 +54,29 @@ class ControllerResponsesListingGridCoupon extends AController
         $response->total = $total_pages;
         $response->records = $total;
 
-        $results = $this->model_sale_coupon->getCoupons(array('content_language_id' => $this->language->getContentLanguageID()));
+        $results =
+            $this->model_sale_coupon->getCoupons(['content_language_id' => $this->language->getContentLanguageID()]);
         $i = 0;
         $now = time();
         foreach ($results as $result) {
             // check date range
-            if (AHelperUtils::dateISO2Int($result['date_start']) > $now || AHelperUtils::dateISO2Int($result['date_end']) < $now) {
+            if (H::dateISO2Int($result['date_start']) > $now || H::dateISO2Int($result['date_end']) < $now) {
                 $result['status'] = 0;
             }
 
             $response->rows[$i]['id'] = $result['coupon_id'];
-            $response->rows[$i]['cell'] = array(
+            $response->rows[$i]['cell'] = [
                 $result['name'],
                 $result['code'],
-                AHelperUtils::moneyDisplayFormat($result['discount']),
-                AHelperUtils::dateISO2Display($result['date_start'], $this->language->get('date_format_short')),
-                AHelperUtils::dateISO2Display($result['date_end'], $this->language->get('date_format_short')),
-                $this->html->buildCheckbox(array(
+                H::moneyDisplayFormat($result['discount']),
+                H::dateISO2Display($result['date_start'], $this->language->get('date_format_short')),
+                H::dateISO2Display($result['date_end'], $this->language->get('date_format_short')),
+                $this->html->buildCheckbox([
                     'name'  => 'status['.$result['coupon_id'].']',
                     'value' => $result['status'],
                     'style' => 'btn_switch',
-                )),
-            );
+                ]),
+            ];
             $i++;
         }
         $this->data['response'] = $response;
@@ -102,10 +99,10 @@ class ControllerResponsesListingGridCoupon extends AController
             $error = new AError('');
 
             return $error->toJSONResponse('NO_PERMISSIONS_402',
-                array(
+                [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/coupon'),
                     'reset_value' => true,
-                ));
+                ]);
         }
 
         switch ($this->request->post['oper']) {
@@ -122,7 +119,7 @@ class ControllerResponsesListingGridCoupon extends AController
                 if ( ! empty($ids)) {
                     foreach ($ids as $id) {
                         $s = isset($this->request->post['status'][$id]) ? $this->request->post['status'][$id] : 0;
-                        $this->model_sale_coupon->editCoupon($id, array('status' => $s));
+                        $this->model_sale_coupon->editCoupon($id, ['status' => $s]);
                     }
                 }
                 break;
@@ -140,6 +137,9 @@ class ControllerResponsesListingGridCoupon extends AController
      * update only one field
      *
      * @return void
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function update_field()
     {
@@ -154,10 +154,10 @@ class ControllerResponsesListingGridCoupon extends AController
             $error = new AError('');
 
             return $error->toJSONResponse('NO_PERMISSIONS_402',
-                array(
+                [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/coupon'),
                     'reset_value' => true,
-                ));
+                ]);
         }
 
         if (isset($this->request->get['id'])) {
@@ -167,20 +167,20 @@ class ControllerResponsesListingGridCoupon extends AController
                 }
 
                 $err = $this->_validateForm($field, $value);
-                if (in_array($field, array('date_start', 'date_end'))) {
-                    $value = AHelperUtils::dateDisplay2ISO($value);
+                if (in_array($field, ['date_start', 'date_end'])) {
+                    $value = H::dateDisplay2ISO($value);
                 }
 
-                if (in_array($field, array('discount', 'total'))) {
-                    $value = AHelperUtils::preformatFloat($value, $this->language->get('decimal_point'));
+                if (in_array($field, ['discount', 'total'])) {
+                    $value = H::preformatFloat($value, $this->language->get('decimal_point'));
                 }
 
                 if ( ! $err) {
-                    $this->model_sale_coupon->editCoupon($this->request->get['id'], array($field => $value));
+                    $this->model_sale_coupon->editCoupon($this->request->get['id'], [$field => $value]);
                 } else {
                     $error = new AError('');
 
-                    return $error->toJSONResponse('VALIDATION_ERROR_406', array('error_text' => $err));
+                    return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                 }
                 //save products to coupon
                 if ($this->request->post['coupon_product']) {
@@ -196,11 +196,11 @@ class ControllerResponsesListingGridCoupon extends AController
             foreach ($value as $k => $v) {
                 $err = $this->_validateForm($field, $v);
                 if ( ! $err) {
-                    $this->model_sale_coupon->editCoupon($k, array($field => $v));
+                    $this->model_sale_coupon->editCoupon($k, [$field => $v]);
                 } else {
                     $error = new AError('');
 
-                    return $error->toJSONResponse('VALIDATION_ERROR_406', array('error_text' => $err));
+                    return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                 }
             }
         }
@@ -236,7 +236,7 @@ class ControllerResponsesListingGridCoupon extends AController
                 break;
             case 'date_start':
             case 'date_end':
-                if ( ! AHelperUtils::dateDisplay2ISO($value)) {
+                if (!H::dateDisplay2ISO($value)) {
                     $err = $this->language->get('error_date');
                 }
                 break;
@@ -258,20 +258,20 @@ class ControllerResponsesListingGridCoupon extends AController
         if (isset($this->request->post['id'])) { // variant for popup listing
             $products = $this->request->post['id'];
         } else {
-            $products = array();
+            $products = [];
         }
-        $product_data = array();
+        $product_data = [];
 
         foreach ($products as $product_id) {
             $product_info = $this->model_catalog_product->getProduct($product_id);
 
             if ($product_info) {
-                $product_data[] = array(
+                $product_data[] = [
                     'id'         => $product_info['product_id'],
                     'product_id' => $product_info['product_id'],
                     'name'       => $product_info['name'],
                     'model'      => $product_info['model'],
-                );
+                ];
             }
         }
 

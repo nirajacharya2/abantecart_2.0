@@ -22,13 +22,12 @@ namespace abc\models\admin;
 
 use abc\core\ABC;
 use abc\core\engine\Model;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\ABackup;
 use abc\core\lib\ADataset;
 use abc\core\lib\AException;
 use abc\core\lib\AFormManager;
 use abc\core\lib\ALayoutManager;
-
+use H;
 
 /**
  * Class ModelToolBackup
@@ -42,6 +41,8 @@ class ModelToolBackup extends Model
 
     /**
      * @param string $sql
+     *
+     * @throws \Exception
      */
     public function restore($sql)
     {
@@ -62,6 +63,8 @@ class ModelToolBackup extends Model
      *
      * @return bool
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
      */
     public function load($xml_source, $mode = 'string')
     {
@@ -75,13 +78,13 @@ class ModelToolBackup extends Model
             $xmlname = $xml_obj->getName();
             if ($xmlname == 'template_layouts') {
                 $load = new ALayoutManager();
-                $load->loadXML(array('xml' => $xml_source));
+                $load->loadXML(['xml' => $xml_source]);
             } elseif ($xmlname == 'datasets') {
                 $load = new ADataset();
-                $load->loadXML(array('xml' => $xml_source));
+                $load->loadXML(['xml' => $xml_source]);
             } elseif ($xmlname == 'forms') {
                 $load = new AFormManager();
-                $load->loadXML(array('xml' => $xml_source));
+                $load->loadXML(['xml' => $xml_source]);
             } else {
                 return false;
             }
@@ -95,10 +98,11 @@ class ModelToolBackup extends Model
      * function returns table list of abantecart
      *
      * @return array|bool
+     * @throws \Exception
      */
     public function getTables()
     {
-        $table_data = array();
+        $table_data = [];
         $prefix_len = strlen($this->db->prefix());
 
         $query = $this->db->query("SHOW TABLES FROM `".$this->db->getDatabaseName()."`", true);
@@ -125,13 +129,15 @@ class ModelToolBackup extends Model
     }
 
     /**
-     * @param array      $tables
-     * @param bool|true  $rl
+     * @param array $tables
+     * @param bool|true $rl
      * @param bool|false $config
-     * @param string     $sql_dump_mode
+     * @param string $sql_dump_mode
      *
      * @return bool
      * @throws AException
+     * @throws \DebugBar\DebugBarException
+     * @throws \ReflectionException
      */
     public function backup($tables, $rl = true, $config = false, $sql_dump_mode = 'data_only')
     {
@@ -143,7 +149,7 @@ class ModelToolBackup extends Model
         }
 
         // do sql dump
-        if (!in_array($sql_dump_mode, array('data_only', 'recreate'))) {
+        if (!in_array($sql_dump_mode, ['data_only', 'recreate'])) {
             $sql_dump_mode = 'data_only';
         }
         $bkp->sql_dump_mode = $sql_dump_mode;
@@ -174,7 +180,7 @@ class ModelToolBackup extends Model
      *
      * @return array|bool
      */
-    public function createBackupJob($job_name, $data = array())
+    public function createBackupJob($job_name, $data = [])
     {
 
         if (!$job_name) {
@@ -194,7 +200,7 @@ class ModelToolBackup extends Model
 
             //calculate estimate time for dumping of tables
             // get sizes of tables
-            $table_list = array();
+            $table_list = [];
             foreach ($data['table_list'] as $table) {
                 if (!is_string($table)) {
                     continue;
@@ -224,8 +230,8 @@ class ModelToolBackup extends Model
 
         $job_info = ['errors' => []];
         try {
-            $job_info = AHelperUtils::createJob(
-                array(
+            $job_info = H::createJob(
+                [
                     'name'          => $job_name,
                     // schedule it!
                     'status'        => 1,
@@ -233,8 +239,7 @@ class ModelToolBackup extends Model
                     'last_time_run' => '0000-00-00 00:00:00',
                     'last_result'   => '0',
                     'configuration' => $job_configuration
-
-                )
+                ]
             );
         } catch(AException $e){
             $this->log->error($e->getMessage().' File:'.$e->getFile().':'.$e->getLine().$e->getTraceAsString());
@@ -252,10 +257,11 @@ class ModelToolBackup extends Model
      * @param array $table_list
      *
      * @return array
+     * @throws \Exception
      */
-    public function getTableSizes($table_list = array())
+    public function getTableSizes($table_list = [])
     {
-        $tables = array();
+        $tables = [];
         foreach ($table_list as $table) {
             if (!is_string($table)) {
                 continue;
@@ -269,7 +275,7 @@ class ModelToolBackup extends Model
 				WHERE information_schema.TABLES.table_schema = '".$this->db->getDatabaseName()."'
 					AND TABLE_NAME IN ('".implode("','", $tables)."')	";
         $result = $this->db->query($sql);
-        $output = array();
+        $output = [];
         foreach ($result->rows as $row) {
             if ($row['size'] > 1048576) {
                 $text = round(($row['size'] / 1048576), 1).'Mb';
@@ -277,10 +283,10 @@ class ModelToolBackup extends Model
                 $text = round($row['size'] / 1024, 1).'Kb';
             }
 
-            $output[$row['table_name']] = array(
+            $output[$row['table_name']] = [
                 'bytes' => $row['size'],
                 'text'  => $text,
-            );
+            ];
         }
 
         return $output;
@@ -292,13 +298,13 @@ class ModelToolBackup extends Model
     public function getCodeSize()
     {
         $all_dirs = scandir(ABC::env('DIR_ROOT'));
-        $content_dirs = array( // black list
-                               '.',
-                               '..',
-                               'resources',
-                               'image',
-                               'download',
-        );
+        $content_dirs = [ // black list
+                          '.',
+                          '..',
+                          'resources',
+                          'image',
+                          'download',
+        ];
         $dirs_size = 0;
         foreach ($all_dirs as $d) {
 
@@ -321,11 +327,11 @@ class ModelToolBackup extends Model
      */
     public function getContentSize()
     {
-        $content_dirs = array( // white list
-                               ABC::env('DIR_RESOURCES'),
-                               ABC::env('DIR_IMAGES'),
-                               ABC::env('DIR_DOWNLOADS')
-        );
+        $content_dirs = [ // white list
+                          ABC::env('DIR_RESOURCES'),
+                          ABC::env('DIR_IMAGES'),
+                          ABC::env('DIR_DOWNLOADS'),
+        ];
         $dirs_size = 0;
         foreach ($content_dirs as $d) {
             $dirs_size += $this->_get_directory_size($d);

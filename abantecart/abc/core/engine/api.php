@@ -20,73 +20,80 @@
 
 namespace abc\core\engine;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+final class AAPI
+{
+    /**
+     * @var Registry
+     */
+    protected $registry;
+    /**
+     * @var array
+     */
+    protected $pre_dispatch = [];
+    protected $error;
+    private $recursion_limit = 0;
 
-final class AAPI{
-	/**
-	 * @var Registry
-	 */
-	protected $registry;
-	/**
-	 * @var array
-	 */
-	protected $pre_dispatch = array ();
-	protected $error;
-	private $recursion_limit = 0;
+    public function __construct($registry)
+    {
+        $this->registry = $registry;
+    }
 
-	public function __construct($registry){
-		$this->registry = $registry;
-	}
+    public function __destruct()
+    {
+    }
 
-	public function __destruct(){
-	}
+    public function __get($key)
+    {
+        return $this->registry->get($key);
+    }
 
-	public function __get($key){
-		return $this->registry->get($key);
-	}
+    public function __set($key, $value)
+    {
+        $this->registry->set($key, $value);
+    }
 
-	public function __set($key, $value){
-		$this->registry->set($key, $value);
-	}
+    /**
+     * @param string $dispatch_rt
+     *
+     * @throws \ReflectionException
+     */
+    public function addPreDispatch($dispatch_rt)
+    {
+        $this->pre_dispatch[] = new ADispatcher($dispatch_rt, ["instance_id" => "0"]);
+    }
 
-	/**
-	 * @param string $dispatch_rt
-	 */
-	public function addPreDispatch($dispatch_rt){
-		$this->pre_dispatch[] = new ADispatcher($dispatch_rt, array ("instance_id" => "0"));
-	}
+    /**
+     * @param string $dispatch_rt
+     *
+     * @throws \ReflectionException
+     */
+    public function build($dispatch_rt)
+    {
+        $dispatch = '';
+        $this->recursion_limit = 0;
 
-	/**
-	 * @param string $dispatch_rt
-	 */
-	public function build($dispatch_rt){
-		$dispatch = '';
-		$this->recursion_limit = 0;
+        foreach ($this->pre_dispatch as $pre_dispatch) {
+            /**
+             * @var ADispatcher $pre_dispatch
+             */
+            $result = $pre_dispatch->dispatch();
+            if ($result) {
+                //Something happened. Need to run different page
+                $dispatch_rt = $result;
+                break;
+            }
+        }
 
-		foreach ($this->pre_dispatch as $pre_dispatch) {
-			/**
-			 * @var ADispatcher $pre_dispatch
-			 */
-			$result = $pre_dispatch->dispatch();
-			if ($result) {
-				//Something happened. Need to run different page
-				$dispatch_rt = $result;
-				break;
-			}
-		}
+        //Process dispatcher in while if we have new dispatch back
+        while ($dispatch_rt) {
+            //Process main level controller
+            //filter in case we have responses set already
+            $dispatch_rt = preg_replace('/^(api)\//', '', $dispatch_rt);
+            $dispatch = new ADispatcher('api/'.$dispatch_rt, ["instance_id" => "0"]);
+            $dispatch_rt = $dispatch->dispatch();
 
-		//Process dispatcher in while if we have new dispatch back
-		while ($dispatch_rt) {
-			//Process main level controller
-			//filter in case we have responses set already
-			$dispatch_rt = preg_replace('/^(api)\//', '', $dispatch_rt);
-			$dispatch = new ADispatcher('api/' . $dispatch_rt, array ("instance_id" => "0"));
-			$dispatch_rt = $dispatch->dispatch();
+        }
 
-		}
-
-		unset($dispatch);
-	}
+        unset($dispatch);
+    }
 }

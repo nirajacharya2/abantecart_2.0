@@ -764,7 +764,6 @@ class AHelperUtils extends AHelper
      * @param string $extension_txt_id
      *
      * @return \SimpleXMLElement | false
-     * @throws \ReflectionException
      */
     public static function getExtensionConfigXml($extension_txt_id)
     {
@@ -1884,7 +1883,9 @@ class AHelperUtils extends AHelper
     /**
      * Function changes and cleans data base on entity codes, such as language_code, sku etc
      *
-     * @param array $data
+     * @param $string
+     * @param int $width
+     * @param bool $addEllipses
      *
      * @return array
      */
@@ -2065,6 +2066,7 @@ class AHelperUtils extends AHelper
      *
      * @return null|string
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      */
     public static function lng(string $key, $block= '', $default_text = '', $section = ''){

@@ -17,158 +17,170 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\admin;
+
 use abc\core\ABC;
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\AConfigManager;
 use abc\core\lib\AError;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
 use abc\models\locale\Currency;
+use H;
 use stdClass;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-class ControllerResponsesListingGridSetting extends AController {
-	public $groups = array();
-	public $data = array();
+class ControllerResponsesListingGridSetting extends AController
+{
+    public $groups = [];
+    public $data = [];
 
-	public function __construct($registry, $instance_id, $controller, $parent_controller = '') {
-		parent::__construct($registry, $instance_id, $controller, $parent_controller);
-		//load available groups for settings
-		$this->groups = $this->config->groups;
-	}
+    public function __construct($registry, $instance_id, $controller, $parent_controller = '')
+    {
+        parent::__construct($registry, $instance_id, $controller, $parent_controller);
+        //load available groups for settings
+        $this->groups = $this->config->groups;
+    }
 
-	public function main() {
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
-		//load available groups for settings
+    public function main()
+    {
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
+        //load available groups for settings
 
-		$this->loadLanguage('setting/setting');
-		$this->loadModel('setting/setting');
+        $this->loadLanguage('setting/setting');
+        $this->loadModel('setting/setting');
 
-		//Prepare filter config
-		$grid_filter_params =  array_merge(array('alias', 'group', 'key'), (array)$this->data['grid_filter_params']);
-		$filter_grid = new AFilter(array( 'method' => 'post', 'grid_filter_params' => $grid_filter_params ));
+        //Prepare filter config
+        $grid_filter_params = array_merge(['alias', 'group', 'key'], (array)$this->data['grid_filter_params']);
+        $filter_grid = new AFilter(['method' => 'post', 'grid_filter_params' => $grid_filter_params]);
 
-		$total = $this->model_setting_setting->getTotalSettings($filter_grid->getFilterData());
-		$response = new stdClass();
-		$response->page = $filter_grid->getParam('page');
-		$response->total = $filter_grid->calcTotalPages($total);
-		$response->records = $total;
-		$response->userdata = new stdClass();
-		$response->userdata->href = array();
+        $total = $this->model_setting_setting->getTotalSettings($filter_grid->getFilterData());
+        $response = new stdClass();
+        $response->page = $filter_grid->getParam('page');
+        $response->total = $filter_grid->calcTotalPages($total);
+        $response->records = $total;
+        $response->userdata = new stdClass();
+        $response->userdata->href = [];
 
-		$results = $this->model_setting_setting->getAllSettings($filter_grid->getFilterData());
+        $results = $this->model_setting_setting->getAllSettings($filter_grid->getFilterData());
 
-		$i = 0;
-		foreach ($results as $result) {
+        $i = 0;
+        foreach ($results as $result) {
 
-			if (($result[ 'value' ] == '1' || $result[ 'value' ] == '0')
-					&& !is_int(strpos($result[ 'key' ], '_id'))
-					&& !is_int(strpos($result[ 'key' ], 'level'))
-			) {
-				$value = $this->html->buildCheckbox(array(
-					'name' => '',
-					'value' => $result[ 'value' ],
-					'style' => 'btn_switch disabled',
-					'attr' => 'readonly="true"'
-				));
-			} else {
-				$value = $result[ 'value' ];
-			}
+            if (($result['value'] == '1' || $result['value'] == '0')
+                && !is_int(strpos($result['key'], '_id'))
+                && !is_int(strpos($result['key'], 'level'))
+            ) {
+                $value = $this->html->buildCheckbox([
+                    'name'  => '',
+                    'value' => $result['value'],
+                    'style' => 'btn_switch disabled',
+                    'attr'  => 'readonly="true"',
+                ]);
+            } else {
+                $value = $result['value'];
+            }
 
-			$response->rows[ $i ][ 'id' ] = $result[ 'group' ] . '-' . $result[ 'key' ] . '-' . $result[ 'store_id' ];
-			if(in_array($result['group'], array('appearance','im'))){
-				$response->userdata->href[$response->rows[ $i ][ 'id' ]] = $this->html->getSecureURL('setting/setting/'.$result['group']);
-			}
-			$response->rows[ $i ][ 'cell' ] = array(
-				$result[ 'alias' ],
-				$result[ 'group' ],
-				$result[ 'key' ],
-				$value,
-			);
-			$i++;
-		}
-		$this->data['response'] = $response;
+            $response->rows[$i]['id'] = $result['group'].'-'.$result['key'].'-'.$result['store_id'];
+            if (in_array($result['group'], ['appearance', 'im'])) {
+                $response->userdata->href[$response->rows[$i]['id']] =
+                    $this->html->getSecureURL('setting/setting/'.$result['group']);
+            }
+            $response->rows[$i]['cell'] = [
+                $result['alias'],
+                $result['group'],
+                $result['key'],
+                $value,
+            ];
+            $i++;
+        }
+        $this->data['response'] = $response;
 
-	    //update controller data
-	    $this->extensions->hk_UpdateData($this, __FUNCTION__);
-	    $this->load->library('json');
-	    $this->response->setOutput(AJson::encode($this->data['response']));
-	}
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+        $this->load->library('json');
+        $this->response->setOutput(AJson::encode($this->data['response']));
+    }
 
-	/**
-	 * update only one field
-	 *
-	 * @return void
-	 */
-	public function update_field() {
+    /**
+     * update only one field
+     *
+     * @return void
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
+     */
+    public function update_field()
+    {
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		if (!$this->user->canModify('listing_grid/setting')) {
-			$error = new AError('');
-			return $error->toJSONResponse('NO_PERMISSIONS_402',
-				array( 'error_text' => sprintf($this->language->get('error_permission_modify'), 'listing_grid/setting'),
-					'reset_value' => true
-				));
-		}
+        if (!$this->user->canModify('listing_grid/setting')) {
+            $error = new AError('');
+            return $error->toJSONResponse('NO_PERMISSIONS_402',
+                [
+                    'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/setting'),
+                    'reset_value' => true,
+                ]);
+        }
 
-		$this->loadLanguage('setting/setting');
-		$this->loadModel('setting/setting');
-		if (isset($this->request->get[ 'group' ])) {
-			$group = $this->request->get[ 'group' ];
-			//for appearance settings per template
-			if( $this->request->get['group']=='appearance' && AHelperUtils::has_value($this->request->get['tmpl_id']) && $this->request->get['tmpl_id'] != 'default'){
-				$group = $this->request->get['tmpl_id'];
-			}
+        $this->loadLanguage('setting/setting');
+        $this->loadModel('setting/setting');
+        if (isset($this->request->get['group'])) {
+            $group = $this->request->get['group'];
+            //for appearance settings per template
+            if ($this->request->get['group'] == 'appearance'
+                && H::has_value($this->request->get['tmpl_id'])
+                && $this->request->get['tmpl_id'] != 'default'
+            ) {
+                $group = $this->request->get['tmpl_id'];
+            }
 
-			//request sent from edit form. ID in url
-			foreach ($this->request->post as $key => $value) {
-				$err = $this->_validateField($group, $key, $value);
-				if (!empty($err)) {
-					$error = new AError('');
-					return $error->toJSONResponse('VALIDATION_ERROR_406', array( 'error_text' => $err ));
-				}
-				$data = array($key => $value);
+            //request sent from edit form. ID in url
+            foreach ($this->request->post as $key => $value) {
+                $err = $this->_validateField($group, $key, $value);
+                if (!empty($err)) {
+                    $error = new AError('');
+                    return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                }
+                $data = [$key => $value];
 
-				//html decode store name
-				if (AHelperUtils::has_value($data['store_name'])) {
-					$data['store_name'] = html_entity_decode($data['store_name'], ENT_COMPAT, ABC::env('APP_CHARSET'));
-				}
+                //html decode store name
+                if (H::has_value($data['store_name'])) {
+                    $data['store_name'] = html_entity_decode($data['store_name'], ENT_COMPAT, ABC::env('APP_CHARSET'));
+                }
 
-				//when change base currency for default store also change values for all currencies in database before saving
-				if (!(int)$this->request->get[ 'store_id' ]
-						&& AHelperUtils::has_value($data['config_currency'])
-						&& $data['config_currency'] != $this->config->get('config_currency')
-				){
+                //when change base currency for default store also change values for all currencies in database before saving
+                if (!(int)$this->request->get['store_id']
+                    && H::has_value($data['config_currency'])
+                    && $data['config_currency'] != $this->config->get('config_currency')
+                ) {
                     $currencyInstance = new Currency();
                     $currencyInstance->switchConfigCurrency($data['config_currency']);
-				}
+                }
 
-				$this->model_setting_setting->editSetting($group, $data, $this->request->get[ 'store_id' ]);
-                AHelperUtils::startStorefrontSession($this->user->getId());
-			}
-			return null;
-		}
+                $this->model_setting_setting->editSetting($group, $data, $this->request->get['store_id']);
+                H::startStorefrontSession($this->user->getId());
+            }
+            return null;
+        }
 
-		//update controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-	}
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
 
-	private function _validateField($group, $field, $value) {
-		$this->data['error'] = '';
-		$this->load->library('config_manager');
-		$config_mngr = new AConfigManager();
-		$result = $config_mngr->validate($group, array( $field => $value ));
-		$this->data['error'] = is_array($result[ 'error' ]) ? current($result[ 'error' ]) : $result[ 'error' ];
+    private function _validateField($group, $field, $value)
+    {
+        $this->data['error'] = '';
+        $this->load->library('config_manager');
+        $config_mngr = new AConfigManager();
+        $result = $config_mngr->validate($group, [$field => $value]);
+        $this->data['error'] = is_array($result['error']) ? current($result['error']) : $result['error'];
 
-		$this->extensions->hk_ValidateData($this, array($group, $field, $value));
+        $this->extensions->hk_ValidateData($this, [$group, $field, $value]);
 
-		return $this->data['error'];
-	}
+        return $this->data['error'];
+    }
 }

@@ -247,8 +247,9 @@ class ControllerResponsesListingGridCustomer extends AController
      * update only one field
      *
      * @return null
-     * @throws \abc\core\lib\AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function update_field()
     {

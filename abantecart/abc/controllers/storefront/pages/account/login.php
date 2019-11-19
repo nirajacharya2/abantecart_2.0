@@ -264,8 +264,9 @@ class ControllerPagesAccountLogin extends AController
      * @param string $password
      *
      * @return bool
-     * @throws \abc\core\lib\AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     private function _validate( $loginname, $password )
     {

@@ -21,20 +21,17 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\AError;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
+use H;
 use stdClass;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 class ControllerResponsesListingGridMessageGrid extends AController
 {
-    public $error = array();
-    public $data = array();
+    public $error = [];
+    public $data = [];
 
     public function main()
     {
@@ -60,7 +57,7 @@ class ControllerResponsesListingGridMessageGrid extends AController
                                 ['title', 'date_added', 'status'],
                                 (array)$this->data['grid_filter_params']
         );
-        $filter = new AFilter(array('method' => 'post', 'grid_filter_params' => $grid_filter_params));
+        $filter = new AFilter(['method' => 'post', 'grid_filter_params' => $grid_filter_params]);
 
         $total = $this->model_tool_message_manager->getTotalMessages();
         $response = new stdClass();
@@ -96,11 +93,11 @@ class ControllerResponsesListingGridMessageGrid extends AController
 
             $response->userdata->classes[$result ['msg_id']] .= !$result['viewed'] ? ' new_message' : '';
 
-            $response->rows [$i] ['cell'] = array(
+            $response->rows [$i] ['cell'] = [
                 $status,
                 $result ['title'],
-                AHelperUtils::dateISO2Display($result ['date_added'], $this->language->get('date_format_short').' H:s'),
-            );
+                H::dateISO2Display($result ['date_added'], $this->language->get('date_format_short').' H:s'),
+            ];
 
             $i++;
         }
@@ -116,6 +113,8 @@ class ControllerResponsesListingGridMessageGrid extends AController
 
     /**
      * @return mixed
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
     public function update()
@@ -125,11 +124,11 @@ class ControllerResponsesListingGridMessageGrid extends AController
             $error = new AError('');
             return $error->toJSONResponse(
                 'NO_PERMISSIONS_402',
-                array(
+                [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'),
                         'listing_grid/message_grid'),
                     'reset_value' => true,
-                ));
+                ]);
         }
 
         //init controller data

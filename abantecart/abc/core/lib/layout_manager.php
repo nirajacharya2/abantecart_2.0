@@ -157,7 +157,7 @@ class ALayoutManager
                 $message_text .= ' Requested data: template: '.$tmpl_id.', page_id: '.$page_id.', layout_id: '
                     .$layout_id;
                 $message_text .= '  '.H::genExecTrace('full');
-                throw new AException ($message_text, AC_ERR_LOAD_LAYOUT, );
+                throw new AException ($message_text, AC_ERR_LOAD_LAYOUT);
             }
         }
 
@@ -240,9 +240,9 @@ class ALayoutManager
                 LEFT JOIN ".$this->db->table_name("pages_layouts")." pl 
                     ON pl.page_id = p.page_id
                 LEFT JOIN ".$this->db->table_name("layouts")." l 
-                    ON l.layout_id = pl.layout_id
-                ".$where."
-                ORDER BY p.page_id ASC";
+                    ON l.layout_id = pl.layout_id "
+            .$where
+            ." ORDER BY p.page_id ASC";
 
         $query = $this->db->query($sql);
         $pages = $query->rows;
@@ -2436,7 +2436,7 @@ class ALayoutManager
      * @param int $parent_instance_id
      *
      * @return bool
-     * @throws \ReflectionException
+     * @throws \Exception
      */
     protected function _processCustomBlock($layout_id, $block, $parent_instance_id = 0)
     {

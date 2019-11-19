@@ -18,14 +18,10 @@
 
 namespace abc\controllers\admin;
 
-use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
-use abc\core\lib\contracts\AttributeManagerInterface;
 use abc\models\catalog\ObjectType;
-use abc\models\catalog\ProductType;
-use abc\models\catalog\ProductTypeDescription;
 use stdClass;
 
 class ControllerResponsesListingGridObjectTypes extends AController
@@ -168,6 +164,7 @@ class ControllerResponsesListingGridObjectTypes extends AController
      * update only one field
      *
      * @return void
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */

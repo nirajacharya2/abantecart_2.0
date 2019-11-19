@@ -388,6 +388,7 @@ class ControllerPagesAccountForgotten extends AController
      * @param $data
      *
      * @return bool|mixed
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */

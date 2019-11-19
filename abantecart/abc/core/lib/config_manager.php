@@ -131,7 +131,9 @@ class AConfigManager
      * @param int $store_id
      *
      * @return array|bool
-     * @throws \Exception
+     * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
      */
     public function validate($group, $fields = [], $store_id = 0)
     {
@@ -296,12 +298,13 @@ class AConfigManager
     }
 
     /**
-     * @var \abc\core\engine\AForm $form
      *
+     * @param AForm $form
      * @param array $data
      *
      * @return array
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function buildFormDetails($form, $data)
     {
@@ -545,12 +548,13 @@ class AConfigManager
     }
 
     /**
-     * @var \abc\core\engine\AForm $form
      *
+     * @param AForm $form
      * @param array $data
      *
      * @return array
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      */
     protected function buildFormGeneral($form, $data)
@@ -732,6 +736,7 @@ class AConfigManager
      * @return array
      *
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      */
     protected function buildFormCheckout($form, $data)
@@ -1288,12 +1293,13 @@ class AConfigManager
     }
 
     /**
-     * @var AForm $form
      *
+     * @param AForm $form
      * @param array $data
      *
      * @return array
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      */
     protected function buildFormMail($form, $data)
@@ -1381,12 +1387,13 @@ class AConfigManager
     }
 
     /**
-     * @var AForm $form
      *
+     * @param AForm $form
      * @param array $data
      *
      * @return array
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      */
     protected function buildFormIm($form, $data)
@@ -1505,12 +1512,13 @@ class AConfigManager
     // validate form fields
 
     /**
-     * @var AForm $form
      *
+     * @param AForm $form
      * @param array $data
      *
      * @return array
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      */
     protected function buildFormSystem($form, $data)

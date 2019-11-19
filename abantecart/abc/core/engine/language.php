@@ -69,7 +69,7 @@ class ALanguage
      * @param int $section - 0(storefront) or 1 (admin)
      *
      * @throws AException
-     * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function __construct($registry, $code = '', $section = 0)
     {
@@ -858,8 +858,8 @@ class ALanguage
         $block = str_replace('/', '_', $filename);
         ADebug::checkpoint('ALanguage '.$this->language_details['name'].' '.$block.' saving to database');
 
-        $sql = "INSERT INTO ".$this->db->table_name("language_definitions")." ";
-        $sql .= "(language_id,block,section,language_key,language_value,date_added) VALUES ";
+        $sql = "INSERT INTO ".$this->db->table_name("language_definitions");
+        $sql .= " (language_id,block,section,language_key,language_value,date_added) VALUES ";
         $values = [];
         foreach ($definitions as $k => $v) {
             //preventing duplication sql-error by unique index
@@ -927,7 +927,6 @@ class ALanguage
      * @param string $mode
      *
      * @return array|null
-     * @throws \ReflectionException
      */
     protected function _load_from_xml($filename, $directory, $mode)
     {
@@ -1055,6 +1054,7 @@ class ALanguage
      * @param array $data
      *
      * @throws AException
+     * @throws \ReflectionException
      */
     protected function _write_missing_definition($data)
     {

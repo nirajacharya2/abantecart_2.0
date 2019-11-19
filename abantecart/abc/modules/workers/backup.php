@@ -19,8 +19,8 @@
 namespace abc\modules\workers;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\ABackup;
+use H;
 
 /**
  * Class ABackupModule
@@ -47,6 +47,8 @@ class ABackupWorker extends ABaseWorker
      *
      *
      * @return bool
+     * @throws \DebugBar\DebugBarException
+     * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
     public function backup(array $configuration)
@@ -61,7 +63,7 @@ class ABackupWorker extends ABaseWorker
          * @var ABackup $bkp
          */
 
-        $bkp = AHelperUtils::getInstance(ABC::getFullClassName('ABackup'));
+        $bkp = H::getInstance(ABC::getFullClassName('ABackup'));
 
         $bkp->setBackupName('manual_backup'.'_'.date('Y-m-d-H-i-s'));
         if ($bkp->error) {
@@ -69,7 +71,7 @@ class ABackupWorker extends ABaseWorker
         }
 
         // do sql dump
-        if (!in_array($sql_dump_mode, array('data_only', 'recreate'))) {
+        if (!in_array($sql_dump_mode, ['data_only', 'recreate'])) {
             $sql_dump_mode = 'data_only';
         }
         $bkp->sql_dump_mode = $sql_dump_mode;

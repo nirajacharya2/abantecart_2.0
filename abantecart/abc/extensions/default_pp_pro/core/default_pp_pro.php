@@ -126,6 +126,9 @@ class ExtensionDefaultPpPro extends Extension
      * @param array $payment_method_data
      *
      * @return array
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     private function _get_capture_form( $data = [], $payment_method_data = [])
     {
@@ -170,9 +173,12 @@ class ExtensionDefaultPpPro extends Extension
     /**
      * @param array $data
      * @param array $payment_method_data
-     * @param int   $not_refunded
+     * @param int $not_refunded
      *
      * @return array
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     private function _get_refund_form( $data = [], $payment_method_data = [], $not_refunded = 0 )
     {

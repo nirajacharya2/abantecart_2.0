@@ -21,16 +21,13 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\models\locale\Currency;
 use abc\models\order\Order;
+use H;
 use stdClass;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 class ControllerResponsesListingGridCurrency extends AController
 {
@@ -94,7 +91,7 @@ class ControllerResponsesListingGridCurrency extends AController
                     'name'  => 'value['.$result['currency_id'].']',
                     'value' => $result['value'],
                 ]),
-                AHelperUtils::dateISO2Display($result['date_modified'], $this->language->get('date_format_short')),
+                H::dateISO2Display($result['date_modified'], $this->language->get('date_format_short')),
                 $this->html->buildCheckbox([
                     'name'  => 'status['.$result['currency_id'].']',
                     'value' => $result['status'],
@@ -207,6 +204,9 @@ class ControllerResponsesListingGridCurrency extends AController
      * update only one field
      *
      * @return void
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function update_field()
     {

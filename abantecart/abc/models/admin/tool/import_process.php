@@ -184,6 +184,7 @@ class ModelToolImportProcess extends Model
      * @return bool
      * @throws \abc\core\lib\AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function process_products_record($task_id, $data, $settings)
     {
@@ -210,6 +211,7 @@ class ModelToolImportProcess extends Model
      * @return bool
      * @throws \abc\core\lib\AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function process_categories_record($task_id, $data, $settings)
     {
@@ -231,6 +233,7 @@ class ModelToolImportProcess extends Model
      * @return bool
      * @throws \abc\core\lib\AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function process_manufacturers_record($task_id, $data, $settings)
     {
@@ -254,6 +257,7 @@ class ModelToolImportProcess extends Model
      * @return bool
      * @throws \abc\core\lib\AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function addUpdateProduct($record, $settings, $language_id, $store_id)
     {
@@ -391,6 +395,7 @@ class ModelToolImportProcess extends Model
      * @return bool
      * @throws \abc\core\lib\AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function addUpdateCategory($record, $settings, $language_id, $store_id)
     {
@@ -477,6 +482,7 @@ class ModelToolImportProcess extends Model
      * @return bool
      * @throws \abc\core\lib\AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function addUpdateManufacturer($record, $settings, $language_id, $store_id)
     {
@@ -522,6 +528,7 @@ class ModelToolImportProcess extends Model
      * @return bool
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function addUpdateOptions($product_id, $data = [], $weight_class_id)
     {
@@ -607,6 +614,7 @@ class ModelToolImportProcess extends Model
      * @param $data
      *
      * @return bool|int|null
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
@@ -663,6 +671,7 @@ class ModelToolImportProcess extends Model
 
     /**
      * add from URL download
+     *
      * @param array $data
      * @param string $object_txt_id
      * @param int $object_id
@@ -670,7 +679,9 @@ class ModelToolImportProcess extends Model
      * @param $language_id
      *
      * @return bool
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     protected function migrateImages($data = [], $object_txt_id = '', $object_id = 0, $title = '', $language_id)
     {

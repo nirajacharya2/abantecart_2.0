@@ -680,7 +680,9 @@ class ControllerResponsesProductProduct extends AController
      * @param $form AForm
      *
      * @return string
-     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     private function _option_value_form($form)
     {
@@ -1099,7 +1101,9 @@ class ControllerResponsesProductProduct extends AController
     /**
      * @param int $product_id
      *
-     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     private function _buildSelectForm($product_id)
     {
@@ -1153,6 +1157,7 @@ class ControllerResponsesProductProduct extends AController
      * @param int $download_id
      * @param int $product_id
      *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
@@ -1357,8 +1362,9 @@ class ControllerResponsesProductProduct extends AController
     /**
      * @param AForm $form
      *
-     * @throws \abc\core\lib\AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     private function _buildAttributesSubform($form)
     {
@@ -1465,7 +1471,9 @@ class ControllerResponsesProductProduct extends AController
      * @param array $data
      *
      * @return bool
-     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     private function _validateDownloadForm($data = [])
     {

@@ -611,7 +611,9 @@ class ModelCatalogProduct extends Model
      * @param int $limit
      *
      * @return array
-     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function getProductsByKeyword(
         $keyword,
@@ -731,7 +733,9 @@ class ModelCatalogProduct extends Model
      * @param bool $model
      *
      * @return int
-     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function getTotalProductsByKeyword($keyword, $category_id = 0, $description = false, $model = false)
     {
@@ -803,7 +807,9 @@ class ModelCatalogProduct extends Model
      * @param int $category_id
      *
      * @return int
-     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function getTotalProductsByTag($tag, $category_id = 0)
     {

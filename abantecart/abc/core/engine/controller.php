@@ -133,6 +133,7 @@ abstract class AController
      * @param string $controller
      * @param string|AController $parent_controller
      *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \abc\core\lib\AException
      */
     public function __construct($registry, $instance_id, $controller, $parent_controller = '')
@@ -185,6 +186,7 @@ abstract class AController
      * Function to enable caching for this page/block
      *
      * @return true/false
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function html_cache()
     {

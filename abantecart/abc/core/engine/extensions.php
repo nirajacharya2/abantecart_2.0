@@ -847,7 +847,7 @@ class ExtensionsApi
      * @param bool $force_enabled_off
      *
      * @void
-     * @throws \ReflectionException
+     * @throws Exception
      */
     public function loadEnabledExtensions($force_enabled_off = false)
     {
@@ -1670,6 +1670,7 @@ class ExtensionUtils
 
     /**
      * @return array
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      */
     public function getDefaultSettings()

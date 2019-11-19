@@ -23,14 +23,10 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 use abc\core\lib\AConfigManager;
 use abc\models\locale\Currency;
-
-if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use H;
 
 /**
  * Class ControllerPagesSettingSetting
@@ -39,15 +35,18 @@ if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
  */
 class ControllerPagesSettingSetting extends AController
 {
-    public $error = array();
-    public $groups = array();
-    public $data = array();
+    public $error = [];
+    public $groups = [];
+    public $data = [];
 
     /**
      * @param Registry $registry
-     * @param int      $instance_id
-     * @param string   $controller
-     * @param string   $parent_controller
+     * @param int $instance_id
+     * @param string $controller
+     * @param string $parent_controller
+     *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \abc\core\lib\AException
      */
     public function __construct($registry, $instance_id, $controller, $parent_controller = '')
     {
@@ -73,8 +72,8 @@ class ControllerPagesSettingSetting extends AController
                 unset($post['config_smtp_password']);
             }
 
-            foreach (array('config_logo', 'config_mail_logo', 'config_icon') as $n) {
-                if (AHelperUtils::has_value($post[$n])) {
+            foreach (['config_logo', 'config_mail_logo', 'config_icon'] as $n) {
+                if (H::has_value($post[$n])) {
                     $post[$n] = html_entity_decode($post[$n], ENT_COMPAT, ABC::env('APP_CHARSET'));
                 } else {
                     if ( ! $post[$n] && isset($post[$n.'_resource_id'])) {
@@ -85,13 +84,13 @@ class ControllerPagesSettingSetting extends AController
             }
 
             //html decode store name
-            if (AHelperUtils::has_value($post['store_name'])) {
+            if (H::has_value($post['store_name'])) {
                 $post['store_name'] = html_entity_decode($post['store_name'], ENT_COMPAT, ABC::env('APP_CHARSET'));
             }
 
             //when change base currency for default store also change values for all currencies in database before saving
             if ( ! (int)$get['store_id']
-                && AHelperUtils::has_value($post['config_currency'])
+                && H::has_value($post['config_currency'])
                 && $post['config_currency'] != $this->config->get('config_currency')
             ) {
                 $currencyInstance = new Currency();
@@ -105,9 +104,9 @@ class ControllerPagesSettingSetting extends AController
             }
 
             $this->session->data['success'] = $this->language->get('text_success');
-            if (AHelperUtils::has_value($post['config_maintenance']) && $post['config_maintenance']) {
+            if (H::has_value($post['config_maintenance']) && $post['config_maintenance']) {
                 //mark storefront session as merchant session
-                AHelperUtils::startStorefrontSession($this->user->getId());
+                H::startStorefrontSession($this->user->getId());
             }
             $redirect_url = $this->html->getSecureURL('setting/setting',
                 '&active='.$get['active'].'&store_id='.(int)$get['store_id']);
@@ -132,17 +131,17 @@ class ControllerPagesSettingSetting extends AController
         $this->data['token'] = $this->session->data['token'];
         $this->data['error'] = $this->error;
 
-        $this->document->initBreadcrumb(array(
+        $this->document->initBreadcrumb([
             'href'      => $this->html->getSecureURL('index/home'),
             'text'      => $this->language->get('text_home'),
             'separator' => false,
-        ));
-        $this->document->addBreadcrumb(array(
+        ]);
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSecureURL('setting/setting'),
             'text'      => $this->language->get('heading_title'),
             'separator' => ' :: ',
             'current'   => true,
-        ));
+        ]);
 
         if (isset($this->session->data['success'])) {
             $this->data['success'] = $this->session->data['success'];
@@ -153,29 +152,29 @@ class ControllerPagesSettingSetting extends AController
             unset($this->session->data['error']);
         }
 
-        $this->data['new_store_button'] = $this->html->buildElement(array(
+        $this->data['new_store_button'] = $this->html->buildElement([
             'type'  => 'button',
             'title' => $this->language->get('button_add_store'),
             'text'  => '&nbsp;',
             'href'  => $this->html->getSecureURL('setting/store/insert'),
-        ));
+        ]);
 
         if ($group == 'system') {
-            $this->data['phpinfo_button'] = $this->html->buildElement(array(
+            $this->data['phpinfo_button'] = $this->html->buildElement([
                 'type'  => 'button',
                 'title' => 'PHP Info',
                 'href'  => $this->html->getSecureURL('setting/setting/phpinfo'),
-            ));
+            ]);
         }
 
         if ($this->data['store_id'] > 0) {
-            $this->data['edit_store_button'] = $this->html->buildElement(array(
+            $this->data['edit_store_button'] = $this->html->buildElement([
                 'type'  => 'button',
                 'title' => $this->language->get('text_edit_store'),
                 'text'  => $this->language->get('text_edit_store'),
                 'href'  => $this->html->getSecureURL('setting/store/update', '&store_id='.$this->data['store_id']),
                 'style' => 'button2',
-            ));
+            ]);
         }
 
         $this->data['cancel'] = $this->html->getSecureURL('setting/setting');
@@ -191,13 +190,13 @@ class ControllerPagesSettingSetting extends AController
 
         if ($this->data['active'] == 'appearance') {
             $this->data['manage_extensions'] = $this->html->buildElement(
-                array(
+                [
                     'type'  => 'button',
                     'name'  => 'manage_extensions',
                     'href'  => $this->html->getSecureURL('extension/extensions/template'),
                     'text'  => $this->language->get('button_manage_extensions'),
                     'title' => $this->language->get('button_manage_extensions'),
-                ));
+                ]);
         }
 
         $this->data['settings'] = $this->model_setting_setting->getSetting($group, $this->data['store_id']);
@@ -221,7 +220,7 @@ class ControllerPagesSettingSetting extends AController
         $this->data['template_image'] = $this->html->getSecureURL('setting/template_image');
 
         //load tabs controller
-        $tabs_obj = $this->dispatch('pages/setting/setting_tabs', array($this->data));
+        $tabs_obj = $this->dispatch('pages/setting/setting_tabs', [$this->data]);
         $this->data['setting_tabs'] = $tabs_obj->dispatchGetOutput();
         unset($tabs_obj);
 
@@ -255,19 +254,19 @@ class ControllerPagesSettingSetting extends AController
             unset($this->session->data['success']);
         }
 
-        $this->document->initBreadcrumb(array(
+        $this->document->initBreadcrumb([
             'href'      => $this->html->getSecureURL('index/home'),
             'text'      => $this->language->get('text_home'),
             'separator' => false,
-        ));
-        $this->document->addBreadcrumb(array(
+        ]);
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSecureURL('setting/setting'),
             'text'      => $this->language->get('heading_title'),
             'separator' => ' :: ',
             'current'   => true,
-        ));
+        ]);
 
-        $grid_settings = array(
+        $grid_settings = [
             'table_id'     => 'setting_grid',
             'url'          => $this->html->getSecureURL('listing_grid/setting'),
             'editurl'      => '',
@@ -275,68 +274,68 @@ class ControllerPagesSettingSetting extends AController
             'sortname'     => 'group',
             'sortorder'    => 'asc',
             'multiselect'  => "false",
-            'actions'      => array(
-                'edit' => array(
+            'actions'      => [
+                'edit' => [
                     'text' => $this->language->get('text_edit'),
                     'href' => $this->html->getSecureURL('setting/setting_quick_form',
                         '&target=edit_dialog&active=%ID%'),
-                ),
-            ),
+                ],
+            ],
             'grid_ready'   => 'grid_ready(data);',
-        );
+        ];
 
-        $grid_settings['colNames'] = array(
+        $grid_settings['colNames'] = [
             $this->language->get('column_store_alias'),
             $this->language->get('column_group'),
             $this->language->get('column_key'),
             $this->language->get('column_value'),
-        );
-        $grid_settings['colModel'] = array(
-            array(
+        ];
+        $grid_settings['colModel'] = [
+            [
                 'name'  => 'store_alias',
                 'index' => 'alias',
                 'align' => 'center',
                 'width' => 110,
-            ),
-            array(
+            ],
+            [
                 'name'  => 'group',
                 'index' => 'group',
                 'align' => 'center',
                 'width' => 120,
-            ),
-            array(
+            ],
+            [
                 'name'  => 'key',
                 'index' => 'key',
                 'align' => 'left',
                 'width' => 260,
-            ),
-            array(
+            ],
+            [
                 'name'     => 'value',
                 'index'    => 'value',
                 'align'    => 'center',
                 'sortable' => false,
                 'search'   => false,
-            ),
-        );
+            ],
+        ];
 
         $form = new AForm();
-        $form->setForm(array(
+        $form->setForm([
             'form_name' => 'setting_grid_search',
-        ));
+        ]);
 
         $grid_settings['search_form'] = true;
 
         $this->data['insert'] = $this->html->buildElement(
-            array(
+            [
                 'type'  => 'button',
                 'title' => $this->language->get('button_add_store'),
                 'text'  => $this->language->get('button_insert'),
                 'href'  => $this->html->getSecureURL('setting/store/insert'),
-            ));
+            ]);
 
         $this->loadModel('setting/store');
         $results = $this->model_setting_store->getStores();
-        $stores = array();
+        $stores = [];
         $stores[0] = $this->language->get('text_default');
         foreach ($results as $result) {
             $stores[$result['store_id']] = $result['alias'];
@@ -344,23 +343,23 @@ class ControllerPagesSettingSetting extends AController
 
         //load tabs controller
         $this->data['active'] = 'all';
-        $tabs_obj = $this->dispatch('pages/setting/setting_tabs', array($this->data));
+        $tabs_obj = $this->dispatch('pages/setting/setting_tabs', [$this->data]);
         $this->data['setting_tabs'] = $tabs_obj->dispatchGetOutput();
         unset($tabs_obj);
 
-        $grid = $this->dispatch('common/listing_grid', array($grid_settings));
+        $grid = $this->dispatch('common/listing_grid', [$grid_settings]);
         $this->view->assign('listing_grid', $grid->dispatchGetOutput());
 
         // include rl-scripts for quick edit logo and icon of store from modal
         $resources_scripts = $this->dispatch(
             'responses/common/resource_library/get_resources_scripts',
-            array(
+            [
                 'object_name' => 'store',
                 'object_id'   => (int)$this->request->get['store_id'],
-                'types'       => array('image'),
+                'types'       => ['image'],
                 'onload'      => true,
                 'mode'        => 'single',
-            )
+            ]
         );
         $this->data['resources_scripts'] = $resources_scripts->dispatchGetOutput();
         $this->data['content_language_id'] = $this->language->getContentLanguageID();
@@ -444,41 +443,41 @@ class ControllerPagesSettingSetting extends AController
         $this->view->assign('language_code', $this->session->data['language']);
         $form = new AForm('HS');
 
-        $form->setForm(array(
+        $form->setForm([
             'form_name' => 'settingFrm',
             'update'    => $this->data['update'],
-        ));
+        ]);
 
         $this->data['form']['id'] = 'settingFrm';
-        $this->data['form']['form_open'] = $form->getFieldHtml(array(
+        $this->data['form']['form_open'] = $form->getFieldHtml([
             'type'   => 'form',
             'name'   => 'settingFrm',
             'attr'   => 'data-confirm-exit="true" class="aform form-horizontal"',
             'action' => $this->data['action'],
-        ));
-        $this->data['form']['submit'] = $form->getFieldHtml(array(
+        ]);
+        $this->data['form']['submit'] = $form->getFieldHtml([
             'type'  => 'button',
             'name'  => 'submit',
             'text'  => $this->language->get('button_save'),
             'style' => 'button1',
-        ));
-        $this->data['form']['cancel'] = $form->getFieldHtml(array(
+        ]);
+        $this->data['form']['cancel'] = $form->getFieldHtml([
             'type'  => 'button',
             'name'  => 'cancel',
             'text'  => $this->language->get('button_cancel'),
             'style' => 'button2',
-        ));
+        ]);
 
         //need resource script on every page for quick start
         $resources_scripts = $this->dispatch(
             'responses/common/resource_library/get_resources_scripts',
-            array(
+            [
                 'object_name' => 'store',
                 'object_id'   => (int)$this->data['store_id'],
-                'types'       => array('image'),
+                'types'       => ['image'],
                 'onload'      => true,
                 'mode'        => 'single',
-            )
+            ]
         );
         $this->data['resources_scripts'] = $resources_scripts->dispatchGetOutput();
 
@@ -497,7 +496,7 @@ class ControllerPagesSettingSetting extends AController
                 //when opens page for looking setting of template (from settings grid or search)
                 if (isset($this->request->get['active'])) {
                     $parts = explode('-', $this->request->get['active']);
-                    $field_names = array();
+                    $field_names = [];
                     foreach ($this->data['form']['fields'] as $fld) {
                         $field_names[] = $fld->name;
                     }
@@ -535,12 +534,14 @@ class ControllerPagesSettingSetting extends AController
      * @param array $data
      *
      * @return array
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \abc\core\lib\AException
      */
     private function _build_details($form, $data)
     {
-        $ret_data = array();
+        $ret_data = [];
         $ret_data['form_language_switch'] = $this->html->getContentLanguageSwitcher();
-        $ret_data['form'] = array('fields' => $this->conf_mngr->getFormFields('details', $form, $data));
+        $ret_data['form'] = ['fields' => $this->conf_mngr->getFormFields('details', $form, $data)];
 
         return $ret_data;
     }
@@ -553,8 +554,8 @@ class ControllerPagesSettingSetting extends AController
      */
     private function _build_general($form, $data)
     {
-        $ret_data = array();
-        $ret_data['form'] = array('fields' => $this->conf_mngr->getFormFields('general', $form, $data));
+        $ret_data = [];
+        $ret_data['form'] = ['fields' => $this->conf_mngr->getFormFields('general', $form, $data)];
 
         return $ret_data;
     }
@@ -567,8 +568,8 @@ class ControllerPagesSettingSetting extends AController
      */
     private function _build_checkout($form, $data)
     {
-        $ret_data = array();
-        $ret_data['form'] = array('fields' => $this->conf_mngr->getFormFields('checkout', $form, $data));
+        $ret_data = [];
+        $ret_data['form'] = ['fields' => $this->conf_mngr->getFormFields('checkout', $form, $data)];
 
         return $ret_data;
     }
@@ -581,9 +582,9 @@ class ControllerPagesSettingSetting extends AController
      */
     private function _build_appearance($form, $data)
     {
-        $ret_data = array();
+        $ret_data = [];
 
-        $ret_data['form'] = array('fields' => $this->conf_mngr->getFormFields('appearance', $form, $data));
+        $ret_data['form'] = ['fields' => $this->conf_mngr->getFormFields('appearance', $form, $data)];
 
         return $ret_data;
     }
@@ -596,8 +597,8 @@ class ControllerPagesSettingSetting extends AController
      */
     private function _build_mail($form, $data)
     {
-        $ret_data = array();
-        $ret_data['form'] = array('fields' => $this->conf_mngr->getFormFields('mail', $form, $data));
+        $ret_data = [];
+        $ret_data['form'] = ['fields' => $this->conf_mngr->getFormFields('mail', $form, $data)];
 
         return $ret_data;
     }
@@ -610,8 +611,8 @@ class ControllerPagesSettingSetting extends AController
      */
     private function _build_im($form, $data)
     {
-        $ret_data = array();
-        $ret_data['form'] = array('fields' => $this->conf_mngr->getFormFields('im', $form, $data));
+        $ret_data = [];
+        $ret_data['form'] = ['fields' => $this->conf_mngr->getFormFields('im', $form, $data)];
 
         return $ret_data;
     }
@@ -624,8 +625,8 @@ class ControllerPagesSettingSetting extends AController
      */
     private function _build_api($form, $data)
     {
-        $ret_data = array();
-        $ret_data['form'] = array('fields' => $this->conf_mngr->getFormFields('api', $form, $data));
+        $ret_data = [];
+        $ret_data['form'] = ['fields' => $this->conf_mngr->getFormFields('api', $form, $data)];
 
         return $ret_data;
     }
@@ -638,10 +639,10 @@ class ControllerPagesSettingSetting extends AController
      */
     private function _build_system($form, $data)
     {
-        $ret_data = array();
+        $ret_data = [];
 
         if ($data['storefront_template_debug']) {
-            $this->session->data['tmpl_debug'] = AHelperUtils::genToken(16);
+            $this->session->data['tmpl_debug'] = H::genToken(16);
             $ret_data['storefront_debug_url'] = $this->html->getCatalogURL('index/home', '&tmpl_debug='.$this->session->data['tmpl_debug']);
             $ret_data['admin_debug_url'] = $this->html->getSecureURL('index/home', '&tmpl_debug='.$this->session->data['tmpl_debug']);
         } else {
@@ -650,14 +651,14 @@ class ControllerPagesSettingSetting extends AController
             $ret_data['admin_debug_url'] = '';
         }
 
-        $ignore = array(
+        $ignore = [
             'common/login',
             'common/logout',
             'error/not_found',
             'error/permission',
-        );
+        ];
 
-        $ret_data['tokens'] = array();
+        $ret_data['tokens'] = [];
 
         $files_pages = glob(ABC::env('DIR_APP').'controllers/pages/*/*.php');
         $files_response = glob(ABC::env('DIR_APP').'controllers/responses/*/*.php');
@@ -671,16 +672,18 @@ class ControllerPagesSettingSetting extends AController
             }
         }
 
-        $ret_data['form'] = array('fields' => $this->conf_mngr->getFormFields('system', $form, $data));
+        $ret_data['form'] = ['fields' => $this->conf_mngr->getFormFields('system', $form, $data)];
 
         return $ret_data;
     }
 
     /**
      * @param string $group
-     * @param int    $store_id
+     * @param int $store_id
      *
      * @return bool
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
     private function _validate($group, $store_id = 0)

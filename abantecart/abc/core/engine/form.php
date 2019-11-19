@@ -134,7 +134,6 @@ class AForm
      * @param string $name
      *
      * @return bool
-     * @throws \ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function loadFromDb($name)
@@ -159,7 +158,6 @@ class AForm
      * @param string $name - unique form name
      *
      * @return bool
-     * @throws \ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function loadForm($name)
@@ -347,7 +345,6 @@ class AForm
      * @param string $fname
      *
      * @return array with field data
-     * @throws \ReflectionException
      */
     public function getField($fname)
     {
@@ -445,6 +442,7 @@ class AForm
      * @return string html
      * @throws \abc\core\lib\AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function loadExtendedFields()
     {
@@ -508,8 +506,9 @@ class AForm
      * @param bool $fieldsOnly
      *
      * @return string html
-     * @throws \abc\core\lib\AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function getFormHtml($fieldsOnly = false)
     {
@@ -751,7 +750,6 @@ class AForm
      * @param array $files - usually it's a $_FILES array
      *
      * @return array - list of absolute paths of moved files
-     * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */

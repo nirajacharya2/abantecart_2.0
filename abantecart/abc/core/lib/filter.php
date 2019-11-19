@@ -21,12 +21,8 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use H;
 
 /**
  * Class AFilter
@@ -40,7 +36,7 @@ final class AFilter
 {
 
     private $registry;
-    private $data = array();
+    private $data = [];
     private $method;
 
     //NOTE: Filter class automatically gets values from POST or GET on construct
@@ -72,43 +68,43 @@ final class AFilter
         //If this data is provided in the input override values of the request.
         if (sizeof((array)$filter_conf['input_params'])) {
             foreach ($filter_conf['input_params'] as $k => $v) {
-                if (AHelperUtils::has_value($v)) {
+                if (H::has_value($v)) {
                     $this->data[$k] = $v;
                 }
             }
         }
 
         //Build Filter Data for result output and model query
-        $this->data['filter_data'] = array(
+        $this->data['filter_data'] = [
             'sort'                => $this->data['sidx'],
             'order'               => $this->data['sord'],
             'limit'               => $this->data['rows'],
             'start'               => ($this->data['page'] - 1) * $this->data['rows'],
             'content_language_id' => $this->session->data['content_language_id'],
-        );
+        ];
 
         //Validate fields that are allowed and build expected filter parameters
         if (sizeof((array)$filter_conf['filter_params'])) {
 
             //support table name extension in fields
             //check if we have associative array
-            if (AHelperUtils::is_assoc($filter_conf['filter_params'])) {
+            if (H::is_assoc($filter_conf['filter_params'])) {
                 $keys_arr = array_keys($filter_conf['filter_params']);
             } else {
                 $keys_arr = $filter_conf['filter_params'];
             }
-            $fl_str = array();
+            $fl_str = [];
             foreach ($keys_arr as $kk => $filter) {
                 $value =
                     isset($this->request->{$this->method}[$filter]) ? $this->request->{$this->method}[$filter] : false;
                 //set null as non-set value. 0 - is value!!!
-                if ($value === '' || $value === false || $value === array()) {
+                if ($value === '' || $value === false || $value === []) {
                     $value = null;
                 }
                 if (isset($value) && !is_null($value)) {
                     $this->data['filter_data']['filter'][$filter] = $value;
 
-                    if (AHelperUtils::is_assoc($filter_conf['filter_params'])) {
+                    if (H::is_assoc($filter_conf['filter_params'])) {
                         //support table name extension in fields
                         $field_name = $filter_conf['filter_params'][$filter];
                         if (strpos($field_name, '.')) {
@@ -126,7 +122,7 @@ final class AFilter
             $this->data['filter_string'] = implode(' AND ', $fl_str);
         }
 
-        $allowedSortDirection = array('ASC', 'DESC');
+        $allowedSortDirection = ['ASC', 'DESC'];
         if (!in_array($this->data['sord'], $allowedSortDirection)) {
             $this->data['sord'] = 'DESC';
         }
@@ -173,25 +169,25 @@ final class AFilter
     }
 
     //Build URI based on current filter params used
-    public function buildFilterURI($exclude_list = array())
+    public function buildFilterURI($exclude_list = [])
     {
 
-        $process_array = array();
+        $process_array = [];
         //add input params from different parts of filter
         foreach (array_keys($this->data) as $param) {
             //skip some params.
-            if (in_array($param, array('filter_data', 'filter_string', 'page'))) {
+            if (in_array($param, ['filter_data', 'filter_string', 'page'])) {
                 continue;
             }
 
-            if (AHelperUtils::has_value($this->data[$param])) {
+            if (H::has_value($this->data[$param])) {
                 $process_array[$param] = $this->data[$param];
             }
         }
         $filter_arr = $this->data['filter_data']['filter'];
         if ($filter_arr) {
             foreach (array_keys($filter_arr) as $param) {
-                if (AHelperUtils::has_value($filter_arr[$param])) {
+                if (H::has_value($filter_arr[$param])) {
                     $process_array[$param] = $filter_arr[$param];
                 }
             }
@@ -267,15 +263,16 @@ final class AGrid
 
     /**
      * @param string $adv_filter_str
-     * @param array  $allowedFields
+     * @param array $allowedFields
      *
      * @return string
+     * @throws AException
      */
     public function filter($adv_filter_str, $allowedFields)
     {
 
-        $allowedOperations = array('AND', 'OR');
-        $search_param = array();
+        $allowedOperations = ['AND', 'OR'];
+        $search_param = [];
         $op = '';
         if (isset($this->search) && $this->search == 'true') {
 
@@ -291,7 +288,7 @@ final class AGrid
                 foreach ($searchData['rules'] as $rule) {
 
                     // $allowedFields can be simple or key based array
-                    if (AHelperUtils::is_assoc($allowedFields)) {
+                    if (H::is_assoc($allowedFields)) {
                         if (!array_key_exists($rule['field'], $allowedFields)) {
                             continue;
                         }

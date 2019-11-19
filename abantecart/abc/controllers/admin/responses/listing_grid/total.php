@@ -24,13 +24,10 @@ use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use stdClass;
 
-if (!class_exists('abc\core\ABC') || !ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 class ControllerResponsesListingGridTotal extends AController
 {
-    public $data = array();
+    public $data = [];
 
     public function main()
     {
@@ -52,7 +49,7 @@ class ControllerResponsesListingGridTotal extends AController
         $ext = $this->extensions->getExtensionsList(
             ['filter' => 'total']
         );
-        $extensions = array();
+        $extensions = [];
         if ($ext->rows) {
             foreach ($ext->rows as $row) {
                 $language_rt = $config_controller = '';
@@ -109,33 +106,33 @@ class ControllerResponsesListingGridTotal extends AController
             foreach ($files as $file) {
                 $id = basename($file, '.php');
                 if (!array_key_exists($id, $extensions)) {
-                    $extensions[$id] = array(
+                    $extensions[$id] = [
                         'extension_txt_id'  => $id,
                         'config_controller' => 'total/'.$id,
                         'language_rt'       => 'total/'.$id,
-                    );
+                    ];
                 }
             }
         }
 
-        $items = array();
+        $items = [];
         if ($extensions) {
             foreach ($extensions as $extension) {
                 $this->loadLanguage($extension['language_rt']);
-                $items[] = array(
+                $items[] = [
                     'id'                => $extension['extension_txt_id'],
                     'name'              => $this->language->get('total_name'),
                     'status'            => $this->config->get($extension['extension_txt_id'].'_status'),
                     'sort_order'        => (int)$this->config->get($extension['extension_txt_id'].'_sort_order'),
                     'calculation_order' => (int)$this->config->get($extension['extension_txt_id'].'_calculation_order'),
                     'action'            => $this->html->getSecureURL($extension['config_controller']),
-                );
+                ];
             }
         }
 
         //sort
-        $allowedSort = array('name', 'status', 'sort_order', 'calculation_order');
-        $allowedDirection = array(SORT_ASC => 'asc', SORT_DESC => 'desc');
+        $allowedSort = ['name', 'status', 'sort_order', 'calculation_order'];
+        $allowedDirection = [SORT_ASC => 'asc', SORT_DESC => 'desc'];
         if (!in_array($sidx, $allowedSort)) {
             $sidx = $allowedSort[0];
         }
@@ -145,7 +142,7 @@ class ControllerResponsesListingGridTotal extends AController
             $sord = array_search($sord, $allowedDirection);
         }
 
-        $sort = array();
+        $sort = [];
         foreach ($items as $item) {
             $sort[] = $item[$sidx];
         }
@@ -165,36 +162,36 @@ class ControllerResponsesListingGridTotal extends AController
         $response->records = $total;
 
         $response->userdata = new stdClass();
-        $response->userdata->rt = array();
-        $response->userdata->classes = array();
+        $response->userdata->rt = [];
+        $response->userdata->classes = [];
 
         $results = array_slice($items, ($page - 1) * -$limit, $limit);
 
         $i = 0;
         foreach ($results as $result) {
             $response->userdata->rt[$result['id']] = $result['action'];
-            $status = $this->html->buildCheckbox(array(
+            $status = $this->html->buildCheckbox([
                 'name'  => $result['id'].'['.$result['id'].'_status]',
                 'value' => $result['status'],
                 'style' => 'btn_switch',
-            ));
-            $sort = $this->html->buildInput(array(
+            ]);
+            $sort = $this->html->buildInput([
                 'name'  => $result['id'].'['.$result['id'].'_sort_order]',
                 'value' => $result['sort_order'],
-            ));
+            ]);
 
-            $calc = $this->html->buildInput(array(
+            $calc = $this->html->buildInput([
                 'name'  => $result['id'].'['.$result['id'].'_calculation_order]',
                 'value' => $result['calculation_order'],
-            ));
+            ]);
 
             $response->rows[$i]['id'] = $result['id'];
-            $response->rows[$i]['cell'] = array(
+            $response->rows[$i]['cell'] = [
                 $result['name'],
                 $status,
                 ($result['status'] ? $sort : ''),
                 ($result['status'] ? $calc : ''),
-            );
+            ];
             $i++;
         }
         $this->data['response'] = $response;
@@ -209,6 +206,8 @@ class ControllerResponsesListingGridTotal extends AController
      * update only one field
      *
      * @return null
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
     public function update_field()
@@ -218,7 +217,7 @@ class ControllerResponsesListingGridTotal extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('extension/total');
-        $ids = array();
+        $ids = [];
         if (isset($this->request->get['id'])) {
             $ids[] = $this->request->get['id'];
         } else {
@@ -228,19 +227,19 @@ class ControllerResponsesListingGridTotal extends AController
         if (!$this->user->canModify('listing_grid/total')) {
             $error = new AError('');
             return $error->toJSONResponse('NO_PERMISSIONS_402',
-                array(
+                [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/total'),
                     'reset_value' => true,
-                ));
+                ]);
         }
         foreach ($ids as $id) {
             if (!$this->user->canModify('total/'.$id)) {
                 $error = new AError('');
                 return $error->toJSONResponse('NO_PERMISSIONS_402',
-                    array(
+                    [
                         'error_text'  => sprintf($this->language->get('error_permission_modify'), 'total/'.$id),
                         'reset_value' => true,
-                    ));
+                    ]);
             }
         }
 

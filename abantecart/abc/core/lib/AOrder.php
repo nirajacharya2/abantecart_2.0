@@ -141,6 +141,7 @@ class AOrder extends ALibBase
      * NOTE: method to create an order based on provided data array.
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function buildOrderData($indata)
     {
@@ -479,6 +480,7 @@ class AOrder extends ALibBase
      *
      * @return int
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      */
     public function _create($data, $set_order_id = '')
@@ -505,7 +507,7 @@ class AOrder extends ALibBase
                 }
             } //remove
             else {
-                //this will remove order with dependencies by Fkeys
+                //this will remove order with dependencies by foreign keys
                 $order->forceDelete();
             }
         }

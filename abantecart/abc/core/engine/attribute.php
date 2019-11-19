@@ -55,6 +55,7 @@ class Attribute implements AttributeInterface
      * @param int $language_id
      *
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function __construct($attribute_type = '', $language_id = 0)
     {
@@ -92,7 +93,7 @@ class Attribute implements AttributeInterface
      * @param int $language_id
      *
      * @return bool
-     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function loadAttributeTypes($language_id = 0)
     {
@@ -130,7 +131,7 @@ class Attribute implements AttributeInterface
      * @param int $language_id
      *
      * @return array|bool
-     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function loadAttributes($attribute_type_id, $language_id = 0)
     {
@@ -301,6 +302,7 @@ class Attribute implements AttributeInterface
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getAttributesByType($attribute_type, $language_id = 0, $attribute_parent_id = 0)
     {
@@ -368,7 +370,7 @@ class Attribute implements AttributeInterface
      * @param int $language_id - Language id. default 0 (english)
      *
      * @return bool
-     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getAttributeValues($attribute_id, $language_id = 0)
     {
@@ -403,6 +405,7 @@ class Attribute implements AttributeInterface
      * @param array $data - usually it's a $_POST
      *
      * @return array - array with error text for each of invalid field data
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */

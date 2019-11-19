@@ -27,13 +27,10 @@ use abc\core\lib\AJson;
 use abc\models\customer\Customer;
 use stdClass;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 class ControllerResponsesListingGridCustomerGroup extends AController
 {
-    public $data = array();
+    public $data = [];
 
     public function main()
     {
@@ -45,8 +42,8 @@ class ControllerResponsesListingGridCustomerGroup extends AController
         $this->loadModel('sale/customer_group');
 
         //Prepare filter config
-        $grid_filter_params = array_merge(array('name', 'tax_exempt'), (array)$this->data['grid_filter_params']);
-        $filter = new AFilter(array('method' => 'post', 'grid_filter_params' => $grid_filter_params));
+        $grid_filter_params = array_merge(['name', 'tax_exempt'], (array)$this->data['grid_filter_params']);
+        $filter = new AFilter(['method' => 'post', 'grid_filter_params' => $grid_filter_params]);
         $total = $this->model_sale_customer_group->getTotalCustomerGroups($filter->getFilterData());
 
         $response = new stdClass();
@@ -56,19 +53,19 @@ class ControllerResponsesListingGridCustomerGroup extends AController
         $results = $this->model_sale_customer_group->getCustomerGroups($filter->getFilterData());
 
         $i = 0;
-        $yesno = array(
+        $yesno = [
             1 => $this->language->get('text_yes'),
             0 => $this->language->get('text_no'),
-        );
+        ];
 
         foreach ($results as $result) {
 
             $response->rows[$i]['id'] = $result['customer_group_id'];
-            $response->rows[$i]['cell'] = array(
+            $response->rows[$i]['cell'] = [
                 $result['name'].(($result['customer_group_id']
                     == $this->config->get('config_customer_group_id')) ? $this->language->get('text_default') : null),
                 $yesno[(int)$result['tax_exempt']],
-            );
+            ];
             $i++;
         }
         $this->data['response'] = $response;
@@ -88,11 +85,11 @@ class ControllerResponsesListingGridCustomerGroup extends AController
         if (!$this->user->canModify('listing_grid/customer_group')) {
             $error = new AError('');
             return $error->toJSONResponse('NO_PERMISSIONS_402',
-                array(
+                [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'),
                         'listing_grid/customer_group'),
                     'reset_value' => true,
-                ));
+                ]);
         }
 
         $this->loadLanguage('sale/customer_group');
@@ -140,6 +137,8 @@ class ControllerResponsesListingGridCustomerGroup extends AController
      * update only one field
      *
      * @return void
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
     public function update_field()
@@ -151,11 +150,11 @@ class ControllerResponsesListingGridCustomerGroup extends AController
         if (!$this->user->canModify('listing_grid/customer_group')) {
             $error = new AError('');
             return $error->toJSONResponse('NO_PERMISSIONS_402',
-                array(
+                [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'),
                         'listing_grid/customer_group'),
                     'reset_value' => true,
-                ));
+                ]);
         }
 
         $this->loadLanguage('sale/customer_group');

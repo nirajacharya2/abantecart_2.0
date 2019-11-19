@@ -23,9 +23,6 @@ namespace abc\models\admin;
 use abc\core\ABC;
 use abc\core\engine\Model;
 
-if ( ! class_exists( 'abc\core\ABC' ) || ! \abc\core\ABC::env( 'IS_ADMIN' ) ) {
-    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
-}
 
 /**
  * Class ModelUserUserGroup
@@ -38,13 +35,14 @@ class ModelUserUserGroup extends Model
      * @param array $data
      *
      * @return int
+     * @throws \Exception
      */
     public function addUserGroup( $data )
     {
 
         if ( ! isset( $data['permission'] ) ) {
             $controllers = $this->getAllControllers();
-            $types = array( 'access', 'modify' );
+            $types = ['access', 'modify'];
             foreach ( $types as $type ) {
                 foreach ( $controllers as $controller ) {
                     $data['permission'][$type][$controller] = 0;
@@ -62,13 +60,15 @@ class ModelUserUserGroup extends Model
     /**
      * @param int $user_group_id
      * @param array $data
+     *
+     * @throws \Exception
      */
     public function editUserGroup( $user_group_id, $data )
     {
         $user_group_id = ! $user_group_id ? $this->addUserGroup( $data['name'] ) : $user_group_id;
         $user_group = $this->getUserGroup( $user_group_id );
 
-        $update = array();
+        $update = [];
         if ( isset( $data['name'] ) ) {
             $update[] = "name = '".$this->db->escape( $data['name'] )."'";
         }
@@ -77,7 +77,7 @@ class ModelUserUserGroup extends Model
             $p = $user_group['permission'];
             if ( isset( $data['permission']['access'] ) ) {
                 foreach ( $data['permission']['access'] as $controller => $value ) {
-                    $value = ! in_array( $value, array( null, 0, 1 ) ) ? 0 : $value;
+                    $value = !in_array($value, [null, 0, 1]) ? 0 : $value;
                     $p['access'][$controller] = $value;
                     if ( ! isset( $p['modify'][$controller] ) && ! isset( $data['permission']['modify'][$controller] ) ) {
                         $p['modify'][$controller] = 0;
@@ -86,7 +86,7 @@ class ModelUserUserGroup extends Model
             }
             if ( isset( $data['permission']['modify'] ) ) {
                 foreach ( $data['permission']['modify'] as $controller => $value ) {
-                    $value = ! in_array( $value, array( null, 0, 1 ) ) ? 0 : $value;
+                    $value = !in_array($value, [null, 0, 1]) ? 0 : $value;
                     $p['modify'][$controller] = $value;
                     if ( ! isset( $p['access'][$controller] ) && ! isset( $data['permission']['access'][$controller] ) ) {
                         $p['access'][$controller] = 0;
@@ -107,6 +107,8 @@ class ModelUserUserGroup extends Model
 
     /**
      * @param int $user_group_id
+     *
+     * @throws \Exception
      */
     public function deleteUserGroup( $user_group_id )
     {
@@ -120,6 +122,8 @@ class ModelUserUserGroup extends Model
      * @param int $user_id
      * @param string $type
      * @param string $page
+     *
+     * @throws \Exception
      */
     public function addPermission( $user_id, $type, $page )
     {
@@ -150,6 +154,7 @@ class ModelUserUserGroup extends Model
      * @param $user_group_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getUserGroup( $user_group_id )
     {
@@ -159,10 +164,10 @@ class ModelUserUserGroup extends Model
               WHERE user_group_id = '".(int)$user_group_id."'"
         );
 
-        $user_group = array(
+        $user_group = [
             'name'       => $query->row['name'],
             'permission' => unserialize( $query->row['permission'] ),
-        );
+        ];
 
         return $user_group;
     }
@@ -171,8 +176,9 @@ class ModelUserUserGroup extends Model
      * @param array $data
      *
      * @return array
+     * @throws \Exception
      */
-    public function getUserGroups( $data = array() )
+    public function getUserGroups( $data = [])
     {
         $sql = "SELECT *
                 FROM ".$this->db->table_name( "user_groups" )." 
@@ -202,6 +208,7 @@ class ModelUserUserGroup extends Model
 
     /**
      * @return mixed
+     * @throws \Exception
      */
     public function getTotalUserGroups()
     {
@@ -218,10 +225,10 @@ class ModelUserUserGroup extends Model
      *
      * @return array
      */
-    public function getAllControllers( $order = 'asc' )
+    public function getAllControllers( $order = 'asc')
     {
 
-        $ignore = array(
+        $ignore = [
             'index/home',
             'common/layout',
             'common/login',
@@ -231,9 +238,9 @@ class ModelUserUserGroup extends Model
             'common/footer',
             'common/header',
             'common/menu',
-        );
+        ];
 
-        $controllers_list = array();
+        $controllers_list = [];
         $files_pages = glob( ABC::env( 'DIR_APP' ).'controllers/admin/pages/*/*.php' );
         $files_response = glob( ABC::env( 'DIR_APP' ).'controllers/admin/responses/*/*.php' );
         $files = array_merge( $files_pages, $files_response );

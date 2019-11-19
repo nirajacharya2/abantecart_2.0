@@ -25,7 +25,9 @@ class StorefrontSendOrderUpdateEmailListener
     /**
      * @param ABaseEvent $event
      *
-     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function handle(ABaseEvent $event)
     {

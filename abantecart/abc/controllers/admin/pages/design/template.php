@@ -457,6 +457,7 @@ class ControllerPagesDesignTemplate extends AController
      * @param string $group
      *
      * @return bool
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */

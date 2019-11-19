@@ -183,7 +183,7 @@ class ControllerResponsesListingGridOrder extends AController
                     if (!empty($ids)) {
                         Order::whereIn('order_id', $ids)->forceDelete();
                     }
-                    $this->db->commt();
+                    $this->db->commit();
                 } catch (\Exception $e) {
                     $this->db->rollback();
                     $error = new AError('');
@@ -230,8 +230,9 @@ class ControllerResponsesListingGridOrder extends AController
      * update only one field
      *
      * @return void
+     * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
      */
     public function update_field()
     {
