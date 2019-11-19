@@ -57,6 +57,14 @@
 		<value><![CDATA[To]]></value>
 	</definition>
 	<definition>
+		<key>date_to</key>
+		<value><![CDATA[Date To]]></value>
+	</definition>
+	<definition>
+		<key>date_from</key>
+		<value><![CDATA[Date From]]></value>
+	</definition>
+	<definition>
 		<key>text_ship_to</key>
 		<value><![CDATA[Ship To (if different address)]]></value>
 	</definition>
