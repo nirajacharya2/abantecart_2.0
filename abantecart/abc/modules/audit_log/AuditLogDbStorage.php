@@ -231,16 +231,12 @@ class AuditLogDbStorage implements AuditLogStorageInterface
                 $audit = $audit->orderBy($sortBy, $ordering);
             }
 
-            $this->db->enableQueryLog();
-
             $this->data['response']['items'] = $audit
                 ->get()
                 ->toArray();
             foreach ($this->data['response']['items'] as &$item) {
                 $item['event'] = AuditEvent::getEventById($item['event_type_id']);
             }
-
-            \H::df($this->db->getQueryLog());
 
             $this->data['response']['total'] = $this->db->sql_get_row_count();
 
