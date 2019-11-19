@@ -167,7 +167,7 @@ class ModelInstall extends Model
                 .'children files/directories need to be writable for AbanteCart to work!';
         }
 
-        if (!is_writable(ABC::env('CACHE')['DIR_CACHE'])) {
+        if (!is_writable(ABC::env('CACHE')['stores']['file']['path'])) {
             $this->error['warning'] = 'Warning: Cache directory needs to be writable for AbanteCart to work!';
         }
 
