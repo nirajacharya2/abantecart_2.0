@@ -65,6 +65,7 @@ class CacheTest extends ATestCase
         $key = 'product.'.$key;
         $cache->put($key, $data);
         $this->assertEquals($data, $cache->tags('product')->get($key));
+        $this->assertEquals($data, $cache->get($key));
         $cache->flush();
 
     }

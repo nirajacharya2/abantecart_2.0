@@ -266,6 +266,12 @@ class AbcCache
             return null;
         }
 
+        //use first word in the key as tag. ABC only case.
+        $parts = explode(".", $key);
+        if (count($parts) > 1 && method_exists($storage->getStore(), 'tags')) {
+            $storage = $storage->tags($parts[0]);
+        }
+
         return $storage->get($key);
     }
 
