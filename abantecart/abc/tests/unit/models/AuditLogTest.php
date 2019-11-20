@@ -19,10 +19,8 @@
 namespace abc\tests\unit\models\admin;
 
 use abc\models\catalog\Product;
-use abc\models\system\Audit;
 use abc\models\system\AuditEvent;
 use abc\tests\unit\ATestCase;
-use Illuminate\Database\Query\Builder;
 use PHPUnit\Framework\Warning;
 
 class AuditLogTest extends ATestCase
@@ -181,6 +179,7 @@ class AuditLogTest extends ATestCase
      */
     public function testLoggedAllEvents(int $productId)
     {
+        echo __FUNCTION__."\n";
 
         //check all events list
         $this->assertEquals(
@@ -200,6 +199,7 @@ class AuditLogTest extends ATestCase
 
     public function testLoggedPreEvents()
     {
+        echo __FUNCTION__."\n";
         //check all events list
         $productId = $this->testCreateUpdateRestoreDeleteProduct(
             ['saving', 'creating', 'updating', 'deleting']
@@ -216,6 +216,7 @@ class AuditLogTest extends ATestCase
 
     public function testLoggedSaving()
     {
+        echo __FUNCTION__."\n";
         $productId = $this->testCreateUpdateRestoreDeleteProduct(['saving']);
         //check all events list
         $this->assertEquals(
@@ -229,6 +230,7 @@ class AuditLogTest extends ATestCase
 
     public function testLoggedSaved()
     {
+        echo __FUNCTION__."\n";
         $productId = $this->testCreateUpdateRestoreDeleteProduct(['saved']);
         //check all events list
         $this->assertEquals(
@@ -239,6 +241,7 @@ class AuditLogTest extends ATestCase
 
     public function testLoggedSavingUpdating()
     {
+        echo __FUNCTION__."\n";
         $productId = $this->testCreateUpdateRestoreDeleteProduct(['saving', 'updating']);
         //check all events list
         $this->assertEquals(
@@ -251,6 +254,7 @@ class AuditLogTest extends ATestCase
 
     public function testLoggedCreatingUpdating()
     {
+        echo __FUNCTION__."\n";
         $productId = $this->testCreateUpdateRestoreDeleteProduct(['saving', 'creating']);
         //check all events list
         $this->assertEquals(
@@ -264,6 +268,7 @@ class AuditLogTest extends ATestCase
 
     public function testLoggedCreatingUpdatingSaving()
     {
+        echo __FUNCTION__."\n";
         $productId = $this->testCreateUpdateRestoreDeleteProduct(['saving', 'creating', 'updating']);
 
         $this->assertEquals(
@@ -277,6 +282,7 @@ class AuditLogTest extends ATestCase
 
     public function testLoggedDeleting()
     {
+        echo __FUNCTION__."\n";
         $productId = $this->testCreateUpdateRestoreDeleteProduct(['deleting']);
 
         $this->assertEquals(
@@ -289,6 +295,7 @@ class AuditLogTest extends ATestCase
 
     public function testLoggedDeleted()
     {
+        echo __FUNCTION__."\n";
         $productId = $this->testCreateUpdateRestoreDeleteProduct(['deleted']);
 
         $this->assertEquals(
@@ -301,6 +308,7 @@ class AuditLogTest extends ATestCase
 
     public function testLoggedDeletingDeleted()
     {
+        echo __FUNCTION__."\n";
         $productId = $this->testCreateUpdateRestoreDeleteProduct(['deleting', 'deleted']);
 
         $this->assertEquals(
@@ -320,6 +328,7 @@ class AuditLogTest extends ATestCase
      */
     public function getLoggedEvents(string $auditableModel, int $auditableId): array
     {
+        echo __FUNCTION__."\n";
         $db = $this->registry->get('db');
 
         $auditableModelId = 0;
@@ -365,6 +374,7 @@ class AuditLogTest extends ATestCase
      */
     public function UpdateProduct(int $productId, $data)
     {
+        echo __FUNCTION__."\n";
         try {
             Product::setCurrentLanguageID(1);
             Product::updateProduct($productId, $data);
