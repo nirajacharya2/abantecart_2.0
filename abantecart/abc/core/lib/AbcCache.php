@@ -9,10 +9,8 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use Illuminate\Cache\CacheManager;
-use Illuminate\Cache\FileStore;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Filesystem\Cache;
 use Illuminate\Filesystem\Filesystem;
 
 /**
@@ -34,7 +32,7 @@ class AbcCache
 {
     /** @var array $storeConfig */
     static $storeConfig;
-    /** @var Cache $manager */
+    /** @var CacheManager $manager */
     protected $manager;
     /** @var bool */
     protected $enabled;
@@ -49,7 +47,7 @@ class AbcCache
                 .'Please check your environment and file config/'.ABC::getStageName().'/config.php');
         }
         static::$currentStore = $defaultDriver;
-        $this->manager = $this->initManager();
+        $this->initManager();
         if (!$this->manager) {
             Registry::log()->write(__CLASS__.':  Cannot to initiate cache manager.');
         }
@@ -99,10 +97,8 @@ class AbcCache
         return $this->enabled;
     }
 
-    /**
-     * @return CacheManager
-     */
-    public function initManager(){
+    protected function initManager()
+    {
         /** @var Application $app */
         $app = new Container();
         Container::setInstance($app);
@@ -110,13 +106,13 @@ class AbcCache
         $this->initMemcachedApp($app);
 
         $config = $this->getConfig();
-        $output['cache.default'] = static::$currentStore;
+        $config['cache.default'] = static::$currentStore;
+        $config['cache.prefix'] = ABC::env('APP_NAME');
 
         $app['config'] = function () use ($config) {
             return $config;
         };
-        $cm = new CacheManager($app);
-        return $cm;
+        $this->manager = new CacheManager($app);
     }
 
     /**
@@ -142,7 +138,7 @@ class AbcCache
         $app['memcached.connector'] = new \Illuminate\Cache\MemcachedConnector();
     }
 
-    protected function getConfig()
+    public function getConfig()
     {
         $output = [];
         if (isset(ABC::env('CACHE')['stores']['file'])) {
@@ -163,6 +159,14 @@ class AbcCache
         }
 
         return $output;
+    }
+
+    /**
+     * @return CacheManager
+     */
+    public function getManager()
+    {
+        return $this->manager;
     }
 
 
@@ -230,9 +234,9 @@ class AbcCache
             return false;
         }
 
-        //use first word in the key as tag
+        //use first word in the key as tag. ABC only case.
         $parts = explode(".", $key);
-        if (count($parts) > 1 && $storage instanceof \Illuminate\Cache\TaggableStore) {
+        if (count($parts) > 1 && method_exists($storage->getStore(), 'tags')) {
             $storage = $storage->tags($parts[0]);
         }
         return $storage->put($key, $value, $ttl);
@@ -315,8 +319,8 @@ class AbcCache
     {
         $tags = is_array($tags) ? $tags : func_get_args();
         $storage = $this->getStorage($store);
-        if ($storage instanceof \Illuminate\Cache\TaggableStore && $tags) {
-            $storage = $storage->tags($tags);
+        if (method_exists($storage->getStore(), 'tags') && $tags) {
+            return $storage->tags($tags)->flush();
         }
         return $storage->flush();
     }
@@ -353,7 +357,7 @@ class AbcCache
     /**
      * @param string $store
      *
-     * @return \Illuminate\Contracts\Cache\Repository|FileStore
+     * @return \Illuminate\Contracts\Cache\Repository
      */
     protected function getStorage(string $store = '')
     {
@@ -367,7 +371,7 @@ class AbcCache
     {
         $tags = is_array($tags) ? $tags : func_get_args();
         $storage = $this->getStorage($store);
-        if ($storage instanceof \Illuminate\Cache\TaggableStore && $tags) {
+        if (method_exists($storage->getStore(), 'tags') && $tags) {
             $storage = $storage->tags($tags);
         }
         return $storage;

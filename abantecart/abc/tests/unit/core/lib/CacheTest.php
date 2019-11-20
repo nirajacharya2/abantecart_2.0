@@ -11,10 +11,6 @@ use stdClass;
 class CacheTest extends ATestCase
 {
 
-    protected function setUp()
-    {
-        //init
-    }
 
     public function testCache1()
     {
@@ -22,12 +18,13 @@ class CacheTest extends ATestCase
         $data = new StdClass;
         $data->property = 'unit';
         $cache = Registry::cache();
+        $cache->flush();
         $cache->put($key, $data);
         $this->assertEquals('unit', $cache->get($key)->property);
         $cache->flush('unit');
     }
 
-    public function testCacheTags()
+    public function testNonTaggableCache()
     {
         $key = 'TestCacheKey';
         $data = new StdClass;
@@ -35,6 +32,7 @@ class CacheTest extends ATestCase
         $tags = 'tag-unit';
 
         $cache = Registry::cache();
+        $cache->flush();
         $cache->tags($tags)->put($key, $data);
         $this->assertEquals('unit', $cache->get($key)->property);
         $cache->flush($tags);
@@ -42,20 +40,32 @@ class CacheTest extends ATestCase
         $this->assertNull($cache->get($key));
     }
 
-//    public function testMemCachedTags(){
-//        $key = 'TestCacheKey';
-//        $data = ['property' => 'unit'];
-//        $tags = 'tag-unit';
-//
-//        $cache = Registry::cache();
-//        $cache->setCurrentStore('memcached');
-//        $cache->tags($tags)->put($key, $data);
-//        //var_dump($cache->get($key));
-//        $this->assertEquals('unit',$cache->get($key)['property']);
-//        $cache->put('other_cache', ['test']);
-//        $cache->flush($tags);
-//
-//        $this->assertNull($cache->get($key));
-//        $this->assertIsArray( $cache->get('other_cache') );
-//    }
+    public function testMemCachedTags()
+    {
+        $key = 'TestCacheKey';
+        $data = ['property' => 'unit'];
+        $tags = 'tagunit';
+
+        $cache = Registry::cache();
+        $cache->setCurrentStore('memcached');
+        $cache->flush();
+
+        $cache->tags($tags)->put($key, $data);
+
+        $this->assertEquals($data, $cache->tags($tags)->get($key));
+
+        $cache->put('other-cache', 'test');
+        $cache->flush($tags);
+
+        $this->assertNull($cache->get($key));
+        $this->assertEquals('test', $cache->get('other-cache'));
+
+        //check abc taggable cache based on prefix
+        $cache->flush();
+        $key = 'product.'.$key;
+        $cache->put($key, $data);
+        $this->assertEquals($data, $cache->tags('product')->get($key));
+        $cache->flush();
+
+    }
 }
