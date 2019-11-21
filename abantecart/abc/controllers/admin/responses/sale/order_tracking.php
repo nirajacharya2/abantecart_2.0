@@ -60,17 +60,18 @@ class ControllerResponsesSaleOrderTracking extends AController
                 Registry::log()->write($e->getMessage());
                 $this->db->rollback();
                 $error = new AError('');
-                return $error->toJSONResponse('APP_ERROR_406',
+                $error->toJSONResponse('APP_ERROR_406',
                     [
                         'error_text'  => 'Application error. See error log for details',
                         'reset_value' => true,
                     ]);
+                return;
 
             }
 
             $this->response->addJSONHeader();
             $this->response->setOutput(AJson::encode(['result_text' => $this->language->get('text_saved')]));
-            return;
+
         }
 
         if ($this->error) {
@@ -281,6 +282,7 @@ class ControllerResponsesSaleOrderTracking extends AController
                                     'catalog/product/update',
                                     '&product_id='.$order_product['product_id']
                                 ),
+                                'product_info' => $product
                             ]
                 );
         }
