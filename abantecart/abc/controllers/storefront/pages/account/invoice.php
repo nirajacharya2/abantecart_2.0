@@ -275,7 +275,7 @@ class ControllerPagesAccountInvoice extends AController
                     }
                 }
 
-                $products[] = [
+                $products[ $product->order_product_id ] = [
                     'id'               => $product->product_id,
                     'order_product_id' => $product->order_product_id,
                     'order_status_id'  => $product->order_status_id,
