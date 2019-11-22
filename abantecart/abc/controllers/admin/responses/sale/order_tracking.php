@@ -54,8 +54,9 @@ class ControllerResponsesSaleOrderTracking extends AController
                         $op->update(['order_status_id' => $orderProduct['order_status_id']]);
                     }
                 }
-                $this->db->commit();
                 H::event('abc\models\admin\order@update', [new ABaseEvent($order_id, $post)]);
+                $this->db->commit();
+
             } catch (\Exception $e) {
                 Registry::log()->write($e->getMessage());
                 $this->db->rollback();
@@ -71,7 +72,7 @@ class ControllerResponsesSaleOrderTracking extends AController
 
             $this->response->addJSONHeader();
             $this->response->setOutput(AJson::encode(['result_text' => $this->language->get('text_saved')]));
-
+            return;
         }
 
         if ($this->error) {
