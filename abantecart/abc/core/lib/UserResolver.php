@@ -22,6 +22,8 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use abc\models\customer\Customer;
+use abc\models\user\User;
 
 class UserResolver
 {
@@ -50,6 +52,11 @@ class UserResolver
      */
     protected $userGroupId;
 
+    /**
+     * @var string - ip
+     */
+    protected $ip;
+
     public function __construct(Registry $registry)
     {
         $this->registry = $registry;
@@ -67,6 +74,7 @@ class UserResolver
             $this->userObject = $user;
             $this->userName = $user->getUserName();
             $this->userId = null;
+            $this->ip = null;
         }
         elseif (
             ABC::env('IS_ADMIN')
@@ -81,6 +89,10 @@ class UserResolver
             $this->userObject = $this->registry->get('user');
             $this->userId = $this->userObject->getId();
             $this->userName = $this->userObject->getUserName();
+            $user = User::find($this->userId);
+            if ($user) {
+                $this->ip = $user->ip;
+            }
         }
         elseif ( $this->registry->get('customer') instanceof $customerClassName)
         {
@@ -90,6 +102,10 @@ class UserResolver
             $this->userObject = $customer;
             $this->userId = $this->userObject->getId();
             $this->userName = $this->userObject->getFirstName().' '.$this->userObject->getLastName();
+            $customer = Customer::find($this->userId);
+            if ($customer) {
+                $this->ip = $customer->ip;
+            }
         }else{
             //TODO: add API-user
         }
@@ -132,5 +148,13 @@ class UserResolver
     public function getUserObject()
     {
         return $this->userObject ?? false;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUserIp()
+    {
+        return $this->ip;
     }
 }

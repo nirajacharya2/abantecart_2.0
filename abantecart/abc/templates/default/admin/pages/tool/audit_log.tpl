@@ -5,19 +5,20 @@
 		padding-left: 15px;
 		max-width: 100%;
 	}
+
 	.v-menu__content.theme--light {
 		min-width: unset !important;
 	}
 </style>
-<?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
+<?php include($tpl_common_dir.'action_confirm.tpl'); ?>
 
-<?php if($modal_mode) { ?>
-<div class="panel-heading">
-	<div class="panel-btns">
-		<a class="panel-close" onclick="$('#viewport_modal').modal('hide');">×</a>
+<?php if ($modal_mode) { ?>
+	<div class="panel-heading">
+		<div class="panel-btns">
+			<a class="panel-close" onclick="$('#viewport_modal').modal('hide');">×</a>
+		</div>
+		<h4 class="panel-title">Audit Log</h4>
 	</div>
-	<h4 class="panel-title">Audit Log</h4>
-</div>
 <?php } ?>
 
 <div class="tab-content">
@@ -170,11 +171,11 @@
 							</v-flex>
 							<v-flex xs12 sm12>
 								<v-chip light close small
-								        v-for="item in arFilter"
-								        :key="arFilter.indexOf(item)"
-								        v-model="item.isOpen"
-								        @click="selectChip(item)"
-								        @input="removeChip(item)"
+										v-for="item in arFilter"
+										:key="arFilter.indexOf(item)"
+										v-model="item.isOpen"
+										@click="selectChip(item)"
+										@input="removeChip(item)"
 								>
 									{{item.auditable_type}}
 									<span v-if="item.auditable_id"> ({{item.auditable_id}}) </span>
@@ -222,16 +223,24 @@
 										<i class="material-icons mi-12">arrow_upward</i>
 									</span>
 										</th>
-									<!--	<th class="column" v-if="!expandedAll" @click="expandAll()">
-											Expand all
-											<v-icon small>unfold_more</v-icon>
+										<!--	<th class="column" v-if="!expandedAll" @click="expandAll()">
+                                                Expand all
+                                                <v-icon small>unfold_more</v-icon>
+                                            </th>
+                                            <th class="column" v-if="expandedAll" @click="unExpandAll()">
+                                                Expand all
+                                                <v-icon small>unfold_less</v-icon>
+                                            </th>
+                                            -->
+										<th>
+											<button id="export_to_excel"
+													class="btn btn-default task_run"
+													title="Export to Excel"
+													:data-run-task-url="dataRunTaskUrl"
+													data-complete-task-url="<?php echo $this->html->getSecureUrl('r/common/export_task/complete', '&controller=task/tool/export_audit_log&limit=100'); ?>"
+													data-abort-task-url="<?php echo $this->html->getSecureUrl('r/common/export_task/abort', '&controller=task/tool/export_audit_log&limit=100'); ?>"
+											><i class="fa fa-file-excel"></i></button>
 										</th>
-										<th class="column" v-if="expandedAll" @click="unExpandAll()">
-											Expand all
-											<v-icon small>unfold_less</v-icon>
-										</th>
-										-->
-										<th></th>
 									</tr>
 								</template>
 								<template slot="items" slot-scope="props">
@@ -272,10 +281,10 @@
 							<v-layout row justify-center align-end>
 								<v-flex xs6 md6 justify-center>
 									<v-pagination v-model="pagination.page"
-									              total-visible="7"
-									              @input="applyFilter"
-									              v-if="Math.ceil(table_total/pagination.rowsPerPage) > 1"
-									              :length="Math.ceil(table_total/pagination.rowsPerPage)"
+												  total-visible="7"
+												  @input="applyFilter"
+												  v-if="Math.ceil(table_total/pagination.rowsPerPage) > 1"
+												  :length="Math.ceil(table_total/pagination.rowsPerPage)"
 									></v-pagination>
 								</v-flex>
 								<v-flex xs3 offset-xs6 offset-md4 md1 justify-end>
@@ -310,11 +319,14 @@
 	let auditable_id = '<?php echo $auditable_id; ?>';
 
 	let curDate = new Date();
+	curDate.setDate(curDate.getDate() - 10)
 	curDate = curDate.toISOString().substr(0, 10);
 
 	let vm = new Vue({
 		el: '#app',
 		data: {
+			dataRunTaskUrlBase: '<?php echo $this->html->getSecureUrl('r/common/export_task/buildTask', '&controller=task/tool/export_audit_log&limit=100'); ?>',
+			dataRunTaskUrl: this.dataRunTaskUrlBase,
 			rowsPerPage: [10, 20, 30, 40, 50],
 			arFilter: [],
 			isConcreteObject: false,
@@ -415,17 +427,23 @@
 		},
 		mounted() {
 			if (auditable_type != '' && auditable_id != '') {
-				this.isConcreteObject = true;
+				//this.isConcreteObject = true;
 				this.selected_data_object = auditable_type;
 				this.data_object_id = auditable_id;
 				this.dataObjectChange();
-				this.isDataObjectDisabled = true;
-				this.isDataObjectIdDisabled = true;
-				this.isSelectedFieldsDisabled = false;
+				//this.isDataObjectDisabled = true;
+				//this.isDataObjectIdDisabled = true;
+				//this.isSelectedFieldsDisabled = false;
 				let filterItem = {
 					'auditable_type': this.selected_data_object,
 					'auditable_id': this.data_object_id,
 				};
+				if (this.data_object_id.length > 0) {
+					filterItem.auditable_id = this.data_object_id.split(',')
+					filterItem.auditable_id.forEach(function (el, index) {
+						this[index] = el.trim()
+					})
+				}
 				this.arFilter.push(filterItem);
 			}
 			this.debouncedGetDataFromApi();
@@ -462,6 +480,12 @@
 					'field_name': this.selected_fields,
 					'auditable_id': this.data_object_id,
 				};
+				if (this.data_object_id.length > 0) {
+					filterItem.auditable_id = this.data_object_id.split(',')
+					filterItem.auditable_id.forEach(function (el, index) {
+						this[index] = el.trim()
+					})
+				}
 				this.arFilter.push(filterItem);
 				this.objectsInArFilter.push(this.selected_data_object);
 				this.removeAddedFromSelect(this.selected_data_object);
@@ -521,11 +545,12 @@
 				param.user_name = this.user_name;
 				param.events = this.events;
 				this.unExpandAll();
-				let promise = axios.get('<?php echo $ajax_url; ?>', {params: param })
+				this.dataRunTaskUrl = this.dataRunTaskUrlBase + '&' + $.param(param)
+				let promise = axios.get('<?php echo $ajax_url; ?>', {params: param})
 					.then(function (response) {
 						vm.table_items = response.data.items;
 						vm.table_total = response.data.total;
-						for (let i=0; i<vm.table_items.length; i++) {
+						for (let i = 0; i < vm.table_items.length; i++) {
 							vm.expand_items[i] = [];
 						}
 						vm.loading = false;
@@ -554,7 +579,7 @@
 					filter: filter,
 					getDetail: true,
 				}
-				let promise = axios.get('<?php echo $ajax_url; ?>', {params: param })
+				let promise = axios.get('<?php echo $ajax_url; ?>', {params: param})
 					.then(function (response) {
 						console.log(response)
 						//vm.expand_items[props.index] = response.data.items;

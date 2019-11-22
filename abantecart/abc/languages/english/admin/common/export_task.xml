@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<definitions>
+	<definition>
+		<key>text_export_task_download</key>
+		<value><![CDATA[Download]]></value>
+	</definition>
+	<definition>
+		<key>text_export_task_failed</key>
+		<value><![CDATA[Export Task Failed, please see Log ]]></value>
+	</definition>
+	<definition>
+		<key>text_export_task_abort</key>
+		<value><![CDATA[Export Task Aborted ]]></value>
+	</definition>
+</definitions>

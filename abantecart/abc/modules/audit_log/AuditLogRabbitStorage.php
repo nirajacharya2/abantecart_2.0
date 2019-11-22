@@ -16,6 +16,11 @@ use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;
 
+/**
+ * Class AuditLogRabbitStorage
+ *
+ * @package abc\modules\audit_log
+ */
 class AuditLogRabbitStorage implements AuditLogStorageInterface
 {
 
@@ -86,7 +91,12 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         }
     }
 
-    public function getEvents(array $request)
+    /**
+     * @param array $request
+     *
+     * @return array
+     */
+    public function getEventsRaw(array $request)
     {
         $api = ABC::env('AUDIT_LOG_API');
         $conf = new AuditLogConfig($api['HOST']);
@@ -95,7 +105,7 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
             $request = $this->prepareRequest($request);
             $events = $client->getEvents($api['DOMAIN'], $request);
             $result = [
-                'items' => $this->prepareEvents($events['events']),
+                'items' => $events['events'],
                 'total' => $events['total'],
             ];
             return $result;
@@ -104,6 +114,25 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         }
     }
 
+    /**
+     * @param array $request
+     *
+     * @return array|mixed
+     */
+    public function getEvents(array $request)
+    {
+        $result = $this->getEventsRaw($request);
+        if (is_array($result)) {
+            $result['items'] = $this->prepareEvents($result['items']);
+        }
+        return $result;
+    }
+
+    /**
+     * @param $request
+     *
+     * @return array
+     */
     protected function prepareRequest($request)
     {
         $allowSortBy = [
@@ -153,9 +182,9 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         }
         $result = [
             'limit'  => (int)$request['rowsPerPage'],
-            'offset' => (int)$request['rowsPerPage'] * (int)$request['page'] - (int)$request['rowsPerPage'],
+            'offset' => ((int)$request['rowsPerPage'] * (int)$request['page'] - (int)$request['rowsPerPage']) > 0 ? (int)$request['rowsPerPage'] * (int)$request['page'] - (int)$request['rowsPerPage'] : 0,
             'sort'   => $allowSortBy[$request['sortBy']] ?: '',
-            'order'  => $request['descending'] === 'true' ? 'DESC' : 'ASC',
+            'order'  => $request['descending'] == 'true' ? 'DESC' : 'ASC',
         ];
         if (!empty($request['date_from'])) {
             $result['dateFrom'] = $request['date_from'];
@@ -169,6 +198,13 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         return $result;
     }
 
+    /**
+     * @param $events
+     *
+     * @return array
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
+     */
     protected function prepareEvents($events)
     {
         $result = [];
@@ -180,7 +216,7 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
                 'main_auditable_model' => $event['entity']['name'],
                 'main_auditable_id'    => $event['entity']['id'],
                 'event'                => $event['entity']['group'],
-                'date_added'           => $event['request']['timestamp'],
+                'date_added'           => date(Registry::language()->get('date_format_long'), strtotime($event['request']['timestamp'])),
             ];
         }
         return $result;
@@ -211,6 +247,11 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         }
     }
 
+    /**
+     * @param $events
+     *
+     * @return array
+     */
     protected function prepareEventDescriptionRows($events)
     {
         $result = [];
