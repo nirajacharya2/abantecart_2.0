@@ -24,16 +24,17 @@ if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 class ControllerCommonPage extends AController {
-	
+
 	public function main() {
 
         //init controller data
         $this->extensions->hk_InitData($this,__FUNCTION__);
-		
+
 		$this->view->assign('lang', $this->language->get('code'));
 		$this->view->assign('direction', $this->language->get('direction'));
 		$this->view->assign('scripts', $this->document->getScripts());
-		
+        $this->view->assign('scripts_bottom', $this->document->getScriptsBottom());
+
         $children = $this->getChildren();
         //save only first child - page content controller
         $this->setChildren( array($children[0]) );
