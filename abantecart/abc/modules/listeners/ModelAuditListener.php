@@ -346,6 +346,10 @@ class ModelAuditListener
                 'id'    => $main_auditable_id,
                 'group' => $event_name,
             ],
+            'request' => [
+                'ip'        => $user->getUserIp(),
+                'timestamp' => date('Y-m-d\TH:i:s.v\Z'),
+            ],
         ];
 
         foreach ($eventDescription as $item) {
@@ -374,7 +378,6 @@ class ModelAuditListener
         try {
             $auditLogStorage->write($data);
         } catch (\Exception $e) {
-            \H::df($e->getMessage());
             $error_message = __CLASS__.": Auditing of ".$modelClassName." failed.";
             $this->registry->get('log')->write($error_message);
             $this->registry->get('log')->write($e->getMessage());

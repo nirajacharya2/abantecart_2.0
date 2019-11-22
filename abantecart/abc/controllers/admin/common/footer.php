@@ -44,10 +44,11 @@ class ControllerCommonFooter extends AController {
 		$this->view->assign('mp_menu_text', $this->language->get($mp['item_text']));
 		$this->view->assign('new_orders', $this->language->get('new_orders'));
 		$this->view->assign('recent_customers', $this->language->get('recent_customers'));
+        $this->view->assign('scripts_bottom', $this->document->getScriptsBottom());
 
-		$this->view->assign('text_footer_left', sprintf($this->language->get('text_footer_left'), date('Y')));
+        $this->view->assign('text_footer_left', sprintf($this->language->get('text_footer_left'), date('Y')));
 		$this->view->assign('text_footer', sprintf($this->language->get('text_footer'),date('Y')).' '.ABC::env('VERSION'));
-		
+
 		if (!$this->user->isLogged() || !isset($this->request->get['token']) || !isset($this->session->data['token']) || ($this->request->get['token'] != $this->session->data['token'])) {
 			$this->view->assign('logged', '');
 			$this->view->assign('home', $this->html->getSecureURL('index/login', '', true));
@@ -56,7 +57,7 @@ class ControllerCommonFooter extends AController {
 			$this->view->assign('avatar', $this->user->getAvatar());
 			$this->view->assign('username', $this->user->getUserName());
 			if($this->user->getLastLogin()) {
-				$this->view->assign('last_login', sprintf($this->language->get('text_last_login'), $this->user->getLastLogin()));	
+				$this->view->assign('last_login', sprintf($this->language->get('text_last_login'), $this->user->getLastLogin()));
 			} else {
 				$this->view->assign('last_login', sprintf($this->language->get('text_welcome'), $this->user->getUserName()));
 			}
