@@ -54,9 +54,8 @@ class ControllerResponsesSaleOrderTracking extends AController
                         $op->update(['order_status_id' => $orderProduct['order_status_id']]);
                     }
                 }
-                H::event('abc\models\admin\order@update', [new ABaseEvent($order_id, $post)]);
                 $this->db->commit();
-
+                H::event('abc\models\admin\order@update', [new ABaseEvent($order_id, $post)]);
             } catch (\Exception $e) {
                 Registry::log()->write($e->getMessage());
                 $this->db->rollback();
