@@ -8,10 +8,10 @@
 		      </a>
 		      <a href="" onclick="<?php echo $support_menu['item_url']; ?> return false;">
 		      <?php echo $support_menu['item_icon_code']; ?><?php echo $support_menu_text; ?>
-		      </a>		      
+		      </a>
 		      <a href="" onclick="<?php echo $mp_menu['item_url']; ?> return false;">
 		      <?php echo $mp_menu['item_icon_code']; ?><?php echo $mp_menu_text; ?>
-		      </a>		      
+		      </a>
 		    </div>
 		    <div class="col-md-3 version"><?php echo $text_footer; ?></div>
 		</div>
@@ -19,7 +19,7 @@
 
  	</div><!-- mainpanel -->
 
-<?php if ($logged) { ?>      
+<?php if ($logged) { ?>
   <div class="rightpanel">
     <!-- Nav tabs -->
     <ul class="nav nav-tabs nav-justified">
@@ -27,19 +27,22 @@
         <li><a href="#rp-orders" data-toggle="tab"><i class="fa fa-money"></i></a></li>
         <?php echo $this->getHookVar('rightpanel_tabs'); ?>
     </ul>
-        
+
     <!-- Tab panes -->
     <div class="tab-content">
         <div class="tab-pane active" id="rp-alluser">
             <h5 class="sidebartitle"><?php echo $recent_customers; ?></h5>
         </div>
-        
+
          <div class="tab-pane" id="rp-orders">
             <h5 class="sidebartitle"><?php echo $new_orders; ?></h5>
         </div>
-        
+
         <?php echo $this->getHookVar('rightpanel_tabpanes'); ?>
-        
+
     </div><!-- tab-content -->
   </div><!-- right panel -->
-<?php } // END of logged in ?>   
+    <?php foreach ((array)$scripts_bottom as $script) { ?>
+		<script type="text/javascript" src="<?php echo $script; ?>" defer></script>
+    <?php } ?>
+<?php } // END of logged in ?>

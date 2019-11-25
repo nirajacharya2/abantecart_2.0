@@ -301,11 +301,13 @@ class ControllerPagesSaleOrder extends AController
         $grid_search_form['fields']['date_start'] = $form->getFieldHtml([
             'type'    => 'date',
             'name'    => 'date_start',
+            'attr' => 'placeholder="'.$this->language->get('date_from').'"',
         ]);
 
         $grid_search_form['fields']['date_end'] = $form->getFieldHtml([
             'type'    => 'date',
             'name'    => 'date_end',
+            'attr' => 'placeholder="'.$this->language->get('date_to').'"',
         ]);
         $grid_settings['search_form'] = true;
 

@@ -213,7 +213,10 @@ class AuditLogDbStorage implements AuditLogStorageInterface
                         '=',
                         'audit_events.id'
                     )->groupBy('audit_events.id')
-                                   ->whereIn('audit_event_descriptions.field_name', $attributeNames);
+                     ->whereIn(
+                         'audit_event_descriptions.field_name',
+                         $attributeNames
+                     );
                 }
 
             }
