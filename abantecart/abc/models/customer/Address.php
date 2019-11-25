@@ -25,6 +25,8 @@ use Illuminate\Database\Query\JoinClause;
  * @property string $city
  * @property int $country_id
  * @property int $zone_id
+ * @property \Carbon\Carbon $date_added
+ * @property \Carbon\Carbon $date_modified
  *
  * @property Customer $customer
  * @property Country $country
@@ -70,6 +72,8 @@ class Address extends BaseModel
         'country_id',
         'zone_id',
     ];
+
+    protected $touches = ['customer'];
 
     protected $rules = [
         'address_id'  => [

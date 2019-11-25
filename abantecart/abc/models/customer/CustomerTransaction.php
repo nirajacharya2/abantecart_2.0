@@ -81,6 +81,8 @@ class CustomerTransaction extends BaseModel
         'stage_id',
     ];
 
+    protected $touches = ['customer'];
+
     protected $rules = [
         'customer_transaction_id' => [
             'checks'   => [
