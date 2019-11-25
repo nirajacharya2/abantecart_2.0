@@ -145,7 +145,10 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         $filter = [];
         if (is_array($request['filter'])) {
             foreach ($request['filter'] as $item) {
-                $item = json_decode($item, true);
+                $decodedItem = json_decode($item, true);
+                if ($decodedItem) {
+                    $item = $decodedItem;
+                }
                 if (isset($request['user_name']) && !empty($request['user_name'])) {
                     $item['actor.name'] = $request['user_name'];
                 }
