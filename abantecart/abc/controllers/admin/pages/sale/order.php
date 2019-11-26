@@ -615,19 +615,22 @@ class ControllerPagesSaleOrder extends AController
                     $this->data['cancel_statuses'][] = $oStatus['order_status_id'];
                 }
             }
-
+            $orderStatus = OrderStatusDescription::where(
+                                [
+                                    'order_status_id' => (int)$order_product['order_status_id'],
+                                    'language_id'     => (int)$order_info['language_id'],
+                                ]
+                            )->first();
             $this->data['order_products'][] = [
                 'disable_edit'     => in_array($order_product['order_status_id'], $this->data['cancel_statuses']),
                 'order_product_id' => $order_product['order_product_id'],
                 'product_id'       => $order_product['product_id'],
                 'product_status'   => $product['status'],
                 'order_status_id'  => $order_product['order_status_id'],
-                'order_status'     => OrderStatusDescription::where(
-                    [
-                        'order_status_id' => (int)$order_product['order_status_id'],
-                        'language_id'     => (int)$order_info['language_id'],
-                    ]
-                )->first()->name,
+                'order_status'     => ( $orderStatus
+                                        ? $orderStatus->name
+                                        : Registry::order_status()->getStatusById($order_product['order_status_id'])
+                                      ),
                 'name'             => $order_product['name'],
                 'model'            => $order_product['model'],
                 'option'           => $option_data,
@@ -733,8 +736,10 @@ class ControllerPagesSaleOrder extends AController
             ]
         );
 
-        $this->data['validate_coupon_url'] =
-            $this->html->getSecureURL('r/sale/order/validateCoupon', '&order_id='.$order_id);
+        $this->data['validate_coupon_url'] = $this->html->getSecureURL(
+            'r/sale/order/validateCoupon',
+            '&order_id='.$order_id
+        );
 
         //if virtual product (no shipment);
         if (!$this->data['shipping_method']) {

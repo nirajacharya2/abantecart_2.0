@@ -25,6 +25,7 @@ use H;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Collection;
 
 /**
  * Class Order
@@ -94,9 +95,7 @@ use Illuminate\Database\Query\JoinClause;
  * @property \Illuminate\Database\Eloquent\Collection $order_products
  * @property \Illuminate\Database\Eloquent\Collection $order_totals
  *
- * @method static QueryBuilder where(string | array $column, string $operator = '=', mixed $value = null, string $boolean = 'and') QueryBuilder
  * @method static Order find(int $order_id) Order
- * @method static Order select(mixed $select) Builder
  *
  * @package abc\models
  */
@@ -879,6 +878,7 @@ class Order extends BaseModel
                     )->get();
                     if ($orderOptions) {
                         foreach ($orderOptions as $orderOption) {
+                            /** @var ProductOptionValue $option */
                             $option = ProductOptionValue::where(
                                 [
                                     'product_option_value_id' => $orderOption['product_option_value_id'],
@@ -1078,10 +1078,11 @@ class Order extends BaseModel
     /**
      * @param int $order_id
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return  Collection
      */
     public static function getOrderHistories($order_id)
     {
+        /** @var QueryBuilder $query */
         $query = OrderHistory::select(
             [
                 'order_history.*',
@@ -1199,7 +1200,7 @@ class Order extends BaseModel
             }
 
             if ($data['order_totals']['total']['value'] !== null) {
-                $data['total'] = $data['order_totals']['total']['value'];
+                $data['total'] = (float)$data['order_totals']['total']['value'];
                 $data['total_difference'] = $order->total - $data['total'];
             }
 
@@ -1260,7 +1261,7 @@ class Order extends BaseModel
         }
 
         $elements_with_options = HtmlElementFactory::getElementsWithOptions();
-
+        $qnt_diff = 0;
         if (isset($data['product'])) {
             foreach ($data['product'] as $orderProduct) {
                 $order_product_id = $orderProduct['order_product_id'];
@@ -1772,7 +1773,7 @@ class Order extends BaseModel
             ->groupBy('customer_id');
         //allow to extends this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $customers_ids);
-        return $query->get()->pluck('count', 'customer_id');
+        return $query->get()->pluck('count', 'customer_id')->toArray();
     }
 
 }

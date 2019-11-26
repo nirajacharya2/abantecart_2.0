@@ -157,6 +157,11 @@ class ProductOption extends BaseModel
         parent::delete();
     }
 
+    /**
+     * @param $po_ids
+     *
+     * @return bool|\Illuminate\Support\Collection
+     */
     public static function getProductOptionsByIds($po_ids)
     {
 
