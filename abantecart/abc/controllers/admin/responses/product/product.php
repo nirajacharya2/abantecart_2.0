@@ -1573,8 +1573,20 @@ class ControllerResponsesProductProduct extends AController
             }
         }
         $preset_values = [];
+        $order_product_info = null;
 
         $this->data['product_info'] = $product_info;
+        if(
+            !$product_info
+            || !$product_info['status']
+            || $product_info['call_to_order']
+            || H::dateISO2Int($product_info['date_available']) > time()
+        ){
+            $this->data['editable'] = false;
+        }else{
+            $this->data['editable'] = true;
+        }
+
         if ($order_product_id) {
 
             //if unknown product_id but order_product_id we know
@@ -1585,7 +1597,6 @@ class ControllerResponsesProductProduct extends AController
             $this->data['order_product_info'] = $order_product_info->toArray();
 
             $product_id = (int)$order_product_info->product_id;
-            $product_info = $this->model_catalog_product->getProduct($product_id);
             $preset_values['price'] = $this->currency->format(
                                             $order_product_info->price,
                                             $order_info['currency'], $order_info['value'],
@@ -1617,7 +1628,8 @@ class ControllerResponsesProductProduct extends AController
             $this->data['text_title'] = $this->language->get('text_edit_order_product');
             $form_action = $this->html->getSecureURL(
                 'sale/order/details',
-                                                '&order_id='.$order_id.'&order_product_id='.$order_product_id
+                '&order_id='.$order_id
+                    .'&order_product_id='.$order_product_id
             );
 
         } elseif($order_id) {
@@ -1837,7 +1849,7 @@ class ControllerResponsesProductProduct extends AController
                 'type'  => 'hidden',
                 'name'  => 'price',
                 'value' => $preset_values['price'],
-                'attr'  => 'readonly'
+                'attr'  => 'readonly data-orgvalue="'.$preset_values['price'].'" '
             ]);
         }else{
             $this->data['form']['fields']['price'] = $form->getFieldHtml([
@@ -1869,7 +1881,7 @@ class ControllerResponsesProductProduct extends AController
             'type'  => 'hidden',
             'name'  => 'total',
             'value' => $preset_values['total'],
-            'attr'  => 'readonly',
+            'attr'  => ' readonly data-orgvalue="'.$preset_values['total'].'" ',
         ]);
 
         $this->data['form']['fields']['product_id'] = $form->getFieldHtml([
@@ -1878,7 +1890,20 @@ class ControllerResponsesProductProduct extends AController
             'value' => $product_id,
         ]);
         $this->data['product_id'] = $product_id;
-        $this->data['product_name'] = html_entity_decode($product_info['name'], ENT_QUOTES, ABC::env('APP_CHARSET'));
+        if($product_info['name']) {
+            $this->data['product_name'] = html_entity_decode(
+                $product_info['name'],
+                ENT_QUOTES,
+                ABC::env('APP_CHARSET')
+            );
+        }elseif($order_product_info){
+            $this->data['product_name'] = html_entity_decode(
+                                                    $order_product_info->name
+                                                    . ($order_product_info->model ? ' ('.$order_product_info->model.')':''),
+                                                    ENT_QUOTES,
+                                                    ABC::env('APP_CHARSET')
+            );
+        }
         $this->data['product_url'] = $this->html->getSecureURL('catalog/product/update','&product_id='.$product_id);
 
         $this->data['form']['fields']['order_product_id'] = $form->getFieldHtml([
