@@ -41,6 +41,7 @@
 			<p class="form-control-static"><?php echo $order_id; ?></p>
 			</div>
 		</div>
+                <?php if ($entry_invoice_id) { ?>
 		<div class="form-group">
 			<label class="control-label col-sm-5"><?php echo $entry_invoice_id; ?></label>
 			<div class="input-group afield col-sm-7"><p class="form-control-static">
@@ -52,6 +53,7 @@
 				} ?>
 			</p></div>
 		</div>
+                <?php } ?>
 		<div class="form-group">
 			<label class="control-label col-sm-5"><?php echo $entry_customer; ?></label>
 			<div class="input-group afield col-sm-7">
@@ -87,7 +89,7 @@
 			<label class="control-label col-sm-5"><?php echo $entry_telephone; ?></label>
 			<div class="input-group afield col-sm-7"><?php echo $telephone; ?></div>
 		</div>
-		<?php if ($fax) { ?>
+                <?php if ($fax->value) { ?>
 			<div class="form-group">
 				<label class="control-label col-sm-5"><?php echo $entry_fax; ?></label>
 				<div class="input-group afield col-sm-7"><?php echo $fax; ?></div>
@@ -112,14 +114,17 @@
 					?></p>
 				</div>
 			</div>
-		<?php } ?>
+                <?php }
+                if ($entry_ip) { ?>
 		<div class="form-group">
 			<label class="control-label col-sm-5"><?php echo $entry_ip; ?></label>
 			<div class="input-group afield col-sm-7">
 			<p class="form-control-static"><?php echo $ip; ?></p>
 			</div>
 		</div>
-		<?php echo $this->getHookVar('order_details_left_post'); ?>
+                    <?php
+                }
+                echo $this->getHookVar('order_details_left_post'); ?>
 	</div>
 	<div class="col-sm-6 col-xs-12">
 		<?php echo $this->getHookVar('order_details_right_pre'); ?>
@@ -141,31 +146,38 @@
 			<p class="form-control-static"><?php echo $date_added; ?></p>
 			</div>
 		</div>
+                <?php if ($entry_shipping_method) { ?>
 		<div class="form-group">
 			<label class="control-label col-sm-5"><?php echo $entry_shipping_method; ?></label>
 			<div class="input-group afield col-sm-7">
 			<p class="form-control-static"><?php echo $form['fields']['shipping_method']; ?></p>
 			</div>
 		</div>
+                <?php }
+
+                if ($entry_payment_method) { ?>
 		<div class="form-group">
 			<label class="control-label col-sm-5"><?php echo $entry_payment_method; ?></label>
 			<div class="input-group afield col-sm-7">
 			<p class="form-control-static"><?php echo $form['fields']['payment_method']; ?></p>
 			</div>
 		</div>
+                <?php } ?>
 		<div class="form-group">
 			<label class="control-label col-sm-5"><?php echo $entry_total; ?></label>
 			<div class="input-group afield col-sm-7">
 			<p class="form-control-static"><?php echo $total; ?></p>
 			</div>
 		</div>
+                <?php if ($entry_order_status) {?>
 		<div class="form-group">
 			<label class="control-label col-sm-5"><?php echo $entry_order_status; ?></label>
 			<div class="input-group afield col-sm-7" id="order_status">
 			<p class="form-control-static"><a target="_blank" href="<?php echo $history; ?>"><?php echo $order_status; ?></a></p>
 			</div>
 		</div>
-		<?php echo $this->getHookVar('order_details_right_post'); ?>
+                <?php }
+                echo $this->getHookVar('order_details_right_post'); ?>
 	</div>
 	</div>
 	
@@ -200,10 +212,9 @@
             $oid = $order_product['order_product_id'];
             ?>
             <tbody id="product_<?php echo $oid; ?>">
-            <tr <?php if (!$order_product['product_status']
-            || $order_product['disable_edit']) { ?>class="alert alert-warning"<?php } ?>>
+                <tr <?php if ($order_product['disable_edit']) { ?>class="alert alert-warning"<?php } ?>>
 				<td>
-                    <?php if ($order_product['product_status'] && !$order_product['disable_edit']) { ?>
+                        <?php if ( !$order_product['disable_edit']) { ?>
 					<a class="edit_product btn btn-xs btn-info-alt tooltips"
                        data-original-title="<?php echo $text_edit; ?>"
                        data-order-product-id="<?php echo $oid; ?>">
@@ -255,13 +266,13 @@
                     <?php echo $order_product['price']; ?>
                     <input class="afield no-save" type="hidden"
                            name="product[<?php echo $oid; ?>][price]"
-                           value="<?php echo $order_product['price']; ?>"/>
+                               value="<?php echo strip_tags($order_product['price']); ?>"/>
                 </td>
                 <td class="align-center">
                     <?php echo $order_product['total']; ?>
                     <input class="afield no-save" type="hidden"
                            name="product[<?php echo $oid; ?>][total]"
-                           value="<?php echo $order_product['total']; ?>"/>
+                               value="<?php echo strip_tags($order_product['total']); ?>"/>
                 </td>
 			</tr>
 			</tbody>
@@ -273,6 +284,7 @@
             <tr>
                 <td class="col-sm-6">
                     <table class="original-totals-table table table-striped col-sm-2 col-sm-offset-4 pull-right"></table>
+                    <input id="original_total" type="hidden" value="<?php echo $order_info['total'] ?>" disabled>
                 </td>
                 <td class="col-sm-6">
                     <table class="table table-striped col-sm-2 col-sm-offset-4 pull-right">
@@ -287,10 +299,10 @@
 				</td>
                 <td><?php
                     if (!in_array($total_row['type'], ['total'])) {
-                        echo $total_row['text'];
+                                        echo html_entity_decode($total_row['text']);
                     } else { ?>
                         <b class="<?php echo $total_row['type']; ?>">
-						<?php echo $total_row['text']; ?>
+                                            <?php echo html_entity_decode($total_row['text']); ?>
 					</b>
                     <?php }
                     $count++;
@@ -322,17 +334,16 @@
 		<div class="list-inline input-group afield col-sm-7 col-xs-9">
 			<?php echo $add_product;?>
 		</div>
-		<div class="list-inline input-group afield col-sm-offset-0 col-sm-3 col-xs-1">
-			<a class="add btn btn-success tooltips"
-			   data-original-title="<?php echo $text_add; ?>">
-				<i class="fa fa-plus-circle fa-lg"></i></a>
-		</div>
 	</div>
 	<?php } ?>
 	</div>
 
 	<div class="panel-footer col-xs-12">
-		<div class="text-center">
+        <div id="balance-alert" class="warning alert alert-error alert-danger hidden text-center">
+            Total amount not equal previous value. You have balance disabled in the settings.
+            So you cannot to save order, because needs to create transaction.
+            <?php echo $warning_balance_disabled; ?></div>
+        <div id="submit-buttons" class="text-center">
 			<button class="btn btn-primary lock-on-click">
 			<i class="fa fa-save fa-fw"></i> <?php echo $button_save; ?>
 			</button>
@@ -443,7 +454,6 @@ echo $this->html->buildElement(
                 //$('#generate_invoice').attr('disabled', '');
             },
             success: function (data) {
-                if (data.hasOwnProperty('totals')) {
 
                     var totals = $('table>tbody#totals');
                     if ($('#original-totals').length == 0) {
@@ -453,7 +463,15 @@ echo $this->html->buildElement(
                     }
 
                     totals.html('');
-                    var totalKeys = [];
+                $('#submit-buttons').show();
+
+                if (data.hasOwnProperty('totals')) {
+                    var totalKeys = [],
+                        cancel_order = false;
+                    if (data.totals.length === 0) {
+                        data.totals['0'] = {id: 'total', title: 'Total', text: '0.00', value: 0.0};
+                        cancel_order = true;
+                    }
                     $.each(data.totals, function (index, row) {
                         totalKeys[index] = row.key;
                         var new_row = $('<tr><td id="total-row-' + row.id + '" class="pull-right">'
@@ -469,10 +487,38 @@ echo $this->html->buildElement(
 
                         new_row.appendTo(totals);
                     });
+                    if (!cancel_order) {
                     //show button to add additional total such as coupon
                     $('a.add_totals').removeClass('hidden');
                 }
-			}		
+
+                    //compare two totals (current and calculated) and mark disbalance
+                    var new_total = $('input[name="order_totals\[total\]\[value\]"]').val();
+                    var old_total = $('#original_total').val();
+
+                    var cssClass = '';
+                    if (old_total > new_total) {
+                        cssClass = "alert-danger";
+                    } else if (old_total < new_total) {
+                        cssClass = "alert-warning";
+                    }
+
+                    $('tbody#totals').find('td>b.total').parent().addClass(cssClass);
+                    <?php if($balance_disabled){ ?>
+                    if (cssClass.length > 0) {
+                        $('#submit-buttons').hide();
+                        $('#balance-alert').removeClass('hidden');
+                    } else {
+                        $('#submit-buttons').show();
+                        $('#balance-alert').addClass('hidden');
+                    }
+                    <?php } ?>
+                }else if(data.hasOwnProperty('error')){
+                    var error_text = $('<tr id="totals_error"><td class="col-sm-12"><div class="alert-danger">' + data.error.text + '</div></td></tr>');
+                    error_text.appendTo(totals);
+                    $('#submit-buttons').hide();
+                }
+			}
 		});
         if (event) {
             event.stopPropagation();
@@ -510,6 +556,8 @@ echo $this->html->buildElement(
             $("#add_product").val('').trigger("chosen:updated");
 			if(vals){
 				id = '&product_id='+vals[0];
+            } else {
+                return false;
 			}
 		}
         var order_status_id = $('input[name="product\[' + order_product_id + '\]\[order_status_id\]"\]').val();
@@ -617,6 +665,8 @@ echo $this->html->buildElement(
             'value="' + currencyToNumber(product_data.total, thousand_point, decimal_point, currency_symbol) + '">'
         );
 
+        <?php echo $this->getHookVar('extend_js'); ?>
+
         if (product_data.quantity > 0) {
             newRow.addClass('alert-warning');
         } else {
@@ -626,7 +676,10 @@ echo $this->html->buildElement(
         if (!edit_mode) {
             newRow.appendTo('#products');
         }
+
+        if(data.editable) {
         recalculateTotals();
+        }
 
         newRowCounter++;
         $('#orderFrm').prop('changed', 'submit').attr('data-confirm-exit', 'false');

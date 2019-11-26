@@ -11,6 +11,7 @@
                                      target="_blank"><?php echo $image['thumb_html']; ?></a></div>
             <div class="col-md-8">
                 <?php if ($options) { ?>
+                <div id="options-div">
                     <label class="h4 heading"><?php echo $tab_option; ?></label>
                     <div class="optionsbox">
                         <fieldset>
@@ -31,24 +32,28 @@
 
                         </fieldset>
                     </div>
+                </div>
                 <?php } ?>
-                <label class="h4 heading"><?php echo $column_total ?></label>
-                <?php foreach ($form['fields'] as $name => $field) { ?>
-                    <div class="form-group ">
-                        <label class="control-label col-sm-5 col-xs-12"
-                               for="<?php echo $field->element_id; ?>"><?php echo ${'column_'.$name}; ?></label>
-                        <div class="input-group afield col-sm-6 col-xs-12">
-                            <?php echo $field;
-                            if ($field->type == 'hidden' && in_array($field->name, [ 'price','total'])) {
-                                echo '<div id="'.$field->name.'_text" class="form-control-static">'.$field->value
-                                    .'</div>';
-                            } ?>
+                <div id="totals-div">
+                    <label class="h4 heading"><?php echo $column_total ?></label>
+                    <?php foreach ($form['fields'] as $name => $field) { ?>
+                        <div class="form-group ">
+                            <label class="control-label col-sm-5 col-xs-12"
+                                   for="<?php echo $field->element_id; ?>"><?php echo ${'column_'.$name}; ?></label>
+                            <div class="input-group afield col-sm-6 col-xs-12">
+                                <?php echo $field;
+                                if ($field->type == 'hidden' && in_array($field->name, [ 'price','total'])) {
+                                    echo '<div id="'.$field->name.'_text" 
+                                               class="form-control-static">'.$field->value.'</div>';
+                                } ?>
+                            </div>
                         </div>
-                    </div>
-                <?php }
-
-                echo $this->getHookVar('extended_product_fields');
-
+                    <?php } ?>
+                </div>
+                <div id="extends-div">
+                <?php echo $this->getHookVar('extended_product_fields'); ?>
+                </div>
+                <?php
                 if ($modal_mode == 'json') { ?>
                 <label class="h4 heading"><?php echo $text_order_status ?></label>
                 <div class="form-group ">
@@ -84,9 +89,16 @@
 
 <script type="application/javascript">
 
-    $('#orderProductFrm input, #orderProductFrm select,  #orderProductFrm textarea')
-        .not('#orderProductFrm_order_status_id')
-        .on('change', display_total_price);
+    var editable = <?php echo $editable ? 'true' : 'false'; ?>;
+
+    if(editable) {
+        $('#orderProductFrm input, #orderProductFrm select,  #orderProductFrm textarea')
+            .not('#orderProductFrm_order_status_id')
+            .on('change', display_total_price);
+    }else{
+        $('#options-div input, #options-div select,  #options-div textarea, #totals-div input, #totals-div select,  #totals-div textarea')
+            .attr('disabled', 'disabled');
+    }
 
     $('#orderProductFrm_quantity')
         .on('keyup', function(){
@@ -107,24 +119,38 @@
                 $('#orderProductFrm_total').val(0);
                 $('#total_text').text(0.00);
 
-            } else {
-                if ($('#orderProductFrm_quantity').val() == 0) {
+            } else if( $('#orderProductFrm_quantity').val() == 0 ) {
+                if(editable) {
                     $('#orderProductFrm_quantity')
                         .val($('#orderProductFrm_quantity').attr('data-orgvalue'))
                         .keyup()
                         .removeAttr('readonly');
+                }else{
+                    $('#orderProductFrm_quantity')
+                        .val($('#orderProductFrm_quantity').attr('data-orgvalue'));
+
+                    var price = $('#orderProductFrm_price').attr('data-orgvalue');
+                    $('#orderProductFrm_price').val( price );
+                    $('#price_text').html( price );
+
+                    var total = $('#orderProductFrm_total').attr('data-orgvalue');
+                    $('#orderProductFrm_total').val(total);
+                    $('#total_text').text(total);
                 }
             }
+
         });
 
 
     function display_total_price() {
+
         var disabled = $("#orderProductFrm").find(":disabled");
         disabled.removeAttr("disabled");
         var data = $("#orderProductFrm").serialize();
-        data = data.replace(new RegExp("product%5Boption%5D", 'g'), 'option'); <?php // data format for storefront response-controller ?>
-        data = data.replace(new RegExp("product%5Bquantity%5D", 'g'), 'quantity'); <?php // data format for storefront response-controller ?>
-        data = data.replace(new RegExp("product%5Bprice%5D", 'g'), 'price'); <?php // data format for storefront response-controller ?>
+        <?php // data format for storefront response-controller ?>
+        data = data.replace(new RegExp("product%5Boption%5D", 'g'), 'option');
+        data = data.replace(new RegExp("product%5Bquantity%5D", 'g'), 'quantity');
+        data = data.replace(new RegExp("product%5Bprice%5D", 'g'), 'price');
         $.ajax({
             type: 'POST',
             url: '<?php echo $total_calc_url;?>',
@@ -143,8 +169,6 @@
 
         disabled.attr("disabled", "disabled");
     }
-
-    display_total_price();
 
     var modal_mode = '<?php echo $modal_mode; ?>';
     <?php //if need to pass js-data back to main page => ?>
@@ -181,6 +205,7 @@
             output.product_url = '<?php echo $product_url; ?>';
             output.order_product_id = '<?php echo $order_product_id; ?>';
             output.order_status_id = $('#orderProductFrm_order_status_id').val();
+            output.editable = editable;
 
             <?php echo $this->getHookVar('extend_js'); ?>
             AddProductToForm(output);

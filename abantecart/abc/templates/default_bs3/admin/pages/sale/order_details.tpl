@@ -46,7 +46,8 @@
                 <?php if ($entry_invoice_id) { ?>
                     <div class="form-group">
                         <label class="control-label col-sm-5"><?php echo $entry_invoice_id; ?></label>
-                        <div class="input-group afield col-sm-7"><p class="form-control-static">
+                        <div class="input-group afield col-sm-7">
+                            <p class="form-control-static">
                                 <?php if ($invoice_id) {
                                     echo $invoice_id;
                                 } else {
@@ -677,7 +678,10 @@ echo $this->html->buildElement(
         if (!edit_mode) {
             newRow.appendTo('#products');
         }
-        recalculateTotals();
+
+        if(data.editable) {
+            recalculateTotals();
+        }
 
         newRowCounter++;
         $('#orderFrm').prop('changed', 'submit').attr('data-confirm-exit', 'false');
