@@ -89,9 +89,10 @@ class ControllerPagesAccountTransactions extends AController
             $trans = [];
 
             $page = $this->request->get['page']; // get the requested page
-            $limit = $this->request->get['rows']; // get how many rows we want to have into the grid
+            $limit = $this->request->get['limit'] ?: 20; // get how many rows we want to have into the grid
             $sidx = $this->request->get['sidx']; // get index row - i.e. user click to sort
             $sord = $this->request->get['sord']; // get the direction
+
             $data = [
                 'sort'        => $sidx,
                 'order'       => $sord,
