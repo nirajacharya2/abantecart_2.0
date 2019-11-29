@@ -1206,20 +1206,23 @@ class Order extends BaseModel
 
             $order->update($data);
 
+            $orderInfo = Order::getOrderArray($order_id, 'any');
+            $language = Language::find($orderInfo['language_id']);
+            $oLanguage = new ALanguage(Registry::getInstance(), $language->code);
+            $oLanguage->load($language->directory);
+
+            if($data['product']) {
+                $old_language = Product::getCurrentLanguageID();
+                Product::setCurrentLanguageID($orderInfo['language_id']);
+                static::editOrderProducts($orderInfo, $data, $oLanguage);
+            }
+
             if (!$data['order_totals']) {
                 H::event('abc\models\admin\order@update', [new ABaseEvent($order_id, $data)]);
                 Registry::db()->commit();
                 return true;
             }
 
-            $orderInfo = Order::getOrderArray($order_id, 'any');
-            $language = Language::find($orderInfo['language_id']);
-            $oLanguage = new ALanguage(Registry::getInstance(), $language->code);
-            $oLanguage->load($language->directory);
-
-            $old_language = Product::getCurrentLanguageID();
-            Product::setCurrentLanguageID($orderInfo['language_id']);
-            static::editOrderProducts($orderInfo, $data, $oLanguage);
             //remove previous totals
             OrderTotal::where('order_id', '=', $order_id)->forceDelete();
             foreach ($data['order_totals'] as $orderTotal) {
@@ -1231,7 +1234,6 @@ class Order extends BaseModel
             Registry::db()->commit();
             //revert language for model back
             Product::setCurrentLanguageID($old_language);
-
             H::event('abc\models\admin\order@update', [new ABaseEvent($order_id, $data)]);
         } catch (\Exception $e) {
             Registry::log()->write(__CLASS__.': '.$e->getMessage()."\nTrace: ".$e->getTraceAsString());

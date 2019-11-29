@@ -2048,7 +2048,19 @@ VALUES
 
 #set default order_status_id to complete
 ALTER TABLE `ac_order_products`
-ADD COLUMN `order_status_id` INT NOT NULL DEFAULT '5' AFTER `subtract`,
+ADD COLUMN  `order_status_id` INT NOT NULL DEFAULT '5' AFTER `subtract`,
+ADD COLUMN  `tax_class_id` int(11) AFTER `order_status_id`,
+ADD COLUMN  `weight` decimal(5,2) AFTER `tax_class_id`,
+ADD COLUMN  `weight_class_id` int(11) AFTER `weight`,
+ADD COLUMN  `length` decimal(5,2) AFTER `weight_class_id`,
+ADD COLUMN  `width` decimal(5,2) AFTER  `length`,
+ADD COLUMN  `height` decimal(5,2) AFTER `width`,
+ADD COLUMN  `length_class_id` int(11) AFTER `height`,
+ADD COLUMN  `shipping` int(1) NOT NULL DEFAULT '1' AFTER `length_class_id`,
+ADD COLUMN  `ship_individually` int(1) NOT NULL DEFAULT '0' AFTER `shipping`,
+ADD COLUMN  `free_shipping` int(1) NOT NULL DEFAULT '0' AFTER `ship_individually`,
+ADD COLUMN  `shipping_price` decimal(15,4) NOT NULL DEFAULT '0.0000' AFTER `free_shipping`,
+
 ADD INDEX `ac_order_products_ibfk_2_idx1` (`order_status_id` ASC);
 
 #remove default order_status_id and add foreign key

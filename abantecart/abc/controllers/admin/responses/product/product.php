@@ -1553,7 +1553,12 @@ class ControllerResponsesProductProduct extends AController
         $this->load->library('json');
 
         $elements_with_options = HtmlElementFactory::getElementsWithOptions();
-        $this->data['order_product_id'] = $order_product_id = (int)$this->request->get['order_product_id'];
+        $order_status_id = $this->request->get['order_status_id'];
+        $order_status_id = ( empty($order_status_id) && $order_status_id !== '0' ) ? null : (int)$order_status_id;
+        $this->data['order_status_id'] = $order_status_id;
+
+        $order_product_id = $this->data['order_product_id'] = (int)$this->request->get['order_product_id'];
+
         $order_id = (int)$this->request->get['order_id'];
         $order_info = Order::getOrderArray($order_id, 'any');
         $this->data['order_info'] = $order_info;
@@ -1587,14 +1592,14 @@ class ControllerResponsesProductProduct extends AController
             $this->data['editable'] = true;
         }
 
+        //when edit existing order
         if ($order_product_id) {
 
             //if unknown product_id but order_product_id we know
-            /**
-             * @var OrderProduct $order_product_info
-             */
+            /** @var OrderProduct $order_product_info */
             $order_product_info = OrderProduct::where(['order_id'=>$order_id, 'order_product_id' => $order_product_id ] )->first();
             $this->data['order_product_info'] = $order_product_info->toArray();
+            $quantity = (int)($this->request->get['quantity'] ?? $order_product_info->quantity);
 
             $product_id = (int)$order_product_info->product_id;
             $preset_values['price'] = $this->currency->format(
@@ -1603,12 +1608,12 @@ class ControllerResponsesProductProduct extends AController
                                             false
             );
             $preset_values['total'] = $this->currency->format((
-                                            $order_product_info->price * $order_product_info->quantity),
+                                            $order_product_info->price * $quantity),
                                             $order_info['currency'],
                                             $order_info['value'],
                                             false
             );
-            $preset_values['quantity'] = $order_product_info->quantity;
+            $preset_values['quantity'] = $quantity;
 
             if (!$product_id) {
                 $product_id = $order_product_info->product_id;
@@ -1632,7 +1637,9 @@ class ControllerResponsesProductProduct extends AController
                     .'&order_product_id='.$order_product_id
             );
 
-        } elseif($order_id) {
+        }
+        //when adding new product to existing order
+        elseif($order_id) {
             $this->data['text_title'] = sprintf($this->language->get('text_add_product_to_order'), $order_id);
             $preset_values['quantity'] = $product_info['minimum'] ? $product_info['minimum'] : 1;
             $preset_values['price'] = $this->currency->format(
@@ -1808,7 +1815,7 @@ class ControllerResponsesProductProduct extends AController
                     'regexp_pattern' => $option['regexp_pattern'],
                     'error_text'     => $option['error_text'],
                     'attr'           => ' data-option-id ="'.$option['product_option_id'].'" '
-                        .($order_product_id ? 'readonly disabled' : ''),
+                                            .($order_product_id ? 'readonly disabled' : ''),
                 ];
                 if ($option_data['type'] == 'checkbox') {
                     // note: 0 and 1 must be string to prevent collision with 'yes'. (in php 'yes'==1) ;-)
@@ -1917,7 +1924,7 @@ class ControllerResponsesProductProduct extends AController
         $this->data['cancel_statuses'] = [];
         $statuses = $disabled_statuses = [];
         foreach ($orderStatuses as $oStatus) {
-            if ($oStatus['display_status'] || $oStatus['order_status_id'] == $this->request->get['order_status_id']) {
+            if ($oStatus['display_status'] || $oStatus['order_status_id'] == $this->data['order_status_id']) {
                 $statuses[$oStatus['order_status_id']] = $oStatus['description']['name'];
             }
             if (!$oStatus['display_status']) {
@@ -1930,19 +1937,24 @@ class ControllerResponsesProductProduct extends AController
 
         $readonly = '';
         if (in_array(
-            $this->order_status->getStatusById($this->request->get['order_status_id']),
+            $this->order_status->getStatusById( $this->data['order_status_id'] ),
             (array)ABC::env('ORDER')['not_reversal_statuses'])
         ) {
             $readonly = 'readonly';
             $disabled_statuses = $statuses;
-            unset($disabled_statuses[$this->request->get['order_status_id']]);
+            unset($disabled_statuses[$this->data['order_status_id']]);
             $disabled_statuses = array_keys($disabled_statuses);
+        }
+
+        //remove incomplete status for newly added products
+        if( $order_status_id === null ){
+            unset($statuses[0]);
         }
 
         $this->data['form']['order_status_id'] = $form->getFieldHtml([
             'type'             => 'selectbox',
             'name'             => 'order_status_id',
-            'value'            => $this->request->get['order_status_id'],
+            'value'            => $this->data['order_status_id'],
             'options'          => $statuses,
             'disabled_options' => $disabled_statuses,
             'attr'             => $readonly,

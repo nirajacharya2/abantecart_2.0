@@ -548,26 +548,29 @@ echo $this->html->buildElement(
 	});
 
     function ProductModal(order_product_id) {
-		var id = '';
+        var queryParams = '';
 		if(order_product_id > 0){
-			id = '&order_product_id='+order_product_id;
+            queryParams = '&order_product_id=' + order_product_id;
 		}else{
 			var vals = $("#add_product").chosen().val();
             $("#add_product").val('').trigger("chosen:updated");
 			if(vals){
-				id = '&product_id='+vals[0];
+                queryParams = '&product_id=' + vals[0];
             } else {
                 return false;
 			}
 		}
         var order_status_id = $('input[name="product\[' + order_product_id + '\]\[order_status_id\]"\]').val();
-        id += '&order_status_id=' + order_status_id;
+        if(order_status_id !== undefined) {
+            queryParams += '&order_status_id=' + order_status_id;
+        }
+        queryParams += '&quantity='+$('input[name="product\[' + order_product_id + '\]\[quantity\]"\]').val();;
 
-		if(id.length>0){
+        if (queryParams.length > 0) {
 			$('#add_product_modal')
 					.modal({ keyboard: false})
 					.find('.modal-content')
-					.load('<?php echo $add_product_url; ?>'+id, function () {
+                .load('<?php echo $add_product_url; ?>' + queryParams, function () {
                         //formOnExit();
 					bindCustomEvents('#orderProductFrm');
 					spanHelp2Toggles();

@@ -366,21 +366,13 @@ class AOrder extends ALibBase
         $product_data = [];
 
         foreach ($this->cart->getProducts() as $key => $product) {
-            $product_data[] = [
-                'key'             => $key,
-                'product_id'      => $product['product_id'],
-                'name'            => (string)$product['name'],
-                'model'           => (string)$product['model'],
-                'sku'             => (string)$product['sku'],
-                'option'          => $product['option'],
-                'download'        => $product['download'],
-                'quantity'        => $product['quantity'],
-                'price'           => $product['price'],
-                'total'           => $product['total'],
-                'tax'             => $this->tax->calcTotalTaxAmount($product['total'], $product['tax_class_id']),
-                'stock'           => $product['stock'],
-                'order_status_id' => (int)$indata['order_status_id'],
-            ];
+            $product_data[$key] = $product;
+            $product_data[$key]['key'] = $key;
+            $product_data[$key]['name'] = (string)$product_data[$key]['name'];
+            $product_data[$key]['model'] = (string)$product_data[$key]['model'];
+            $product_data[$key]['sku'] = (string)$product_data[$key]['sku'];
+            $product_data[$key]['tax'] = $this->tax->calcTotalTaxAmount($product['total'], $product['tax_class_id']);
+            $product_data[$key]['order_status_id'] = (int)$indata['order_status_id'];
         }
 
         $order_info['products'] = $product_data;
@@ -571,8 +563,9 @@ class AOrder extends ALibBase
                     : '';
                 //disable download for manual mode for customer
                 $download['status'] = $download['activate'] == 'manually' ? 0 : 1;
-                $download['attributes_data'] =
-                    Registry::download()->getDownloadAttributesValues($download['download_id']);
+                $download['attributes_data'] = Registry::download()
+                                                       ->getDownloadAttributesValues($download['download_id']);
+
                 Registry::download()->addProductDownloadToOrder($order_product_id, $order_id, $download);
             }
         }

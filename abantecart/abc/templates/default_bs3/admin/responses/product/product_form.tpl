@@ -44,7 +44,7 @@
                                 <?php echo $field;
                                 if ($field->type == 'hidden' && in_array($field->name, [ 'price','total'])) {
                                     echo '<div id="'.$field->name.'_text" 
-                                               class="form-control-static">'.$field->value.'</div>';
+                                               class="form-control-static pl-1">'.$field->value.'</div>';
                                 } ?>
                             </div>
                         </div>
@@ -92,17 +92,17 @@
     var editable = <?php echo $editable ? 'true' : 'false'; ?>;
 
     if(editable) {
-        $('#orderProductFrm input, #orderProductFrm select,  #orderProductFrm textarea')
+        $( '#totals-div input, #totals-div  select,  #totals-div  textarea, #options-div input, #options-div  select,  #options-div  textarea')
             .not('#orderProductFrm_order_status_id')
             .on('change', display_total_price);
+
     }else{
         $('#options-div input, #options-div select,  #options-div textarea, #totals-div input, #totals-div select,  #totals-div textarea')
             .attr('disabled', 'disabled');
     }
 
-    $('#orderProductFrm_quantity')
+    $('#orderProductFrm_quantity, #orderProductFrm_price')
         .on('keyup', function(){
-            console.log($(this).val());
             if($(this).val() == ''){
                 $(this).val('1');
             }
@@ -143,7 +143,8 @@
 
 
     function display_total_price() {
-
+        var qnt = $('#orderProductFrm_quantity');
+        var price= $('#orderProductFrm_price');
         var disabled = $("#orderProductFrm").find(":disabled");
         disabled.removeAttr("disabled");
         var data = $("#orderProductFrm").serialize();
@@ -151,6 +152,16 @@
         data = data.replace(new RegExp("product%5Boption%5D", 'g'), 'option');
         data = data.replace(new RegExp("product%5Bquantity%5D", 'g'), 'quantity');
         data = data.replace(new RegExp("product%5Bprice%5D", 'g'), 'price');
+
+        if(editable && modal_mode === 'json' && price.attr('type') !== 'text'
+            && qnt.val() > qnt.attr('data-orgvalue')
+        ){
+            <?php //remove custom price when edit existing product
+                  //price will be taken from SF-side, not order
+                  //use current price when quantity increased ?>
+            data += '&price=';
+        }
+
         $.ajax({
             type: 'POST',
             url: '<?php echo $total_calc_url;?>',
@@ -158,8 +169,14 @@
             data: data,
             success: function (data) {
                 if (data.total) {
-                    $('#orderProductFrm_price').val(currencyToNumber(data.price));
+                    if(currencyToNumber(data.price) != price.attr('data-orgvalue') ){
+                        $('#price_text').addClass('changed');
+                    }else{
+                        $('#price_text').removeClass('changed');
+                    }
+                    price.val(currencyToNumber(data.price));
                     $('#price_text').text(currencyToNumber(data.price));
+
                     $('#orderProductFrm_total').val(data.total);
                     $('#total_text').text(currencyToNumber(data.total));
                     $('#orderProductFrm_order_status_id').change();
