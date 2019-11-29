@@ -33,6 +33,18 @@ class ControllerTaskToolExportAuditLog extends AController implements ExportTask
             return false;
         }
 
+        if (isset($params['sortDesc']) && is_array($params['sortDesc'])) {
+            $params['sortDesc'] = $params['sortDesc'][0];
+        } else {
+            $params['sortDesc'] = 'true';
+        }
+
+        if (isset($params['sortBy']) && is_array($params['sortBy'])) {
+            $params['sortBy'] = $params['sortBy'][0];
+        } else {
+            $params['sortBy'] = 'date_added';
+        }
+
         $response = $auditLogStorage->getEvents($params);
 
         $this->data['response'] = [
@@ -71,6 +83,18 @@ class ControllerTaskToolExportAuditLog extends AController implements ExportTask
         $request = $settings['request'];
         $request['rowsPerPage'] = $limit;
         $request['page'] = ceil($start / $limit) + 1;
+
+        if (isset($request['sortDesc']) && is_array($request['sortDesc'])) {
+            $request['sortDesc'] = $request['sortDesc'][0];
+        } else {
+            $request['sortDesc'] = 'true';
+        }
+
+        if (isset($request['sortBy']) && is_array($request['sortBy'])) {
+            $request['sortBy'] = $request['sortBy'][0];
+        } else {
+            $request['sortBy'] = 'date_added';
+        }
 
         $file = $settings['file'];
         if (!$file) {

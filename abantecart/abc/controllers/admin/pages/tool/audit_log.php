@@ -14,7 +14,6 @@ class ControllerPagesToolAuditLog extends AController
     {
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
-
         $this->loadLanguage('tool/audit_log');
         $heading_title = $this->language->get('audit_log_heading_title');
 
@@ -67,7 +66,8 @@ class ControllerPagesToolAuditLog extends AController
         foreach ($auditableTypes as $auditableType) {
             $arResult['classes'][] = $auditableType;
             $instance = ABC::getModelObjectByAlias($auditableType);
-            if (get_class($instance)) {
+            $arResult[$auditableType]['table_columns'] = [];
+            if (is_object($instance) && get_class($instance)) {
                 $arResult[$auditableType]['table_columns'] = $instance->getTableColumns();
             }
         }

@@ -162,7 +162,7 @@
 								<div id="id_selected_fields"></div>
 							</v-flex>
 							<v-flex xs12 sm3 style="text-align: center;">
-								<v-btn small @click="addFilter()" v-bind:disabled="isAddDisabled">Add</v-btn>
+								<v-btn @click="addFilter()" v-bind:disabled="isAddDisabled">Add</v-btn>
 							</v-flex>
 							<v-flex xs12 sm12>
 								<v-chip light close small
@@ -170,7 +170,7 @@
 										:key="arFilter.indexOf(item)"
 										v-model="item.isOpen"
 										@click="selectChip(item)"
-										@input="removeChip(item)"
+										@click:close="removeChip(item)"
 								>
 									{{item.auditable_type}}
 									<span v-if="item.auditable_id"> ({{item.auditable_id}}) </span>
@@ -179,11 +179,20 @@
 							</v-flex>
 						</v-layout>
 						<v-layout>
-							<v-flex xs12 sm6 style="text-align: center;">
-								<v-btn small color="primary" @click="applyFilter()" v-bind:disabled="clearFilterDisabled">Apply Filter</v-btn>
+							<v-flex xs12 sm4 style="text-align: center;">
+								<v-btn color="primary" @click="applyFilter()" v-bind:disabled="clearFilterDisabled">Apply Filter</v-btn>
 							</v-flex>
-							<v-flex xs12 sm6 style="text-align: center;">
-								<v-btn small color="error" @click="clearFilter()" v-bind:disabled="clearFilterDisabled">Clear Filter</v-btn>
+							<v-flex xs12 sm4 style="text-align: center;">
+								<v-btn color="error" @click="clearFilter()" v-bind:disabled="clearFilterDisabled">Clear Filter</v-btn>
+							</v-flex>
+							<v-flex xs12 sm4 style="text-align: center;">
+								<button id="export_to_excel"
+										class="btn btn-default task_run"
+										title="Export to Excel"
+										:data-run-task-url="dataRunTaskUrl"
+										data-complete-task-url="<?php echo $this->html->getSecureUrl('r/common/export_task/complete', '&controller=task/tool/export_audit_log&limit=100'); ?>"
+										data-abort-task-url="<?php echo $this->html->getSecureUrl('r/common/export_task/abort', '&controller=task/tool/export_audit_log&limit=100'); ?>"
+								><i class="fa fa-file-excel"></i></button>
 							</v-flex>
 						</v-layout>
 					</v-container>
@@ -192,86 +201,41 @@
 							<v-data-table
 									:headers="table_headers"
 									:items="table_items"
-									:rows-per-page-items="table_rows_per_page_items"
 									ref="dTable"
-									:pagination.sync="pagination"
-									:total-items="table_total"
+									:options.sync="pagination"
+									:server-items-length="table_total"
 									no-data-text="No data, please change filter props."
 									class="elevation-1"
-									expand
+									v-on:item-expanded="expandFunction"
 									attach
-									hide-actions
+									hide-default-footer
+									show-expand
 							>
-								<template slot="headers" slot-scope="props">
-									<tr>
-										<th
-												v-for="header in props.headers"
-												:key="header.text"
-												:class="['column sortable', pagination.descending ? 'desc' : 'asc', header.value === pagination.sortBy ? 'active' : '']"
-												@click="changeSort(header.value)"
-										>
-											{{ header.text }}
-											<span v-if="pagination.descending && header.value === pagination.sortBy">
-										<i class="material-icons mi-12">arrow_downward</i>
-									</span>
-											<span v-if="!pagination.descending && header.value === pagination.sortBy">
-										<i class="material-icons mi-12">arrow_upward</i>
-									</span>
-										</th>
-										<!--<th class="column" v-if="!expandedAll" @click="expandAll()">
-											Expand all
-											<v-icon small>unfold_more</v-icon>
-										</th>
-										<th class="column" v-if="expandedAll" @click="unExpandAll()">
-											Expand all
-											<v-icon small>unfold_less</v-icon>
-										</th> -->
-										<th>
-											<button id="export_to_excel"
-													class="btn btn-default task_run"
-													title="Export to Excel"
-													:data-run-task-url="dataRunTaskUrl"
-													data-complete-task-url="<?php echo $this->html->getSecureUrl('r/common/export_task/complete', '&controller=task/tool/export_audit_log&limit=100'); ?>"
-													data-abort-task-url="<?php echo $this->html->getSecureUrl('r/common/export_task/abort', '&controller=task/tool/export_audit_log&limit=100'); ?>"
-											><i class="fa fa-file-excel"></i></button>
-										</th>
-									</tr>
-								</template>
-								<template slot="items" slot-scope="props">
-									<tr @click="expandFunction(props)" style="background-color: #E5E5E5">
-										<td v-for="table_header in table_headers">
-											{{ props.item[table_header.value] }}
-										</td>
-										<td>
-											<i aria-hidden="true" class="v-icon material-icons theme--light" style="font-size: 16px;" v-if="!props.expanded">expand_more</i>
-											<i aria-hidden="true" class="v-icon material-icons theme--light" style="font-size: 16px;" v-if="props.expanded">expand_less</i>
-										</td>
-									</tr>
-								</template>
-								<template slot="expand" slot-scope="props">
-									<v-card flat>
-										<v-card-text>
-											<v-data-table
-													:headers="expand_headers"
-													:items="expand_items[props.index]"
-													:pagination.sync="expand_pagination[props.index]"
-													:total-items="expand_table_total[props.index]"
-													:pagination.sync="{ rowsPerPage: -1 }"
-													hide-actions
-											>
-												<template slot="items" slot-scope="expand_props">
-													<tr>
-														<td v-for="expand_header in expand_headers">
-															<span v-html="expand_props.item[expand_header.value]"></span>
-														</td>
-													</tr>
-												</template>
-											</v-data-table>
-										</v-card-text>
-									</v-card>
+								<template slot="expanded-item" slot-scope="{ headers, item }">
+									<td :colspan="headers.length">
+										<v-card flat>
+											<v-card-text>
+												<v-data-table
+														:headers="expand_headers"
+														:items="expand_items[item.id]"
+														:options.sync="expand_pagination[props.id]"
+														:server-items-length="expand_table_total[props.id]"
+														hide-default-footer
+												>
+													<template slot="items" slot-scope="expand_props">
+														<tr>
+															<td v-for="expand_header in expand_headers">
+																<span v-html="expand_props.item[expand_header.value]"></span>
+															</td>
+														</tr>
+													</template>
+												</v-data-table>
+											</v-card-text>
+										</v-card>
+									</td>
 								</template>
 							</v-data-table>
-							<v-layout row justify-center align-end>
+							<v-layout row justify-center align-end mt-4>
 								<v-flex xs6 md6 justify-center>
 									<v-pagination v-model="pagination.page"
 												  total-visible="7"
@@ -317,6 +281,7 @@
 
 	let vm = new Vue({
 		el: '#app',
+		vuetify: new Vuetify(),
 		data: {
 			dataRunTaskUrlBase: '<?php echo $this->html->getSecureUrl('r/common/export_task/buildTask', '&controller=task/tool/export_audit_log&limit=100'); ?>',
 			dataRunTaskUrl: this.dataRunTaskUrlBase,
@@ -344,26 +309,37 @@
 			pagination: {
 				rowsPerPage: 20,
 				descending: true,
-				sortBy: 'date_added'
+				sortBy: ['date_added'],
+				sortDesc: [true],
 			},
 			events: [],
 			event_items: ['Created', 'Updating', 'Deleted', 'Restored'],
 			table_rows_per_page_items: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
 			table_headers: [
+				{ text: 'Expand', value: 'data-table-expand', width: '5%'},
 				{
 					text: 'User Name',
 					align: 'left',
-					value: 'user_name'
+					value: 'user_name',
+					width: '10%'
 				},
 				/*{
 					text: 'User Alias',
 					align: 'left',
 					value: 'alias_name'
 				},*/
-				{text: 'Auditable Object', value: 'main_auditable_model'},
-				{text: 'Auditable ID', value: 'main_auditable_id'},
-				{text: 'Event', value: 'event'},
-				{text: 'Date Change', value: 'date_added'},
+				{text: 'Auditable Object', value: 'main_auditable_model',
+					width: '10%'},
+				{text: 'Auditable ID', value: 'main_auditable_id',
+					width: '10%'},
+				{text: 'Event', value: 'event',
+					width: '10%'},
+				{text: 'Description', value: 'description', sortable: false,
+					width: '20%'},
+				{text: 'IP', value: 'ip',
+					width: '10%'},
+				{text: 'Date Change', value: 'date_added',
+					width: '15%'},
 			],
 			expand_items: [],
 			expand_headers: [
@@ -526,9 +502,6 @@
 				}
 				this.data_objects.push(item.auditable_type);
 			},
-			applyFilter: function () {
-				this.getDataFromApi();
-			},
 			getDataFromApi() {
 				this.loading = true;
 				let param = this.pagination;
@@ -543,9 +516,6 @@
 					.then(function (response) {
 						vm.table_items = response.data.items;
 						vm.table_total = response.data.total;
-						for (let i = 0; i < vm.table_items.length; i++) {
-							vm.expand_items[i] = [];
-						}
 						vm.loading = false;
 					})
 					.catch(function (error) {
@@ -554,17 +524,12 @@
 					});
 			},
 			expandFunction: function (props) {
-				if (!props.expanded) {
+				if (props.value && typeof vm.expand_items[props.item.id] == "undefined") {
 					this.getExpandDataFromApi(props);
-				} else {
-					props.expanded = false;
 				}
-				console.log(props)
 			},
 			getExpandDataFromApi(props) {
 				this.loading = true;
-				//vm.$set(vm.$refs.dTable.expanded, props.item.id, true);
-				props.expanded = true;
 				let filter = {
 					'audit_event_id': props.item.id,
 				};
@@ -574,11 +539,9 @@
 				}
 				let promise = axios.get('<?php echo $ajax_url; ?>', {params: param})
 					.then(function (response) {
-						//vm.expand_items[props.index] = response.data.items;
-						vm.expand_items.splice(props.index, 1, response.data.items);
-						vm.expand_table_total[props.index] = response.data.total;
-						props.expanded = true;
-						vm.$set(vm.$refs.dTable.expanded, props.index, true);
+						vm.expand_items[props.item.id] = response.data.items;
+						vm.expand_items.splice(props.item.id, 1, response.data.items)
+						vm.expand_table_total[props.item.id] = response.data.total;
 						vm.loading = false;
 					})
 					.catch(function (error) {
