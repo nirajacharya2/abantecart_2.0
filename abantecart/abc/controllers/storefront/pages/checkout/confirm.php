@@ -247,7 +247,7 @@ class ControllerPagesCheckoutConfirm extends AController
         );
 
         //Format product data specific for confirmation page
-        for ($i = 0; $i < sizeof($this->data['products']); $i++) {
+        foreach($this->data['products'] as $i => $product) {
             $product_id = $this->data['products'][$i]['product_id'];
             $opts = $this->data['products'][$i]['option'];
             $options = [];
@@ -280,21 +280,26 @@ class ControllerPagesCheckoutConfirm extends AController
                     'title' => $title,
                 ];
                 // product image by option value
-                $mSizes = array(
+                $mSizes = [
                     'main'  =>
-                        array(
+                        [
                             'width' => $this->config->get('config_image_cart_width'),
                             'height' => $this->config->get('config_image_cart_height')
-                        ),
-                    'thumb' => array(
+                        ],
+                    'thumb' => [
                         'width' =>  $this->config->get('config_image_cart_width'),
                         'height' => $this->config->get('config_image_cart_height')
-                    ),
+                    ],
+                ];
+
+
+                $main_image = $resource->getResourceAllObjects(
+                    'product_option_value',
+                    $option['product_option_value_id'],
+                    $mSizes,
+                    1,
+                    false
                 );
-
-
-                $main_image =
-                    $resource->getResourceAllObjects('product_option_value', $option['product_option_value_id'], $mSizes, 1, false);
 
                 if (!empty($main_image)) {
                     $thumbnail['origin'] = $main_image['origin'];

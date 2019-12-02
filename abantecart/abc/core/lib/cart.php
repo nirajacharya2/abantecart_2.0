@@ -201,7 +201,6 @@ class ACart  extends ALibBase
                 $product_result = $this->buildProductDetailsByOrderProduct(
                                                                     $data['order_product_id'],
                                                                     $quantity,
-                                                                    $options,
                                                                     $custom_price,
                                                                     $data
                 );
