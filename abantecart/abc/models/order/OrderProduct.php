@@ -38,7 +38,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property Order $order
  * @property Product $product
- * @property \Illuminate\Database\Eloquent\Collection $order_downloads
+ * @property OrderOption $order_options
+ * @property OrderDownload $order_downloads
  * @property \Illuminate\Database\Eloquent\Collection $order_downloads_histories
  *
  * @method static OrderProduct find(int $order_product_id) OrderProduct
@@ -363,6 +364,12 @@ class OrderProduct extends BaseModel
     {
         return $this->belongsTo(Order::class, 'order_id');
     }
+
+    public function order_options()
+    {
+        return $this->belongsTo(OrderOption::class, 'order_product_id');
+    }
+
     public function order_status()
     {
         return $this->belongsTo(OrderStatus::class, 'order_status_id');

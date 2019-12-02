@@ -121,6 +121,6 @@ class OrderProductModelTest extends ATestCase
     {
         //test getOrderProductOptions
         $orderProductOption = OrderProduct::getOrderProductOptions(4,18);
-        $this->assertEquals(25, count($orderProductOption->toArray()[0]));
+        $this->assertEquals(27, count($orderProductOption->toArray()[0]));
     }
 }

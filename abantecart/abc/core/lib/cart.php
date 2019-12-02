@@ -26,7 +26,6 @@ use abc\core\engine\contracts\AttributeInterface;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use abc\models\catalog\Product;
-use abc\models\order\OrderOption;
 use abc\models\order\OrderProduct;
 use H;
 
@@ -173,7 +172,6 @@ class ACart  extends ALibBase
 
         $product_data = [];
         //process data in the cart session per each product in the cart
-
         foreach ($this->cust_data['cart'] as $key => $data) {
             if ($key == 'virtual') {
                 continue;
@@ -192,37 +190,34 @@ class ACart  extends ALibBase
                             ? $data['custom_price']
                             : null;
             $product = Product::find($product_id);
-            $product_result = [];
+            $productDetails = [];
             if($product) {
-                $product_result = $this->buildProductDetails($product_id, $quantity, $options, $custom_price);
+                $productDetails = $this->buildProductDetails($product_id, $quantity, $options, $custom_price);
             }
             //When use conciergeMode and product already deleted from database
             elseif($this->conciergeMode && $data['order_product_id']){
-                $product_result = $this->buildProductDetailsByOrderProduct(
+                $productDetails = $this->buildProductDetailsByOrderProduct(
                                                                     $data['order_product_id'],
                                                                     $quantity,
-                                                                    $custom_price,
-                                                                    $data
+                                                                    $custom_price
                 );
             }
 
-
-
-            if (count($product_result)) {
-                $product_data[$key] = $product_result;
+            if (count($productDetails)) {
+                $product_data[$key] = $productDetails;
                 $product_data[$key]['key'] = $key;
 
                 //apply min and max for quantity once we have product details.
-                if ($quantity < $product_result['minimum']) {
+                if ($quantity < $productDetails['minimum']) {
                     $this->language->load('checkout/cart', 'silent');
                     $this->cust_data['error'] = $this->language->get('error_quantity_minimum');
-                    $this->update($key, $product_result['minimum']);
+                    $this->update($key, $productDetails['minimum']);
                 }
-                if ($product_result['maximum'] > 0) {
+                if ($productDetails['maximum'] > 0) {
                     $this->language->load('checkout/cart', 'silent');
-                    if ($quantity > $product_result['maximum']) {
+                    if ($quantity > $productDetails['maximum']) {
                         $this->cust_data['error'] = $this->language->get('error_quantity_maximum');
-                        $this->update($key, $product_result['maximum']);
+                        $this->update($key, $productDetails['maximum']);
                     }
                 }
             } else {
@@ -458,7 +453,8 @@ class ACart  extends ALibBase
         if($this->cust_data['cart']) {
             foreach($this->cust_data['cart'] as $key => $cart_product){
                 list($pId,) = explode(':',$key);
-                if($product_id != $pId || $key == $product_id.':'.md5(serialize($options))){
+                $uuid = ($options ? serialize($options) : '').$custom_price;
+                if($product_id != $pId || $key == $product_id.':'.md5($uuid)){
                     continue;
                 }
                 if(!$op_stock_trackable){
@@ -511,7 +507,6 @@ class ACart  extends ALibBase
      * @param int $order_product_id
      * @param int $quantity
      * @param float|null $custom_price
-     * @param array $data
      *
      * @return array
      * @throws AException
@@ -519,8 +514,7 @@ class ACart  extends ALibBase
     public function buildProductDetailsByOrderProduct(
         int $order_product_id,
         int $quantity = 0,
-        float $custom_price = null,
-        array $data = []
+        float $custom_price = null
     ){
         if(!$this->conciergeMode){
             throw new AException('Method '.__FUNCTION__.' can be called only in Concierge Mode of cart!');
@@ -530,204 +524,26 @@ class ACart  extends ALibBase
             return [];
         }
 
-        $orderProduct = OrderProduct::find($order_product_id);
+        $orderProduct = OrderProduct::with('order_downloads', 'order_options')->find($order_product_id);
         if(!$orderProduct){
             return [];
         }
-        $product_query = $orderProduct->toArray();
-        $custom_price = $custom_price ?? $product_query['price'];
+        $productDetails = $orderProduct->toArray();
+        $option_data = $orderProduct->order_options->toArray();
+        $download_data = $orderProduct->order_downloads->toArray();
+        unset(
+            $productDetails['order_options'],
+            $productDetails['order_downloads']
+        );
 
-        $option_data = OrderOption::where('order_product_id', '=', $order_product_id)
-                           ->get()
-                           ->toArray();
+        $custom_price = $custom_price ?? $productDetails['price'];
+        $final_price = $custom_price ?? $orderProduct->price;
 
-        $stock = true;
-        /**
-         * @var  \abc\models\storefront\ModelCatalogProduct $product_mdl
-         */
-        $product_mdl = $this->load->model('catalog/product', 'storefront');
-
-
-        $elements_with_options = HtmlElementFactory::getElementsWithOptions();
-
-        $stock_checkout = $product_query['stock_checkout'];
-        if (!H::has_value($stock_checkout)) {
-            $stock_checkout = $this->config->get('config_stock_checkout');
+        $options = [];
+        foreach($option_data as $row){
+            $options[ $row['product_option_id'] ][] = $row['product_option_value_id'];
         }
 
-        $option_price = 0;
-        $option_data = [];
-        $groups = [];
-        $op_stock_trackable = 0;
-        //Process each option and value
-        foreach ($options as $product_option_id => $product_option_value_id) {
-            //skip empty values
-            if ($product_option_value_id == '' || (is_array($product_option_value_id) && !$product_option_value_id)) {
-                continue;
-            }
-
-            $option_query = $product_mdl->getProductOption($product_id, $product_option_id);
-            $element_type = $option_query['element_type'];
-            $option_value_query = [];
-            $option_value_queries = [];
-
-            if (!in_array($element_type, $elements_with_options)) {
-                //This is single value element, get all values and expect only one
-                $option_value_query = $product_mdl->getProductOptionValues($product_id, $product_option_id);
-                $option_value_query = $option_value_query[0];
-                //Set value from input
-                $option_value_query['name'] = $this->db->escape($options[$product_option_id]);
-            } else {
-                //is multivalue option type
-                if (is_array($product_option_value_id)) {
-                    foreach ($product_option_value_id as $val_id) {
-                        $option_value_queries[$val_id] = $product_mdl->getProductOptionValue($product_id, $val_id);
-                    }
-                } else {
-                    $option_value_query = $product_mdl->getProductOptionValue(
-                                                                            $product_id,
-                                                                            (int)$product_option_value_id
-                    );
-                }
-            }
-
-            if ($option_value_query) {
-                //if group option load price from parent value
-                if ($option_value_query['group_id'] && !in_array($option_value_query['group_id'], $groups)) {
-                    $group_value_query = $product_mdl->getProductOptionValue(
-                                                                            $product_id,
-                                                                            $option_value_query['group_id']
-                    );
-                    $option_value_query['prefix'] = $group_value_query['prefix'];
-                    $option_value_query['price'] = $group_value_query['price'];
-                    $groups[] = $option_value_query['group_id'];
-                }
-                $option_data[] = [
-                    'product_option_id'       => $product_option_id,
-                    'product_option_value_id' => $option_value_query['product_option_value_id'],
-                    'name'                    => $option_query['name'],
-                    'element_type'            => $element_type,
-                    'settings'                => $option_query['settings'],
-                    'value'                   => $option_value_query['name'],
-                    'prefix'                  => $option_value_query['prefix'],
-                    'price'                   => $custom_price,
-                    'sku'                     => $option_value_query['sku'],
-                    'inventory_quantity'      => (
-                    $option_value_query['subtract']
-                        ? (int)$option_value_query['quantity']
-                        : 1000000
-                    ),
-                    'weight'                  => $option_value_query['weight'],
-                    'weight_type'             => $option_value_query['weight_type'],
-                ];
-
-                //check if need to track stock and we have it
-                if ($option_value_query['subtract']
-                    && $option_value_query['quantity'] < $quantity
-                    && !$stock_checkout
-                ) {
-                    $stock = false;
-                }
-                $op_stock_trackable += $option_value_query['subtract'];
-                unset($option_value_query);
-            } else {
-                if ($option_value_queries) {
-                    foreach ($option_value_queries as $item) {
-                        $option_data[] = [
-                            'product_option_id'       => $product_option_id,
-                            'product_option_value_id' => $item['product_option_value_id'],
-                            'name'                    => $option_query['name'],
-                            'value'                   => $item['name'],
-                            'prefix'                  => $item['prefix'],
-                            'price'                   => (
-                            $custom_price !== null
-                                ? $custom_price
-                                : $item['price']
-                            ),
-                            'sku'                     => $item['sku'],
-                            'inventory_quantity'      => ($item['subtract'] ? (int)$item['quantity'] : 1000000),
-                            'weight'                  => $item['weight'],
-                            'weight_type'             => $item['weight_type'],
-                        ];
-                        //check if need to track stock and we have it
-                        if ($item['subtract'] && $item['quantity'] < $quantity) {
-                            $stock = false;
-                        }
-                        $op_stock_trackable += $option_value_query['subtract'];
-                    }
-                    unset($option_value_queries);
-                }
-            }
-        } // end of options build
-
-        if($custom_price === null){
-            //needed for promotion
-            $discount_quantity = 0; // this is used to calculate total QTY of 1 product in the cart
-
-            // check is product is in cart and calculate quantity to define item price with product discount
-            foreach ($this->cust_data['cart'] as $k => $v) {
-                $array2 = explode(':', $k);
-                if ($array2[0] == $product_id) {
-                    $discount_quantity += $v['qty'];
-                }
-            }
-            if (!$discount_quantity) {
-                $discount_quantity = $quantity;
-            }
-
-            //Apply group and quantity discount first and if non, reply product discount
-            $price = $this->promotion->getProductQtyDiscount($product_id, $discount_quantity);
-            if (!$price) {
-                $price = $this->promotion->getProductSpecial($product_id);
-            }
-            //Still no special price, use regular price
-            if (!$price) {
-                $price = $product_query['price'];
-            }
-
-            //Need to round price after discounts and specials
-            //round base currency price to 2 decimal place
-            $decimal_place = 2;
-            $price = round($price, $decimal_place);
-            foreach ($option_data as $item) {
-                if ($item['prefix'] == '%') {
-                    $option_price += $price * $item['price'] / 100;
-                } else {
-                    $option_price += $item['price'];
-                }
-            }
-            //round option price to currency decimal_place setting (most common 2, but still...)
-            $option_price = round($option_price, $decimal_place);
-            $final_price = $price + $option_price;
-        }else{
-            $final_price = $custom_price;
-        }
-
-        // product downloads
-        $download_data = $this->download->getProductOrderDownloads($product_id);
-
-        $common_quantity = $quantity;
-        //check if this product with another option values already in the cart
-        if($this->cust_data['cart']) {
-            foreach($this->cust_data['cart'] as $key => $cart_product){
-                list($pId,) = explode(':',$key);
-                if($product_id != $pId || $key == $product_id.':'.md5(serialize($options))){
-                    continue;
-                }
-                if(!$op_stock_trackable){
-                    $common_quantity += $cart_product['qty'];
-                }
-            }
-        }
-
-        //check if we need to check main product stock. Do only if no stock trackable options selected
-        if ((!$options || !$op_stock_trackable)
-            && $product_query['subtract']
-            && $product_query['quantity'] < $common_quantity
-            && !$product_query['stock_checkout']
-        ) {
-            $stock = false;
-        }
 
         // group sku for each options if presents
         $SKUs = [];
@@ -739,29 +555,13 @@ class ACart  extends ALibBase
             }
         }
 
-
-        $result = [
-            'product_id'         => $product_query['product_id'],
-            'name'               => $product_query['name'],
-            'model'              => $product_query['model'],
-            'shipping'           => $product_query['shipping'],
-            'option'             => $option_data,
-            'download'           => $download_data,
-            'quantity'           => $quantity,
-            'price'              => $final_price,
-            'total'              => $final_price * $quantity,
-            'tax_class_id'       => $product_query['tax_class_id'],
-            'weight'             => $product_query['weight'],
-            'weight_class'       => $product_query['weight_class'],
-            'length'             => $product_query['length'],
-            'width'              => $product_query['width'],
-            'height'             => $product_query['height'],
-            'length_class'       => $product_query['length_class'],
-            'ship_individually'  => $product_query['ship_individually'],
-            'shipping_price'     => $product_query['shipping_price'],
-            'free_shipping'      => $product_query['free_shipping'],
-            'sku'                => implode(", ", $SKUs),
-        ];
+        $result = $productDetails;
+        $result['option'] = $option_data;
+        $result['download'] = $download_data;
+        $result['quantity'] = $quantity;
+        $result['price'] = $final_price;
+        $result['total'] = $final_price * $quantity;
+        $result['sku'] = implode(", ", $SKUs);
 
         return $result;
     }
@@ -781,10 +581,11 @@ class ACart  extends ALibBase
     public function add($product_id, $qty = 1, $options = [], $custom_price = null)
     {
         $product_id = (int)$product_id;
-        if (!$options) {
+        $uuid = ($options ? serialize($options) : '').$custom_price;
+        if (!$uuid) {
             $key = (string)$product_id;
         } else {
-            $key = $product_id.':'.md5(serialize($options));
+            $key = $product_id.':'.md5($uuid);
         }
 
         if ((int)$qty && ((int)$qty > 0)) {

@@ -1575,6 +1575,9 @@ class ControllerResponsesProductProduct extends AController
             if ($orderProduct) {
                 $product_id = (int)$orderProduct->product_id;
                 $product_info = $this->model_catalog_product->getProduct($product_id);
+                if(!$product_info){
+                    $product_info = $orderProduct->toArray();
+                }
             }
         }
         $preset_values = [];
