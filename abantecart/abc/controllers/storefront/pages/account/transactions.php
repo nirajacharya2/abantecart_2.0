@@ -65,44 +65,44 @@ class ControllerPagesAccountTransactions extends AController
                 'separator' => $this->language->get('text_separator'),
             ]);
 
-        $trans_total = CustomerTransaction::where('customer_id', '=', $this->customer->getId())->get()->count();
+        $this->data['action'] = $this->html->getSecureURL('account/transactions');
+
+        if (isset($this->request->get['page'])) {
+            $page = $this->request->get['page'];
+        } else {
+            $page = 1;
+        }
+
+        if (isset($this->request->get['limit'])) {
+            $limit = (int)$this->request->get['limit'];
+            $limit = $limit > 50 ? 50 : $limit;
+        } else {
+            $limit = $this->config->get('config_catalog_limit');
+        }
+
+        $trans = [];
+
+        $page = $this->request->get['page']; // get the requested page
+        $sidx = $this->request->get['sidx']; // get index row - i.e. user click to sort
+        $sord = $this->request->get['sord']; // get the direction
+
+        $data = [
+            'sort'        => $sidx,
+            'order'       => $sord,
+            'start'       => ($page - 1) * $limit,
+            'limit'       => $limit,
+            'customer_id' => (int)$this->customer->getId(),
+        ];
+        $results = CustomerTransaction::getTransactions($data);
+
+        if ($results && isset($results[0]['total_num_rows'])) {
+            $trans_total = $results[0]['total_num_rows'];
+        }
 
         $balance = $this->customer->getBalance();
         $this->data['balance_amount'] = $this->currency->format($balance);
 
         if ($trans_total) {
-            $this->data['action'] = $this->html->getSecureURL('account/transactions');
-
-            if (isset($this->request->get['page'])) {
-                $page = $this->request->get['page'];
-            } else {
-                $page = 1;
-            }
-
-            if (isset($this->request->get['limit'])) {
-                $limit = (int)$this->request->get['limit'];
-                $limit = $limit > 50 ? 50 : $limit;
-            } else {
-                $limit = $this->config->get('config_catalog_limit');
-            }
-
-            $trans = [];
-
-            $page = $this->request->get['page']; // get the requested page
-            $limit = $this->request->get['limit'] ?: 20; // get how many rows we want to have into the grid
-            $sidx = $this->request->get['sidx']; // get index row - i.e. user click to sort
-            $sord = $this->request->get['sord']; // get the direction
-
-            $data = [
-                'sort'        => $sidx,
-                'order'       => $sord,
-                'start'       => ($page - 1) * $limit,
-                'limit'       => $limit,
-                'customer_id' => (int)$this->customer->getId(),
-            ];
-
-            $results = CustomerTransaction::getTransactions($data);
-
             foreach ($results as $result) {
                 $trans[] = [
                     'customer_transaction_id' => $result['customer_transaction_id'],
