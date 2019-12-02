@@ -2074,10 +2074,10 @@ ADD CONSTRAINT `ac_order_products_ibfk_2`
   ON UPDATE CASCADE;
 
 ALTER TABLE `ac_order_options`
-  ADD COLUMN `product_option_id` INT NOT NULL DEFAULT '0'
-  AFTER `order_product_id`,
-  ADD COLUMN `product_option_name` VARCHAR(255) NOT NULL
-  AFTER `product_option_id`,
+  ADD COLUMN `product_option_id` INT NOT NULL DEFAULT '0' AFTER `order_product_id`,
+  ADD COLUMN `product_option_name` VARCHAR(255) NOT NULL AFTER `product_option_id`,
+  ADD COLUMN `weight` decimal(5,2) AFTER `settings`,
+  ADD COLUMN `weight_type` char(3) AFTER `weight`,
   ADD INDEX `ac_order_options_idx_2` (`product_option_id` ASC);
 
 ALTER TABLE `ac_order_totals`

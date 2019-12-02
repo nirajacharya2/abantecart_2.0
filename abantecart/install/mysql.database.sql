@@ -9781,6 +9781,8 @@ CREATE TABLE `ac_order_options` (
   `price`                   decimal(15,4) NOT NULL DEFAULT '0.0000',
   `prefix`                  char(1)       NOT NULL DEFAULT '',
   `settings`                longtext,
+  `weight`                  decimal(5,2)  DEFAULT '0.0000',
+  `weight_type`             char(3),
   `date_added`              timestamp     NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified`           timestamp     NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `date_deleted`            timestamp     NULL,

@@ -24,6 +24,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property float $tax
  * @property int $quantity
  * @property int $subtract
+ * @property int|null $tax_class_id
+ * @property float|null $weight
+ * @property int|null $weight_class_id
+ * @property float|null $length
+ * @property float|null $width
+ * @property float|null $height
+ * @property int|null $length_class_id
+ * @property int $shipping
+ * @property int $ship_individually
+ * @property int $free_shipping
+ * @property float|null $shipping_price
  *
  * @property Order $order
  * @property Product $product
