@@ -99,7 +99,7 @@
             .attr('disabled', 'disabled');
     }
 
-    $('#orderProductFrm_quantity')
+    $('#orderProductFrm_quantity, #orderProductFrm_price')
         .on('keyup', function(){
             if($(this).val() == ''){
                 $(this).val('1');
@@ -203,7 +203,7 @@
                     output.form[index].value_text = field.find('option[value="' + value.value + '"]').text().trim();
                 } else if (tag === "INPUT") {
                     if (field.prop('type') === 'radio') {
-                        field = field.filter('.changed');
+                        field = field.filter('[checked=checked]');
                         output.form[index].value_text = that.find('label[for="' + field.prop('id') + '"]').text().trim();
                     }
                     if (field.prop('type') === 'checkbox') {

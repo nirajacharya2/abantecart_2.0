@@ -207,7 +207,7 @@
                     output.form[index].value_text = field.find('option[value="' + value.value + '"]').text().trim();
                 } else if (tag === "INPUT") {
                     if (field.prop('type') === 'radio') {
-                        field = field.filter('.changed');
+                        field = field.filter('[checked=checked]');
                         output.form[index].value_text = that.find('label[for="' + field.prop('id') + '"]').text().trim();
                     }
                     if (field.prop('type') === 'checkbox') {
