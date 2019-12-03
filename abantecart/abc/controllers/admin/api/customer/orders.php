@@ -50,7 +50,7 @@ class ControllerApiCustomerOrders extends AControllerAPI
 
         $filter = [
             'filter_customer_id' => $request['customer_id'],
-            'sort'               => 'o.date_added',
+            'sort'               => 'date_added',
             'order'              => 'DESC',
             'start'              => 0,
             'limit'              => 20,
