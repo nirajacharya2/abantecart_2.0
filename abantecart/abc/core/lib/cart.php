@@ -529,8 +529,8 @@ class ACart  extends ALibBase
             return [];
         }
         $productDetails = $orderProduct->toArray();
-        $option_data = $orderProduct->order_options->toArray();
-        $download_data = $orderProduct->order_downloads->toArray();
+        $option_data = $productDetails['order_options'];
+        $download_data = $productDetails['order_downloads'];
         unset(
             $productDetails['order_options'],
             $productDetails['order_downloads']
@@ -566,19 +566,17 @@ class ACart  extends ALibBase
         return $result;
     }
 
-
     /**
      * @param int $product_id
      * @param int $qty
      * @param array $options
-     *
      * @param null $custom_price
-     *
+     * @param null $order_product_id
      * @return string
      * @throws AException
      * @throws \ReflectionException
      */
-    public function add($product_id, $qty = 1, $options = [], $custom_price = null)
+    public function add($product_id, $qty = 1, $options = [], $custom_price = null, $order_product_id = null)
     {
         $product_id = (int)$product_id;
         $uuid = ($options ? serialize($options) : '').$custom_price;
@@ -596,9 +594,15 @@ class ACart  extends ALibBase
             }
             //TODO Add validation for correct options for the product and add error return or more stable behaviour
             $this->cust_data['cart'][$key]['options'] = $options;
-            //allow custom price in conciergeMode
-            if($this->conciergeMode && $custom_price !== null) {
-                $this->cust_data['cart'][$key]['custom_price'] = (float)$custom_price;
+            if($this->conciergeMode) {
+                if ($order_product_id) {
+                    $this->cust_data['cart'][$key]['order_product_id'] = $order_product_id;
+                }
+
+                //allow custom price in conciergeMode
+                if ($custom_price !== null) {
+                    $this->cust_data['cart'][$key]['custom_price'] = (float)$custom_price;
+                }
             }
         }
 
