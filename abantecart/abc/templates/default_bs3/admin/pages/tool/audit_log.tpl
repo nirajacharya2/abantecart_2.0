@@ -274,6 +274,7 @@
 	let data_objects = <?php echo $data_objects; ?>;
 	let auditable_type = '<?php echo $auditable_type; ?>';
 	let auditable_id = '<?php echo $auditable_id; ?>';
+	let auditable_fields = '<?php echo $auditable_fields; ?>';
 
 	let curDate = new Date();
 	curDate.setDate(curDate.getDate() - 10)
@@ -406,10 +407,17 @@
 				let filterItem = {
 					'auditable_type': this.selected_data_object,
 					'auditable_id': this.data_object_id,
+					'field_name' : auditable_fields
 				};
 				if (this.data_object_id.length > 0) {
 					filterItem.auditable_id = this.data_object_id.split(',')
 					filterItem.auditable_id.forEach(function (el, index) {
+						this[index] = el.trim()
+					})
+				}
+				if (auditable_fields.length > 0) {
+					filterItem.field_name = auditable_fields.split(',')
+					filterItem.field_name.forEach(function (el, index) {
 						this[index] = el.trim()
 					})
 				}
