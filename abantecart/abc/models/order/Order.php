@@ -1418,18 +1418,15 @@ class Order extends BaseModel
                         foreach ($values as $value) {
                             if(!$value){ continue;}
                             $arr_key = $opt_id.'_'.$value;
-                            $orderOption = new OrderOption(
-                                [
-                                    'order_id'                => $order_id,
-                                    'order_product_id'        => $order_product_id,
-                                    'product_option_value_id' => $value,
-                                    'name'                    => $option_value_info[$arr_key]['option_name'],
-                                    'sku'                     => $option_value_info[$arr_key]['sku'],
-                                    'value'                   => $option_value_info[$arr_key]['option_value_name'],
-                                    'price'                   => $option_value_info[$arr_key]['price'],
-                                    'prefix'                  => $option_value_info[$arr_key]['prefix'],
-                                ]
-                            );
+                            $optionData = $option_value_info[$arr_key];
+                            unset($optionData['date_added'], $optionData['date_modified']);
+                            $optionData['order_id'] = $order_id;
+                            $optionData['order_product_id'] = $order_product_id;
+                            $optionData['product_option_value_id'] = $value;
+                            $optionData['name'] = $option_value_info[$arr_key]['option_name'];
+                            $optionData['value'] = $option_value_info[$arr_key]['option_value_name'];
+
+                            $orderOption = new OrderOption( $optionData );
                             $orderOption->save();
 
                             if ($option_value_info[$arr_key]['subtract']) {

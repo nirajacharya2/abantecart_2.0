@@ -1547,6 +1547,11 @@ class ControllerPagesSaleOrder extends AController
                         $this->error['product_error'] = 'Product #'.$item['product_id'].' already deleted! You cannot to change it\'s quantity in order!';
                         break;
                     }
+                }elseif( (int)$item['order_product_id']>0 ){
+                    //remove options from post data for existing order product.
+                    //do not allow to change options!
+                    unset($this->request->post['product'][$item['order_product_id']]['option']);
+
                 }
             }
         }
