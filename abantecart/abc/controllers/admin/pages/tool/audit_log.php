@@ -41,6 +41,10 @@ class ControllerPagesToolAuditLog extends AController
             $this->data['auditable_id'] = $this->request->get['auditable_id'];
         }
 
+        if (isset($this->request->get['auditable_fields']) && !empty($this->request->get['auditable_fields'])) {
+            $this->data['auditable_fields'] = $this->request->get['auditable_fields'];
+        }
+
         if (isset($this->request->get['modal_mode'])) {
             $this->data['modal_mode'] = 1;
         }
