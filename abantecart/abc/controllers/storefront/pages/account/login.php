@@ -48,6 +48,10 @@ class ControllerPagesAccountLogin extends AController
             abc_redirect( $this->html->getSecureURL( 'account/account' ) );
         }
 
+        if (isset($this->session->data['actoronbehalf'])) {
+            unset($this->session->data['actoronbehalf']);
+        }
+
         $this->document->setTitle( $this->language->get( 'heading_title' ) );
         $loginname = '';
         if ( ( $this->request->is_POST() ) ) {

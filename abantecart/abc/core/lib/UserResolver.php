@@ -53,6 +53,11 @@ class UserResolver
     protected $userGroupId;
 
     /**
+     * @var int - User Id who click act on behalf from admin side
+     */
+    protected $actoronbehalf;
+
+    /**
      * @var string - ip
      */
     protected $ip;
@@ -102,6 +107,7 @@ class UserResolver
             $this->userObject = $customer;
             $this->userId = $this->userObject->getId();
             $this->userName = $this->userObject->getFirstName().' '.$this->userObject->getLastName();
+            $this->actoronbehalf = (int) Registry::session()->data['actoronbehalf'];
             $customer = Customer::find($this->userId);
             if ($customer) {
                 $this->ip = $customer->ip;
@@ -157,4 +163,14 @@ class UserResolver
     {
         return $this->ip;
     }
+
+    /**
+     * @return int
+     */
+    public function getActoronbehalf()
+    {
+        return $this->actoronbehalf;
+    }
+
+
 }
