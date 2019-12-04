@@ -505,13 +505,16 @@ class AOrder extends ALibBase
         //clean up based on setting (remove already created or abandoned orders)
         $expireDays = (int)$settings->get('config_expire_order_days');
         if ($expireDays) {
-            Order::where('order_status_id', '=', 0)
-                 ->where(
-                     'date_modified',
-                     '<',
-                     Carbon::now()->subDays($expireDays)->toISOString()
-                 )->forceDelete();
-
+            try {
+                Order::where('order_status_id', '=', 0)
+                     ->where(
+                         'date_modified',
+                         '<',
+                         Carbon::now()->subDays($expireDays)->toISOString()
+                     )->forceDelete();
+            }catch(\Exception $e){
+                Registry::log()->write(__FILE__. "Cannot to delete obsolete incomplete orders!\n".$e->getMessage());
+            }
         }
 
         if (!$set_order_id && (int)$settings->get('config_start_order_id')) {
