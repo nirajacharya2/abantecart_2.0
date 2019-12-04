@@ -104,7 +104,7 @@
             if($(this).val() == ''){
                 $(this).val('1');
             }
-            display_total_price();
+            setTimeout(display_total_price,1000);
         });
 
     $('#orderProductFrm_order_status_id').on(
