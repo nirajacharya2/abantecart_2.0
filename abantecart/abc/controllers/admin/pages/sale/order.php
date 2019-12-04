@@ -1543,7 +1543,7 @@ class ControllerPagesSaleOrder extends AController
                         break;
                     }
                     $prev_quantity = $orderProduct->quantity;
-                    if($prev_quantity != $item['quantity']){
+                    if($prev_quantity != $item['quantity'] && $item['quantity'] != 0){
                         $this->error['product_error'] = 'Product #'.$item['product_id'].' already deleted! You cannot to change it\'s quantity in order!';
                         break;
                     }
