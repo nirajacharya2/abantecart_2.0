@@ -79,7 +79,11 @@ class UserResolver
             $this->userObject = $user;
             $this->userName = $user->getUserName();
             $this->userId = null;
-            $this->ip = null;
+
+            $this->ip = $registry->get('request')->getRemoteIP();
+            if (!$this->ip) {
+                $this->ip = null;
+            }
         }
         elseif (
             ABC::env('IS_ADMIN')
@@ -94,9 +98,12 @@ class UserResolver
             $this->userObject = $this->registry->get('user');
             $this->userId = $this->userObject->getId();
             $this->userName = $this->userObject->getUserName();
-            $user = User::find($this->userId);
-            if ($user) {
-                $this->ip = $user->ip;
+            $this->ip = $registry->get('request')->getRemoteIP();
+            if (!$this->ip) {
+                $user = User::find($this->userId);
+                if ($user) {
+                    $this->ip = $user->ip;
+                }
             }
         }
         elseif ( $this->registry->get('customer') instanceof $customerClassName)
@@ -108,9 +115,13 @@ class UserResolver
             $this->userId = $this->userObject->getId();
             $this->userName = $this->userObject->getFirstName().' '.$this->userObject->getLastName();
             $this->actoronbehalf = (int) Registry::session()->data['actoronbehalf'];
-            $customer = Customer::find($this->userId);
-            if ($customer) {
-                $this->ip = $customer->ip;
+
+            $this->ip = $registry->get('request')->getRemoteIP();
+            if (!$this->ip) {
+                $customer = Customer::find($this->userId);
+                if ($customer) {
+                    $this->ip = $customer->ip;
+                }
             }
         }else{
             //TODO: add API-user
