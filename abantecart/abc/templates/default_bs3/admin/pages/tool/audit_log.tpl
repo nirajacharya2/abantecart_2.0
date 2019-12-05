@@ -209,8 +209,16 @@
 									v-on:item-expanded="expandFunction"
 									attach
 									hide-default-footer
-									show-expand
+									:expanded.sync="table_expand"
 							>
+								<template slot="item" slot-scope="props">
+									<tr @click="expandFunction(props)">
+										<td v-for="table_header in table_headers" :width="table_header.width" :title="props.item[table_header.value]">
+											<span v-html="props.item[table_header.value]"></span>
+										</td>
+									</tr>
+								</template>
+
 								<template slot="expanded-item" slot-scope="{ headers, item }">
 									<td :colspan="headers.length">
 										<v-card flat>
@@ -222,9 +230,9 @@
 														:server-items-length="expand_table_total[props.id]"
 														hide-default-footer
 												>
-													<template slot="items" slot-scope="expand_props">
+													<template slot="item" slot-scope="expand_props">
 														<tr>
-															<td v-for="expand_header in expand_headers">
+															<td v-for="expand_header in expand_headers" :title="expand_props.item[expand_header.value]">
 																<span v-html="expand_props.item[expand_header.value]"></span>
 															</td>
 														</tr>
@@ -288,6 +296,7 @@
 			dataRunTaskUrl: this.dataRunTaskUrlBase,
 			rowsPerPage: [10, 20, 30, 40, 50],
 			arFilter: [],
+			table_expand: [],
 			isConcreteObject: false,
 			objectsInArFilter: [],
 			isSelectedFieldsDisabled: true,
@@ -317,37 +326,49 @@
 			event_items: ['Created', 'Updating', 'Deleted', 'Restored'],
 			table_rows_per_page_items: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
 			table_headers: [
-				{ text: 'Expand', value: 'data-table-expand', width: '5%'},
+				/*{ text: 'Expand', value: 'data-table-expand', width: '5%'}, */
 				{
 					text: 'User Name',
 					align: 'left',
 					value: 'user_name',
-					width: '10%'
+					width: '20%'
 				},
 				/*{
 					text: 'User Alias',
 					align: 'left',
 					value: 'alias_name'
 				},*/
-				{text: 'Auditable Object', value: 'main_auditable_model',
-					width: '10%'},
-				{text: 'Auditable ID', value: 'main_auditable_id',
-					width: '10%'},
-				{text: 'Event', value: 'event',
-					width: '10%'},
-				{text: 'Description', value: 'description', sortable: false,
-					width: '20%'},
-				{text: 'IP', value: 'ip',
-					width: '10%'},
-				{text: 'Date Change', value: 'date_added',
-					width: '15%'},
+				{
+					text: 'Auditable Object', value: 'main_auditable_model',
+					width: '10%'
+				},
+				{
+					text: 'Auditable ID', value: 'main_auditable_id',
+					width: '10%'
+				},
+				{
+					text: 'Event', value: 'event',
+					width: '10%'
+				},
+				{
+					text: 'Description', value: 'description', sortable: false,
+					width: '20%'
+				},
+				{
+					text: 'IP', value: 'ip',
+					width: '10%'
+				},
+				{
+					text: 'Date Change', value: 'date_added',
+					width: '15%'
+				},
 			],
 			expand_items: [],
 			expand_headers: [
-				{text: 'Model', value: 'auditable_model', sortable: false,},
-				{text: 'Field', value: 'field_name', sortable: false,},
-				{text: 'Old Value', value: 'old_value', sortable: false,},
-				{text: 'New Value', value: 'new_value', sortable: false,},
+				{text: 'Model', value: 'auditable_model', sortable: false, width: '20%'},
+				{text: 'Field', value: 'field_name', sortable: false, width: '20%'},
+				{text: 'Old Value', value: 'old_value', sortable: false, width: '30%'},
+				{text: 'New Value', value: 'new_value', sortable: false, width: '30%'},
 			],
 			expand_pagination: [],
 			expand_table_total: [],
@@ -407,7 +428,7 @@
 				let filterItem = {
 					'auditable_type': this.selected_data_object,
 					'auditable_id': this.data_object_id,
-					'field_name' : auditable_fields
+					'field_name': auditable_fields
 				};
 				if (this.data_object_id.length > 0) {
 					filterItem.auditable_id = this.data_object_id.split(',')
@@ -532,7 +553,12 @@
 					});
 			},
 			expandFunction: function (props) {
-				if (props.value && typeof vm.expand_items[props.item.id] == "undefined") {
+				if (!this.table_expand.includes(props.item)) {
+					this.table_expand.push(props.item)
+				} else {
+					this.table_expand.splice( this.table_expand.indexOf(props.item), 1 );
+				}
+				if (typeof vm.expand_items[props.item.id] == "undefined") {
 					this.getExpandDataFromApi(props);
 				}
 			},
