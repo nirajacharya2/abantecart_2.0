@@ -5,6 +5,7 @@ namespace abc\modules\listeners;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\contracts\AuditLogStorageInterface;
+use abc\core\lib\OSUser;
 use abc\core\lib\UserResolver;
 use abc\models\BaseModel;
 use abc\models\catalog\Product;
@@ -222,6 +223,10 @@ class ModelAuditListener
         if ($this->registry->get('request')) {
             $request_id = $this->registry->get('request')->getUniqueId();
         } else {
+            $request_id = \H::genRequestId();
+        }
+
+        if(php_sapi_name() == 'cli' && $this->registry->get('os_user') instanceof OSUser){
             $request_id = \H::genRequestId();
         }
 

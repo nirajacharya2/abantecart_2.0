@@ -533,6 +533,7 @@
 			},
 			getDataFromApi() {
 				this.loading = true;
+				this.table_expand = []
 				let param = this.pagination;
 				param.filter = this.arFilter;
 				param.date_from = this.date_from;
