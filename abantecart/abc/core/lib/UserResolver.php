@@ -79,11 +79,7 @@ class UserResolver
             $this->userObject = $user;
             $this->userName = $user->getUserName();
             $this->userId = null;
-
-            $this->ip = $registry->get('request')->getRemoteIP();
-            if (!$this->ip) {
-                $this->ip = null;
-            }
+            $this->ip = null;
         }
         elseif (
             ABC::env('IS_ADMIN')
