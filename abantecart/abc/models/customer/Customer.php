@@ -15,6 +15,7 @@ use abc\models\system\Audit;
 use abc\models\system\Store;
 use H;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Validation\Rule;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
@@ -323,7 +324,7 @@ class Customer extends BaseModel
 
         'status' => [
             'checks'   => [
-                'boolean'
+                'boolean',
             ],
             'messages' => [
                 '*' => [
@@ -346,7 +347,7 @@ class Customer extends BaseModel
 
         'approved' => [
             'checks'   => [
-                'boolean'
+                'boolean',
             ],
             'messages' => [
                 '*' => [
@@ -750,35 +751,37 @@ class Customer extends BaseModel
         $filter = (isset($inputData['filter']) ? $inputData['filter'] : []);
 
         if (H::has_value($filter['name'])) {
-            $query->whereRaw("CONCAT(".$aliasC.".firstname, ' ', ".$aliasC.".lastname) LIKE '%".$filter['name']."%'");
+
+            $query->whereRaw("CONCAT(".$aliasC.".firstname, ' ', ".$aliasC.".lastname) LIKE '%".$db->escape($filter['name'])."%'");
         }
 
         if (H::has_value($filter['name_email'])) {
-            $query->whereRaw("CONCAT(".$aliasC.".firstname, ' ', ".$aliasC.".lastname, ' ', ".$aliasC.".email) LIKE '%"
-                .$filter['name_email']."%'");
+            $query->whereRaw(
+                "CONCAT(".$aliasC.".firstname, ' ', ".$aliasC.".lastname, ' ', ".$aliasC.".email) LIKE '%"
+                .$db->escape($filter['name_email'])."%'");
         }
         //more specific login, last and first name search
         if (H::has_value($filter['loginname'])) {
             if ($filter['search_operator'] == 'equal') {
-                $query->whereRaw("LOWER(".$aliasC.".loginname) =  '".mb_strtolower($filter['loginname'])."'");
+                $query->whereRaw("LOWER(".$aliasC.".loginname) =  '".$db->escape(mb_strtolower($filter['loginname']))."'");
             } else {
-                $query->whereRaw("LOWER(".$aliasC.".loginname) LIKE '%".mb_strtolower($filter['loginname'])."%'");
+                $query->whereRaw("LOWER(".$aliasC.".loginname) LIKE '%".$db->escape(mb_strtolower($filter['loginname']))."%'");
             }
         }
 
         if (H::has_value($filter['firstname'])) {
             if ($filter['search_operator'] == 'equal') {
-                $query->whereRaw("LOWER(".$aliasC.".firstname) =  '".mb_strtolower($filter['firstname'])."'");
+                $query->whereRaw("LOWER(".$aliasC.".firstname) =  '".$db->escape(mb_strtolower($filter['firstname']))."'");
             } else {
-                $query->whereRaw("LOWER(".$aliasC.".firstname) LIKE '".mb_strtolower($filter['firstname'])."%'");
+                $query->whereRaw("LOWER(".$aliasC.".firstname) LIKE '".$db->escape(mb_strtolower($filter['firstname']))."%'");
             }
         }
 
         if (H::has_value($filter['lastname'])) {
             if ($filter['search_operator'] == 'equal') {
-                $query->whereRaw("LOWER(".$aliasC.".lastname) =  '".mb_strtolower($filter['lastname'])."'");
+                $query->whereRaw("LOWER(".$aliasC.".lastname) =  '".$db->escape(mb_strtolower($filter['lastname']))."'");
             } else {
-                $query->whereRaw("LOWER(".$aliasC.".lastname) LIKE '".mb_strtolower($filter['lastname'])."%'");
+                $query->whereRaw("LOWER(".$aliasC.".lastname) LIKE '".$db->escape(mb_strtolower($filter['lastname']))."%'");
             }
         }
 
@@ -802,6 +805,7 @@ class Customer extends BaseModel
             if (H::has_value($filter['email'])) {
                 $emails = (array)$filter['email'];
                 $query->where(function ($query) use ($emails, $filter) {
+                    /** @var QueryBuilder $query */
                     foreach ($emails as $email) {
                         if ($filter['search_operator'] == 'equal') {
                             $query->orWhere('customers.email', '=', mb_strtolower($email));
@@ -813,10 +817,10 @@ class Customer extends BaseModel
             }
 
             if (H::has_value($filter['telephone'])) {
-                $query->where('customers.telephone', 'like', "%".$filter['telephone']."%");
+                $query->where('customers.telephone', 'like', "%".$db->escape($filter['telephone'])."%");
             }
             if (H::has_value($filter['sms'])) {
-                $query->where('customers.sms', 'like', "%".$filter['sms']."%");
+                $query->where('customers.sms', 'like', "%".$db->escape($filter['sms'])."%");
             }
         }
 
@@ -830,19 +834,22 @@ class Customer extends BaseModel
 
         if (H::has_value($filter['only_subscribers'])) {
             $query->where(function ($query) use ($subscriberGroupId) {
+                /** @var QueryBuilder $query */
                 $query->where('customer_groups.customer_group_id', '=', $subscriberGroupId);
             });
         } elseif (H::has_value($filter['all_subscribers'])) {
             $query->where(function ($query) {
+                /** @var QueryBuilder $query */
                 $query->where(
                     [
                         'customers.newsletter' => 1,
                         'customers.status' => 1,
-                        'customers.approved' => 1
+                        'customers.approved' => 1,
                     ]
                 );
             })
                   ->orWhere(function ($query) use ($subscriberGroupId) {
+                      /** @var QueryBuilder $query */
                       $query->where('customers.newsletter', '=', 1)
                             ->where('customer_groups.customer_group_id', '=', $subscriberGroupId);
                   });
@@ -894,13 +901,14 @@ class Customer extends BaseModel
         if (($filter['all_subscribers'] || $filter['only_subscribers']) && $filter['newsletter_protocol']) {
             $query->join('customer_notifications',
                 function ($join) use ($filter) {
+                /** @var JoinClause $join */
                     $join->on('customer_notifications.customer_id', '=', 'customers.customer_id')
                          ->where('customer_notifications.sendpoint', '=', 'newsletter');
                 });
             $query->where(
                 [
                     'customer_notifications.status' => 1,
-                    'customer_notifications.protocol' => $filter['newsletter_protocol']
+                    'customer_notifications.protocol' => $filter['newsletter_protocol'],
                 ]
             );
         }
@@ -1083,9 +1091,11 @@ class Customer extends BaseModel
          */
         $query->selectRaw($db->raw_sql_row_count().' '.$db->table_name('customers').'.*');
         $query->join('orders', function ($join) {
+            /** @var JoinClause $join */
             $join->on('orders.order_id', '=', 'order_products.order_id');
         });
         $query->join('customers', function ($join) {
+            /** @var JoinClause $join */
             $join->on('orders.customer_id', '=', 'customers.customer_id');
         })
               ->where('orders.order_status_id', '>', 0)
@@ -1122,7 +1132,7 @@ class Customer extends BaseModel
         $aliasC = $db->table_name('customers');
 
         //exclude current customer from checking
-        $query = static::whereRaw("LOWER(".$aliasC.".loginname) = '".mb_strtolower($loginname)."'");
+        $query = static::whereRaw("LOWER(".$aliasC.".loginname) = '".$db->escape(mb_strtolower($loginname))."'");
 
         if ($customer_id) {
             $query->where('customer_id', '<>', $customer_id);
