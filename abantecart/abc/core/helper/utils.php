@@ -1963,7 +1963,7 @@ class AHelperUtils extends AHelper
     {
         return  sprintf(
             "%08x",
-            abs(crc32(self::getRemoteIP() . $_SERVER['REQUEST_TIME'] . $_SERVER['REMOTE_PORT']))
+            abs(crc32(self::getRemoteIP() . $_SERVER['REQUEST_TIME'] . $_SERVER['REMOTE_PORT'].microtime()))
         );
     }
 
