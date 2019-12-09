@@ -226,10 +226,6 @@ class ModelAuditListener
             $request_id = \H::genRequestId();
         }
 
-        if(php_sapi_name() == 'cli' && $this->registry->get('os_user') instanceof OSUser){
-            $request_id = \H::genRequestId();
-        }
-
         $session_id = session_id();
 
         $user = new UserResolver($this->registry);
