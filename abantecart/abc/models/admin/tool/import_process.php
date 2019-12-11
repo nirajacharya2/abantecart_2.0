@@ -186,19 +186,39 @@ class ModelToolImportProcess extends Model
      */
     public function process_products_record($task_id, $data, $settings)
     {
-        $this->task_id = $task_id;
-        $language_id = $settings['language_id']
-            ? $settings['language_id']
-            : $this->language->getContentLanguageID();
-        $store_id = $settings['store_id']
-            ? (int)$settings['store_id']
-            : (int)$this->session->data['current_store_id'];
-        $this->load->model('catalog/product');
-        $log_classname = ABC::getFullClassName('ALog');
-        if ($log_classname) {
-            $this->imp_log = new $log_classname(['app' => "products_import_{$task_id}.txt"]);
+        $this->db->beginTransaction();
+        try {
+            $this->task_id = $task_id;
+            $language_id = $settings['language_id']
+                ? $settings['language_id']
+                : $this->language->getContentLanguageID();
+            $store_id = $settings['store_id']
+                ? (int)$settings['store_id']
+                : (int)$this->session->data['current_store_id'];
+            $this->load->model('catalog/product');
+            $log_classname = ABC::getFullClassName('ALog');
+            if ($log_classname) {
+                $this->imp_log = new $log_classname(['app' => "products_import_{$task_id}.txt"]);
+            }
+
+            $this->data['product_data'] = $data;
+            $this->data['settings'] = $settings;
+
+            //allow to change list from hooks
+            $this->extensions->hk_ProcessData($this, __FUNCTION__);
+
+            $result = false;
+            if (empty($this->errors)) {
+                $result = $this->addUpdateProduct($this->data['product_data'], $this->data['settings'], $language_id, $store_id);
+            }
+
+            $this->db->commit();
+            return $result;
+        } catch (\Exception $e) {
+            $this->db->rollback();
+            $this->toLog($e->getMessage());
+            return false;
         }
-        return $this->addUpdateProduct($data, $settings, $language_id, $store_id);
     }
 
     /**
@@ -256,8 +276,6 @@ class ModelToolImportProcess extends Model
      */
     protected function addUpdateProduct($record, $settings, $language_id, $store_id)
     {
-        $this->db->beginTransaction();
-        try {
             $status = false;
             $record = array_map('trim', $record);
 
@@ -374,16 +392,10 @@ class ModelToolImportProcess extends Model
                 $product_data['weight_class_id']
             );
 
-            $this->db->commit();
-
             if ($status) {
                 //call event
                 H::event(__CLASS__.'@'.__FUNCTION__, [new ABaseEvent($this->task_id, $product_id, $data, $record)]);
             }
-        } catch (\Exception $e) {
-            $this->db->rollback();
-            $this->log->write($e->getMessage());
-        }
 
         return $status;
     }
