@@ -30,6 +30,8 @@ class OrderOptionModelTest extends ATestCase
             'price'                   => 'fail',
             'prefix'                  => 'fail',
             'settings'                => 'fail',
+            'weight'                  => 'fail',
+            'weight_type'             => -0.000000000123232,
         ];
 
         $orderOption = new OrderOption();
@@ -40,7 +42,7 @@ class OrderOptionModelTest extends ATestCase
             $errors = $orderOption->errors()['validation'];
             // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
-        $this->assertEquals(9, count($errors));
+        $this->assertEquals(11, count($errors));
 
         //check validation of presence in database
         $data = [
@@ -51,6 +53,8 @@ class OrderOptionModelTest extends ATestCase
             // fill required junk
             'name'             => 'test',
             'value'            => 'value',
+            'weight'           => 0.01,
+            'weight_type'      => '%'
         ];
 
         $orderOption = new OrderOption();
@@ -95,6 +99,8 @@ class OrderOptionModelTest extends ATestCase
             'price'             => 1.25,
             'prefix'            => '$',
             'settings'          => ['somedata' => 'somevalue'],
+            'weight'           => 0.01,
+            'weight_type'      => '%'
         ];
 
         $orderOption = new OrderOption($data);

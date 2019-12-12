@@ -29,6 +29,7 @@ use abc\core\lib\ACurrency;
 use abc\core\lib\AException;
 use abc\core\lib\LibException;
 use abc\models\catalog\Category;
+use abc\models\catalog\Product;
 use abc\models\customer\Address;
 use abc\models\customer\Customer;
 use abc\models\customer\CustomerGroup;
@@ -363,7 +364,7 @@ class ControllerPagesSaleOrder extends AController
         $post = $this->request->post;
         $post['order_status_id'] = $order_info['order_status_id'];
 
-        if ($this->request->is_POST() && $this->validateHistoryForm($order_id, $post)) {
+        if ($this->request->is_POST() && $this->validateDetailsForm($order_id, $post)) {
             try {
                 Order::editOrder($order_id, $this->request->post);
             } catch (AException $e) {
@@ -615,19 +616,22 @@ class ControllerPagesSaleOrder extends AController
                     $this->data['cancel_statuses'][] = $oStatus['order_status_id'];
                 }
             }
-
+            $orderStatus = OrderStatusDescription::where(
+                                [
+                                    'order_status_id' => (int)$order_product['order_status_id'],
+                                    'language_id'     => (int)$order_info['language_id'],
+                                ]
+                            )->first();
             $this->data['order_products'][] = [
                 'disable_edit'     => in_array($order_product['order_status_id'], $this->data['cancel_statuses']),
                 'order_product_id' => $order_product['order_product_id'],
                 'product_id'       => $order_product['product_id'],
                 'product_status'   => $product['status'],
                 'order_status_id'  => $order_product['order_status_id'],
-                'order_status'     => OrderStatusDescription::where(
-                    [
-                        'order_status_id' => (int)$order_product['order_status_id'],
-                        'language_id'     => (int)$order_info['language_id'],
-                    ]
-                )->first()->name,
+                'order_status'     => ( $orderStatus
+                                        ? $orderStatus->name
+                                        : Registry::order_status()->getStatusById($order_product['order_status_id'])
+                                      ),
                 'name'             => $order_product['name'],
                 'model'            => $order_product['model'],
                 'option'           => $option_data,
@@ -637,11 +641,23 @@ class ControllerPagesSaleOrder extends AController
                     $order_info['currency'],
                     $order_info['value']
                 ),
+                'price_value'      => $this->currency->format(
+                    $order_product['price'],
+                    $order_info['currency'],
+                    $order_info['value'],
+                    false
+                ),
                 'total'            => $this->currency->format_total(
                     $order_product['price'],
                     $order_product['quantity'],
                     $order_info['currency'], $order_info['value']
                 ),
+                'total_value'      => $this->currency->format(
+                                            $order_product['price'],
+                                            $order_info['currency'],
+                                            $order_info['value'],
+                                            false
+                                        ) * $order_product['quantity'],
                 'href'             => $this->html->getSecureURL(
                     'catalog/product/update',
                     '&product_id='.$order_product['product_id']
@@ -733,8 +749,10 @@ class ControllerPagesSaleOrder extends AController
             ]
         );
 
-        $this->data['validate_coupon_url'] =
-            $this->html->getSecureURL('r/sale/order/validateCoupon', '&order_id='.$order_id);
+        $this->data['validate_coupon_url'] = $this->html->getSecureURL(
+            'r/sale/order/validateCoupon',
+            '&order_id='.$order_id
+        );
 
         //if virtual product (no shipment);
         if (!$this->data['shipping_method']) {
@@ -1495,6 +1513,60 @@ class ControllerPagesSaleOrder extends AController
         $this->processTemplate('pages/sale/order_payment_details.tpl');
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
+
+    protected function validateDetailsForm($order_id, $data)
+    {
+        if (!$this->user->canModify('sale/order')) {
+            $this->error['warning'] = $this->language->get('error_permission');
+        }
+
+        //check is order exists
+        $order = Order::find($order_id);
+        if(!$order){
+            $this->error['not_found'] = 'Order #'.$order_id.' not found!';
+        }
+
+        if($data['product'] && !is_array($data['product'])){
+
+            $this->error['products_list'] = 'Products List of Order #'.$order_id.' must be an array!';
+        }
+
+        if($data['product']){
+            foreach($data['product'] as $item){
+                $product = Product::find($item['product_id']);
+                //when product already deleted from database
+                if(!$product){
+                    $orderProduct = OrderProduct::find($item['order_product_id']);
+                    if(!$orderProduct){
+                        $this->error['order_product_not_found'] = 'Order Product #'.$item['order_product_id'].' not found!';
+                        break;
+                    }
+                    $prev_quantity = $orderProduct->quantity;
+                    if($prev_quantity != $item['quantity'] && $item['quantity'] != 0){
+                        $this->error['product_error'] = 'Product #'.$item['product_id'].' already deleted! You cannot to change it\'s quantity in order!';
+                        break;
+                    }
+                }elseif( (int)$item['order_product_id']>0 ){
+                    //remove options from post data for existing order product.
+                    //do not allow to change options!
+                    unset($this->request->post['product'][$item['order_product_id']]['option']);
+
+                }
+            }
+        }
+
+        if($data['order_totals'] && !is_array($data['order_totals'])){
+            $this->error['totals_list'] = 'Totals List of Order #'.$order_id.' must be an array!';
+        }
+
+        $this->extensions->hk_ValidateData($this, $data);
+
+        if (!$this->error) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     protected function validateHistoryForm($order_id, $data)

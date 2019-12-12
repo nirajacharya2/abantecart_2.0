@@ -17,33 +17,19 @@ use abc\core\ABC; ?>
 <?php } ?>
 
 <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" />
-<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/vuetify/vuetify.css'); ?>" />
+<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/vuetify/v2/vuetify.css'); ?>" />
+<link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/vue/vue.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/tinymce-vue/tinymce-vue.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/vuetify/v2/vuetify.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/vee-validate/vee-validate.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/polyfill/polyfill.min.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/axios/axios.min.js'); ?>"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
 
-<?php
-//TODO: Make form on vue-js work!!!
-$oldform = true;
-if ($oldform == true) {
-    ?>
-    <script defer type="text/javascript" src="vendor/tinymce/tinymce/tinymce.min.js"></script>
-    <?php
-} else {
-    ?>
-    <script type="text/javascript" src="<?php echo $this->templateResource('assets/js/vue/vue.js'); ?>"></script>
-    <script type="text/javascript"
-            src="<?php echo $this->templateResource('assets/js/tinymce-vue/tinymce-vue.js'); ?>"></script>
-    <script type="text/javascript"
-            src="<?php echo $this->templateResource('assets/js/vuetify/vuetify.js'); ?>"></script>
-    <script type="text/javascript"
-            src="<?php echo $this->templateResource('assets/js/vee-validate/vee-validate.js'); ?>"></script>
-    <script type="text/javascript"
-            src="<?php echo $this->templateResource('assets/js/polyfill/polyfill.min.js'); ?>"></script>
-    <script type="text/javascript"
-            src="<?php echo $this->templateResource('assets/js/axios/axios.min.js'); ?>"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
-<?php } ?>
 <link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/stylesheet.css'); ?>" />
 
 
@@ -76,6 +62,16 @@ if ($oldform == true) {
 <script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/jquery-ui/jquery-ui-1.10.4.custom.min.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo $this->templateResource('assets/js/bootstrap.min.js'); ?>"></script>
 <link rel="stylesheet" type="text/css" href="vendor/css/font-awesome/css/fontawesome-all.min.css" />
+
+
+<?php
+if (strpos($this->request->get['rt'], 'catalog/product') === false) {
+?>
+<script defer type="text/javascript" src="<?php echo $this->templateResource('assets/js/tinymce/tinymce.min.js'); ?>"></script>
+<?php
+}
+?>
+
 
 <?php foreach ($scripts as $script) { ?>
 <script type="text/javascript" src="<?php echo $script; ?>"></script>

@@ -5,12 +5,14 @@ namespace abc\modules\listeners;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\contracts\AuditLogStorageInterface;
+use abc\core\lib\OSUser;
 use abc\core\lib\UserResolver;
 use abc\models\BaseModel;
 use abc\models\catalog\Product;
 use abc\models\system\AuditEvent;
 use abc\models\system\AuditModel;
 use abc\models\system\AuditUser;
+use abc\models\user\User;
 use H;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Support\Facades\Cache;
@@ -229,7 +231,10 @@ class ModelAuditListener
         $user = new UserResolver($this->registry);
         $user_type = $user->getUserType();
         $user_id = $user->getUserId();
-        $user_name = $user->getUserName();
+        if ($user->getActoronbehalf() > 0) {
+            $actorOnBehalf = User::find($user->getActoronbehalf());
+        }
+        $user_name = $user->getUserName().($actorOnBehalf ? '('.$actorOnBehalf->username.')' : '');
         $auditData = [];
 
         //get primary key value

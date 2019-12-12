@@ -1108,7 +1108,8 @@ class ControllerPagesSaleCustomer extends AController
                 }
             } else {
                 H::startStorefrontSession($this->user->getId(),
-                    ['customer_id' => $this->request->get['customer_id']]);
+                    ['customer_id' => $this->request->get['customer_id'],
+                      'actoronbehalf' => $this->user->getId()]);
                 if ($store_settings['config_ssl']) {
                     abc_redirect($this->html->getCatalogURL('account/account', '', '', true));
                 } else {

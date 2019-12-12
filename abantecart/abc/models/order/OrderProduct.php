@@ -24,10 +24,22 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property float $tax
  * @property int $quantity
  * @property int $subtract
+ * @property int|null $tax_class_id
+ * @property float|null $weight
+ * @property int|null $weight_class_id
+ * @property float|null $length
+ * @property float|null $width
+ * @property float|null $height
+ * @property int|null $length_class_id
+ * @property int $shipping
+ * @property int $ship_individually
+ * @property int $free_shipping
+ * @property float|null $shipping_price
  *
  * @property Order $order
  * @property Product $product
- * @property \Illuminate\Database\Eloquent\Collection $order_downloads
+ * @property OrderOption $order_options
+ * @property OrderDownload $order_downloads
  * @property \Illuminate\Database\Eloquent\Collection $order_downloads_histories
  *
  * @method static OrderProduct find(int $order_product_id) OrderProduct
@@ -49,14 +61,25 @@ class OrderProduct extends BaseModel
     protected $mainClassKey = 'order_id';
 
     protected $casts = [
-        'order_id'        => 'int',
-        'product_id'      => 'int',
-        'price'           => 'float',
-        'total'           => 'float',
-        'tax'             => 'float',
-        'quantity'        => 'int',
-        'subtract'        => 'int',
-        'order_status_id' => 'int',
+        'order_id'          => 'int',
+        'product_id'        => 'int',
+        'price'             => 'float',
+        'total'             => 'float',
+        'tax'               => 'float',
+        'quantity'          => 'int',
+        'subtract'          => 'int',
+        'order_status_id'   => 'int',
+        'tax_class_id'      => 'int',
+        'weight'            => 'float',
+        'weight_class_id'   => 'int',
+        'length'            => 'float',
+        'width'             => 'float',
+        'height'            => 'float',
+        'length_class_id'   => 'int',
+        'shipping'          => 'boolean',
+        'ship_individually' => 'int',
+        'free_shipping'     => 'boolean',
+        'shipping_price'    => 'float',
     ];
 
     protected $dates = [
@@ -76,6 +99,17 @@ class OrderProduct extends BaseModel
         'quantity',
         'subtract',
         'order_status_id',
+        'tax_class_id',
+        'weight',
+        'weight_class_id',
+        'length',
+        'width',
+        'height',
+        'length_class_id',
+        'shipping',
+        'ship_individually',
+        'free_shipping',
+        'shipping_price'
     ];
 
     protected $rules = [
@@ -103,7 +137,6 @@ class OrderProduct extends BaseModel
                 ],
             ],
         ],
-
         'name'  => [
             'checks'   => [
                 'string',
@@ -138,7 +171,6 @@ class OrderProduct extends BaseModel
                 ],
             ],
         ],
-
         'price' => [
             'checks'   => [
                 'numeric',
@@ -149,7 +181,6 @@ class OrderProduct extends BaseModel
                 ],
             ],
         ],
-
         'total' => [
             'checks'   => [
                 'numeric',
@@ -160,7 +191,6 @@ class OrderProduct extends BaseModel
                 ],
             ],
         ],
-
         'tax' => [
             'checks'   => [
                 'numeric',
@@ -171,7 +201,6 @@ class OrderProduct extends BaseModel
                 ],
             ],
         ],
-
         'quantity' => [
             'checks'   => [
                 'integer',
@@ -183,7 +212,6 @@ class OrderProduct extends BaseModel
                 ],
             ],
         ],
-
         'subtract'        => [
             'checks'   => [
                 'boolean',
@@ -206,13 +234,142 @@ class OrderProduct extends BaseModel
                 ],
             ],
         ],
-
+        'tax_class_id' => [
+            'checks'   => [
+                'nullable',
+                'integer',
+                'exists:tax_classes',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or absent in tax_classes table!',
+                ],
+            ],
+        ],
+        'weight' => [
+            'checks'   => [
+                'numeric',
+                'nullable'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+        'weight_class_id' => [
+            'checks'   => [
+                'integer',
+                'nullable',
+                'exists:weight_classes',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or absent in weight_classes table!',
+                ],
+            ],
+        ],
+        'length' => [
+            'checks'   => [
+                'numeric',
+                'nullable'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+        'width' => [
+            'checks'   => [
+                'numeric',
+                'nullable'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+        'height' => [
+            'checks'   => [
+                'numeric',
+                'nullable'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+        'length_class_id' => [
+            'checks'   => [
+                'integer',
+                'nullable',
+                'exists:length_classes',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not integer or not presents in length_classes table!',
+                ],
+            ],
+        ],
+        'shipping' => [
+            'checks'   => [
+                'boolean',
+                'nullable'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not boolean!',
+                ],
+            ],
+        ],
+        'ship_individually' => [
+            'checks'   => [
+                'boolean',
+                'nullable'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not boolean!',
+                ],
+            ],
+        ],
+        'free_shipping'     => [
+            'checks'   => [
+                'boolean',
+                'nullable'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is not boolean!',
+                ],
+            ],
+        ],
+        'shipping_price'    => [
+            'checks'   => [
+                'numeric',
+                'nullable'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
     ];
 
     public function order()
     {
         return $this->belongsTo(Order::class, 'order_id');
     }
+
+    public function order_options()
+    {
+        return $this->belongsTo(OrderOption::class, 'order_product_id');
+    }
+
     public function order_status()
     {
         return $this->belongsTo(OrderStatus::class, 'order_status_id');

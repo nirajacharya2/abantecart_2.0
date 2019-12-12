@@ -40,6 +40,8 @@ use Illuminate\Database\Query\JoinClause;
 class Address extends BaseModel
 {
     use SoftDeletes;
+    protected $mainClassName = Customer::class;
+    protected $mainClassKey = 'customer_id';
 
     protected $primaryKey = 'address_id';
 

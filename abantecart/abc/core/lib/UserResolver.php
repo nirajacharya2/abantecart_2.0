@@ -53,6 +53,11 @@ class UserResolver
     protected $userGroupId;
 
     /**
+     * @var int - User Id who click act on behalf from admin side
+     */
+    protected $actoronbehalf;
+
+    /**
      * @var string - ip
      */
     protected $ip;
@@ -89,9 +94,12 @@ class UserResolver
             $this->userObject = $this->registry->get('user');
             $this->userId = $this->userObject->getId();
             $this->userName = $this->userObject->getUserName();
-            $user = User::find($this->userId);
-            if ($user) {
-                $this->ip = $user->ip;
+            $this->ip = $registry->get('request')->getRemoteIP();
+            if (!$this->ip) {
+                $user = User::find($this->userId);
+                if ($user) {
+                    $this->ip = $user->ip;
+                }
             }
         }
         elseif ( $this->registry->get('customer') instanceof $customerClassName)
@@ -102,9 +110,14 @@ class UserResolver
             $this->userObject = $customer;
             $this->userId = $this->userObject->getId();
             $this->userName = $this->userObject->getFirstName().' '.$this->userObject->getLastName();
-            $customer = Customer::find($this->userId);
-            if ($customer) {
-                $this->ip = $customer->ip;
+            $this->actoronbehalf = (int) Registry::session()->data['actoronbehalf'];
+
+            $this->ip = $registry->get('request')->getRemoteIP();
+            if (!$this->ip) {
+                $customer = Customer::find($this->userId);
+                if ($customer) {
+                    $this->ip = $customer->ip;
+                }
             }
         }else{
             //TODO: add API-user
@@ -157,4 +170,14 @@ class UserResolver
     {
         return $this->ip;
     }
+
+    /**
+     * @return int
+     */
+    public function getActoronbehalf()
+    {
+        return $this->actoronbehalf;
+    }
+
+
 }

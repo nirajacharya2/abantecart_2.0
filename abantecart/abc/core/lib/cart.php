@@ -25,6 +25,8 @@ use abc\core\engine\ALanguage;
 use abc\core\engine\contracts\AttributeInterface;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
+use abc\models\catalog\Product;
+use abc\models\order\OrderProduct;
 use H;
 
 /**
@@ -171,7 +173,6 @@ class ACart  extends ALibBase
 
         $product_data = [];
         //process data in the cart session per each product in the cart
-
         foreach ($this->cust_data['cart'] as $key => $data) {
             if ($key == 'virtual') {
                 continue;
@@ -189,23 +190,35 @@ class ACart  extends ALibBase
             $custom_price = ($this->conciergeMode && isset($data['custom_price']))
                             ? $data['custom_price']
                             : null;
+            $product = Product::find($product_id);
+            $productDetails = [];
+            if($product) {
+                $productDetails = $this->buildProductDetails($product_id, $quantity, $options, $custom_price);
+            }
+            //When use conciergeMode and product already deleted from database
+            elseif($this->conciergeMode && $data['order_product_id']){
+                $productDetails = $this->buildProductDetailsByOrderProduct(
+                                                                    $data['order_product_id'],
+                                                                    $quantity,
+                                                                    $custom_price
+                );
+            }
 
-            $product_result = $this->buildProductDetails($product_id, $quantity, $options, $custom_price);
-            if (count($product_result)) {
-                $product_data[$key] = $product_result;
+            if (count($productDetails)) {
+                $product_data[$key] = $productDetails;
                 $product_data[$key]['key'] = $key;
 
                 //apply min and max for quantity once we have product details.
-                if ($quantity < $product_result['minimum']) {
+                if ($quantity < $productDetails['minimum']) {
                     $this->language->load('checkout/cart', 'silent');
                     $this->cust_data['error'] = $this->language->get('error_quantity_minimum');
-                    $this->update($key, $product_result['minimum']);
+                    $this->update($key, $productDetails['minimum']);
                 }
-                if ($product_result['maximum'] > 0) {
+                if ($productDetails['maximum'] > 0) {
                     $this->language->load('checkout/cart', 'silent');
-                    if ($quantity > $product_result['maximum']) {
+                    if ($quantity > $productDetails['maximum']) {
                         $this->cust_data['error'] = $this->language->get('error_quantity_maximum');
-                        $this->update($key, $product_result['maximum']);
+                        $this->update($key, $productDetails['maximum']);
                     }
                 }
             } else {
@@ -274,12 +287,12 @@ class ACart  extends ALibBase
 
         $elements_with_options = HtmlElementFactory::getElementsWithOptions();
 
-        $product_query = $sf_product_mdl->getProductDataForCart($product_id);
-        if (count($product_query) <= 0 || $product_query['call_to_order']) {
+        $productInfo = $sf_product_mdl->getProductDataForCart($product_id);
+        if (count($productInfo) <= 0 || $productInfo['call_to_order']) {
             return [];
         }
 
-        $stock_checkout = $product_query['stock_checkout'];
+        $stock_checkout = $productInfo['stock_checkout'];
         if (!H::has_value($stock_checkout)) {
             $stock_checkout = $this->config->get('config_stock_checkout');
         }
@@ -414,7 +427,7 @@ class ACart  extends ALibBase
             }
             //Still no special price, use regular price
             if (!$price) {
-                $price = $product_query['price'];
+                $price = $productInfo['price'];
             }
 
             //Need to round price after discounts and specials
@@ -443,7 +456,8 @@ class ACart  extends ALibBase
         if($this->cust_data['cart']) {
             foreach($this->cust_data['cart'] as $key => $cart_product){
                 list($pId,) = explode(':',$key);
-                if($product_id != $pId || $key == $product_id.':'.md5(serialize($options))){
+                $uuid = ($options ? serialize($options) : '').$custom_price;
+                if($product_id != $pId || $key == $product_id.':'.md5($uuid)){
                     continue;
                 }
                 if(!$op_stock_trackable){
@@ -454,9 +468,9 @@ class ACart  extends ALibBase
 
         //check if we need to check main product stock. Do only if no stock trackable options selected
         if ((!$options || !$op_stock_trackable)
-            && $product_query['subtract']
-            && $product_query['quantity'] < $common_quantity
-            && !$product_query['stock_checkout']
+            && $productInfo['subtract']
+            && $productInfo['quantity'] < $common_quantity
+            && !$productInfo['stock_checkout']
         ) {
             $stock = false;
         }
@@ -471,37 +485,86 @@ class ACart  extends ALibBase
             }
         }
         if (!$SKUs) {
-            $SKUs = [$product_query['sku']];
+            $SKUs = [$productInfo['sku']];
         }
 
-        $result = [
-            'product_id'         => $product_query['product_id'],
-            'name'               => $product_query['name'],
-            'model'              => $product_query['model'],
-            'shipping'           => $product_query['shipping'],
-            'option'             => $option_data,
-            'download'           => $download_data,
-            'quantity'           => $quantity,
-            'inventory_quantity' => ($product_query['subtract']
-                ? (int)$product_query['quantity']
-                : 1000000),
-            'minimum'            => $product_query['minimum'],
-            'maximum'            => $product_query['maximum'],
-            'stock'              => $stock,
-            'price'              => $final_price,
-            'total'              => $final_price * $quantity,
-            'tax_class_id'       => $product_query['tax_class_id'],
-            'weight'             => $product_query['weight'],
-            'weight_class'       => $product_query['weight_class'],
-            'length'             => $product_query['length'],
-            'width'              => $product_query['width'],
-            'height'             => $product_query['height'],
-            'length_class'       => $product_query['length_class'],
-            'ship_individually'  => $product_query['ship_individually'],
-            'shipping_price'     => $product_query['shipping_price'],
-            'free_shipping'      => $product_query['free_shipping'],
-            'sku'                => implode(", ", $SKUs),
-        ];
+        $result = $productInfo;
+
+        $result['option']             = $option_data;
+        $result['download']           = $download_data;
+        $result['inventory_quantity'] =
+                                    $productInfo['subtract']
+                                    ? (int)$productInfo['quantity']
+                                    : 1000000;
+
+        $result['quantity']           = $quantity;
+        $result['stock']              = $stock;
+        $result['price']              = $final_price;
+        $result['total']              = $final_price * $quantity;
+        $result['sku']                = implode(", ", $SKUs);
+
+        return $result;
+    }
+
+    /**
+     * @param int $order_product_id
+     * @param int $quantity
+     * @param float|null $custom_price
+     *
+     * @return array
+     * @throws AException
+     */
+    public function buildProductDetailsByOrderProduct(
+        int $order_product_id,
+        int $quantity = 0,
+        float $custom_price = null
+    ){
+        if(!$this->conciergeMode){
+            throw new AException('Method '.__FUNCTION__.' can be called only in Concierge Mode of cart!');
+        }
+
+        if (!H::has_value($order_product_id) || !is_numeric($order_product_id) || $quantity == 0) {
+            return [];
+        }
+
+        $orderProduct = OrderProduct::with('order_downloads', 'order_options')->find($order_product_id);
+        if(!$orderProduct){
+            return [];
+        }
+        $productDetails = $orderProduct->toArray();
+        $option_data = $productDetails['order_options'];
+        $download_data = $productDetails['order_downloads'];
+        unset(
+            $productDetails['order_options'],
+            $productDetails['order_downloads']
+        );
+
+        $custom_price = $custom_price ?? $productDetails['price'];
+        $final_price = $custom_price ?? $orderProduct->price;
+
+        $options = [];
+        foreach($option_data as $row){
+            $options[ $row['product_option_id'] ][] = $row['product_option_value_id'];
+        }
+
+
+        // group sku for each options if presents
+        $SKUs = [];
+        $sku = array_column($option_data, 'sku');
+        foreach ($sku as $sk) {
+            $sk = trim($sk);
+            if ($sk) {
+                $SKUs[] = $sk;
+            }
+        }
+
+        $result = $productDetails;
+        $result['option'] = $option_data;
+        $result['download'] = $download_data;
+        $result['quantity'] = $quantity;
+        $result['price'] = $final_price;
+        $result['total'] = $final_price * $quantity;
+        $result['sku'] = implode(", ", $SKUs);
 
         return $result;
     }
@@ -510,21 +573,21 @@ class ACart  extends ALibBase
      * @param int $product_id
      * @param int $qty
      * @param array $options
-     *
      * @param null $custom_price
-     *
+     * @param null $order_product_id
      * @return string
      * @throws AException
      * @throws \ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function add($product_id, $qty = 1, $options = [], $custom_price = null)
+    public function add($product_id, $qty = 1, $options = [], $custom_price = null, $order_product_id = null)
     {
         $product_id = (int)$product_id;
-        if (!$options) {
+        $uuid = ($options ? serialize($options) : '').$custom_price;
+        if (!$uuid) {
             $key = (string)$product_id;
         } else {
-            $key = $product_id.':'.md5(serialize($options));
+            $key = $product_id.':'.md5($uuid);
         }
 
         if ((int)$qty && ((int)$qty > 0)) {
@@ -535,9 +598,15 @@ class ACart  extends ALibBase
             }
             //TODO Add validation for correct options for the product and add error return or more stable behaviour
             $this->cust_data['cart'][$key]['options'] = $options;
-            //allow custom price in conciergeMode
-            if($this->conciergeMode && $custom_price !== null) {
-                $this->cust_data['cart'][$key]['custom_price'] = (float)$custom_price;
+            if($this->conciergeMode) {
+                if ($order_product_id) {
+                    $this->cust_data['cart'][$key]['order_product_id'] = $order_product_id;
+                }
+
+                //allow custom price in conciergeMode
+                if ($custom_price !== null) {
+                    $this->cust_data['cart'][$key]['custom_price'] = (float)$custom_price;
+                }
             }
         }
 
@@ -559,7 +628,6 @@ class ACart  extends ALibBase
      */
     public function addVirtual($key, $data)
     {
-
         if (!H::has_value($data)) {
             return false;
         }

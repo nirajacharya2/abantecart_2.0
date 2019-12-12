@@ -188,19 +188,45 @@ class ModelToolImportProcess extends Model
      */
     public function process_products_record($task_id, $data, $settings)
     {
-        $this->task_id = $task_id;
-        $language_id = $settings['language_id']
-            ? $settings['language_id']
-            : $this->language->getContentLanguageID();
-        $store_id = $settings['store_id']
-            ? (int)$settings['store_id']
-            : (int)$this->session->data['current_store_id'];
-        $this->load->model('catalog/product');
-        $log_classname = ABC::getFullClassName('ALog');
-        if ($log_classname) {
-            $this->imp_log = new $log_classname(['app' => "products_import_{$task_id}.txt"]);
+        $this->db->beginTransaction();
+        try {
+            $this->task_id = $task_id;
+            $language_id = $settings['language_id']
+                ? $settings['language_id']
+                : $this->language->getContentLanguageID();
+            $store_id = $settings['store_id']
+                ? (int)$settings['store_id']
+                : (int)$this->session->data['current_store_id'];
+            $this->load->model('catalog/product');
+            $log_classname = ABC::getFullClassName('ALog');
+            if ($log_classname) {
+                $this->imp_log = new $log_classname(['app' => "products_import_{$task_id}.txt"]);
+            }
+
+            $this->data['product_data'] = $data;
+            $this->data['settings'] = $settings;
+
+            $this->errors = [];
+
+            //allow to change list from hooks
+            $this->extensions->hk_ProcessData($this, __FUNCTION__);
+
+            $result = false;
+            if (empty($this->errors)) {
+                $result = $this->addUpdateProduct($this->data['product_data'], $this->data['settings'], $language_id, $store_id);
+            } else {
+                foreach ($this->errors as $error) {
+                    $this->toLog($error);
+                    }
+            }
+
+            $this->db->commit();
+            return $result;
+        } catch (\Exception $e) {
+            $this->db->rollback();
+            $this->toLog($e->getMessage());
+            return false;
         }
-        return $this->addUpdateProduct($data, $settings, $language_id, $store_id);
     }
 
     /**
@@ -261,87 +287,87 @@ class ModelToolImportProcess extends Model
      */
     protected function addUpdateProduct($record, $settings, $language_id, $store_id)
     {
-        $status = false;
-        $record = array_map('trim', $record);
+            $status = false;
+            $record = array_map('trim', $record);
 
-        //data mapping
-        $data = $this->buildDataMap(
-            $record,
-            $settings['import_col'],
-            $settings['products_fields'],
-            $settings['split_col']
-        );
+            //data mapping
+            $data = $this->buildDataMap(
+                $record,
+                $settings['import_col'],
+                $settings['products_fields'],
+                $settings['split_col']
+            );
 
-        if (empty($data)) {
-            $this->toLog("Error: Unable to build products import data map.");
-            return false;
-        }
-        $product = $this->filterArray($data['products']);
-        $product_desc = $this->filterArray($data['product_descriptions']);
-        $manufacturers = $this->filterArray($data['manufacturers']);
+            if (empty($data)) {
+                $this->toLog("Error: Unable to build products import data map.");
+                return false;
+            }
+            $product = $this->filterArray($data['products']);
+            $product_desc = $this->filterArray($data['product_descriptions']);
+            $manufacturers = $this->filterArray($data['manufacturers']);
 
-        $product_data = $product;
+            $product_data = $product;
 
-        // import brand if needed
-        $product_data['manufacturer_id'] = 0;
-        if ($manufacturers['manufacturer']) {
-            $product_data['manufacturer_id'] = $this->processManufacturer($manufacturers['manufacturer'], 0, $store_id);
-        }
+            // import brand if needed
+            $product_data['manufacturer_id'] = 0;
+            if ($manufacturers['manufacturer']) {
+                $product_data['manufacturer_id'] = $this->processManufacturer($manufacturers['manufacturer'], 0, $store_id);
+            }
 
-        //check if row is complete and uniform
-        if (!$product_desc['name'] && !$product['sku'] && !$product['model']) {
-            $this->toLog('Error: Record is not complete or missing required data. Skipping!');
-            return false;
-        }
+            //check if row is complete and uniform
+            if (!$product_desc['name'] && !$product['sku'] && !$product['model']) {
+                $this->toLog('Error: Record is not complete or missing required data. Skipping!');
+                return false;
+            }
 
-        $this->toLog("Processing record for product {$product_desc['name']} {$product['sku']} {$product['model']}.");
+            $this->toLog("Processing record for product {$product_desc['name']} {$product['sku']} {$product['model']}.");
 
-        //detect if we update or create new product based on update settings
-        $new_product = true;
-        $product_id = 0;
-        if ($settings['update_col']) {
-            $unique_field_index = key($settings['update_col']);
-            if (is_numeric($unique_field_index)) {
-                $unique_field = $settings['products_fields'][$unique_field_index];
-                $lookup_value = $this->getValueFromDataMap(
-                    $unique_field,
-                    $record,
-                    $settings['products_fields'],
-                    $settings['import_col']
-                );
-                $product_id = $this->getProductByField($unique_field, $lookup_value, $language_id, $store_id);
-                if ($product_id) {
-                    //we have product, update
-                    $new_product = false;
+            //detect if we update or create new product based on update settings
+            $new_product = true;
+            $product_id = 0;
+            if ($settings['update_col']) {
+                $unique_field_index = key($settings['update_col']);
+                if (is_numeric($unique_field_index)) {
+                    $unique_field = $settings['products_fields'][$unique_field_index];
+                    $lookup_value = $this->getValueFromDataMap(
+                        $unique_field,
+                        $record,
+                        $settings['products_fields'],
+                        $settings['import_col']
+                    );
+                    $product_id = $this->getProductByField($unique_field, $lookup_value, $language_id, $store_id);
+                    if ($product_id) {
+                        //we have product, update
+                        $new_product = false;
+                    }
                 }
             }
-        }
 
-        $this->load->model('catalog/product');
-        if ($new_product) {
-            $product_data['product_description'] = array_merge($product_desc, ['language_id' => $language_id]);
-            //apply default settings for new products only
-            $default_arr = [
-                'status'          => 1,
-                'subtract'        => 1,
-                'free_shipping'   => 0,
-                'shipping'        => 1,
-                'call_to_order'   => 0,
-                'sort_order'      => 0,
-                'weight_class_id' => 5,
-                'length_class_id' => 3,
-            ];
-            foreach ($default_arr as $key => $val) {
-                $product_data[$key] = isset($product_data[$key]) ? $product_data[$key] : $val;
-            }
+            $this->load->model('catalog/product');
+            if ($new_product) {
+                $product_data['product_description'] = array_merge($product_desc, ['language_id' => $language_id]);
+                //apply default settings for new products only
+                $default_arr = [
+                    'status'          => 1,
+                    'subtract'        => 1,
+                    'free_shipping'   => 0,
+                    'shipping'        => 1,
+                    'call_to_order'   => 0,
+                    'sort_order'      => 0,
+                    'weight_class_id' => 5,
+                    'length_class_id' => 3,
+                ];
+                foreach ($default_arr as $key => $val) {
+                    $product_data[$key] = isset($product_data[$key]) ? $product_data[$key] : $val;
+                }
 
-            $product_id = Product::createProduct($product_data);
-            if ($product_id) {
-                $this->toLog("Created product '".$product_desc['name']."' with ID ".$product_id);
-                $status = true;
-            } else {
-                $this->toLog("Error: Failed to create product '".$product_desc['name']."'.");
-            }
+                $product_id = Product::createProduct($product_data);
+                if ($product_id) {
+                    $this->toLog("Created product '".$product_desc['name']."' with ID ".$product_id);
+                    $status = true;
+                } else {
+                    $this->toLog("Error: Failed to create product '".$product_desc['name']."'.");
+                }
 
         } else {
             //flat array for description (specific for update)
@@ -352,36 +378,36 @@ class ModelToolImportProcess extends Model
             $status = true;
         }
 
-        // import category if needed
-        $categories = [];
-        if ($data['categories'] && $data['categories']['category']) {
-           $categories = $this->processCategories($data['categories'], $language_id, $store_id);
-        }
+            // import category if needed
+            $categories = [];
+            if ($data['categories'] && $data['categories']['category']) {
+                $categories = $this->processCategories($data['categories'], $language_id, $store_id);
+            }
 
-        $product_links = [
-            'product_store' => [$store_id],
-        ];
+            $product_links = [
+                'product_store' => [$store_id],
+            ];
 
-        $product_links['product_category'] = [];
-        if (count($categories)) {
-            $product_links['product_category'] = array_column($categories, 'category_id');
-        }
-        Product::updateProductLinks($product_id, $product_links);
+            $product_links['product_category'] = [];
+            if (count($categories)) {
+                $product_links['product_category'] = array_column($categories, 'category_id');
+            }
+            Product::updateProductLinks($product_id, $product_links);
 
-        //process images
-        $this->migrateImages($data['images'], 'products', $product_id, $product_desc['name'], $language_id);
+            //process images
+            $this->migrateImages($data['images'], 'products', $product_id, $product_desc['name'], $language_id);
 
-        //process options
-        $this->addUpdateOptions(
-            $product_id,
-            $data['product_options'],
-            $product_data['weight_class_id']
-        );
+            //process options
+            $this->addUpdateOptions(
+                $product_id,
+                $data['product_options'],
+                $product_data['weight_class_id']
+            );
 
-        if($status){
-            //call event
-            H::event(__CLASS__.'@'.__FUNCTION__, [new ABaseEvent($this->task_id, $product_id, $data, $record)]);
-        }
+            if ($status) {
+                //call event
+                H::event(__CLASS__.'@'.__FUNCTION__, [new ABaseEvent($this->task_id, $product_id, $data, $record)]);
+            }
 
         return $status;
     }

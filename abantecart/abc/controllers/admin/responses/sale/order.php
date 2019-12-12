@@ -265,14 +265,15 @@ class ControllerResponsesSaleOrder extends AController
 
         //initialize existing order as new
         $this->checkout = $this->initCheckout($orderData, $customer_data);
-
+        $cart = $this->checkout->getCart();
         foreach ($this->request->post['product'] as $order_product_id => $order_product) {
-            $this->checkout->getCart()->add(
-                $order_product['product_id'],
-                $order_product['quantity'],
-                $order_product['option'],
-                H::preformatFloat($order_product['price'])
-            );
+            $cart->add(
+                            $order_product['product_id'],
+                            $order_product['quantity'],
+                            $order_product['option'],
+                            H::preformatFloat($order_product['price']),
+                            $order_product['order_product_id']
+                        );
         }
     }
 

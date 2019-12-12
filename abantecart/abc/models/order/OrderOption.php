@@ -20,6 +20,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property float $price
  * @property string $prefix
  * @property string $settings
+ * @property float $weight
+ * @property string $weight_type - "%" or 3 letter weight unit iso code
  *
  * @property ProductOptionValue $product_option_value
  *
@@ -41,6 +43,7 @@ class OrderOption extends BaseModel
         'product_option_value_id' => 'int',
         'price'                   => 'float',
         'settings'                => 'serialized',
+        'weight'                  => 'float'
     ];
 
     protected $dates = [
@@ -59,6 +62,8 @@ class OrderOption extends BaseModel
         'price',
         'prefix',
         'settings',
+        'weight',
+        'weight_type'
     ];
 
     protected $rules = [
@@ -164,6 +169,28 @@ class OrderOption extends BaseModel
             'messages' => [
                 '*' => [
                     'default_text' => ':attribute must be string :size characters length!',
+                ],
+            ],
+        ],
+        'weight' => [
+            'checks'   => [
+                'numeric',
+                'nullable'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+        'weight_type' => [
+            'checks'   => [
+                'string',
+                'max:3',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be maximum string 3 characters length!',
                 ],
             ],
         ],

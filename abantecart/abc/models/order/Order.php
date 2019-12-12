@@ -25,6 +25,7 @@ use H;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Collection;
 
 /**
  * Class Order
@@ -1079,6 +1080,7 @@ class Order extends BaseModel
      */
     public static function getOrderHistories($order_id)
     {
+        /** @var QueryBuilder $query */
         $query = OrderHistory::select(
             [
                 'order_history.*',
@@ -1197,7 +1199,7 @@ class Order extends BaseModel
             }
 
             if ($data['order_totals']['total']['value'] !== null) {
-                $data['total'] = $data['order_totals']['total']['value'];
+                $data['total'] = (float)$data['order_totals']['total']['value'];
                 $data['total_difference'] = $order->total - $data['total'];
             }
 
@@ -1214,9 +1216,18 @@ class Order extends BaseModel
             $oLanguage = new ALanguage(Registry::getInstance(), $language->code);
             $oLanguage->load($language->directory);
 
-            $old_language = Product::getCurrentLanguageID();
-            Product::setCurrentLanguageID($orderInfo['language_id']);
-            static::editOrderProducts($orderInfo, $data, $oLanguage);
+            if($data['product']) {
+                $old_language = Product::getCurrentLanguageID();
+                Product::setCurrentLanguageID($orderInfo['language_id']);
+                static::editOrderProducts($orderInfo, $data, $oLanguage);
+            }
+
+            if (!$data['order_totals']) {
+                H::event('abc\models\admin\order@update', [new ABaseEvent($order_id, $data)]);
+                Registry::db()->commit();
+                return true;
+            }
+
             //remove previous totals
             OrderTotal::where('order_id', '=', $order_id)->forceDelete();
             foreach ($data['order_totals'] as $orderTotal) {
@@ -1416,18 +1427,15 @@ class Order extends BaseModel
                         foreach ($values as $value) {
                             if(!$value){ continue;}
                             $arr_key = $opt_id.'_'.$value;
-                            $orderOption = new OrderOption(
-                                [
-                                    'order_id'                => $order_id,
-                                    'order_product_id'        => $order_product_id,
-                                    'product_option_value_id' => $value,
-                                    'name'                    => $option_value_info[$arr_key]['option_name'],
-                                    'sku'                     => $option_value_info[$arr_key]['sku'],
-                                    'value'                   => $option_value_info[$arr_key]['option_value_name'],
-                                    'price'                   => $option_value_info[$arr_key]['price'],
-                                    'prefix'                  => $option_value_info[$arr_key]['prefix'],
-                                ]
-                            );
+                            $optionData = $option_value_info[$arr_key];
+                            unset($optionData['date_added'], $optionData['date_modified']);
+                            $optionData['order_id'] = $order_id;
+                            $optionData['order_product_id'] = $order_product_id;
+                            $optionData['product_option_value_id'] = $value;
+                            $optionData['name'] = $option_value_info[$arr_key]['option_name'];
+                            $optionData['value'] = $option_value_info[$arr_key]['option_value_name'];
+
+                            $orderOption = new OrderOption( $optionData );
                             $orderOption->save();
 
                             if ($option_value_info[$arr_key]['subtract']) {

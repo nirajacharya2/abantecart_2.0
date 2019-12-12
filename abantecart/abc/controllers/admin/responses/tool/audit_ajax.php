@@ -31,6 +31,18 @@ class ControllerResponsesToolAuditAjax extends AController
             return false;
         }
 
+        if (isset($this->request->get['sortDesc']) && is_array($this->request->get['sortDesc'])) {
+            $this->request->get['sortDesc'] = $this->request->get['sortDesc'][0];
+        } else {
+            $this->request->get['sortDesc'] = 'true';
+        }
+
+        if (isset($this->request->get['sortBy']) && is_array($this->request->get['sortBy'])) {
+            $this->request->get['sortBy'] = $this->request->get['sortBy'][0];
+        } else {
+            $this->request->get['sortBy'] = 'date_added';
+        }
+
         if (isset($this->request->get['getDetail'])) {
             $this->getDetail();
             return;

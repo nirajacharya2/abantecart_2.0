@@ -73,7 +73,6 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
             $channel->queue_bind('audit_log', 'exch_main');
             $channel->queue_bind('audit_log_backup', 'exch_backup');
 
-
             $msg = new AMQPMessage(json_encode($data));
             $channel->basic_publish($msg, '', $conf['QUEUE']);
             $channel->close();
@@ -183,11 +182,19 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
             $item = json_encode($item);
             $filter[] = $item;
         }
+
+        if (is_array($request['sortBy'])) {
+            $request['sortBy'] = $request['sortBy'][0];
+        }
+        if (is_array($request['sortDesc'])) {
+            $request['sortDesc'] = $request['sortDesc'][0];
+        }
+
         $result = [
             'limit'  => (int)$request['rowsPerPage'],
             'offset' => ((int)$request['rowsPerPage'] * (int)$request['page'] - (int)$request['rowsPerPage']) > 0 ? (int)$request['rowsPerPage'] * (int)$request['page'] - (int)$request['rowsPerPage'] : 0,
             'sort'   => $allowSortBy[$request['sortBy']] ?: '',
-            'order'  => $request['descending'] == 'true' ? 'DESC' : 'ASC',
+            'order'  => $request['sortDesc'] == 'true' ? 'DESC' : 'ASC',
         ];
         if (!empty($request['date_from'])) {
             $result['dateFrom'] = $request['date_from'];
@@ -218,6 +225,8 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
                 'alias_name'           => '',
                 'main_auditable_model' => $event['entity']['name'],
                 'main_auditable_id'    => $event['entity']['id'],
+                'description'          => $event['description'],
+                'ip'                   => $event['request']['ip'],
                 'event'                => $event['entity']['group'],
                 'date_added'           => date(Registry::language()->get('date_format_long'), strtotime($event['request']['timestamp'])),
             ];

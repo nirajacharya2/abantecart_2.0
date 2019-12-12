@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*------------------------------------------------------------------------------
   $Id$
 
@@ -47,6 +47,10 @@ class ControllerPagesAccountLogout extends AController {
             unset($this->session->data['used_balance_full']);
             unset($this->session->data['csrftoken']);
 
+            if (isset($this->session->data['actoronbehalf'])) {
+                unset($this->session->data['actoronbehalf']);
+            }
+
 		    if($this->config->get('config_tax_store')){
 				$country_id = $this->config->get('config_country_id');
 				$zone_id = $this->config->get('config_zone_id');
@@ -54,32 +58,32 @@ class ControllerPagesAccountLogout extends AController {
 				$country_id = $zone_id = 0;
 			}
 			$this->tax->setZone( $country_id, $zone_id );
-			
+
       		abc_redirect($this->html->getSecureURL('account/logout'));
     	}
- 
+
 		$this->document->setTitle( $this->language->get('heading_title') );
-      	
+
 		$this->document->resetBreadcrumbs();
 
-      	$this->document->addBreadcrumb( array ( 
+      	$this->document->addBreadcrumb( array (
         	'href'      => $this->html->getHomeURL(),
         	'text'      => $this->language->get('text_home'),
         	'separator' => FALSE
       	 ));
-      	
-		$this->document->addBreadcrumb( array ( 
+
+		$this->document->addBreadcrumb( array (
         	'href'      => $this->html->getSecureURL('account/account'),
         	'text'      => $this->language->get('text_account'),
         	'separator' => $this->language->get('text_separator')
       	 ));
-		
-      	$this->document->addBreadcrumb( array ( 
+
+      	$this->document->addBreadcrumb( array (
         	'href'      => $this->html->getSecureURL('account/logout'),
         	'text'      => $this->language->get('text_logout'),
         	'separator' => $this->language->get('text_separator')
-      	 ));	
-		
+      	 ));
+
     	$this->view->assign('continue', $this->html->getHomeURL() );
 		$continue = $this->html->buildElement( array ('type' => 'button',
 		                                               'name' => 'continue_button',
