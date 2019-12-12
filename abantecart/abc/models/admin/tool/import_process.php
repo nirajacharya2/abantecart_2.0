@@ -204,12 +204,18 @@ class ModelToolImportProcess extends Model
             $this->data['product_data'] = $data;
             $this->data['settings'] = $settings;
 
+            $this->errors = [];
+
             //allow to change list from hooks
             $this->extensions->hk_ProcessData($this, __FUNCTION__);
 
             $result = false;
             if (empty($this->errors)) {
                 $result = $this->addUpdateProduct($this->data['product_data'], $this->data['settings'], $language_id, $store_id);
+            } else {
+                foreach ($this->errors as $error) {
+                    $this->toLog($error);
+                    }
             }
 
             $this->db->commit();
