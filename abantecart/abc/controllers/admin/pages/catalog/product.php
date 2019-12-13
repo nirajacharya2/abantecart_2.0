@@ -589,6 +589,9 @@ class ControllerPagesCatalogProduct extends AController
         if (isset($this->request->get['product_id'])) {
             $product_id = $this->request->get['product_id'];
             $product_info = $this->model_catalog_product->getProduct($product_id);
+            if(!$product_info){
+                abc_redirect($this->html->getSecureURL('catalog/product'));
+            }
             $product_info['featured'] = $product_info['featured'] ? 1 : 0;
             $product_info['has_track_options'] = $this->model_catalog_product->hasTrackOptions($product_id);
             if ($product_info['has_track_options']) {
