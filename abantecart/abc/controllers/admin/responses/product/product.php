@@ -1586,9 +1586,6 @@ class ControllerResponsesProductProduct extends AController
         $this->data['product_info'] = $product_info;
         if(
             !$product_info
-            || !$product_info['status']
-            || $product_info['call_to_order']
-            || H::dateISO2Int($product_info['date_available']) > time()
         ){
             $this->data['editable'] = false;
         }else{
