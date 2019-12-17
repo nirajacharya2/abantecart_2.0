@@ -586,6 +586,9 @@ class ControllerPagesCatalogProduct extends AController
         $content_language_id = $this->language->getContentLanguageID();
 
         $product_info = Product::getProductInfo($product_id);
+        if(!$product_info){
+           abc_redirect($this->html->getSecureURL('catalog/product'));
+        }
 
         if ($this->request->post) {
             $this->data = array_merge($this->data, $this->request->post);

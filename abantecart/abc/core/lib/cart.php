@@ -288,7 +288,8 @@ class ACart  extends ALibBase
         $elements_with_options = HtmlElementFactory::getElementsWithOptions();
 
         $productInfo = $sf_product_mdl->getProductDataForCart($product_id);
-        if (count($productInfo) <= 0 || $productInfo['call_to_order']) {
+        if ( count($productInfo) <= 0 || (!$this->conciergeMode && $productInfo['call_to_order'])
+        ){
             return [];
         }
 
