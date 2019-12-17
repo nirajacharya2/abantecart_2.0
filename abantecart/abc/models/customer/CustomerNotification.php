@@ -47,6 +47,8 @@ class CustomerNotification extends BaseModel
         'date_modified',
     ];
 
+    protected $touches = ['customer'];
+
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id');

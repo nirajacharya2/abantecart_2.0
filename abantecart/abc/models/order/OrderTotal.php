@@ -16,8 +16,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $sort_order
  * @property string $type
  * @property string $key
+ * @property \Carbon\Carbon $date_added
+ * @property \Carbon\Carbon $date_modified
  *
  * @property Order $order
+ *
+ * @method static OrderTotal find(int $order_total_id) OrderTotal
  *
  * @package abc\models
  */
@@ -26,10 +30,11 @@ class OrderTotal extends BaseModel
     use SoftDeletes;
 
     protected $primaryKey = 'order_total_id';
-    public $timestamps = false;
 
     protected $mainClassName = Order::class;
     protected $mainClassKey = 'order_id';
+
+    protected $touches = ['order'];
 
     protected $dates = [
         'date_added',

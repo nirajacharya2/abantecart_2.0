@@ -22,8 +22,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $settings
  * @property float $weight
  * @property string $weight_type - "%" or 3 letter weight unit iso code
+ * @property \Carbon\Carbon $date_added
+ * @property \Carbon\Carbon $date_modified
  *
  * @property ProductOptionValue $product_option_value
+ *
+ * @method static OrderOption find(int $order_option_id) OrderOption
  *
  * @package abc\models
  */
@@ -32,9 +36,9 @@ class OrderOption extends BaseModel
     use SoftDeletes;
 
     protected $primaryKey = 'order_option_id';
-    public $timestamps = false;
     protected $mainClassName = Order::class;
     protected $mainClassKey = 'order_id';
+    protected $touches = ['order_product'];
 
     protected $casts = [
         'order_id'                => 'int',

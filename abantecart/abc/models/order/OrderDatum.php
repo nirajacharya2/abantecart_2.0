@@ -32,6 +32,8 @@ class OrderDatum extends BaseModel
     protected $mainClassName = Order::class;
     protected $mainClassKey = 'order_id';
 
+    protected $touches = ['order'];
+
     protected $casts = [
         'order_id' => 'int',
         'type_id'  => 'int',

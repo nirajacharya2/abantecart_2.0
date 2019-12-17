@@ -19,11 +19,15 @@ use Illuminate\Validation\Rule;
  * @property int $order_status_id
  * @property string $status_text_id
  * @property int $display_status
+ * @property \Carbon\Carbon $date_added
+ * @property \Carbon\Carbon $date_modified
  *
  * @property Collection $order_histories
  * @property Collection $descriptions
  * @property OrderStatusDescription $description
  * @property Order $orders
+ *
+ * @method static OrderStatus find(int $order_status_id) OrderStatus
  *
  * @package abc\models
  */
