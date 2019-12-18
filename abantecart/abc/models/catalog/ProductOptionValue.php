@@ -25,6 +25,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $grouped_attribute_data
  * @property int $sort_order
  * @property int $default
+ * @property \Carbon\Carbon $date_added
+ * @property \Carbon\Carbon $date_modified
  *
  * @property ProductOption $product_option
  * @property Product $product
@@ -41,6 +43,8 @@ class ProductOptionValue extends BaseModel
     protected $cascadeDeletes = ['descriptions'];
 
     protected $primaryKey = 'product_option_value_id';
+
+    protected $touches = ['option'];
 
     /**
      * @var array

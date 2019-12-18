@@ -170,7 +170,8 @@ class ModelAuditListener
         }
 
         //if data still presents write log
-        if (!$newData && !$oldData) {
+        //exclude touches! (case when only date_modified updated)
+        if ((!$newData && !$oldData) || array_keys($newData) == [$modelObject::UPDATED_AT]) {
             return $this->output(
                 true,
                 'ModelAuditListener: Nothing to audit of model '.$modelClassName.'.'

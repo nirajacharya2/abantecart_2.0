@@ -43,10 +43,13 @@ use Illuminate\Validation\Rule;
  * @property int $required
  * @property string $regexp_pattern
  * @property string $settings
+ * @property \Carbon\Carbon $date_added
+ * @property \Carbon\Carbon $date_modified
+ *
  * @property ProductOptionValue $values
  * @property Product $product
- * @property \Illuminate\Database\Eloquent\Collection $product_option_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $product_option_values
+ * @property ProductOptionDescription $product_option_descriptions
+ * @property ProductOptionValue $product_option_values
  *
  * @method static ProductOption find(int $product_option_id) ProductOption
  * @method static ProductOption select(mixed $select) Builder
@@ -62,6 +65,8 @@ class ProductOption extends BaseModel
      * @var string
      */
     protected $primaryKey = 'product_option_id';
+
+    protected $touches = ['product'];
 
     /**
      * @var array

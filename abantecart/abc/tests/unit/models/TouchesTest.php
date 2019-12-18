@@ -2,6 +2,12 @@
 
 namespace abc\tests\unit;
 
+use abc\models\catalog\Category;
+use abc\models\catalog\Product;
+use abc\models\catalog\ProductOption;
+use abc\models\catalog\ProductOptionDescription;
+use abc\models\catalog\ProductOptionValue;
+use abc\models\catalog\ProductOptionValueDescription;
 use abc\models\customer\Address;
 use abc\models\customer\Customer;
 use abc\models\customer\CustomerNotification;
@@ -28,7 +34,7 @@ class TouchesTest extends ATestCase
         $customer = Customer::find($address->customer_id);
         $this->assertEquals($now, $customer->date_modified->timestamp);
 
-        sleep(1);
+        sleep(2);
         $now = time();
         CustomerTransaction::create(
             [
@@ -41,7 +47,7 @@ class TouchesTest extends ATestCase
         $customer = Customer::find($address->customer_id);
         $this->assertEquals($now, $customer->date_modified->timestamp);
 
-        sleep(1);
+        sleep(2);
         $now = time();
         CustomerNotification::create(
             [
@@ -66,7 +72,7 @@ class TouchesTest extends ATestCase
         $order = Order::find($orderOption->order_id);
         $this->assertEquals($now, $order->date_modified->timestamp);
 
-        sleep(1);
+        sleep(2);
         $now = time();
         OrderDatum::create(
             [
@@ -79,7 +85,7 @@ class TouchesTest extends ATestCase
         $this->assertEquals($now, $order->date_modified->timestamp);
 
         //order total
-        sleep(1);
+        sleep(2);
         $orderTotal = OrderTotal::where('order_id', '=', $orderOption->order_id)->first();
         $now = time();
         $orderTotal->touch();
@@ -87,13 +93,45 @@ class TouchesTest extends ATestCase
         $order = Order::find($orderOption->order_id);
         $this->assertEquals($now, $order->date_modified->timestamp);
 
-        sleep(1);
+        sleep(2);
         /** @var OrderStatusDescription $orderStatusDescription */
         $orderStatusDescription = OrderStatusDescription::first();
         $now = time();
         $orderStatusDescription->touch();
         $orderStatus = OrderStatus::find($orderStatusDescription->order_status_id);
         $this->assertEquals($now, $orderStatus->date_modified->timestamp);
+
+    }
+
+    public function testProductTouches()
+    {
+        /** @var ProductOptionValueDescription $optionValueDescription */
+        $optionValueDescription = ProductOptionValueDescription::first();
+        $now = time();
+        $optionValueDescription->touch();
+        $optionValue = ProductOptionValue::find($optionValueDescription->product_option_value_id);
+        $this->assertEquals($now, $optionValue->date_modified->timestamp);
+
+        $option = ProductOption::find($optionValue->product_option_id);
+        $this->assertEquals($now, $option->date_modified->timestamp);
+
+        $product = Product::with('categories')->find($optionValueDescription->product_id);
+        $this->assertEquals($now, $product->date_modified->timestamp);
+
+        $category = $product->categories->first();
+        $this->assertEquals($now, $category->date_modified->timestamp);
+
+        sleep(2);
+
+        $optionDescription = ProductOptionDescription::first();
+        $now = time();
+        $optionDescription->touch();
+
+        $option = ProductOption::find($optionDescription->product_option_id);
+        $this->assertEquals($now, $option->date_modified->timestamp);
+
+        $product = Product::with('categories')->find($optionDescription->product_id);
+        $this->assertEquals($now, $product->date_modified->timestamp);
 
     }
 }

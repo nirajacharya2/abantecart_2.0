@@ -48,6 +48,8 @@ class ProductOptionDescription extends BaseModel
         'language_id',
     ];
 
+    protected $touches = ['product_option'];
+
     protected $casts = [
         'product_option_id' => 'int',
         'language_id'       => 'int',

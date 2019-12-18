@@ -30,9 +30,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $product_id
  * @property string $name
  * @property string $grouped_attribute_names
+ * @property \Carbon\Carbon $date_added
+ * @property \Carbon\Carbon $date_modified
  *
  * @property Product $product
  * @property Language $language
+ *
+ * @method static ProductOptionValueDescription find(int $id) ProductOptionValueDescription
  *
  * @package abc\models
  */
@@ -46,6 +50,8 @@ class ProductOptionValueDescription extends BaseModel
         'language_id',
         'product_id',
     ];
+
+    protected $touches = ['product_option_value'];
 
     protected $casts = [
         'product_option_value_id' => 'int',
@@ -117,6 +123,11 @@ class ProductOptionValueDescription extends BaseModel
             ],
         ],
     ];
+
+    public function product_option_value()
+    {
+        return $this->belongsTo(ProductOptionValue::class, 'product_option_value_id');
+    }
 
     public function product()
     {
