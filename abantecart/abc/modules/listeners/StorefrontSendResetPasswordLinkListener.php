@@ -63,12 +63,12 @@ class StorefrontSendResetPasswordLinkListener
             //allow to change email data from extensions
             Registry::extensions()->hk_ProcessData($this, 'sf_password_reset_mail');
 
+
             $mail = new AMail(Registry::config());
             $mail->setTo($customer_info['email']);
             $mail->setFrom($store_info->store_main_email);
             $mail->setSender($store_info->store_name);
-            $mail->setSubject($subject);
-            $mail->setText(html_entity_decode($this->data['mail_plain_text'], ENT_QUOTES, ABC::env('APP_CHARSET')));
+            $mail->setTemplate('storefront_reset_password_link', $this->data);
             $mail->send();
         }
 
