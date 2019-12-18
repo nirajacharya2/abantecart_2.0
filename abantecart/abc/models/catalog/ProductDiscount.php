@@ -29,6 +29,8 @@ class ProductDiscount extends BaseModel
 
     protected $primaryKey = 'product_discount_id';
 
+    protected $touches = ['product'];
+
     protected $casts = [
         'product_id'        => 'int',
         'customer_group_id' => 'int',

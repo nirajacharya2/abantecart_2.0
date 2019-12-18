@@ -31,6 +31,8 @@ class ProductSpecial extends BaseModel
 
     protected $primaryKey = 'product_special_id';
 
+    protected $touches = ['product'];
+
     protected $casts = [
         'product_id'        => 'int',
         'customer_group_id' => 'int',

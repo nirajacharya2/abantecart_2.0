@@ -4,10 +4,13 @@ namespace abc\tests\unit;
 
 use abc\models\catalog\Category;
 use abc\models\catalog\Product;
+use abc\models\catalog\ProductDiscount;
 use abc\models\catalog\ProductOption;
 use abc\models\catalog\ProductOptionDescription;
 use abc\models\catalog\ProductOptionValue;
 use abc\models\catalog\ProductOptionValueDescription;
+use abc\models\catalog\ProductSpecial;
+use abc\models\catalog\ProductTag;
 use abc\models\customer\Address;
 use abc\models\customer\Customer;
 use abc\models\customer\CustomerNotification;
@@ -122,7 +125,7 @@ class TouchesTest extends ATestCase
         $this->assertEquals($now, $category->date_modified->timestamp);
 
         sleep(2);
-
+        /** @var ProductOptionDescription $optionDescription */
         $optionDescription = ProductOptionDescription::first();
         $now = time();
         $optionDescription->touch();
@@ -133,5 +136,36 @@ class TouchesTest extends ATestCase
         $product = Product::with('categories')->find($optionDescription->product_id);
         $this->assertEquals($now, $product->date_modified->timestamp);
 
+        sleep(2);
+        /** @var ProductTag $tag */
+        $tag = ProductTag::first();
+        $now = time();
+        $newTag = new ProductTag(
+            [
+                'product_id'  => $tag->product_id,
+                'language_id' => $tag->language_id,
+                'tag'         => $now,
+            ]
+        );
+        $newTag->save();
+        $product = Product::find($tag->product_id);
+        $this->assertEquals($now, $product->date_modified->timestamp);
+
+        sleep(2);
+        /** @var ProductSpecial $special */
+        $special = ProductSpecial::first();
+        $now = time();
+        $special->touch();
+        $product = Product::find($special->product_id);
+        $this->assertEquals($now, $product->date_modified->timestamp);
+        sleep(2);
+        /** @var ProductDiscount $discount */
+        $discount = ProductDiscount::first();
+        $now = time();
+        $discount->touch();
+        $product = Product::find($discount->product_id);
+        $this->assertEquals($now, $product->date_modified->timestamp);
+
     }
+
 }

@@ -22,6 +22,7 @@ class ProductTag extends BaseModel
     protected $primaryKey = 'id';
 
     public $timestamps = false;
+    protected $touches = ['product'];
     protected $primaryKeySet = [
         'product_id',
         'language_id',

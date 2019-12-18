@@ -28,6 +28,8 @@ class CategoryDescription extends BaseModel
     protected $mainClassName = Category::class;
     protected $mainClassKey = 'category_id';
 
+    protected $touches = ['category'];
+
     /**
      * @var string
      */

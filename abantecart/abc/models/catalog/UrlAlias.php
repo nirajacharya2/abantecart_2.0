@@ -108,16 +108,28 @@ class UrlAlias extends BaseModel
     public static function setProductKeyword(string $keyword, int $productId)
     {
         self::setKeyword($keyword, 'product_id', $productId);
+        $product = Product::find($productId);
+        if ($product) {
+            $product->touch();
+        }
     }
 
     public static function setCategoryKeyword(string $keyword, int $categoryId)
     {
         self::setKeyword($keyword, 'category_id', $categoryId);
+        $category = Category::find($categoryId);
+        if ($category) {
+            $category->touch();
+        }
     }
 
-    public static function setManufacturerKeyword(string $keyword, int $productId)
+    public static function setManufacturerKeyword(string $keyword, int $manufacturerId)
     {
-        self::setKeyword($keyword, 'manufacturer_id', $productId);
+        self::setKeyword($keyword, 'manufacturer_id', $manufacturerId);
+        $manufacturer = Manufacturer::find($manufacturerId);
+        if ($manufacturer) {
+            $manufacturer->touch();
+        }
     }
 
     /**
