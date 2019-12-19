@@ -40,29 +40,13 @@ class StorefrontSendResetPasswordLinkListener
         // send email to customer
         if ($customer_info && $customer_info['email']) {
 
-            if (ABC::env('IS_ADMIN')) {
-                //create new instance of language for case when model called from admin-side
-                $language = new ALanguage($this->registry, $this->language->getLanguageCode(), 0);
-                $language->load($language->language_details['filename']);
-                $language->load('mail/account_forgotten');
-            } else {
-                $this->registry->get('load')->language('mail/account_forgotten');
-                $language = $this->registry->get('language');
-           }
             $store_info = Setting::getStoreSettings($customer_info['store_id']);
-            $link = Registry::html()->getCatalogURL('account/forgotten/reset', '&rtoken='.$rtoken);
 
-            $this->data['mail_plain_text'] = sprintf($language->get('text_greeting'), $store_info->store_name)
-                ."\n\n"
-                .$language->get('text_password')
-                ."\n\n"
-                .$link;
-
-            $subject = sprintf($language->get('text_subject'), $store_info->store_name);
+            $this->data['store_name'] = $store_info->store_name;
+            $this->data['reset_link'] = Registry::html()->getCatalogURL('account/forgotten/reset', '&rtoken='.$rtoken);
 
             //allow to change email data from extensions
             Registry::extensions()->hk_ProcessData($this, 'sf_password_reset_mail');
-
 
             $mail = new AMail(Registry::config());
             $mail->setTo($customer_info['email']);
