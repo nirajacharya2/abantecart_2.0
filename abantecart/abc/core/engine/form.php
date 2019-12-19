@@ -690,11 +690,11 @@ class AForm
                 }
             }
 
-            //for captcha or recaptcha	
+            //for captcha or recaptcha
             if ($field['element_type'] == 'K' || $field['element_type'] == 'J') {
 
                 if ($this->config->get('config_recaptcha_secret_key')) {
-                    require_once ABC::env('DIR_VENDOR').ABC::env('DIRNAME_ASSETS').'google/recaptcha/src/autoload.php';
+                    require_once ABC::env('DIR_VENDOR').'google/recaptcha/src/autoload.php';
                     $recaptcha = new ReCaptcha($this->config->get('config_recaptcha_secret_key'));
                     $resp = $recaptcha->verify($data['g-recaptcha-response'], $this->request->getRemoteIP());
                     if (!$resp->isSuccess() && $resp->getErrorCodes()) {
