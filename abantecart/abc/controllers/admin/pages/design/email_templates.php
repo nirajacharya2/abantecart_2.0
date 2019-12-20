@@ -95,10 +95,10 @@ class ControllerPagesDesignEmailTemplates extends AController
 
         if ($this->request->is_POST() && $this->validate($this->request->post)) {
             try {
-               $emailTemplate = new EmailTemplate($this->request->post);
-               $emailTemplate->save();
+                $emailTemplate = new EmailTemplate($this->request->post);
+                $emailTemplate->save();
                 $this->session->data['success'] = $this->language->get('save_complete');
-            }  catch (\Exception $e) {
+            } catch (\Exception $e) {
                 $this->log->write($e->getMessage());
                 $this->session->data['warning'] = $this->language->get('save_error');
             }
@@ -142,7 +142,7 @@ class ControllerPagesDesignEmailTemplates extends AController
                 $emailTemplate->update($this->request->post);
                 $this->session->data['success'] = $this->language->get('save_complete');
                 abc_redirect($this->html->getSecureURL('design/email_templates/update', '&id='.$emailTemplate->id));
-            }  catch (\Exception $e) {
+            } catch (\Exception $e) {
                 $this->log->write($e->getMessage());
                 $this->session->data['warning'] = $this->language->get('save_error');
             }
@@ -188,7 +188,7 @@ class ControllerPagesDesignEmailTemplates extends AController
             ->where('status', '=', 1)
             ->get();
         $this->data['languages'] = [
-            0 => '-- Please Select --'
+            0 => '-- Please Select --',
         ];
         if ($languages) {
             foreach ($languages as $language) {
@@ -200,18 +200,17 @@ class ControllerPagesDesignEmailTemplates extends AController
             $emailTemplate = EmailTemplate::find((int)$this->request->get['id']);
             if ($emailTemplate) {
                 $emailTemplate = $emailTemplate->toArray();
-                foreach ($emailTemplate as $key=>$value) {
+                foreach ($emailTemplate as $key => $value) {
                     $this->data[$key] = $value;
                 }
             }
         }
 
         if ($this->request->is_POST()) {
-            foreach ($this->request->post as $key=>$value) {
+            foreach ($this->request->post as $key => $value) {
                 $this->data[$key] = $value;
             }
         }
-
 
         $form = new AForm ('ST');
         $form->setForm(['form_name' => 'emailTemplateFrm']);
@@ -255,7 +254,7 @@ class ControllerPagesDesignEmailTemplates extends AController
                 'name'     => 'text_id',
                 'value'    => $this->data['text_id'],
                 'required' => true,
-                'attr' => (int)$this->request->get['id'] ? 'disabled' : ''
+                'attr'     => (int)$this->request->get['id'] ? 'disabled' : '',
             ]);
 
         $this->data['form']['fields']['language_id'] = $form->getFieldHtml(
@@ -265,7 +264,7 @@ class ControllerPagesDesignEmailTemplates extends AController
                 'options'  => $this->data['languages'],
                 'value'    => isset($this->data['language_id']) ? $this->data['language_id'] : $this->language->getContentLanguageID(),
                 'required' => true,
-                'attr' => (int)$this->request->get['id'] ? 'disabled' : ''
+                'attr'     => (int)$this->request->get['id'] ? 'disabled' : '',
             ]);
 
         $this->data['form']['fields']['headers'] = $form->getFieldHtml(
@@ -296,13 +295,14 @@ class ControllerPagesDesignEmailTemplates extends AController
                 'type'     => 'textarea',
                 'name'     => 'text_body',
                 'value'    => $this->data['text_body'],
+                'attr'     => 'rows="16"',
                 'required' => true,
             ]);
         $this->data['form']['fields']['allowed_placeholders'] = $form->getFieldHtml(
             [
-                'type'     => 'textarea',
-                'name'     => 'allowed_placeholders',
-                'value'    => $this->data['allowed_placeholders'],
+                'type'  => 'textarea',
+                'name'  => 'allowed_placeholders',
+                'value' => $this->data['allowed_placeholders'],
             ]);
 
     }
