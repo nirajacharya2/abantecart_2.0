@@ -20,6 +20,7 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use H;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
@@ -109,8 +110,8 @@ final class ALog
         // the default output format is "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n"
         if (Registry::request()) {
             $request_id = Registry::request()->getUniqueId();
-        } else {
-            $request_id = \H::genRequestId();
+        } elseif(class_exists('\H')) {
+            $request_id = H::genRequestId();
         }
         $output = "%datetime% > ".ABC::env('APP_NAME')." v".ABC::env('VERSION')." > Request ID: ".$request_id
             ." > %level_name% > %message%\n";
