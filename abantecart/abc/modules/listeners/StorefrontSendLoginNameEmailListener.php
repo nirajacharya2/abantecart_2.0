@@ -36,20 +36,10 @@ class StorefrontSendLoginNameEmailListener
         // send email to customer
         if ( $customer_info && $customer_info['email'] ) {
 
-            $this->registry->get('load')->language('mail/account_forgotten_login');
-            $language = $this->registry->get('language');
             $store_info = Setting::getStoreSettings($customer_info['store_id']);
 
-            $subject = sprintf($language->get('text_subject'), $store_info->store_name);
-
-            $this->data['mail_plain_text'] = sprintf(
-                    $language->get('text_greeting'),
-                    $store_info->store_name
-                )
-                ."\n\n"
-                . $language->get('text_your_loginname')
-                ."\n\n"
-                . $customer_info['loginname'];
+            $this->data['store_name'] = $store_info->store_name;
+            $this->data['login_name'] = $customer_info['loginname'];
 
             //allow to change email data from extensions
             Registry::extensions()->hk_ProcessData( $this, 'sf_loginname_reminder_email' );
@@ -58,8 +48,7 @@ class StorefrontSendLoginNameEmailListener
             $mail->setTo($customer_info['email']);
             $mail->setFrom($store_info->store_main_email);
             $mail->setSender($store_info->store_name);
-            $mail->setSubject($subject);
-            $mail->setText(html_entity_decode($this->data['mail_plain_text'], ENT_QUOTES, ABC::env('APP_CHARSET')));
+            $mail->setTemplate('storefront_send_login_name', $this->data);
             $mail->send();
         }
 
