@@ -52,21 +52,20 @@ class AdminSendOrderStatusNotifyEmailListener
         $language->load($orderInfo['language_filename']);
         $language->load('mail/order');
 
-        $subject = sprintf($language->get('text_subject'), $orderInfo['store_name'], $order_id);
+        $this->data['store_name'] = $orderInfo['store_name'];
+        $this->data['order_id'] = $order_id;
+        $this->data['date_added'] = H::dateISO2Display($orderInfo['date_added'],
+                $language->get('date_format_short'));
 
-        $message = $language->get('text_order').' '.$order_id."\n";
-        $message .= $language->get('text_date_added').' '.H::dateISO2Display($orderInfo['date_added'],
-                $language->get('date_format_short'))."\n\n";
-        $message .= $language->get('text_order_status')."\n\n";
-        $message .= $orderInfo['order_status_name']."\n\n";
+        $this->data['order_status_name'] = $orderInfo['order_status_name'];
+
         //send link to order only for registered customers
         if ($orderInfo['customer_id']) {
-            $message .= $language->get('text_invoice')."\n";
-            $message .= html_entity_decode(
+            $this->data['invoice'] = html_entity_decode(
                     $orderInfo['store_url'].'index.php?rt=account/invoice&order_id='.$order_id,
                     ENT_QUOTES,
                     ABC::env('APP_CHARSET')
-                )."\n\n";
+                );
         } //give link on order page for quest
         elseif ($config->get('config_guest_checkout') && $orderInfo['email']) {
             /**
@@ -74,20 +73,17 @@ class AdminSendOrderStatusNotifyEmailListener
              */
             $enc = ABC::getObjectByAlias('AEncryption', [$config->get('encryption_key')]);
             $order_token = $enc->encrypt($order_id.'::'.$orderInfo['email']);
-            $message .= $language->get('text_invoice')."\n";
-            $message .= html_entity_decode(
+            $this->data['invoice'] = html_entity_decode(
                     $orderInfo['store_url'].'index.php?rt=account/invoice&ot='.$order_token,
                     ENT_QUOTES,
                     ABC::env('APP_CHARSET')
-                )."\n\n";
+                );
         }
 
         if ($data['comment']) {
-            $message .= $language->get('text_comment')."\n\n";
-            $message .= strip_tags(html_entity_decode($data['comment'], ENT_QUOTES, ABC::env('APP_CHARSET')))."\n\n";
+            $this->data['comment']= strip_tags(html_entity_decode($data['comment'], ENT_QUOTES, ABC::env('APP_CHARSET')));
         }
 
-        $message .= $language->get('text_footer');
 
         if ($dcrypt->active) {
             $customer_email = $dcrypt->decrypt_field(
@@ -102,8 +98,7 @@ class AdminSendOrderStatusNotifyEmailListener
         $mail->setTo($customer_email);
         $mail->setFrom($config->get('store_main_email'));
         $mail->setSender($orderInfo['store_name']);
-        $mail->setSubject($subject);
-        $mail->setText(html_entity_decode($message, ENT_QUOTES, ABC::env('APP_CHARSET')));
+        $mail->setTemplate('admin_order_status_notify', $this->data);
         $mail->send();
 
         //send IMs except emails.
