@@ -59,54 +59,9 @@ class StorefrontOrderConfirmEmailListener
             $store_info = Setting::getStoreSettings($order_info['store_id']);
             $config_mail_logo = $store_info->config_mail_logo ?: $store_info->config_logo;
 
-            // HTML Mail
-            $this->data['mail_template_data']['title'] = sprintf(
-                $language->get('text_subject'),
-                html_entity_decode(
-                    $order_info['store_name'],
-                    ENT_QUOTES,
-                    ABC::env('APP_CHARSET')
-                ),
-                $order_id);
-            $this->data['mail_template_data']['text_greeting'] = sprintf(
-                $language->get('text_greeting'),
-                html_entity_decode(
-                    $order_info['store_name'],
-                    ENT_QUOTES,
-                    ABC::env('APP_CHARSET')
-                )
-            );
-            $this->data['mail_template_data']['text_order_detail'] = $language->get('text_order_detail');
-            $this->data['mail_template_data']['text_order_id'] = $language->get('text_order_id');
-            $this->data['mail_template_data']['text_invoice'] = $language->get('text_invoice');
-            $this->data['mail_template_data']['text_date_added'] = $language->get('text_date_added');
-            $this->data['mail_template_data']['text_telephone'] = $language->get('text_telephone');
-            $this->data['mail_template_data']['text_mobile_phone'] = $language->get('text_mobile_phone');
-
-            $this->data['mail_template_data']['text_email'] = $language->get('text_email');
-            $this->data['mail_template_data']['text_ip'] = $language->get('text_ip');
-            $this->data['mail_template_data']['text_fax'] = $language->get('text_fax');
-            $this->data['mail_template_data']['text_shipping_address'] = $language->get('text_shipping_address');
-            $this->data['mail_template_data']['text_payment_address'] = $language->get('text_payment_address');
-            $this->data['mail_template_data']['text_shipping_method'] = $language->get('text_shipping_method');
-            $this->data['mail_template_data']['text_payment_method'] = $language->get('text_payment_method');
-            $this->data['mail_template_data']['text_comment'] = $language->get('text_comment');
-            $this->data['mail_template_data']['text_powered_by'] = $language->get('text_powered_by');
-            $this->data['mail_template_data']['text_project_label'] = $language->get('text_powered_by')
-                .' '.H::project_base();
-
-            $this->data['mail_template_data']['text_total'] = $language->get('text_total');
-            $this->data['mail_template_data']['text_footer'] = $language->get('text_footer');
-
-            $this->data['mail_template_data']['column_product'] = $language->get('column_product');
-            $this->data['mail_template_data']['column_model'] = $language->get('column_model');
-            $this->data['mail_template_data']['column_quantity'] = $language->get('column_quantity');
-            $this->data['mail_template_data']['column_price'] = $language->get('column_price');
-            $this->data['mail_template_data']['column_total'] = $language->get('column_total');
-
-            $this->data['mail_template_data']['order_id'] = $order_id;
-            $this->data['mail_template_data']['customer_id'] = $order_info['customer_id'];
-            $this->data['mail_template_data']['date_added'] = H::dateISO2Display(
+            $this->data['order_number'] = $order_id;
+            $this->data['customer_id'] = $order_info['customer_id'];
+            $this->data['date_added'] = H::dateISO2Display(
                 $order_info['date_added'],
                 $language->get('date_format_short')
             );
@@ -116,26 +71,26 @@ class StorefrontOrderConfirmEmailListener
                     $r = new AResource('image');
                     $resource_info = $r->getResource($config_mail_logo);
                     if ($resource_info) {
-                        $this->data['mail_template_data']['logo_html'] = html_entity_decode(
+                        $this->data['logo_html'] = html_entity_decode(
                             $resource_info['resource_code'],
                             ENT_QUOTES,
                             ABC::env('APP_CHARSET')
                         );
                     }
                 } else {
-                    $this->data['mail_template_data']['logo_uri'] = 'cid:'
+                    $this->data['logo_uri'] = 'cid:'
                         .md5(pathinfo($config_mail_logo, PATHINFO_FILENAME))
                         .'.'.pathinfo($config_mail_logo, PATHINFO_EXTENSION);
                 }
             }
 
-            $this->data['mail_template_data']['logo'] = $config_mail_logo;
-            $this->data['mail_template_data']['store_name'] = $order_info['store_name'];
-            $this->data['mail_template_data']['address'] = nl2br($config->get('config_address'));
-            $this->data['mail_template_data']['telephone'] = $config->get('config_telephone');
-            $this->data['mail_template_data']['fax'] = $config->get('config_fax');
-            $this->data['mail_template_data']['email'] = $config->get('store_main_email');
-            $this->data['mail_template_data']['store_url'] = $order_info['store_url'];
+            $this->data['logo'] = $config_mail_logo;
+            $this->data['store_name'] = $order_info['store_name'];
+            $this->data['address'] = nl2br($config->get('config_address'));
+            $this->data['telephone'] = $config->get('config_telephone');
+            $this->data['fax'] = $config->get('config_fax');
+            $this->data['email'] = $config->get('store_main_email');
+            $this->data['store_url'] = $order_info['store_url'];
 
             //give link on order page for quest
             if ($config->get('config_guest_checkout') && $order_info['email']) {
@@ -144,36 +99,34 @@ class StorefrontOrderConfirmEmailListener
                  */
                 $enc = ABC::getObjectByAlias('AEncryption', [$config->get('encryption_key')]);
                 $order_token = $enc->encrypt($order_id.'::'.$order_info['email']);
-                $this->data['mail_template_data']['invoice'] = $order_info['store_url']
+                $this->data['invoice'] = $order_info['store_url']
                     .'index.php?rt=account/invoice&ot='.$order_token."\n\n";
             }//give link on order for registered customers
             elseif ($order_info['customer_id']) {
-                $this->data['mail_template_data']['invoice'] = $order_info['store_url']
+                $this->data['invoice'] = $order_info['store_url']
                     .'index.php?rt=account/invoice&order_id='.$order_id;
             }
 
-            $this->data['mail_template_data']['firstname'] = $order_info['firstname'];
-            $this->data['mail_template_data']['lastname'] = $order_info['lastname'];
-            $this->data['mail_template_data']['shipping_method'] = $order_info['shipping_method'];
-            $this->data['mail_template_data']['payment_method'] = $order_info['payment_method'];
-            $this->data['mail_template_data']['customer_email'] = $order_info['email'];
-            $this->data['mail_template_data']['customer_telephone'] = $order_info['telephone'];
-            $this->data['mail_template_data']['customer_mobile_phone'] =
+            $this->data['firstname'] = $order_info['firstname'];
+            $this->data['lastname'] = $order_info['lastname'];
+            $this->data['shipping_method'] = $order_info['shipping_method'];
+            $this->data['payment_method'] = $order_info['payment_method'];
+            $this->data['customer_email'] = $order_info['email'];
+            $this->data['customer_telephone'] = $order_info['telephone'];
+            $this->data['customer_mobile_phone'] =
                 Registry::im()->getCustomerURI(
                     'sms',
                     (int)$order_info['customer_id'],
                     $order_id
                 );
-            $this->data['mail_template_data']['customer_fax'] = $order_info['fax'];
-            $this->data['mail_template_data']['customer_ip'] = $order_info['ip'];
-            $this->data['mail_template_data']['comment'] = trim(nl2br($order_info['comment']));
-
-            //override with the data from the before hooks
-            if ($this->data) {
-                $this->data['mail_template_data'] = array_merge($this->data['mail_template_data'], $this->data);
+            $this->data['customer_fax'] = $order_info['fax'];
+            $this->data['customer_ip'] = $order_info['ip'];
+            if (strlen(trim(nl2br($order_info['comment']))) > 0) {
+                $this->data['comment'] = trim(nl2br($order_info['comment']));
             }
 
-            $shipping_data = [
+
+            $this->data['shipping_data'] = [
                 'firstname' => $order_info['shipping_firstname'],
                 'lastname'  => $order_info['shipping_lastname'],
                 'company'   => $order_info['shipping_company'],
@@ -186,12 +139,7 @@ class StorefrontOrderConfirmEmailListener
                 'country'   => $order_info['shipping_country'],
             ];
 
-            $this->data['mail_template_data']['shipping_address'] = Registry::customer()->getFormattedAddress(
-                $shipping_data,
-                $order_info['shipping_address_format']
-            );
-
-            $payment_data = [
+            $this->data['payment_data'] = [
                 'firstname' => $order_info['payment_firstname'],
                 'lastname'  => $order_info['payment_lastname'],
                 'company'   => $order_info['payment_company'],
@@ -204,10 +152,6 @@ class StorefrontOrderConfirmEmailListener
                 'country'   => $order_info['payment_country'],
             ];
 
-            $this->data['mail_template_data']['payment_address'] = Registry::customer()->getFormattedAddress(
-                $payment_data,
-                $order_info['payment_address_format']
-            );
 
             if (!H::has_value($this->data['products'])) {
                 $this->data['products'] = [];
@@ -283,46 +227,26 @@ class StorefrontOrderConfirmEmailListener
                 Registry::log()->write(__CLASS__.': '.$e->getMessage()."\n".$e->getTraceAsString());
                 return null;
             }
-            $this->data['mail_template_data']['products'] = $this->data['products'];
 
             $orderTotals = OrderTotal::where('order_id', '=', $order_id)->get();
             if ($orderTotals) {
-                $this->data['mail_template_data']['totals'] = $orderTotals->toArray();
+                $this->data['totals'] = $orderTotals->toArray();
             }
 
-            $this->data['mail_template'] = 'mail/order_confirm.tpl';
 
             //allow to change email data from extensions
             Registry::extensions()->hk_ProcessData($this, 'sf_order_confirm_mail');
 
-            $view = new AView($this->registry, 0, false);
-            $view->batchAssign($this->data['mail_template_data']);
-            $html_body = $view->fetch($this->data['mail_template']);
-
-            //text email
-            $this->data['mail_template'] = 'mail/order_confirm_text.tpl';
-
             //allow to change email data from extensions
             Registry::extensions()->hk_ProcessData($this, 'sf_order_confirm_mail_text');
-            $this->data['mail_plain_text'] = $view->fetch($this->data['mail_template']);
-            $this->data['mail_plain_text'] = html_entity_decode(
-                $this->data['mail_plain_text'],
-                ENT_QUOTES,
-                ABC::env('APP_CHARSET')
-            );
-            //remove html-tags
-            $breaks = ["<br />", "<br>", "<br/>"];
-            $this->data['mail_plain_text'] = str_ireplace($breaks, "\r\n", $this->data['mail_plain_text']);
 
-            $subject = sprintf($language->get('text_subject'), $order_info['store_name'], $order_id);
+
 
             $mail = new AMail($config);
             $mail->setTo($order_info['email']);
             $mail->setFrom($config->get('store_main_email'));
             $mail->setSender($order_info['store_name']);
-            $mail->setSubject($subject);
-            $mail->setHtml($html_body);
-            $mail->setText($this->data['mail_plain_text']);
+            $mail->setTemplate('storefront_order_confirm', $this->data);
             if (is_file(ABC::env('DIR_RESOURCES').$config_mail_logo)) {
                 $mail->addAttachment(ABC::env('DIR_RESOURCES').$config_mail_logo);
             }
@@ -331,32 +255,10 @@ class StorefrontOrderConfirmEmailListener
             //send alert email for merchant
             if ($config->get('config_alert_mail')) {
 
-                // HTML
-                $this->data['mail_template_data']['text_greeting'] = $language->get('text_received')."\n\n";
-                $this->data['mail_template_data']['invoice'] = '';
-                $this->data['mail_template_data']['text_invoice'] = '';
-                $this->data['mail_template_data']['text_footer'] = '';
-
-                $this->data['mail_template'] = 'mail/order_confirm.tpl';
-
                 //allow to change email data from extensions
                 Registry::extensions()->hk_ProcessData($this, 'sf_order_confirm_alert_mail');
 
-                $view = new AView($this->registry, 0, false);
-                $view->batchAssign($this->data['mail_template_data']);
-                $html_body = $view->fetch($this->data['mail_template']);
-
-                //text email
-                //allow to change email data from extensions
-                $this->data['mail_template'] = 'mail/order_confirm_text.tpl';
                 Registry::extensions()->hk_ProcessData($this, 'sf_order_confirm_alert_mail_text');
-
-                $this->data['mail_plain_text'] = $view->fetch($this->data['mail_template']);
-                $this->data['mail_plain_text'] =
-                    html_entity_decode($this->data['mail_plain_text'], ENT_QUOTES, ABC::env('APP_CHARSET'));
-                //remove html-tags
-                $breaks = ["<br />", "<br>", "<br/>"];
-                $this->data['mail_plain_text'] = str_ireplace($breaks, "\r\n", $this->data['mail_plain_text']);
 
                 $order_total = '';
                 foreach ($orderTotals->toArray() as $row) {
@@ -366,14 +268,10 @@ class StorefrontOrderConfirmEmailListener
                     }
                 }
 
-                $subject = sprintf($language->get('text_subject'),
-                    html_entity_decode($config->get('store_name'), ENT_QUOTES, ABC::env('APP_CHARSET')),
-                    $order_id.' ('.$order_total.')');
+                $this->data['order_total'] = $order_total;
 
-                $mail->setSubject($subject);
                 $mail->setTo($config->get('store_main_email'));
-                $mail->setHtml($html_body);
-                $mail->setText($this->data['mail_plain_text']);
+                $mail->setTemplate('storefront_order_confirm_alert', $this->data);
                 $mail->send();
 
                 // Send to additional alert emails
