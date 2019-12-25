@@ -1171,7 +1171,9 @@ class Order extends BaseModel
                     continue;
                 }
                 $uri = $im->getCustomerURI($protocol, $customer_id, $order_id);
-                $output[$protocol] = ['uri' => $uri];
+                if($uri) {
+                    $output[$protocol] = ['uri' => $uri];
+                }
             }
         }
 

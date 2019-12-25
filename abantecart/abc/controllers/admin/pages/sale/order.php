@@ -533,11 +533,6 @@ class ControllerPagesSaleOrder extends AController
 
         if (isset($order_info['im'])) {
             foreach ($order_info['im'] as $protocol => $setting) {
-                //prevent duplication of data
-                if( $protocol == 'email' && $setting['uri'] == $order_info['email']){
-                    continue;
-                }
-
                 if ($setting['uri']) {
                     $this->data['im'][$protocol] = $setting['uri'];
                 }
