@@ -31,8 +31,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property ProductOption $product_option
  * @property Product $product
  * @property \Illuminate\Database\Eloquent\Collection $order_options
+ * @property ProductOptionDescription $descriptions
+ * @property ProductOptionDescription $description
  *
  * @method static ProductOptionValue find(int $product_option_value_id) ProductOptionValue
+ * @method static ProductOptionValue create(array $attributes) ProductOptionValue
  *
  * @package abc\models
  */
@@ -52,16 +55,17 @@ class ProductOptionValue extends BaseModel
     protected $images = [];
 
     protected $casts = [
-        'product_option_id'  => 'int',
-        'product_id'         => 'int',
-        'group_id'           => 'int',
-        'quantity'           => 'int',
-        'subtract'           => 'int',
-        'price'              => 'float',
-        'weight'             => 'float',
-        'attribute_value_id' => 'int',
-        'sort_order'         => 'int',
-        'default'            => 'int',
+        'product_option_id'      => 'int',
+        'product_id'             => 'int',
+        'group_id'               => 'int',
+        'quantity'               => 'int',
+        'subtract'               => 'int',
+        'price'                  => 'float',
+        'weight'                 => 'float',
+        'attribute_value_id'     => 'int',
+        'grouped_attribute_data' => 'serialized',
+        'sort_order'             => 'int',
+        'default'                => 'int',
     ];
 
     /** @var array */
@@ -238,6 +242,12 @@ class ProductOptionValue extends BaseModel
 
     ];
 
+    public function setGroupedAttributeDataAttribute($value)
+    {
+        if ($value !== null && !is_string($value)) {
+            $this->attributes['grouped_attribute_data'] = serialize($value);
+        }
+    }
 
     public function option()
     {
@@ -266,16 +276,16 @@ class ProductOptionValue extends BaseModel
             return $this->images;
         }
         $resource = new AResource('image');
-        $sizes = array(
-            'main'  => array(
+        $sizes = [
+            'main'  => [
                 'width'  => $this->config->get('config_image_popup_width'),
                 'height' => $this->config->get('config_image_popup_height'),
-            ),
-            'thumb' => array(
+            ],
+            'thumb' => [
                 'width'  => $this->config->get('config_image_thumb_width'),
                 'height' => $this->config->get('config_image_thumb_height'),
-            ),
-        );
+            ],
+        ];
         $this->images['images'] = $resource->getResourceAllObjects(
             'product_option_value',
             $this->getKey(),

@@ -23,6 +23,7 @@ use abc\core\ABC;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use abc\core\lib\AResourceManager;
+use abc\core\lib\AttributeManager;
 use abc\models\BaseModel;
 use abc\models\QueryBuilder;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
@@ -48,11 +49,11 @@ use Illuminate\Validation\Rule;
  *
  * @property ProductOptionValue $values
  * @property Product $product
- * @property ProductOptionDescription $product_option_descriptions
- * @property ProductOptionValue $product_option_values
+ * @property ProductOptionDescription $descriptions
  *
  * @method static ProductOption find(int $product_option_id) ProductOption
- * @method static ProductOption select(mixed $select) Builder
+ * @method static ProductOption create(array $attributes) ProductOption
+ * @method static ProductOption first() ProductOption
  *
  * @package abc\models
  */
@@ -245,7 +246,7 @@ class ProductOption extends BaseModel
         $cache_key = 'product.alldata.'.$this->getKey();
         $data = $this->cache->get($cache_key);
         if ($data === null) {
-            $this->load('descriptions');
+            $this->load('descriptions', 'values');
             $data = $this->toArray();
             foreach ($this->values as $optionValue) {
                 $data['values'][] = $optionValue->getAllData();
@@ -257,13 +258,14 @@ class ProductOption extends BaseModel
 
     public function delete()
     {
-        /**
-         * @var AResourceManager $rm
-         */
-        $rm = ABC::getObjectByAlias('AResourceManager');
-        $rm->setType('image');
-        if ($this->option_values) {
-            foreach ($this->option_values as $option_value) {
+        $this->load('values');
+        if ($this->values) {
+            /**
+             * @var AResourceManager $rm
+             */
+            $rm = ABC::getObjectByAlias('AResourceManager');
+            $rm->setType('image');
+            foreach ($this->values as $option_value) {
                 //Remove previous resources of object
                 $rm->unmapAndDeleteResources('product_option_value', $option_value->product_option_value_id);
             }
@@ -328,5 +330,131 @@ class ProductOption extends BaseModel
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
         return $query->get();
     }
+
+    /**
+     * @param array $indata - must contains product_id, product_option_value_id
+     *
+     * @return int|null
+     * @throws \Exception
+     */
+    public static function addProductOptionValueAndDescription(array $indata)
+    {
+        if (empty($indata) || !$indata['product_id'] || !$indata['product_option_id']) {
+            return false;
+        }
+
+        $optionData = $indata;
+        if (is_array($indata['attribute_value_id'])) {
+            unset($optionData['attribute_value_id']);
+        } else {
+            $optionData['attribute_value_id'] = (int)$optionData['attribute_value_id'];
+            if (!$optionData['attribute_value_id']) {
+                unset($optionData['attribute_value_id']);
+            } else {
+                $indata['attribute_value_id'] = [$optionData['attribute_value_id']];
+            }
+
+        }
+
+        /**
+         * @var AttributeManager $am
+         */
+        $am = ABC::getObjectByAlias('AttributeManager');
+        //build grouped attributes if this is a parent attribute
+        if (is_array($indata['attribute_value_id'])) {
+            //add children option values from global attributes
+            $groupData = [];
+            foreach ($indata['attribute_value_id'] as $child_option_id => $attribute_value_id) {
+                #special data for grouped options. will be serialized in model mutator
+                $groupData[] = [
+                    'attr_id'   => $child_option_id,
+                    'attr_v_id' => $attribute_value_id,
+                ];
+            }
+            $optionData['grouped_attribute_data'] = $groupData;
+        }
+
+        $optionValue = ProductOptionValue::create($optionData);
+        $optionValueId = $optionValue->getKey();
+
+        //Build options value descriptions
+        if (is_array($indata['attribute_value_id'])) {
+            //add children option values description from global attributes
+            $group_description = [];
+            $descr_names = [];
+            foreach ($indata['attribute_value_id'] as $child_option_id => $attribute_value_id) {
+                #special insert for grouped options
+                foreach ($am->getAttributeValueDescriptions($attribute_value_id) as $language_id => $name) {
+                    $group_description[$language_id][] = [
+                        'attr_v_id' => $attribute_value_id,
+                        'name'      => $name,
+                    ];
+                    $descr_names[$language_id][] = $name;
+                }
+            }
+
+            // Insert generic merged name
+            $grouped_names = null;
+            foreach ($descr_names as $language_id => $name) {
+                ProductOptionValueDescription::create(
+                    [
+                        'product_id'              => $optionValue->product_id,
+                        'product_option_value_id' => $optionValueId,
+                        'language_id'             => $language_id,
+                        'name'                    => implode(' / ', $name),
+                        //note: serialized data (array)
+                        'grouped_attribute_names' => $group_description[$language_id],
+                    ]
+                );
+            }
+
+        } else {
+            if (!$indata['attribute_value_id']) {
+                //We save custom option value for current language
+                if (isset($indata['descriptions'])) {
+                    $valueDescriptions = $indata['descriptions'];
+                } elseif (isset($indata['description'])) {
+                    $valueDescriptions = [
+                        static::$current_language_id => [
+                            'name' => ($indata['description']['name'] ?? 'Unknown'),
+                        ],
+                    ];
+                } elseif ($indata['name']) {
+                    $valueDescriptions = [
+                        static::$current_language_id =>
+                            [
+                                'name' => ($indata['name'] ?? 'Unknown'),
+                            ],
+                    ];
+                } else {
+                    $valueDescriptions = [
+                        static::$current_language_id =>
+                            [
+                                'name' => 'Unknown',
+                            ],
+                    ];
+                }
+            } else {
+                //We have global attributes, copy option value text from there.
+                $valueDescriptions = $am->getAttributeValueDescriptions((int)$indata['attribute_value_id']);
+            }
+
+            foreach ($valueDescriptions as $language_id => $description) {
+                $language_id = (int)$language_id;
+                if (!$language_id) {
+                    throw new \Exception('Wrong format of input data! Description of value must have the language ID as a key!');
+                }
+
+                $desc = $description;
+                $desc['product_id'] = $optionValue->product_id;
+                $desc['product_option_value_id'] = $optionValueId;
+                $desc['language_id'] = $language_id;
+                ProductOptionValueDescription::create($desc);
+            }
+        }
+        Registry::cache()->flush('product');
+        return $optionValueId;
+    }
+
 }
 
