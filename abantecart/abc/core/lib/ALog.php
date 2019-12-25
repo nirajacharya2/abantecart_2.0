@@ -110,7 +110,7 @@ final class ALog
         // the default output format is "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n"
         if (Registry::request()) {
             $request_id = Registry::request()->getUniqueId();
-        } else {
+        } elseif(class_exists('\H')) {
             $request_id = H::genRequestId();
         }
         $output = "%datetime% > ".ABC::env('APP_NAME')." v".ABC::env('VERSION')." > Request ID: ".$request_id

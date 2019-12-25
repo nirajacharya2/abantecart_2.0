@@ -1952,6 +1952,7 @@ class ControllerPagesSaleOrder extends AController
 
         if ($this->request->is_POST() && $checkout->getCart()->hasProducts()) {
             $post = $this->request->post;
+            $this->db->beginTransaction();
             try {
                 $shippings = $checkout->getShippingList();
 
@@ -1982,13 +1983,20 @@ class ControllerPagesSaleOrder extends AController
                 $this->extensions->hk_ProcessData($this, 'after_confirm_order');
 
                 unset($this->session->data['admin_order']);
+                $this->db->commit();
                 abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id='.$order_id));
             } catch (LibException $e) {
+                $this->db->rollback();
                 $error_text = $e->getMessages();
                 if (!$error_text) {
                     $error_text = 'App Error. See error log for details';
                     $this->log->write($e->getTraceAsString());
                 }
+                $this->data['error_warning'] = $error_text;
+            }catch(\Exception $e){
+                $this->db->rollback();
+                $error_text = 'App Error. '.$e->getMessage();
+                $this->log->write($e->getTraceAsString());
                 $this->data['error_warning'] = $error_text;
             }
         }
