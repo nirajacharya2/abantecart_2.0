@@ -60,6 +60,7 @@ class StorefrontOrderConfirmEmailListener
             $config_mail_logo = $store_info->config_mail_logo ?: $store_info->config_logo;
 
             $this->data['order_number'] = $order_id;
+            $this->data['order_id'] = $order_id;
             $this->data['customer_id'] = $order_info['customer_id'];
             $this->data['date_added'] = H::dateISO2Display(
                 $order_info['date_added'],
@@ -287,7 +288,7 @@ class StorefrontOrderConfirmEmailListener
             $msg_text =
                 sprintf($language->get('text_new_order_text'), $order_info['firstname'].' '.$order_info['lastname']);
             $msg_text .= "<br/><br/>";
-            foreach ($this->data['mail_template_data']['totals'] as $total) {
+            foreach ((array)$this->data['mail_template_data']['totals'] as $total) {
                 $msg_text .= $total['title'].' - '.$total['text']."<br/>";
             }
             $msg = new AMessage();
