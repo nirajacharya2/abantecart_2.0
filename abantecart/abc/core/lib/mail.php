@@ -55,6 +55,7 @@ class AMail
      * @var EmailTemplate
      */
     protected $emailTemplate;
+
     /**
      * @var AMessage
      */
@@ -270,6 +271,23 @@ class AMail
     {
         return $this->user;
     }
+
+    /**
+     * @return EmailTemplate
+     */
+    public function getEmailTemplate()
+    {
+        return $this->emailTemplate;
+    }
+
+    /**
+     * @return array
+     */
+    public function getPlaceholders()
+    {
+        return $this->placeholders;
+    }
+
 
     /**
      * @param AUser $user
