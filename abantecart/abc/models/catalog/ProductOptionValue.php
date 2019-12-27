@@ -303,4 +303,71 @@ class ProductOptionValue extends BaseModel
         return $data;
     }
 
+    public static function getProductOptionValues($product_option_id)
+    {
+
+        $values = ProductOptionValue::where(
+            [
+                'product_option_id' => $product_option_id,
+            ]
+        )->orderBy('sort_order')
+                                    ->get();
+
+        $result = [];
+        if ($values) {
+            foreach ($values as $option_value) {
+                $result[] = static::getProductOptionValue($option_value->product_option_value_id);
+            }
+        }
+
+        return $result;
+    }
+
+    public static function getProductOptionValue($option_value_id)
+    {
+        $option_value_id = (int)$option_value_id;
+        if (!$option_value_id) {
+            return [];
+        }
+
+        $option_value = ProductOptionValue::with('descriptions')->where(
+            [
+                'product_option_value_id' => $option_value_id,
+                'group_id'                => 0,
+            ]
+        )->orderBy('sort_order')
+                                          ->first();
+
+        if (!$option_value) {
+            return [];
+        }
+
+        $value_description_data = [];
+        foreach ($option_value->descriptions->toArray() as $description) {
+            /** @var ProductOptionValueDescription $description */
+            $language_id = $description['language_id'];
+            //regular option value name
+            $value_description_data[$language_id] = $description;
+            //get children (grouped options) individual names array
+            if ($description['grouped_attribute_names']) {
+                $value_description_data[$language_id]['children_options_names'] =
+                    $description['grouped_attribute_names'];
+            }
+        }
+
+        $result = $option_value->toArray();
+        $result['language'] = $value_description_data;
+
+        //get children (grouped options) data
+        $child_option_values = $result['grouped_attribute_data'];
+        if (is_array($child_option_values) && sizeof($child_option_values)) {
+            $result['children_options'] = [];
+            foreach ($child_option_values as $child_value) {
+                $result['children_options'][$child_value['attr_id']] = (int)$child_value['attr_v_id'];
+            }
+        }
+
+        return $result;
+    }
+
 }

@@ -176,26 +176,29 @@ class ControllerResponsesListingGridProduct extends AController
                 $ids = explode(',', $this->request->post['id']);
                 if (!empty($ids)) {
                     $ids = array_unique($ids);
-                    foreach ($ids as $id) {
-                        $err = $this->validateDelete($id);
-                        if (!empty($err)) {
-                            $error = new AError('');
-                            return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
-                        }
-                        $this->extensions->hk_ProcessData($this, 'deleting', ['product_id' => $id]);
+                    $this->db->beginTransaction();
+                    try {
+                        foreach ($ids as $id) {
+                            $err = $this->validateDelete($id);
+                            if (!empty($err)) {
+                                $error = new AError('');
+                                return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                            }
+                            $product = Product::with('categories')->find($id);
+                            $categories = $product->categories;
 
-                        $categories = $this->db->table('products_to_categories')
-                                     ->where(['product_id' => $id])
-                                     ->get();
-                        //TODO: think here!!!
-                        $this->model_catalog_product->deleteProduct($id);
-                        //run products count recalculation
-                        foreach($categories as $item){
-                            $category = Category::find($item->category_id);
-                            if($category){
-                                $category->touch();
+                            $product->forceDelete();
+                            //run products count recalculation
+                            foreach ($categories as $item) {
+                                $item->touch();
                             }
                         }
+                        $this->db->commit();
+                    } catch (\Exception $e) {
+                        $this->db->rollback();
+                        $error = new AError($e->getMessage());
+                        $error->toLog();
+                        return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $e->getMessage()]);
                     }
                 }
                 break;

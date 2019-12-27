@@ -564,7 +564,7 @@ class ModelToolImportProcess extends Model
         }
 
         $this->toLog("Creating product option for product ID {$product_id}.");
-        $product = Product::find($product_id);
+        $product = Product::with('options')->find($product_id);
         if (!$product) {
             $this->toLog("Error: Product ID ".$product_id." not found in database.");
             return false;
@@ -572,18 +572,7 @@ class ModelToolImportProcess extends Model
 
         //get existing options and values.
         $this->load->model('catalog/product');
-        $options = $this->model_catalog_product->getProductOptions($product_id);
-        if ($options) {
-            //delete all options if exist
-            foreach ($options as $option) {
-                ProductOption::where(
-                    [
-                        'product_option_id' => $product_id,
-                        'product_id'        => $option['product_option_id'],
-                    ]
-                )->forceDelete();
-            }
-        }
+        $product->options->forceDelete();
 
         //add new options for each option
         for ($i = 0; $i < count($data); $i++) {
@@ -634,9 +623,9 @@ class ModelToolImportProcess extends Model
     }
 
     /**
-     * @param $product_id
-     * @param $weight_class_id
-     * @param $p_option_id
+     * @param $productId
+     * @param $weightClassId
+     * @param $optionId
      * @param $data
      *
      * @return bool|int|null
@@ -644,14 +633,17 @@ class ModelToolImportProcess extends Model
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
-    protected function saveOptionValue($product_id, $weight_class_id, $p_option_id, $data)
+    protected function saveOptionValue($productId, $weightClassId, $optionId, $data)
     {
         if (empty($data) || !array_filter($data)) {
             //skip empty data
             return false;
         }
 
-        $opt_val_data = [];
+        $optionValueData = [
+            'product_id'        => $productId,
+            'product_option_id' => $optionId,
+        ];
         $opt_keys = [
             'name'        => '',
             'sku'         => '',
@@ -665,27 +657,23 @@ class ModelToolImportProcess extends Model
             'price'       => 0,
         ];
         foreach ($opt_keys as $k => $v) {
-            $opt_val_data[$k] = $v;
+            $optionValueData[$k] = $v;
             if (isset($data[$k])) {
-                $opt_val_data[$k] = $data[$k];
+                $optionValueData[$k] = $data[$k];
             }
         }
         //enable stock taking if quantity specified
-        if ($opt_val_data['quantity'] > 0) {
-            $opt_val_data['subtract'] = 1;
+        if ($optionValueData['quantity'] > 0) {
+            $optionValueData['subtract'] = 1;
         }
 
         $this->load->model('localisation/weight_class');
-        $prd_weight_info = $this->model_localisation_weight_class->getWeightClass($weight_class_id);
+        $prd_weight_info = $this->model_localisation_weight_class->getWeightClass($weightClassId);
         if ($prd_weight_info['unit']) {
-            $opt_val_data['weight_type'] = $prd_weight_info['unit'];
+            $optionValueData['weight_type'] = $prd_weight_info['unit'];
         }
 
-        $pd_opt_val_id = $this->model_catalog_product->addProductOptionValueAndDescription(
-            $product_id,
-            $p_option_id,
-            $opt_val_data
-        );
+        $pd_opt_val_id = ProductOption::addProductOptionValueAndDescription($optionValueData);
 
         if ($pd_opt_val_id && !empty($data['image'])) {
             //process images

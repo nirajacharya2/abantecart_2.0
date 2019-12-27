@@ -2092,4 +2092,18 @@ class AHelperUtils extends AHelper
             $errors[$rule] = implode(' ', $msgArr);
         }
     }
+
+    public static function getAppErrorText()
+    {
+        $language = Registry::language();
+        if (!ABC::env('IS_ADMIN')) {
+            return 'Application Error!';
+        }
+        if ($language) {
+            return sprintf($language->get('error_system'), Registry::html()->getSecureURL('tool/error_log'));
+        } else {
+            return 'Application Error! Please check error log for details.';
+        }
+
+    }
 }

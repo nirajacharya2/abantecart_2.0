@@ -2396,4 +2396,44 @@ class Product extends BaseModel
         return $product_option_id;
     }
 
+    public function getProductOptions($group_id = 0)
+    {
+        if (!$this->getKey()) {
+            return [];
+        }
+
+        $product_option_data = [];
+        $where = ['product_id' => $this->getKey()];
+        if ((int)$group_id) {
+            $where['group_id'] = (int)$group_id;
+        }
+
+        $options = ProductOption::where($where)->orderBy('sort_order')->get();
+
+        if ($options) {
+            foreach ($options as $product_option) {
+                $product_option_data[] = static::getProductOption($product_option['product_option_id']);
+            }
+        }
+
+        return $product_option_data;
+    }
+
+    public static function getProductOption($option_id)
+    {
+        $option = ProductOption::with('descriptions')
+                               ->find($option_id)
+                               ->toArray();
+
+        $optionData = [];
+        foreach ($option['descriptions'] as $desc) {
+            $optionData['language'][$desc['language_id']] = $desc;
+        }
+        unset($option['descriptions']);
+        $option_data = array_merge($optionData, $option);
+        $option_data['product_option_value'] = ProductOptionValue::getProductOptionValues($option_id);
+
+        return $option_data;
+    }
+
 }

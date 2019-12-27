@@ -37,6 +37,7 @@ use abc\models\admin\ModelCatalogDownload;
 use abc\models\catalog\Category;
 use abc\models\catalog\Product;
 use abc\models\catalog\ProductOption;
+use abc\models\catalog\ProductOptionValue;
 use abc\models\order\Order;
 use abc\models\order\OrderProduct;
 use abc\models\order\OrderStatus;
@@ -315,16 +316,16 @@ class ControllerResponsesProductProduct extends AController
 
     public function get_options_list()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->loadModel('catalog/product');
-        $product_options = $this->model_catalog_product->getProductOptions($this->request->get['product_id']);
+        $product_options = ProductOption::with('description')
+                                        ->where('product_id', '=', $this->request->get['product_id'])
+                                        ->get()->toArray();
 
         $result = [];
         foreach ($product_options as $option) {
-            $option_name = trim($option['language'][$this->language->getContentLanguageID()]['name']);
+            $option_name = trim($option['description']['name']);
             $result[$option['product_option_id']] = $option_name ? $option_name : 'n/a';
         }
 
@@ -403,9 +404,14 @@ class ControllerResponsesProductProduct extends AController
         unset($this->session->data['success']);
 
         $product_id = (int)$this->request->get['product_id'];
+        $product = Product::find($product_id);
+        if (!$product) {
+            $error = new AError('');
+            return $error->toJSONResponse('', ['error_title' => 'Product with ID "'.$product_id.'" not found!']);
+        }
         $option_id = (int)$this->request->get['option_id'];
 
-        $this->data['option_data'] = $this->model_catalog_product->getProductOption($product_id, $option_id);
+        $this->data['option_data'] = $product->getProductOption($option_id);
 
         if ($this->data['option_data']) {
 
@@ -428,10 +434,7 @@ class ControllerResponsesProductProduct extends AController
                 'product/product/update_option_values',
                 '&product_id='.$product_id.'&option_id='.$option_id);
 
-            $this->data['option_values'] = $this->model_catalog_product->getProductOptionValues(
-                                                                                                $product_id,
-                                                                                                $option_id
-            );
+            $this->data['option_values'] = ProductOptionValue::getProductOptionValues($option_id);
 
             $this->data['option_name'] = $this->html->buildElement([
                 'type'  => 'input',
@@ -647,10 +650,17 @@ class ControllerResponsesProductProduct extends AController
         $this->loadLanguage('catalog/product');
         $this->loadModel('catalog/product');
 
-        $option_info = $this->model_catalog_product->getProductOption(
-            $this->request->get['product_id'],
-            $this->request->get['option_id']
-        );
+        $product = Product::find($this->request->get['product_id']);
+        if (!$product) {
+            $error = new AError('');
+            return $error->toJSONResponse('NOT_FOUND',
+                [
+                    'error_text'  => 'Product ID '.$this->request->get['product_id'].' not found!',
+                    'reset_value' => true,
+                ]);
+        }
+
+        $option_info = $product::getProductOption($this->request->get['option_id']);
 
         //remove html-code from textarea product option
         if (in_array($option_info['element_type'], ['T', 'B'])) {
@@ -660,11 +670,26 @@ class ControllerResponsesProductProduct extends AController
             }
         }
 
-        $this->model_catalog_product->updateProductOptionValues(
-            $this->request->get['product_id'],
-            $this->request->get['option_id'],
-            $this->request->post
-        );
+        $post = $this->request->post;
+        $post['product_id'] = $this->request->get['product_id'];
+        $post['product_option_id'] = $this->request->get['option_id'];
+        foreach ($post['price'] as &$price) {
+            $price = H::preformatFloat($price, $this->language->get('decimal_point'));
+        }
+
+        try {
+            ProductOption::updateProductOptionValues($post);
+        } catch (\Exception $e) {
+            $this->log->error($e->getMessage());
+            $this->log->error($e->getTraceAsString());
+            $error = new AError('');
+            return $error->toJSONResponse('APP_ERROR',
+                [
+                    'error_text'  => H::getAppErrorText(),
+                    'reset_value' => true,
+                ]);
+
+        }
         $this->session->data['success'] = $this->language->get('text_success_option');
 
         //update controller data

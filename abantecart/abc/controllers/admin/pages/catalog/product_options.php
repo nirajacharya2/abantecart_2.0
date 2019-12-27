@@ -26,6 +26,9 @@ use abc\core\engine\AForm;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\lib\contracts\AttributeManagerInterface;
 use abc\models\catalog\Product;
+use abc\models\catalog\ProductOption;
+use H;
+use PDOException;
 
 class ControllerPagesCatalogProductOptions extends AController
 {
@@ -47,35 +50,52 @@ class ControllerPagesCatalogProductOptions extends AController
         $this->attribute_manager = ABC::getObjectByAlias('AttributeManager');
 
         if ($this->request->is_POST() && $this->validateForm()) {
-            $this->data['product_id'] = $this->request->get['product_id'];
-            $this->data['product_option_id'] = $this->model_catalog_product->addProductOption(
-                $this->data['product_id'],
-                $this->request->post
-            );
-            $this->extensions->hk_ProcessData($this);
-            $this->session->data['success'] = $this->language->get('text_success');
-            abc_redirect(
-                $this->html->getSecureURL(
-                    'catalog/product_options',
-                    '&product_id='.$this->data['product_id']
+
+            $post = $this->request->post;
+            if (!(int)$post['attribute_id']) {
+                unset($post['attribute_id']);
+            }
+            $post['product_id'] = $this->data['product_id'] = $this->request->get['product_id'];
+            $this->db->beginTransaction();
+            try {
+                $this->data['product_option_id'] = ProductOption::addProductOption($post);
+
+                $this->extensions->hk_ProcessData($this);
+                $this->session->data['success'] = $this->language->get('text_success');
+                $this->db->commit();
+                abc_redirect(
+                    $this->html->getSecureURL(
+                        'catalog/product_options',
+                        '&product_id='.$this->data['product_id']
                         .'&product_option_id='.$this->data['product_option_id']
-                )
-            );
+                    )
+                );
+            } catch (\Exception $e) {
+                $this->db->rollback();
+                $this->log->error(__CLASS__.': '.$e->getMessage());
+                $this->session->data['warning'] = H::getAppErrorText();
+            }
         }
 
-        $product_info = $this->model_catalog_product->getProduct($this->request->get['product_id']);
-        if (!$product_info) {
+        $product = Product::with('description', 'options.description')->find($this->request->get['product_id']);
+        if (!$product) {
             $this->session->data['warning'] = $this->language->get('error_product_not_found');
             abc_redirect($this->html->getSecureURL('catalog/product'));
+        }
+
+        $this->view->assign('error_warning', $this->session->data['warning']);
+        if (isset($this->session->data['warning'])) {
+            unset($this->session->data['warning']);
         }
 
         $this->data['attributes'] = [
             'new' => $this->language->get('text_add_new_option'),
         ];
+
         $results = $this->attribute_manager->getAttributes(
             [
                 'search' =>
-                        "ga.attribute_type_id = '".$this->attribute_manager->getAttributeTypeID('product_option')."'"
+                    "ga.attribute_type_id = '".$this->attribute_manager->getAttributeTypeID('product_option')."'"
                         ." AND ga.status = 1 AND ga.attribute_parent_id IS NULL ",
                 'sort'   => 'sort_order',
                 'order'  => 'ASC',
@@ -87,22 +107,8 @@ class ControllerPagesCatalogProductOptions extends AController
             $this->data['attributes'][$type['attribute_id']] = $type['name'];
         }
 
-        $this->data['product_description'] = $this->model_catalog_product->getProductDescriptions(
-                                                                        $this->request->get['product_id']
-        );
-        $product_options = $this->model_catalog_product->getProductOptions($this->request->get['product_id']);
-
-        $content_language_id = $this->language->getContentLanguageID();
-        $default_language_id = $this->language->getDefaultLanguageID();
-        foreach ($product_options as &$option) {
-            $option_name = trim($option['language'][$content_language_id]['name']);
-            $option['language'][$content_language_id]['name'] = $option_name ? $option_name : 'n/a';
-            $option_name = trim($option['language'][$default_language_id]['name']);
-            $option['language'][$default_language_id]['name'] = $option_name ? $option_name : 'n/a';
-        }
-        unset($option);
-
-        $this->data['product_options'] = $product_options;
+        $this->data['product_description'] = $product->description->toArray();
+        $this->data['product_options'] = $product->options->toArray();
         $this->data['language_id'] = $this->session->data['content_language_id'];
         $this->data['url']['load_option'] = $this->html->getSecureURL(
                                                         'product/product/load_option',
@@ -184,18 +190,20 @@ class ControllerPagesCatalogProductOptions extends AController
         $this->data['update'] = '';
         $form = new AForm('HT');
 
-        $product_opt = [];
-        foreach ($product_options as $option) {
-            $product_opt[$option['product_option_id']] = $option['language'][$content_language_id]['name'];
+        $options_list = [];
+        foreach ($product->options as $option) {
+            $options_list[$option->product_option_id] = $option->description->name ?? 'n/a';
         }
+
         $product_option_id = $this->request->get['product_option_id']
             ? $this->request->get['product_option_id']
             : $this->data['product_option_id'];
+
         $this->data['options'] = $form->getFieldHtml([
             'type'    => 'selectbox',
             'name'    => 'option',
             'value'   => $product_option_id,
-            'options' => $product_opt,
+            'options' => $options_list,
         ]);
 
         $form->setForm([

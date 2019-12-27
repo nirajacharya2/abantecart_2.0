@@ -54,10 +54,7 @@ class ControllerResponsesSaleOrderHistory extends AController
                 $json['date_added'] = date($this->language->get('date_format_short'));
                 H::event('admin\SendOrderStatusNotifyEmail', [new ABaseEvent($data)]);
             } catch (\Exception $e) {
-                $json['error'] = sprintf(
-                    $this->language->get('error_system'),
-                    $this->html->getSecureURL('tool/error_log')
-                );
+                $json['error'] = H::getAppErrorText();
                 $this->db->rollback();
             }
 

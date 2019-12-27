@@ -142,9 +142,12 @@ class ControllerPagesCatalogProductPromotions extends AController
         }
 
         $this->data['form_title'] = $this->language->get('text_edit').'&nbsp;'.$this->language->get('text_product');
-        $this->data['product_discounts'] = $this->model_catalog_product->getProductDiscounts(
-                                                                $this->request->get['product_id']
-        );
+        $this->data['product_discounts'] = ProductDiscount::where('product_id', '=', $this->request->get['product_id'])
+                                                          ->orderBy('quantity')
+                                                          ->orderBy('priority')
+                                                          ->orderBy('price')
+                                                          ->get()->toArray();
+
         $this->data['delete_discount'] = $this->html->getSecureURL(
             'catalog/product_promotions/delete',
             '&product_id='.$this->request->get['product_id'].'&product_discount_id=%ID%'
