@@ -4,10 +4,12 @@ namespace abc\modules\listeners;
 
 use abc\core\ABC;
 use abc\core\engine\ALanguage;
+use abc\core\engine\AResource;
 use abc\core\engine\Registry;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AMail;
 use abc\models\order\Order;
+use abc\models\system\Setting;
 use abc\modules\events\ABaseEvent;
 use H;
 
@@ -45,6 +47,26 @@ class AdminSendOrderStatusNotifyEmailListener
             Registry::log()->write(__CLASS__.": order #".$data['order_id']." not found!");
             return true;
         }
+
+        /**
+         * @var \stdClass $store_info
+         */
+        $store_info = Setting::getStoreSettings($orderInfo['store_id']);
+        $logo = $store_info->config_mail_logo ?: $store_info->config_logo;
+        $homepage = Registry::html()->getHomeURL();
+
+        //see if we have a resource ID instead of path
+        if (is_numeric($logo)) {
+            $resource = new AResource('image');
+            $image_data = $resource->getResource( $logo );
+            $img_sub_path = $image_data['type_name'].'/'.$image_data['resource_path'];
+            if ( is_file(ABC::env('DIR_RESOURCES') . $img_sub_path) ) {
+                $logo = $img_sub_path;
+            } else {
+                $logo = $image_data['resource_code'];
+            }
+        }
+        $this->data['logo_uri'] = $homepage.'resources/'.$logo;
 
         $order_id = $orderInfo['order_id'];
         //load language specific for the order in admin section
