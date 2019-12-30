@@ -36,6 +36,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property Language $language
  * @property ProductOption $product_option
  *
+ * @method static ProductOptionDescription create(array $attributes) ProductOptionDescription
+ *
+ *
  * @package abc\models
  */
 class ProductOptionDescription extends BaseModel

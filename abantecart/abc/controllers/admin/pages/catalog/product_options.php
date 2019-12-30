@@ -28,7 +28,6 @@ use abc\core\lib\contracts\AttributeManagerInterface;
 use abc\models\catalog\Product;
 use abc\models\catalog\ProductOption;
 use H;
-use PDOException;
 
 class ControllerPagesCatalogProductOptions extends AController
 {

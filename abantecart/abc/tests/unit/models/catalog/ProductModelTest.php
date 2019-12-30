@@ -225,7 +225,7 @@ class ProductModelTest extends ATestCase
     public function testHasAnyStock()
     {
         $product = Product::find(57);
-        $this->assertEquals(true, $product->hasAnyStock());
+        $this->assertIsInt($product->hasAnyStock());
     }
 
     /**
@@ -344,6 +344,15 @@ class ProductModelTest extends ATestCase
         $result = $db->query("SELECT product_id, related_id FROM ".$db->table_name("products_related")
             ." WHERE product_id=51");
         $this->assertEquals(1, $result->num_rows);
+
+        $product = $product = Product::find(64);
+        $options = $product->getProductOptions();
+
+        $this->assertEquals($options[0]['product_option_id'], 314);
+        $this->assertEquals($options[0]['descriptions'][0]['name'], 'Fragrance Size');
+        $this->assertEquals($options[0]['language'][1]['name'], 'Fragrance Size');
+        $this->assertEquals($options[0]['product_option_value'][0]['descriptions'][0]['name'], '1.0 oz');
+        $this->assertEquals($options[0]['product_option_value'][0]['language'][1]['name'], '1.0 oz');
 
     }
 

@@ -76,5 +76,10 @@ class ProductOptionValueModelTest extends ATestCase
         $this->assertEquals(count($options), 3);
         $this->assertEquals($options[0]['product_id'], 64);
         $this->assertEquals($options[0]['descriptions'][0]['name'], '1.0 oz');
+
+        $option = ProductOptionValue::getProductOptionValue($options[0]['product_option_value_id']);
+        $this->assertEquals($option['product_id'], 64);
+        $this->assertEquals($option['descriptions'][0]['name'], '1.0 oz');
+
     }
 }

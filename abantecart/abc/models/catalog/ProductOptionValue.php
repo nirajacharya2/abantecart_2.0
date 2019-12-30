@@ -303,6 +303,11 @@ class ProductOptionValue extends BaseModel
         return $data;
     }
 
+    /**
+     * @param int $product_option_id
+     *
+     * @return array - array with options
+     */
     public static function getProductOptionValues($product_option_id)
     {
 
@@ -323,6 +328,11 @@ class ProductOptionValue extends BaseModel
         return $result;
     }
 
+    /**
+     * @param int $option_value_id
+     *
+     * @return array
+     */
     public static function getProductOptionValue($option_value_id)
     {
         $option_value_id = (int)$option_value_id;
@@ -330,7 +340,8 @@ class ProductOptionValue extends BaseModel
             return [];
         }
 
-        $option_value = ProductOptionValue::with('descriptions')->where(
+        $option_value = ProductOptionValue::with('descriptions')
+                                          ->where(
             [
                 'product_option_value_id' => $option_value_id,
                 'group_id'                => 0,

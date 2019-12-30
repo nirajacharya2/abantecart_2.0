@@ -2412,7 +2412,7 @@ class Product extends BaseModel
 
         if ($options) {
             foreach ($options as $product_option) {
-                $product_option_data[] = static::getProductOption($product_option['product_option_id']);
+                $product_option_data[] = Product::getProductOption($product_option->product_option_id);
             }
         }
 
@@ -2429,8 +2429,7 @@ class Product extends BaseModel
         foreach ($option['descriptions'] as $desc) {
             $optionData['language'][$desc['language_id']] = $desc;
         }
-        unset($option['descriptions']);
-        $option_data = array_merge($optionData, $option);
+        $option_data = array_merge($option, $optionData);
         $option_data['product_option_value'] = ProductOptionValue::getProductOptionValues($option_id);
 
         return $option_data;
