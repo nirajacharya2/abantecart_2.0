@@ -266,22 +266,18 @@ class ControllerResponsesCommonExportTask extends AController
             if (file_exists($file)) {
                 header('Content-Description: File Transfer');
                 header('Content-Type: application/x-gzip');
+                header('Content-Type: application/octet-stream');
                 header('Content-Disposition: attachment; filename='.$filename);
                 header('Content-Transfer-Encoding: binary');
                 header('Expires: 0');
                 header('Cache-Control: must-revalidate');
                 header('Pragma: public');
                 header('Content-Length: '.filesize($file));
-                $chunkSize = 1024 * 1024;
-                $handle = fopen($file, 'rb');
-                while (!feof($handle))
-                {
-                    $buffer = fread($handle, $chunkSize);
-                    echo $buffer;
-                    ob_flush();
-                    flush();
+                if (ob_get_level()) {
+                    ob_end_clean();
                 }
-                fclose($handle);
+                ob_end_flush();
+                readfile($file);
                 exit;
             } else {
                 $this->session->data['error'] = 'Error: You Cannot to Download File '
