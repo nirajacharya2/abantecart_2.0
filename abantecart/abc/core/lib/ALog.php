@@ -106,7 +106,7 @@ final class ALog
 
         $stream = new StreamHandler($this->app_filename, Logger::DEBUG, 0664);
         // the default date format is "Y-m-d H:i:s"
-        $dateFormat = "Y-m-d H:i:s";
+        $dateFormat = "Y-m-d H:i:s.u";
         // the default output format is "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n"
         if (Registry::request()) {
             $request_id = Registry::request()->getUniqueId();
