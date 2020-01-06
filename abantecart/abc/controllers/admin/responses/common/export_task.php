@@ -272,9 +272,16 @@ class ControllerResponsesCommonExportTask extends AController
                 header('Cache-Control: must-revalidate');
                 header('Pragma: public');
                 header('Content-Length: '.filesize($file));
-                ob_end_clean();
-                flush();
-                readfile($file);
+                $chunkSize = 1024 * 1024;
+                $handle = fopen($file, 'rb');
+                while (!feof($handle))
+                {
+                    $buffer = fread($handle, $chunkSize);
+                    echo $buffer;
+                    ob_flush();
+                    flush();
+                }
+                fclose($handle);
                 exit;
             } else {
                 $this->session->data['error'] = 'Error: You Cannot to Download File '
