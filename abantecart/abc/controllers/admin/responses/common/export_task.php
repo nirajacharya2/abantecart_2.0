@@ -11,10 +11,12 @@ use abc\core\lib\AJson;
 use abc\core\lib\ATaskManager;
 use H;
 use ReflectionClass;
+use ZipArchive;
 
 class ControllerResponsesCommonExportTask extends AController
 {
     public $data = [];
+    protected $zipFile = '';
     protected $errors;
     /**
      * @var string
@@ -194,10 +196,21 @@ class ControllerResponsesCommonExportTask extends AController
         if ($task_result) {
             $tm->deleteTask($task_id);
             $rt = $this->rt();
-            $rt = str_replace('responses/', 'r/', $rt);
-            $result_text = '<a href="'.$this->html->getSecureURL($rt.'/downloadFile', '&file=export_'.$task_id.'.csv').'">'.
-                $this->language->get('text_export_task_download')
-                .'</a>';
+            $zip = new ZipArchive();
+            $filename = $this->getPublicExportFile($task_id);
+            if ($zip->open($filename, ZipArchive::CREATE)!==TRUE) {
+                $this->log->write('Can\'t open file for write '.$filename);
+                $result_text = $this->language->get('text_export_task_failed');
+            } else {
+                $zip->addFile($this->getExportFile($task_id), 'export_'.$task_id.'.csv');
+                $zip->close();
+                unlink($this->getExportFile($task_id));
+                $rt = str_replace('responses/', 'r/', $rt);
+                $downloadLink = $this->html->getHomeURL().'export/'.$this->zipFile;
+                $result_text = '<a href="'.$downloadLink.'">'.
+                    $this->language->get('text_export_task_download')
+                    .'</a>';
+            }
         } else {
             $result_text = $this->language->get('text_export_task_failed');
         }
@@ -296,7 +309,25 @@ class ControllerResponsesCommonExportTask extends AController
                 throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
             }
         }
+        if (!file_exists(ABC::env('DIR_PUBLIC').'resources'.DS.'download'.DS.'export')) {
+            if (!mkdir($concurrentDirectory = ABC::env('DIR_PUBLIC').'resources'.DS.'download'.DS.'export', 0775, true) && !is_dir($concurrentDirectory)) {
+                throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
+            }
+        }
 
         return ABC::env('DIR_SYSTEM').'export'.DS.'export_'.$taskId.'.csv';
+    }
+
+    private function getPublicExportFile($taskId)
+    {
+        if (!file_exists(ABC::env('DIR_PUBLIC').'export')) {
+            if (!mkdir($concurrentDirectory = ABC::env('DIR_PUBLIC').'export', 0775, true) && !is_dir($concurrentDirectory)) {
+                throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
+            }
+        }
+
+        $this->zipFile = 'export_'.$taskId.microtime(true).'.zip';
+
+        return ABC::env('DIR_PUBLIC').'export'.DS.$this->zipFile;
     }
 }
