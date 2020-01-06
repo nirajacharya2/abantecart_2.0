@@ -89,8 +89,7 @@ class ControllerResponsesCommonExportTask extends AController
             } else {
                 $this->errors[] = isset($response['error_text']) ? $response['error_text'] : '';
             }
-        } catch (\Exception $exception)
-        {
+        } catch (\Exception $exception) {
             Registry::log()->write($exception->getMessage());
         }
 
@@ -133,10 +132,10 @@ class ControllerResponsesCommonExportTask extends AController
                 'max_execution_time' => $timePerItem * $limit,
                 'controller'         => $this->exportTaskController.'/export',
                 'settings'           => [
-                    'start' => $i * $limit - $limit,
-                    'limit' => $limit,
-                    'file' => $this->getExportFile($task_id),
-                    'request' => $this->request->get
+                    'start'   => $i * $limit - $limit,
+                    'limit'   => $limit,
+                    'file'    => $this->getExportFile($task_id),
+                    'request' => $this->request->get,
                 ],
             ));
 
@@ -195,22 +194,15 @@ class ControllerResponsesCommonExportTask extends AController
         $task_result = $task_info['last_result'];
         if ($task_result) {
             $tm->deleteTask($task_id);
-            $rt = $this->rt();
-            $zip = new ZipArchive();
-            $filename = $this->getPublicExportFile($task_id);
-            if ($zip->open($filename, ZipArchive::CREATE)!==TRUE) {
-                $this->log->write('Can\'t open file for write '.$filename);
-                $result_text = $this->language->get('text_export_task_failed');
-            } else {
-                $zip->addFile($this->getExportFile($task_id), 'export_'.$task_id.'.csv');
-                $zip->close();
-                unlink($this->getExportFile($task_id));
-                $rt = str_replace('responses/', 'r/', $rt);
-                $downloadLink = $this->html->getHomeURL().'export/'.$this->zipFile;
-                $result_text = '<a href="'.$downloadLink.'">'.
-                    $this->language->get('text_export_task_download')
-                    .'</a>';
-            }
+            //$rt = $this->rt();
+            rename($this->getExportFile($task_id), $this->getPublicExportFile($task_id));
+            unlink($this->getExportFile($task_id));
+            //$rt = str_replace('responses/', 'r/', $rt);
+            $downloadLink = $this->html->getHomeURL().'export/'.$this->zipFile;
+            $result_text = '<a href="'.$downloadLink.'">'.
+                $this->language->get('text_export_task_download')
+                .'</a>';
+
         } else {
             $result_text = $this->language->get('text_export_task_failed');
         }
@@ -326,7 +318,7 @@ class ControllerResponsesCommonExportTask extends AController
             }
         }
 
-        $this->zipFile = 'export_'.$taskId.microtime(true).'.zip';
+        $this->zipFile = 'export_'.$taskId.microtime(true).'.csv';
 
         return ABC::env('DIR_PUBLIC').'export'.DS.$this->zipFile;
     }
