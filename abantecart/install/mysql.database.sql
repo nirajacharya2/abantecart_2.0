@@ -13626,7 +13626,8 @@ CREATE TABLE `ac_audit_event_descriptions` (
   `field_name` varchar(128) NOT NULL,
   `old_value` text,
   `new_value` text,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `ac_audit_event_id_idx` (`audit_event_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `ac_audit_events`;
@@ -13641,7 +13642,9 @@ CREATE TABLE `ac_audit_events` (
   `main_auditable_id` int(11) DEFAULT NULL,
   `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `request_id_UNIQUE` (`request_id`,`audit_user_id`,`event_type_id`,`main_auditable_model_id`,`main_auditable_id`)
+  UNIQUE KEY `request_id_UNIQUE` (`request_id`,`audit_user_id`,`event_type_id`,`main_auditable_model_id`,`main_auditable_id`),
+  KEY `ac_audit_events_main_auditable_id_idx` (`main_auditable_id`),
+  KEY `ac_audit_events_date_added_event_idx` (`date_added`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `ac_audit_models`;
