@@ -9899,12 +9899,15 @@ CREATE INDEX `ac_product_specials_idx` ON `ac_product_specials` ( `product_id`, 
 -- DDL for table `product_tags`
 --
 CREATE TABLE `ac_product_tags` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `product_id` int(11) NOT NULL,
-  `tag` varchar(32) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
-  `language_id` int(11) NOT NULL,
-  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `stage_id` INT(6) NULL,
+  `id`            int(11)                             NOT NULL AUTO_INCREMENT,
+  `product_id`    int(11)                             NOT NULL,
+  `tag`           varchar(32) COLLATE utf8_general_ci NOT NULL COMMENT 'translatable',
+  `language_id`   int(11)                             NOT NULL,
+  `date_added`    timestamp                           NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp                           NULL     DEFAULT CURRENT_TIMESTAMP
+  ON UPDATE CURRENT_TIMESTAMP,
+  `date_deleted`  timestamp                           NULL,
+  `stage_id`      INT(6)                              NULL,
   PRIMARY KEY  (`id`,`product_id`,`tag`,`language_id`),
   INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -13585,6 +13588,16 @@ CREATE TABLE `ac_audit_users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_userid_indx` (`id`,`name`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+ALTER TABLE `ac_audit_event_descriptions`
+  ADD INDEX `ac_audit_event_descriptions_fk_idx` (`audit_event_id` ASC);
+ALTER TABLE `ac_audit_event_descriptions`
+  ADD CONSTRAINT `ac_audit_event_descriptions_fk`
+FOREIGN KEY (`audit_event_id`)
+REFERENCES `ac_audit_events` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
 
 ALTER TABLE `ac_downloads`
 ADD CONSTRAINT `ac_downloads_order_status_fk`

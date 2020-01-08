@@ -5,17 +5,10 @@ namespace abc\modules\listeners;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\contracts\AuditLogStorageInterface;
-use abc\core\lib\OSUser;
 use abc\core\lib\UserResolver;
 use abc\models\BaseModel;
 use abc\models\catalog\Product;
-use abc\models\system\AuditEvent;
-use abc\models\system\AuditModel;
-use abc\models\system\AuditUser;
 use abc\models\user\User;
-use H;
-use Illuminate\Cache\CacheManager;
-use Illuminate\Support\Facades\Cache;
 use ReflectionClass;
 
 class ModelAuditListener
@@ -359,12 +352,15 @@ class ModelAuditListener
         ];
 
         foreach ($eventDescription as $item) {
+            if ((string)$item['old_value'] === (string)$item['new_value']) {
+                continue;
+            }
             $data['changes'][] = [
-              'name' => $item['field_name'],
-              'groupId' => $item['auditable_id'],
-              'groupName' => $item['auditable_model_name'],
-              'oldValue' => $item['old_value'],
-              'newValue' => $item['new_value'],
+                'name'      => $item['field_name'],
+                'groupId'   => $item['auditable_id'],
+                'groupName' => $item['auditable_model_name'],
+                'oldValue'  => $item['old_value'],
+                'newValue'  => $item['new_value'],
             ];
         }
 

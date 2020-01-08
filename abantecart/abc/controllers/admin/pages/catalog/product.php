@@ -341,12 +341,16 @@ class ControllerPagesCatalogProduct extends AController
 
         $this->document->setTitle($this->language->get('heading_title'));
         if ($this->request->is_POST() && $this->validateForm()) {
-            $product_data = $this->prepareData($this->request->post);
-            $product_id = Product::createProduct($product_data);
-            $this->data['product_id'] = $product_id;
-            $this->extensions->hk_ProcessData($this, 'product_insert');
-            $this->session->data['success'] = $this->language->get('text_success');
-            abc_redirect($this->html->getSecureURL('catalog/product/update', '&product_id='.$product_id));
+            try {
+                $product_data = $this->prepareData($this->request->post);
+                $product = Product::createProduct($product_data);
+                $this->data['product_id'] = $product->product_id;
+                $this->extensions->hk_ProcessData($this, 'product_insert');
+                $this->session->data['success'] = $this->language->get('text_success');
+                abc_redirect($this->html->getSecureURL('catalog/product/update', '&product_id='.$product->product_id));
+            } catch (\Exception $e) {
+                $this->log->error($e->getMessage()."\n".$e->getTraceAsString());
+            }
         }
 
         if (isset($this->data['oldForm']) && $this->data['oldForm'] === true) {

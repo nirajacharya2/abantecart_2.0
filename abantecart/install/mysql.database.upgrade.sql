@@ -488,7 +488,8 @@ ALTER TABLE `ac_block_descriptions`
 MODIFY COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP;
 
 ALTER TABLE `ac_block_descriptions`
-MODIFY COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP
+  MODIFY COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+  ON UPDATE CURRENT_TIMESTAMP;
 
 ALTER TABLE `ac_block_layouts`
 MODIFY COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP;
@@ -1785,10 +1786,13 @@ ADD INDEX `stage_id` (`stage_id` ASC);
 
 ALTER TABLE `ac_product_tags`
 ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+ON UPDATE CURRENT_TIMESTAMP,
+  ADD COLUMN `date_deleted` timestamp NULL,
 ADD COLUMN `stage_id` INT(6) NULL,
 ADD COLUMN `id` INT NOT NULL AUTO_INCREMENT FIRST,
   DROP PRIMARY KEY,
-  ADD PRIMARY KEY (`id`,`product_id`,`tag`,`language_id`)
+  ADD PRIMARY KEY (`id`, `product_id`, `tag`, `language_id`),
 ADD INDEX `stage_id` (`stage_id` ASC),
 ADD FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
 ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;

@@ -4,6 +4,7 @@ namespace abc\models\catalog;
 
 use abc\models\BaseModel;
 use abc\models\locale\Language;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class ProductTag
@@ -19,9 +20,12 @@ use abc\models\locale\Language;
  */
 class ProductTag extends BaseModel
 {
+    use SoftDeletes;
     protected $primaryKey = 'id';
 
-    public $timestamps = false;
+    protected $mainClassName = Product::class;
+    protected $mainClassKey = 'product_id';
+
     protected $touches = ['product'];
     protected $primaryKeySet = [
         'product_id',
@@ -37,6 +41,8 @@ class ProductTag extends BaseModel
 
     protected $dates = [
         'date_added',
+        'date_modified',
+        'date_deleted',
     ];
 
     protected $fillable = [

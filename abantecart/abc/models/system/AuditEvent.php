@@ -21,7 +21,9 @@ class AuditEvent extends BaseModel
         'saved'                  => 12,
         'restoring'              => 13,
         'restored'               => 14,
-        'forceDeleting'              => 15,
+        //Note: forceDeleting event not fired from softDelete trait!
+        //Name is just reserved!
+        //'forceDeleting'              => 15,
         'forceDeleted'               => 16,
     ];
 

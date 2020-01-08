@@ -1587,7 +1587,7 @@ class Product extends BaseModel
     /**
      * @param array $product_data
      *
-     * @return int
+     * @return Product
      * @throws Exception
      */
     public static function createProduct(array $product_data)
@@ -1604,8 +1604,8 @@ class Product extends BaseModel
 
             UrlAlias::setProductKeyword($product_data['keyword'] ?: $product_data['product_description']['name'], $productId);
             self::updateProductLinks($product, $product_data);
-            return $productId;
         }
+        return $product;
     }
 
     /**
@@ -2285,9 +2285,14 @@ class Product extends BaseModel
         $IDs = is_array($IDs) ? $IDs : func_get_args();
         $arr = [];
         foreach ($IDs as $id) {
+
             $arr[] = 'product_id='.$id;
         }
-        UrlAlias::whereIn('query', $arr)->forceDelete();
+
+        $aliases = UrlAlias::whereIn('query', $arr)
+                           ->pluck('url_alias_id');
+        UrlAlias::destroy($aliases);
+
         return parent::destroy($IDs);
     }
 
@@ -2295,12 +2300,11 @@ class Product extends BaseModel
      * @return bool|null
      * @throws Exception
      */
-    /* public function delete()
+    public function delete()
      {
-         UrlAlias::where('query', '=', 'product_id='.$this->getKey())
-                 ->forceDelete();
+         UrlAlias::where('query', '=', 'product_id='.$this->getKey())->delete();
          return parent::delete();
-     }*/
+     }
 
     /**
      * @param array $data

@@ -260,6 +260,13 @@ class BaseModel extends OrmModel
         }
     }
 
+    /**
+     * @return bool
+     */
+    public function isForceDeleting()
+    {
+        return $this->forceDeleting;
+    }
 
     /**
      * Boot
@@ -415,6 +422,7 @@ class BaseModel extends OrmModel
      * @throws ValidationException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function validate(array $data= [], array $messages = [], array $customAttributes = [])
     {

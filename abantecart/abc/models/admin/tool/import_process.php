@@ -361,7 +361,8 @@ class ModelToolImportProcess extends Model
                     $product_data[$key] = isset($product_data[$key]) ? $product_data[$key] : $val;
                 }
 
-                $product_id = Product::createProduct($product_data);
+                $productModel = Product::createProduct($product_data);
+                $product_id = $productModel->product_id;
                 if ($product_id) {
                     $this->toLog("Created product '".$product_desc['name']."' with ID ".$product_id);
                     $status = true;
