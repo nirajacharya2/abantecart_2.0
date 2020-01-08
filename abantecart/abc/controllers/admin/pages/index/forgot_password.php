@@ -185,7 +185,7 @@ class ControllerPagesIndexForgotPassword extends AController
         //validate token
 
         $enc = ABC::getObjectByAlias('AEncryption', [$this->config->get('encryption_key')]);
-        list($username, $hash) = explode("::", $enc->decrypt($this->request->get['rtoken']));
+        list($username, $hash) = explode("::", $enc->decrypt((string)$this->request->get['rtoken']));
         //get hash from dataset
         $dataset = new ADataset('admin_pass_reset', $username, 'silent');
         $reset_data = $dataset->getDatasetProperties();

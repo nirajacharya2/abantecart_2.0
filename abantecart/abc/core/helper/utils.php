@@ -2035,7 +2035,7 @@ class AHelperUtils extends AHelper
          * @var AEncryption $enc
          */
         $enc = ABC::getObjectByAlias('AEncryption', [$config->get('encryption_key')]);
-        $decrypted = $enc->decrypt( $ot );
+        $decrypted = $enc->decrypt( (string)$ot );
         list( $order_id, $email ) = explode( '::', $decrypted );
 
         $order_id = (int)$order_id;

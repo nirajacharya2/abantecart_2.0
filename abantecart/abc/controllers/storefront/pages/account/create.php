@@ -411,7 +411,7 @@ class ControllerPagesAccountCreate extends AController
          */
         $enc = ABC::getObjectByAlias('AEncryption', [$this->config->get('encryption_key')]);
 
-        list($customer_id, $activation_code) = explode("::", $enc->decrypt($this->request->get['rid']));
+        list($customer_id, $activation_code) = explode("::", $enc->decrypt((string)$this->request->get['rid']));
         if ($customer_id && $activation_code) {
             $customer = Customer::find($customer_id);
             $customer_info = $customer->toArray();
