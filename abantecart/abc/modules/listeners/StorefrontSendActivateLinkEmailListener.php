@@ -95,7 +95,7 @@ class StorefrontSendActivateLinkEmailListener
             $mail->setFrom($store_info->store_main_email);
             $mail->setSender($store_info->store_name);
 
-            $mail->setTemplate('storefront_send_activate_link', $this->data);
+            $mail->setTemplate('storefront_send_activate_link', $this->data, $this->registry->get('language')->getLanguageID());
 
             if (is_file(ABC::env('DIR_RESOURCES').$store_info->config_mail_logo)) {
                 $mail->addAttachment(

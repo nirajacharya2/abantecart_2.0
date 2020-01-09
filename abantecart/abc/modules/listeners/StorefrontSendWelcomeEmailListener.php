@@ -72,9 +72,9 @@ class StorefrontSendWelcomeEmailListener
             $mail->setFrom($store_info->store_main_email);
             $mail->setSender($store_info->store_name);
             if ( $customer_info['activated'] ) {
-                $mail->setTemplate('storefront_welcome_email_activated', $this->data);
+                $mail->setTemplate('storefront_welcome_email_activated', $this->data, $this->registry->get('language')->getLanguageID());
             } else {
-                $mail->setTemplate('storefront_welcome_email_approval', $this->data);
+                $mail->setTemplate('storefront_welcome_email_approval', $this->data, $this->registry->get('language')->getLanguageID());
             }
 
             if (is_file(ABC::env('DIR_RESOURCES').$store_info->config_mail_logo)) {
