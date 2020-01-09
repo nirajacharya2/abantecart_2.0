@@ -25,7 +25,7 @@ use Illuminate\Validation\ValidationException;
 class AdminOrderUpdateProductStatusesChange
 {
 
-    protected $registry, $data;
+    public $registry, $data;
     protected $db;
 
     public function __construct()
@@ -316,17 +316,11 @@ class AdminOrderUpdateProductStatusesChange
             Registry::extensions()->hk_ProcessData($this, 'sf_order_confirm_mail');
 
 
-            //allow to change email data from extensions
-            Registry::extensions()->hk_ProcessData($this, 'sf_order_confirm_mail_text');
-
             $mail = new AMail($config);
             $mail->setTo($order_info['email']);
             $mail->setFrom($config->get('store_main_email'));
             $mail->setSender($order_info['store_name']);
             $mail->setTemplate('admin_order_update_product_statuses', $this->data);
-            if (is_file(ABC::env('DIR_RESOURCES').$config_mail_logo)) {
-                $mail->addAttachment(ABC::env('DIR_RESOURCES').$config_mail_logo);
-            }
             $mail->send();
 
             //send alert email for merchant
