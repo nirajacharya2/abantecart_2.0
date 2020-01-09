@@ -170,7 +170,7 @@ class ControllerPagesAccountForgotten extends AController
         $this->document->setTitle($this->language->get('heading_title'));
 
         //validate token
-        $rtoken = $this->request->get['rtoken'];
+        $rtoken = (string)$this->request->get['rtoken'];
         /**
          * @var AEncryption $enc
          */
