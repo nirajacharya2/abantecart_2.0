@@ -16,7 +16,7 @@ use H;
 class AdminSendOrderStatusNotifyEmailListener
 {
 
-    protected $registry, $data;
+    public $registry, $data;
     protected $db;
 
     public function __construct()

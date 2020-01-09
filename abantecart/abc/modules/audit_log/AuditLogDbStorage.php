@@ -71,7 +71,7 @@ class AuditLogDbStorage implements AuditLogStorageInterface
             }
             $event['audit_user_id'] = $auditUserId;
             $event['request_id'] = $data['id'];
-            $event['event_type_id'] = AuditEvent::EVENT_NAMES[$data['entity']['group']];
+            $event['event_type_id'] = AuditEvent::EVENT_NAMES[$data['entity']['group']] ?: 1;
             $event['main_auditable_model_id'] = $data['entity']['model_id'];
             $event['main_auditable_id'] = $data['entity']['id'];
 
