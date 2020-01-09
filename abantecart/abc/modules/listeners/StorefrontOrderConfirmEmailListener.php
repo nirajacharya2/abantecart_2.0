@@ -238,19 +238,11 @@ class StorefrontOrderConfirmEmailListener
             //allow to change email data from extensions
             Registry::extensions()->hk_ProcessData($this, 'sf_order_confirm_mail');
 
-            //allow to change email data from extensions
-            Registry::extensions()->hk_ProcessData($this, 'sf_order_confirm_mail_text');
-
-
-
             $mail = new AMail($config);
             $mail->setTo($order_info['email']);
             $mail->setFrom($config->get('store_main_email'));
             $mail->setSender($order_info['store_name']);
             $mail->setTemplate('storefront_order_confirm', $this->data);
-            if (is_file(ABC::env('DIR_RESOURCES').$config_mail_logo)) {
-                $mail->addAttachment(ABC::env('DIR_RESOURCES').$config_mail_logo);
-            }
             $mail->send();
 
             //send alert email for merchant
@@ -258,8 +250,6 @@ class StorefrontOrderConfirmEmailListener
 
                 //allow to change email data from extensions
                 Registry::extensions()->hk_ProcessData($this, 'sf_order_confirm_alert_mail');
-
-                Registry::extensions()->hk_ProcessData($this, 'sf_order_confirm_alert_mail_text');
 
                 $order_total = '';
                 foreach ($orderTotals->toArray() as $row) {
