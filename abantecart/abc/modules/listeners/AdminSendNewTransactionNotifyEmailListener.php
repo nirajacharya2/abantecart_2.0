@@ -62,15 +62,9 @@ class AdminSendNewTransactionNotifyEmailListener
 
                     //build plain text email
                     $amount = $this->registry->get('currency')->format($data['credit'] - $data['debit']);
-                    $this->data['mail_plain_text'] = sprintf(
-                            $language->get('text_transaction_notification_message'),
-                            $store_info->store_name,
-                            $amount,
-                            $store_info->store_name
-                        )."\n\n";
+                    $this->data['store_name'] = $store_info->store_name;
+                    $this->data['amount'] = $amount;
 
-                    $subject =
-                        sprintf($language->get('text_transaction_notification_subject'), $store_info->store_name);
 
                     //allow to change email data from extensions
                     $this->registry->get('extensions')->hk_ProcessData($this, 'cp_customer_transaction_notify_mail');
@@ -79,9 +73,7 @@ class AdminSendNewTransactionNotifyEmailListener
                     $mail->setTo($customer_info->email);
                     $mail->setFrom($config->get('store_main_email'));
                     $mail->setSender($store_info->store_name);
-                    $mail->setSubject($subject);
-                    $mail->setText(html_entity_decode($this->data['mail_plain_text'], ENT_QUOTES,
-                        ABC::env('APP_CHARSET')));
+                    $mail->setTemplate('admin_new_transaction_notify', $this->data, $this->registry->get('language')->getContentLanguageID());
                     $mail->send();
 
                     //notify customer

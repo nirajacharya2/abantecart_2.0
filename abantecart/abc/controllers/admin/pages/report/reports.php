@@ -212,6 +212,11 @@ class ControllerPagesReportReports extends AController
                     $gridSettings['colModel'] = $reflectionMethod->invoke($classObj);
                 }
 
+                if ($reflection->hasMethod('getTaskData')) {
+                    $reflectionMethod = new ReflectionMethod($className, 'getTaskData');
+                    $this->view->assign('taskData', $reflectionMethod->invoke($classObj));
+                }
+
                 $grid = $this->dispatch('common/listing_grid', [$gridSettings]);
                 $this->view->assign('listing_grid', $grid->dispatchGetOutput());
 

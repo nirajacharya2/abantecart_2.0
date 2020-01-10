@@ -12,7 +12,7 @@ use Illuminate\Validation\ValidationException;
 class AdminOrderUpdateTotalBalance
 {
 
-    protected $registry, $data;
+    public $registry, $data;
     protected $db;
 
     public function __construct()

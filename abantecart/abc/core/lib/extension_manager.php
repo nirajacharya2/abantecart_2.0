@@ -21,7 +21,7 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\commands\Publish;
 use abc\core\engine\ExtensionUtils;
-use abc\core\helper\AHelperUtils;
+use \H;
 use abc\core\engine\Registry;
 use Exception;
 
@@ -399,7 +399,7 @@ class AExtensionManager
 
             //Special case.
             //Check that we have single mode RL with ID
-            if (AHelperUtils::has_value($data[$key."_resource_id"]) && !AHelperUtils::has_value($value)) {
+            if (H::has_value($data[$key."_resource_id"]) && !H::has_value($value)) {
                 //save ID if resource path is missing
                 $value = $data[$key."_resource_id"];
             }
@@ -454,10 +454,14 @@ class AExtensionManager
      */
     public function deleteSetting($group)
     {
-        $this->db->query("DELETE FROM ".$this->db->table_name("settings")." WHERE `group` = '".$this->db->escape($group)
-            ."';");
-        $this->db->query("DELETE FROM ".$this->db->table_name("language_definitions")." WHERE `block` = '"
-            .$this->db->escape($group)."_".$this->db->escape($group)."';");
+        $this->db->query(
+            "DELETE FROM ".$this->db->table_name("settings")
+            ." WHERE `group` = '".$this->db->escape($group)."';"
+        );
+        $this->db->query(
+            "DELETE FROM ".$this->db->table_name("language_definitions")
+            ." WHERE `block` = '".$this->db->escape($group)."_".$this->db->escape($group)."';"
+        );
         $this->cache->remove('settings');
         $this->cache->remove('extensions');
         $this->cache->remove('localization');
@@ -479,6 +483,10 @@ class AExtensionManager
         $ext = new ExtensionUtils($name);
         // gets extension_id for install.php
         $extension_info = $this->getExtensionsList(['search' => $name]);
+        if(!$extension_info->row){
+            throw new Exception('Extension '.$name .' not found!');
+        }
+
         $validate = $this->validateCoreVersion($extension_info->row['key'], $config);
         $this->errors += $ext->getError();
 
@@ -510,11 +518,15 @@ class AExtensionManager
 
         // running php install script if it exists
         if (isset($config->install->trigger)) {
-            $file = ABC::env('DIR_APP_EXTENSIONS').str_replace('../', '', $name).'/'.(string)$config->install->trigger;
+            $file = ABC::env('DIR_APP_EXTENSIONS')
+                    .str_replace('../', '', $name)
+                    .'/'
+                    .(string)$config->install->trigger;
+
             if (is_file($file)) {
                 try {
                     include($file);
-                } catch (AException $e) {
+                } catch (\Exception $e) {
                     $this->errors[] = $e->getMessage();
                     return false;
                 }
@@ -572,10 +584,12 @@ class AExtensionManager
     }
 
     /**
-     * @param string                       $name
+     * @param string $name
      * @param \DOMNode | \SimpleXMLElement $config
      *
      * @return bool|null
+     * @throws AException
+     * @throws \ReflectionException
      */
     public function uninstall($name, $config)
     {
@@ -608,7 +622,7 @@ class AExtensionManager
             if (is_file($file)) {
                 try {
                     include($file);
-                } catch (AException $e) {
+                } catch (\Exception $e) {
                     $this->errors[] = $e->getMessage();
                     return false;
                 }
@@ -639,6 +653,7 @@ class AExtensionManager
      *
      * @return bool
      * @throws AException
+     * @throws \ReflectionException
      */
     public function delete($extension_txt_id)
     {
@@ -690,6 +705,7 @@ class AExtensionManager
      * @param string $extension_txt_id
      *
      * @return bool
+     * @throws \ReflectionException
      */
     public function validate($extension_txt_id)
     {
@@ -698,7 +714,7 @@ class AExtensionManager
             return false;
         }
         // get config.xml
-        $config = AHelperUtils::getExtensionConfigXml($extension_txt_id);
+        $config = H::getExtensionConfigXml($extension_txt_id);
         $result = $this->validateCoreVersion($extension_txt_id, $config);
         if (!$result) {
             return false;
@@ -759,8 +775,8 @@ class AExtensionManager
             // if extension installed - check version that need
             if ($version) {
                 if ($required
-                    && (!AHelperUtils::versionCompare($version, $versions[$item], '>=')
-                        || !AHelperUtils::versionCompare($prior_version, $versions[$item], '<='))) {
+                    && (!H::versionCompare($version, $versions[$item], '>=')
+                        || !H::versionCompare($prior_version, $versions[$item], '<='))) {
                     $this->errors[] =
                         sprintf('%s extension cannot be installed: %s extension versions '.$prior_version.' - '.$version
                             .' are required', $extension_txt_id, $item);
@@ -792,7 +808,7 @@ class AExtensionManager
             /**
              * @var \DOMNode $config
              */
-            $config = AHelperUtils::getExtensionConfigXml($extension);
+            $config = H::getExtensionConfigXml($extension);
             if (!isset($config->dependencies->item)) {
                 continue;
             }
@@ -836,12 +852,12 @@ class AExtensionManager
      *
      * @return bool
      */
-    public function validateCoreVersion($extension_txt_id, $config)
+    public function validateCoreVersion(string $extension_txt_id, \DOMNode $config)
     {
         $this->errors = [];
         if (!isset($config->cartversions->item)) {
-            $this->errors[] =
-                'Error: config file of extension does not contain any information about versions of AbanteCart where it can be run.';
+            $this->errors[] = 'Error: config file of extension does not contain any information'
+                            .' about versions of AbanteCart where it can be run.';
             return false;
         }
         $cart_versions = [];
@@ -851,7 +867,7 @@ class AExtensionManager
         }
         // check is cart version presents on extension cart version list
         foreach ($cart_versions as $version) {
-            $result = AHelperUtils::versionCompare(ABC::env('VERSION'), $version, '>=')
+            $result = H::versionCompare(ABC::env('VERSION'), $version, '>=')
                 && version_compare($version, '2.0.0', '>');
             if ($result) {
                 return true;
@@ -859,7 +875,7 @@ class AExtensionManager
         }
         // if not - seek cart earlier version then current cart version in the list
         foreach ($cart_versions as $version) {
-            $result = (AHelperUtils::versionCompare($version, ABC::env('VERSION'), '<=')
+            $result = (H::versionCompare($version, ABC::env('VERSION'), '<=')
                 && version_compare($version, '2.0.0', '<='));
             if ($result) {
                 $error_text = 'Extension "%s" written for earlier version of Abantecart (v.%s) lower that you have. ';

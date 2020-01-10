@@ -102,7 +102,7 @@ class ControllerPagesAccountLogin extends AController
              * @var AEncryption $enc
              */
             $enc = ABC::getObjectByAlias('AEncryption', [$this->config->get('encryption_key')]);
-            list( $customer_id, $activation_code ) = explode( "::", $enc->decrypt( $this->request->get['ac'] ) );
+            list( $customer_id, $activation_code ) = explode( "::", $enc->decrypt( (string)$this->request->get['ac'] ) );
             if ( $customer_id && $activation_code ) {
                 //get customer
                 $customer = Customer::find( (int)$customer_id );

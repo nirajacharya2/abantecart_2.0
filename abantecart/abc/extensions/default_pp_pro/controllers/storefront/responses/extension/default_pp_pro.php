@@ -400,7 +400,7 @@ class ControllerResponsesExtensionDefaultPPPro extends AController
                 if ( $option['type'] != 'file' ) {
                     $value = $option['value'];
                 } else {
-                    $filename = $encryption->decrypt( $option['value'] );
+                    $filename = $encryption->decrypt( (string)$option['value'] );
                     $value = mb_substr( $filename, 0, mb_strrpos( $filename, '.' ) );
                 }
 
