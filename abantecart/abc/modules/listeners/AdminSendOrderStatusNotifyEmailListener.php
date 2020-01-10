@@ -120,7 +120,7 @@ class AdminSendOrderStatusNotifyEmailListener
         $mail->setTo($customer_email);
         $mail->setFrom($config->get('store_main_email'));
         $mail->setSender($orderInfo['store_name']);
-        $mail->setTemplate('admin_order_status_notify', $this->data);
+        $mail->setTemplate('admin_order_status_notify', $this->data, $orderInfo['language_id']);
         $mail->send();
 
         //send IMs except emails.

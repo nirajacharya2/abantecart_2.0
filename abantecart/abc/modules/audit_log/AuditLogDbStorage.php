@@ -90,6 +90,9 @@ class AuditLogDbStorage implements AuditLogStorageInterface
 
             if ($eventId) {
                 foreach ($data['changes'] as $change) {
+                    if (!$change['groupName']) {
+                        $change['groupName'] = $change['name'];
+                    }
                     $model = $db->table('audit_models')
                         ->where('name', '=', $change['groupName'])
                         ->first();
@@ -280,7 +283,6 @@ class AuditLogDbStorage implements AuditLogStorageInterface
                 ->toArray();
         }
 
-        //\H::df($this->db->getQueryLog());
 
         foreach ($this->data['response']['items'] as &$item) {
             if ($item['old_value'] === null) {

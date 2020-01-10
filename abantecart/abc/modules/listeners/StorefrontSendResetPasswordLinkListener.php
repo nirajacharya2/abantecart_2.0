@@ -52,7 +52,7 @@ class StorefrontSendResetPasswordLinkListener
             $mail->setTo($customer_info['email']);
             $mail->setFrom($store_info->store_main_email);
             $mail->setSender($store_info->store_name);
-            $mail->setTemplate('storefront_reset_password_link', $this->data);
+            $mail->setTemplate('storefront_reset_password_link', $this->data, $this->registry->get('language')->getLanguageID());
             $mail->send();
         }
 

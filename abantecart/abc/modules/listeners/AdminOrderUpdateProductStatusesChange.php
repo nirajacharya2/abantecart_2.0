@@ -320,7 +320,7 @@ class AdminOrderUpdateProductStatusesChange
             $mail->setTo($order_info['email']);
             $mail->setFrom($config->get('store_main_email'));
             $mail->setSender($order_info['store_name']);
-            $mail->setTemplate('admin_order_update_product_statuses', $this->data);
+            $mail->setTemplate('admin_order_update_product_statuses', $this->data, $order_info['language_id']);
             $mail->send();
 
             //send alert email for merchant
