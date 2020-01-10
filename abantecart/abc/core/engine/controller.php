@@ -176,7 +176,7 @@ abstract class AController
     {
         if (isset($this->language)) {
             //clean up the scope
-            $this->language->set_language_scope([]);
+            $this->language->setLanguageScope([]);
         }
         $this->clear();
     }
