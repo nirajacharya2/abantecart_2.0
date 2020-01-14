@@ -207,7 +207,7 @@ class ModelToolImportProcess extends Model
             $this->errors = [];
 
             //allow to change list from hooks
-            $this->extensions->hk_ProcessData($this, __FUNCTION__);
+            $this->extensions->hk_InitData($this, __FUNCTION__);
 
             $result = false;
             if (empty($this->errors)) {
@@ -219,6 +219,8 @@ class ModelToolImportProcess extends Model
             }
 
             $this->db->commit();
+            //allow to run additional actions from hooks
+            $this->extensions->hk_ProcessData($this, __FUNCTION__);
             return $result;
         } catch (\Exception $e) {
             $this->db->rollback();
@@ -398,6 +400,7 @@ class ModelToolImportProcess extends Model
                 $product_data['weight_class_id']
             );
 
+            $this->data['product_data']['product_id'] = $product_id;
             if ($status) {
                 //call event
                 H::event(__CLASS__.'@'.__FUNCTION__, [new ABaseEvent($this->task_id, $product_id, $data, $record)]);
