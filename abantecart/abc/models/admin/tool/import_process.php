@@ -181,8 +181,6 @@ class ModelToolImportProcess extends Model
      * @param $settings
      *
      * @return bool
-     * @throws \abc\core\lib\AException
-     * @throws \ReflectionException
      */
     public function process_products_record($task_id, $data, $settings)
     {
@@ -1560,7 +1558,7 @@ class ModelToolImportProcess extends Model
             ],
         ];
         //allow to change list from hooks
-        $this->extensions->hk_ProcessData($this, __FUNCTION__);
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
         return $this->data['output'];
     }
