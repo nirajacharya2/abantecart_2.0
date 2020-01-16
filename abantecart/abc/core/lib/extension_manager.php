@@ -21,6 +21,7 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\commands\Publish;
 use abc\core\engine\ExtensionUtils;
+use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 use Exception;
 use H;
@@ -488,6 +489,10 @@ class AExtensionManager
         $ext = new ExtensionUtils($name);
         // gets extension_id for install.php
         $extension_info = $this->getExtensionsList(['search' => $name]);
+        if(!$extension_info->row){
+            throw new Exception('Extension '.$name .' not found!');
+        }
+
         $validate = $this->validateCoreVersion($extension_info->row['key'], $config);
         $this->errors += $ext->getError();
 
@@ -519,7 +524,11 @@ class AExtensionManager
 
         // running php install script if it exists
         if (isset($config->install->trigger)) {
-            $file = ABC::env('DIR_APP_EXTENSIONS').str_replace('../', '', $name).'/'.(string)$config->install->trigger;
+            $file = ABC::env('DIR_APP_EXTENSIONS')
+                    .str_replace('../', '', $name)
+                    .'/'
+                    .(string)$config->install->trigger;
+
             if (is_file($file)) {
                 try {
                     include($file);
@@ -854,12 +863,12 @@ class AExtensionManager
      *
      * @return bool
      */
-    public function validateCoreVersion($extension_txt_id, $config)
+    public function validateCoreVersion(string $extension_txt_id, \DOMNode $config)
     {
         $this->errors = [];
         if (!isset($config->cartversions->item)) {
-            $this->errors[] =
-                'Error: config file of extension does not contain any information about versions of AbanteCart where it can be run.';
+            $this->errors[] = 'Error: config file of extension does not contain any information'
+                            .' about versions of AbanteCart where it can be run.';
             return false;
         }
         $cart_versions = [];

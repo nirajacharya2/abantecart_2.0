@@ -81,7 +81,7 @@ class AuditLogDbStorage implements AuditLogStorageInterface
             }
             $event['audit_user_id'] = $auditUserId;
             $event['request_id'] = $data['id'];
-            $event['event_type_id'] = AuditEvent::EVENT_NAMES[$data['entity']['group']];
+            $event['event_type_id'] = AuditEvent::EVENT_NAMES[$data['entity']['group']] ?: 1;
             $event['main_auditable_model_id'] = $data['entity']['model_id'];
             $event['main_auditable_id'] = $data['entity']['id'];
 
@@ -103,6 +103,9 @@ class AuditLogDbStorage implements AuditLogStorageInterface
 
             if ($eventId) {
                 foreach ($data['changes'] as $change) {
+                    if (!$change['groupName']) {
+                        $change['groupName'] = $change['name'];
+                    }
                     $model = $db->table('audit_models')
                         ->where('name', '=', $change['groupName'])
                         ->first();
@@ -318,7 +321,6 @@ class AuditLogDbStorage implements AuditLogStorageInterface
                 ->toArray();
         }
 
-        //\H::df($this->db->getQueryLog());
 
         foreach ($this->data['response']['items'] as &$item) {
             if ($item['old_value'] === null) {

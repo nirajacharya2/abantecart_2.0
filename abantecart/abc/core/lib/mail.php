@@ -23,6 +23,8 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\models\customer\CustomerCommunication;
+use abc\models\system\EmailTemplate;
+use Mustache_Engine;
 
 class AMail
 {
@@ -47,6 +49,13 @@ class AMail
     protected $html;
     protected $attachments = [];
     protected $headers = [];
+
+    protected $placeholders = [];
+    /**
+     * @var EmailTemplate
+     */
+    protected $emailTemplate;
+
     /**
      * @var AMessage
      */
@@ -155,6 +164,66 @@ class AMail
         $this->html = $html;
     }
 
+    public function setTemplate($text_id, array $placeholders = [], $languageId = 1)
+    {
+        $text_id = trim($text_id);
+        if (empty($text_id)) {
+            $this->log->write('Email text id can\'t be empmty');
+            return;
+        }
+
+        if (!preg_match("/(^[\w]+)$/i", $text_id)) {
+            $this->log->write('Email text id "'.$text_id.'" must be in one word without spaces, underscores are allowed');
+            return;
+        }
+
+        $emailTemplate = EmailTemplate::where('text_id', '=', $text_id)
+            ->where('language_id', '=', $languageId)
+            ->where('status', '=', 1)
+            ->get()
+            ->first();
+        if (!$emailTemplate) {
+            $this->log->write('Email Template with text id "'.$text_id.'" and language_id = '.$languageId.' not found');
+            return;
+        }
+        $this->emailTemplate = $emailTemplate;
+        $arAllowedPlaceholders = explode(',', $emailTemplate->allowed_placeholders);
+
+        foreach ($arAllowedPlaceholders as &$placeholder) {
+            $placeholder = trim($placeholder);
+        }
+
+        foreach ($placeholders as $key => $val) {
+            if (in_array($key, $arAllowedPlaceholders, true)) {
+                $this->placeholders[$key] = $val;
+            }
+        }
+        $subject = html_entity_decode($emailTemplate->subject, ENT_QUOTES, ABC::env('APP_CHARSET'));
+        $htmlBody = html_entity_decode($emailTemplate->html_body, ENT_QUOTES, ABC::env('APP_CHARSET'));
+        $textBody = $emailTemplate->text_body;
+
+        $mustache = new Mustache_Engine;
+
+        $subject = $mustache->render($subject, $this->placeholders);
+        $htmlBody = $mustache->render($htmlBody, $this->placeholders);
+        $textBody = $mustache->render($textBody, $this->placeholders);
+
+        $this->setSubject($subject);
+        $this->setHtml($htmlBody);
+        $this->setText($textBody);
+
+        if ($emailTemplate->headers) {
+            $headers = explode(',', $emailTemplate->headers);
+            foreach ($headers as $header) {
+                $parts = explode(':', $header);
+                if (count((array) $parts) !== 2) {
+                    continue;
+                }
+                $this->addHeader($parts[0], $parts[1]);
+            }
+        }
+    }
+
     /**
      * @return string
      */
@@ -204,6 +273,23 @@ class AMail
     }
 
     /**
+     * @return EmailTemplate
+     */
+    public function getEmailTemplate()
+    {
+        return $this->emailTemplate;
+    }
+
+    /**
+     * @return array
+     */
+    public function getPlaceholders()
+    {
+        return $this->placeholders;
+    }
+
+
+    /**
      * @param AUser $user
      */
     public function setUser($user)
@@ -234,8 +320,6 @@ class AMail
     {
         return $this->reply_to;
     }
-
-
 
     /**
      * @param string $file - full path to file
@@ -318,7 +402,6 @@ class AMail
         $boundary = '----=_NextPart_'.md5(rand());
 
         $header = '';
-
 
         if ($this->protocol == 'smtp') {
             $header .= 'To: '.$to.$this->newline;
@@ -638,12 +721,12 @@ class AMail
                 fclose($handle);
             }
         } elseif ($this->protocol == 'mailapi') {
-        $mailDriver = MailApiManager::getInstance()->getCurrentMailApiDriver();
-        if (!is_bool($mailDriver)) {
-            if (!$mailDriver->send($this)) {
-                $this->error[] = "Error send via Mail Api";
+            $mailDriver = MailApiManager::getInstance()->getCurrentMailApiDriver();
+            if (!is_bool($mailDriver)) {
+                if (!$mailDriver->send($this)) {
+                    $this->error[] = "Error send via Mail Api";
+                }
             }
-        }
         }
         if ($this->error) {
             $this->messages->saveError('Mailer error!',
@@ -659,8 +742,8 @@ class AMail
     }
 }
 
-
-abstract class AMailDriver {
+abstract class AMailDriver
+{
     abstract function send(AMail $mail);
 
 }

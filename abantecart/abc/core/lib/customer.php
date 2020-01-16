@@ -178,7 +178,7 @@ class ACustomer extends ALibBase
              * @var AEncryption $encryption
              */
             $encryption = ABC::getObjectByAlias('AEncryption', [$config->get('encryption_key')]);
-            $this->unauth_customer = unserialize($encryption->decrypt($this->request->cookie['customer']));
+            $this->unauth_customer = unserialize($encryption->decrypt((string)$this->request->cookie['customer']));
             //customer is not valid or not from the same store (under the same domain)
             if (
                 $this->unauth_customer['script_name'] != $this->request->server['SCRIPT_NAME']

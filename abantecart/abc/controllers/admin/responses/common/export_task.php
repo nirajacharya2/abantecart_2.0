@@ -11,10 +11,12 @@ use abc\core\lib\AJson;
 use abc\core\lib\ATaskManager;
 use H;
 use ReflectionClass;
+use ZipArchive;
 
 class ControllerResponsesCommonExportTask extends AController
 {
     public $data = [];
+    protected $zipFile = '';
     protected $errors;
     /**
      * @var string
@@ -87,8 +89,7 @@ class ControllerResponsesCommonExportTask extends AController
             } else {
                 $this->errors[] = isset($response['error_text']) ? $response['error_text'] : '';
             }
-        } catch (\Exception $exception)
-        {
+        } catch (\Exception $exception) {
             Registry::log()->write($exception->getMessage());
         }
 
@@ -131,10 +132,10 @@ class ControllerResponsesCommonExportTask extends AController
                 'max_execution_time' => $timePerItem * $limit,
                 'controller'         => $this->exportTaskController.'/export',
                 'settings'           => [
-                    'start' => $i * $limit - $limit,
-                    'limit' => $limit,
-                    'file' => $this->getExportFile($task_id),
-                    'request' => $this->request->get
+                    'start'   => $i * $limit - $limit,
+                    'limit'   => $limit,
+                    'file'    => $this->getExportFile($task_id),
+                    'request' => $this->request->get,
                 ],
             ));
 
@@ -193,11 +194,15 @@ class ControllerResponsesCommonExportTask extends AController
         $task_result = $task_info['last_result'];
         if ($task_result) {
             $tm->deleteTask($task_id);
-            $rt = $this->rt();
-            $rt = str_replace('responses/', 'r/', $rt);
-            $result_text = '<a href="'.$this->html->getSecureURL($rt.'/downloadFile', '&file=export_'.$task_id.'.csv').'">'.
+            //$rt = $this->rt();
+            rename($this->getExportFile($task_id), $this->getPublicExportFile($task_id));
+            unlink($this->getExportFile($task_id));
+            //$rt = str_replace('responses/', 'r/', $rt);
+            $downloadLink = $this->html->getHomeURL().'export/'.$this->zipFile;
+            $result_text = '<a href="'.$downloadLink.'">'.
                 $this->language->get('text_export_task_download')
                 .'</a>';
+
         } else {
             $result_text = $this->language->get('text_export_task_failed');
         }
@@ -266,14 +271,17 @@ class ControllerResponsesCommonExportTask extends AController
             if (file_exists($file)) {
                 header('Content-Description: File Transfer');
                 header('Content-Type: application/x-gzip');
+                header('Content-Type: application/octet-stream');
                 header('Content-Disposition: attachment; filename='.$filename);
                 header('Content-Transfer-Encoding: binary');
                 header('Expires: 0');
                 header('Cache-Control: must-revalidate');
                 header('Pragma: public');
                 header('Content-Length: '.filesize($file));
-                ob_end_clean();
-                flush();
+                if (ob_get_level()) {
+                    ob_end_clean();
+                }
+                ob_end_flush();
                 readfile($file);
                 exit;
             } else {
@@ -293,7 +301,25 @@ class ControllerResponsesCommonExportTask extends AController
                 throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
             }
         }
+        if (!file_exists(ABC::env('DIR_PUBLIC').'resources'.DS.'download'.DS.'export')) {
+            if (!mkdir($concurrentDirectory = ABC::env('DIR_PUBLIC').'resources'.DS.'download'.DS.'export', 0775, true) && !is_dir($concurrentDirectory)) {
+                throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
+            }
+        }
 
         return ABC::env('DIR_SYSTEM').'export'.DS.'export_'.$taskId.'.csv';
+    }
+
+    private function getPublicExportFile($taskId)
+    {
+        if (!file_exists(ABC::env('DIR_PUBLIC').'export')) {
+            if (!mkdir($concurrentDirectory = ABC::env('DIR_PUBLIC').'export', 0775, true) && !is_dir($concurrentDirectory)) {
+                throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
+            }
+        }
+
+        $this->zipFile = 'export_'.$taskId.microtime(true).'.csv';
+
+        return ABC::env('DIR_PUBLIC').'export'.DS.$this->zipFile;
     }
 }

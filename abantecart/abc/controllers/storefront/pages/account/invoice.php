@@ -495,7 +495,7 @@ class ControllerPagesAccountInvoice extends AController
              * @var AEncryption $enc
              */
             $enc = ABC::getObjectByAlias('AEncryption', [$this->config->get('encryption_key')]);
-            $decrypted = $enc->decrypt($this->request->get['ot']);
+            $decrypted = $enc->decrypt((string)$this->request->get['ot']);
             list($order_id, $email) = explode('::', $decrypted);
 
             $order_id = (int)$order_id;

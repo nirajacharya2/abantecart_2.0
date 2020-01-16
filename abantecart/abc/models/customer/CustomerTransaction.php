@@ -224,10 +224,15 @@ class CustomerTransaction extends BaseModel
             //you cannot to update transaction!
             //All records must be incremental!
             //INSERTS ONLY!
+            $dbg = debug_backtrace();
+            $debug = '';
+            foreach($dbg as $k=>$d){
+                $debug .= '#'.$k.' '.$d['file'].":".$d['line']."\n";
+            }
             Registry::log()->write(
                 "Customer ".$this->customer_id." attempts to update transaction # ".$this->customer_transaction_id
                 .". Action is prohibited. "
-                ."\n Input Data: ".var_export($this->getAttributes(), true)
+                ."\n Input Data: ".var_export($this->getAttributes(), true)."backtrace: \n".$debug
             );
             return true;
         }

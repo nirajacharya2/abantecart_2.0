@@ -300,7 +300,7 @@ class ALanguageManager extends ALanguage
             if ($config->get('auto_translate_status')) {
                 //locate source language based on translation setting
                 $src_lang_code = $config->get('translate_src_lang_code');
-                $src_lang_id = $this->_get_language_id($src_lang_code);
+                $src_lang_id = $this->getLanguageIdByCode($src_lang_code);
                 if (empty($txt_data[$src_lang_id])) {
                     //this is not source language. exit
                     return null;
@@ -502,7 +502,7 @@ class ALanguageManager extends ALanguage
 
         //locate source language based on translation setting
         $src_lang_code = $config->get('translate_src_lang_code');
-        $src_lang_id = $this->_get_language_id($src_lang_code);
+        $src_lang_id = $this->getLanguageIdByCode($src_lang_code);
 
         if (empty($txt_data[$src_lang_id])) {
             return false;
@@ -660,7 +660,7 @@ class ALanguageManager extends ALanguage
         }
         //check what path is valid
         foreach ($test_array as $filename) {
-            $file_path = $this->_detect_language_xml_file($filename);
+            $file_path = $this->detectLanguageXmlFile($filename);
             if (file_exists($file_path)) {
                 return $filename;
             }
@@ -1151,9 +1151,9 @@ class ALanguageManager extends ALanguage
                                     } else {
                                         if (count($translatable_fields) && in_array($fld_name, $translatable_fields)) {
                                             //we need to translate
-                                            $value = $this->translate($this->_get_language_code($from_language),
+                                            $value = $this->translate($this->getLanguageCodeById($from_language),
                                                 $value,
-                                                $this->_get_language_code($new_language),
+                                                $this->getLanguageCodeById($new_language),
                                                 $translate_method);
                                             //if one of translation is null - means that translation failed
                                             // interrupt translation
@@ -1180,7 +1180,7 @@ class ALanguageManager extends ALanguage
                                 //#PR There are some key condition in definitions that can be duplicate (CASE: block = 'english' main language ) skip
                                 //We assume that main language XML need to be present
                                 //TODO rename main language file to common.xml
-                                if (!$this->_is_definition_in_db($insert_data)) {
+                                if (!$this->isDefinitionInDb($insert_data)) {
                                     $this->db->query($insert_sql);
                                 } else {
                                     continue;
