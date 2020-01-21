@@ -8,6 +8,7 @@ use abc\core\lib\contracts\AuditLogStorageInterface;
 use abc\core\lib\UserResolver;
 use abc\models\BaseModel;
 use abc\models\catalog\Product;
+use abc\models\system\AuditEvent;
 use abc\models\user\User;
 use ReflectionClass;
 
@@ -229,7 +230,6 @@ class ModelAuditListener
             $actorOnBehalf = User::find($user->getActoronbehalf());
         }
         $user_name = $user->getUserName().($actorOnBehalf ? '('.$actorOnBehalf->username.')' : '');
-        $auditData = [];
 
         //get primary key value
         $auditable_id = $modelObject->getKey();
@@ -257,17 +257,8 @@ class ModelAuditListener
             'id'    => $user_id,
             'name'  => $user_name,
         ];
-        $db = $this->registry->get('db');
 
-        $auditModel = $db->table('audit_models')
-            ->where('name', '=', $auditable_model)
-            ->first();
-        if ($auditModel) {
-            $auditableModelId = $auditModel->id;
-        } else {
-            $auditableModelId = $db->table('audit_models')->insertGetId(['name' => $auditable_model]);
-        }
-
+        $auditableModelId = AuditEvent::getModelIdByName($auditable_model);
         if ($event_name == 'belongsToManyAttaching') {
             $colName = $relationName;
             $event_name = 'creating';
@@ -293,8 +284,12 @@ class ModelAuditListener
         $eventDescription = [];
 
         foreach ($newData as $colName => $newValue) {
+
             if (is_array($newValue)) {
                 foreach ($newValue as $cName => $nValue) {
+                    if ((string)$oldData[$colName][$cName] === (string)$nValue) {
+                        continue;
+                    }
                     $eventDescription[] = [
                         'auditable_model_id' => $auditableModelId,
                         'auditable_model_name' => $auditable_model,
@@ -305,6 +300,9 @@ class ModelAuditListener
                     ];
                 }
             } else {
+                if ((string)$oldData[$colName] === (string)$newValue) {
+                    continue;
+                }
                 $eventDescription[] = [
                     'auditable_model_id' => $auditableModelId,
                     'auditable_model_name' => $auditable_model,
@@ -316,31 +314,23 @@ class ModelAuditListener
             }
         }
 
-        $db = $this->registry->get('db');
-        $mainModel = $db->table('audit_models')
-            ->where('name', '=', $main_auditable_model)
-            ->first();
-        if ($mainModel) {
-            $mainModelId = $mainModel->id;
-        } else {
-            $mainModelId = $db->table('audit_models')->insertGetId(['name' => $main_auditable_model]);
-        }
+        $mainModelId = AuditEvent::getModelIdByName($main_auditable_model);
 
         if ($mainModelId !== $auditableModelId && $event_name === 'created') {
             $event_name = 'updating';
         }
 
         $data = [
-            'id'     => $request_id,
-            'actor'  => $userData,
-            'app'    => [
+            'id'      => $request_id,
+            'actor'   => $userData,
+            'app'     => [
                 'name'    => 'Abantecart',
                 'server'  => '',
                 'version' => '2.0',
                 'build'   => ABC::env('BUILD_ID') ?: '',
                 'stage'   => ABC::$stage_name,
             ],
-            'entity' => [
+            'entity'  => [
                 'name'  => $main_auditable_model,
                 'id'    => $main_auditable_id,
                 'group' => $event_name,
@@ -349,12 +339,10 @@ class ModelAuditListener
                 'ip'        => $user->getUserIp(),
                 'timestamp' => date('Y-m-d\TH:i:s.v\Z'),
             ],
+            'changes' => [],
         ];
 
         foreach ($eventDescription as $item) {
-            if ((string)$item['old_value'] === (string)$item['new_value']) {
-                continue;
-            }
             $data['changes'][] = [
                 'name'      => $item['field_name'],
                 'groupId'   => $item['auditable_id'],
@@ -381,9 +369,14 @@ class ModelAuditListener
             $auditLogStorage->write($data);
         } catch (\Exception $e) {
             $error_message = __CLASS__.": Auditing of ".$modelClassName." failed.";
-            $this->registry->get('log')->write($error_message);
-            $this->registry->get('log')->write($e->getMessage());
-            $this->registry->get('log')->write($event_name);
+            Registry::log()->write(
+                $error_message
+                ."\n"
+                .$e->getMessage()
+                ."\n".
+                $event_name
+            );
+
             //TODO: need to check
             return $this->output(
                 false,
@@ -407,7 +400,7 @@ class ModelAuditListener
         ];
 
         if (self::DEBUG_TO_LOG === true) {
-            $this->registry->get('log')->write(var_export($output, true));
+            Registry::log()->write(var_export($output, true));
         }
         return $output;
     }

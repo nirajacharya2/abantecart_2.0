@@ -215,8 +215,6 @@ class BaseModel extends OrmModel
      */
     public static $auditExcludes = ['date_added', 'date_modified'];
 
-    protected $forceDeleting = false;
-
     /**
      * @param array $attributes
      */
@@ -233,15 +231,6 @@ class BaseModel extends OrmModel
         $this->config = $this->registry->get('config');
         $this->cache = Registry::cache();
         $this->db = Registry::db();
-
-        $called_class = $this->getClass();
-        if (static::$env['FORCE_DELETING']
-            && method_exists($this, 'forceDelete')
-            && isset(static::$env['FORCE_DELETING'][$called_class])
-        ) {
-            $this->forceDeleting = (bool)static::$env['FORCE_DELETING'][$called_class];
-        }
-
 
         parent::__construct($attributes);
         static::boot();

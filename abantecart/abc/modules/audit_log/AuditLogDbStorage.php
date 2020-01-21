@@ -27,7 +27,7 @@ class AuditLogDbStorage implements AuditLogStorageInterface
     public function __construct()
     {
         /** @var ADB db */
-        $this->db = Registry::getInstance()->get('db');
+        $this->db = Registry::db();
     }
 
     /**
@@ -38,95 +38,52 @@ class AuditLogDbStorage implements AuditLogStorageInterface
      */
     public function write(array $data)
     {
-        $auditModel = $this->db->table('audit_models')
-            ->where('name', '=', $data['entity']['name'])
-            ->first();
-        if ($auditModel) {
-            $auditableModelId = $auditModel->id;
-        } else {
-            $auditableModelId = $this->db->table('audit_models')->insertGetId(['name' => $data['entity']['name']]);
-        }
+        $this->db->beginTransaction();
+
+        $auditableModelId = AuditEvent::getModelIdByName($data['entity']['name']);
         $data['entity']['model_id'] = $auditableModelId;
 
-        $db = $this->db;
-        $this->db->transaction(static function () use ($db, $data) {
+        $auditUserId = AuditEvent::getUserId(
+            AuditUser::getUserTypeId($data['actor']['group']),
+            (int)$data['actor']['id'],
+            $data['actor']['name']
+        );
 
-            /*$auditSession = $db->table('audit_sessions')
-                ->where('session_id', '=', $data['event']['session_id'])
-                ->first();
-            if ($auditSession) {
-                $auditSessionId = $auditSession->id;
-            } else {
-                $auditSessionId = $db->table('audit_sessions')->insertGetId(['session_id' => $data['event']['session_id']]);
-            }
-            $event['audit_session_id'] = $auditSessionId;*/
+        $eventId = AuditEvent::getEventIdByParams(
+            [
+                'audit_user_id'           => $auditUserId,
+                'request_id'              => $data['id'],
+                'event_type_id'           => AuditEvent::EVENT_NAMES[$data['entity']['group']] ?: 1,
+                'main_auditable_model_id' => $data['entity']['model_id'],
+                'main_auditable_id'       => $data['entity']['id'],
+            ]
+        );
 
-            $auditUser = $db->table('audit_users')
-                            ->where(
-                                [
-                                    'user_type_id' => AuditUser::getUserTypeId($data['actor']['group']),
-                                    'user_id'      => $data['actor']['id'],
-                                    'name'         => $data['actor']['name'],
-                                ]
-                            )->first();
-            if ($auditUser) {
-                $auditUserId = $auditUser->id;
-            } else {
-                $userData = [
-                    'user_type_id' => AuditUser::getUserTypeId($data['actor']['group']),
-                    'user_id'      => $data['actor']['id'],
-                    'name'         => $data['actor']['name'],
-                ];
-                $auditUserId = $db->table('audit_users')->insertGetId($userData);
-            }
-            $event['audit_user_id'] = $auditUserId;
-            $event['request_id'] = $data['id'];
-            $event['event_type_id'] = AuditEvent::EVENT_NAMES[$data['entity']['group']] ?: 1;
-            $event['main_auditable_model_id'] = $data['entity']['model_id'];
-            $event['main_auditable_id'] = $data['entity']['id'];
-
-            $auditEvent = $db->table('audit_events')
-                             ->where(
-                                 [
-                                     'request_id'              => $event['request_id'],
-                                     'audit_user_id'           => $auditUserId,
-                                     'event_type_id'           => $event['event_type_id'],
-                                     'main_auditable_model_id' => $event['main_auditable_model_id'],
-                                     'main_auditable_id'       => $event['main_auditable_id'],
-                                 ]
-                             )->first();
-            if ($auditEvent) {
-                $eventId = $auditEvent->id;
-            } else {
-                $eventId = $db->table('audit_events')->insertGetId($event);
-            }
-
-            if ($eventId) {
-                foreach ($data['changes'] as $change) {
-                    if (!$change['groupName']) {
-                        $change['groupName'] = $change['name'];
-                    }
-                    $model = $db->table('audit_models')
-                        ->where('name', '=', $change['groupName'])
-                        ->first();
-                    if ($model) {
-                        $modelId = $model->id;
-                    } else {
-                        $modelId = $db->table('audit_models')->insertGetId(['name' => $change['groupName']]);
-                    }
-                    $change['model_id'] = $modelId;
-                    $eventDescription = [
-                        'auditable_model_id' => $change['model_id'],
-                        'auditable_id'       => $change['groupId'] ?: 0,
-                        'field_name'         => $change['name'],
-                        'old_value'          => $change['oldValue'],
-                        'new_value'          => $change['newValue'],
-                        'audit_event_id'     => $eventId,
-                    ];
-                    $db->table('audit_event_descriptions')->insert($eventDescription);
+        if ($eventId) {
+            $eventDescriptions = [];
+            foreach ($data['changes'] as $change) {
+                if (!$change['groupName']) {
+                    $change['groupName'] = $change['name'];
                 }
+
+                $modelId = AuditEvent::getModelIdByName($change['groupName']);
+                $change['model_id'] = $modelId;
+                $eventDescriptions[] = [
+                    'auditable_model_id' => $change['model_id'],
+                    'auditable_id'       => $change['groupId'] ?: 0,
+                    'field_name'         => $change['name'],
+                    'old_value'          => $change['oldValue'],
+                    'new_value'          => $change['newValue'],
+                    'audit_event_id'     => $eventId,
+                ];
+
             }
-        });
+            if ($eventDescriptions) {
+                $this->db->table('audit_event_descriptions')->insert($eventDescriptions);
+            }
+        }
+        $this->db->commit();
+
     }
 
     /**

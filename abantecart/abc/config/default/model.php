@@ -57,11 +57,6 @@ return [
     ],
     //allow to enable/disable soft-deleting for models. Default value "false"
     //see eloquent documentation for details
-    'FORCE_DELETING' => [
-        //Product::class => true,
-        Customer::class => true,
-        Address::class => true,
-    ],
     //you can extends base model with this array
     'INITIALIZE'       => [
             Product::class => [
