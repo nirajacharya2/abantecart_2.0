@@ -1278,6 +1278,16 @@ class Product extends BaseModel
         }
         $product_data['product_category_prev'] = $product->categories->pluck('category_id')->toArray();
 
+        // Temporary solution for serializing of additional columns from extensions
+        $casts = $product->getCasts();
+        foreach($product_data as $k=>&$v){
+            if($casts[$k] == 'serialized' && !is_string($v)){
+                $v = serialize($v);
+            }
+        }
+        unset($v);
+        //remove it after solving problem with extendability of baseModel
+
         $product->update($product_data);
         if ($product_data['product_description']) {
             if (!isset($product_data['product_description']['language_id'])) {

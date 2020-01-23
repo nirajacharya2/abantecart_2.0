@@ -212,7 +212,7 @@ class Customer extends BaseModel
                 //required only when new customer creating
                 'required_without:customer_id',
                 'max:96',
-                'regex:/^[A-Z0-9._%-]+@[A-Z0-9.-]{0,61}[A-Z0-9]\.[A-Z]{2,16}$/i',
+                'regex:/^[A-Z0-9._\'%-]+@[A-Z0-9.-]{0,61}[A-Z0-9]\.[A-Z]{2,16}$/i',
             ],
             'messages' => [
                 'unique' => [

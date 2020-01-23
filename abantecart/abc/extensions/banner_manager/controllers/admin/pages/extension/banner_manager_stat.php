@@ -153,8 +153,10 @@ class ControllerPagesExtensionBannerManagerStat extends AController
             [
                 'type'  => 'button',
                 'title' => $this->language->get('text_delete_statistic'),
-                'href'  => $this->html->getSecureURL('extension/banner_manager_stat/delete',
-                    '&delete=1&banner_id='.$banner_id),
+                'href'  => $this->html->getSecureURL(
+                                                    'extension/banner_manager_stat/delete',
+                                                    '&delete=1&banner_id='.$banner_id
+                ),
             ]
         );
 
@@ -181,7 +183,10 @@ class ControllerPagesExtensionBannerManagerStat extends AController
 
         $this->document->addBreadcrumb(
             [
-                'href'      => $this->html->getSecureURL('extension/banner_manager_stat', '&banner_id='.$banner_id),
+                'href'      => $this->html->getSecureURL(
+                    'extension/banner_manager_stat',
+                    '&banner_id='.$banner_id
+                ),
                 'text'      => $this->data['heading_title'],
                 'separator' => ' :: ',
                 'current'   => true,

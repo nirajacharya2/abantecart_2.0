@@ -11,7 +11,7 @@ include($tpl_common_dir . 'action_confirm.tpl'); ?>
 				   title="<?php echo $delete_button->title; ?>"
 				   href="<?php echo $delete_button->href; ?>"
 				   data-confirmation="delete"
-					><i class="fa fa-trash-o fa-fw"></i> <?php echo $delete_button->title; ?></a>
+					><i class="fa fa-trash fa-fw"></i> <?php echo $delete_button->title; ?></a>
 			</div>
 			<div class="btn-group mr10 toolbar">
 				<?php echo $select_range;?>
@@ -85,12 +85,13 @@ function getSalesChart(range) {
 				// The data for our dataset
 				data: {
 					labels: viewed_labels,
-					datasets: [{
-						label: viewed.label,
-						backgroundColor: '#1CAF9A',
-						borderColor: '#1CAF9A',
-						data: viewed_values,
-					},
+					datasets: [
+					    /*{
+                            label: viewed.label,
+                            backgroundColor: '#1CAF9A',
+                            borderColor: '#1CAF9A',
+                            data: viewed_values,
+                        },*/
 						{
 							label: clicked.label,
 							backgroundColor: '#428BCA',
