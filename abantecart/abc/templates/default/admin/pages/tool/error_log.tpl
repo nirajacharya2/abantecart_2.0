@@ -2,8 +2,23 @@
 
 <div class="tab-content">
 	<div class="panel-heading">
-		<div class="pull-left">
-			<a href="<?php echo $clear_url; ?>" class="btn btn-primary lock-on-click" id="clear"><i class="fa fa-trash-alt"></i> <?php echo $button_clear;?></a>
+        <div class="primary_content_actions pull-left">
+            <?php if($log_list){ ?>
+                <div class="btn-group">
+                <?php echo $log_list; ?>
+                </div>
+                <script type="text/javascript">
+                    $('select#filename').on('change', function(){
+                       location = '<?php echo $main_url; ?>&filename='+ $(this).val();
+                    });
+                </script>
+                <?php
+            }
+            if($button_clear){ ?>
+            <div class="btn-group">
+			    <a href="<?php echo $clear_url; ?>" class="btn btn-primary lock-on-click" id="clear"><i class="fa fa-trash-alt"></i> <?php echo $button_clear;?></a>
+            </div>
+            <?php } ?>
 		</div>
 	</div>
 

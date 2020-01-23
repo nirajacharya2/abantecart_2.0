@@ -23,10 +23,6 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 
-if ( ! class_exists( 'abc\core\ABC' ) || ! ABC::env( 'IS_ADMIN' ) ) {
-    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
-}
-
 class ControllerPagesToolErrorLog extends AController
 {
     public $data;
@@ -38,7 +34,11 @@ class ControllerPagesToolErrorLog extends AController
 
         $this->loadLanguage( 'tool/error_log' );
 
-        $this->data['button_clear'] = $this->language->get( 'button_clear' );
+        $this->data['main_url'] = $this->html->getSecureURL( 'tool/error_log');
+        //TODO: solve issue with grants
+        //if(ABAC::hasPermission('clear_log')) {
+            $this->data['button_clear'] = $this->language->get('button_clear');
+        //}
 
         if ( isset( $this->session->data['success'] ) ) {
             $this->data['success'] = $this->session->data['success'];
@@ -50,30 +50,47 @@ class ControllerPagesToolErrorLog extends AController
         $filename = $this->request->get['filename'];
         if ( $filename && is_file( ABC::env( 'DIR_LOGS' ).$filename ) ) {
             $file = ABC::env( 'DIR_LOGS' ).$filename;
-            $this->data['clear_url'] = '';
+            $this->data['clear_url'] = $this->html->getSecureURL( 'tool/error_log/clearlog', '&filename='.$filename );
             $heading_title = $this->request->clean( $filename );
         } else {
-            //TODO: add ability to delete other logs
             $args = ABC::getClassDefaultArgs( 'ALog' );
             $file = ABC::env( 'DIR_LOGS' ).$args[0]['app'];
             $this->data['clear_url'] = $this->html->getSecureURL( 'tool/error_log/clearlog' );
             $heading_title = $this->language->get( 'heading_title' );
         }
 
+        $all_logs = glob(ABC::env( 'DIR_LOGS' ).'{*.log,*.txt}', GLOB_BRACE);
+        $options = [];
+        foreach($all_logs as $f){
+            $fileShortName = basename($f);
+            $options[$fileShortName] = $fileShortName .' '.\H::human_filesize(filesize($f));
+        }
+        $this->view->assign(
+            'log_list',
+            $this->html->buildElement(
+                [
+                    'type'    => 'selectbox',
+                    'name'    => 'filename',
+                    'options' => $options,
+                    'value'   => $filename
+                ]
+            )
+        );
+
         $this->document->setTitle( $heading_title );
         $this->data['heading_title'] = $heading_title;
         $this->document->resetBreadcrumbs();
-        $this->document->addBreadcrumb( array(
+        $this->document->addBreadcrumb( [
             'href'      => $this->html->getSecureURL( 'index/home' ),
             'text'      => $this->language->get( 'text_home' ),
             'separator' => false,
-        ) );
-        $this->document->addBreadcrumb( array(
+        ]);
+        $this->document->addBreadcrumb( [
             'href'      => $this->html->getSecureURL( 'tool/error_log', ( $filename ? '&filename='.$filename : '' ) ),
             'text'      => $heading_title,
             'separator' => ' :: ',
             'current'   => true,
-        ) );
+        ]);
 
         if ( file_exists( $file ) ) {
             ini_set( "auto_detect_line_endings", true );
@@ -98,7 +115,7 @@ class ControllerPagesToolErrorLog extends AController
             $log = '';
         }
 
-        $log = htmlentities(str_replace(array('<br/>', '<br />'), "\n", $log), ENT_QUOTES | ENT_IGNORE,
+        $log = htmlentities(str_replace(['<br/>', '<br />'], "\n", $log), ENT_QUOTES | ENT_IGNORE,
             ABC::env('APP_CHARSET'), true);
         //filter empty string
         $lines = array_filter( explode( "\n", $log ), 'strlen' );
@@ -140,7 +157,7 @@ class ControllerPagesToolErrorLog extends AController
         $handle = fopen($file, 'w+');
         fclose($handle);
         $this->session->data['success'] = $this->language->get('text_success');
-        abc_redirect($this->html->getSecureURL('tool/error_log'));
+        abc_redirect($this->html->getSecureURL('tool/error_log', '&filename='.$filename));
 
         //update controller data
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
