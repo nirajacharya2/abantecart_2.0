@@ -71,7 +71,7 @@ class ControllerResponsesToolAuditAjax extends AController
             return false;
         }
 
-        $this->data['response'] = $auditLogStorage->getEventDetail($this->request->get);
+        $this->data['response'] = $auditLogStorage->getEventDetails($this->request->get);
 
         $this->load->library('json');
         $this->response->setOutput(AJson::encode($this->data['response']));

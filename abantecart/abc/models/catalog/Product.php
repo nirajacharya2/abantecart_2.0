@@ -72,7 +72,7 @@ use Illuminate\Support\Collection;
  * @property ProductDiscount               $product_discounts
  * @property ProductOption                 $product_options
  * @property ProductSpecial                $product_specials
- * @property ProductTag                    $product_tags
+ * @property ProductTag $tags
  * @property Review                        $reviews
  * @property int                           $product_type_id
  *
@@ -1592,6 +1592,7 @@ class Product extends BaseModel
      */
     public static function createProduct(array $product_data)
     {
+        $product_data['new_product'] = true;
         if (!isset($product_data['product_store']) || empty($product_data['product_store'])) {
             $product_data['product_store'] = [0 => 0];
         }
@@ -1599,11 +1600,17 @@ class Product extends BaseModel
         $product->save();
         $productId = $product->product_id;
         if ($productId) {
-            $description = new ProductDescription($product_data['product_description']);
-            $product->descriptions()->save($description);
-
-            UrlAlias::setProductKeyword($product_data['keyword'] ?: $product_data['product_description']['name'], $productId);
-            self::updateProductLinks($product, $product_data);
+            if ($product_data['product_description']) {
+                $description = new ProductDescription($product_data['product_description']);
+                $product->descriptions()->save($description);
+            }
+            if ($product_data['keyword'] || $product_data['product_description']['name']) {
+                UrlAlias::setProductKeyword(
+                    $product_data['keyword'] ?: $product_data['product_description']['name'],
+                    $product
+                );
+            }
+            self::updateProductLinks($product, $product_data, true);
         }
         return $product;
     }
@@ -1764,34 +1771,41 @@ class Product extends BaseModel
        }*/
 
     /**
-     * @param int   $product_id
+     * @param int $product_id
      * @param array $product_data
      *
      * @return bool
+     * @throws Exception
      */
     public static function updateProduct(int $product_id, array $product_data)
     {
         /**
          * @var Product $product
          */
-        $product = Product::with('categories')->find($product_id);
+        $product = Product::find($product_id);
         if (!$product) {
             return false;
         }
-        $product_data['product_category_prev'] = $product->categories->pluck('category_id')->toArray();
+        if (isset($product_data['product_category'])) {
+            $product->load('categories');
+            $product_data['product_category_prev'] = $product->categories->pluck('category_id')->toArray();
+        }
+        if (isset($product_data['product_tags'])) {
+            $product->load('tags');
+        }
 
         $product->update($product_data);
         if ($product_data['product_description']) {
             if (!isset($product_data['product_description']['language_id'])) {
                 $product_data['product_description']['language_id'] = static::$current_language_id;
             }
-            $product->descriptions()->update($product_data['product_description']);
+            $product->description()->update($product_data['product_description']);
         }
 
         if ($product_data['keyword'] || $product_data['product_description']['name']) {
             UrlAlias::setProductKeyword(
                 $product_data['keyword'] ?: $product_data['product_description']['name'],
-                $product_id
+                $product
             );
         }
 
@@ -1849,6 +1863,7 @@ class Product extends BaseModel
      * @param array $product_data
      *
      * @return bool
+     * @throws Exception
      */
     public static function updateProductLinks(&$product, array $product_data)
     {
@@ -1893,11 +1908,6 @@ class Product extends BaseModel
             foreach((array)$product_data['product_category_prev']  as $id) {
                 $affectedCategories[] = $id;
             }
-
-            foreach($affectedCategories as $categoryId){
-                $category = Category::find($categoryId);
-                $category->touch();
-            }
         }
 
         if (isset($product_data['product_store'])) {
@@ -1917,16 +1927,23 @@ class Product extends BaseModel
                 $languageId = static::$current_language_id;
                 $productTags = [];
                 foreach ($tags as $tag) {
-                    $productTag = ProductTag::updateOrCreate([
+                    $productTag = ProductTag::create([
                         'tag'         => trim($tag),
                         'product_id'  => $model->product_id,
                         'language_id' => $languageId,
                     ]);
                     $productTags[] = $productTag->id;
                 }
-                ProductTag::where('product_id', '=', $model->product_id)
-                    ->whereNotIn('id', $productTags)
-                    ->forceDelete();
+
+                if ($product->tags) {
+                    ProductTag::where(
+                        [
+                            'product_id'  => $model->product_id,
+                            'language_id' => $languageId,
+                        ]
+                    )->whereNotIn('id', $productTags)
+                              ->forceDelete();
+                }
             }
         }
         return true;

@@ -58,7 +58,6 @@ class ModelAuditListener
          * @var BaseModel | Product $modelObject
          */
         if (is_object($params[1])) {
-
             $eventsList = [
                 'creating',
                 'created',
@@ -109,12 +108,20 @@ class ModelAuditListener
         } else {
             return $this->handleModel($eventAlias, $params[0]);
         }
-
     }
 
+    /**
+     * @param string $eventAlias
+     * @param BaseModel $modelObject
+     * @param string $relationName
+     * @param array $ids
+     * @param array $morphAttributes
+     *
+     * @return array
+     * @throws \ReflectionException
+     */
     protected function handleModel($eventAlias, $modelObject, $relationName = '', $ids = [], $morphAttributes = [])
     {
-
         if (!is_object($modelObject)
             || !($modelObject instanceof BaseModel)
         ) {
@@ -165,7 +172,7 @@ class ModelAuditListener
 
         //if data still presents write log
         //exclude touches! (case when only date_modified updated)
-        if ((!$newData && !$oldData) || array_keys($newData) == [$modelObject::UPDATED_AT]) {
+        if ((!$newData && !$oldData) || array_keys($newData) == [$modelObject->getUpdatedAtColumn()]) {
             return $this->output(
                 true,
                 'ModelAuditListener: Nothing to audit of model '.$modelClassName.'.'
@@ -176,7 +183,7 @@ class ModelAuditListener
         if ($event_name == 'saving' && !$oldData) {
             return $this->output(
                 false,
-                'ModelAuditListener: Skipped "saving" event before inserting for '.$modelClassName.'.'
+                'ModelAuditListener: Skipped "'.$event_name.'" event before inserting for '.$modelClassName.'.'
             );
         }
         //Skip saved event after inserts and updates
@@ -187,32 +194,11 @@ class ModelAuditListener
             );
         }
         //Skip updating event after inserts and updates
-        if ($event_name == 'updating' && !$newData) {
+        if ($event_name == 'updating' && (!$newData || !$oldData)) {
             return $this->output(
                 false,
-                'ModelAuditListener: Skipped "updating" event with empty newData for '.$modelClassName.'.'
+                'ModelAuditListener: Skipped "updating" event with empty data set for '.$modelClassName.'.'
             );
-        }
-
-        //skip creating event if created will be fired.
-        // creating event do not save auditable_id into audit log table because id does not exists yet
-        if (
-            ($event_name == 'creating' && in_array('created', $allowedEvents))
-            || //skip saving if creating presents to prevent duplication
-            ($event_name == 'saving'
-                && !$modelObject->exists
-                && in_array('creating', $allowedEvents)
-            )
-            || //skip saving if updating presents to prevent duplication
-            ($event_name == 'saving'
-                && $modelObject->exists
-                && in_array('updating', $allowedEvents)
-            )
-        ) {
-
-            return $this->output(
-                false,
-                'Skipped "'.$event_name.'" of model '.$modelClassName.' to prevent duplication of data');
         }
 
         if ($this->registry->get('request')) {
@@ -283,6 +269,32 @@ class ModelAuditListener
 
         $eventDescription = [];
 
+        //skip creating event if created will be fired.
+        // creating event do not save auditable_id into audit log table because key (ID) does not exists yet
+        if (
+            ($event_name == 'creating' && in_array('created', $allowedEvents))
+            || //skip saving if creating presents to prevent duplication
+            ($event_name == 'saving'
+                && !$modelObject->exists
+                && in_array('creating', $allowedEvents)
+            )
+            || //skip saving if updating presents to prevent duplication
+            ($event_name == 'saving'
+                && $modelObject->exists
+                && in_array('updating', $allowedEvents)
+            )
+        ) {
+
+            return $this->output(
+                false,
+                'Skipped "'.$event_name.'" of model '.$modelClassName.' to prevent duplication of data');
+        }
+
+        if ($event_name == 'creating') {
+            var_dump($modelClassName);
+            exit;
+        }
+
         foreach ($newData as $colName => $newValue) {
 
             if (is_array($newValue)) {
@@ -312,12 +324,6 @@ class ModelAuditListener
                     'new_value'          => $newValue,
                 ];
             }
-        }
-
-        $mainModelId = AuditEvent::getModelIdByName($main_auditable_model);
-
-        if ($mainModelId !== $auditableModelId && $event_name === 'created') {
-            $event_name = 'updating';
         }
 
         $data = [

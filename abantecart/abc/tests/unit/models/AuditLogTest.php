@@ -31,9 +31,9 @@ class AuditLogTest extends ATestCase
      *
      * @return int
      */
-    public function testCreateUpdateRestoreDeleteProduct($eventList = [])
+    protected function CreateUpdateRestoreDeleteProduct($eventList = [])
     {
-        $product = $productId = null;
+        $productId = null;
 
         if (!$eventList) {
             Product::$auditEvents = [
@@ -134,8 +134,8 @@ class AuditLogTest extends ATestCase
                     'name'             => 'Test update product',
                     'blurb'            => 'Test update blurb',
                     'description'      => 'Test update description',
-                    'meta_keywords'    => '',
-                    'meta_description' => '',
+                    'meta_keywords'    => 'test meta keywords',
+                    'meta_description' => 'test meta description',
                     'language_id'      => 1,
                 ]
         ];
@@ -143,7 +143,7 @@ class AuditLogTest extends ATestCase
 
         // now delete, restore and force delete
         try {
-            Product::destroy($productId);
+            $product->delete();
             $result = true;
         } catch (\PDOException $e) {
             $this->fail($e->getMessage());
@@ -158,15 +158,18 @@ class AuditLogTest extends ATestCase
 
         $this->assertEquals(true, $result);
         //call restore events
-        Product::onlyTrashed()
-               ->where('product_id', $productId)
-               ->first()
-               ->restore();
+        $product = Product::onlyTrashed()
+                          ->where('product_id', $productId)
+                          ->first();
+        $product->restore();
 
         //force delete
         /**
          * @var Product $mdl
          */
+        $product = Product::withTrashed()
+                          ->where('product_id', $productId)
+                          ->first();
         if ($product) {
             $product->forceDelete();
         }
@@ -174,82 +177,86 @@ class AuditLogTest extends ATestCase
         return $productId;
     }
 
-//    /**
-//     * @depends testCreateUpdateRestoreDeleteProduct
-//     *
-//     * @param $productId
-//     */
-//    public function testLoggedAllEvents(int $productId)
-//    {
-//        echo "\n Start method ".__FUNCTION__."\n";
-//        Registry::db()->table('audit_events')->delete();
-//        //check all events list
-//        $this->assertEquals(
-//            $this->getLoggedEvents('Product', $productId),
-//            [
-//                "created"      => 28,
-//                "deleted"      => 111,
-//                "deleting"     => 149,
-//                "forceDeleted" => 28,
-//                "restored"     => 29,
-//                "restoring"    => 30,
-//                "updated"      => 5,
-//                "updating"     => 19,
-//            ]
-//        );
-//    }
-
-    public function testLoggedPreEvents()
+    public function testLoggedAllEvents()
     {
         echo "\n Start method ".__FUNCTION__."\n";
         Registry::db()->table('audit_events')->delete();
-
         $this->reGenerateRequestId();
         //check all events list
-        $productId = $this->testCreateUpdateRestoreDeleteProduct(
-            ['saving', 'creating', 'updating', 'deleting']
-//['deleting']
-        );
+        $productId = $this->CreateUpdateRestoreDeleteProduct();
+        //check all events list
         $this->assertEquals(
             $this->getLoggedEvents('Product', $productId),
             [
-                //Note: 11 - because product_id on creating is unknown!
-                "creating" => 11,
-                "deleting" => 1046,
-                "updating" => 5,
+                //28 fields of product, 6 descriptions + 8 tags
+                "created"      => 42,
+                "deleted"      => 32,
+                "deleting"     => 65,
+                "forceDeleted" => 29,
+                "restored"     => 29,
+                "restoring"    => 30,
+
+                //updated: 1 product price + 6 product descriptions + 1 date_deleted of product(restoring)
+                "updated"      => 7,
+                "updating"     => 7,
             ]
         );
     }
+
+//    public function testLoggedPreEvents()
+//    {
+//        echo "\n Start method ".__FUNCTION__."\n";
+//        Registry::db()->table('audit_events')->delete();
 //
+//        $this->reGenerateRequestId();
+//        //check all events list
+//        $productId = $this->CreateUpdateRestoreDeleteProduct(
+//            [
+//                'saving',
+//                'creating',
+//                'updating',
+//                'deleting'
+//            ]
+//        );
+//        $this->assertEquals(
+//            $this->getLoggedEvents('Product', $productId),
+//            [
+//                //Note: 11 - because product_id on creating is unknown!
+//                "creating" => 11,
+//                //deleting includes deletes of product, description and tags
+//                "deleting" => 72,
+//                // updated price of product. twice
+//                "updating" => 2,
+//            ]
+//        );
+//    }
 //    public function testLoggedSaving()
 //    {
 //        echo __FUNCTION__."\n";
-//        $productId = $this->testCreateUpdateRestoreDeleteProduct(['saving']);
+//        $productId = $this->CreateUpdateRestoreDeleteProduct(['saving']);
 //        //check all events list
 //        $this->assertEquals(
 //            $this->getLoggedEvents('Product', $productId),
 //            [
 //                //1 because saving before creating will skip
-//                "saving" => 5,
+//                "saving" => 60,
 //            ]
 //        );
 //    }
-//
 //    public function testLoggedSaved()
 //    {
 //        echo __FUNCTION__."\n";
-//        $productId = $this->testCreateUpdateRestoreDeleteProduct(['saved']);
+//        $productId = $this->CreateUpdateRestoreDeleteProduct(['saved']);
 //        //check all events list
 //        $this->assertEquals(
 //            $this->getLoggedEvents('Product', $productId),
 //            []
 //        );
 //    }
-//
 //    public function testLoggedSavingUpdating()
 //    {
 //        echo __FUNCTION__."\n";
-//        $productId = $this->testCreateUpdateRestoreDeleteProduct(['saving', 'updating']);
+//        $productId = $this->CreateUpdateRestoreDeleteProduct(['saving', 'updating']);
 //        //check all events list
 //        $this->assertEquals(
 //            $this->getLoggedEvents('Product', $productId),
@@ -262,7 +269,7 @@ class AuditLogTest extends ATestCase
 //    public function testLoggedCreatingUpdating()
 //    {
 //        echo __FUNCTION__."\n";
-//        $productId = $this->testCreateUpdateRestoreDeleteProduct(['saving', 'creating']);
+//        $productId = $this->CreateUpdateRestoreDeleteProduct(['saving', 'creating']);
 //        //check all events list
 //        $this->assertEquals(
 //            $this->getLoggedEvents('Product', $productId),
@@ -276,7 +283,7 @@ class AuditLogTest extends ATestCase
 //    public function testLoggedCreatingUpdatingSaving()
 //    {
 //        echo __FUNCTION__."\n";
-//        $productId = $this->testCreateUpdateRestoreDeleteProduct(['saving', 'creating', 'updating']);
+//        $productId = $this->CreateUpdateRestoreDeleteProduct(['saving', 'creating', 'updating']);
 //
 //        $this->assertEquals(
 //            $this->getLoggedEvents('Product', $productId),
@@ -290,7 +297,7 @@ class AuditLogTest extends ATestCase
 //    public function testLoggedDeleting()
 //    {
 //        echo __FUNCTION__."\n";
-//        $productId = $this->testCreateUpdateRestoreDeleteProduct(['deleting']);
+//        $productId = $this->CreateUpdateRestoreDeleteProduct(['deleting']);
 //
 //        $this->assertEquals(
 //            $this->getLoggedEvents('Product', $productId),
@@ -303,7 +310,7 @@ class AuditLogTest extends ATestCase
 //    public function testLoggedDeleted()
 //    {
 //        echo __FUNCTION__."\n";
-//        $productId = $this->testCreateUpdateRestoreDeleteProduct(['deleted']);
+//        $productId = $this->CreateUpdateRestoreDeleteProduct(['deleted']);
 //
 //        $this->assertEquals(
 //            $this->getLoggedEvents('Product', $productId),
@@ -316,7 +323,7 @@ class AuditLogTest extends ATestCase
 //    public function testLoggedDeletingDeleted()
 //    {
 //        echo __FUNCTION__."\n";
-//        $productId = $this->testCreateUpdateRestoreDeleteProduct(['deleting', 'deleted']);
+//        $productId = $this->CreateUpdateRestoreDeleteProduct(['deleting', 'deleted']);
 //
 //        $this->assertEquals(
 //            $this->getLoggedEvents('Product', $productId),
@@ -356,12 +363,21 @@ class AuditLogTest extends ATestCase
 
         $audit = $db->table('audit_events');
         $result = $audit
-            ->select('event_type_id', $db->getORM()::raw('count(*) as count'))
-            ->leftJoin('audit_event_descriptions', 'audit_event_descriptions.audit_event_id', '=', 'audit_events.id')
-            ->where('main_auditable_model_id', '=', $auditableModelId)
-            ->where('main_auditable_id', '=', $auditableId)
-            ->where('request_id', '=', $requestId)
-            ->groupBy('event_type_id')
+            ->select(
+                'event_type_id',
+                $db->getORM()::raw('count(*) as count')
+            )->leftJoin(
+                'audit_event_descriptions',
+                'audit_event_descriptions.audit_event_id',
+                '=',
+                'audit_events.id'
+            )->where(
+                [
+                    'main_auditable_model_id' => $auditableModelId,
+                    'main_auditable_id'       => $auditableId,
+                    'request_id'              => $requestId,
+                ]
+            )->groupBy('event_type_id')
             ->get();
 
         if ($result) {

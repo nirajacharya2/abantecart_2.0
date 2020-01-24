@@ -232,8 +232,10 @@ class BaseModel extends OrmModel
         $this->cache = Registry::cache();
         $this->db = Registry::db();
 
+        static::$env = ABC::env('MODEL');
+        Relation::morphMap(static::$env['MORPH_MAP']);
+
         parent::__construct($attributes);
-        static::boot();
         $this->newBaseQueryBuilder();
 
         //process validation rules
@@ -255,16 +257,6 @@ class BaseModel extends OrmModel
     public function isForceDeleting()
     {
         return $this->forceDeleting;
-    }
-
-    /**
-     * Boot
-     */
-    public static function boot()
-    {
-        static::$env = ABC::env('MODEL');
-        Relation::morphMap(static::$env['MORPH_MAP']);
-        parent::boot();
     }
 
     /**
@@ -724,17 +716,17 @@ class BaseModel extends OrmModel
         return $query;
     }
 
-    public static function __callStatic($method, $parameters)
-    {
-        //check permissions for static methods of model
-        /*
-         * ??? comment it yet. Need to resolve issues with abac-rbac class
-         * $abac = Registry::getInstance()->get('abac');
-        if($abac && !$abac->hasAccess(__CLASS__)){
-            throw new AException('Forbidden');
-        }*/
-        return parent::__callStatic($method, $parameters);
-    }
+//    public static function __callStatic($method, $parameters)
+//    {
+//        //check permissions for static methods of model
+//        /*
+//         * ??? comment it yet. Need to resolve issues with abac-rbac class
+//         * $abac = Registry::getInstance()->get('abac');
+//        if($abac && !$abac->hasAccess(__CLASS__)){
+//            throw new AException('Forbidden');
+//        }*/
+//        return parent::__callStatic($method, $parameters);
+//    }
 
     public function getTableColumns()
     {
