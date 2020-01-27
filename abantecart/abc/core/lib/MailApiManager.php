@@ -10,8 +10,7 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
-
-
+use abc\core\lib\contracts\MailApi;
 
 class MailApiManager
 {
@@ -72,7 +71,13 @@ class MailApiManager
        $className = preg_replace('/[^a-zA-Z]/', '', $driver);
         try {
             $driver = ABC::getObjectByAlias($className);
-        } catch (\Cake\Database\Exception $e){}
+            if (!($driver instanceof MailApi)) {
+                Registry::log()->write($driver.' not instance of MailApi Class!');
+                return false;
+            }
+        } catch (\Cake\Database\Exception $e){
+            Registry::log()->write($e->getMessage());
+        }
         return $driver;
     }
 }
