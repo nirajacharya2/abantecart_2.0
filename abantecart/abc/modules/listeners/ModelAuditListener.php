@@ -290,11 +290,6 @@ class ModelAuditListener
                 'Skipped "'.$event_name.'" of model '.$modelClassName.' to prevent duplication of data');
         }
 
-        if ($event_name == 'creating') {
-            var_dump($modelClassName);
-            exit;
-        }
-
         foreach ($newData as $colName => $newValue) {
 
             if (is_array($newValue)) {
@@ -313,6 +308,7 @@ class ModelAuditListener
                 }
             } else {
                 if ((string)$oldData[$colName] === (string)$newValue) {
+                    $this->output(true, 'DATA SKIPPED: '.$colName." because values are equal.");
                     continue;
                 }
                 $eventDescription[] = [
