@@ -167,6 +167,7 @@ class BaseModelTest extends ATestCase
     public function testSoftDelete($productId)
     {
         $model = new Product();
+        /** @var Product $product */
         $product = $model->find($productId);
         $result = false;
 
@@ -174,8 +175,10 @@ class BaseModelTest extends ATestCase
             $product->delete();
             Product::onlyTrashed()->where('product_id', $productId)->restore();
             try {
-                $product->get(['date_deleted']);
-                $result = true;
+                $product = $model->find($productId);
+                if( !$product->date_deleted) {
+                    $result = true;
+                }
             } catch (\PDOException $e) {
                 $this->fail($e->getTraceAsString());
             }

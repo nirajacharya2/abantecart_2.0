@@ -381,6 +381,12 @@ class Customer extends BaseModel
         ],
 
     ];
+//temporary disable softDeleting
+public function __construct(array $attributes = [])
+{
+    $this->forceDeleting = true;
+    parent::__construct($attributes);
+}
 
     /** Wrap basic method to implement conditional rules
      *
