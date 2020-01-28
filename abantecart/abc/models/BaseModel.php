@@ -212,8 +212,6 @@ class BaseModel extends OrmModel
      */
     public static $auditExcludes = ['date_added', 'date_modified'];
 
-    protected $forceDeleting = false;
-
     /**
      * @param array $attributes
      */
@@ -228,20 +226,13 @@ class BaseModel extends OrmModel
                                             : $this->registry->get('language')->getLanguageID();
         }
         $this->config = $this->registry->get('config');
-        $this->cache = $this->registry->get('cache');
-        $this->db = $this->registry->get('db');
+        $this->cache = Registry::cache();
+        $this->db = Registry::db();
 
-        $called_class = $this->getClass();
-        if (static::$env['FORCE_DELETING']
-            && method_exists($this, 'forceDelete')
-            && isset(static::$env['FORCE_DELETING'][$called_class])
-        ) {
-            $this->forceDeleting = (bool)static::$env['FORCE_DELETING'][$called_class];
-        }
-
+        static::$env = ABC::env('MODEL');
+        Relation::morphMap(static::$env['MORPH_MAP']);
 
         parent::__construct($attributes);
-        static::boot();
         $this->newBaseQueryBuilder();
 
         //process validation rules
@@ -257,15 +248,12 @@ class BaseModel extends OrmModel
         }
     }
 
-
     /**
-     * Boot
+     * @return bool
      */
-    public static function boot()
+    public function isForceDeleting()
     {
-        static::$env = ABC::env('MODEL');
-        Relation::morphMap(static::$env['MORPH_MAP']);
-        parent::boot();
+        return $this->forceDeleting;
     }
 
     /**
