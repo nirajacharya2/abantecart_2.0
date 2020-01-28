@@ -187,12 +187,9 @@ class BaseModelTest extends ATestCase
 
         if($result) {
             //test force deleting
-            $env = ABC::env('MODEL');
-            $env['FORCE_DELETING'][Product::class] = true;
-            ABC::env('MODEL', $env, true);
             $model = new Product();
             $product = $model->find($productId);
-            $product->delete();
+            $product->forceDelete();
             $exists = Product::onlyTrashed()->where('product_id', $productId)->exists();
             $this->assertEquals($exists, false);
         }
