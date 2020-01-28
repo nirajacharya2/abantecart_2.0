@@ -87,9 +87,9 @@ class ModelToolImportProcess extends Model
         $task_controller = 'task/tool/import_process/processRows';
 
         //numbers of rows per task step
-        $divider = 5;
+        $divider = 2;
         //timeout in seconds for one row
-        $time_per_send = 6;
+        $time_per_send = 15;
 
         $tm = new ATaskManager();
         //create new task
