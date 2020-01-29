@@ -684,7 +684,7 @@ return [
         // SEO URL Keyword separator
         'SEO_URL_SEPARATOR' => '-',
         // EMAIL REGEXP PATTERN
-        'EMAIL_REGEX_PATTERN' => '/^[A-Z0-9._%-]+@[A-Z0-9.-]{0,61}[A-Z0-9]\.[A-Z]{2,16}$/i',
+        'EMAIL_REGEX_PATTERN' => '/^[A-Z0-9._\'%-]+@[A-Z0-9.-]{0,61}[A-Z0-9]\.[A-Z]{2,16}$/i',
         //postfixes for template override
         'POSTFIX_OVERRIDE' => '.override',
         'POSTFIX_PRE' => '.pre',

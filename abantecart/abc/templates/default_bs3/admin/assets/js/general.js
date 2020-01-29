@@ -1276,8 +1276,6 @@ jQuery.fn.extend({
 })(jQuery);
 
 //order edit functions
-
-
 function formatMoney(num, decimal_place, decimal_point, thousand_point) {
     decimal_place = isNaN(decimal_place = Math.abs(decimal_place)) ? 2 : decimal_place;
     decimal_point = decimal_point === undefined ? "." : decimal_point;
@@ -1292,6 +1290,8 @@ function formatMoney(num, decimal_place, decimal_point, thousand_point) {
 
 function currencyToNumber(str, thousand_point, decimal_point, currency_symbol) {
     str = str === undefined || str.length === 0 ? '0' : str;
+    //html-entities decoding
+    str = $('<textarea />').html(str).text();
     //remove html-tags from currency formatted string
     str = str.replace( /<.*?>/g, '' );
     var final_number = str.replace(thousand_point, '')
@@ -1301,7 +1301,6 @@ function currencyToNumber(str, thousand_point, decimal_point, currency_symbol) {
     final_number = parseFloat(final_number);
     return final_number;
 }
-
 
 function numberToCurrency(num, currency_location, decimal_place, decimal_point, thousand_point) {
     var str;

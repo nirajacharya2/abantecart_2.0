@@ -144,7 +144,7 @@ class AuditLogTest extends ATestCase
 
         // now delete, restore and force delete
         try {
-            $product->delete();
+            Product::destroy($productId);
             $result = true;
         } catch (\PDOException $e) {
             $this->fail($e->getMessage());

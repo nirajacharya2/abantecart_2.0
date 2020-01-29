@@ -22,6 +22,7 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use abc\core\lib\contracts\MailApiResponse;
 use abc\models\customer\CustomerCommunication;
 use abc\models\system\EmailTemplate;
 use Mustache_Engine;
@@ -79,6 +80,11 @@ class AMail
      * @var AUser
      */
     protected $user;
+
+    /**
+     * @var MailApiResponse
+     */
+    public $response;
 
     /**
      * @param null | AConfig $config
@@ -723,7 +729,11 @@ class AMail
         } elseif ($this->protocol == 'mailapi') {
             $mailDriver = MailApiManager::getInstance()->getCurrentMailApiDriver();
             if (!is_bool($mailDriver)) {
-                if (!$mailDriver->send($this)) {
+                /**
+                 * @var MailApiResponse $result
+                 */
+                $this->response = $mailDriver->send($this);
+                if (!$this->response->result) {
                     $this->error[] = "Error send via Mail Api";
                 }
             }

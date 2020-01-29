@@ -257,6 +257,13 @@ class Address extends BaseModel
         ],
     ];
 
+//temporary disable softDeleting
+public function __construct(array $attributes = [])
+{
+    $this->forceDeleting = true;
+    parent::__construct($attributes);
+}
+
     /**
      * @param $value
      */
