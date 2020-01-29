@@ -121,11 +121,11 @@ class CustomerCommunication extends BaseModel
         }
         $communication->customer_id = $customer_id;
 
+
+        $communication->user_id = null;
         $user = Registry::user();
-        if($user){
+        if($user && $user->getId()){
            $communication->user_id = $user->getId();
-        }else{
-            $communication->user_id = null;
         }
         $communication->type = 'email';
         $communication->sent_to_address = $mail->getTo();
