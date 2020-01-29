@@ -89,7 +89,8 @@ class ControllerResponsesListingGridCustomerCommunications extends AController
             if ($communication) {
 
                 $this->data['message'] = $communication;
-                $this->data['message']['date_added'] =
+                $this->data['message']['body'] = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', "",  $this->data['message']['body']);
+                    $this->data['message']['date_added'] =
                     H::dateISO2Display(
                         $this->data['message']['date_added'],
                         $this->language->get('date_format_short').' '.$this->language->get('time_format')
