@@ -196,7 +196,7 @@ class ControllerResponsesCommonExportTask extends AController
             $tm->deleteTask($task_id);
             //$rt = $this->rt();
             rename($this->getExportFile($task_id), $this->getPublicExportFile($task_id));
-            unlink($this->getExportFile($task_id));
+            @unlink($this->getExportFile($task_id));
             //$rt = str_replace('responses/', 'r/', $rt);
             $downloadLink = $this->html->getHomeURL().'export/'.$this->zipFile;
             $result_text = '<a href="'.$downloadLink.'">'.
