@@ -94,6 +94,7 @@ class ControllerPagesAccountTransactions extends AController
             'customer_id' => (int)$this->customer->getId(),
         ];
         $results = CustomerTransaction::getTransactions($data);
+        $this->data['selected_transactions'] = $results;
 
         if ($results && isset($results[0]['total_num_rows'])) {
             $trans_total = $results[0]['total_num_rows'];
