@@ -103,9 +103,10 @@ class Job extends BaseCommand
             $this->errors[] = 'Job ID '.$job_id.' not found or have incorrect configuration!';
             return false;
         }
-        if ($job_info['status'] === $handler::STATUS_DISABLED) {
-            $this->errors[] = 'Cannot to run disabled Job! To run please change Job status to "Ready" first.';
-            return false;
+
+        if ($job_info['status'] !== $handler::STATUS_READY) {
+            $this->errors[] = 'Cannot to run Job! To re-run please change Job status to "Ready" first.';
+            return true;
         }
 
         $result = false;
