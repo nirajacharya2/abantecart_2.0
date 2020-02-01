@@ -1812,9 +1812,9 @@ class Product extends BaseModel
             $product->description()->update($product_data['product_description']);
         }
 
-        if ($product_data['keyword'] || $product_data['product_description']['name']) {
+        if (trim($product_data['keyword'])) {
             UrlAlias::setProductKeyword(
-                $product_data['keyword'] ?: $product_data['product_description']['name'],
+                $product_data['keyword'],
                 $product
             );
         }
@@ -2329,7 +2329,8 @@ class Product extends BaseModel
      */
     public function delete()
      {
-         UrlAlias::where('query', '=', 'product_id='.$this->getKey())->delete();
+         $delete = $this->forceDeleting ? 'forceDelete' : 'delete';
+         UrlAlias::where('query', '=', 'product_id='.$this->getKey())->$delete();
          return parent::delete();
      }
 
