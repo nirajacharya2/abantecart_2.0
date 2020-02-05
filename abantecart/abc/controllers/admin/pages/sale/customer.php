@@ -1445,6 +1445,7 @@ class ControllerPagesSaleCustomer extends AController
         $grid_settings['colNames'] = [
             $this->language->get('column_subject'),
             $this->language->get('column_type'),
+            $this->language->get('column_status'),
             $this->language->get('column_date_added'),
             $this->language->get('column_user'),
         ];
@@ -1463,6 +1464,14 @@ class ControllerPagesSaleCustomer extends AController
                 'index'    => 'type',
                 'width'    => 50,
                 'align'    => 'center',
+                'sortable' => true,
+                'search'   => false,
+            ],
+            [
+                'name'     => 'status',
+                'index'    => 'status',
+                'width'    => 50,
+                'align'    => 'left',
                 'sortable' => true,
                 'search'   => false,
             ],
