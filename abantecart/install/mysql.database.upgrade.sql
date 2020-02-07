@@ -40,7 +40,6 @@ ALTER TABLE `ac_order_totals` ENGINE=INNODB;
 ALTER TABLE `ac_products` ENGINE=INNODB;
 ALTER TABLE `ac_product_descriptions` ENGINE=INNODB;
 ALTER TABLE `ac_product_discounts` ENGINE=INNODB;
-ALTER TABLE `ac_products_featured` ENGINE=INNODB;
 ALTER TABLE `ac_product_options` ENGINE=INNODB;
 ALTER TABLE `ac_product_option_descriptions` ENGINE=INNODB;
 ALTER TABLE `ac_product_option_values` ENGINE=INNODB;
@@ -2097,11 +2096,6 @@ ADD COLUMN `children_count` int(11) NOT NULL DEFAULT '0' AFTER `active_products_
 
 INSERT INTO `ac_settings` (`group`, `key`, `value`) VALUES
 ('general','config_google_tag_manager_id','');
-
-
-# TODO
-#MOVE products_featured to products
-#and drop table
 
 
 ALTER TABLE `ac_products`

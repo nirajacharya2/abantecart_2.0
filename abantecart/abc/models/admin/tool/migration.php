@@ -194,7 +194,7 @@ class ModelToolMigration extends Model
             $sql .= "DELETE FROM `".$this->db->table_name("product_option_values")."`;\n";
             $sql .= "DELETE FROM `".$this->db->table_name("product_option_value_descriptions")."`;\n";
             $sql .= "DELETE FROM `".$this->db->table_name("product_specials")."`;\n";
-            $sql .= "DELETE FROM `".$this->db->table_name("products_featured")."`;\n";
+            //$sql .= "DELETE FROM `".$this->db->table_name("products_featured")."`;\n";
             $sql .= "DELETE FROM `".$this->db->table_name("products_related")."`;\n";
             $sql .= "DELETE FROM `".$this->db->table_name("product_tags")."`;\n";
 

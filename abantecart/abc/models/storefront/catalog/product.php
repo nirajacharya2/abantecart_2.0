@@ -942,18 +942,17 @@ class ModelCatalogProduct extends Model
                     .md5($limit.$order.$start.$sort.$total);
         $product_data = $this->cache->get($cache_key);
         if ($product_data === null) {
-            $sql = "SELECT f.*, pd.*, ss.name AS stock, p.*
-                    FROM ".$this->db->table_name("products_featured")." f
-                    LEFT JOIN ".$this->db->table_name("products")." p
-                        ON (f.product_id = p.product_id)
+            $sql = "SELECT pd.*, ss.name AS stock, p.*
+                    FROM ".$this->db->table_name("products")." p
                     LEFT JOIN ".$this->db->table_name("product_descriptions")." pd
-                        ON (f.product_id = pd.product_id AND pd.language_id = '".$language_id."')
+                        ON (p.product_id = pd.product_id AND pd.language_id = '".$language_id."')
                     LEFT JOIN ".$this->db->table_name("products_to_stores")." p2s 
                         ON (p.product_id = p2s.product_id)
                     LEFT JOIN ".$this->db->table_name("stock_statuses")." ss 
                         ON (p.stock_status_id = ss.stock_status_id AND ss.language_id = '".$language_id."')
                     WHERE p2s.store_id = '".$store_id."'
                         AND p.status='1'
+                        AND p.featured = 1 
                         AND p.date_available <= NOW()
                    ";
 
@@ -1613,8 +1612,8 @@ class ModelCatalogProduct extends Model
                     FROM ".$this->db->table_name("product_specials")." p2sp
                     WHERE p2sp.product_id = p.product_id
                             AND p2sp.customer_group_id = '".$customer_group_id."'
-                            AND ((p2sp.date_start = '0000-00-00' OR p2sp.date_start < NOW())
-                            AND (p2sp.date_end = '0000-00-00' OR p2sp.date_end > NOW()))
+                            AND ((p2sp.date_start IS NULL OR p2sp.date_start < NOW())
+                            AND (p2sp.date_end IS NULL OR p2sp.date_end > NOW()))
                     ORDER BY p2sp.priority ASC, p2sp.price ASC 
                     LIMIT 1
                  ) ";
@@ -1669,8 +1668,8 @@ class ModelCatalogProduct extends Model
                     FROM ".$this->db->table_name("product_specials")."
                     WHERE product_id IN (".implode(', ', $products).")
                             AND customer_group_id = '".$customer_group_id."'
-                            AND ((date_start = '0000-00-00' OR date_start < NOW())
-                            AND (date_end = '0000-00-00' OR date_end > NOW()))
+                            AND ((date_start IS NULL OR date_start < NOW())
+                            AND (date_end IS NULL OR date_end > NOW()))
                     ORDER BY product_id ASC, priority ASC, price ASC";
             $result = $this->db->query($sql);
             $temp = '';
@@ -1702,8 +1701,8 @@ class ModelCatalogProduct extends Model
                     WHERE product_id IN (".implode(', ', $products).")
                         AND customer_group_id = '".(int)$customer_group_id."'
                         AND quantity = '1'
-                        AND ((date_start = '0000-00-00' OR date_start < NOW())
-                        AND (date_end = '0000-00-00' OR date_end > NOW()))
+                        AND ((date_start IS NULL OR date_start < NOW())
+                        AND (date_end IS NULL OR date_end > NOW()))
                     ORDER BY  product_id ASC, priority ASC, price ASC";
             $result = $this->db->query($sql);
             $temp = '';

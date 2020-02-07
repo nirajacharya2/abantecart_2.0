@@ -161,8 +161,8 @@ class APromotion
                 WHERE product_id = '".(int)$product_id."'
                         AND customer_group_id = '".$customer_group_id."'
                         AND quantity <= '".(int)$discount_quantity."'
-                        AND ((date_start = '0000-00-00' OR date_start < NOW()) 
-                                AND (date_end = '0000-00-00' OR date_end > NOW()))
+                        AND ((date_start IS NULL OR date_start < NOW()) 
+                                AND (date_end IS NULL OR date_end > NOW()))
                 ORDER BY quantity DESC, priority ASC, price ASC
                 LIMIT 1";
         $product_discount_query = $this->db->query($sql);
@@ -195,8 +195,8 @@ class APromotion
                                     WHERE product_id = '".(int)$product_id."'
                                         AND customer_group_id = '".$customer_group_id."'
                                         AND quantity = '1'
-                                        AND ((date_start = '0000-00-00' OR date_start < NOW())
-                                        AND (date_end = '0000-00-00' OR date_end > NOW()))
+                                        AND ((date_start IS NULL OR date_start < NOW())
+                                        AND (date_end  IS NULL OR date_end > NOW()))
                                     ORDER BY priority ASC, price ASC
                                     LIMIT 1");
         if ($query->num_rows) {
@@ -231,8 +231,8 @@ class APromotion
                                     WHERE product_id = '".(int)$product_id."'
                                         AND customer_group_id = '".(int)$customer_group_id."'
                                         AND quantity > 1
-                                        AND ((date_start = '0000-00-00' OR date_start < NOW())
-                                        AND (date_end = '0000-00-00' OR date_end > NOW()))
+                                        AND ((date_start IS NULL OR date_start < NOW())
+                                        AND (date_end IS NULL OR date_end > NOW()))
                                     ORDER BY quantity ASC, priority ASC, price ASC");
         $output = $query->rows;
         $this->cache->put($cache_key, $output);
@@ -262,8 +262,8 @@ class APromotion
                                     FROM ".$this->db->table_name("product_specials")."
                                     WHERE product_id = '".(int)$product_id."'
                                         AND customer_group_id = '".$customer_group_id."'
-                                        AND ((date_start = '0000-00-00' OR date_start < NOW())
-                                        AND (date_end = '0000-00-00' OR date_end > NOW()))
+                                        AND ((date_start IS NULL OR date_start < NOW())
+                                        AND (date_end IS NULL OR date_end > NOW()))
                                     ORDER BY priority ASC, price ASC LIMIT 1");
         if ($query->num_rows) {
             $output = (float)$query->row['price'];
@@ -324,8 +324,8 @@ class APromotion
                 WHERE p.status = '1'
                     AND p.date_available <= NOW() AND p2s.store_id = '".$store_id."'
                     AND ps.customer_group_id = '".$customer_group_id."'
-                    AND ((ps.date_start = '0000-00-00' OR ps.date_start < NOW())
-                    AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW()))
+                    AND ((ps.date_start IS NULL OR ps.date_start < NOW())
+                    AND (ps.date_end IS NULL OR ps.date_end > NOW()))
                 GROUP BY ps.product_id";
 
         $sort_data = [
@@ -411,8 +411,8 @@ class APromotion
                     WHERE rd.product_id = ps.product_id
                         AND customer_group_id = '".$customer_group_id."'
                         AND quantity = '1'
-                        AND ((date_start = '0000-00-00' OR date_start < NOW())
-                        AND (date_end = '0000-00-00' OR date_end > NOW()))
+                        AND ((date_start IS NULL OR date_start < NOW())
+                        AND (date_end IS NULL OR date_end > NOW()))
                     ORDER BY priority ASC, price ASC
                     LIMIT 1) as discount_price\n ";
 
@@ -427,8 +427,8 @@ class APromotion
                 WHERE p.status = '1'
                     AND p.date_available <= NOW() AND p2s.store_id = '".$store_id."'
                     AND ps.customer_group_id = '".$customer_group_id."'
-                    AND ((ps.date_start = '0000-00-00' OR ps.date_start < NOW())
-                    AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW()))
+                    AND ((ps.date_start IS NULL OR ps.date_start < NOW())
+                    AND (ps.date_end IS NULL OR ps.date_end > NOW()))
                 GROUP BY ps.product_id";
 
         $sort_data = [
@@ -497,8 +497,8 @@ class APromotion
                                         AND p.date_available <= NOW()
                                         AND p2s.store_id = '".(int)$store_id."'
                                         AND ps.customer_group_id = '".(int)$customer_group_id."'
-                                        AND ((ps.date_start = '0000-00-00' OR ps.date_start < NOW())
-                                        AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW()))");
+                                        AND ((ps.date_start IS NULL OR ps.date_start < NOW())
+                                        AND (ps.date_end IS NULL OR ps.date_end > NOW()))");
 
         $output = (int)$query->row['total'];
         $this->cache->put($cache_key, $output);

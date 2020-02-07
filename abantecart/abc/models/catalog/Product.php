@@ -2035,8 +2035,8 @@ class Product extends BaseModel
                     FROM ".$this->db->table_name("product_specials")." p2sp
                     WHERE p2sp.product_id = ".$this->db->table_name("products").".product_id
                             AND p2sp.customer_group_id = '".$customer_group_id."'
-                            AND ((p2sp.date_start = '0000-00-00' OR p2sp.date_start < NOW())
-                            AND (p2sp.date_end = '0000-00-00' OR p2sp.date_end > NOW()))
+                            AND ((p2sp.date_start IS NULL OR p2sp.date_start < NOW())
+                            AND (p2sp.date_end IS NULL OR p2sp.date_end > NOW()))
                     ORDER BY p2sp.priority ASC, p2sp.price ASC 
                     LIMIT 1
                  ) ";

@@ -569,7 +569,7 @@ final class ADataset
             $query
                 = "SELECT  dd.dataset_column_name, dd.dataset_column_id, dv.value_integer,
                                 dv.value_float, dv.value_varchar, dv.value_boolean,
-                                CASE WHEN dv.value_timestamp='0000-00-00 00:00:00' THEN '' ELSE dv.value_timestamp END AS value_timestamp,
+                                dv.value_timestamp,
                                 dv.value_text, dv.row_id
                       FROM ".$this->db->table_name("dataset_values")." dv
                       LEFT JOIN  ".$this->db->table_name("dataset_definition")." dd ON dd.dataset_column_id = dv.dataset_column_id
