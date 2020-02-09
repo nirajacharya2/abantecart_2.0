@@ -388,7 +388,7 @@ class ALanguage
         //language code is provided as input. Higher priority
         $request_lang = $request->get['language'] ?? '';
         $request_lang = $request->post['language'] ?? $request_lang;
-        unset($request->get['language'], $request->post['language']);
+        $request->get['language'] = $request->post['language'] = null;
 
         if ($request_lang && array_key_exists($request_lang, $languages)) {
             $lang_code = $request_lang;
