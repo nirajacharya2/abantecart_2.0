@@ -226,13 +226,11 @@ class ControllerApiCatalogProduct extends AControllerAPI
         //create defined relationships
         $product->updateRelationships($rels);
 
-        //touch categories to run recalculation
-        if($rels['categories']){
-            foreach($rels['categories'] as $id){
-                $category = Category::find($id);
-                if($category){
-                    $category->touch();
-                }
+        //touch category to run recalculation of products count in it
+        foreach( (array)$data['category_uuids'] as $uuid ){
+            $category = Category::where( [ 'uuid' => $uuid ] )->first();
+            if($category){
+                $category->touch();
             }
         }
 
