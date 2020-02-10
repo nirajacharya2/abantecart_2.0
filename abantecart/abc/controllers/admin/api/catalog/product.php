@@ -270,7 +270,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
         $product->updateImages($data);
 
         //touch category to run recalculation of products count in it
-        foreach( array_merge((array)$data['category_uuids'], $prev_categories) as $uuid ){
+        foreach( array_merge($prev_categories, (array)$data['category_uuids']) as $uuid ){
             $category = Category::where( [ 'uuid' => $uuid ] )->first();
             if($category){
                 $category->touch();
