@@ -349,7 +349,7 @@ class ControllerPagesToolImportExport extends AController
 
         $this->handler = new AData();
 
-        $this->data['map'] = $this->request->post ? $this->request->post : $this->session->data['import_map'];
+        $this->data['map'] = $this->request->post ?: $this->session->data['import_map'];
         if ($this->request->post['serialized_map']) {
             $this->data['map'] = unserialize(base64_decode($this->request->post['serialized_map']));
         }
