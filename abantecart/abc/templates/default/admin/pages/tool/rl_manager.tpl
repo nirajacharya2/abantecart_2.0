@@ -5,32 +5,32 @@
 			<div class="btn-group mr10 toolbar">
 			</div>
 		</div>
-		
-		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>	
+
+		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>
 	</div>
 
 	<div class="panel-body panel-body-nopadding">
 
-	<?php foreach ( $types as $type ) { 
+	<?php foreach ( $types as $type ) {
 		$title = ${'text_type_'.$type['type_name']};
 		if(!$title) {
 			$title = ucfirst($type['type_name']);
 		}
 		switch($type['type_name']){
 		    case 'image':
-		    	$icon = 'fa-file-image-o';
+		    	$icon = 'fa-file-image';
 		    break;
 		    case 'audio':
-		    	$icon = 'fa-file-audio-o';
+		    	$icon = 'fa-file-audio';
 		    break;
 		    case 'video':
-		    	$icon = 'fa-file-movie-o';
+		    	$icon = 'fa-file-movie';
 		    break;
 		    case 'pdf':
-		    	$icon = 'fa-file-pdf-o';
+		    	$icon = 'fa-file-pdf';
 		    break;
 		    case 'archive':
-		    	$icon = 'fa-file-archive-o';
+		    	$icon = 'fa-file-archive';
 		    break;
 		    case 'download':
 		    	$icon = 'fa-download';
@@ -46,14 +46,14 @@
 		  </div>
 		  <h3 class="panel-title">
 		  	<a href="#" data-type="<?php echo $type['type_name']; ?>" data-mode="list_all" class="tab_<?php echo $type['type_name']; ?> resource_edit" id="tab_<?php echo $type['type_name']; ?>">
-		  	<i class="fa <?php echo $icon; ?> fa-fw"></i> 
+		  	<i class="fa <?php echo $icon; ?> fa-fw"></i>
 		  	<?php echo $title; ?>
 		  	</a>
 		  	<p class="inblock">&nbsp;&nbsp;<?php echo $text_rl_latest; ?></p>
 		  	<p class="inblock">
 		  	<a href="#" data-type="<?php echo $type['type_name']; ?>" data-mode="list_all" class="tab_<?php echo $type['type_name']; ?> resource_edit" id="tab_<?php echo $type['type_name']; ?>">
-		  	<i class="fa fa-folder-open fa-fw"></i> 
-		  	</a>		  	
+		  	<i class="fa fa-folder-open fa-fw"></i>
+		  	</a>
 		  	</p>
 		  	<span class="pull-right">
 				<a class="tooltips" href="<?php echo $rl_types_url.'&rl_type='.$type['type_name']; ?>"
@@ -61,11 +61,11 @@
 					   data-target="#rl_types_modal"
 					   title="<?php echo $button_edit; ?>">
 					<i class="fa fa-cogs"></i>
-				</a>		  	
+				</a>
 				&nbsp;
 		  	</span>
 		  </h3>
-		</div>	
+		</div>
 		<div class="panel-body panel-body-nopadding" id="type_<?php echo $type['type_name']; ?>" style="display:none">
 			<div class="row reslibrary type_blocks">
 			<?php //resource library list insearted here  ?>
