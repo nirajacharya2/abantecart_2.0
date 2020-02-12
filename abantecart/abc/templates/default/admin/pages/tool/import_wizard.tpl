@@ -320,5 +320,7 @@
 			}
 		});
 	};
-
+    <?php
+    echo $this->getHookVar('js_hook');
+    ?>
 </script>

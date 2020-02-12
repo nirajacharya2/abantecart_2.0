@@ -11,19 +11,19 @@
 	        <?php foreach($types as $rl_type){
 				switch($rl_type['type_name']){
 					case 'image':
-						$icon = 'fa-file-image-o';
+						$icon = 'fa-file-image';
 					break;
 					case 'audio':
-						$icon = 'fa-file-audio-o';
+						$icon = 'fa-file-audio';
 					break;
 					case 'video':
-						$icon = 'fa-file-movie-o';
+						$icon = 'fa-file-video';
 					break;
 					case 'pdf':
-						$icon = 'fa-file-pdf-o';
+						$icon = 'fa-file-pdf';
 					break;
 					case 'archive':
-						$icon = 'fa-file-archive-o';
+						$icon = 'fa-file-archive';
 					break;
 					case 'download':
 						$icon = 'fa-download';

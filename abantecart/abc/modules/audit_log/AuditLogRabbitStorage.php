@@ -12,6 +12,7 @@ use Elasticsearch\Client;
 use Elasticsearch\ClientBuilder;
 use H;
 use http\Exception;
+use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;
@@ -29,12 +30,55 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
      */
     private $log;
 
+    protected $conf;
+    /**
+     * @var AMQPStreamConnection $conn
+     */
+    protected $conn;
+    /**
+     * @var AMQPChannel $channel
+     */
+    protected $channel;
+
+
     /**
      * AuditLogRabbitStorage constructor.
      */
     public function __construct()
     {
         $this->log = Registry::log();
+        $this->connect();
+    }
+
+    public function __destruct() {
+        $this->disconnect();
+    }
+
+
+    protected function connect() {
+        $this->conf = ABC::env('RABBIT_MQ');
+        $this->conn = new AMQPStreamConnection($this->conf['HOST'], $this->conf['PORT'], $this->conf['USER'], $this->conf['PASSWORD']);
+        $this->channel = $this->conn->channel();
+
+        $this->channel->exchange_declare('exch_main', 'direct', false, true, false);
+        $this->channel->exchange_declare('exch_backup', 'fanout', false, true, false);
+
+        $this->channel->queue_declare('audit_log', false, true, false, false, false, new AMQPTable([
+            'x-dead-letter-exchange' => 'exch_backup',
+            'x-message-ttl'          => 15000,
+            //'x-expires'              => 16000,
+        ]));
+
+        $this->channel->queue_declare('audit_log_backup', false, true, false, false, false, new AMQPTable([]));
+
+        $this->channel->queue_bind('audit_log', 'exch_main');
+        $this->channel->queue_bind('audit_log_backup', 'exch_backup');
+    }
+
+    public function disconnect()
+    {
+        $this->channel->close();
+        $this->conn->close();
     }
 
     /**
@@ -55,28 +99,11 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         ];
 
         try {
-            $conf = ABC::env('RABBIT_MQ');
-            $conn = new AMQPStreamConnection($conf['HOST'], $conf['PORT'], $conf['USER'], $conf['PASSWORD']);
-            $channel = $conn->channel();
-
-            $channel->exchange_declare('exch_main', 'direct', false, true, false);
-            $channel->exchange_declare('exch_backup', 'fanout', false, true, false);
-
-            $channel->queue_declare('audit_log', false, true, false, false, false, new AMQPTable([
-                'x-dead-letter-exchange' => 'exch_backup',
-                'x-message-ttl'          => 15000,
-                //'x-expires'              => 16000,
-            ]));
-
-            $channel->queue_declare('audit_log_backup', false, true, false, false, false, new AMQPTable([]));
-
-            $channel->queue_bind('audit_log', 'exch_main');
-            $channel->queue_bind('audit_log_backup', 'exch_backup');
-
+            if (!$this->conn->isConnected() || !$this->channel->is_open()) {
+                $this->connect();
+            }
             $msg = new AMQPMessage(json_encode($data));
-            $channel->basic_publish($msg, '', $conf['QUEUE']);
-            $channel->close();
-            $conn->close();
+            $this->channel->basic_publish($msg, '', $this->conf['QUEUE']);
         } catch (\Exception $exception) {
             if (!file_exists(ABC::env('DIR_SYSTEM').'rabbitmq')) {
                 if (!mkdir($concurrentDirectory = ABC::env('DIR_SYSTEM').'rabbitmq', 0775, true) && !is_dir($concurrentDirectory)) {

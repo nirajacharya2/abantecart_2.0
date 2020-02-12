@@ -21,11 +21,16 @@
 namespace abc\core\engine;
 
 use abc\core\ABC;
+use abc\core\lib\AbcCache;
+use abc\core\lib\ADB;
 use abc\core\lib\ADebug;
 use abc\core\lib\AError;
 use abc\core\lib\AWarning;
 use abc\core\lib\AException;
+use abc\models\storefront\ModelLocalisationLanguage;
+use Exception;
 use H;
+use ReflectionException;
 
 /**
  * Class ALanguage
@@ -43,11 +48,11 @@ class ALanguage
 
     protected $code = '';
     /**
-     * @var \abc\core\lib\ADB
+     * @var ADB
      */
     protected $db;
     /**
-     * @var \abc\core\lib\AbcCache
+     * @var AbcCache
      */
     protected $cache;
     /**
@@ -55,7 +60,7 @@ class ALanguage
      */
     protected $registry;
     /**
-     * @var \abc\core\engine\ALoader
+     * @var ALoader
      */
     protected $loader;
     protected $language_path;
@@ -86,7 +91,7 @@ class ALanguage
         $result = $this->loader->model('localisation/language', 'silent');
         if ($result !== false) {
             /**
-             * @var \abc\models\admin\ModelLocalisationLanguage $model
+             * @var ModelLocalisationLanguage $model
              */
             $model = $registry->get('model_localisation_language');
             $this->available_languages = $model->getLanguages();
@@ -138,7 +143,7 @@ class ALanguage
      * @param bool $silent
      *
      * @return null|string - Definition value
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws AException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -177,7 +182,7 @@ class ALanguage
      * @param string $key
      *
      * @return string
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws AException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -214,7 +219,7 @@ class ALanguage
      *                          Block will be loaded to memory if not yet loaded
      *
      * @return array- Array with key/definition
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws AException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -243,7 +248,7 @@ class ALanguage
      * @param string $mode - Load mode. silent - No error if XML file is missing.
      *
      * @return array|null - Array with key/definition loaded
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws AException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -340,6 +345,8 @@ class ALanguage
      * Detect language used by the client's browser
      *
      * @return int|null|string - language code for detected locale
+     * @throws AException
+     * @throws ReflectionException
      */
     public function getClientBrowserLanguage()
     {
@@ -352,7 +359,7 @@ class ALanguage
             if ($browser_languages) {
                 foreach ($browser_languages as $browser_language) {
                     $browser_language = trim($browser_language);
-                    $browser_language = preg_replace('/[^a-zA-Z\-\_]/', '', $browser_language);
+                    $browser_language = preg_replace('/[^a-zA-Z\-_]/', '', $browser_language);
                     //validate and ignore browser data if causing warnings
                     if (!$browser_language) {
                         continue;
@@ -395,7 +402,7 @@ class ALanguage
         //language code is provided as input. Higher priority
         $request_lang = $request->get['language'] ?? '';
         $request_lang = $request->post['language'] ?? $request_lang;
-        unset($request->get['language'], $request->post['language']);
+        unset($_GET['language'],$_POST['language']);
 
         if ($request_lang && array_key_exists($request_lang, $languages)) {
             $lang_code = $request_lang;
@@ -487,6 +494,8 @@ class ALanguage
      * Default site language Code
      *
      * @return string
+     * @throws AException
+     * @throws ReflectionException
      */
     public function getDefaultLanguageCode()
     {
@@ -499,6 +508,8 @@ class ALanguage
      * Default site language ID
      *
      * @return int
+     * @throws AException
+     * @throws ReflectionException
      */
     public function getDefaultLanguageID()
     {
@@ -510,6 +521,8 @@ class ALanguage
      * Default site language info
      *
      * @return array
+     * @throws AException
+     * @throws ReflectionException
      */
     public function getDefaultLanguage()
     {
@@ -642,7 +655,7 @@ class ALanguage
      * @param string $mode
      *
      * @return array|null
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws AException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -835,7 +848,7 @@ class ALanguage
      * @param int $section
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     protected function loadFromDB($language_id, $filename, $section)
     {
@@ -867,7 +880,7 @@ class ALanguage
      * @param  array $definitions
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     protected function saveToDb($filename, $definitions)
     {
@@ -946,6 +959,8 @@ class ALanguage
      * @param string $mode
      *
      * @return array|null
+     * @throws ReflectionException
+     * @throws AException
      */
     protected function loadFromXml($filename, $directory, $mode)
     {
@@ -1025,6 +1040,9 @@ class ALanguage
      * @param bool $silent
      *
      * @return null|string
+     * @throws AException
+     * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function getLastLanguageValue(
         $key,
@@ -1073,6 +1091,7 @@ class ALanguage
      * @param array $data
      *
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      */
     protected function writeMissingDefinition($data)
@@ -1110,7 +1129,7 @@ class ALanguage
      * @param array $data
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     protected function isDefinitionInDb($data)
     {

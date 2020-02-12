@@ -27,6 +27,7 @@ use abc\models\catalog\UrlAlias;
 use abc\models\QueryBuilder;
 use abc\modules\events\ABaseEvent;
 use abc\core\lib\AException;
+use Exception;
 
 /**
  * Class ControllerApiCatalogProduct
@@ -225,13 +226,11 @@ class ControllerApiCatalogProduct extends AControllerAPI
         //create defined relationships
         $product->updateRelationships($rels);
 
-        //touch categories to run recalculation
-        if($rels['categories']){
-            foreach($rels['categories'] as $id){
-                $category = Category::find($id);
-                if($category){
-                    $category->touch();
-                }
+        //touch category to run recalculation of products count in it
+        foreach( (array)$data['category_uuids'] as $uuid ){
+            $category = Category::where( [ 'uuid' => $uuid ] )->first();
+            if($category){
+                $category->touch();
             }
         }
 
@@ -247,7 +246,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
      * @param         $data
      *
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     protected function updateProduct($product, $data)
     {
@@ -259,6 +258,8 @@ class ControllerApiCatalogProduct extends AControllerAPI
                 unset($data[$key]);
             }
         }
+        //get previous categories to update it via listener that calculates products count
+        $prev_categories = array_column( (array)$product->categories->toArray(), 'uuid' );
 
         $product->update($data);
 
@@ -267,7 +268,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
         $product->updateImages($data);
 
         //touch category to run recalculation of products count in it
-        foreach( (array)$data['category_uuids'] as $uuid ){
+        foreach( array_merge($prev_categories, (array)$data['category_uuids']) as $uuid ){
             $category = Category::where( [ 'uuid' => $uuid ] )->first();
             if($category){
                 $category->touch();

@@ -533,7 +533,7 @@ class ACart  extends ALibBase
             return [];
         }
         $productDetails = $orderProduct->toArray();
-        $option_data = $productDetails['order_options'];
+        $option_data = (array)$productDetails['order_options'];
         $download_data = $productDetails['order_downloads'];
         unset(
             $productDetails['order_options'],

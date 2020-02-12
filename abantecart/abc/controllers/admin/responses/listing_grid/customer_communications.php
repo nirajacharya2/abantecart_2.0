@@ -54,6 +54,7 @@ class ControllerResponsesListingGridCustomerCommunications extends AController
             $response->rows[$i]['cell'] = [
                 $communication->subject,
                 $communication->type,
+                $communication->status,
                 H::dateISO2Display($communication->date_added,
                     $this->language->get('date_format_short').' '.$this->language->get('time_format')),
                 ($user_first_name || $user_last_mame) ?

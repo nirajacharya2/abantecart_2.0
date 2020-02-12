@@ -81,7 +81,6 @@ class ControllerPagesAccountCreate extends AController
                 $customer = $this->customer::createCustomer($customer_data);
                 $this->data['customer_model'] = $customer;
                 $this->data['customer_id'] = $customer->customer_id;
-                $customer->saveCustomerNotificationSettings($request_data);
 
                 unset($this->session->data['guest']);
                 $customer_info = $customer->toArray();

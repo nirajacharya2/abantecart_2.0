@@ -1099,6 +1099,8 @@ p {
 /* resource library */
 .reslibrary_block{
 	width: 150px;
+	flex: none;
+	max-width: unset;
 }
 .reslibrary .thumbnail {
 	margin-bottom : 0px;
@@ -1238,6 +1240,7 @@ p {
 	position:absolute;
 	bottom: 15px;
 	right: 15px;
+	font-weight: 600;
 }
 .reslibrary .thmb::after {
     clear: both;

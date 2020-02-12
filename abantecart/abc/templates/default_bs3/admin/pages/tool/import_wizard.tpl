@@ -216,9 +216,7 @@
 
 </div>
 
-
 <script type="text/javascript">
-
 	$(document).ready(function () {
 		$('.aform').show();
 
@@ -321,4 +319,7 @@
 		});
 	};
 
+    <?php
+    echo $this->getHookVar('js_hook');
+    ?>
 </script>

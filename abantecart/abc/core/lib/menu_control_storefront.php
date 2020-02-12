@@ -37,16 +37,14 @@ class AMenu_Storefront extends AMenu
 
         $this->dataset = new ADataset ('menu', 'storefront');
         $this->dataset_description = new ADataset ('menu', 'storefront_description');
-
         $this->_buildMenu();
-
     }
 
     protected function _buildMenu()
     {
 
         $this->dataset_rows = (array)$this->dataset->getRows();
-        $this->dataset_description_rows = (array)$this->dataset_description->getRows();
+        $this->dataset_description_rows = (array)$this->dataset_description->getRows([]);
 
         // need to resort by sort_order property
         $offset = 0; // it needs for process repeating sort numbers
@@ -59,7 +57,7 @@ class AMenu_Storefront extends AMenu
                 }
             }
 
-            if (isset ($tmp [$item ['parent_id']] [$item['sort_order']])) {
+            while (isset ($tmp [$item ['parent_id']] [$item['sort_order'] + $offset])) {
                 $offset++;
             }
             //mark current page
@@ -141,7 +139,7 @@ class AMenu_Storefront extends AMenu
     public function insertMenuItem($item = [])
     {
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException('Error: permission denied to change menu', AC_ERR_LOAD);
+            throw new AException (AC_ERR_LOAD, 'Error: permission denied to change menu');
         }
 
         //clean text id
