@@ -1,3 +1,8 @@
+<style>
+	.btn.btn-primary.tooltips.add_media {
+		display: none;
+	}
+</style>
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
 <div id="content" class="panel panel-default">
