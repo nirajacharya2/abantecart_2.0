@@ -33,7 +33,8 @@ class AuditLogTest extends ATestCase
      */
     protected function CreateUpdateRestoreDeleteProduct($eventList = [])
     {
-        Registry::db()->table('audit_events')->delete();
+        //use direct sql-query to prevent audit log of this operation
+        Registry::db()->query("DELETE FROM ".Registry::db()->table_name('audit_events'));
         $this->reGenerateRequestId();
 
         $productId = null;
@@ -188,7 +189,7 @@ class AuditLogTest extends ATestCase
             //28 fields of product, 6 descriptions + 8 tags
             "created"      => 43,
             "deleting"     => 76,
-            "deleted"      => 35,
+            "deleted"      => 34,
             "restoring"    => 31,
             "restored"     => 30,
             "forceDeleted" => 30,
@@ -301,7 +302,7 @@ class AuditLogTest extends ATestCase
         $this->assertEquals(
             $this->getLoggedEvents('Product', $productId),
             [
-                'deleted' => 35,
+                'deleted' => 34,
             ]
         );
     }
@@ -314,7 +315,7 @@ class AuditLogTest extends ATestCase
             $logged,
             [
                 'deleting' => 76,
-                'deleted'  => 35,
+                'deleted'  => 34,
             ]
         );
     }

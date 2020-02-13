@@ -21,6 +21,7 @@ namespace abc\tests\unit\models\catalog;
 use abc\core\engine\Registry;
 use abc\models\catalog\Product;
 use abc\models\catalog\ProductDescription;
+use abc\models\catalog\UrlAlias;
 use abc\tests\unit\ATestCase;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -153,6 +154,7 @@ class ProductModelTest extends ATestCase
      */
     public function testCreateProduct()
     {
+        $urlAliases = UrlAlias::where('keyword', 'like', 'test-seo-keyword%')->forceDelete();
         $arProduct = [
             'status'              => '1',
             'featured'            => '1',
@@ -204,7 +206,8 @@ class ProductModelTest extends ATestCase
         ];
         $productId = null;
         try {
-            $productId = Product::createProduct($arProduct);
+            $product = Product::createProduct($arProduct);
+            $productId = $product->getKey();
         } catch (\PDOException $e) {
             $this->fail($e->getMessage());
         } catch (Warning $e) {
@@ -286,11 +289,11 @@ class ProductModelTest extends ATestCase
     public function testTouchProduct(int $productId)
     {
         $product = Product::find($productId);
+        sleep(1);
         $old_date = (string)$product->date_modified;
         try {
             /** @var ProductDescription $pd */
             $pd = ProductDescription::where('product_id', '=', $productId)->first();
-            sleep(2);
             $pd->touch();
         } catch (\PDOException $e) {
             $this->fail($e->getMessage());

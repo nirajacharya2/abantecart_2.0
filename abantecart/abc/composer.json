@@ -226,6 +226,7 @@
     "ext-gd": "*",
     "ext-phar": "*",
     "ext-bcmath": "*",
+    "ext-pdo": "*",
     "mnsami/composer-custom-directory-installer": "1.1.*",
     "wikimedia/composer-merge-plugin": "1.4.0",
     "google/recaptcha": "~1.1",

@@ -47,16 +47,16 @@ final class AUser
     private $lastname;
     private $lastLogin;
     /**
-     * @var \abc\core\lib\ARequest
+     * @var ARequest
      */
     private $request;
     /**
-     * @var \abc\core\lib\ASession
+     * @var ASession
      */
     private $session;
 
     /**
-     * @var \abc\core\lib\ADB
+     * @var ADB
      */
     private $db;
 
@@ -66,7 +66,7 @@ final class AUser
     private $permission = [];
 
     /**
-     * @param $registry \abc\core\engine\Registry
+     * @param $registry Registry
      *
      * @throws \Exception
      */

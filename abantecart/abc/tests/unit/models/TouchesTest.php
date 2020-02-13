@@ -37,7 +37,6 @@ class TouchesTest extends ATestCase
         $customer = Customer::find($address->customer_id);
         $this->assertEquals($now, $customer->date_modified->timestamp);
 
-        sleep(2);
         $now = time();
         CustomerTransaction::create(
             [
@@ -50,7 +49,6 @@ class TouchesTest extends ATestCase
         $customer = Customer::find($address->customer_id);
         $this->assertEquals($now, $customer->date_modified->timestamp);
 
-        sleep(2);
         $now = time();
         CustomerNotification::create(
             [
@@ -75,7 +73,6 @@ class TouchesTest extends ATestCase
         $order = Order::find($orderOption->order_id);
         $this->assertEquals($now, $order->date_modified->timestamp);
 
-        sleep(2);
         $now = time();
         OrderDatum::create(
             [
@@ -88,7 +85,6 @@ class TouchesTest extends ATestCase
         $this->assertEquals($now, $order->date_modified->timestamp);
 
         //order total
-        sleep(2);
         $orderTotal = OrderTotal::where('order_id', '=', $orderOption->order_id)->first();
         $now = time();
         $orderTotal->touch();
@@ -96,7 +92,6 @@ class TouchesTest extends ATestCase
         $order = Order::find($orderOption->order_id);
         $this->assertEquals($now, $order->date_modified->timestamp);
 
-        sleep(2);
         /** @var OrderStatusDescription $orderStatusDescription */
         $orderStatusDescription = OrderStatusDescription::first();
         $now = time();
@@ -124,7 +119,6 @@ class TouchesTest extends ATestCase
         $category = $product->categories->first();
         $this->assertEquals($now, $category->date_modified->timestamp);
 
-        sleep(2);
         /** @var ProductOptionDescription $optionDescription */
         $optionDescription = ProductOptionDescription::first();
         $now = time();
@@ -136,7 +130,6 @@ class TouchesTest extends ATestCase
         $product = Product::with('categories')->find($optionDescription->product_id);
         $this->assertEquals($now, $product->date_modified->timestamp);
 
-        sleep(2);
         /** @var ProductTag $tag */
         $tag = ProductTag::first();
         $now = time();
@@ -151,14 +144,12 @@ class TouchesTest extends ATestCase
         $product = Product::find($tag->product_id);
         $this->assertEquals($now, $product->date_modified->timestamp);
 
-        sleep(2);
         /** @var ProductSpecial $special */
         $special = ProductSpecial::first();
         $now = time();
         $special->touch();
         $product = Product::find($special->product_id);
         $this->assertEquals($now, $product->date_modified->timestamp);
-        sleep(2);
         /** @var ProductDiscount $discount */
         $discount = ProductDiscount::first();
         $now = time();

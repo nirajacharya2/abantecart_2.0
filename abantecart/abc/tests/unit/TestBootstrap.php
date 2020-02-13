@@ -44,14 +44,17 @@ class TestBootstrap
      */
     public static function getInstance()
     {
-        if(!self::$instance)
-        {
+        if (!self::$instance) {
             self::$instance = new TestBootstrap();
         }
         return self::$instance;
     }
 
-    public function init () {
+    /**
+     * Note: this method calls once!
+     */
+    public function init()
+    {
         require_once dirname(__DIR__, 2).DS.'core'.DS.'abc.php';
 
         //run constructor of ABC class to load environment
