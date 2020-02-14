@@ -139,11 +139,16 @@ class ProductDescription extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'default_text'   => 'Blurb must be less than 1500 characters!',
+                    'default_text' => 'Blurb must be less than 1500 characters!',
                 ],
             ],
         ]
     ];
+
+    public function getNameAttribute($value)
+    {
+        return $value === '' ? 'n/a' : $value;
+    }
 
     public function product()
     {

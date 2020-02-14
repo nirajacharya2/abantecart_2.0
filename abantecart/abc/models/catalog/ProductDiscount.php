@@ -3,6 +3,7 @@
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -14,8 +15,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $quantity
  * @property int $priority
  * @property float $price
- * @property \Carbon\Carbon|string $date_start
- * @property \Carbon\Carbon|string $date_end
+ * @property Carbon|string $date_start
+ * @property Carbon|string $date_end
  *
  * @property Product $product
  *
@@ -28,6 +29,8 @@ class ProductDiscount extends BaseModel
     use SoftDeletes;
 
     protected $primaryKey = 'product_discount_id';
+    protected $mainClassName = Product::class;
+    protected $mainClassKey = 'product_id';
 
     protected $touches = ['product'];
 

@@ -20,6 +20,7 @@ namespace abc\models\catalog;
 
 use abc\models\BaseModel;
 use abc\models\locale\Language;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -31,8 +32,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $name
  * @property string $grouped_attribute_names
  *
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
  *
  * @property Product $product
  * @property Language $language
@@ -52,6 +53,8 @@ class ProductOptionValueDescription extends BaseModel
         'language_id',
         'product_id',
     ];
+    protected $mainClassName = Product::class;
+    protected $mainClassKey = 'product_id';
 
     protected $touches = ['product_option_value'];
 
@@ -59,7 +62,7 @@ class ProductOptionValueDescription extends BaseModel
         'product_option_value_id' => 'int',
         'language_id'             => 'int',
         'product_id'              => 'int',
-        'grouped_attribute_names' => 'serialized'
+        'grouped_attribute_names' => 'serialized',
     ];
 
     /** @var array */

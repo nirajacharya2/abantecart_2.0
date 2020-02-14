@@ -26,10 +26,17 @@ use abc\core\lib\AResourceManager;
 use abc\core\lib\AttributeManager;
 use abc\models\BaseModel;
 use abc\models\QueryBuilder;
+use Carbon\Carbon;
+use Exception;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
+use Psr\SimpleCache\InvalidArgumentException;
 
 /**
  * Class ProductOption
@@ -44,11 +51,12 @@ use Illuminate\Validation\Rule;
  * @property int $required
  * @property string $regexp_pattern
  * @property string $settings
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
  *
  * @property ProductOptionValue $values
  * @property Product $product
+ * @property ProductOptionDescription $description
  * @property ProductOptionDescription $descriptions
  *
  * @method static ProductOption find(int $product_option_id) ProductOption
@@ -62,6 +70,9 @@ class ProductOption extends BaseModel
     use SoftDeletes, CascadeSoftDeletes;
 
     protected $cascadeDeletes = ['descriptions', 'values'];
+
+    protected $mainClassName = Product::class;
+    protected $mainClassKey = 'product_id';
     /**
      * @var string
      */
@@ -199,13 +210,13 @@ class ProductOption extends BaseModel
         parent::__construct($attributes);
     }
 
-    public function setSettings($value)
+    public function setSettingsAttribute($value)
     {
         $this->attributes['settings'] = serialize($value);
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function product()
     {
@@ -213,7 +224,7 @@ class ProductOption extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function descriptions()
     {
@@ -221,7 +232,7 @@ class ProductOption extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return HasOne
      */
     public function description()
     {
@@ -230,7 +241,7 @@ class ProductOption extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function values()
     {
@@ -239,7 +250,7 @@ class ProductOption extends BaseModel
 
     /**
      * @return false|array
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getAllData()
     {
@@ -276,7 +287,7 @@ class ProductOption extends BaseModel
     /**
      * @param $po_ids
      *
-     * @return bool|\Illuminate\Support\Collection
+     * @return bool|Collection
      */
     public static function getProductOptionsByIds($po_ids)
     {
@@ -335,7 +346,7 @@ class ProductOption extends BaseModel
      * @param array $indata - must contains product_id, product_option_value_id
      *
      * @return int|null
-     * @throws \Exception
+     * @throws Exception
      */
     public static function addProductOptionValueAndDescription(array $indata)
     {
@@ -442,7 +453,7 @@ class ProductOption extends BaseModel
             foreach ($valueDescriptions as $language_id => $description) {
                 $language_id = (int)$language_id;
                 if (!$language_id) {
-                    throw new \Exception('Wrong format of input data! Description of value must have the language ID as a key!');
+                    throw new Exception('Wrong format of input data! Description of value must have the language ID as a key!');
                 }
 
                 $desc = $description;
@@ -461,7 +472,7 @@ class ProductOption extends BaseModel
      * @param array $indata - must contains product_id
      *
      * @return bool|mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public static function addProductOption($indata)
     {
@@ -558,8 +569,9 @@ class ProductOption extends BaseModel
         return true;
     }
 
-    public static function updateProductOptionValueAndDescription($pd_opt_val_id, $data)
+    public static function updateProductOptionValueAndDescription($pd_opt_val_id, $inData)
     {
+        $data = $inData;
         $language_id = $data['language_id'] ?? static::$current_language_id;
         $product_id = $data['product_id'];
         if (is_array($data['attribute_value_id']) || !$data['attribute_value_id']) {
@@ -576,10 +588,10 @@ class ProductOption extends BaseModel
          */
         $am = ABC::getObjectByAlias('AttributeManager');
         //build grouped attributes if this is a parent attribute
-        if (is_array($data['attribute_value_id'])) {
+        if (is_array($inData['attribute_value_id'])) {
             //update children option values from global attributes
             $groupData = [];
-            foreach ($data['attribute_value_id'] as $child_option_id => $attr_val_id) {
+            foreach ($inData['attribute_value_id'] as $child_option_id => $attr_val_id) {
                 #special serialized data for grouped options
                 $groupData[] = [
                     'attr_id'   => $child_option_id,
@@ -588,12 +600,13 @@ class ProductOption extends BaseModel
             }
             $data['grouped_attribute_data'] = $groupData;
         }
+
         $optionValue = ProductOptionValue::find($pd_opt_val_id);
         if ($optionValue) {
             $optionValue->update($data);
         }
 
-        if (is_array($data['attribute_value_id'])) {
+        if (is_array($inData['attribute_value_id'])) {
             //update children option values description from global attributes
             $group_description = [];
             $descr_names = [];
@@ -629,7 +642,7 @@ class ProductOption extends BaseModel
                 }
             }
         } else {
-            if (!$data['attribute_value_id']) {
+            if (!$inData['attribute_value_id']) {
                 $exist = ProductOptionValueDescription::where(
                     [
                         'product_id'              => $product_id,
@@ -650,7 +663,7 @@ class ProductOption extends BaseModel
                     );
                 }
             } else {
-                $valueDescriptions = $am->getAttributeValueDescriptions((int)$data['attribute_value_id']);
+                $valueDescriptions = $am->getAttributeValueDescriptions((int)$inData['attribute_value_id']);
                 foreach ($valueDescriptions as $lang_id => $name) {
                     if ($language_id == $lang_id) {
                         //Update only language that we currently work with
@@ -666,6 +679,88 @@ class ProductOption extends BaseModel
             }
         }
 
+    }
+
+    /**
+     * check attribute before add to product options
+     * cant add attribute that is already in group attribute that assigned to product
+     *
+     * @param $product_id
+     * @param $attribute_id
+     *
+     * @return int
+     * @throws \Exception
+     */
+    public static function isProductGroupOption($product_id, $attribute_id = null)
+    {
+        return ProductOption::where(
+            [
+                'product_id'   => $product_id,
+                'attribute_id' => $attribute_id,
+            ]
+        )->whereNotNull('group_id')
+                            ->count();
+    }
+
+    public function getProductOptionValueArray($option_value_id)
+    {
+
+        $product_option_value = ProductOptionValue::with('description')
+                                                  ->whereNull('group_id')
+                                                  ->find($option_value_id);
+        if (!$product_option_value) {
+            return [];
+        }
+        //when asking value of another product - throw exception
+        if ($this->product_id != $product_option_value->product_id) {
+            throw new Exception('Option value not found for productID '.$this->product_id);
+        }
+
+        $result = $product_option_value->toArray();
+
+//        $option_value = $product_option_value->row;
+//        $value_description_data = [];
+//        $value_description = $this->db->query(
+//            "SELECT *
+//            FROM ".$this->db->table_name("product_option_value_descriptions")."
+//            WHERE product_option_value_id = '".(int)$option_value['product_option_value_id']."'");
+//
+//        foreach ($value_description->rows as $description) {
+//            //regular option value name
+//            $value_description_data[$description['language_id']]['name'] = $description['name'];
+//            //get children (grouped options) individual names array
+//            if ($description['grouped_attribute_names']) {
+//                $value_description_data[$description['language_id']]['children_options_names'] =
+//                    unserialize($description['grouped_attribute_names']);
+//            }
+//        }
+
+        $result = [
+            'product_option_value_id' => $option_value['product_option_value_id'],
+            'language'                => $value_description_data,
+            'sku'                     => $option_value['sku'],
+            'quantity'                => $option_value['quantity'],
+            'subtract'                => $option_value['subtract'],
+            'price'                   => $option_value['price'],
+            'prefix'                  => $option_value['prefix'],
+            'weight'                  => $option_value['weight'],
+            'weight_type'             => $option_value['weight_type'],
+            'attribute_value_id'      => $option_value['attribute_value_id'],
+            'grouped_attribute_data'  => $option_value['grouped_attribute_data'],
+            'sort_order'              => $option_value['sort_order'],
+            'default'                 => $option_value['default'],
+        ];
+
+        //get children (grouped options) data
+        $child_option_values = unserialize($result['grouped_attribute_data']);
+        if (is_array($child_option_values) && sizeof($child_option_values)) {
+            $result['children_options'] = [];
+            foreach ($child_option_values as $child_value) {
+                $result['children_options'][$child_value['attr_id']] = (int)$child_value['attr_v_id'];
+            }
+        }
+
+        return $result;
     }
 }
 

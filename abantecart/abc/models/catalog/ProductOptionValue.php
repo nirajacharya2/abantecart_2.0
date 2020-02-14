@@ -6,6 +6,7 @@ use abc\core\engine\AResource;
 use abc\models\BaseModel;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 
 /**
  * Class ProductOptionValue
@@ -30,7 +31,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property ProductOption $product_option
  * @property Product $product
- * @property \Illuminate\Database\Eloquent\Collection $order_options
+ * @property Collection $order_options
  * @property ProductOptionDescription $descriptions
  * @property ProductOptionDescription $description
  *
@@ -44,6 +45,8 @@ class ProductOptionValue extends BaseModel
     use SoftDeletes, CascadeSoftDeletes;
 
     protected $cascadeDeletes = ['descriptions'];
+    protected $mainClassName = Product::class;
+    protected $mainClassKey = 'product_id';
 
     protected $primaryKey = 'product_option_value_id';
 
@@ -377,7 +380,6 @@ class ProductOptionValue extends BaseModel
                 $result['children_options'][$child_value['attr_id']] = (int)$child_value['attr_v_id'];
             }
         }
-
         return $result;
     }
 

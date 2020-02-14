@@ -4,6 +4,7 @@ namespace abc\models\catalog;
 
 use abc\models\BaseModel;
 use abc\models\customer\CustomerGroup;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -14,10 +15,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $customer_group_id
  * @property int $priority
  * @property float $price
- * @property \Carbon\Carbon $date_start
- * @property \Carbon\Carbon $date_end
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
+ * @property Carbon $date_start
+ * @property Carbon $date_end
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
  *
  * @property Product $product
  *
@@ -30,6 +31,8 @@ class ProductSpecial extends BaseModel
     use SoftDeletes;
 
     protected $primaryKey = 'product_special_id';
+    protected $mainClassName = Product::class;
+    protected $mainClassKey = 'product_id';
 
     protected $touches = ['product'];
 

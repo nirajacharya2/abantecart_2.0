@@ -51,6 +51,9 @@ class ProductOptionDescription extends BaseModel
         'language_id',
     ];
 
+    protected $mainClassName = Product::class;
+    protected $mainClassKey = 'product_id';
+
     protected $touches = ['product_option'];
 
     protected $casts = [
@@ -149,6 +152,11 @@ class ProductOptionDescription extends BaseModel
         ],
 
     ];
+
+    public function getNameAttribute($value)
+    {
+        return $value === '' ? 'n/a' : $value;
+    }
 
     public function product()
     {
