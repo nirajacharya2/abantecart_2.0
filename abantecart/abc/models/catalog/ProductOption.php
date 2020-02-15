@@ -593,9 +593,9 @@ class ProductOption extends BaseModel
             $groupData = [];
             foreach ($inData['attribute_value_id'] as $child_option_id => $attr_val_id) {
                 #special serialized data for grouped options
-                $groupData[] = [
-                    'attr_id'   => $child_option_id,
-                    'attr_v_id' => $attr_val_id,
+                $groupData[$child_option_id] = [
+                    'attr_id'   => (int)$child_option_id,
+                    'attr_v_id' => (int)$attr_val_id,
                 ];
             }
             $data['grouped_attribute_data'] = $groupData;

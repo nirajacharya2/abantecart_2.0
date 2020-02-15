@@ -4,6 +4,7 @@ namespace abc\models\catalog;
 
 use abc\core\engine\AResource;
 use abc\models\BaseModel;
+use Carbon\Carbon;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
@@ -26,8 +27,8 @@ use Illuminate\Support\Collection;
  * @property string $grouped_attribute_data
  * @property int $sort_order
  * @property int $default
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
  *
  * @property ProductOption $product_option
  * @property Product $product
@@ -345,11 +346,11 @@ class ProductOptionValue extends BaseModel
 
         $option_value = ProductOptionValue::with('descriptions')
                                           ->where(
-            [
-                'product_option_value_id' => $option_value_id,
-                'group_id'                => 0,
-            ]
-        )->orderBy('sort_order')
+                                              [
+                                                  'product_option_value_id' => $option_value_id,
+                                                  'group_id'                => 0,
+                                              ]
+                                          )
                                           ->first();
 
         if (!$option_value) {

@@ -733,8 +733,11 @@ class ControllerResponsesProductProduct extends AController
         $product_option_value_id = $this->request->get['product_option_value_id'];
         $group_attribute = [];
         if ($this->data['option_attribute']['attribute_id']) {
-            $group_attribute = $this->attribute_manager->getAttributes([], $this->data['language_id'],
-                $this->data['option_attribute']['attribute_id']);
+            $group_attribute = $this->attribute_manager->getAttributes(
+                [],
+                $this->data['language_id'],
+                $this->data['option_attribute']['attribute_id']
+            );
         }
 
         $this->data['elements_with_options'] = HtmlElementFactory::getElementsWithOptions();
@@ -792,7 +795,7 @@ class ControllerResponsesProductProduct extends AController
             $this->data['attr_val_id'] = $product_option_value_id;
             $optionValue = ProductOptionValue::with('description')
                                              ->where('product_id', '=', $this->request->get['product_id'])
-                                             ->whereNull('group_id')
+                                             ->where('group_id', '=', 0)
                                              ->find($product_option_value_id);
         } else {
             $optionValue = null;
