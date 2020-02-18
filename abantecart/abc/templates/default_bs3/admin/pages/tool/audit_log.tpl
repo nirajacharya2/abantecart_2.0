@@ -31,16 +31,15 @@
 					>
 						<v-card
 								color="primary"
-								dark
 						>
-							<v-card-text>
+							<v-card-title>
 								Please stand by
 								<v-progress-linear
 										indeterminate
 										color="white"
 										class="mb-0"
 								></v-progress-linear>
-							</v-card-text>
+							</v-card-title>
 						</v-card>
 					</v-dialog>
 					<v-container>
