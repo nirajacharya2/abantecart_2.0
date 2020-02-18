@@ -7,19 +7,27 @@
 		$colspan++;
 	}
 	if ($form['fields']['option_value'] && $option_data['element_type'] != 'U') { ?>
-		<td>
-			<div class="input-group input-group-sm afield"><?php
-				echo $form['fields']['option_value'];
-				if ($option_data['element_type'] == 'T') {
-					?>
-					<a class="input-group-addon btn btn-xs btn-default" data-toggle="modal"
-					   data-target="#option_value_modal"><i class="fa fa-pencil-alt"></i></a>
-				<?php }
-				?></div>
-		</td>
-		<td class="small-td">
-			<div class="input-group input-group-sm afield"><?php echo $form['fields']['quantity']; ?></div>
-		</td>
+        <td>
+            <div class="input-group input-group-sm afield">
+                <?php
+                if (is_array($form['fields']['option_value'])) {
+                    foreach ($form['fields']['option_value'] as $ov) {
+                        echo '<div class="row list-inline"><div>'.$ov['name'].':&nbsp;</div><div>'.$ov['html']
+                            .'</div></div></br>';
+                    }
+                } else {
+                    echo $form['fields']['option_value'];
+                }
+                if ($option_data['element_type'] == 'T') {
+                    ?>
+                    <a class="input-group-addon btn btn-xs btn-default" data-toggle="modal"
+                       data-target="#option_value_modal"><i class="fa fa-pencil-alt"></i></a>
+                <?php }
+                ?></div>
+        </td>
+        <td class="small-td">
+            <div class="input-group input-group-sm afield"><?php echo $form['fields']['quantity']; ?></div>
+        </td>
 		<td>
 			<div class="input-group input-group-sm afield"><?php echo $form['fields']['subtract']; ?></div>
 		</td>

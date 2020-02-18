@@ -576,85 +576,85 @@ class ModelCatalogProduct extends Model
        }
    */
 
-    public function addProductOption($product_id, $data)
-       {
-
-
-           $am = ABC::getObjectByAlias('AttributeManager');
-           $attribute = $am->getAttribute($data['attribute_id']);
-
-           if ($attribute) {
-               $data['element_type'] = $attribute['element_type'];
-               $data['required'] = $attribute['required'];
-               $data['regexp_pattern'] = $attribute['regexp_pattern'];
-               $data['placeholder'] = $attribute['placeholder'];
-               $data['sort_order'] = $attribute['sort_order'];
-               $data['settings'] = $attribute['settings'];
-           } else {
-               $data['placeholder'] = $data['option_placeholder'];
-           }
-
-           $this->db->query(
-               "INSERT INTO ".$this->db->table_name("product_options")."
-                   (product_id,
-                    attribute_id,
-                    element_type,
-                    required,
-                    sort_order,
-                    group_id,
-                    status,
-                    regexp_pattern,
-                    settings)
-               VALUES ('".(int)$product_id."',
-                   '".(int)$data['attribute_id']."',
-                   '".$this->db->escape($data['element_type'])."',
-                   '".(int)$data['required']."',
-                   '".(int)$data['sort_order']."',
-                   '".(int)$data['group_id']."',
-                   '".(int)$data['status']."',
-                   '".$this->db->escape($data['regexp_pattern'])."',
-                   '".$this->db->escape($data['settings'])."'
-                   )"
-           );
-           $product_option_id = $this->db->getLastId();
-
-           if (!empty($data['option_name'])) {
-               $attributeDescriptions = [
-                   $this->language->getContentLanguageID() => [
-                       'name'        => $data['option_name'],
-                       'error_text'  => $data['error_text'],
-                       'placeholder' => $data['placeholder'],
-                   ],
-               ];
-           } else {
-               $attributeDescriptions = $am->getAttributeDescriptions($data['attribute_id']);
-           }
-
-           foreach ($attributeDescriptions as $language_id => $descr) {
-               $this->language->replaceDescriptions('product_option_descriptions',
-                   [
-                       'product_option_id' => (int)$product_option_id,
-                       'product_id'        => (int)$product_id,
-                   ],
-                   [
-                       $language_id => [
-                           'name'               => $descr['name'],
-                           'error_text'         => $descr['error_text'],
-                           'option_placeholder' => $data['placeholder'],
-                       ],
-                   ]);
-           }
-
-           //add empty option value for single value attributes
-           $elements_with_options = HtmlElementFactory::getElementsWithOptions();
-           if (!in_array($data['element_type'], $elements_with_options)) {
-               $this->insertProductOptionValue($product_id, $product_option_id, '', '', []);
-           }
-
-           $this->touchProduct($product_id);
-
-           return $product_option_id;
-       }
+//    public function addProductOption($product_id, $data)
+//       {
+//
+//
+//           $am = ABC::getObjectByAlias('AttributeManager');
+//           $attribute = $am->getAttribute($data['attribute_id']);
+//
+//           if ($attribute) {
+//               $data['element_type'] = $attribute['element_type'];
+//               $data['required'] = $attribute['required'];
+//               $data['regexp_pattern'] = $attribute['regexp_pattern'];
+//               $data['placeholder'] = $attribute['placeholder'];
+//               $data['sort_order'] = $attribute['sort_order'];
+//               $data['settings'] = $attribute['settings'];
+//           } else {
+//               $data['placeholder'] = $data['option_placeholder'];
+//           }
+//
+//           $this->db->query(
+//               "INSERT INTO ".$this->db->table_name("product_options")."
+//                   (product_id,
+//                    attribute_id,
+//                    element_type,
+//                    required,
+//                    sort_order,
+//                    group_id,
+//                    status,
+//                    regexp_pattern,
+//                    settings)
+//               VALUES ('".(int)$product_id."',
+//                   '".(int)$data['attribute_id']."',
+//                   '".$this->db->escape($data['element_type'])."',
+//                   '".(int)$data['required']."',
+//                   '".(int)$data['sort_order']."',
+//                   '".(int)$data['group_id']."',
+//                   '".(int)$data['status']."',
+//                   '".$this->db->escape($data['regexp_pattern'])."',
+//                   '".$this->db->escape($data['settings'])."'
+//                   )"
+//           );
+//           $product_option_id = $this->db->getLastId();
+//
+//           if (!empty($data['option_name'])) {
+//               $attributeDescriptions = [
+//                   $this->language->getContentLanguageID() => [
+//                       'name'        => $data['option_name'],
+//                       'error_text'  => $data['error_text'],
+//                       'placeholder' => $data['placeholder'],
+//                   ],
+//               ];
+//           } else {
+//               $attributeDescriptions = $am->getAttributeDescriptions($data['attribute_id']);
+//           }
+//
+//           foreach ($attributeDescriptions as $language_id => $descr) {
+//               $this->language->replaceDescriptions('product_option_descriptions',
+//                   [
+//                       'product_option_id' => (int)$product_option_id,
+//                       'product_id'        => (int)$product_id,
+//                   ],
+//                   [
+//                       $language_id => [
+//                           'name'               => $descr['name'],
+//                           'error_text'         => $descr['error_text'],
+//                           'option_placeholder' => $data['placeholder'],
+//                       ],
+//                   ]);
+//           }
+//
+//           //add empty option value for single value attributes
+//           $elements_with_options = HtmlElementFactory::getElementsWithOptions();
+//           if (!in_array($data['element_type'], $elements_with_options)) {
+//               $this->insertProductOptionValue($product_id, $product_option_id, '', '', []);
+//           }
+//
+//           $this->touchProduct($product_id);
+//
+//           return $product_option_id;
+//       }
 
     /* public function deleteProductOption($product_id, $product_option_id)
      {
@@ -679,8 +679,6 @@ class ModelCatalogProduct extends Model
 
          $this->touchProduct($product_id);
      }*/
-
-
 
     //Add new product option value and value descriptions for all global attributes languages or current language
 
@@ -946,96 +944,96 @@ class ModelCatalogProduct extends Model
      * @throws \Exception
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function updateProductOptionValueAndDescription($product_id, $pd_opt_val_id, $data, $language_id)
-    {
-        $attribute_value_id = $data['attribute_value_id'];
-        if (is_array($data['attribute_value_id'])) {
-            $attribute_value_id = '';
-        }
-
-        /**
-         * @var AttributeManagerInterface $am
-         */
-        $am = ABC::getObjectByAlias('AttributeManager');
-        //build grouped attributes if this is a parent attribute
-        if (is_array($data['attribute_value_id'])) {
-            //update children option values from global attributes
-            $groupData = [];
-            foreach ($data['attribute_value_id'] as $child_option_id => $attr_val_id) {
-                #special serialized data for grouped options
-                $groupData[] = [
-                    'attr_id'   => $child_option_id,
-                    'attr_v_id' => $attr_val_id,
-                ];
-            }
-            $data['grouped_attribute_data'] = serialize($groupData);
-        }
-
-        $this->updateProductOptionValue($pd_opt_val_id, $attribute_value_id, $data);
-
-        if (is_array($data['attribute_value_id'])) {
-            //update children option values description from global attributes
-            $group_description = [];
-            $descr_names = [];
-            foreach ($data['attribute_value_id'] as $child_option_id => $attr_val_id) {
-                #special insert for grouped options
-                foreach ($am->getAttributeValueDescriptions($attr_val_id) as $lang_id => $name) {
-                    if ($language_id == $lang_id) {
-                        $group_description[$language_id][] = [
-                            'attr_v_id' => $attr_val_id,
-                            'name'      => $name,
-                        ];
-                        $descr_names[$language_id][] = $name;
-                    }
-                }
-            }
-            // Insert generic merged name
-            foreach ($descr_names as $lang_id => $name) {
-                if ($language_id == $lang_id && count($group_description[$language_id])) {
-                    $group_description[$language_id][] = $name;
-                    $grouped_names = serialize($group_description[$language_id]);
-                    $this->updateProductOptionValueDescriptions(
-                        $product_id,
-                        $pd_opt_val_id,
-                        implode(' / ', $name),
-                        $language_id,
-                        $grouped_names
-                    );
-                }
-            }
-        } else {
-            if (!$data['attribute_value_id']) {
-                $exist = ProductOptionValueDescription::where(
-                    [
-                        'product_id'              => $product_id,
-                        'product_option_value_id' => $pd_opt_val_id,
-                        'language_id'             => $language_id,
-                    ]
-                )->first();
-                if ($exist) {
-                    $exist->update(['name' => $data['name']]);
-                } else {
-                    ProductOptionValueDescription::create(
-                        [
-                            'product_id'              => $product_id,
-                            'product_option_value_id' => $pd_opt_val_id,
-                            'name'                    => $data['name'],
-                            'language_id'             => $language_id,
-                        ]
-                    );
-                }
-            } else {
-                $valueDescriptions = $am->getAttributeValueDescriptions((int)$data['attribute_value_id']);
-                foreach ($valueDescriptions as $lang_id => $name) {
-                    if ($language_id == $lang_id) {
-                        //Update only language that we currently work with
-                        $this->updateProductOptionValueDescriptions($product_id, $pd_opt_val_id, $name, $language_id);
-                    }
-                }
-            }
-        }
-        $this->touchProduct($product_id);
-    }
+//    public function updateProductOptionValueAndDescription($product_id, $pd_opt_val_id, $data, $language_id)
+//    {
+//        $attribute_value_id = $data['attribute_value_id'];
+//        if (is_array($data['attribute_value_id'])) {
+//            $attribute_value_id = '';
+//        }
+//
+//        /**
+//         * @var AttributeManagerInterface $am
+//         */
+//        $am = ABC::getObjectByAlias('AttributeManager');
+//        //build grouped attributes if this is a parent attribute
+//        if (is_array($data['attribute_value_id'])) {
+//            //update children option values from global attributes
+//            $groupData = [];
+//            foreach ($data['attribute_value_id'] as $child_option_id => $attr_val_id) {
+//                #special serialized data for grouped options
+//                $groupData[] = [
+//                    'attr_id'   => $child_option_id,
+//                    'attr_v_id' => $attr_val_id,
+//                ];
+//            }
+//            $data['grouped_attribute_data'] = serialize($groupData);
+//        }
+//
+//        $this->updateProductOptionValue($pd_opt_val_id, $attribute_value_id, $data);
+//
+//        if (is_array($data['attribute_value_id'])) {
+//            //update children option values description from global attributes
+//            $group_description = [];
+//            $descr_names = [];
+//            foreach ($data['attribute_value_id'] as $child_option_id => $attr_val_id) {
+//                #special insert for grouped options
+//                foreach ($am->getAttributeValueDescriptions($attr_val_id) as $lang_id => $name) {
+//                    if ($language_id == $lang_id) {
+//                        $group_description[$language_id][] = [
+//                            'attr_v_id' => $attr_val_id,
+//                            'name'      => $name,
+//                        ];
+//                        $descr_names[$language_id][] = $name;
+//                    }
+//                }
+//            }
+//            // Insert generic merged name
+//            foreach ($descr_names as $lang_id => $name) {
+//                if ($language_id == $lang_id && count($group_description[$language_id])) {
+//                    $group_description[$language_id][] = $name;
+//                    $grouped_names = serialize($group_description[$language_id]);
+//                    $this->updateProductOptionValueDescriptions(
+//                        $product_id,
+//                        $pd_opt_val_id,
+//                        implode(' / ', $name),
+//                        $language_id,
+//                        $grouped_names
+//                    );
+//                }
+//            }
+//        } else {
+//            if (!$data['attribute_value_id']) {
+//                $exist = ProductOptionValueDescription::where(
+//                    [
+//                        'product_id'              => $product_id,
+//                        'product_option_value_id' => $pd_opt_val_id,
+//                        'language_id'             => $language_id,
+//                    ]
+//                )->first();
+//                if ($exist) {
+//                    $exist->update(['name' => $data['name']]);
+//                } else {
+//                    ProductOptionValueDescription::create(
+//                        [
+//                            'product_id'              => $product_id,
+//                            'product_option_value_id' => $pd_opt_val_id,
+//                            'name'                    => $data['name'],
+//                            'language_id'             => $language_id,
+//                        ]
+//                    );
+//                }
+//            } else {
+//                $valueDescriptions = $am->getAttributeValueDescriptions((int)$data['attribute_value_id']);
+//                foreach ($valueDescriptions as $lang_id => $name) {
+//                    if ($language_id == $lang_id) {
+//                        //Update only language that we currently work with
+//                        $this->updateProductOptionValueDescriptions($product_id, $pd_opt_val_id, $name, $language_id);
+//                    }
+//                }
+//            }
+//        }
+//        $this->touchProduct($product_id);
+//    }
 
     /**
      * @param int $product_id

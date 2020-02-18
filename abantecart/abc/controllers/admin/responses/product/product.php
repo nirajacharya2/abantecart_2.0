@@ -819,17 +819,21 @@ class ControllerResponsesProductProduct extends AController
 
         if (isset($this->data['option_attribute']['group'])) {
             //process grouped (parent/child) options
-            $this->data['form']['fields']['option_value'] = '';
+            $this->data['form']['fields']['option_value'] = [];
             foreach ($this->data['option_attribute']['group'] as $attribute_id => $data) {
-                $this->data['form']['fields']['option_value'] .=
-                    '<span style="white-space: nowrap;">'.$data['name'].''.$form->getFieldHtml([
-                        'type'    => $data['type'],
-                        'name'    => 'attribute_value_id['.$product_option_value_id.']['.$attribute_id.']',
-                        'value'   => $this->data['grouped_attribute_data'][$attribute_id],
-                        'options' => $data['values'],
-                        'attr'    => '',
-                    ]).'<span><br class="clr_both">';
-
+                $this->data['form']['fields']['option_value'][] =
+                    [
+                        'name' => $data['name'],
+                        'html' => $form->getFieldHtml(
+                            [
+                                'type'    => $data['type'],
+                                'name'    => 'attribute_value_id['.$product_option_value_id.']['.$attribute_id.']',
+                                'value'   => $this->data['grouped_attribute_data'][$attribute_id],
+                                'options' => $data['values'],
+                                'attr'    => '',
+                            ]
+                        ),
+                    ];
             }
         } else {
             if (in_array($this->data['option_attribute']['element_type'], $this->data['elements_with_options'])) {

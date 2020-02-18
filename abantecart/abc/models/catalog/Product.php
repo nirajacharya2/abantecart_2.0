@@ -6,6 +6,7 @@ use abc\core\ABC;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use abc\core\lib\ADB;
+use abc\core\lib\AException;
 use abc\core\lib\AttributeManager;
 use abc\models\BaseModel;
 use abc\core\engine\AResource;
@@ -18,63 +19,73 @@ use abc\models\system\Audit;
 use abc\models\system\Setting;
 use abc\models\system\Store;
 use abc\models\system\TaxClass;
+use Carbon\Carbon;
+use Chelout\RelationshipEvents\HasOne;
 use Dyrynda\Database\Support\GeneratesUuid;
 use Exception;
 use H;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 /**
  * Class Product
  *
- * @property int                           $product_id
- * @property string                        $model
- * @property string                        $sku
- * @property string                        $uuid
- * @property string                        $location
- * @property int                           $quantity
- * @property string                        $stock_checkout
- * @property int                           $stock_status_id
- * @property int                           $manufacturer_id
+ * @property int $product_id
+ * @property string $model
+ * @property string $sku
+ * @property string $uuid
+ * @property string $location
+ * @property int $quantity
+ * @property string $stock_checkout
+ * @property int $stock_status_id
+ * @property StockStatus $stock_status
+ * @property int $manufacturer_id
  * @property Manufacturer $manufacturer
- * @property int                           $shipping
- * @property int                           $ship_individually
- * @property int                           $free_shipping
- * @property float                         $shipping_price
- * @property float                         $price
- * @property int                           $tax_class_id
- * @property \Carbon\Carbon                $date_available
- * @property float                         $weight
- * @property int                           $weight_class_id
- * @property float                         $length
- * @property float                         $width
- * @property float                         $height
- * @property int                           $length_class_id
- * @property int                           $status
+ * @property int $shipping
+ * @property int $ship_individually
+ * @property int $free_shipping
+ * @property float $shipping_price
+ * @property float $price
+ * @property int $tax_class_id
+ * @property Carbon $date_available
+ * @property float $weight
+ * @property int $weight_class_id
+ * @property float $length
+ * @property float $width
+ * @property float $height
+ * @property int $length_class_id
+ * @property int $status
  * @property int $featured
- * @property int                           $viewed
- * @property int                           $sort_order
- * @property int                           $subtract
- * @property int                           $minimum
- * @property int                           $maximum
- * @property float                         $cost
- * @property int                           $call_to_order
- * @property string                        $settings
- * @property \Carbon\Carbon                $date_added
- * @property \Carbon\Carbon                $date_modified
- * @property ProductDescription            $description
- * @property ProductDescription            $descriptions
- * @property Collection                    $categories
- * @property ProductOption                 $options
- * @property ProductDescription            $product_descriptions
- * @property ProductDiscount               $product_discounts
- * @property ProductOption                 $product_options
- * @property ProductSpecial                $product_specials
+ * @property int $viewed
+ * @property int $sort_order
+ * @property int $subtract
+ * @property int $minimum
+ * @property int $maximum
+ * @property float $cost
+ * @property int $call_to_order
+ * @property string $settings
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
+ * @property ProductDescription $description
+ * @property ProductDescription $descriptions
+ * @property Collection $categories
+ * @property ProductOption $options
+ * @property ProductDescription $product_descriptions
+ * @property ProductDiscount $product_discounts
+ * @property ProductOption $product_options
+ * @property ProductSpecial $product_specials
  * @property ProductTag $tags
- * @property Review                        $reviews
- * @property int                           $product_type_id
+ * @property ProductTag $tagsByLanguage
+ * @property Product $related
+ * @property Review $reviews
+ * @property int $product_type_id
  *
  * @method static Product find(int $product_id) Product
  * @method static Product select(mixed $select) Builder
@@ -984,7 +995,16 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return HasOne
+     */
+    public function stock_status()
+    {
+        return $this->hasOne(StockStatus::class, 'stock_status_id')
+                    ->where('language_id', '=', static::$current_language_id);
+    }
+
+    /**
+     * @return BelongsToMany
      */
     public function coupons()
     {
@@ -992,7 +1012,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function descriptions()
     {
@@ -1000,7 +1020,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return HasOne
      */
     public function description()
     {
@@ -1009,7 +1029,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function discounts()
     {
@@ -1017,7 +1037,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function options()
     {
@@ -1025,7 +1045,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function specials()
     {
@@ -1033,7 +1053,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function tags()
     {
@@ -1041,7 +1061,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function tagsByLanguage()
     {
@@ -1050,7 +1070,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return BelongsToMany
      */
     public function related()
     {
@@ -1058,7 +1078,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function reviews()
     {
@@ -1066,7 +1086,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return BelongsToMany
      */
     public function categories()
     {
@@ -1074,7 +1094,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return HasOne
      */
     public function manufacturer()
     {
@@ -1082,7 +1102,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return BelongsToMany
      */
     public function downloads()
     {
@@ -1090,7 +1110,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return BelongsToMany
      */
     public function stores()
     {
@@ -1098,7 +1118,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     * @return MorphMany
      */
     public function attributes()
     {
@@ -1126,9 +1146,9 @@ class Product extends BaseModel
 
     /**
      * @return array
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
+     * @throws InvalidArgumentException
      */
     public function getProductCategories()
     {
@@ -1176,11 +1196,14 @@ class Product extends BaseModel
 
     /**
      * @return array
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function getStockCheckouts()
     {
         $language = $this->registry->get('language');
-        $result = [
+        return [
             (object)[
                 'id'   => '',
                 'name' => $language->get('text_default'),
@@ -1194,7 +1217,6 @@ class Product extends BaseModel
                 'name' => $language->get('text_yes'),
             ],
         ];
-        return $result;
     }
 
     /**
@@ -1240,7 +1262,7 @@ class Product extends BaseModel
 
     /**
      * @return array|false|mixed
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function getAllData()
     {
@@ -1258,9 +1280,9 @@ class Product extends BaseModel
 
     /**
      * @return mixed
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
+     * @throws InvalidArgumentException
      */
     public function thumbnail()
     {
@@ -1280,9 +1302,9 @@ class Product extends BaseModel
 
     /**
      * @return array
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
+     * @throws InvalidArgumentException
      */
     public function images()
     {
@@ -1331,17 +1353,19 @@ class Product extends BaseModel
     public function isStockTrackable()
     {
         $track_status = 0;
+
         //check product option values
-        if (is_array($this->product_option_values)) {
-            foreach ($this->product_option_values as $opv) {
+        if ($this->product_options && $this->product_options->values) {
+            foreach ($this->product_options->values as $opv) {
+                /** @var ProductOptionValue $opv */
                 $track_status += $opv->subtract;
             }
         }
 
         //if no options - check whole product subtract
-        if (!$track_status && !$this->product_option_values) {
+        if (!$track_status && !$this->product_options && !$this->product_options->values) {
             //check main product
-            $track_status = (int)$this->first()->subtract;
+            $track_status = (int)$this->subtract;
         }
         return $track_status;
     }
@@ -1416,7 +1440,7 @@ class Product extends BaseModel
      * @param array $data - nested array of options with descriptions, values and value descriptions
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function replaceOptions($data)
     {
@@ -1610,7 +1634,7 @@ class Product extends BaseModel
                     $product
                 );
             }
-            self::updateProductLinks($product, $product_data, true);
+            self::updateProductLinks($product, $product_data);
         }
         return $product;
     }
@@ -1618,8 +1642,8 @@ class Product extends BaseModel
     /**
      *
      * @return bool|array
-     * @throws \abc\core\lib\AException
-     * @throws \ReflectionException
+     * @throws AException
+     * @throws ReflectionException
      */
     /*   public function copyProduct()
        {
@@ -1963,7 +1987,7 @@ class Product extends BaseModel
      * @param array $product_ids
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public static function relateProducts($product_ids = [])
     {
@@ -1989,6 +2013,9 @@ class Product extends BaseModel
      * @param int $productId
      *
      * @return array|bool
+     * @throws AException
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public static function getProductTypeSettings(int $productId)
     {
@@ -2114,6 +2141,9 @@ class Product extends BaseModel
      * @param array $data
      *
      * @return array|bool|false|mixed
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public static function getBestSellerProductIds(array $data)
     {
@@ -2168,6 +2198,9 @@ class Product extends BaseModel
      * @param array $data
      *
      * @return array|bool|false|mixed
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public static function getBestSellerProducts(array $data)
     {
@@ -2278,9 +2311,9 @@ class Product extends BaseModel
      * @param array $productIds
      *
      * @return array
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
+     * @throws InvalidArgumentException
      */
     public static function getProductsAllInfo(array $productIds)
     {
@@ -2298,7 +2331,7 @@ class Product extends BaseModel
     /**
      * Destroy the models for the given IDs.
      *
-     * @param  \Illuminate\Support\Collection|array|int $ids
+     * @param Collection|array|int $ids
      *
      * @return int
      */
@@ -2418,7 +2451,7 @@ class Product extends BaseModel
 
             $this->touch();
             $db->commit();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Registry::log()->write($e->getMessage());
             Registry::log()->write($e->getTraceAsString());
             $db->rollback();
