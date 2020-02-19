@@ -5,6 +5,7 @@ namespace abc\models\catalog;
 use abc\core\engine\AResource;
 use abc\models\BaseModel;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -27,8 +28,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $default
  *
  * @property ProductOption $product_option
+ * @property ProductOptionValueDescription $description
  * @property Product $product
- * @property \Illuminate\Database\Eloquent\Collection $order_options
+ * @property Collection $order_options
  *
  * @method static ProductOptionValue find(int $product_option_value_id) ProductOptionValue
  * @method static ProductOptionValue select(mixed $select) Builder
@@ -106,16 +108,16 @@ class ProductOptionValue extends BaseModel
             return $this->images;
         }
         $resource = new AResource('image');
-        $sizes = array(
-            'main'  => array(
+        $sizes = [
+            'main'  => [
                 'width'  => $this->config->get('config_image_popup_width'),
                 'height' => $this->config->get('config_image_popup_height'),
-            ),
-            'thumb' => array(
+            ],
+            'thumb' => [
                 'width'  => $this->config->get('config_image_thumb_width'),
                 'height' => $this->config->get('config_image_thumb_height'),
-            ),
-        );
+            ],
+        ];
         $this->images['images'] = $resource->getResourceAllObjects(
             'product_option_value',
             $this->getKey(),
