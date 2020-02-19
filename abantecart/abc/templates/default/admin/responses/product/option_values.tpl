@@ -87,12 +87,12 @@
 </div>
 </div>
 
-<?php echo $update_option_values_form['open']; ?>
 <div class="col-md-12">
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<h3 class="panel-title"><?php echo $text_option_values; ?></h3>
 	</div>
+    <?php echo $update_option_values_form['open']; ?>
 	<div class="panel-body panel-body-nopadding">
 		<table id="option_values_tbl" class="table table_narrow">
 			<thead>
@@ -142,9 +142,10 @@
             <?php } ?>
 		</div>
 	</div>
+    </form>
 </div>
 </div>
-</form>
+
 
 
 <table style="display:none;" id="new_row_table">
