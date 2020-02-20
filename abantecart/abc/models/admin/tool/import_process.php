@@ -219,7 +219,7 @@ class ModelToolImportProcess extends Model
             } else {
                 foreach ($this->errors as $error) {
                     $this->toLog($error);
-                    }
+                }
             }
 
             $this->db->commit();
@@ -576,8 +576,8 @@ class ModelToolImportProcess extends Model
             $sql = "SELECT po.product_option_id  
                     FROM ".$this->db->table_name('product_option_descriptions')." pod
                     LEFT JOIN ".$this->db->table_name('product_options')." po
-                        ON po.product_id = '".$product_id."'
-                    WHERE pod.name = '".$data[$i]['name']."'";
+                        ON po.product_id = '".(int)$product_id."'
+                    WHERE pod.name = '".$this->db->escape($data[$i]['name'])."'";
 
             $result = $this->db->query($sql);
             $p_option_id = $result->row['product_option_id'];
@@ -611,14 +611,23 @@ class ModelToolImportProcess extends Model
                 }
             }
 
+            //get all values of option
+            $sql = "SELECT product_option_value_id 
+                    FROM ".$this->db->table_name('product_option_values')." 
+                    WHERE product_option_id = '.$p_option_id.' 
+                    product_id = '.$product_id.'";
+            $result = $this->db->query($sql);
+            $exist_ids = array_column($result->rows, 'product_option_value_id');
+
             //now load values. Pick longest data array
             $option_vals = $data[$i]['product_option_values'];
 
             //find largest key by count
             $counts = @array_map('count', $option_vals);
+            $ids = [];
             if (max($counts) == 1) {
                 //single option value case
-                $this->saveOptionValue($product_id, $weight_class_id, $p_option_id, $option_vals);
+                $ids[] = $this->saveOptionValue($product_id, $weight_class_id, $p_option_id, $option_vals);
             } else {
                 for ($j = 0; $j < max($counts); $j++) {
                     //build flat associative array options value
@@ -626,9 +635,19 @@ class ModelToolImportProcess extends Model
                     foreach (array_keys($option_vals) as $key) {
                         $opt_val_data[$key] = $option_vals[$key][$j];
                     }
-                    $this->saveOptionValue($product_id, $weight_class_id, $p_option_id, $opt_val_data);
+                    $ids[] = $this->saveOptionValue($product_id, $weight_class_id, $p_option_id, $opt_val_data);
                 }
             }
+
+            //remove values that absent in save record
+            $diff_ids = array_diff($exist_ids, $ids);
+            foreach($diff_ids as $delete_id){
+                $pov = ProductOptionValue::find($delete_id);
+                if($pov) {
+                    $pov->forceDelete();
+                }
+            }
+
         }
         return true;
     }
@@ -650,17 +669,31 @@ class ModelToolImportProcess extends Model
             return false;
         }
 
-        $opt_val_data = [];
-        $sql = "SELECT ov.*, ovd.* 
-                FROM ".$this->db->table_name('product_option_values')." ov 
-                LEFT JOIN ".$this->db->table_name('product_option_value_descriptions')." ovd
-                    ON ovd.product_option_value_id = ov.product_option_value_id
-                WHERE ov.product_id = '".(int)$product_id."'
-                    AND ovd.name = '".$this->db->escape($data['name'])."'
-                    AND ov.product_option_id = '".(int)$p_option_id."'";
-        $result = $this->db->query($sql);
+        //update by sku first. if not - see name of option value
+        $update_by = [];
+        if( isset($data['sku']) && trim($data['sku']) ){
+            $update_by['ov.sku'] = $data['sku'];
+        }
+        if( isset($data['name'])  && trim($data['name']) ){
+            $update_by['ovd.name'] = $data['name'];
+        }
+        $result = null;
+        foreach( $update_by as $colName => $colValue ){
+            $sql = "SELECT ov.*, ovd.* 
+                    FROM ".$this->db->table_name('product_option_values')." ov 
+                    LEFT JOIN ".$this->db->table_name('product_option_value_descriptions')." ovd
+                        ON ovd.product_option_value_id = ov.product_option_value_id
+                    WHERE ov.product_id = '".(int)$product_id."'
+                        AND ".$colName." = '".$this->db->escape($colValue)."'
+                        AND ov.product_option_id = '".(int)$p_option_id."'";
+            $result = $this->db->query($sql);
+            if($result->num_rows){
+                break;
+            }
+        }
 
-        if($result->row){
+        $opt_val_data = [];
+        if($result && $result->row){
             $opt_keys = $result->row;
             $update = true;
         }else{
