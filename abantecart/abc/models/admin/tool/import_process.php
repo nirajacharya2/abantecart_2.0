@@ -614,8 +614,8 @@ class ModelToolImportProcess extends Model
             //get all values of option
             $sql = "SELECT product_option_value_id 
                     FROM ".$this->db->table_name('product_option_values')." 
-                    WHERE product_option_id = '.$p_option_id.' 
-                    product_id = '.$product_id.'";
+                    WHERE product_option_id = '".(int)$p_option_id."' 
+                    AND product_id = '".(int)$product_id."'";
             $result = $this->db->query($sql);
             $exist_ids = array_column($result->rows, 'product_option_value_id');
 
