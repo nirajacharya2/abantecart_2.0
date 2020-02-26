@@ -55,6 +55,7 @@ class ControllerPagesToolErrorLog extends AController
         } else {
             $args = ABC::getClassDefaultArgs( 'ALog' );
             $file = ABC::env( 'DIR_LOGS' ).$args[0]['app'];
+            $filename = $args[0]['app'];
             $this->data['clear_url'] = $this->html->getSecureURL( 'tool/error_log/clearlog' );
             $heading_title = $this->language->get( 'heading_title' );
         }
