@@ -100,7 +100,7 @@ class BaseApiClient
 
         $response = curl_exec($curl);
         if (!$response) {
-            $err = new AError('Request failed: '.curl_error($curl).'('.curl_errno($curl).')');
+            $err = new AError('Request failed: '.curl_error($curl).'('.curl_errno($curl).'). Requested URL: '.$api_url);
             try {
                 $err->toLog()->toDebug();
             } catch (\ReflectionException $exception) {

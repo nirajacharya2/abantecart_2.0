@@ -37,6 +37,7 @@ use DOMDocument;
 use DOMXPath;
 use Exception;
 use Illuminate\Events\Dispatcher;
+use Illuminate\Support\Collection;
 use PharData;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 
@@ -2089,5 +2090,19 @@ class AHelperUtils extends AHelper
         foreach($array as $rule => $msgArr){
             $errors[$rule] = implode(' ', $msgArr);
         }
+    }
+
+    /**
+     * Return true if $table (short name) already joined
+     *
+     * @param $query
+     * @param $table
+     *
+     * @return bool
+     */
+    public static function isJoined($query, $table)
+    {
+        $joins = new Collection($query->getQuery()->joins);
+        return $joins->pluck('table')->contains($table);
     }
 }

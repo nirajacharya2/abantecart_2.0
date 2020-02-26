@@ -12,12 +12,15 @@ use abc\models\BaseModel;
 use abc\models\QueryBuilder;
 use abc\models\system\Setting;
 use abc\models\system\Store;
+use Carbon\Carbon;
 use Dyrynda\Database\Support\GeneratesUuid;
+use Exception;
 use H;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
+use ReflectionException;
 
 /**
  * Class Category
@@ -32,12 +35,12 @@ use Illuminate\Support\Collection;
  * @property int                                      $sort_order
  * @property int                                      $status
  * @property CategoryDescription                      $description
- * @property \Carbon\Carbon                           $date_added
- * @property \Carbon\Carbon                           $date_modified
+ * @property Carbon                                   $date_added
+ * @property Carbon                                   $date_modified
  *
- * @property \Illuminate\Database\Eloquent\Collection $categories_to_stores
- * @property \Illuminate\Database\Eloquent\Collection $category_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $products_to_categories
+ * @property Collection                               $categories_to_stores
+ * @property Collection                               $category_descriptions
+ * @property Collection                               $products_to_categories
  *
  * @method static Category find(int $customer_id) Category
  * @package abc\models
@@ -128,7 +131,7 @@ class Category extends BaseModel
 
     /**
      * @return array|false|mixed
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws AException
      */
     public function getAllData()
@@ -151,7 +154,7 @@ class Category extends BaseModel
 
     /**
      * @return array
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws AException
      */
     public function getImages()
@@ -236,7 +239,7 @@ class Category extends BaseModel
      * @param string $mode
      *
      * @return string
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws AException
      */
     public static function getPath($category_id, $mode = '')
@@ -282,7 +285,7 @@ class Category extends BaseModel
      * @param        $category_id
      *
      * @return array
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws AException
      */
     public static function getCategoryBranchInfo($category_id)
@@ -322,14 +325,12 @@ class Category extends BaseModel
 
         $category_info = $query->distinct()->first();
 
-        $output = [
+        return [
             'path' => static::getPath($category_id, 'id'),
             'children' => $children,
             'active_products_count' => (int)$category_info->active_products_count,
             'total_products_count' => (int)$category_info->total_products_count
         ];
-
-        return $output;
     }
 
     /**
@@ -338,7 +339,7 @@ class Category extends BaseModel
      * @param int $limit
      *
      * @return array
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws AException
      */
     public static function getCategories($parentId = 0, $storeId = null, $limit = 0)
@@ -386,9 +387,12 @@ class Category extends BaseModel
 
             $query
                 ->where('category_descriptions.language_id', '=', $languageId)
-                ->active('categories')
-                ->orderBy('categories.sort_order')
-                ->orderBy('category_descriptions.name');
+                ->where('category_descriptions.language_id', '=', $languageId);
+            if (!ABC::env('IS_ADMIN')) {
+                $query->active('categories');
+            }
+            $query->orderBy('categories.sort_order')
+                  ->orderBy('category_descriptions.name');
 
             //allow to extends this method from extensions
             Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query, func_get_args());
@@ -514,7 +518,7 @@ class Category extends BaseModel
 
     /**
      * @return array
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws AException
      */
     public static function getAllCategories()
@@ -555,7 +559,7 @@ class Category extends BaseModel
      * @param $inputData
      *
      * @return Collection|bool
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws AException
      */
     public static function getCategoriesData($inputData)
@@ -725,7 +729,7 @@ class Category extends BaseModel
      * @param $data
      *
      * @return bool|mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public static function addCategory($data)
     {
@@ -797,7 +801,7 @@ class Category extends BaseModel
             //call listener on saved event after commit
             $category->touch();
             return $categoryId;
-        }catch(\Exception $e){
+        }catch(Exception $e){
             Registry::log()->write($e->getMessage());
             $db->rollback();
             return false;
@@ -879,7 +883,7 @@ class Category extends BaseModel
             //call event listener on saved
             $category->touch();
             return true;
-        }catch(\Exception $e){
+        }catch(Exception $e){
             $db->rollback();
             Registry::log()->write(__CLASS__." ".$e->getMessage()."\n".$e->getTraceAsString());
             return false;
@@ -891,7 +895,7 @@ class Category extends BaseModel
      *
      * @return bool
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public static function deleteCategory($categoryId)
     {
@@ -900,7 +904,7 @@ class Category extends BaseModel
         $cache = Registry::cache();
 
         if (!$category) {
-            throw new \Exception('Cannot to find category ID '.$categoryId);
+            throw new Exception('Cannot to find category ID '.$categoryId);
         }
 
         //run recalculation of products count before delete
@@ -910,7 +914,7 @@ class Category extends BaseModel
 
         //do not allow non empty category
         if($category->total_products_count){
-            throw new \Exception('Cannot to delete category ID '.$categoryId.'. It have '.$category->total_products_count.' products!');
+            throw new Exception('Cannot to delete category ID '.$categoryId.'. It have '.$category->total_products_count.' products!');
         }
 
         //get all children of category by tree and add current
@@ -1120,7 +1124,7 @@ class Category extends BaseModel
      * @param string $name
      * @param int|null $parent_id
      *
-     * @return QueryBuilder|\Illuminate\Database\Eloquent\Model|null
+     * @return QueryBuilder|BaseModel|null
      */
     public static function getCategoryByName(string $name, $parent_id = null)
     {
