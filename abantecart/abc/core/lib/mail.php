@@ -727,15 +727,19 @@ class AMail
                 fclose($handle);
             }
         } elseif ($this->protocol == 'mailapi') {
-            $mailDriver = MailApiManager::getInstance()->getCurrentMailApiDriver();
-            if (!is_bool($mailDriver)) {
-                /**
-                 * @var MailApiResponse $result
-                 */
-                $this->response = $mailDriver->send($this);
-                if (!$this->response->result) {
-                    $this->error[] = "Error send via Mail Api";
+            try {
+                $mailDriver = MailApiManager::getInstance()->getCurrentMailApiDriver();
+                if (!is_bool($mailDriver)) {
+                    /**
+                     * @var MailApiResponse $result
+                     */
+                    $this->response = $mailDriver->send($this);
+                    if (!$this->response->result) {
+                        $this->error[] = "Error send via Mail Api";
+                    }
                 }
+            }catch(\Exception $e){
+                $this->error[] = __CLASS__ .'->MailApiManager: '.$e->getMessage()."\n".$e->getTraceAsString();
             }
         }
         if ($this->error) {
