@@ -393,11 +393,11 @@ class ControllerPagesCatalogProduct extends AController
             abc_redirect($this->html->getSecureURL('catalog/product/update', '&product_id='.$product_id));
         }
 
-        if (isset($this->data['oldForm']) && $this->data['oldForm'] === true) {
-            $this->buildForm($args);
-        } else {
-            $this->buildFormNew();
-        }
+        // if (isset($this->data['oldForm']) && $this->data['oldForm'] === true) {
+        $this->buildForm($args);
+        //} else {
+        //    $this->buildFormNew();
+        //}
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);

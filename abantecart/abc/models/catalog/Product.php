@@ -84,6 +84,7 @@ use ReflectionException;
  * @property ProductTag $tags
  * @property ProductTag $tagsByLanguage
  * @property Product $related
+ * @property Review $active_reviews
  * @property Review $reviews
  * @property int $product_type_id
  *
@@ -1075,6 +1076,15 @@ class Product extends BaseModel
     public function related()
     {
         return $this->belongsToMany(Product::class, 'products_related', 'product_id', 'related_id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function active_reviews()
+    {
+        return $this->hasMany(Review::class, 'product_id', 'product_id')
+                    ->where('status', '=', 1);
     }
 
     /**

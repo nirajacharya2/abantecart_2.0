@@ -34,16 +34,14 @@ use abc\models\catalog\Product;
 use abc\models\catalog\ProductOption;
 use abc\models\catalog\ProductOptionValue;
 use abc\models\catalog\ProductTag;
-use abc\models\storefront\ModelCatalogManufacturer;
 use Exception;
 use H;
+use Illuminate\Support\Collection;
 
 /**
  * Class ControllerPagesProductProduct
  *
  * @package abc\controllers\storefront
- * @property \abc\models\storefront\ModelCatalogReview $model_catalog_review
- * @property ModelCatalogManufacturer $model_catalog_manufacturer
  */
 class ControllerPagesProductProduct extends AController
 {
@@ -173,14 +171,21 @@ class ControllerPagesProductProduct extends AController
         $this->loadModel('catalog/product');
         $promotion = new APromotion();
 
-        $product = Product::with(
+        $rels = [
             'description',
             'options.description',
             'options.values.description',
             'manufacturer',
             'stock_status',
-            'related.description.options'
-        )->find($product_id);
+            'related.description',
+            'related.options',
+            'active_reviews',
+        ];
+        if ($this->config->get('enable_reviews')) {
+            $rels[] = 'related.active_reviews';
+        }
+
+        $product = Product::with($rels)->find($product_id);
 
         //can not locate product? get out
         if (!$product) {
@@ -235,14 +240,13 @@ class ControllerPagesProductProduct extends AController
             '&product_id='.$product_id
         );
 
-        $this->loadModel('catalog/review');
         $this->data['tab_review'] = sprintf(
             $this->language->get('tab_review'),
-            $this->model_catalog_review->getTotalReviewsByProductId($product_id)
+            $product->active_reviews->count()
         );
 
         if ($this->config->get('enable_reviews')) {
-            $average = $this->model_catalog_review->getAverageRating($product_id);
+            $average = $product->active_reviews->pluck('rating')->avg();
             $this->data['rating_element'] = HtmlElementFactory::create(
                 [
                     'type'    => 'rating',
@@ -787,11 +791,11 @@ class ControllerPagesProductProduct extends AController
             $this->data['images'] = $option_images['images'];
         }
 
-        $products = [];
+        $this->data['related_products'] = [];
         $this->data['tags'] = [];
         $relatedProducts = $product->related;
         foreach ($relatedProducts as $related) {
-            /** @var Product $related */
+            /** @var Product|Collection $related */
             // related product image
             $sizes = [
                 'main'  => [
@@ -805,11 +809,9 @@ class ControllerPagesProductProduct extends AController
             ];
             $image = $resource->getResourceAllObjects('products', $related->product_id, $sizes, 1);
 
-            if ($this->config->get('enable_reviews')) {
-                $rating = $this->model_catalog_review->getAverageRating($related->product_id);
-            } else {
-                $rating = false;
-            }
+            $rating = $related->active_reviews
+                ? $related->active_reviews->pluck('rating')->avg()
+                : false;
 
             $special = false;
             $discount = $promotion->getProductDiscount($related->product_id);
@@ -842,8 +844,7 @@ class ControllerPagesProductProduct extends AController
                 }
             }
 
-            $options = $related->options;
-            if ($options) {
+            if (count($related->options)) {
                 $add = $this->html->getSEOURL(
                     'product/product',
                     '&product_id='.$related->product_id,
@@ -860,7 +861,7 @@ class ControllerPagesProductProduct extends AController
                 }
             }
 
-            $products[] = [
+            $this->data['related_products'][] = [
                 'product_id'    => $related->product_id,
                 'name'          => $related->description->name,
                 'model'         => $related->getAttribute('model'),
@@ -868,7 +869,7 @@ class ControllerPagesProductProduct extends AController
                 'stars'         => sprintf($this->language->get('text_stars'), $rating),
                 'price'         => $price,
                 'call_to_order' => $related->call_to_order,
-                'options'       => $options->toArray(),
+                'options'       => $related->options->toArray(),
                 'special'       => $special,
                 'image'         => $image,
                 'href'          => $this->html->getSEOURL(
@@ -891,7 +892,6 @@ class ControllerPagesProductProduct extends AController
             }
         }
 
-        $this->data['related_products'] = $products;
         if ($this->config->get('config_customer_price')) {
             $display_price = true;
         } elseif ($this->customer->isLogged()) {
@@ -912,8 +912,9 @@ class ControllerPagesProductProduct extends AController
                         'account/download/startdownload',
                         '&download_id='.$download['download_id']
                     );
-                    $download['attributes'] =
-                        $this->download->getDownloadAttributesValuesForCustomer($download['download_id']);
+                    $download['attributes'] = $this->download->getDownloadAttributesValuesForCustomer(
+                        $download['download_id']
+                    );
 
                     $download['button'] = $form->getFieldHtml(
                         [
@@ -923,7 +924,6 @@ class ControllerPagesProductProduct extends AController
                             'title' => $this->language->get('text_start_download'),
                             'text'  => $this->language->get('text_start_download'),
                         ]);
-
                     $downloads[] = $download;
                 }
 
@@ -974,13 +974,13 @@ class ControllerPagesProductProduct extends AController
                 'name'  => 'continue_button',
                 'text'  => $this->language->get('button_continue'),
                 'style' => 'button',
-            ]);
+            ]
+        );
 
         $this->view->assign('button_continue', $continue);
         $this->data['continue'] = $this->html->getHomeURL();
 
         $this->view->setTemplate('pages/error/not_found.tpl');
-
         $this->view->batchAssign($this->data);
         $this->processTemplate();
     }
