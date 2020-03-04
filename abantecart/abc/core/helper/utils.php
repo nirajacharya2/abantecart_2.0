@@ -37,6 +37,7 @@ use DOMDocument;
 use DOMXPath;
 use Exception;
 use Illuminate\Events\Dispatcher;
+use Illuminate\Support\Collection;
 use PharData;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 
@@ -764,6 +765,7 @@ class AHelperUtils extends AHelper
      * @param string $extension_txt_id
      *
      * @return \SimpleXMLElement | false
+     * @throws \ReflectionException
      */
     public static function getExtensionConfigXml($extension_txt_id)
     {
@@ -2105,5 +2107,19 @@ class AHelperUtils extends AHelper
             return 'Application Error! Please check error log for details.';
         }
 
+    }
+
+    /**
+     * Return true if $table (short name) already joined
+     *
+     * @param $query
+     * @param $table
+     *
+     * @return bool
+     */
+    public static function isJoined($query, $table)
+    {
+        $joins = new Collection($query->getQuery()->joins);
+        return $joins->pluck('table')->contains($table);
     }
 }

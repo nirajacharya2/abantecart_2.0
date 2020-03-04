@@ -87,29 +87,28 @@
     </div>
 </div>
 
-
-    <div class="col-md-12">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title"><?php echo $text_option_values; ?></h3>
-            </div>
-            <?php echo $update_option_values_form['open']; ?>
-            <div class="panel-body panel-body-nopadding">
-                <table id="option_values_tbl" class="table table_narrow">
-                    <thead>
-                    <tr>
-                        <?php if ($with_default) { ?>
-                            <th class="left">
-                                <a href="#" title="Click to uncheck default value" class="uncheck tooltips">
-                                    <?php echo $text_default; ?>&nbsp;&nbsp;<i class="fa fa-sync"></i>
-                                </a>
-                            </th>
-                        <?php }
-                        if ($option_data['element_type'] != 'U') { ?>
-                            <th class="left"><?php echo $entry_option_value; ?></th>
-                            <th class="left"><?php echo $entry_option_quantity; ?></th>
-                            <th class="left"><?php echo $entry_track_option_stock; ?></th>
-                        <?php } ?>
+<div class="col-md-12">
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h3 class="panel-title"><?php echo $text_option_values; ?></h3>
+	</div>
+    <?php echo $update_option_values_form['open']; ?>
+	<div class="panel-body panel-body-nopadding">
+		<table id="option_values_tbl" class="table table_narrow">
+			<thead>
+				<tr>
+					<?php if($with_default){?>
+					<th class="left">
+						<a href="#" title="Click to uncheck default value" class="uncheck tooltips">
+							<?php echo $text_default; ?>&nbsp;&nbsp;<i class="fa fa-sync"></i>
+						</a>
+					</th>
+					<?php }
+					if($option_data['element_type']!='U'){ ?>
+					<th class="left"><?php echo $entry_option_value; ?></th>
+					<th class="left"><?php echo $entry_option_quantity; ?></th>
+					<th class="left"><?php echo $entry_track_option_stock; ?></th>
+					<?php } ?>
 
                         <th class="left"><?php echo $entry_option_price; ?></th>
                         <th class="left"><?php echo $entry_option_prefix; ?></th>

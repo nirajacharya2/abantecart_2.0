@@ -2348,7 +2348,7 @@ class NumberHtmlElement extends HtmlElement
             [
                 'name'           => $this->name,
                 'id'             => $this->element_id,
-                'type'           => 'text',
+                'type'           => 'number',
                 'value'          => str_replace('"', '&quot;', $this->value),
                 'default'        => $this->default,
                 //TODO: remove deprecated attribute aform_field_type
@@ -2638,7 +2638,7 @@ class ZonesHtmlElement extends HtmlElement
 }
 
 /*
-* Build pagination HTML element based on the template. 
+* Build pagination HTML element based on the template.
 * Supported v 1.1.5+
 */
 

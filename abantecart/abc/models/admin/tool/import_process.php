@@ -23,16 +23,21 @@ namespace abc\models\admin;
 use abc\core\ABC;
 use abc\core\engine\Model;
 use abc\core\engine\Registry;
+use abc\core\lib\AException;
 use abc\core\lib\AFile;
+use abc\core\lib\ALog;
 use abc\core\lib\AResourceManager;
 use abc\core\lib\ATaskManager;
 use abc\models\catalog\Category;
 use abc\models\catalog\CategoryDescription;
 use abc\models\catalog\Manufacturer;
 use abc\models\catalog\Product;
+use abc\models\catalog\ProductOptionValue;
 use abc\models\catalog\ProductOption;
 use abc\modules\events\ABaseEvent;
+use Exception;
 use H;
+use ReflectionException;
 
 /**
  * Class ModelToolImportProcess
@@ -49,7 +54,7 @@ class ModelToolImportProcess extends Model
     protected $eta = [];
     protected $task_id;
     /**
-     * @var \abc\core\lib\ALog
+     * @var ALog
      */
     protected $imp_log = null;
 
@@ -58,7 +63,7 @@ class ModelToolImportProcess extends Model
      * @param array $data
      *
      * @return array|bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function createTask($task_name, $data = [])
     {
@@ -217,14 +222,14 @@ class ModelToolImportProcess extends Model
             } else {
                 foreach ($this->errors as $error) {
                     $this->toLog($error);
-                    }
+                }
             }
 
             $this->db->commit();
             //allow to run additional actions from hooks
             $this->extensions->hk_ProcessData($this, __FUNCTION__);
             return $result;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->db->rollback();
             $this->toLog($e->getMessage());
             return false;
@@ -237,8 +242,8 @@ class ModelToolImportProcess extends Model
      * @param $settings
      *
      * @return bool
-     * @throws \abc\core\lib\AException
-     * @throws \ReflectionException
+     * @throws AException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function process_categories_record($task_id, $data, $settings)
@@ -259,9 +264,9 @@ class ModelToolImportProcess extends Model
      * @param $settings
      *
      * @return bool
-     * @throws \abc\core\lib\AException
-     * @throws \ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws AException
+     * @throws ReflectionException
      */
     public function process_manufacturers_record($task_id, $data, $settings)
     {
@@ -283,8 +288,8 @@ class ModelToolImportProcess extends Model
      * @param $store_id
      *
      * @return bool
-     * @throws \abc\core\lib\AException
-     * @throws \ReflectionException
+     * @throws AException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function addUpdateProduct($record, $settings, $language_id, $store_id)
@@ -423,8 +428,8 @@ class ModelToolImportProcess extends Model
      * @param $store_id
      *
      * @return bool
-     * @throws \abc\core\lib\AException
-     * @throws \ReflectionException
+     * @throws AException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function addUpdateCategory($record, $settings, $language_id, $store_id)
@@ -510,8 +515,8 @@ class ModelToolImportProcess extends Model
      * @param $store_id
      *
      * @return bool
-     * @throws \abc\core\lib\AException
-     * @throws \ReflectionException
+     * @throws AException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function addUpdateManufacturer($record, $settings, $language_id, $store_id)
@@ -556,8 +561,8 @@ class ModelToolImportProcess extends Model
      * @param int $weight_class_id
      *
      * @return bool
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws ReflectionException
+     * @throws AException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function addUpdateOptions($product_id, $data = [], $weight_class_id)
@@ -585,33 +590,62 @@ class ModelToolImportProcess extends Model
                 continue;
             }
 
+            //check is update needed
+            $sql = "SELECT po.product_option_id  
+                    FROM ".$this->db->table_name('product_option_descriptions')." pod
+                    LEFT JOIN ".$this->db->table_name('product_options')." po
+                        ON po.product_id = '".(int)$product_id."'
+                    WHERE pod.name = '".$this->db->escape($data[$i]['name'])."'";
+
+            $result = $this->db->query($sql);
+            $p_option_id = $result->row['product_option_id'];
+
             $opt_data = [
                 'option_name'        => $data[$i]['name'],
                 'element_type'       => 'S',
+                'status'             => isset($data[$i]['status']) ? $data[$i]['status'] : 1,
                 'regexp_pattern'     => "",
                 'error_text'         => '',
                 'option_placeholder' => '',
+                'required'           => isset($data[$i]['required']) ? $data[$i]['required'] : 0,
+                'sort_order'         => isset($data[$i]['sort_order']) ? $data[$i]['sort_order'] : 0
             ];
-            $opt_data['required'] = isset($data[$i]['required']) ? $data[$i]['required'] : 0;
-            $opt_data['sort_order'] = isset($data[$i]['sort_order']) ? $data[$i]['sort_order'] : 0;
-            $opt_data['status'] = isset($data[$i]['status']) ? $data[$i]['status'] : 1;
-
-            $p_option_id = $product->addProductOption($opt_data);
-            if ($p_option_id) {
-                $this->toLog("Created product option '{$data[$i]['name']}' with ID {$p_option_id}.");
-            } else {
-                $this->toLog("Error: Failed to create product option '{$data[$i]['name']}'.");
-                return false;
+            if( !$p_option_id ) {
+                $p_option_id = $product->addProductOption($opt_data);
+                if ($p_option_id) {
+                    $this->toLog("Created product option '{$data[$i]['name']}' with ID {$p_option_id}.");
+                }else{
+                    $this->toLog("Error: Failed to create product option '{$data[$i]['name']}'.");
+                    return false;
+                }
+            }else{
+                try {
+                    $option = ProductOption::find($p_option_id);
+                    $option->update($opt_data);
+                    $this->toLog( "Created product option '{$data[$i]['name']}' with ID {$p_option_id}." );
+                }catch(Exception $e){
+                    $this->toLog( "Error: Failed to update product option '{$data[$i]['name']}' with ID {$p_option_id}.\n".$e->getMessage() );
+                    return false;
+                }
             }
+
+            //get all values of option
+            $sql = "SELECT product_option_value_id 
+                    FROM ".$this->db->table_name('product_option_values')." 
+                    WHERE product_option_id = '".(int)$p_option_id."' 
+                    AND product_id = '".(int)$product_id."'";
+            $result = $this->db->query($sql);
+            $exist_ids = array_column($result->rows, 'product_option_value_id');
 
             //now load values. Pick longest data array
             $option_vals = $data[$i]['product_option_values'];
 
             //find largest key by count
             $counts = @array_map('count', $option_vals);
+            $ids = [];
             if (max($counts) == 1) {
                 //single option value case
-                $this->saveOptionValue($product_id, $weight_class_id, $p_option_id, $option_vals);
+                $ids[] = $this->saveOptionValue($product_id, $weight_class_id, $p_option_id, $option_vals);
             } else {
                 for ($j = 0; $j < max($counts); $j++) {
                     //build flat associative array options value
@@ -619,9 +653,19 @@ class ModelToolImportProcess extends Model
                     foreach (array_keys($option_vals) as $key) {
                         $opt_val_data[$key] = $option_vals[$key][$j];
                     }
-                    $this->saveOptionValue($product_id, $weight_class_id, $p_option_id, $opt_val_data);
+                    $ids[] = $this->saveOptionValue($product_id, $weight_class_id, $p_option_id, $opt_val_data);
                 }
             }
+
+            //remove values that absent in save record
+            $diff_ids = array_diff($exist_ids, $ids);
+            foreach($diff_ids as $delete_id){
+                $pov = ProductOptionValue::find($delete_id);
+                if($pov) {
+                    $pov->forceDelete();
+                }
+            }
+
         }
         return true;
     }
@@ -633,33 +677,62 @@ class ModelToolImportProcess extends Model
      * @param $data
      *
      * @return bool|int|null
+     * @throws ReflectionException
+     * @throws AException
      * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
      */
     protected function saveOptionValue($productId, $weightClassId, $optionId, $data)
     {
-        if (empty($data) || !array_filter($data)) {
+        if ( empty($data) || !array_filter($data) || !$data['name'] ) {
             //skip empty data
             return false;
+        }
+
+        //update by sku first. if not - see name of option value
+        $update_by = [];
+        if( isset($data['sku']) && trim($data['sku']) ){
+            $update_by['ov.sku'] = $data['sku'];
+        }
+        if( isset($data['name'])  && trim($data['name']) ){
+            $update_by['ovd.name'] = $data['name'];
+        }
+        $result = null;
+        foreach( $update_by as $colName => $colValue ){
+            $sql = "SELECT ov.*, ovd.* 
+                    FROM ".$this->db->table_name('product_option_values')." ov 
+                    LEFT JOIN ".$this->db->table_name('product_option_value_descriptions')." ovd
+                        ON ovd.product_option_value_id = ov.product_option_value_id
+                    WHERE ov.product_id = '".(int)$productId."'
+                        AND ".$colName." = '".$this->db->escape($colValue)."'
+                        AND ov.product_option_id = '".(int)$optionId."'";
+            $result = $this->db->query($sql);
+            if($result->num_rows){
+                break;
+            }
         }
 
         $optionValueData = [
             'product_id'        => $productId,
             'product_option_id' => $optionId,
         ];
-        $opt_keys = [
-            'name'        => '',
-            'sku'         => '',
-            'quantity'    => 0,
-            'sort_order'  => 0,
-            'subtract'    => 0,
-            'prefix'      => '$',
-            'weight'      => 0,
-            'weight_type' => 'lbs',
-            'default'     => 0,
-            'price'       => 0,
-        ];
+        if($result && $result->row){
+            $opt_keys = $result->row;
+            $update = true;
+        }else{
+            $opt_keys = [
+                'name'        => 'n/a',
+                'sku'         => '',
+                'quantity'    => 0,
+                'sort_order'  => 0,
+                'subtract'    => 0,
+                'prefix'      => '$',
+                'weight'      => 0,
+                'weight_type' => 'lbs',
+                'default'     => 0,
+                'price'       => 0,
+            ];
+            $update = false;
+        }
         foreach ($opt_keys as $k => $v) {
             $optionValueData[$k] = $v;
             if (isset($data[$k])) {
@@ -677,7 +750,13 @@ class ModelToolImportProcess extends Model
             $optionValueData['weight_type'] = $prd_weight_info['unit'];
         }
 
-        $pd_opt_val_id = ProductOption::addProductOptionValueAndDescription($optionValueData);
+        if($update) {
+            $pd_opt_val_id = $opt_keys['product_option_value_id'];
+            $optionValue = ProductOptionValue::with('description')->find($pd_opt_val_id);
+            $optionValue->update($optionValueData);
+            $optionValue->description->update($optionValueData);
+        }else{
+            $pd_opt_val_id = ProductOption::addProductOptionValueAndDescription($optionValueData);}
 
         if ($pd_opt_val_id && !empty($data['image'])) {
             //process images
@@ -698,8 +777,8 @@ class ModelToolImportProcess extends Model
      *
      * @return bool
      * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws ReflectionException
+     * @throws AException
      */
     protected function migrateImages($data = [], $object_txt_id = '', $object_id = 0, $title = '', $language_id)
     {
@@ -811,7 +890,7 @@ class ModelToolImportProcess extends Model
      * @param int $store_id
      *
      * @return null
-     * @throws \Exception
+     * @throws Exception
      */
     public function getProductByField($field, $value, $language_id, $store_id)
     {
@@ -835,7 +914,7 @@ class ModelToolImportProcess extends Model
      * @param $store_id
      *
      * @return null
-     * @throws \Exception
+     * @throws Exception
      */
     public function getProductIDByName($name, $language_id, $store_id)
     {
@@ -862,7 +941,7 @@ class ModelToolImportProcess extends Model
      * @param $store_id
      *
      * @return null
-     * @throws \Exception
+     * @throws Exception
      */
     public function getProductIDByModel($model, $store_id)
     {
@@ -887,7 +966,7 @@ class ModelToolImportProcess extends Model
      * @param int $store_id
      *
      * @return null
-     * @throws \Exception
+     * @throws Exception
      */
     public function getProductIDBySku($sku, $store_id)
     {
@@ -910,7 +989,7 @@ class ModelToolImportProcess extends Model
      * @param int $store_id
      *
      * @return int|null
-     * @throws \Exception
+     * @throws Exception
      */
     protected function processManufacturer($manufacturer_name, $sort_order, $store_id)
     {
@@ -948,7 +1027,7 @@ class ModelToolImportProcess extends Model
      * @param int $store_id
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     protected function processCategories($data, $language_id, $store_id)
     {
@@ -1008,7 +1087,7 @@ class ModelToolImportProcess extends Model
      * @param $store_id
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     protected function checkCategoryTree($nameTree = [], $language_id, $store_id)
     {
@@ -1095,7 +1174,7 @@ class ModelToolImportProcess extends Model
      * @param int $parent_id
      *
      * @return int|false
-     * @throws \Exception
+     * @throws Exception
      */
     protected function getCategory($category_name, $language_id, $store_id, $parent_id)
     {
@@ -1134,7 +1213,7 @@ class ModelToolImportProcess extends Model
      * @param int $pid
      *
      * @return int
-     * @throws \Exception
+     * @throws Exception
      */
     protected function saveCategory($category_name, $language_id, $store_id, $pid = 0)
     {
