@@ -370,7 +370,7 @@ class ALanguage
                             continue;
                         }
                         //match browser language code with AbanteCart language locales
-                        if (preg_grep("/".$browser_language."/i", $locale)) {
+                        if (preg_grep("/^(".$browser_language.")/i", $locale)) {
                             //matching language was found
                             return $value['code'];
                         }
