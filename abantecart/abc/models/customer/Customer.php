@@ -7,18 +7,27 @@ use abc\core\engine\Registry;
 use abc\core\lib\ADataEncryption;
 use abc\core\lib\ADB;
 use abc\core\lib\AEncryption;
+use abc\core\lib\AException;
 use abc\models\BaseModel;
 use abc\models\order\Order;
 use abc\models\order\OrderProduct;
 use abc\models\QueryBuilder;
 use abc\models\system\Audit;
 use abc\models\system\Store;
+use Carbon\Carbon;
+use Exception;
 use H;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Validation\Rule;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
+use ReflectionException;
 
 /**
  * Class Customer
@@ -44,9 +53,9 @@ use Illuminate\Support\Collection;
  * @property int $customer_group_id
  * @property string $ip
  * @property array $data
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
- * @property \Carbon\Carbon $last_login
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
+ * @property Carbon $last_login
  *
  * @property Store $store
  * @property \Illuminate\Database\Eloquent\Collection $addresses
@@ -395,9 +404,9 @@ public function __construct(array $attributes = [])
      * @param array $customAttributes
      *
      * @return bool|void
-     * @throws \Illuminate\Validation\ValidationException
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws ValidationException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function validate(array $data = [], array $messages = [], array $customAttributes = [])
     {
@@ -564,7 +573,7 @@ public function __construct(array $attributes = [])
      * @param array $options
      *
      * @return bool
-     * @throws \abc\core\lib\AException
+     * @throws AException
      */
     public function save(array $options = [])
     {
@@ -603,7 +612,7 @@ public function __construct(array $attributes = [])
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function store()
     {
@@ -616,7 +625,7 @@ public function __construct(array $attributes = [])
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function addresses()
     {
@@ -624,7 +633,7 @@ public function __construct(array $attributes = [])
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function notifications()
     {
@@ -632,7 +641,7 @@ public function __construct(array $attributes = [])
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function transactions()
     {
@@ -640,7 +649,7 @@ public function __construct(array $attributes = [])
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function orders()
     {
@@ -648,7 +657,7 @@ public function __construct(array $attributes = [])
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     * @return MorphMany
      */
     public function audits()
     {
@@ -656,12 +665,12 @@ public function __construct(array $attributes = [])
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function approve()
     {
         if (!$this->hasPermission('write', ['approved'])) {
-            throw new \Exception('Permissions are restricted '.__CLASS__."::".__METHOD__."\n");
+            throw new Exception('Permissions are restricted '.__CLASS__."::".__METHOD__."\n");
         }
         $this->approved = 1;
         $this->save();
@@ -683,8 +692,8 @@ public function __construct(array $attributes = [])
      *
      * @param string $mode - can be quick(without orders_count), default, total_only(returns row count)
      *
-     * @return array|\Illuminate\Support\Collection|int
-     * @throws \abc\core\lib\AException
+     * @return array|Collection|int
+     * @throws AException
      */
     public static function getCustomer($customer_id, $mode = 'quick')
     {
@@ -701,7 +710,7 @@ public function __construct(array $attributes = [])
      * @param string $mode
      *
      * @return Collection|int
-     * @throws \abc\core\lib\AException
+     * @throws AException
      */
     public static function getCustomers($inputData = [], $mode = 'quick')
     {
@@ -810,23 +819,23 @@ public function __construct(array $attributes = [])
         if (!$dcrypt->active) {
             if (H::has_value($filter['email'])) {
                 $emails = (array)$filter['email'];
-                $query->where(function ($query) use ($emails, $filter) {
+                $query->where(function ($query) use ($emails, $filter, $db) {
                     /** @var QueryBuilder $query */
                     foreach ($emails as $email) {
                         if ($filter['search_operator'] == 'equal') {
-                            $query->orWhere('customers.email', '=', mb_strtolower($email));
+                            $query->orWhere('customers.email', '=', $db->escape(mb_strtolower($email)));
                         } else {
-                            $query->orWhere('customers.email', 'like', "%".mb_strtolower($email)."%");
+                            $query->orWhere('customers.email', 'LIKE', "%".$db->escape(mb_strtolower($email)."%"));
                         }
                     }
                 });
             }
 
             if (H::has_value($filter['telephone'])) {
-                $query->where('customers.telephone', 'like', "%".$db->escape($filter['telephone'])."%");
+                $query->where('customers.telephone', 'LIKE', "%".$db->escape($filter['telephone'])."%");
             }
             if (H::has_value($filter['sms'])) {
-                $query->where('customers.sms', 'like', "%".$db->escape($filter['sms'])."%");
+                $query->where('customers.sms', 'LIKE', "%".$db->escape($filter['sms'])."%");
             }
         }
 
@@ -1002,7 +1011,7 @@ public function __construct(array $attributes = [])
      * @param array $data
      *
      * @return Collection|int
-     * @throws \abc\core\lib\AException
+     * @throws AException
      */
     public static function getTotalCustomers($data = [])
     {
@@ -1013,7 +1022,7 @@ public function __construct(array $attributes = [])
      * @param array $settings
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function saveCustomerNotificationSettings($settings = [])
     {
@@ -1072,8 +1081,8 @@ public function __construct(array $attributes = [])
     /**
      * @param int $product_id
      *
-     * @return array|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|Collection
-     * @throws \abc\core\lib\AException
+     * @return array|Builder[]|\Illuminate\Database\Eloquent\Collection|Collection
+     * @throws AException
      */
     public static function getCustomersByProduct($product_id)
     {
