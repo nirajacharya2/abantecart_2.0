@@ -26,13 +26,15 @@ use abc\core\engine\Registry;
 use abc\core\lib\APromotion;
 use abc\core\engine\AResource;
 use abc\models\catalog\Category;
+use abc\models\catalog\Product;
+use abc\models\storefront\ModelCatalogReview;
 use abc\modules\traits\ProductListingTrait;
 
 /**
  * Class ControllerPagesProductSearch
  *
  * @package abc\controllers\storefront
- * @property \abc\models\storefront\ModelCatalogReview $model_catalog_review
+ * @property ModelCatalogReview $model_catalog_review
  */
 class ControllerPagesProductSearch extends AController
 {
@@ -110,11 +112,7 @@ class ControllerPagesProductSearch extends AController
             'separator' => $this->language->get('text_separator'),
         ]);
 
-        if (isset($request['page'])) {
-            $page = $request['page'];
-        } else {
-            $page = 1;
-        }
+        $page = isset($request['page']) ? $request['page'] : 1;
 
         $sorting_href = $request['sort'];
         if (!$sorting_href || !isset($this->data['sorts'][$request['sort']])) {
@@ -136,13 +134,10 @@ class ControllerPagesProductSearch extends AController
             ]
         );
 
-        $categories = $this->getCategories(0);
         $options = [0 => $this->language->get('text_category')];
-        if ($categories) {
-            foreach ($categories as $item) {
-                $options[$item['category_id']] = $item['name'];
-            }
-        }
+        Category::setCurrentLanguageID(Registry::language()->getLanguageID());
+        $results = Category::getCategories(0, $this->config->get('store_id'));
+        $options = $options + array_column($results, 'name', 'category_id');
         $this->data['category'] = $this->html->buildElement(
             [
                 'type'    => 'selectbox',
@@ -219,32 +214,33 @@ class ControllerPagesProductSearch extends AController
 
                 $this->loadModel('catalog/review');
                 $this->loadModel('tool/seo_url');
-                $products = [];
-                $products_result = $this->model_catalog_product->getProductsByKeyword($request['keyword'],
-                    $category_id,
-                    isset($request['description']) ? $request['description'] : '',
-                    isset($request['model']) ? $request['model'] : '',
-                    $sort,
-                    $order,
-                    ($page - 1) * $limit,
-                    $limit
-                );
+
+                $productsList = Product::search(
+                    [
+                        'filter' => [
+                            'keyword'     => $request['keyword'],
+                            'category_id' => $category_id,
+                            'model'       => $request['model'],
+                        ],
+                        'sort'   => $sort,
+                        'order'  => $order,
+                        'start'  => ($page - 1) * $limit,
+                        'limit'  => $limit,
+                    ]
+                )->toArray();
 
                 //if single result, redirect to the product
-                if (count($products_result) == 1) {
+                if (count($productsList) == 1) {
                     abc_redirect(
                         $this->html->getSEOURL(
                             'product/product',
-                            '&product_id='.key($products_result),
+                            '&product_id='.key($productsList[0]['product_id']),
                             '&encode')
                     );
                 }
-
-                if (is_array($products_result) && $products_result) {
-                    $product_ids = [];
-                    foreach ($products_result as $result) {
-                        $product_ids[] = (int)$result['product_id'];
-                    }
+                $products = [];
+                if ($productsList) {
+                    $product_ids = array_column($productsList, 'product_id');
 
                     //Format product data specific for confirmation page
                     $resource = new AResource('image');
@@ -255,8 +251,7 @@ class ControllerPagesProductSearch extends AController
                         $this->config->get('config_image_product_height')
                     );
                     $stock_info = $this->model_catalog_product->getProductsStockInfo($product_ids);
-
-                    foreach ($products_result as $result) {
+                    foreach ($productsList as $result) {
                         $thumbnail = $thumbnails[$result['product_id']];
                         if ($this->config->get('enable_reviews')) {
                             $rating = $this->model_catalog_review->getAverageRating($result['product_id']);
@@ -320,8 +315,8 @@ class ControllerPagesProductSearch extends AController
                         $in_stock = false;
                         $no_stock_text = $this->language->get('text_out_of_stock');
                         $stock_checkout = $result['stock_checkout'] === ''
-                                            ? $this->config->get('config_stock_checkout')
-                                            : $result['stock_checkout'];
+                            ? $this->config->get('config_stock_checkout')
+                            : $result['stock_checkout'];
                         $total_quantity = 0;
                         if ($stock_info[$result['product_id']]['subtract']) {
                             $track_stock = true;
@@ -345,11 +340,18 @@ class ControllerPagesProductSearch extends AController
                             'call_to_order'  => $result['call_to_order'],
                             'options'        => $options,
                             'special'        => $special,
-                            'href'           => $this->html->getSEOURL('product/product',
-                                '&keyword='.$request['keyword'].$url.'&product_id='.$result['product_id'], '&encode'),
+                            'href'           => $this->html->getSEOURL(
+                                'product/product',
+                                '&keyword='.$request['keyword']
+                                .$url
+                                .'&product_id='.$result['product_id'],
+                                '&encode'),
                             'add'            => $add,
-                            'description'    => html_entity_decode($result['description'], ENT_QUOTES,
-                                ABC::env('APP_CHARSET')),
+                            'description'    => html_entity_decode(
+                                $result['description'],
+                                ENT_QUOTES,
+                                ABC::env('APP_CHARSET')
+                            ),
                             'track_stock'    => $track_stock,
                             'in_stock'       => $in_stock,
                             'no_stock_text'  => $no_stock_text,
@@ -396,9 +398,9 @@ class ControllerPagesProductSearch extends AController
 
                 $sort_options = [];
 
-                foreach($this->data['sorts'] as $item => &$text){
+                foreach ($this->data['sorts'] as $item => &$text) {
                     $sort_options[$item] = $text;
-                    list($s,$o) = explode('-', $item);
+                    list($s, $o) = explode('-', $item);
                     $text = [
                         'text'  => $text,
                         'value' => $item,

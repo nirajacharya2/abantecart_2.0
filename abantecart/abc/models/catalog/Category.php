@@ -20,27 +20,28 @@ use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
+use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 
 /**
  * Class Category
  *
- * @property int                                      $category_id
- * @property int                                      $parent_id
- * @property string                                   $path
- * @property string                                   $uuid
- * @property int                                      $total_products_count
- * @property int                                      $active_products_count
- * @property int                                      $children_count
- * @property int                                      $sort_order
- * @property int                                      $status
- * @property CategoryDescription                      $description
- * @property Carbon                                   $date_added
- * @property Carbon                                   $date_modified
+ * @property int $category_id
+ * @property int $parent_id
+ * @property string $path
+ * @property string $uuid
+ * @property int $total_products_count
+ * @property int $active_products_count
+ * @property int $children_count
+ * @property int $sort_order
+ * @property int $status
+ * @property CategoryDescription $description
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
  *
- * @property Collection                               $categories_to_stores
- * @property Collection                               $category_descriptions
- * @property Collection                               $products_to_categories
+ * @property Collection $categories_to_stores
+ * @property Collection $category_descriptions
+ * @property Collection $products_to_categories
  *
  * @method static Category find(int $customer_id) Category
  * @package abc\models
@@ -232,7 +233,7 @@ class Category extends BaseModel
      * @return array|false|mixed
      * @throws ReflectionException
      * @throws AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getAllData()
     {
@@ -254,7 +255,7 @@ class Category extends BaseModel
      * @return array
      * @throws ReflectionException
      * @throws AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getImages()
     {
@@ -299,7 +300,8 @@ class Category extends BaseModel
                 $protocol = $protocolSetting->value;
             }
 
-            if (isset($images['image_main']['direct_url']) && strpos($images['image_main']['direct_url'], 'http') !== 0) {
+            if (isset($images['image_main']['direct_url'])
+                && strpos($images['image_main']['direct_url'], 'http') !== 0) {
                 $images['image_main']['direct_url'] = $protocol.':'.$images['image_main']['direct_url'];
             }
             if (isset($images['image_main']['main_url']) && strpos($images['image_main']['main_url'], 'http') !== 0) {
@@ -308,7 +310,8 @@ class Category extends BaseModel
             if (isset($images['image_main']['thumb_url']) && strpos($images['image_main']['thumb_url'], 'http') !== 0) {
                 $images['image_main']['thumb_url'] = $protocol.':'.$images['image_main']['thumb_url'];
             }
-            if (isset($images['image_main']['thumb2_url']) && strpos($images['image_main']['thumb2_url'], 'http') !== 0) {
+            if (isset($images['image_main']['thumb2_url'])
+                && strpos($images['image_main']['thumb2_url'], 'http') !== 0) {
                 $images['image_main']['thumb2_url'] = $protocol.':'.$images['image_main']['thumb2_url'];
             }
 
@@ -340,7 +343,7 @@ class Category extends BaseModel
      * @return string
      * @throws ReflectionException
      * @throws AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public static function getPath($category_id, $mode = '')
     {
@@ -388,12 +391,12 @@ class Category extends BaseModel
      * @return array
      * @throws ReflectionException
      * @throws AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public static function getCategoryBranchInfo($category_id)
     {
         $category_id = (int)$category_id;
-        if(!$category_id){
+        if (!$category_id) {
             return [];
         }
 
@@ -406,7 +409,7 @@ class Category extends BaseModel
         $query = Category::select('parent_id')
                          ->where('categories.category_id', '=', $category_id)
                          ->selectRaw(
-            '(SELECT COUNT('.$pAlias.'.product_id)
+                             '(SELECT COUNT('.$pAlias.'.product_id)
             FROM '.$pAlias.'
             INNER JOIN '.$p2cAlias.'
                 ON ('.$p2cAlias.'.product_id = '.$pAlias.'.product_id)
@@ -415,26 +418,24 @@ class Category extends BaseModel
                     AND '.$pAlias.'.date_deleted IS NULL
                     AND '.$p2cAlias.'.category_id IN ('.implode(", ", $childrenIDs).')
             ) as active_products_count'
-        )->selectRaw(
-            '(SELECT COUNT('.$pAlias.'.product_id)
+                         )->selectRaw(
+                '(SELECT COUNT('.$pAlias.'.product_id)
             FROM '.$pAlias.'
             INNER JOIN '.$p2cAlias.'
                 ON ('.$p2cAlias.'.product_id = '.$pAlias.'.product_id)
             WHERE '.$p2cAlias.'.category_id IN ('.implode(", ", $childrenIDs).')
                 AND '.$pAlias.'.date_deleted IS NULL
             ) as total_products_count'
-        );
+            );
 
         $category_info = $query->distinct()->first();
 
-        $output = [
+        return [
             'path'                  => static::getPath($category_id, 'id'),
             'children'              => $children,
             'active_products_count' => (int)$category_info->active_products_count,
             'total_products_count'  => (int)$category_info->total_products_count,
         ];
-
-        return $output;
     }
 
     /**
@@ -445,20 +446,21 @@ class Category extends BaseModel
      * @return array
      * @throws ReflectionException
      * @throws AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public static function getCategories($parentId = 0, $storeId = null, $limit = 0)
     {
         $languageId = static::$current_language_id;
 
         $cacheKey = 'category.list.'.$parentId
-                    .'.store_'.$storeId
-                    .'_limit_'.$limit
-                    .'_lang_'.$languageId
-                    .'_side_'.(int)ABC::env('IS_ADMIN');
+            .'.store_'.$storeId
+            .'_limit_'.$limit
+            .'_lang_'.$languageId
+            .'_side_'.(int)ABC::env('IS_ADMIN');
         $cache = Registry::cache()->get($cacheKey);
 
         if ($cache === null) {
+
             $category_data = [];
 
             /**
@@ -476,12 +478,12 @@ class Category extends BaseModel
                     'categories_to_stores',
                     function ($join) use ($storeId) {
                         /** @var JoinClause $join */
-                    $join->on(
-                        'categories.category_id',
-                         '=',
-                        'categories_to_stores.category_id'
-                    )->where('categories_to_stores.store_id', '=', (int)$storeId);
-                });
+                        $join->on(
+                            'categories.category_id',
+                            '=',
+                            'categories_to_stores.category_id'
+                        )->where('categories_to_stores.store_id', '=', (int)$storeId);
+                    });
             }
 
             if ((int)$parentId > 0) {
@@ -491,7 +493,6 @@ class Category extends BaseModel
             }
 
             $query
-                ->where('category_descriptions.language_id', '=', $languageId)
                 ->where('category_descriptions.language_id', '=', $languageId);
             if (!ABC::env('IS_ADMIN')) {
                 $query->active('categories');
@@ -500,7 +501,7 @@ class Category extends BaseModel
                   ->orderBy('category_descriptions.name');
 
             //allow to extends this method from extensions
-            Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query, func_get_args());
+            Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
             $categories = $query->get();
 
             foreach ($categories as $category) {
@@ -513,7 +514,6 @@ class Category extends BaseModel
             $cache = $category_data;
             Registry::cache()->put($cacheKey, $cache);
         }
-
         return $cache;
     }
 
@@ -521,7 +521,7 @@ class Category extends BaseModel
      * @param int $categoryId
      *
      * @return false|mixed
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public static function getCategory($categoryId)
     {
@@ -560,14 +560,14 @@ class Category extends BaseModel
                     $join->on('category_descriptions.category_id', '=', 'categories.category_id')
                          ->where('category_descriptions.language_id', '=', $languageId);
                 })
-                ->leftJoin(
-                    'categories_to_stores',
-                    'categories_to_stores.category_id',
-                    '=',
-                    'categories.category_id'
-                )
-                ->where('categories.category_id', '=', $categoryId)
-                ->where('categories_to_stores.store_id', '=', $storeId);
+                  ->leftJoin(
+                      'categories_to_stores',
+                      'categories_to_stores.category_id',
+                      '=',
+                      'categories.category_id'
+                  )
+                  ->where('categories.category_id', '=', $categoryId)
+                  ->where('categories_to_stores.store_id', '=', $storeId);
             //allow to extends this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
             $category = $query->first();
@@ -590,7 +590,7 @@ class Category extends BaseModel
     public static function getChildrenIDs($categoryId, $mode = '')
     {
         $categoryId = (int)$categoryId;
-        if(!$categoryId){
+        if (!$categoryId) {
             return [];
         }
 
@@ -606,7 +606,7 @@ class Category extends BaseModel
         );
         $query->where('categories.parent_id', '=', $categoryId);
         $query->where('categories_to_stores.store_id', '=', $storeId);
-        if($mode == 'active_only') {
+        if ($mode == 'active_only') {
             $query->active('categories');
         }
 
@@ -626,7 +626,7 @@ class Category extends BaseModel
      * @return array
      * @throws ReflectionException
      * @throws AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public static function getAllCategories()
     {
@@ -643,11 +643,11 @@ class Category extends BaseModel
         /** @var QueryBuilder|Collection $query */
         $query = self::select(['categories.category_id']);
         $query->leftJoin(
-                'categories_to_stores',
-                'categories_to_stores.category_id',
-                '=',
-                'categories.category_id'
-            )
+            'categories_to_stores',
+            'categories_to_stores.category_id',
+            '=',
+            'categories.category_id'
+        )
               ->where('categories_to_stores.store_id', '=', (int)Registry::config()->get('config_store_id'))
               ->active('categories');
         if ($parentId) {
@@ -667,7 +667,7 @@ class Category extends BaseModel
      * @return Collection|bool
      * @throws ReflectionException
      * @throws AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public static function getCategoriesData($inputData)
     {
@@ -694,17 +694,18 @@ class Category extends BaseModel
         $query->leftJoin('category_descriptions', function ($join) use ($language_id) {
             /** @var JoinClause $join */
             $join->on('category_descriptions.category_id', '=', 'categories.category_id')
-                ->where('category_descriptions.language_id', '=', $language_id);
+                 ->where('category_descriptions.language_id', '=', $language_id);
         })
-        ->join(
-            'categories_to_stores',
-            function ($join) use ($store_id) {
-                /** @var JoinClause $join */
-                $join->on('categories_to_stores.category_id', '=', 'categories.category_id')
-                    ->where('categories_to_stores.store_id', '=', $store_id);
-            });
+              ->join(
+                  'categories_to_stores',
+                  function ($join) use ($store_id) {
+                      /** @var JoinClause $join */
+                      $join->on('categories_to_stores.category_id', '=', 'categories.category_id')
+                           ->where('categories_to_stores.store_id', '=', $store_id);
+                  });
 
-        $inputData['parent_id'] = (isset($inputData['parent_id']) && (int)$inputData['parent_id'] > 0) ? (int)$inputData['parent_id'] : null;
+        $inputData['parent_id'] =
+            (isset($inputData['parent_id']) && (int)$inputData['parent_id'] > 0) ? (int)$inputData['parent_id'] : null;
 
         $query->where('categories.parent_id', '=', $inputData['parent_id']);
 
@@ -899,7 +900,7 @@ class Category extends BaseModel
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $category, func_get_args());
             if ($data['keywords']) {
                 UrlAlias::replaceKeywords($data['keywords'], $category->getKeyName(), $category->getKey());
-            }elseif($data['keyword']) {
+            } elseif ($data['keyword']) {
                 UrlAlias::setCategoryKeyword(($data['keyword'] ?: $categoryName), (int)$categoryId);
             }
 
@@ -908,7 +909,7 @@ class Category extends BaseModel
             //call listener on saved event after commit
             $category->touch();
             return $categoryId;
-        }catch(Exception $e){
+        } catch (Exception $e) {
             Registry::log()->write($e->getMessage());
             $db->rollback();
             return false;
@@ -938,7 +939,9 @@ class Category extends BaseModel
 
             if (!empty($data['category_description'])) {
                 foreach ($data['category_description'] as $language_id => $value) {
-                    if(!$value){ continue; }
+                    if (!$value) {
+                        continue;
+                    }
                     $value['language_id'] = $language_id;
                     $category->descriptions()->update($value);
                 }
@@ -975,9 +978,9 @@ class Category extends BaseModel
                     $categoryName = $description[$language->getContentLanguageID()]['name'];
                 }
             }
-            if( $data['keywords']){
+            if ($data['keywords']) {
                 UrlAlias::replaceKeywords($data['keywords'], $category->getKeyName(), $category->getKey());
-            }elseif($data['keyword']) {
+            } elseif ($data['keyword']) {
                 UrlAlias::setCategoryKeyword(($data['keyword'] ?: $categoryName), (int)$categoryId);
             }
 
@@ -990,7 +993,7 @@ class Category extends BaseModel
             //call event listener on saved
             $category->touch();
             return true;
-        }catch(Exception $e){
+        } catch (Exception $e) {
             $db->rollback();
             Registry::log()->write(__CLASS__." ".$e->getMessage()."\n".$e->getTraceAsString());
             return false;
@@ -1003,7 +1006,7 @@ class Category extends BaseModel
      * @return bool
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public static function deleteCategory($categoryId)
     {
@@ -1021,15 +1024,16 @@ class Category extends BaseModel
         $category->refresh();
 
         //do not allow non empty category
-        if($category->total_products_count){
-            throw new Exception('Cannot to delete category ID '.$categoryId.'. It have '.$category->total_products_count.' products!');
+        if ($category->total_products_count) {
+            throw new Exception('Cannot to delete category ID '.$categoryId.'. It have '.$category->total_products_count
+                .' products!');
         }
 
         //get all children of category by tree and add current
         $subCategories = self::getChildrenIDs((int)$categoryId);
         $subCategories[] = $categoryId;
 
-        foreach($subCategories as $categoryId) {
+        foreach ($subCategories as $categoryId) {
             UrlAlias::where(
                 'query',
                 '=',
@@ -1041,7 +1045,7 @@ class Category extends BaseModel
             $resources = $rm->getResourcesList(
                 [
                     'object_name' => 'categories',
-                    'object_id' => (int)$categoryId
+                    'object_id'   => (int)$categoryId,
                 ]
             );
 
@@ -1057,13 +1061,13 @@ class Category extends BaseModel
             $lm->deletePageLayout('pages/product/category', 'path', $categoryId);
             $category = static::find($categoryId);
             $parentId = null;
-            if($category) {
+            if ($category) {
                 $parentId = $category->parent_id;
                 //allow to extends this method from extensions
                 Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $category, func_get_args());
                 $category->forceDelete();
             }
-            if($parentId) {
+            if ($parentId) {
                 $parent = Category::find($parentId);
                 if ($parent) {
                     //run recalculation of products count and subcategories count
@@ -1135,11 +1139,11 @@ class Category extends BaseModel
     public static function getCategoryStores($category_id)
     {
         $stores = Registry::db()->table('categories_to_stores')
-        ->where('category_id', '=', $category_id)
-        ->get(['store_id']);
+                          ->where('category_id', '=', $category_id)
+                          ->get(['store_id']);
 
-        if($stores){
-            return array_column($stores->toArray(),'store_id');
+        if ($stores) {
+            return array_column($stores->toArray(), 'store_id');
         }
 
         return [];
@@ -1181,7 +1185,7 @@ class Category extends BaseModel
                          ->where('sss.key', '=', 'config_ssl_url');
                 }
             )->where('category_id', '=', (int)$category_id)
-            ->get();
+                             ->get();
         if ($storeInfo) {
             return json_decode($storeInfo, true);
         }

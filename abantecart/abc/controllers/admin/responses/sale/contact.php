@@ -22,12 +22,13 @@ namespace abc\controllers\admin;
 
 use abc\core\ABC;
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\core\lib\ATaskManager;
+use abc\models\admin\ModelSaleContact;
 use abc\models\customer\Customer;
 use abc\models\order\Order;
+use H;
 
 if (ABC::env('IS_DEMO')) {
     header('Location: static_pages/demo_mode.php');
@@ -36,7 +37,7 @@ if (ABC::env('IS_DEMO')) {
 /**
  * Class ControllerResponsesSaleContact
  *
- * @property \abc\models\admin\ModelSaleContact $model_sale_contact
+ * @property ModelSaleContact $model_sale_contact
  */
 class ControllerResponsesSaleContact extends AController
 {
@@ -110,7 +111,7 @@ class ControllerResponsesSaleContact extends AController
         if ($task_result) {
             $tm->deleteTask($task_id);
             $result_text = sprintf($this->language->get('text_success_sent'), $task_info['settings']['sent']);
-            if (AHelperUtils::has_value($this->session->data['sale_contact_presave'])) {
+            if (H::has_value($this->session->data['sale_contact_presave'])) {
                 unset($this->session->data['sale_contact_presave']);
             }
         } else {
@@ -283,7 +284,7 @@ class ControllerResponsesSaleContact extends AController
                 //$max_exec_time = 7200;
                 $max_exec_time = 7200;
             }
-            if (time() - AHelperUtils::dateISO2Int($incm_task['last_time_run']) > $max_exec_time) {
+            if (time() - H::dateISO2Int($incm_task['last_time_run']) > $max_exec_time) {
 
                 //get some info about task, for ex message-text and subject
                 $steps = $tm->getTaskSteps($incm_task['task_id']);
@@ -299,9 +300,9 @@ class ControllerResponsesSaleContact extends AController
                     $incm_task['subject'] = $step_settings['subject'];
                 }
                 $incm_task['message'] = mb_substr($step_settings['message'], 0, 300);
-                $incm_task['date_added'] = AHelperUtils::dateISO2Display($incm_task['date_added'],
+                $incm_task['date_added'] = H::dateISO2Display($incm_task['date_added'],
                     $this->language->get('date_format_short').' '.$this->language->get('time_format'));
-                $incm_task['last_time_run'] = AHelperUtils::dateISO2Display($incm_task['last_time_run'],
+                $incm_task['last_time_run'] = H::dateISO2Display($incm_task['last_time_run'],
                     $this->language->get('date_format_short').' '.$this->language->get('time_format'));
                 $incm_task['sent'] = sprintf($this->language->get('text_sent'), $incm_task['settings']['sent'],
                     $incm_task['settings']['recipients_count']);
@@ -376,23 +377,29 @@ class ControllerResponsesSaleContact extends AController
             case 'all_subscribers':
                 $filter = $newsletter_db_filter;
                 $filter['filter']['all_subscribers'] = 1;
-                $count = Customer::getCustomers($filter, 'total_only');
+                $count = Customer::getTotalCustomers($filter);
                 break;
             case 'only_subscribers':
                 $filter = $newsletter_db_filter;
                 $filter['filter']['only_subscribers'] = 1;
-                $count = Customer::getCustomers($filter, 'total_only');
+                $count = Customer::getTotalCustomers($filter);
                 break;
             case 'only_customers':
                 $filter = $newsletter_db_filter;
                 $filter['filter']['only_customers'] = 1;
-                $count = Customer::getCustomers($filter, 'total_only');
+                $count = Customer::getTotalCustomers($filter);
                 break;
             case 'ordered':
                 $products = $this->request->post['products'];
                 if (is_array($products)) {
                     foreach ($products as $product_id) {
-                        $results = Customer::getCustomersByProduct($product_id);
+                        $results = Customer::search(
+                            [
+                                'filter' => [
+                                    'product_id' => $product_id,
+                                ],
+                            ]
+                        );
                         foreach ($results as $result) {
                             $emails[] = trim($result[$protocol]);
                         }

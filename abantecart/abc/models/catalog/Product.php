@@ -90,6 +90,9 @@ use ReflectionException;
  *
  * @method static Product find(int $product_id) Product
  * @method static Product select(mixed $select) Builder
+ * @method static WithFinalPrice(int $customer_group_id, Carbon $toDate = null) - adds "final_price" column into selected fields
+ * @method static WithReviewCount(bool $only_enabled = true) - adds "review_count" column into selected fields
+ * @method static WithAvgRating(bool $only_enabled = true) - adds "rating" column into selected fields
  *
  * @package abc\models
  */
@@ -133,27 +136,27 @@ class Product extends BaseModel
         'manufacturer_id'   => 'int',
         'shipping'          => 'int',
         'ship_individually' => 'int',
-        'free_shipping'     => 'int',
-        'shipping_price'    => 'float',
-        'price'             => 'float',
-        'tax_class_id'      => 'int',
-        'weight'            => 'float',
-        'weight_class_id'   => 'int',
-        'length'            => 'float',
-        'width'             => 'float',
-        'height'            => 'float',
-        'length_class_id'   => 'int',
-        'status'            => 'int',
-        'featured'          => 'boolean',
-        'viewed'            => 'int',
-        'sort_order'        => 'int',
-        'subtract'          => 'int',
-        'minimum'           => 'int',
-        'maximum'           => 'int',
-        'cost'              => 'float',
-        'call_to_order'     => 'int',
-        'product_type_id'   => 'int',
-        'settings'          => 'serialized'
+        'free_shipping'   => 'int',
+        'shipping_price'  => 'float',
+        'price'           => 'float',
+        'tax_class_id'    => 'int',
+        'weight'          => 'float',
+        'weight_class_id' => 'int',
+        'length'          => 'float',
+        'width'           => 'float',
+        'height'          => 'float',
+        'length_class_id' => 'int',
+        'status'          => 'int',
+        'featured'        => 'boolean',
+        'viewed'          => 'int',
+        'sort_order'      => 'int',
+        'subtract'        => 'int',
+        'minimum'         => 'int',
+        'maximum'         => 'int',
+        'cost'            => 'float',
+        'call_to_order'   => 'int',
+        'product_type_id' => 'int',
+        'settings'        => 'serialized',
     ];
 
     /** @var array */
@@ -200,7 +203,7 @@ class Product extends BaseModel
         'call_to_order',
         'product_type_id',
         'settings',
-        'date_deleted'
+        'date_deleted',
     ];
 
     protected $rules = [
@@ -281,7 +284,7 @@ class Product extends BaseModel
             'checks'   => [
                 'string',
                 'nullable',
-                'in:0,1'
+                'in:0,1',
             ],
             'messages' => [
                 '*' => [
@@ -456,7 +459,7 @@ class Product extends BaseModel
 
         'status' => [
             'checks'   => [
-                'boolean'
+                'boolean',
             ],
             'messages' => [
                 '*' => [
@@ -467,7 +470,7 @@ class Product extends BaseModel
 
         'featured' => [
             'checks'   => [
-                'boolean'
+                'boolean',
             ],
             'messages' => [
                 '*' => [
@@ -478,7 +481,7 @@ class Product extends BaseModel
 
         'viewed'     => [
             'checks'   => [
-                'integer'
+                'integer',
             ],
             'messages' => [
                 '*' => [
@@ -488,7 +491,7 @@ class Product extends BaseModel
         ],
         'sort_order' => [
             'checks'   => [
-                'integer'
+                'integer',
             ],
             'messages' => [
                 '*' => [
@@ -499,7 +502,7 @@ class Product extends BaseModel
 
         'subtract' => [
             'checks'   => [
-                'boolean'
+                'boolean',
             ],
             'messages' => [
                 '*' => [
@@ -510,7 +513,7 @@ class Product extends BaseModel
 
         'minimum' => [
             'checks'   => [
-                'integer'
+                'integer',
             ],
             'messages' => [
                 '*' => [
@@ -522,7 +525,7 @@ class Product extends BaseModel
         'maximum' => [
             'checks'   => [
                 'integer',
-                'gte:minimum'
+                'gte:minimum',
             ],
             'messages' => [
                 '*' => [
@@ -544,7 +547,7 @@ class Product extends BaseModel
 
         'call_to_order' => [
             'checks'   => [
-                'boolean'
+                'boolean',
             ],
             'messages' => [
                 '*' => [
@@ -661,7 +664,7 @@ class Product extends BaseModel
             ],
             'hidable'    => false,
         ],
-        'product_store'    => [
+        'product_store' => [
             'cast'       => 'int',
             'rule'       => 'integer',
             'access'     => 'read',
@@ -989,10 +992,94 @@ class Product extends BaseModel
      *
      */
     public static $auditExcludes = ['sku'];
+    /**
+     * @var string
+     * @see Product::getProducts()
+     */
+    public static $searchMethod = 'getProducts',
+        $searchParams = [
+        'filter' =>
+            [
+                'keyword',
+                'description',
+                'model',
+                'only_enabled',
+                'category_id',
+                'customer_group_id',
+                'language_id',
+                'store_id',
+            ],
+        //pagination
+        'sort',
+        'order',
+        'start',
+        'limit',
+    ];
 
+    /**
+     * @param mixed $value
+     */
     public function setSettings($value)
     {
         $this->attributes['settings'] = serialize($value);
+    }
+
+    /**
+     * @param QueryBuilder $builder
+     * @param int $customer_group_id
+     * @param Carbon|null $toDate
+     */
+    public static function scopeWithFinalPrice($builder, $customer_group_id, Carbon $toDate = null)
+    {
+        if (!$toDate || !($toDate instanceof Carbon)) {
+            $inc = "NOW()";
+        } else {
+            $inc = "'".$toDate->toIso8601String()."'";
+        }
+
+        $sql = " ( SELECT p2sp.price
+                    FROM ".Registry::db()->table_name("product_specials")." p2sp
+                    WHERE p2sp.product_id = ".Registry::db()->table_name("products").".product_id
+                            AND p2sp.customer_group_id = '".(int)$customer_group_id."'
+                            AND ((p2sp.date_start IS NULL OR p2sp.date_start < ".$inc.")
+                            AND (p2sp.date_end IS NULL OR p2sp.date_end > ".$inc."))
+                    ORDER BY p2sp.priority ASC, p2sp.price ASC 
+                    LIMIT 1
+                 ) ";
+        $sql = "COALESCE( ".$sql.", ".Registry::db()->table_name("products").".price) as final_price";
+        $builder->selectRaw($sql);
+    }
+
+    /**
+     * @param QueryBuilder $builder
+     * @param bool $only_enabled
+     */
+    public static function scopeWithReviewCount($builder, $only_enabled = true)
+    {
+        $sql = " ( SELECT COUNT(rw.review_id)
+                 FROM ".Registry::db()->table_name("reviews")." rw
+                 WHERE ".Registry::db()->table_name("products").".product_id = rw.product_id";
+        if ($only_enabled) {
+            $sql .= " AND status = 1 ";
+        }
+        $sql .= "GROUP BY rw.product_id) AS review_count ";
+        $builder->selectRaw($sql);
+    }
+
+    /**
+     * @param QueryBuilder $builder
+     * @param bool $only_enabled
+     */
+    public static function scopeWithAvgRating($builder, $only_enabled = true)
+    {
+        $sql = " ( SELECT AVG(rw.review_id)
+                 FROM ".Registry::db()->table_name("reviews")." rw
+                 WHERE ".Registry::db()->table_name("products").".product_id = rw.product_id";
+        if ($only_enabled) {
+            $sql .= " AND status = 1 ";
+        }
+        $sql .= "GROUP BY rw.product_id) AS rating ";
+        $builder->selectRaw($sql);
     }
 
     /**
@@ -1141,17 +1228,17 @@ class Product extends BaseModel
     public function getProductTypes()
     {
         return $this->db->table('object_types as ot')
-            ->join('object_type_descriptions as otd', 'ot.object_type_id', '=', 'otd.object_type_id')
-            ->where(
-                [
-                    'ot.object_type'  => 'Product',
-                    'ot.status'       => 1,
-                    'otd.language_id' => static::$current_language_id
-                ]
-            )
-            ->select('otd.object_type_id as id', 'otd.name')
-            ->get()
-            ->toArray();
+                        ->join('object_type_descriptions as otd', 'ot.object_type_id', '=', 'otd.object_type_id')
+                        ->where(
+                            [
+                                'ot.object_type'  => 'Product',
+                                'ot.status'       => 1,
+                                'otd.language_id' => static::$current_language_id,
+                            ]
+                        )
+                        ->select('otd.object_type_id as id', 'otd.name')
+                        ->get()
+                        ->toArray();
     }
 
     /**
@@ -1238,8 +1325,8 @@ class Product extends BaseModel
     {
         $language_id = $language_id ?: static::$current_language_id;
         $stock_statuses = StockStatus::where('language_id', '=', $language_id)
-            ->select(['stock_status_id as id', 'name'])
-            ->get();
+                                     ->select(['stock_status_id as id', 'name'])
+                                     ->get();
         $result = [];
         foreach ($stock_statuses as $stock_status) {
             $result[] = (object)[
@@ -1388,19 +1475,19 @@ class Product extends BaseModel
         $total_quantity = 0;
         //check product option values
         $option_values = ProductOption::select(['product_option_values.quantity', 'product_option_values.subtract'])
-            ->where(
-                [
-                    'product_options.product_id' => $this->product_id,
-                    'status'                     => 1,
-                ]
-            )
-            ->join(
-                'product_option_values',
-                'product_option_values.product_option_id',
-                '=',
-                'product_options.product_option_id'
-            )
-            ->get();
+                                      ->where(
+                                          [
+                                              'product_options.product_id' => $this->product_id,
+                                              'status'                     => 1,
+                                          ]
+                                      )
+                                      ->join(
+                                          'product_option_values',
+                                          'product_option_values.product_option_id',
+                                          '=',
+                                          'product_options.product_option_id'
+                                      )
+                                      ->get();
         if ($option_values) {
             $notrack_qnt = 0;
             foreach ($option_values as $row) {
@@ -1576,7 +1663,7 @@ class Product extends BaseModel
         }
 
         $product = Product::with('description', 'categories', 'stores', 'tagsByLanguage')
-            ->find($product_id);
+                          ->find($product_id);
         if (!$product) {
             return [];
         }
@@ -1830,8 +1917,8 @@ class Product extends BaseModel
 
         // Temporary solution for serializing of additional columns from extensions
         $casts = $product->getCasts();
-        foreach($product_data as $k=>&$v){
-            if($casts[$k] == 'serialized' && !is_string($v)){
+        foreach ($product_data as $k => &$v) {
+            if ($casts[$k] == 'serialized' && !is_string($v)) {
                 $v = serialize($v);
             }
         }
@@ -1870,8 +1957,8 @@ class Product extends BaseModel
     }
 
     /**
-     * @param int   $productId
-     * @param int   $productTypeId
+     * @param int $productId
+     * @param int $productTypeId
      * @param array $attributes
      */
     public static function updateProductAttributes(int $productId, int $productTypeId, array $attributes)
@@ -1911,45 +1998,46 @@ class Product extends BaseModel
      */
     public static function updateProductLinks(&$product, array $product_data)
     {
-        if(is_numeric($product)) {
+        if (is_numeric($product)) {
             $model = Product::find($product);
-        }else{
+        } else {
             $model = $product;
         }
 
-        if(!$model instanceof Product){
+        if (!$model instanceof Product) {
             return false;
         }
 
-        if( !is_array($product_data['product_category_prev']) ){
+        if (!is_array($product_data['product_category_prev'])) {
             $product_data['product_category_prev'] = $model->categories()
-                ->where('product_id', '=', $model->getKey())
-                ->get()->pluck('category_id')->toArray();
+                                                           ->where('product_id', '=', $model->getKey())
+                                                           ->get()->pluck('category_id')->toArray();
         }
 
-        if (isset($product_data['product_category']) &&  $product_data['product_category'] != $product_data['product_category_prev']) {
+        if (isset($product_data['product_category'])
+            && $product_data['product_category'] != $product_data['product_category_prev']) {
 
             $ids = (array)$product_data['product_category'];
             $product_data['product_category'] = [];
-            foreach($ids as $id){
+            foreach ($ids as $id) {
                 $id = (int)$id;
-                if($id){
+                if ($id) {
                     $product_data['product_category'][] = $id;
                 }
             }
-            if($product_data['product_category']) {
+            if ($product_data['product_category']) {
                 $model->categories()->sync($product_data['product_category']);
-            }else{
+            } else {
                 $model->categories()->detach($product_data['product_category_prev']);
             }
 
             //touch all categories to call update listener that calculates products count in it
             $affectedCategories = [];
 
-            foreach((array)$product_data['product_category']  as $id) {
+            foreach ((array)$product_data['product_category'] as $id) {
                 $affectedCategories[] = $id;
             }
-            foreach((array)$product_data['product_category_prev']  as $id) {
+            foreach ((array)$product_data['product_category_prev'] as $id) {
                 $affectedCategories[] = $id;
             }
         }
@@ -2042,9 +2130,9 @@ class Product extends BaseModel
         $store_id = $registry->get('config')->get('config_store_id');
 
         $settings = Setting::where('store_id', $store_id)
-            ->where('group', 'object_type')
-            ->where('group_id', $product->product_type_id)
-            ->get();
+                           ->where('group', 'object_type')
+                           ->where('group_id', $product->product_type_id)
+                           ->get();
 
         if (!$settings) {
             return false;
@@ -2082,20 +2170,20 @@ class Product extends BaseModel
         $languageId = (int)$this->config->get('storefront_language_id');
 
         $products_info = Product::select($arSelect)
-            ->where('products.catalog_only', '=', 1)
-            ->leftJoin('product_descriptions as pd', function ($join) use ($languageId) {
-                /** @var JoinClause $join */
-                $join->on('products.product_id', '=', 'pd.product_id')
-                    ->where('pd.language_id', '=', $languageId);
-            })
-            ->leftJoin('products_to_stores as p2s', 'products.product_id', '=', 'p2s.product_id')
-            ->leftJoin('manufacturers as m', 'products.manufacturer_id', '=', 'm.manufacturer_id')
-            ->leftJoin('stock_statuses as ss', function ($join) use ($languageId) {
-                /** @var JoinClause $join */
-                $join->on('products.stock_status_id', '=', 'ss.stock_status_id')
-                    ->where('ss.language_id', '=', $languageId);
-            })
-            ->active('products');
+                                ->where('products.catalog_only', '=', 1)
+                                ->leftJoin('product_descriptions as pd', function ($join) use ($languageId) {
+                                    /** @var JoinClause $join */
+                                    $join->on('products.product_id', '=', 'pd.product_id')
+                                         ->where('pd.language_id', '=', $languageId);
+                                })
+                                ->leftJoin('products_to_stores as p2s', 'products.product_id', '=', 'p2s.product_id')
+                                ->leftJoin('manufacturers as m', 'products.manufacturer_id', '=', 'm.manufacturer_id')
+                                ->leftJoin('stock_statuses as ss', function ($join) use ($languageId) {
+                                    /** @var JoinClause $join */
+                                    $join->on('products.stock_status_id', '=', 'ss.stock_status_id')
+                                         ->where('ss.language_id', '=', $languageId);
+                                })
+                                ->active('products');
 
         if ($limit) {
             $products_info = $products_info->limit($limit);
@@ -2127,21 +2215,21 @@ class Product extends BaseModel
          * @var QueryBuilder $query
          */
         $query = ProductOption::with('description')
-            ->with('values', 'values.description')
-            ->where(
-                [
-                    'product_id' => $product_id,
-                    'group_id'   => 0
-                ]
-            )->active()
-            ->orderBy('sort_order');
+                              ->with('values', 'values.description')
+                              ->where(
+                                  [
+                                      'product_id' => $product_id,
+                                      'group_id'   => 0,
+                                  ]
+                              )->active()
+                              ->orderBy('sort_order');
         //allow to extends this method from extensions
-        Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
+        Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query);
 
         $productOptions = $query->get()->toArray();
 
         $elements = HtmlElementFactory::getAvailableElements();
-        foreach($productOptions as &$option){
+        foreach ($productOptions as &$option) {
             $option['html_type'] = $elements[$option['element_type']]['type'];
         }
         return $productOptions;
@@ -2253,31 +2341,31 @@ class Product extends BaseModel
              * @var QueryBuilder $query
              */
             $query = self::selectRaw($db->raw_sql_row_count()." ".$aliasPD.".*")
-                ->addSelect($select)
-                ->leftJoin('product_descriptions', function ($subQuery) use ($language_id) {
-                    /** @var JoinClause $subQuery */
-                    $subQuery->on('products.product_id',
-                        '=',
-                        'product_descriptions.product_id')
-                             ->where('product_descriptions.language_id', '=', $language_id);
-                })
-                ->leftJoin(
-                    'products_to_stores',
-                    'products.product_id',
-                    '=',
-                    'products_to_stores.product_id'
-                )
-                ->leftJoin('stock_statuses', function ($subQuery) use ($language_id) {
-                    /** @var JoinClause $subQuery */
-                    $subQuery->on('products.stock_status_id',
-                        '=',
-                        'stock_statuses.stock_status_id')
-                             ->where('stock_statuses.language_id', '=', $language_id);
-                })
-                ->whereIn('products.product_id', $bestSellerIds)
-                ->whereRaw($aliasP.'.date_available<=NOW()')
-                ->where('products.status', '=', 1)
-                ->where('products_to_stores.store_id', '=', $store_id);
+                         ->addSelect($select)
+                         ->leftJoin('product_descriptions', function ($subQuery) use ($language_id) {
+                             /** @var JoinClause $subQuery */
+                             $subQuery->on('products.product_id',
+                                 '=',
+                                 'product_descriptions.product_id')
+                                      ->where('product_descriptions.language_id', '=', $language_id);
+                         })
+                         ->leftJoin(
+                             'products_to_stores',
+                             'products.product_id',
+                             '=',
+                             'products_to_stores.product_id'
+                         )
+                         ->leftJoin('stock_statuses', function ($subQuery) use ($language_id) {
+                             /** @var JoinClause $subQuery */
+                             $subQuery->on('products.stock_status_id',
+                                 '=',
+                                 'stock_statuses.stock_status_id')
+                                      ->where('stock_statuses.language_id', '=', $language_id);
+                         })
+                         ->whereIn('products.product_id', $bestSellerIds)
+                         ->whereRaw($aliasP.'.date_available<=NOW()')
+                         ->where('products.status', '=', 1)
+                         ->where('products_to_stores.store_id', '=', $store_id);
 
             $sort_data = [
                 'pd.name'       => 'product_descriptions.name',
@@ -2371,11 +2459,11 @@ class Product extends BaseModel
      * @throws Exception
      */
     public function delete()
-     {
-         $delete = $this->forceDeleting ? 'forceDelete' : 'delete';
-         UrlAlias::where('query', '=', 'product_id='.$this->getKey())->$delete();
-         return parent::delete();
-     }
+    {
+        $delete = $this->forceDeleting ? 'forceDelete' : 'delete';
+        UrlAlias::where('query', '=', 'product_id='.$this->getKey())->$delete();
+        return parent::delete();
+    }
 
     /**
      * @param array $data
@@ -2510,4 +2598,189 @@ class Product extends BaseModel
         return $option_data;
     }
 
+    public static function getProducts(array $options = [])
+    {
+        $options['sort'] = $options['sort'] ?? 'products.sort_order';
+        $options['order'] = $options['order'] ?? 'ASC';
+        $options['start'] = $options['start'] > 0 ? $options['start'] : 0;
+        $options['limit'] = $options['limit'] >= 1 ? $options['limit'] : 20;
+
+        $filter = (array)$options['filter'];
+        $filter['category_id'] = $filter['category_id'] ?? 0;
+        $filter['description'] = $filter['description'] ?? false;
+        $filter['model'] = $filter['model'] ?? false;
+
+        $filter['only_enabled'] = $filter['only_enabled'] ?? true;
+        $filter['customer_group_id'] =
+            $filter['customer_group_id'] ?? Registry::config()->get('config_customer_group_id');
+        $filter['keyword'] = trim($filter['keyword']);
+        $filter['language_id'] = (int)$filter['language_id'];
+        if (!$filter['language_id']) {
+            $filter['language_id'] = static::getCurrentLanguageID();
+        }
+        $filter['store_id'] = (int)$filter['store_id'];
+        if (!$filter['store_id']) {
+            $filter['store_id'] = ABC::env('IS_ADMIN') === true
+                ? Registry::session()->data['current_store_id']
+                : Registry::config()->get('config_store_id');
+        }
+
+        $cacheKey = 'product.list.'
+            .md5(var_export($options, true))
+            .'_side_'.(int)ABC::env('IS_ADMIN');
+        $cache = Registry::cache()->get($cacheKey);
+
+        if ($cache === null) {
+            $db = Registry::db();
+
+            //full table names
+            $p_table = $db->table_name('products');
+            $pt_table = $db->table_name('product_tags');
+            $pd_table = $db->table_name('product_descriptions');
+
+            /** @var Product|QueryBuilder $query */
+            $query = self::selectRaw(Registry::db()->raw_sql_row_count().' '.$p_table.'.*');
+            $query->WithFinalPrice($filter['customer_group_id']);
+            $query->WithReviewCount($filter['only_enabled']);
+            $query->WithAvgRating($filter['only_enabled']);
+            $query->addSelect(
+                [
+                    'product_descriptions.*',
+                    'manufacturers.name as manufacturer',
+                    'stock_statuses.name as stock_status_name',
+                ]
+            );
+
+            $query->leftJoin(
+                'product_descriptions',
+                function ($join) use ($filter) {
+                    /** @var JoinClause $join */
+                    $join->on('product_descriptions.product_id', '=', 'products.product_id')
+                         ->where('product_descriptions.language_id', '=', $filter['language_id']);
+                }
+            );
+
+            $query->leftJoin(
+                'manufacturers',
+                function ($join) {
+                    /** @var JoinClause $join */
+                    $join->on('manufacturers.manufacturer_id', '=', 'products.manufacturer_id');
+                }
+            );
+
+            $query->leftJoin(
+                'product_tags',
+                function ($join) use ($filter) {
+                    /** @var JoinClause $join */
+                    $join->on('product_tags.product_id', '=', 'products.product_id')
+                         ->where('product_tags.language_id', '=', $filter['language_id']);
+                }
+            );
+            $query->leftJoin(
+                'stock_statuses',
+                function ($join) use ($filter) {
+                    /** @var JoinClause $join */
+                    $join->on('stock_statuses.stock_status_id', '=', 'products.stock_status_id')
+                         ->where('stock_statuses.language_id', '=', $filter['language_id']);
+                }
+            );
+
+            $query->join(
+                'products_to_stores',
+                function ($join) use ($filter) {
+                    /** @var JoinClause $join */
+                    $join->on('products_to_stores.product_id', '=', 'products.product_id')
+                         ->where('products_to_stores.store_id', '=', $filter['store_id']);
+                }
+            );
+
+            if ($filter['keyword']) {
+                $tags = explode(' ', trim($filter['keyword']));
+                $query->where(
+                    function ($query) use ($filter, $tags, $db, $pt_table) {
+                        /** @var QueryBuilder $query */
+                        if (sizeof($tags) > 1) {
+                            $query->orWhereRaw("LCASE(".$pt_table.".tag) = '".$db->escape(trim($filter['keyword']))
+                                ."'");
+                        }
+                        foreach ($tags as $tag) {
+                            $query->orWhereRaw("LCASE(".$pt_table.".tag) = '".$db->escape(trim($tag))."'");
+                        }
+                    }
+                );
+
+                $query->orWhereRaw("LCASE(".$pd_table.".name) LIKE '%".$db->escape(mb_strtolower($filter['keyword']),
+                        true)."%'");
+                if ($filter['description']) {
+                    $query->orWhereRaw(
+                        "LCASE(".$pd_table.".description) LIKE '%".$db->escape(mb_strtolower($filter['keyword']), true)
+                        ."%'"
+                    );
+                }
+
+                if ($filter['model']) {
+                    $query->orWhereRaw(
+                        "LCASE(".$p_table.".model) LIKE '%".$db->escape(mb_strtolower($filter['keyword']), true)."%'"
+                    );
+                }
+            }
+
+            if ($filter['category_id']) {
+                $path = Category::getPath($filter['category_id'], 'id');
+                $category_ids = array_map('intval', explode('_', $path));
+                $query->join(
+                    "products_to_categories",
+                    function ($join) use ($category_ids) {
+                        /** @var JoinClause $join */
+                        $join->on('products.product_id', '=', 'products_to_categories.product_id')
+                             ->whereIn('products_to_categories.category_id', $category_ids);
+                    }
+                );
+            }
+
+            //show only enabled and available products for storefront!
+            if (ABC::env('IS_ADMIN') !== true) {
+                $query->where('products.date_available', '<=', Carbon::now()->toIso8601String());
+                $query->active('products');
+            }
+
+            $query->groupBy('products.product_id');
+
+            //NOTE: order by must be raw sql string
+            $sort_data = [
+                'name'          => "LCASE(".$pd_table.".name)",
+                'sort_order'    => $p_table.".sort_order",
+                'price'         => "final_price",
+                'special'       => "final_price",
+                'rating'        => "rating",
+                'date_modified' => $p_table.".date_modified",
+                'review'        => "review",
+            ];
+            $orderBy = $sort_data[$options['sort']] ? $sort_data[$options['sort']] : 'name';
+            if (isset($options['order']) && (strtoupper($options['order']) == 'DESC')) {
+                $sorting = "desc";
+            } else {
+                $sorting = "asc";
+            }
+            $query->orderByRaw($orderBy." ".$sorting);
+
+            //pagination
+            if (isset($options['start']) || isset($options['limit'])) {
+                if ($options['start'] < 0) {
+                    $options['start'] = 0;
+                }
+                if ($options['limit'] < 1) {
+                    $options['limit'] = 20;
+                }
+                $query->offset((int)$options['start'])->limit((int)$options['limit']);
+            }
+
+            //allow to extends this method from extensions
+            Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $options);
+            $cache = $query->get();
+            Registry::cache()->put($cacheKey, $cache);
+        }
+
+        return $cache;
+    }
 }

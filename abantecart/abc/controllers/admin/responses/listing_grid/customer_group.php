@@ -22,11 +22,13 @@ namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
 use abc\core\lib\AError;
+use abc\core\lib\AException;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
 use abc\models\customer\Customer;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 use stdClass;
-
 
 class ControllerResponsesListingGridCustomerGroup extends AController
 {
@@ -112,7 +114,7 @@ class ControllerResponsesListingGridCustomerGroup extends AController
                             return null;
                         }
 
-                        $customer_total = Customer::getCustomers(['filter' => ['customer_group_id' => $id]], 'total_only');
+                        $customer_total = Customer::getTotalCustomers(['filter' => ['customer_group_id' => $id]]);
                         if ($customer_total) {
                             $this->response->setOutput(sprintf($this->language->get('error_customer'),
                                 $customer_total));
@@ -137,9 +139,9 @@ class ControllerResponsesListingGridCustomerGroup extends AController
      * update only one field
      *
      * @return void
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function update_field()
     {

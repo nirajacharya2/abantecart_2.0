@@ -2,7 +2,6 @@
 
 namespace abc\tests\unit;
 
-use abc\models\catalog\Category;
 use abc\models\catalog\Product;
 use abc\models\catalog\ProductDiscount;
 use abc\models\catalog\ProductOption;
@@ -31,8 +30,9 @@ class TouchesTest extends ATestCase
 
     public function testCustomerTouches()
     {
-        $address = Address::find(1);
-        $now = time();
+
+        $address = Address::with('customer')->find(1);
+        $now = $address->customer->date_modified->timestamp;
         $address->touch();
         $customer = Customer::find($address->customer_id);
         $this->assertEquals($now, $customer->date_modified->timestamp);

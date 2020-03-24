@@ -69,10 +69,10 @@ class ControllerPagesIndexHome extends AController
                 $this->config->get('config_currency')
             )
         );
-        $this->view->assign('total_order', Order::getOrders([], 'total_only'));
+        $this->view->assign('total_order', Order::search(['mode' => 'total_only']));
 
         $this->view->assign('total_customer', Customer::getTotalCustomers());
-        $this->view->assign('total_customer_approval', Customer::getTotalCustomers(['filter' => ['approved' => 0 ]]));
+        $this->view->assign('total_customer_approval', Customer::getTotalCustomers(['filter' => ['approved' => 0]]));
 
         $this->loadModel('catalog/product');
         $this->view->assign('total_product', $this->model_catalog_product->getTotalProducts());
@@ -150,12 +150,15 @@ class ControllerPagesIndexHome extends AController
             'start' => 0,
             'limit' => 10,
         ];
-        $top_customers = Customer::getCustomers($filter);
+        $top_customers = Customer::search($filter)->toArray();
         foreach ($top_customers as $index => $customer) {
             $action = [];
             $action[] = [
                 'text' => $this->language->get('text_edit'),
-                'href' => $this->html->getSecureURL('sale/customer/update', '&customer_id='.$customer['customer_id']),
+                'href' => $this->html->getSecureURL(
+                    'sale/customer/update',
+                    '&customer_id='.$customer['customer_id']
+                ),
             ];
             $top_customers[$index]['action'] = $action;
         }
@@ -172,7 +175,7 @@ class ControllerPagesIndexHome extends AController
         $this->view->assign('orders_url', $this->html->getSecureURL('sale/order'));
         $this->view->assign('orders_text', $this->language->get('text_order'));
 
-        $results = Order::getOrders($filter)->toArray();
+        $results = Order::search($filter)->toArray();
         foreach ($results as $result) {
             $action = [];
             $action[] = [

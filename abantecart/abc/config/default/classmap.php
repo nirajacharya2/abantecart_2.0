@@ -26,6 +26,7 @@ use abc\core\lib\ACurrency;
 use abc\core\lib\UserResolver;
 use abc\core\view\AViewDefaultRender;
 use abc\modules\audit_log\AuditLogDbStorage;
+use abc\modules\injections\models\ModelSearch;
 use abc\modules\workers\FixCategoriesCounters;
 use Illuminate\Events\Dispatcher as EventDispatcher;
 use PhpAbac\AbacFactory;
@@ -64,6 +65,7 @@ return [
     'AdminCommands'     => AdminCommands::class,
     'AExceptionHandler' => AExceptionHandler::class,
     'AuditLogStorage'   => AuditLogDbStorage::class,
+    'ModelSearch'       => ModelSearch::class,
 
-    'FixCategoriesCounters' => FixCategoriesCounters::class
+    'FixCategoriesCounters' => FixCategoriesCounters::class,
 ];

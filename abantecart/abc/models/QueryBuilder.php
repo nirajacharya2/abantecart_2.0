@@ -30,15 +30,15 @@ class QueryBuilder extends Builder
     protected $cacheTags = [];
 
     /**
-    * Returns a Unique String that can identify this Query.
-    *
-    * @return string
-    */
+     * Returns a Unique String that can identify this Query.
+     *
+     * @return string
+     */
     protected function getCacheKey()
     {
-         return json_encode([
-             $this->toSql() => $this->getBindings()
-         ]);
+        return json_encode([
+            $this->toSql() => $this->getBindings(),
+        ]);
     }
 
     /**
@@ -62,8 +62,8 @@ class QueryBuilder extends Builder
         $output = $cache->remember(
             $this->getCacheKey(),
             $ttl,
-            function() {
-                 return parent::runSelect();
+            function () {
+                return parent::runSelect();
             },
             $this->cacheStore
         );
@@ -92,7 +92,7 @@ class QueryBuilder extends Builder
             }
 
             $this->offset((int)$data['start'])
-                ->limit((int)$data['limit']);
+                 ->limit((int)$data['limit']);
         }
 
         $this->whereNull('date_deleted');
@@ -105,12 +105,13 @@ class QueryBuilder extends Builder
      *
      * @return $this
      */
-    public function active($tableName = '') {
+    public function active($tableName = '')
+    {
         $fieldName = 'status';
         if (!empty($tableName)) {
             $fieldName = $tableName.'.'.$fieldName;
         }
-        $this->where($fieldName, '=',1);
+        $this->where($fieldName, '=', 1);
         return $this;
     }
 
@@ -128,6 +129,11 @@ class QueryBuilder extends Builder
      */
     public function useCache($tags, $store = '')
     {
+        //if cache disabled - returns query
+        if (!Registry::config()->get('config_cache_enable')) {
+            return $this;
+        }
+
         $this->cacheTags = $tags ? $tags : [];
         $this->cacheTags = is_string($this->cacheTags) ? [$this->cacheTags] : $this->cacheTags;
 

@@ -7,18 +7,28 @@ use abc\core\engine\Registry;
 use abc\core\lib\ADataEncryption;
 use abc\core\lib\ADB;
 use abc\core\lib\AEncryption;
+use abc\core\lib\AException;
 use abc\models\BaseModel;
 use abc\models\order\Order;
 use abc\models\order\OrderProduct;
 use abc\models\QueryBuilder;
 use abc\models\system\Audit;
 use abc\models\system\Store;
+use Carbon\Carbon;
+use Exception;
 use H;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Validation\Rule;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 /**
  * Class Customer
@@ -44,9 +54,9 @@ use Illuminate\Support\Collection;
  * @property int $customer_group_id
  * @property string $ip
  * @property array $data
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
- * @property \Carbon\Carbon $last_login
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
+ * @property Carbon $last_login
  *
  * @property Store $store
  * @property \Illuminate\Database\Eloquent\Collection $addresses
@@ -380,12 +390,43 @@ class Customer extends BaseModel
         ],
 
     ];
-//temporary disable softDeleting
-public function __construct(array $attributes = [])
-{
-    $this->forceDeleting = true;
-    parent::__construct($attributes);
-}
+    /**
+     * @var string
+     * @see Customer::getCustomers()
+     */
+    public static $searchMethod = 'getCustomers',
+        $searchParams = [
+        'filter' => [
+            'name',
+            'name_email',
+            'loginname',
+            'firstname',
+            'lastname',
+            'password',
+            'email',
+            'telephone',
+            'sms',
+            'customer_group_id',
+            'only_subscribers',
+            'all_subscribers',
+            'only_customers',
+            'only_with_mobile_phones',
+            'customer_id',
+            'include',
+            'exclude',
+            'status',
+            'approved',
+            'date_added',
+            'store_id',
+            //filtering for registered customers who bought product with ID
+            'product_id',
+        ],
+        //pagination
+        'sort',
+        'order',
+        'start',
+        'limit',
+    ];
 
     /** Wrap basic method to implement conditional rules
      *
@@ -394,9 +435,10 @@ public function __construct(array $attributes = [])
      * @param array $customAttributes
      *
      * @return bool|void
-     * @throws \Illuminate\Validation\ValidationException
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws ValidationException
+     * @throws ReflectionException
+     * @throws AException
+     * @throws InvalidArgumentException
      */
     public function validate(array $data = [], array $messages = [], array $customAttributes = [])
     {
@@ -411,7 +453,7 @@ public function __construct(array $attributes = [])
         $this->rules['loginname']['checks'][] = Rule::unique('customers', 'loginname')
                                                     ->ignore($this->customer_id, 'customer_id');
         $this->rules['email']['checks'][] = Rule::unique('customers', 'email')
-                                                    ->ignore($this->customer_id, 'customer_id');
+                                                ->ignore($this->customer_id, 'customer_id');
 
         //do merging to make required_without rule work
         if ($this->customer_id) {
@@ -524,8 +566,8 @@ public function __construct(array $attributes = [])
         ];
     }
 
-
-    public function SetEmailAttribute($value){
+    public function SetEmailAttribute($value)
+    {
         $this->attributes['email'] = mb_strtolower($value, ABC::env('APP_CHARSET'));
     }
 
@@ -563,7 +605,7 @@ public function __construct(array $attributes = [])
      * @param array $options
      *
      * @return bool
-     * @throws \abc\core\lib\AException
+     * @throws AException
      */
     public function save(array $options = [])
     {
@@ -602,7 +644,7 @@ public function __construct(array $attributes = [])
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function store()
     {
@@ -615,7 +657,7 @@ public function __construct(array $attributes = [])
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function addresses()
     {
@@ -623,7 +665,7 @@ public function __construct(array $attributes = [])
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function notifications()
     {
@@ -631,7 +673,7 @@ public function __construct(array $attributes = [])
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function transactions()
     {
@@ -639,7 +681,7 @@ public function __construct(array $attributes = [])
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function orders()
     {
@@ -647,7 +689,7 @@ public function __construct(array $attributes = [])
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     * @return MorphMany
      */
     public function audits()
     {
@@ -655,12 +697,12 @@ public function __construct(array $attributes = [])
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function approve()
     {
         if (!$this->hasPermission('write', ['approved'])) {
-            throw new \Exception('Permissions are restricted '.__CLASS__."::".__METHOD__."\n");
+            throw new Exception('Permissions are restricted '.__CLASS__."::".__METHOD__."\n");
         }
         $this->approved = 1;
         $this->save();
@@ -682,8 +724,7 @@ public function __construct(array $attributes = [])
      *
      * @param string $mode - can be quick(without orders_count), default, total_only(returns row count)
      *
-     * @return array|\Illuminate\Support\Collection|int
-     * @throws \abc\core\lib\AException
+     * @return array|Collection|int
      */
     public static function getCustomer($customer_id, $mode = 'quick')
     {
@@ -691,19 +732,29 @@ public function __construct(array $attributes = [])
         if (!$customer_id) {
             return [];
         }
-        $result = static::getCustomers(['filter' => ['include' => [$customer_id]]], $mode);
+        $result = static::search(
+            [
+                'filter' => [
+                    'include' => [
+                        $customer_id,
+                    ],
+                ],
+                'mode'   => $mode,
+            ]
+        );
         return $result[0];
     }
 
     /**
      * @param array $inputData
-     * @param string $mode
      *
      * @return Collection|int
-     * @throws \abc\core\lib\AException
+     * @throws AException
      */
-    public static function getCustomers($inputData = [], $mode = 'quick')
+    public static function getCustomers($inputData = [])
     {
+        $mode = (string)$inputData['mode'];
+        $mode = $mode ?: 'quick';
         /**
          * @var ADataEncryption $dcrypt
          */
@@ -740,9 +791,9 @@ public function __construct(array $attributes = [])
         /**
          * @var QueryBuilder $query
          */
-        if($mode != 'total_only'){
+        if ($mode != 'total_only') {
             $query = $customer->selectRaw($db->raw_sql_row_count().' '.$aliasC.'.*');
-        }else{
+        } else {
             $query = $customer->select();
         }
         $query->addSelect($select);
@@ -756,8 +807,10 @@ public function __construct(array $attributes = [])
         $filter = (isset($inputData['filter']) ? $inputData['filter'] : []);
 
         if (H::has_value($filter['name'])) {
-
-            $query->whereRaw("CONCAT(".$aliasC.".firstname, ' ', ".$aliasC.".lastname) LIKE '%".$db->escape($filter['name'])."%'");
+            $query->whereRaw(
+                "CONCAT(".$aliasC.".firstname, ' ', ".$aliasC.".lastname) LIKE '%"
+                .$db->escape($filter['name'])."%'"
+            );
         }
 
         if (H::has_value($filter['name_email'])) {
@@ -768,25 +821,31 @@ public function __construct(array $attributes = [])
         //more specific login, last and first name search
         if (H::has_value($filter['loginname'])) {
             if ($filter['search_operator'] == 'equal') {
-                $query->whereRaw("LOWER(".$aliasC.".loginname) =  '".$db->escape(mb_strtolower($filter['loginname']))."'");
+                $query->whereRaw("LOWER(".$aliasC.".loginname) =  '".$db->escape(mb_strtolower($filter['loginname']))
+                    ."'");
             } else {
-                $query->whereRaw("LOWER(".$aliasC.".loginname) LIKE '%".$db->escape(mb_strtolower($filter['loginname']))."%'");
+                $query->whereRaw("LOWER(".$aliasC.".loginname) LIKE '%".$db->escape(mb_strtolower($filter['loginname']))
+                    ."%'");
             }
         }
 
         if (H::has_value($filter['firstname'])) {
             if ($filter['search_operator'] == 'equal') {
-                $query->whereRaw("LOWER(".$aliasC.".firstname) =  '".$db->escape(mb_strtolower($filter['firstname']))."'");
+                $query->whereRaw("LOWER(".$aliasC.".firstname) =  '".$db->escape(mb_strtolower($filter['firstname']))
+                    ."'");
             } else {
-                $query->whereRaw("LOWER(".$aliasC.".firstname) LIKE '".$db->escape(mb_strtolower($filter['firstname']))."%'");
+                $query->whereRaw("LOWER(".$aliasC.".firstname) LIKE '".$db->escape(mb_strtolower($filter['firstname']))
+                    ."%'");
             }
         }
 
         if (H::has_value($filter['lastname'])) {
             if ($filter['search_operator'] == 'equal') {
-                $query->whereRaw("LOWER(".$aliasC.".lastname) =  '".$db->escape(mb_strtolower($filter['lastname']))."'");
+                $query->whereRaw("LOWER(".$aliasC.".lastname) =  '".$db->escape(mb_strtolower($filter['lastname']))
+                    ."'");
             } else {
-                $query->whereRaw("LOWER(".$aliasC.".lastname) LIKE '".$db->escape(mb_strtolower($filter['lastname']))."%'");
+                $query->whereRaw("LOWER(".$aliasC.".lastname) LIKE '".$db->escape(mb_strtolower($filter['lastname']))
+                    ."%'");
             }
         }
 
@@ -805,27 +864,41 @@ public function __construct(array $attributes = [])
             );
         }
 
+        if ($filter['product_id']) {
+            $query->join('orders', function ($join) {
+                /** @var JoinClause $join */
+                $join->on('orders.customer_id', '=', 'customers.customer_id');
+            });
+            $query->join('order_products', function ($join) use ($filter) {
+                /** @var JoinClause $join */
+                $join->on('orders.order_id', '=', 'order_products.order_id')
+                     ->where('order_products.product_id', '=', (int)$filter['product_id']);
+            });
+            $query->where('orders.order_status_id', '>', 0)
+                  ->distinct();
+        }
+
         //select differently if encrypted
         if (!$dcrypt->active) {
             if (H::has_value($filter['email'])) {
                 $emails = (array)$filter['email'];
-                $query->where(function ($query) use ($emails, $filter) {
+                $query->where(function ($query) use ($emails, $filter, $db) {
                     /** @var QueryBuilder $query */
                     foreach ($emails as $email) {
                         if ($filter['search_operator'] == 'equal') {
-                            $query->orWhere('customers.email', '=', mb_strtolower($email));
+                            $query->orWhere('customers.email', '=', $db->escape(mb_strtolower($email)));
                         } else {
-                            $query->orWhere('customers.email', 'like', "%".mb_strtolower($email)."%");
+                            $query->orWhere('customers.email', 'LIKE', "%".$db->escape(mb_strtolower($email)."%"));
                         }
                     }
                 });
             }
 
             if (H::has_value($filter['telephone'])) {
-                $query->where('customers.telephone', 'like', "%".$db->escape($filter['telephone'])."%");
+                $query->where('customers.telephone', 'LIKE', "%".$db->escape($filter['telephone'])."%");
             }
             if (H::has_value($filter['sms'])) {
-                $query->where('customers.sms', 'like', "%".$db->escape($filter['sms'])."%");
+                $query->where('customers.sms', 'LIKE', "%".$db->escape($filter['sms'])."%");
             }
         }
 
@@ -835,7 +908,7 @@ public function __construct(array $attributes = [])
         // select only subscribers (group + customers with subscription)
         $subscriberGroupId = CustomerGroup::where('name', '=', self::SUBSCRIBERS_GROUP_NAME)
                                           ->first()
-                                          ->customer_group_id;
+            ->customer_group_id;
 
         if (H::has_value($filter['only_subscribers'])) {
             $query->where(function ($query) use ($subscriberGroupId) {
@@ -906,7 +979,7 @@ public function __construct(array $attributes = [])
         if (($filter['all_subscribers'] || $filter['only_subscribers']) && $filter['newsletter_protocol']) {
             $query->join('customer_notifications',
                 function ($join) use ($filter) {
-                /** @var JoinClause $join */
+                    /** @var JoinClause $join */
                     $join->on('customer_notifications.customer_id', '=', 'customers.customer_id')
                          ->where('customer_notifications.sendpoint', '=', 'newsletter');
                 });
@@ -921,7 +994,7 @@ public function __construct(array $attributes = [])
         //If for total, we done building the query
         if ($mode == 'total_only' && !$dcrypt->active) {
             //allow to extends this method from extensions
-            Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query, $inputData);
+            Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $inputData);
             $result = $query->first();
             return (int)$result->total;
         }
@@ -965,7 +1038,7 @@ public function __construct(array $attributes = [])
             }
         }
         //allow to extends this method from extensions
-        Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query, $inputData);
+        Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $inputData);
 
         if ($filter['include'] && count($filter['include']) == 1) {
             //do not use cache when only one customer were asked
@@ -975,8 +1048,7 @@ public function __construct(array $attributes = [])
         }
 
         $result_rows = $query->get();
-
-//???? TODO need to check when encrypted
+        //TODO need to check when encrypted
         if ($result_rows->count() && $dcrypt->active) {
 
             if (H::has_value($filter['email'])) {
@@ -1004,23 +1076,23 @@ public function __construct(array $attributes = [])
         return $result_rows;
     }
 
-
     /**
      * @param array $data
      *
      * @return Collection|int
-     * @throws \abc\core\lib\AException
      */
     public static function getTotalCustomers($data = [])
     {
-        return static::getCustomers($data, 'total_only');
+        /** @see Customer::getCustomers() */
+        $data['mode'] = 'total_only';
+        return static::search($data);
     }
 
     /**
      * @param array $settings
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function saveCustomerNotificationSettings($settings = [])
     {
@@ -1042,8 +1114,8 @@ public function __construct(array $attributes = [])
             }
             foreach ($im_protocols as $protocol) {
                 $update[$sendpoint][$protocol] = isset($settings[$sendpoint][$protocol])
-                                                ? (int)$settings[$sendpoint][$protocol]
-                                                : 0;
+                    ? (int)$settings[$sendpoint][$protocol]
+                    : 0;
             }
         }
 
@@ -1079,8 +1151,8 @@ public function __construct(array $attributes = [])
     /**
      * @param int $product_id
      *
-     * @return array|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|Collection
-     * @throws \abc\core\lib\AException
+     * @return array|Builder[]|\Illuminate\Database\Eloquent\Collection|Collection
+     * @throws AException
      */
     public static function getCustomersByProduct($product_id)
     {
@@ -1115,7 +1187,7 @@ public function __construct(array $attributes = [])
               ->distinct();
 
         //allow to extends this method from extensions
-        Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
+        Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query);
 
         $result_rows = $query->useCache('customer')->get();
 
@@ -1152,7 +1224,7 @@ public function __construct(array $attributes = [])
             $query->where('customer_id', '<>', $customer_id);
         }
         //allow to extends this method from extensions
-        Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
+        Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query);
         return !($query->get()->count());
     }
 

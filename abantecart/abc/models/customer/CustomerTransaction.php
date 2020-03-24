@@ -6,8 +6,11 @@ use abc\core\engine\Registry;
 use abc\core\lib\ADB;
 use abc\models\BaseModel;
 use abc\models\QueryBuilder;
+use Carbon\Carbon;
+use Exception;
 use H;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 
 /**
  * Class CustomerTransaction
@@ -22,12 +25,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $transaction_type
  * @property string $comment
  * @property string $description
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
  *
  * @property Customer $customer
  *
  * @method static CustomerTransaction find(int $customer_transaction_id) CustomerTransaction
+ * @method static CustomerTransaction UpdateOrCreate(array $data) CustomerTransaction
+ * @method static CustomerTransaction create(array $data) CustomerTransaction
  * @method static QueryBuilder where(mixed $conditions, string $condition = null, mixed $value = null)
  * @method static QueryBuilder select(mixed $fields)
  * @method static CustomerTransaction firstOrCreate(array $attributes, array $values = []) QueryBuilder
@@ -216,7 +221,7 @@ class CustomerTransaction extends BaseModel
      * @param array $options
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function save(array $options = [])
     {
@@ -256,7 +261,7 @@ class CustomerTransaction extends BaseModel
      * @param $data
      * @param string $mode
      *
-     * @return \Illuminate\Support\Collection | integer
+     * @return Collection | integer
      */
     public static function getTransactions($data, $mode = 'default')
     {
@@ -393,8 +398,7 @@ class CustomerTransaction extends BaseModel
                      ->useCache('customer_transaction');
         //allow to extends this method from extensions
         Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
-        $result_rows = $query->get();
-        return $result_rows;
+        return $query->get();
     }
 
 }

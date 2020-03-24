@@ -76,13 +76,13 @@ class ControllerApiCustomerSearch extends AControllerAPI
 
         if (!$data['store_id'] && H::has_value($this->session->data['current_store_id'])) {
             $data['store_id'] = (int)$this->session->data['current_store_id'];
-        }else {
+        } else {
             $this->load->model('setting/store');
         }
         if (!$data['store_id'] && !$this->model_setting_store->isDefaultStore()) {
             $data['store_id'] = $this->config->get('config_store_id');
         }
-        $results = Customer::getCustomers($data);
+        $results = Customer::search($data);
 
         $total = $results[0]['total_num_rows'];
         if ($total > 0) {
@@ -97,9 +97,7 @@ class ControllerApiCustomerSearch extends AControllerAPI
         $response->total = $total_pages;
         $response->records = $total;
 
-
         $i = 0;
-
         if ($results) {
             foreach ($results as $result) {
                 $response->rows[$i]['id'] = $result['customer_id'];

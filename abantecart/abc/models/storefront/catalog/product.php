@@ -21,10 +21,14 @@
 namespace abc\models\storefront;
 
 use abc\core\ABC;
+use abc\core\lib\AException;
 use abc\core\lib\APromotion;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Model;
 use abc\models\catalog\Category;
+use Exception;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 class ModelCatalogProduct extends Model
 {
@@ -33,32 +37,32 @@ class ModelCatalogProduct extends Model
         [
             'column'   => 'p.date_available',
             'operator' => '<=',
-            'value'    => 'NOW()'
+            'value'    => 'NOW()',
         ],
         [
             'column'   => 'p.status',
             'operator' => '=',
-            'value'    => '1'
+            'value'    => '1',
         ],
     ];
 
-    protected function getProductFilters(){
+    protected function getProductFilters()
+    {
 
         $output = [];
 
-        foreach($this->filter as $f){
+        foreach ($this->filter as $f) {
             $output[] = $f['column'].$f['operator'].$f['value'];
         }
 
         return $output ? implode(' AND ', $output) : ' 1=1 ';
     }
 
-
     /**
      * @param int $product_id
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getProduct($product_id)
     {
@@ -91,7 +95,7 @@ class ModelCatalogProduct extends Model
      * @param int $product_id
      *
      * @return int
-     * @throws \Exception
+     * @throws Exception
      */
     public function isStockTrackable($product_id)
     {
@@ -125,13 +129,13 @@ class ModelCatalogProduct extends Model
     /**
      * Returns array with stock information
      *
-     * @since 1.2.7
-     *
      * @param array $product_ids
      *
      * @return array
-     * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws Exception
+     * @throws InvalidArgumentException
+     * @since 1.2.7
+     *
      */
     public function getProductsStockInfo($product_ids = [])
     {
@@ -189,54 +193,54 @@ class ModelCatalogProduct extends Model
      * @param int $product_id
      *
      * @return int|true - integer as quantity, true as availability when tracking stock is off
-     * @throws \Exception
+     * @throws Exception
      */
     public function hasAnyStock($product_id)
-        {
-            if (!(int)$product_id) {
-                return 0;
-            }
-            $trackable = false;
-            $total_quantity = 0;
-            //check product option values
-            $query = $this->db->query("SELECT pov.quantity AS quantity, pov.subtract
+    {
+        if (!(int)$product_id) {
+            return 0;
+        }
+        $trackable = false;
+        $total_quantity = 0;
+        //check product option values
+        $query = $this->db->query("SELECT pov.quantity AS quantity, pov.subtract
     									FROM ".$this->db->table_name("product_options")." po
     									LEFT JOIN ".$this->db->table_name("product_option_values")." pov
     										ON (po.product_option_id = pov.product_option_id)
     									WHERE po.product_id = '".(int)$product_id."' AND po.status = 1");
-            if ($query->num_rows) {
-                foreach ($query->rows as $row) {
-                    //if tracking of stock disabled - set quantity as big
-                    if (!$row['subtract']) {
-                        $total_quantity = true;
-                        continue;
-                    }else{
-                        $trackable = true;
-                    }
-                    //calculate only if have no options without tracking
-                    if($total_quantity !== true) {
-                        $total_quantity += $row['quantity'] < 0 ? 0 : $row['quantity'];
-                    }
-                }
-                //if some of option value have subtract NO - think product is available
-                if ($total_quantity == 0 && !$trackable) {
+        if ($query->num_rows) {
+            foreach ($query->rows as $row) {
+                //if tracking of stock disabled - set quantity as big
+                if (!$row['subtract']) {
                     $total_quantity = true;
+                    continue;
+                } else {
+                    $trackable = true;
+                }
+                //calculate only if have no options without tracking
+                if ($total_quantity !== true) {
+                    $total_quantity += $row['quantity'] < 0 ? 0 : $row['quantity'];
                 }
             }
+            //if some of option value have subtract NO - think product is available
+            if ($total_quantity == 0 && !$trackable) {
+                $total_quantity = true;
+            }
+        }
 
-            if(!$trackable) {
-                //get product quantity without options
-                $query = $this->db->query("SELECT quantity, subtract
+        if (!$trackable) {
+            //get product quantity without options
+            $query = $this->db->query("SELECT quantity, subtract
     										FROM ".$this->db->table_name("products")." p
     										WHERE p.product_id = '".(int)$product_id."'");
-                if($query->row['subtract']) {
-                    $total_quantity = (int)$query->row['quantity'];
-                }else{
-                    $total_quantity = true;
-                }
+            if ($query->row['subtract']) {
+                $total_quantity = (int)$query->row['quantity'];
+            } else {
+                $total_quantity = true;
             }
-            return $total_quantity;
         }
+        return $total_quantity;
+    }
 
     public function getProductDataForCart($product_id)
     {
@@ -274,24 +278,24 @@ class ModelCatalogProduct extends Model
      * @param int $limit
      *
      * @return array
-     * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws Exception
+     * @throws InvalidArgumentException
      */
     public function getProductsByCategoryId(
         $category_id,
         $sort = 'p.sort_order',
         $order = 'ASC',
         $start = 0,
-        $limit = 20)
-    {
+        $limit = 20
+    ) {
         $store_id = (int)$this->config->get('config_store_id');
         $language_id = (int)$this->config->get('storefront_language_id');
         $filters = $this->getProductFilters();
 
         $cache_key = 'product.listing.products_category.'
-                    .(int)$category_id
-                    .'.store_'.$store_id
-                    .'_'.md5($filters.$sort.$order.$start.$limit.$language_id);
+            .(int)$category_id
+            .'.store_'.$store_id
+            .'_'.md5($filters.$sort.$order.$start.$limit.$language_id);
         $cache = $this->cache->get($cache_key);
         if ($cache === null) {
             //get all children categories
@@ -353,8 +357,8 @@ class ModelCatalogProduct extends Model
      * @param int $category_id
      *
      * @return int
-     * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws Exception
+     * @throws InvalidArgumentException
      */
     public function getTotalProductsByCategoryId($category_id = 0)
     {
@@ -362,9 +366,9 @@ class ModelCatalogProduct extends Model
 
         $filters = $this->getProductFilters();
         $cache_key = 'product.listing.products_by_category.'
-                        .(int)$category_id
-                        .'.store_'.$store_id
-                        .'_'.md5($filters);
+            .(int)$category_id
+            .'.store_'.$store_id
+            .'_'.md5($filters);
         $cache = $this->cache->get($cache_key);
         if ($cache === null) {
             //get all children category ids
@@ -380,7 +384,7 @@ class ModelCatalogProduct extends Model
                         p2c.category_id in (".$categList.")
                         AND ".$filters."
                         AND p2s.store_id = '".$store_id."'";
-            $query = $this->db->query( $sql );
+            $query = $this->db->query($sql);
 
             $cache = $query->row['total'];
             $this->cache->put($cache_key, $cache);
@@ -397,15 +401,15 @@ class ModelCatalogProduct extends Model
      * @param int $limit
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getProductsByManufacturerId(
         $manufacturer_id,
         $sort = 'p.sort_order',
         $order = 'ASC',
         $start = 0,
-        $limit = 20)
-    {
+        $limit = 20
+    ) {
         if (!(int)$manufacturer_id) {
             return [];
         }
@@ -458,7 +462,7 @@ class ModelCatalogProduct extends Model
      * @param int $manufacturer_id
      *
      * @return int
-     * @throws \Exception
+     * @throws Exception
      */
     public function getTotalProductsByManufacturerId($manufacturer_id = 0)
     {
@@ -479,7 +483,7 @@ class ModelCatalogProduct extends Model
      * @param int $limit
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getProductsByTag(
         $tag,
@@ -488,7 +492,7 @@ class ModelCatalogProduct extends Model
         $order = 'ASC',
         $start = 0,
         $limit = 20
-    ){
+    ) {
         if ($tag) {
             $sql = "SELECT *, p.product_id,
                             ".$this->sqlFinalPriceString().",
@@ -579,9 +583,9 @@ class ModelCatalogProduct extends Model
      * @param int $limit
      *
      * @return array
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function getProductsByKeyword(
         $keyword,
@@ -592,7 +596,7 @@ class ModelCatalogProduct extends Model
         $order = 'ASC',
         $start = 0,
         $limit = 20
-    ){
+    ) {
         //trim keyword
         $keyword = trim($keyword);
         if ($keyword) {
@@ -701,9 +705,9 @@ class ModelCatalogProduct extends Model
      * @param bool $model
      *
      * @return int
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function getTotalProductsByKeyword($keyword, $category_id = 0, $description = false, $model = false)
     {
@@ -775,9 +779,9 @@ class ModelCatalogProduct extends Model
      * @param int $category_id
      *
      * @return int
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function getTotalProductsByTag($tag, $category_id = 0)
     {
@@ -834,9 +838,9 @@ class ModelCatalogProduct extends Model
      * @param int $category_id
      *
      * @return string
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function getPath($category_id)
     {
@@ -853,17 +857,17 @@ class ModelCatalogProduct extends Model
      * @param int $limit
      *
      * @return array
-     * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws Exception
+     * @throws InvalidArgumentException
      */
     public function getLatestProducts($limit)
     {
         $limit = (int)$limit;
         $filters = $this->getProductFilters();
         $cache_key = 'product.latest.'
-                    .'.store_'.(int)$this->config->get('config_store_id')
-                    .'_lang_'.$this->config->get('storefront_language_id')
-                    .'_'.md5($filters.$limit);
+            .'.store_'.(int)$this->config->get('config_store_id')
+            .'_lang_'.$this->config->get('storefront_language_id')
+            .'_'.md5($filters.$limit);
         $cache = $this->cache->get($cache_key);
 
         if ($cache === null) {
@@ -896,7 +900,7 @@ class ModelCatalogProduct extends Model
      * @param int $limit
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getPopularProducts($limit = 0)
     {
@@ -924,8 +928,8 @@ class ModelCatalogProduct extends Model
      * @param $options
      *
      * @return array
-     * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws Exception
+     * @throws InvalidArgumentException
      */
     public function getFeaturedProducts($options)
     {
@@ -938,8 +942,8 @@ class ModelCatalogProduct extends Model
         $language_id = (int)$this->config->get('storefront_language_id');
         $store_id = (int)$this->config->get('config_store_id');
         $cache_key = 'product.featured.store_'.$store_id
-                    .'_lang_'.$language_id
-                    .md5($limit.$order.$start.$sort.$total);
+            .'_lang_'.$language_id
+            .md5($limit.$order.$start.$sort.$total);
         $product_data = $this->cache->get($cache_key);
         if ($product_data === null) {
             $sql = "SELECT pd.*, ss.name AS stock, p.*
@@ -989,7 +993,7 @@ class ModelCatalogProduct extends Model
 
             $query = $this->db->query($sql);
             if ($query->num_rows) {
-                $product_data=[];
+                $product_data = [];
                 foreach ($query->rows as $result) {
                     $product_data[$result['product_id']] = $result;
                 }
@@ -1003,8 +1007,8 @@ class ModelCatalogProduct extends Model
      * @param $options
      *
      * @return array
-     * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws Exception
+     * @throws InvalidArgumentException
      */
     public function getBestSellerProducts($options)
     {
@@ -1018,12 +1022,12 @@ class ModelCatalogProduct extends Model
         $store_id = (int)$this->config->get('config_store_id');
         $filters = $this->getProductFilters();
         $cache_key = 'product.bestseller.'
-                    .'.store_'.$store_id
-                    .'_lang_'.$language_id
-                    .'_'.md5($filters.$limit.$order.$start.$sort.$total);
+            .'.store_'.$store_id
+            .'_lang_'.$language_id
+            .'_'.md5($filters.$limit.$order.$start.$sort.$total);
 
         $product_data = $this->cache->get($cache_key);
-        if ($product_data === null ) {
+        if ($product_data === null) {
             $product_data = [];
 
             $sql = "SELECT op.product_id, SUM(op.quantity) AS total
@@ -1087,7 +1091,7 @@ class ModelCatalogProduct extends Model
                     $product_query = $this->db->query($sql);
 
                     if ($product_query->num_rows) {
-                        $product_data=[];
+                        $product_data = [];
                         foreach ($product_query->rows as $result) {
                             $product_data[$result['product_id']] = $result;
                         }
@@ -1107,7 +1111,7 @@ class ModelCatalogProduct extends Model
      * @param int $product_id
      *
      * @return null
-     * @throws \Exception
+     * @throws Exception
      */
     public function updateViewed($product_id)
     {
@@ -1127,7 +1131,7 @@ class ModelCatalogProduct extends Model
      * @param int $status
      *
      * @return null
-     * @throws \Exception
+     * @throws Exception
      */
     public function updateStatus($product_id, $status = 0)
     {
@@ -1151,7 +1155,7 @@ class ModelCatalogProduct extends Model
      * @param $option_value_id
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getProductGroupOptions($product_id, $option_id, $option_value_id)
     {
@@ -1218,7 +1222,7 @@ class ModelCatalogProduct extends Model
      * @param int $product_id
      *
      * @return boolean
-     * @throws \Exception
+     * @throws Exception
      */
     public function hasAnyOptions($product_id)
     {
@@ -1241,8 +1245,8 @@ class ModelCatalogProduct extends Model
      * @param int $product_id
      *
      * @return array
-     * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws Exception
+     * @throws InvalidArgumentException
      */
     public function getProductOptions($product_id)
     {
@@ -1286,7 +1290,7 @@ class ModelCatalogProduct extends Model
                                 $attribute_values[] = $product_option_value['attribute_value_id'];
                             }
                             $pd_opt_val_description_qr = $this->db->query(
-                            "SELECT *
+                                "SELECT *
                             FROM ".$this->db->table_name("product_option_value_descriptions")."
                             WHERE product_option_value_id = '".(int)$product_option_value['product_option_value_id']."'
                                 AND language_id = '".(int)$language_id."'"
@@ -1308,7 +1312,7 @@ class ModelCatalogProduct extends Model
                                     'error_text'              => $product_option['error_text'],
                                     'settings'                => $product_option['settings'],
                                     'children_options_names'  =>
-                                            $pd_opt_val_description_qr->row['children_options_names'],
+                                        $pd_opt_val_description_qr->row['children_options_names'],
                                     'sku'                     => $product_option_value['sku'],
                                     'price'                   => $product_option_value['price'],
                                     'prefix'                  => $product_option_value['prefix'],
@@ -1357,7 +1361,7 @@ class ModelCatalogProduct extends Model
      * @param int $product_option_id
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getProductOption($product_id, $product_option_id)
     {
@@ -1382,7 +1386,7 @@ class ModelCatalogProduct extends Model
      * @param $product_option_id
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getProductOptionValues($product_id, $product_option_id)
     {
@@ -1404,7 +1408,7 @@ class ModelCatalogProduct extends Model
      * @param int $product_option_value_id
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getProductOptionValue($product_id, $product_option_value_id)
     {
@@ -1440,8 +1444,8 @@ class ModelCatalogProduct extends Model
      * @param array $input_options
      *
      * @return array
-     * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws Exception
+     * @throws InvalidArgumentException
      */
     public function validateProductOptions($product_id, $input_options)
     {
@@ -1462,8 +1466,8 @@ class ModelCatalogProduct extends Model
                 }
 
                 if ($option['regexp_pattern']
-                        && !preg_match($option['regexp_pattern'], (string)$input_options[$option['product_option_id']])
-                ){
+                    && !preg_match($option['regexp_pattern'], (string)$input_options[$option['product_option_id']])
+                ) {
                     $errors[] = $option['name'].': '.$option['error_text'];
                 }
 
@@ -1477,7 +1481,7 @@ class ModelCatalogProduct extends Model
      * @param int $product_id
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getProductTags($product_id)
     {
@@ -1496,7 +1500,7 @@ class ModelCatalogProduct extends Model
      * @param int $product_id
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getProductDownloads($product_id)
     {
@@ -1521,7 +1525,7 @@ class ModelCatalogProduct extends Model
      * @param int $product_id
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getProductRelated($product_id)
     {
@@ -1556,23 +1560,23 @@ class ModelCatalogProduct extends Model
         return $product_data;
     }
 
-    /**
-     * @param int $product_id
-     *
-     * @return array
-     * @throws \Exception
-     */
-    public function getCategories($product_id)
-    {
-        if (!(int)$product_id) {
-            return [];
-        }
-        $query = $this->db->query("SELECT *
-                                    FROM ".$this->db->table_name("products_to_categories")."
-                                    WHERE product_id = '".(int)$product_id."'");
-
-        return $query->rows;
-    }
+//    /**
+//     * @param int $product_id
+//     *
+//     * @return array
+//     * @throws \Exception
+//     */
+//    public function getCategories($product_id)
+//    {
+//        if (!(int)$product_id) {
+//            return [];
+//        }
+//        $query = $this->db->query("SELECT *
+//                                    FROM ".$this->db->table_name("products_to_categories")."
+//                                    WHERE product_id = '".(int)$product_id."'");
+//
+//        return $query->rows;
+//    }
 
     protected function sqlAvgRatingString()
     {
@@ -1656,10 +1660,10 @@ class ModelCatalogProduct extends Model
         $language_id = (int)$this->config->get('storefront_language_id');
         $store_id = (int)$this->config->get('config_store_id');
         $cache_key = 'product.all_info.'
-                    .md5(implode('', $products)).'.'
-                    .$customer_group_id
-                    .'.store_'.$store_id
-                    .'_lang_'.$language_id;
+            .md5(implode('', $products)).'.'
+            .$customer_group_id
+            .'.store_'.$store_id
+            .'_lang_'.$language_id;
 
         $output = $this->cache->get($cache_key);
         // if no cache
@@ -1783,20 +1787,21 @@ class ModelCatalogProduct extends Model
      *
      * @return array
      */
-    public function getProductsByIds($ids = []){
+    public function getProductsByIds($ids = [])
+    {
         $ids = (array)$ids;
         $product_ids = [];
-        foreach($ids as $id){
+        foreach ($ids as $id) {
             $id = (int)$id;
-            if($id){
+            if ($id) {
                 $product_ids[] = $id;
             }
         }
-        if(!$product_ids){
+        if (!$product_ids) {
             return [];
         }
 
-        return $this->getProducts(['subsql_filter' => " p.product_id IN ('".implode("', '",$product_ids)."') "]);
+        return $this->getProducts(['subsql_filter' => " p.product_id IN ('".implode("', '", $product_ids)."') "]);
     }
 
     public function getProducts($data = [], $mode = 'default')
@@ -1980,8 +1985,8 @@ class ModelCatalogProduct extends Model
      * @param int $limit
      *
      * @return array
-     * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws Exception
+     * @throws InvalidArgumentException
      */
     public function getProductSpecials($sort = 'p.sort_order', $order = 'ASC', $start = 0, $limit = 0)
     {

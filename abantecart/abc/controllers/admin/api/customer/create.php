@@ -40,33 +40,33 @@ class ControllerApiCustomerCreate extends AControllerAPI
 
         $request = $this->rest->getRequestParams();
 
-        if (!\H::has_value($request['firstname'])) {
+        if (!H::has_value($request['firstname'])) {
             $this->rest->setResponseData(['Error' => 'Customer first name is missing']);
             $this->rest->sendResponse(200);
             return;
         }
 
-        if (!\H::has_value($request['lastname'])) {
+        if (!H::has_value($request['lastname'])) {
             $this->rest->setResponseData(['Error' => 'Customer last name is missing']);
             $this->rest->sendResponse(200);
             return;
         }
 
-        if (!\H::has_value($request['email'])) {
+        if (!H::has_value($request['email'])) {
             $this->rest->setResponseData(['Error' => 'Customer email is missing']);
             $this->rest->sendResponse(200);
             return;
         }
 
         //check if customer exists.
-        $result = Customer::getCustomers(['filter' => ['email' => $request['email']]], 'total_only');
+        $result = Customer::getTotalCustomers(['filter' => ['email' => $request['email']]]);
         if ($result) {
             $this->rest->setResponseData(['Error' => "Customer with email {$request['email']} already exists."]);
             $this->rest->sendResponse(200);
             return;
         }
         //check if login is unique
-        $request['loginname'] = isset($request['loginname']) ? $request['loginname'] : $request['email'];
+        $request['loginname'] = $request['loginname'] ?? $request['email'];
         if (!Customer::isUniqueLoginname($request['loginname'])) {
             $this->rest->setResponseData(
                 ['Error' => "Customer with loginname {$request['loginname']} already exists."]
@@ -77,8 +77,8 @@ class ControllerApiCustomerCreate extends AControllerAPI
 
         //create customer first
         $request['customer_group_id'] = isset($request['customer_group_id'])
-                                        ? $request['customer_group_id']
-                                        : self::DEFAULT_GROUP;
+            ? $request['customer_group_id']
+            : self::DEFAULT_GROUP;
 
         $request['approved'] = isset($request['approved']) ? $request['approved'] : self::APPROVAL;
 
