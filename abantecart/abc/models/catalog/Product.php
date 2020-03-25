@@ -93,6 +93,7 @@ use ReflectionException;
  * @method static WithFinalPrice(int $customer_group_id, Carbon $toDate = null) - adds "final_price" column into selected fields
  * @method static WithReviewCount(bool $only_enabled = true) - adds "review_count" column into selected fields
  * @method static WithAvgRating(bool $only_enabled = true) - adds "rating" column into selected fields
+ * @method static WithStockInfo() - adds "stock_tracking" and quantity in the stock columns into selected fields
  *
  * @package abc\models
  */
@@ -1072,13 +1073,32 @@ class Product extends BaseModel
      */
     public static function scopeWithAvgRating($builder, $only_enabled = true)
     {
-        $sql = " ( SELECT AVG(rw.review_id)
-                 FROM ".Registry::db()->table_name("reviews")." rw
-                 WHERE ".Registry::db()->table_name("products").".product_id = rw.product_id";
+        $db = Registry::db();
+        $sql = " ( SELECT ROUND(AVG(rw.rating))
+                 FROM ".$db->table_name("reviews")." rw
+                 WHERE ".$db->table_name("products").".product_id = rw.product_id";
         if ($only_enabled) {
             $sql .= " AND status = 1 ";
         }
         $sql .= "GROUP BY rw.product_id) AS rating ";
+        $builder->selectRaw($sql);
+    }
+
+    /**
+     * @param QueryBuilder $builder
+     */
+    public static function scopeWithStockInfo($builder)
+    {
+        $db = Registry::db();
+        $sql = "(SELECT CASE WHEN COALESCE(".$db->table_name('products').".subtract,0) + SUM(COALESCE(pov.subtract,0)) > 0 THEN 1 ELSE 0 END
+                FROM ".$db->table_name("product_option_values")." pov
+                WHERE pov.product_id = ".$db->table_name('products').".product_id
+                GROUP BY pov.product_id) as subtract";
+        $builder->selectRaw($sql);
+        $sql = "(SELECT COALESCE(".$db->table_name('products').".quantity,0) + SUM(COALESCE(pov.quantity,0))
+                FROM ".$db->table_name("product_option_values")." pov
+                WHERE pov.product_id = ".$db->table_name('products').".product_id 
+                GROUP BY pov.product_id) as quantity ";
         $builder->selectRaw($sql);
     }
 
@@ -2598,14 +2618,14 @@ class Product extends BaseModel
         return $option_data;
     }
 
-    public static function getProducts(array $options = [])
+    public static function getProducts(array $params = [])
     {
-        $options['sort'] = $options['sort'] ?? 'products.sort_order';
-        $options['order'] = $options['order'] ?? 'ASC';
-        $options['start'] = $options['start'] > 0 ? $options['start'] : 0;
-        $options['limit'] = $options['limit'] >= 1 ? $options['limit'] : 20;
+        $params['sort'] = $params['sort'] ?? 'products.sort_order';
+        $params['order'] = $params['order'] ?? 'ASC';
+        $params['start'] = $params['start'] > 0 ? $params['start'] : 0;
+        $params['limit'] = $params['limit'] >= 1 ? $params['limit'] : 20;
 
-        $filter = (array)$options['filter'];
+        $filter = (array)$params['filter'];
         $filter['category_id'] = $filter['category_id'] ?? 0;
         $filter['description'] = $filter['description'] ?? false;
         $filter['model'] = $filter['model'] ?? false;
@@ -2626,7 +2646,7 @@ class Product extends BaseModel
         }
 
         $cacheKey = 'product.list.'
-            .md5(var_export($options, true))
+            .md5(var_export($params, true))
             .'_side_'.(int)ABC::env('IS_ADMIN');
         $cache = Registry::cache()->get($cacheKey);
 
@@ -2640,9 +2660,27 @@ class Product extends BaseModel
 
             /** @var Product|QueryBuilder $query */
             $query = self::selectRaw(Registry::db()->raw_sql_row_count().' '.$p_table.'.*');
-            $query->WithFinalPrice($filter['customer_group_id']);
-            $query->WithReviewCount($filter['only_enabled']);
-            $query->WithAvgRating($filter['only_enabled']);
+
+            if ($params['with_final_price']) {
+                /** @see Product::scopeWithFinalPrice() */
+                $query->WithFinalPrice($filter['customer_group_id']);
+            }
+
+            if ($params['with_review_count']) {
+                /** @see Product::scopeWithReviewCount() */
+                $query->WithReviewCount($filter['only_enabled']);
+            }
+
+            if ($params['with_rating']) {
+                /** @see Product::scopeWithAvgRating() */
+                $query->WithAvgRating($filter['only_enabled']);
+            }
+
+            if ($params['with_stock_info']) {
+                /** @see Product::scopeWithStockInfo() */
+                $query->WithStockInfo();
+            }
+
             $query->addSelect(
                 [
                     'product_descriptions.*',
@@ -2676,6 +2714,7 @@ class Product extends BaseModel
                          ->where('product_tags.language_id', '=', $filter['language_id']);
                 }
             );
+
             $query->leftJoin(
                 'stock_statuses',
                 function ($join) use ($filter) {
@@ -2697,32 +2736,34 @@ class Product extends BaseModel
             if ($filter['keyword']) {
                 $tags = explode(' ', trim($filter['keyword']));
                 $query->where(
-                    function ($query) use ($filter, $tags, $db, $pt_table) {
+                    function ($query) use ($filter, $tags, $db, $pt_table, $pd_table, $p_table) {
                         /** @var QueryBuilder $query */
                         if (sizeof($tags) > 1) {
-                            $query->orWhereRaw("LCASE(".$pt_table.".tag) = '".$db->escape(trim($filter['keyword']))
+                            $query->orWhereRaw("LCASE(".$pt_table.".tag) = '"
+                                .$db->escape(mb_strtolower(trim($filter['keyword'])))
                                 ."'");
                         }
                         foreach ($tags as $tag) {
-                            $query->orWhereRaw("LCASE(".$pt_table.".tag) = '".$db->escape(trim($tag))."'");
+                            $query->orWhereRaw("LCASE(".$pt_table.".tag) = '".$db->escape(mb_strtolower(trim($tag)))
+                                ."'");
+                        }
+                        $query->orWhereRaw("LCASE(".$pd_table.".name) LIKE '%"
+                            .$db->escape(mb_strtolower($filter['keyword']), true)."%'");
+                        if ($filter['description']) {
+                            $query->orWhereRaw(
+                                "LCASE(".$pd_table.".description) LIKE '%"
+                                .$db->escape(mb_strtolower($filter['keyword']), true)
+                                ."%'"
+                            );
+                        }
+                        if ($filter['model']) {
+                            $query->orWhereRaw(
+                                "LCASE(".$p_table.".model) LIKE '%".$db->escape(mb_strtolower($filter['keyword']), true)
+                                ."%'"
+                            );
                         }
                     }
                 );
-
-                $query->orWhereRaw("LCASE(".$pd_table.".name) LIKE '%".$db->escape(mb_strtolower($filter['keyword']),
-                        true)."%'");
-                if ($filter['description']) {
-                    $query->orWhereRaw(
-                        "LCASE(".$pd_table.".description) LIKE '%".$db->escape(mb_strtolower($filter['keyword']), true)
-                        ."%'"
-                    );
-                }
-
-                if ($filter['model']) {
-                    $query->orWhereRaw(
-                        "LCASE(".$p_table.".model) LIKE '%".$db->escape(mb_strtolower($filter['keyword']), true)."%'"
-                    );
-                }
             }
 
             if ($filter['category_id']) {
@@ -2740,8 +2781,8 @@ class Product extends BaseModel
 
             //show only enabled and available products for storefront!
             if (ABC::env('IS_ADMIN') !== true) {
-                $query->where('products.date_available', '<=', Carbon::now()->toIso8601String());
-                $query->active('products');
+                $query->where('products.date_available', '<=', Carbon::now()->toIso8601String())
+                      ->active('products');
             }
 
             $query->groupBy('products.product_id');
@@ -2756,8 +2797,8 @@ class Product extends BaseModel
                 'date_modified' => $p_table.".date_modified",
                 'review'        => "review",
             ];
-            $orderBy = $sort_data[$options['sort']] ? $sort_data[$options['sort']] : 'name';
-            if (isset($options['order']) && (strtoupper($options['order']) == 'DESC')) {
+            $orderBy = $sort_data[$params['sort']] ? $sort_data[$params['sort']] : 'name';
+            if (isset($params['order']) && (strtoupper($params['order']) == 'DESC')) {
                 $sorting = "desc";
             } else {
                 $sorting = "asc";
@@ -2765,19 +2806,25 @@ class Product extends BaseModel
             $query->orderByRaw($orderBy." ".$sorting);
 
             //pagination
-            if (isset($options['start']) || isset($options['limit'])) {
-                if ($options['start'] < 0) {
-                    $options['start'] = 0;
+            if (isset($params['start']) || isset($params['limit'])) {
+                if ($params['start'] < 0) {
+                    $params['start'] = 0;
                 }
-                if ($options['limit'] < 1) {
-                    $options['limit'] = 20;
+                if ($params['limit'] < 1) {
+                    $params['limit'] = 20;
                 }
-                $query->offset((int)$options['start'])->limit((int)$options['limit']);
+                $query->offset((int)$params['start'])->limit((int)$params['limit']);
             }
 
             //allow to extends this method from extensions
-            Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $options);
+            Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
             $cache = $query->get();
+
+            //add total number of rows into each row
+            $totalNumRows = $db->sql_get_row_count();
+            for ($i = 0; $i < $cache->count(); $i++) {
+                $cache[$i]['total_num_rows'] = $totalNumRows;
+            }
             Registry::cache()->put($cacheKey, $cache);
         }
 
