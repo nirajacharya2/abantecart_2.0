@@ -54,19 +54,19 @@ class ControllerBlocksLatest extends AController
 
         $results = Product::search(
             [
-                'with_final_price' => true,
-                'with_rating'      => true,
-                'with_stock_info'  => true,
-                'limit'            => $this->config->get('config_latest_limit'),
-                'sort'             => 'date_added',
-                'order'            => 'desc',
+                'with_final_price'    => true,
+                'with_discount_price' => true,
+                'with_special_price'  => true,
+                'with_rating'         => true,
+                'with_stock_info'     => true,
+                'with_option_count'   => true,
+                'limit'               => $this->config->get('config_latest_limit'),
+                'sort'                => 'date_added',
+                'order'               => 'desc',
             ]
         );
         if ($results) {
             $product_ids = $results->pluck('product_id')->toArray();
-
-            $products_info = $this->model_catalog_product->getProductsAllInfo($product_ids);
-
             //get thumbnails by one pass
             $resource = new AResource('image');
             $thumbnails = $resource->getMainThumbList(
@@ -88,7 +88,7 @@ class ControllerBlocksLatest extends AController
                 $thumbnail = $thumbnails[$result['product_id']];
                 $rating = $result['rating'];
                 $special = false;
-                $discount = $products_info[$result['product_id']]['discount'];
+                $discount = $result['discount_price'];
 
                 if ($discount) {
                     $price = $this->currency->format(
@@ -106,7 +106,7 @@ class ControllerBlocksLatest extends AController
                             $this->config->get('config_tax')
                         )
                     );
-                    $special = $products_info[$result['product_id']]['special'];
+                    $special = $result['special_price'];
                     if ($special) {
                         $special = $this->currency->format(
                             $this->tax->calculate(
@@ -118,9 +118,9 @@ class ControllerBlocksLatest extends AController
                     }
                 }
 
-                $options = $products_info[$result['product_id']]['options'];
+                $hasOptions = $result['option_count'];
 
-                if ($options) {
+                if ($hasOptions) {
                     $add = $this->html->getSEOURL(
                         'product/product',
                         '&product_id='.$result['product_id'],
@@ -175,7 +175,7 @@ class ControllerBlocksLatest extends AController
                 $this->data['products'][$i] = $result->toArray();
                 $this->data['products'][$i]['stars'] = sprintf($this->language->get('text_stars'), $rating);
                 $this->data['products'][$i]['price'] = $price;
-                $this->data['products'][$i]['options'] = $options;
+                $this->data['products'][$i]['options'] = $hasOptions;
                 $this->data['products'][$i]['special'] = $special;
                 $this->data['products'][$i]['thumb'] = $thumbnail;
                 $this->data['products'][$i]['href'] = $this->html->getSEOURL(

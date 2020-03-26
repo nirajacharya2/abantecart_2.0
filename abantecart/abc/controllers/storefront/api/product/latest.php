@@ -43,7 +43,6 @@ class ControllerApiProductLatest extends AControllerAPI
             [
                 'with_final_price' => true,
                 'with_rating'      => true,
-
                 'limit' => $filters['limit'],
                 'sort'  => 'date_added',
                 'order' => 'desc',

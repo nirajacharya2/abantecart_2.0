@@ -29,12 +29,12 @@ use abc\models\catalog\Category;
 use abc\models\catalog\Product;
 use abc\models\storefront\ModelCatalogReview;
 use abc\modules\traits\ProductListingTrait;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Class ControllerPagesProductSearch
  *
  * @package abc\controllers\storefront
- * @property ModelCatalogReview $model_catalog_review
  */
 class ControllerPagesProductSearch extends AController
 {
@@ -52,7 +52,6 @@ class ControllerPagesProductSearch extends AController
 
     public function main()
     {
-        $this->loadModel('catalog/review');
         $this->loadModel('tool/seo_url');
 
         $request = $this->request->get;
@@ -123,11 +122,6 @@ class ControllerPagesProductSearch extends AController
         }
 
         list($sort, $order) = explode("-", $sorting_href);
-        if ($sort == 'name') {
-            $sort = 'pd.'.$sort;
-        } elseif (in_array($sort, ['sort_order', 'price'])) {
-            $sort = 'p.'.$sort;
-        }
 
         $this->data['keyword'] = $this->html->buildElement(
             [
@@ -177,8 +171,6 @@ class ControllerPagesProductSearch extends AController
         ]);
 
         if (isset($request['keyword'])) {
-            $this->loadModel('catalog/product');
-            $promotion = new APromotion();
             if (isset($request['category_id'])) {
                 $category_id = explode(',', $request['category_id']);
                 end($category_id);
@@ -198,20 +190,22 @@ class ControllerPagesProductSearch extends AController
             /** @see Product::getProducts() $productsList */
             $productsList = Product::search(
                 [
-                    'with_final_price'  => true,
-                    'with_review_count' => true,
-                    'with_rating'       => true,
-                    'with_stock_info'   => true,
-                    'filter'            => [
+                    'with_final_price'    => true,
+                    'with_discount_price' => true,
+                    'with_special_price'  => true,
+                    'with_rating'         => true,
+                    'with_stock_info'     => true,
+                    'with_option_count'   => true,
+                    'filter'              => [
                         'keyword'     => $request['keyword'],
                         'category_id' => $category_id,
                         'model'       => $request['model'],
                         'description' => $request['description'],
                     ],
-                    'sort'              => $sort,
-                    'order'             => $order,
-                    'start'             => ($page - 1) * $limit,
-                    'limit'             => $limit,
+                    'sort'                => $sort,
+                    'order'               => $order,
+                    'start'               => ($page - 1) * $limit,
+                    'limit'               => $limit,
                 ]
             );
             $product_total = $productsList[0]['total_num_rows'];
@@ -241,6 +235,7 @@ class ControllerPagesProductSearch extends AController
                 $products = [];
                 if ($productsList) {
                     $product_ids = $productsList->pluck('product_id')->toArray();
+
                     //Format product data specific for confirmation page
                     $resource = new AResource('image');
                     $thumbnails = $resource->getMainThumbList(
@@ -249,11 +244,13 @@ class ControllerPagesProductSearch extends AController
                         $this->config->get('config_image_product_width'),
                         $this->config->get('config_image_product_height')
                     );
-                    foreach ($productsList as $listItem) {
+                    /** @var Collection $listItem */
+                    foreach ($productsList as $i => $listItem) {
+                        $products[$i] = $listItem->toArray();
                         $thumbnail = $thumbnails[$listItem['product_id']];
                         $rating = $this->config->get('enable_reviews') ? $listItem['rating'] : false;
                         $special = false;
-                        $discount = $promotion->getProductDiscount($listItem['product_id']);
+                        $discount = $listItem['discount_price'];
 
                         if ($discount) {
                             $price = $this->currency->format(
@@ -271,7 +268,7 @@ class ControllerPagesProductSearch extends AController
                                     $this->config->get('config_tax')
                                 )
                             );
-                            $special = $promotion->getProductSpecial($listItem['product_id']);
+                            $special = $listItem['special_price'];
                             if ($special) {
                                 $special =
                                     $this->currency->format(
@@ -284,8 +281,8 @@ class ControllerPagesProductSearch extends AController
                             }
                         }
 
-                        $options = $this->model_catalog_product->getProductOptions($listItem['product_id']);
-                        if ($options) {
+                        $hasOptions = $listItem['option_count'];
+                        if ($hasOptions) {
                             $addToCartUrl = $this->html->getSEOURL(
                                 'product/product',
                                 '&product_id='.$listItem['product_id'],
@@ -320,37 +317,29 @@ class ControllerPagesProductSearch extends AController
                             }
                         }
 
-                        $products[] = [
-                            'product_id'     => $listItem['product_id'],
-                            'name'           => $listItem['name'],
-                            'blurb'          => $listItem['blurb'],
-                            'model'          => $listItem['model'],
-                            'rating'         => $rating,
-                            'stars'          => sprintf($this->language->get('text_stars'), $rating),
-                            'thumb'          => $thumbnail,
-                            'price'          => $price,
-                            'raw_price'      => $listItem['price'],
-                            'call_to_order'  => $listItem['call_to_order'],
-                            'options'        => $options,
-                            'special'        => $special,
-                            'href'           => $this->html->getSEOURL(
-                                'product/product',
-                                '&keyword='.$request['keyword']
-                                .$url
-                                .'&product_id='.$listItem['product_id'],
-                                '&encode'),
-                            'add'            => $addToCartUrl,
-                            'description'    => html_entity_decode(
-                                $listItem['description'],
-                                ENT_QUOTES,
-                                ABC::env('APP_CHARSET')
-                            ),
-                            'track_stock'    => $track_stock,
-                            'in_stock'       => $in_stock,
-                            'no_stock_text'  => $no_stock_text,
-                            'total_quantity' => $total_quantity,
-                            'tax_class_id'   => $listItem['tax_class_id'],
-                        ];
+                        $products[$i]['rating'] = $rating;
+                        $products[$i]['stars'] = sprintf($this->language->get('text_stars'), $rating);
+                        $products[$i]['thumb'] = $thumbnail;
+                        $products[$i]['price'] = $price;
+                        $products[$i]['raw_price'] = $listItem['price'];
+                        $products[$i]['options'] = $hasOptions;
+                        $products[$i]['special'] = $special;
+                        $products[$i]['href'] = $this->html->getSEOURL(
+                            'product/product',
+                            '&keyword='.$request['keyword']
+                            .$url
+                            .'&product_id='.$listItem['product_id'],
+                            '&encode');
+                        $products[$i]['add'] = $addToCartUrl;
+                        $products[$i]['description'] = html_entity_decode(
+                            $listItem['description'],
+                            ENT_QUOTES,
+                            ABC::env('APP_CHARSET')
+                        );
+                        $products[$i]['track_stock'] = $track_stock;
+                        $products[$i]['in_stock'] = $in_stock;
+                        $products[$i]['no_stock_text'] = $no_stock_text;
+                        $products[$i]['total_quantity'] = $total_quantity;
                     }
                 }
 

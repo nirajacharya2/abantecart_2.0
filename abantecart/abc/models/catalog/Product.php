@@ -90,8 +90,11 @@ use ReflectionException;
  *
  * @method static Product find(int $product_id) Product
  * @method static Product select(mixed $select) Builder
- * @method static WithFinalPrice(int $customer_group_id, Carbon $toDate = null) - adds "final_price" column into selected fields
+ * @method static WithFinalPrice(int $customer_group_id, Carbon|string $toDate = null) - adds "final_price" column into selected fields
+ * @method static WithFirstSpecialPrice(int $customer_group_id, Carbon|string $toDate = null) - adds "special_price" column into selected fields
+ * @method static WithFirstDiscountPrice(int $customer_group_id, Carbon|string $toDate = null) - adds "discount_price" column into selected fields
  * @method static WithReviewCount(bool $only_enabled = true) - adds "review_count" column into selected fields
+ * @method static WithOptionCount(bool $only_enabled = true) - adds "option_count" column into selected fields
  * @method static WithAvgRating(bool $only_enabled = true) - adds "rating" column into selected fields
  * @method static WithStockInfo() - adds "stock_tracking" and quantity in the stock columns into selected fields
  *
@@ -137,27 +140,27 @@ class Product extends BaseModel
         'manufacturer_id'   => 'int',
         'shipping'          => 'int',
         'ship_individually' => 'int',
-        'free_shipping'   => 'int',
-        'shipping_price'  => 'float',
-        'price'           => 'float',
-        'tax_class_id'    => 'int',
-        'weight'          => 'float',
-        'weight_class_id' => 'int',
-        'length'          => 'float',
-        'width'           => 'float',
-        'height'          => 'float',
-        'length_class_id' => 'int',
-        'status'          => 'int',
-        'featured'        => 'boolean',
-        'viewed'          => 'int',
-        'sort_order'      => 'int',
-        'subtract'        => 'int',
-        'minimum'         => 'int',
-        'maximum'         => 'int',
-        'cost'            => 'float',
-        'call_to_order'   => 'int',
-        'product_type_id' => 'int',
-        'settings'        => 'serialized',
+        'free_shipping'     => 'int',
+        'shipping_price'    => 'float',
+        'price'             => 'float',
+        'tax_class_id'      => 'int',
+        'weight'            => 'float',
+        'weight_class_id'   => 'int',
+        'length'            => 'float',
+        'width'             => 'float',
+        'height'            => 'float',
+        'length_class_id'   => 'int',
+        'status'            => 'int',
+        'featured'          => 'boolean',
+        'viewed'            => 'int',
+        'sort_order'        => 'int',
+        'subtract'          => 'int',
+        'minimum'           => 'int',
+        'maximum'           => 'int',
+        'cost'              => 'float',
+        'call_to_order'     => 'int',
+        'product_type_id'   => 'int',
+        'settings'          => 'serialized',
     ];
 
     /** @var array */
@@ -999,6 +1002,14 @@ class Product extends BaseModel
      */
     public static $searchMethod = 'getProducts',
         $searchParams = [
+        'with_final_price',
+        'with_discount_price',
+        'with_special_price',
+        'with_review_count',
+        'with_rating',
+        'with_stock_info',
+        'with_option_count',
+
         'filter' =>
             [
                 'keyword',
@@ -1009,6 +1020,8 @@ class Product extends BaseModel
                 'customer_group_id',
                 'language_id',
                 'store_id',
+                // current date for comparison with available_date and also for promotions
+                'date',
             ],
         //pagination
         'sort',
@@ -1058,12 +1071,29 @@ class Product extends BaseModel
     public static function scopeWithReviewCount($builder, $only_enabled = true)
     {
         $sql = " ( SELECT COUNT(rw.review_id)
-                 FROM ".Registry::db()->table_name("reviews")." rw
-                 WHERE ".Registry::db()->table_name("products").".product_id = rw.product_id";
+                     FROM ".Registry::db()->table_name("reviews")." rw
+                     WHERE ".Registry::db()->table_name("products").".product_id = rw.product_id";
         if ($only_enabled) {
             $sql .= " AND status = 1 ";
         }
         $sql .= "GROUP BY rw.product_id) AS review_count ";
+        $builder->selectRaw($sql);
+    }
+
+    /**
+     * @param QueryBuilder $builder
+     * @param bool $only_enabled
+     */
+    public static function scopeWithOptionCount($builder, $only_enabled = true)
+    {
+        $sql = "( SELECT COUNT(po.product_option_id)
+                 FROM ".Registry::db()->table_name("product_options")." po
+                 WHERE ".Registry::db()->table_name("products").".product_id = po.product_id
+                    AND (po.group_id = 0 OR po.group_id IS NULL) ";
+        if ($only_enabled) {
+            $sql .= " AND status = 1 ";
+        }
+        $sql .= ") as option_count";
         $builder->selectRaw($sql);
     }
 
@@ -1081,6 +1111,65 @@ class Product extends BaseModel
             $sql .= " AND status = 1 ";
         }
         $sql .= "GROUP BY rw.product_id) AS rating ";
+        $builder->selectRaw($sql);
+    }
+
+    /**
+     * @param QueryBuilder $builder
+     * @param int $customer_group_id
+     * @param null $date
+     */
+    public static function scopeWithFirstSpecialPrice($builder, $customer_group_id, $date = null)
+    {
+        $db = Registry::db();
+        if ($date) {
+            if ($date instanceof Carbon) {
+                $now = $date->toIso8601String();
+            } else {
+                $now = Carbon::parse($date)->toIso8601String();
+            }
+        } else {
+            $now = Carbon::now()->toIso8601String();
+        }
+
+        $sql = "(SELECT price
+                FROM ".$db->table_name("product_specials")." ps
+                WHERE ps.product_id = ".$db->table_name("products").".product_id
+                        AND customer_group_id = '".$customer_group_id."'
+                        AND ((date_start IS NULL OR date_start < '".$now."')
+                        AND (date_end IS NULL OR date_end > '".$now."'))
+                ORDER BY ps.priority ASC, ps.price ASC
+                LIMIT 1) as special_price";
+        $builder->selectRaw($sql);
+    }
+
+    /**
+     * @param QueryBuilder $builder
+     * @param int $customer_group_id
+     * @param Carbon|string|null $date
+     */
+    public static function scopeWithFirstDiscountPrice($builder, $customer_group_id, $date = null)
+    {
+        $db = Registry::db();
+        if ($date) {
+            if ($date instanceof Carbon) {
+                $now = $date->toIso8601String();
+            } else {
+                $now = Carbon::parse($date)->toIso8601String();
+            }
+        } else {
+            $now = Carbon::now()->toIso8601String();
+        }
+
+        $sql = "(SELECT price
+                FROM ".$db->table_name("product_discounts")." pd
+                WHERE pd.product_id = ".$db->table_name("products").".product_id
+                        AND quantity = 1
+                        AND customer_group_id = '".$customer_group_id."'
+                        AND ((date_start IS NULL OR date_start < '".$now."')
+                        AND (date_end IS NULL OR date_end > '".$now."'))
+                ORDER BY pd.priority ASC, pd.price ASC
+                LIMIT 1) as discount_price";
         $builder->selectRaw($sql);
     }
 
@@ -2665,10 +2754,23 @@ class Product extends BaseModel
                 /** @see Product::scopeWithFinalPrice() */
                 $query->WithFinalPrice($filter['customer_group_id']);
             }
+            if ($params['with_special_price']) {
+                /** @see Product::scopeWithFirstSpecialPrice() */
+                $query->WithFirstSpecialPrice($filter['customer_group_id'], $filter['date']);
+            }
+            if ($params['with_discount_price']) {
+                /** @see Product::scopeWithFirstSpecialPrice() */
+                $query->WithFirstDiscountPrice($filter['customer_group_id'], $filter['date']);
+            }
 
             if ($params['with_review_count']) {
                 /** @see Product::scopeWithReviewCount() */
                 $query->WithReviewCount($filter['only_enabled']);
+            }
+
+            if ($params['with_option_count']) {
+                /** @see Product::scopeWithOptionCount() */
+                $query->WithOptionCount($filter['with_option_count']);
             }
 
             if ($params['with_rating']) {
@@ -2781,7 +2883,17 @@ class Product extends BaseModel
 
             //show only enabled and available products for storefront!
             if (ABC::env('IS_ADMIN') !== true) {
-                $query->where('products.date_available', '<=', Carbon::now()->toIso8601String())
+                if ($filter['date']) {
+                    if ($filter['date'] instanceof Carbon) {
+                        $now = $filter['date']->toIso8601String();
+                    } else {
+                        $now = Carbon::parse($filter['date'])->toIso8601String();
+                    }
+                } else {
+                    $now = Carbon::now()->toIso8601String();
+                }
+
+                $query->where('products.date_available', '<=', $now)
                       ->active('products');
             }
 
@@ -2819,7 +2931,7 @@ class Product extends BaseModel
             //allow to extends this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
             $cache = $query->get();
-
+            Registry::log()->write($query->toSql());
             //add total number of rows into each row
             $totalNumRows = $db->sql_get_row_count();
             for ($i = 0; $i < $cache->count(); $i++) {
