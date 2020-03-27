@@ -55,10 +55,8 @@ class AuditLogApiStorage implements AuditLogStorageInterface
         $api = ABC::env('AUDIT_LOG_API');
         $conf = new AuditLogConfig($api['HOST']);
         $client = new AuditLogClient($conf);
-        \H::df($data);
         try {
             $result = $client->addEvent($api['DOMAIN'], $data);
-            \H::df($result);
             return $result;
         } catch (Exception $exception) {
             $this->log->write($exception->getMessage());

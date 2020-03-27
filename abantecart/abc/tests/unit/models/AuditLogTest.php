@@ -116,13 +116,10 @@ class AuditLogTest extends ATestCase
             $productId = Product::createProduct($arProduct);
         } catch (\PDOException $e) {
             $this->fail($e->getMessage());
-            \H::df($e->getMessage());
         } catch (Warning $e) {
             $this->fail($e->getMessage());
-            \H::df($e->getMessage());
         } catch (\Exception $e) {
             $this->fail($e->getMessage());
-            \H::df($e->getMessage());
         }
 
         $this->assertIsInt($productId);
