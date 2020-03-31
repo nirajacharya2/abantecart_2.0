@@ -28,7 +28,6 @@ class ControllerPagesDesignEmailTemplates extends AController
             'update_field'     => $this->html->getSecureURL('listing_grid/email_templates/update_field'),
             'sortname'         => 'text_id',
             'sortorder'        => 'asc',
-            'drag_sort_column' => 'text_id',
             'columns_search'   => true,
             'actions'          => array(
                 'edit'   => array(
