@@ -202,19 +202,19 @@ INSERT INTO `ac_languages` (`language_id`, `name`, `code`, `locale`, `image`, `d
 -- DDL for table `language_definitions`
 --
 CREATE TABLE `ac_language_definitions` (
-  `language_definition_id` int(11) NOT NULL auto_increment,
-  `language_id` int(11) NOT NULL,
-  `section` tinyint(1) NOT NULL default '0' COMMENT '0-SF, 1-ADMIN',
-  `block` varchar(160) NOT NULL,
-  `language_key` varchar(170) NOT NULL,
-  `language_value` text NOT NULL COMMENT 'translatable',
-  `date_added` timestamp NULL default CURRENT_TIMESTAMP,
-  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `date_deleted` timestamp NULL,
-  `stage_id` INT(6) NULL,
-  PRIMARY KEY  (`language_definition_id`, `language_id`, `section`, `block`, `language_key`),
-    FULLTEXT INDEX `ac_lang_definition_idx` (`language_value` ASC),
-    INDEX `stage_idx` (`stage_id` ASC)
+                                           `language_definition_id` int(11)      NOT NULL auto_increment,
+                                           `language_id`            int(11)      NOT NULL,
+                                           `section`                tinyint(1)   NOT NULL default '0' COMMENT '0-SF, 1-ADMIN',
+                                           `block`                  varchar(160) NOT NULL,
+                                           `language_key`           varchar(170) NOT NULL,
+                                           `language_value`         text         NOT NULL COMMENT 'translatable',
+                                           `date_added`             timestamp    NULL     default CURRENT_TIMESTAMP,
+                                           `date_modified`          timestamp    NULL     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                           `date_deleted`           timestamp    NULL,
+                                           `stage_id`               INT(6)       NULL,
+                                           PRIMARY KEY (`language_definition_id`, `language_id`, `section`, `block`, `language_key`),
+                                           FULLTEXT INDEX `ac_lang_definition_idx` (`language_value`),
+                                           INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 --
@@ -9866,12 +9866,11 @@ CREATE INDEX `ac_product_discounts_idx` ON `ac_product_discounts` (`product_id`,
 -- DDL for table `product_related`
 --
 CREATE TABLE `ac_products_related` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `product_id` int(11) NOT NULL,
-  `related_id` int(11) NOT NULL,
-  PRIMARY KEY (`id`, `product_id`, `related_id`),
-  UNIQUE INDEX `ac_product_related_unique_idx` (`product_id` ASC, `related_id` ASC),
-  CONSTRAINT `ac_products_related_chk` CHECK (`product_id` <> `related_id`)
+                                       `id` int(11) NOT NULL AUTO_INCREMENT,
+                                       `product_id` int(11) NOT NULL,
+                                       `related_id` int(11) NOT NULL,
+                                       PRIMARY KEY (`id`, `product_id`, `related_id`),
+                                       UNIQUE INDEX `ac_product_related_unique_idx` (`product_id` ASC, `related_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -9978,19 +9977,19 @@ CREATE INDEX `ac_reviews_idx` ON `ac_reviews` ( `product_id`, `customer_id` );
 -- DDL for table `settings`
 --
 CREATE TABLE `ac_settings` (
-  `setting_id` int(11) NOT NULL AUTO_INCREMENT,
-  `store_id` int(11) NOT NULL DEFAULT 0,
-  `group` varchar(32) COLLATE utf8_general_ci NOT NULL,
-  `group_id` int(11) NOT NULL DEFAULT 0,
-  `key` varchar(64) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `value` text COLLATE utf8_general_ci NOT NULL,
-  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `date_deleted` timestamp NULL,
-  `stage_id` INT(6) NULL,
- PRIMARY KEY (`setting_id`, `store_id`, `group`, `key`),
- FULLTEXT INDEX `ac_settings_idx` (`value` ASC),
- INDEX `stage_idx` (`stage_id` ASC)
+                               `setting_id`    int(11)                             NOT NULL AUTO_INCREMENT,
+                               `store_id`      int(11)                             NOT NULL DEFAULT 0,
+                               `group`         varchar(32) COLLATE utf8_general_ci NOT NULL,
+                               `group_id`      int(11)                             NOT NULL DEFAULT 0,
+                               `key`           varchar(64) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+                               `value`         text COLLATE utf8_general_ci        NOT NULL,
+                               `date_added`    timestamp                           NULL     DEFAULT CURRENT_TIMESTAMP,
+                               `date_modified` timestamp                           NULL     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                               `date_deleted`  timestamp                           NULL,
+                               `stage_id`      INT(6)                              NULL,
+                               PRIMARY KEY (`setting_id`, `store_id`, `group`, `key`),
+                               FULLTEXT INDEX `ac_settings_idx` (`value`),
+                               INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 --

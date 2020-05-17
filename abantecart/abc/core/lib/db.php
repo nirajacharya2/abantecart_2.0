@@ -107,9 +107,10 @@ class ADB
             }
 
         } catch (\PDOException $e) {
-            throw new AException($e->getTraceAsString(), $e->getCode(), $e->getFile(), $e->getLine());
+            throw new AException($e->getMessage()."\n".$e->getTraceAsString(), $e->getCode(), $e->getFile(),
+                $e->getLine());
         } catch (\Error $e) {
-            exit($e->getTraceAsString());
+            exit($e->getMessage()."\n".$e->getTraceAsString());
         }
         $this->registry = Registry::getInstance();
     }

@@ -846,7 +846,6 @@ EOD;
         }
 
         $db->query("SET CHARACTER SET utf8;");
-        $db->query("SET @@session.sql_mode = 'MYSQL40';");
         $salt_key = H::genToken(8);
         $db->query(
             "INSERT INTO `".$options['db_prefix']."users`
@@ -941,7 +940,6 @@ EOD;
             }
         }
         $db->query("SET CHARACTER SET utf8");
-        $db->query("SET @@session.sql_mode = 'MYSQL40'");
 
         //clear earlier created cache by AConfig and ALanguage classes in previous step
         $cache = new AbcCache('file');
