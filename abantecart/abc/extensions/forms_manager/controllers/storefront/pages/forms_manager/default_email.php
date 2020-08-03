@@ -141,7 +141,7 @@ class ControllerPagesFormsManagerDefaultEmail extends AController
                 $mail->setUser($user);
                 $mail->send();
 
-                if ( empty( $mail->error ) ) {
+                if ( empty( $mail->errors ) ) {
                     if ( $form_data['success_page'] ) {
                         $success_url = $this->html->getSecureURL( $form_data['success_page'] );
                     } else {
@@ -153,7 +153,7 @@ class ControllerPagesFormsManagerDefaultEmail extends AController
                     abc_redirect( $success_url );
                     exit;
                 } else {
-                    $this->session->data['warning'] = $mail->error;
+                    $this->session->data['warning'] = $mail->errors;
                     abc_redirect( $this->html->getSecureURL( 'forms_manager/default_email', '&form_id='.$form_id ) );
                     exit;
                 }

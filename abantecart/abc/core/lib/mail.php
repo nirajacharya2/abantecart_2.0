@@ -75,7 +75,7 @@ class AMail
     public $crlf = "\r\n";
     public $verp = false;
     public $parameter = '';
-    public $error = [];
+    public $errors = [];
     /**
      * @var AUser
      */
@@ -170,17 +170,28 @@ class AMail
         $this->html = $html;
     }
 
+    /**
+     * @param string $text_id
+     * @param array  $placeholders
+     * @param int    $languageId
+     *
+     * @return bool
+     */
     public function setTemplate($text_id, array $placeholders = [], $languageId = 1)
     {
         $text_id = trim($text_id);
         if (empty($text_id)) {
-            $this->log->write('Email text id can\'t be empmty');
-            return;
+            $error_text = __FUNCTION__.": Email text id can't be empty";
+            $this->errors[] = $error_text;
+            $this->log->write($error_text);
+            return false;
         }
 
         if (!preg_match("/(^[\w]+)$/i", $text_id)) {
-            $this->log->write('Email text id "'.$text_id.'" must be in one word without spaces, underscores are allowed');
-            return;
+            $error_text = __FUNCTION__.": Email text id ".$text_id." must be in one word without spaces, underscores are allowed.";
+            $this->errors[] = $error_text;
+            $this->log->write($error_text);
+            return false;
         }
 
         $emailTemplate = EmailTemplate::where('text_id', '=', $text_id)
@@ -189,8 +200,10 @@ class AMail
             ->get()
             ->first();
         if (!$emailTemplate) {
-            $this->log->write('Email Template with text id "'.$text_id.'" and language_id = '.$languageId.' not found');
-            return;
+            $error_text = __FUNCTION__.": Enabled Email Template with text id ".$text_id." and language_id = ".$languageId." not found.";
+            $this->errors[] = $error_text;
+            $this->log->write($error_text);
+            return false;
         }
         $this->emailTemplate = $emailTemplate;
         $arAllowedPlaceholders = explode(',', $emailTemplate->allowed_placeholders);
@@ -228,6 +241,7 @@ class AMail
                 $this->addHeader($parts[0], $parts[1]);
             }
         }
+        return true;
     }
 
     /**
@@ -354,48 +368,42 @@ class AMail
         }
 
         if (!$this->to) {
-
-            $error = 'Error: E-Mail to required!';
-            $this->log->write($error);
-            $this->error[] = $error;
-            $this->messages->saveError('Mailer error!',
-                'Can\'t send emails. Please see log for details and check your mail settings.');
+            $error_text = 'Error: E-Mail "to"(receiver) required!';
+            $this->errors[] = $error_text;
+            $this->log->write($error_text);
+            $this->saveMessageError();
             return false;
         }
 
         if (!$this->from) {
-            $error = 'Error: E-Mail from required!';
-            $this->log->write($error);
-            $this->error[] = $error;
-            $this->messages->saveError('Mailer error!',
-                'Can\'t send emails. Please see log for details and check your mail settings.');
+            $error_text = 'Error: E-Mail "From" required!';
+            $this->errors[] = $error_text;
+            $this->log->write($error_text);
+            $this->saveMessageError();
             return false;
         }
 
         if (!$this->sender) {
-            $error = 'Error: E-Mail sender required!';
-            $this->log->write($error);
-            $this->error[] = $error;
-            $this->messages->saveError('Mailer error!',
-                'Can\'t send emails. Please see log for details and check your mail settings.');
+            $error_text = 'Error: E-Mail sender required!';
+            $this->errors[] = $error_text;
+            $this->log->write($error_text);
+            $this->saveMessageError();
             return false;
         }
 
         if (!$this->subject) {
-            $error = 'Error: E-Mail subject required!';
-            $this->log->write($error);
-            $this->error[] = $error;
-            $this->messages->saveError('Mailer error!',
-                'Can\'t send emails. Please see log for details and check your mail settings.');
+            $error_text = 'Error: E-Mail subject required!';
+            $this->errors[] = $error_text;
+            $this->log->write($error_text);
+            $this->saveMessageError();
             return false;
         }
 
         if ((!$this->text) && (!$this->html)) {
-            $error = 'Error: E-Mail message required!';
-            $this->log->write($error);
-            $this->error[] = $error;
-            $this->messages->saveError('Mailer error!',
-                'Can\'t send emails. Please see log for details and check your mail settings.');
+            $error_text = 'Error: E-Mail message required!';
+            $this->errors[] = $error_text;
+            $this->log->write($error_text);
+            $this->saveMessageError();
             return false;
         }
 
@@ -483,9 +491,9 @@ class AMail
             $handle = fsockopen($this->hostname, (int)$this->port, $errno, $errstr, (int)$this->timeout);
 
             if (!$handle) {
-                $error = 'Error: '.$errstr.' ('.$errno.')';
-                $this->log->write($error);
-                $this->error[] = $error;
+                $error_text = 'Error: '.$errstr.' ('.$errno.')';
+                $this->log->write($error_text);
+                $this->errors[] = $error_text;
             } else {
                 if (substr(PHP_OS, 0, 3) != 'WIN') {
                     socket_set_timeout($handle, $this->timeout, 0);
@@ -509,9 +517,9 @@ class AMail
                     }
 
                     if (substr($reply, 0, 3) != 220) {
-                        $error = 'Error: STARTTLS not accepted from server!';
-                        $this->log->write($error);
-                        $this->error[] = $error;
+                        $error_text = 'Error: STARTTLS not accepted from server!';
+                        $this->log->write($error_text);
+                        $this->errors[] = $error_text;
                     }
                 }
 
@@ -529,9 +537,9 @@ class AMail
                     }
 
                     if (substr($reply, 0, 3) != 250) {
-                        $error = 'Error: EHLO not accepted from server!';
-                        $this->log->write($error);
-                        $this->error[] = $error;
+                        $error_text = 'Error: EHLO not accepted from server!';
+                        $this->log->write($error_text);
+                        $this->errors[] = $error_text;
                     }
 
                     fputs($handle, 'AUTH LOGIN'.$this->crlf);
@@ -547,9 +555,9 @@ class AMail
                     }
 
                     if (substr($reply, 0, 3) != 334) {
-                        $error = 'Error: AUTH LOGIN not accepted from server!';
-                        $this->log->write($error);
-                        $this->error[] = $error;
+                        $error_text = 'Error: AUTH LOGIN not accepted from server!';
+                        $this->log->write($error_text);
+                        $this->errors[] = $error_text;
                     }
 
                     fputs($handle, base64_encode($this->username).$this->crlf);
@@ -565,9 +573,9 @@ class AMail
                     }
 
                     if (substr($reply, 0, 3) != 334) {
-                        $error = 'Error: Username not accepted from server!';
-                        $this->log->write($error);
-                        $this->error[] = $error;
+                        $error_text = 'Error: Username not accepted from server!';
+                        $this->log->write($error_text);
+                        $this->errors[] = $error_text;
                     }
 
                     fputs($handle, base64_encode($this->password).$this->crlf);
@@ -583,9 +591,9 @@ class AMail
                     }
 
                     if (substr($reply, 0, 3) != 235) {
-                        $error = 'Error: Password not accepted from server!';
-                        $this->log->write($error);
-                        $this->error[] = $error;
+                        $error_text = 'Error: Password not accepted from server!';
+                        $this->log->write($error_text);
+                        $this->errors[] = $error_text;
                     }
                 } else {
                     fputs($handle, 'HELO '.getenv('SERVER_NAME').$this->crlf);
@@ -601,9 +609,9 @@ class AMail
                     }
 
                     if (substr($reply, 0, 3) != 250) {
-                        $error = 'Error: HELO not accepted from server!';
-                        $this->log->write($error);
-                        $this->error[] = $error;
+                        $error_text = 'Error: HELO not accepted from server!';
+                        $this->log->write($error_text);
+                        $this->errors[] = $error_text;
                     }
                 }
 
@@ -624,9 +632,9 @@ class AMail
                 }
 
                 if (substr($reply, 0, 3) != 250) {
-                    $error = 'Error: MAIL FROM not accepted from server!';
-                    $this->log->write($error);
-                    $this->error[] = $error;
+                    $error_text = 'Error: MAIL FROM not accepted from server!';
+                    $this->log->write($error_text);
+                    $this->errors[] = $error_text;
                 }
 
                 if (!is_array($this->to)) {
@@ -643,9 +651,9 @@ class AMail
                     }
 
                     if ((substr($reply, 0, 3) != 250) && (substr($reply, 0, 3) != 251)) {
-                        $error = 'Error: RCPT TO not accepted from server!';
-                        $this->log->write($error);
-                        $this->error[] = $error;
+                        $error_text = 'Error: RCPT TO not accepted from server!';
+                        $this->log->write($error_text);
+                        $this->errors[] = $error_text;
                     }
                 } else {
                     foreach ($this->to as $recipient) {
@@ -662,9 +670,9 @@ class AMail
                         }
 
                         if ((substr($reply, 0, 3) != 250) && (substr($reply, 0, 3) != 251)) {
-                            $error = 'Error: RCPT TO not accepted from server!';
-                            $this->log->write($error);
-                            $this->error[] = $error;
+                            $error_text = 'Error: RCPT TO not accepted from server!';
+                            $this->log->write($error_text);
+                            $this->errors[] = $error_text;
                         }
                     }
                 }
@@ -682,9 +690,9 @@ class AMail
                 }
 
                 if (substr($reply, 0, 3) != 354) {
-                    $error = 'Error: DATA not accepted from server!';
-                    $this->log->write($error);
-                    $this->error[] = $error;
+                    $error_text = 'Error: DATA not accepted from server!';
+                    $this->log->write($error_text);
+                    $this->errors[] = $error_text;
                 }
 
                 fputs($handle, $header.$message.$this->crlf);
@@ -701,9 +709,9 @@ class AMail
                 }
 
                 if (substr($reply, 0, 3) != 250) {
-                    $error = 'Error: DATA not accepted from server!';
-                    $this->log->write($error);
-                    $this->error[] = $error;
+                    $error_text = 'Error: DATA not accepted from server!';
+                    $this->log->write($error_text);
+                    $this->errors[] = $error_text;
                 }
 
                 fputs($handle, 'QUIT'.$this->crlf);
@@ -719,9 +727,9 @@ class AMail
                 }
 
                 if (substr($reply, 0, 3) != 221) {
-                    $error = 'Error: QUIT not accepted from server!';
-                    $this->log->write($error);
-                    $this->error[] = $error;
+                    $error_text = 'Error: QUIT not accepted from server!';
+                    $this->log->write($error_text);
+                    $this->errors[] = $error_text;
                 }
 
                 fclose($handle);
@@ -735,16 +743,15 @@ class AMail
                      */
                     $this->response = $mailDriver->send($this);
                     if (!$this->response->result) {
-                        $this->error[] = "Error send via Mail Api";
+                        $this->errors[] = "Error send via Mail Api";
                     }
                 }
             }catch(\Exception $e){
-                $this->error[] = __CLASS__ .'->MailApiManager: '.$e->getMessage()."\n".$e->getTraceAsString();
+                $this->errors[] = __CLASS__ .'->MailApiManager: '.$e->getMessage()."\n".$e->getTraceAsString();
             }
         }
-        if ($this->error) {
-            $this->messages->saveError('Mailer error!',
-                'Can\'t send emails. Please see log for details and check your mail settings.');
+        if ($this->errors) {
+            $this->saveMessageError();
             return false;
         }
 
@@ -753,6 +760,12 @@ class AMail
         }
 
         return true;
+    }
+    protected function saveMessageError(){
+        $this->messages->saveError(
+            'Mailer error!',
+            'Can\'t send emails. Please see log for details and check your mail settings.'
+        );
     }
 }
 
