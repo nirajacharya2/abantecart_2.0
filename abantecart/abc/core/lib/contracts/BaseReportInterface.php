@@ -1,6 +1,6 @@
 <?php
 
-namespace abc\core\lib;
+namespace abc\core\lib\contracts;
 
 /**
  * Interface BaseReportInterface

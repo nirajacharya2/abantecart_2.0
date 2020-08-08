@@ -280,6 +280,13 @@ class BaseModel extends OrmModel
         $className = get_called_class();
         /** @var ModelSearch $searchObj */
         $searchObj = ABC::getObjectByAlias('ModelSearch', [new $className]);
+        //check and convert parameters for data set into correct format
+        foreach ($searchParams as $name => $value) {
+            if (is_string($value) && substr($value, 0, 5) == 'with_') {
+                $searchParams[$value] = true;
+                unset($searchParams[$name]);
+            }
+        }
         return $searchObj->search($searchParams);
     }
 

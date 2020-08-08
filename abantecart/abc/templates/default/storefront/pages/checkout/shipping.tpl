@@ -58,30 +58,33 @@
 					</tr>
 					<?php if (!$shipping_method['error']){ ?>
 						<?php foreach ($shipping_method['quote'] as $quote){ ?>
-							<tr>
-								<td style="width: 5%"><?php echo $quote['radio']; ?></td>
-								<td>
-									<label for="shipping_shipping_method<?php echo $quote['id']; ?>"
-									       title="<?php echo \abc\core\helper\AHelperUtils::has_value($quote['description']) ? $quote['description'] : ''; ?>"
-									       style="cursor: pointer;">
-										<?php $icon = $shipping_method['icon'];
-										if ($icon){ ?>
-											<?php if (is_file(ABC::env('DIR_RESOURCES') . $icon['image'])){ ?>
-												<span class="shipping_icon mr10"><img
-															src="resources/<?php echo $icon['image']; ?>"
-															title="<?php echo $icon['title']; ?>"/></span>
-											<?php } else if (!empty($icon['resource_code'])){ ?>
-												<span class="shipping_icon mr10"><?php echo $icon['resource_code']; ?></span>
-											<?php }
-										} ?>
-										<?php echo $quote['title']; ?>
-									</label>
-								</td>
-								<td class="align_right"><label for="shipping_shipping_method<?php echo $quote['id']; ?>"
-								                               style="cursor: pointer;"><?php echo $quote['text']; ?></label>
-								</td>
-							</tr>
-						<?php } ?>
+                            <tr>
+                                <td style="width: 5%"><?php echo $quote['radio']; ?></td>
+                                <td>
+                                    <label for="<?php echo $quote['radio']->element_id.$quote['radio']->id; ?>"
+                                           title="<?php echo \H::has_value($quote['description']) ? $quote['description'] : ''; ?>"
+                                           style="cursor: pointer;">
+                                        <?php $icon = $shipping_method['icon'];
+                                        if ($icon) { ?>
+                                            <?php if (is_file(ABC::env('DIR_RESOURCES').$icon['image'])) { ?>
+                                                <span class="shipping_icon mr10"><img
+                                                            src="resources/<?php echo $icon['image']; ?>"
+                                                            title="<?php echo $icon['title']; ?>"/></span>
+                                            <?php } else {
+                                                if (!empty($icon['resource_code'])) { ?>
+                                                    <span class="shipping_icon mr10"><?php echo $icon['resource_code']; ?></span>
+                                                <?php }
+                                            }
+                                        } ?>
+                                        <?php echo $quote['title']; ?>
+                                    </label>
+                                </td>
+                                <td class="align_right"><label
+                                            for="<?php echo $quote['radio']->element_id.$quote['radio']->id; ?>"
+                                            style="cursor: pointer;"><?php echo $quote['text']; ?></label>
+                                </td>
+                            </tr>
+                        <?php } ?>
 					<?php } else{ ?>
 						<tr>
 							<td colspan="3">

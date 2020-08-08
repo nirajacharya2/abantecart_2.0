@@ -95,29 +95,29 @@ $wrapper_id = \H::randomWord(6);
 			    id="text_editor_<?php echo $id ?>"
 			    ><?php echo $value ?>
 	        </textarea>
-		</div>
+        </div>
 
-	</div>
+    </div>
 
 </div>
 
 
 <script type="application/javascript">
-	$(window).load(function () {
-	    try {
-            tinymce.remove();
+    $(window).load(function () {
+        try {
+            tinymce.remove('textarea#text_editor_<?php echo $id ?>');
         } catch (e) {
         }
-		//initiate editor
-		mcei.selector = 'textarea#text_editor_<?php echo $id ?>';
+        //initiate editor
+        mcei.selector = 'textarea#text_editor_<?php echo $id ?>';
 
-		//tinymce.baseURL = "<?php echo $this->templateResource('templates/assets/js/tinymce'); ?>";
-		tinymce.baseURL = 'templates/default_bs3/admin/assets/js/tinymce';
-		tinymce.init(mcei);
+        //tinymce.baseURL = "<?php echo $this->templateResource('templates/assets/js/tinymce'); ?>";
+        tinymce.baseURL = 'templates/default_bs3/admin/assets/js/tinymce';
+        tinymce.init(mcei);
 
-		//for modal mode
-		if($('#<?php echo $wrapper_id; ?>').parents('.modal-content').length>0){
-			$('#<?php echo $wrapper_id; ?> a.qt_cnt_expand').hide();
+        //for modal mode
+        if ($('#<?php echo $wrapper_id; ?>').parents('.modal-content').length > 0) {
+            $('#<?php echo $wrapper_id; ?> a.qt_cnt_expand').hide();
 		}
 	
 		//event for textarea buttons
@@ -180,27 +180,28 @@ $wrapper_id = \H::randomWord(6);
 			var editor, cursorPosition;
 			editor = $('#<?php echo $id ?>');
 			textareaInsert(editor, '<!-- comment -->');
-			return false;
-		});
-		$('#<?php echo $wrapper_id; ?> a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-			var newtab_id = $(e.target).attr('aria-controls'), // newly activated tab
-		        prevtab_id = $(e.relatedTarget).attr('aria-controls'); // previous active tab
+            return false;
+        });
+        $('#<?php echo $wrapper_id; ?> a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            var newtab_id = $(e.target).attr('aria-controls'), // newly activated tab
+                prevtab_id = $(e.relatedTarget).attr('aria-controls'); // previous active tab
 
-			var textarea, value;
-			textarea = $('#'+prevtab_id+ ' textarea');
-			
-			if(prevtab_id == 'visual_<?php echo $wrapper_id?>'){
-				value = tinyMCE.activeEditor.getContent();
-				value = visual2html(value);
-				$('#'+newtab_id+ ' textarea')
-						.val( value )
-						.removeAttr('disabled');
-			} else {
-				$('#'+newtab_id+ ' textarea')
-						.val(textarea.val())
-						.removeAttr('disabled');
-				if(tinyMCE.activeEditor != null) {
-					value = textarea.val();
+            var textarea, value;
+            textarea = $('#' + prevtab_id + ' textarea');
+
+            if (prevtab_id == 'visual_<?php echo $wrapper_id?>') {
+                value = tinyMCE.get('text_editor_<?php echo $id ?>').getContent();
+                ;
+                value = visual2html(value);
+                $('#' + newtab_id + ' textarea')
+                    .val(value)
+                    .removeAttr('disabled');
+            } else {
+                $('#' + newtab_id + ' textarea')
+                    .val(textarea.val())
+                    .removeAttr('disabled');
+                if (tinyMCE.activeEditor != null) {
+                    value = textarea.val();
 					value = html2visual(value);
 					tinyMCE.activeEditor.setContent( value );
 				}

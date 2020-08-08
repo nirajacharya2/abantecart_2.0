@@ -223,10 +223,9 @@ class Product extends BaseModel
 
         'uuid' => [
             'checks'   => [
-                'string',
+                'uuid',
                 'sometimes',
                 'required',
-                'between:1,255',
             ],
             'messages' => [
                 '*' => [
@@ -2707,6 +2706,39 @@ class Product extends BaseModel
         return $option_data;
     }
 
+    /**
+     * @param array $params
+     *   common parameters:
+     *              - sort
+     *              - order
+     *              - start
+     *              - limit
+     *  filter parameters - $params['filter']:
+     *              - category_id
+     *              - description
+     *              - model
+     *              - only_enabled - with status 1 and date_available less than current time
+     *              - customer_group_id
+     *              - keyword
+     *              - language_id
+     *              - store_id
+     *
+     *  parameters for data set:
+     *              - with_all
+     *              - with_final_price
+     *              - with_special_price
+     *              - with_discount_price
+     *              - with_review_count
+     *              - with_option_count
+     *              - with_option_count
+     *              - with_rating
+     *              - with_stock_info
+     *
+     * @return false|Collection|mixed
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     */
     public static function getProducts(array $params = [])
     {
         $params['sort'] = $params['sort'] ?? 'products.sort_order';
@@ -2715,11 +2747,13 @@ class Product extends BaseModel
         $params['limit'] = $params['limit'] >= 1 ? $params['limit'] : 20;
 
         $filter = (array)$params['filter'];
+        $filter['include'] = $filter['include'] ?? [];
+        $filter['exclude'] = $filter['exclude'] ?? [];
         $filter['category_id'] = $filter['category_id'] ?? 0;
         $filter['description'] = $filter['description'] ?? false;
         $filter['model'] = $filter['model'] ?? false;
 
-        $filter['only_enabled'] = $filter['only_enabled'] ?? true;
+        $filter['only_enabled'] = isset($filter['only_enabled']) ? (bool)$filter['only_enabled'] : true;
         $filter['customer_group_id'] =
             $filter['customer_group_id'] ?? Registry::config()->get('config_customer_group_id');
         $filter['keyword'] = trim($filter['keyword']);
@@ -2749,36 +2783,35 @@ class Product extends BaseModel
 
             /** @var Product|QueryBuilder $query */
             $query = self::selectRaw(Registry::db()->raw_sql_row_count().' '.$p_table.'.*');
-
-            if ($params['with_final_price']) {
+            if ($params['with_final_price'] || $params['with_all']) {
                 /** @see Product::scopeWithFinalPrice() */
                 $query->WithFinalPrice($filter['customer_group_id']);
             }
-            if ($params['with_special_price']) {
+            if ($params['with_special_price'] || $params['with_all']) {
                 /** @see Product::scopeWithFirstSpecialPrice() */
                 $query->WithFirstSpecialPrice($filter['customer_group_id'], $filter['date']);
             }
-            if ($params['with_discount_price']) {
+            if ($params['with_discount_price'] || $params['with_all']) {
                 /** @see Product::scopeWithFirstSpecialPrice() */
                 $query->WithFirstDiscountPrice($filter['customer_group_id'], $filter['date']);
             }
 
-            if ($params['with_review_count']) {
+            if ($params['with_review_count'] || $params['with_all']) {
                 /** @see Product::scopeWithReviewCount() */
                 $query->WithReviewCount($filter['only_enabled']);
             }
 
-            if ($params['with_option_count']) {
+            if ($params['with_option_count'] || $params['with_all']) {
                 /** @see Product::scopeWithOptionCount() */
                 $query->WithOptionCount($filter['with_option_count']);
             }
 
-            if ($params['with_rating']) {
+            if ($params['with_rating'] || $params['with_all']) {
                 /** @see Product::scopeWithAvgRating() */
                 $query->WithAvgRating($filter['only_enabled']);
             }
 
-            if ($params['with_stock_info']) {
+            if ($params['with_stock_info'] || $params['with_all']) {
                 /** @see Product::scopeWithStockInfo() */
                 $query->WithStockInfo();
             }
@@ -2881,6 +2914,13 @@ class Product extends BaseModel
                 );
             }
 
+            if ((array)$filter['include']) {
+                $query->whereIn('products.product_id', (array)$filter['include']);
+            }
+            if ((array)$filter['exclude']) {
+                $query->whereNotIn('products.product_id', (array)$filter['exclude']);
+            }
+
             //show only enabled and available products for storefront!
             if (ABC::env('IS_ADMIN') !== true) {
                 if ($filter['date']) {
@@ -2931,7 +2971,6 @@ class Product extends BaseModel
             //allow to extends this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
             $cache = $query->get();
-            Registry::log()->write($query->toSql());
             //add total number of rows into each row
             $totalNumRows = $db->sql_get_row_count();
             for ($i = 0; $i < $cache->count(); $i++) {

@@ -22,7 +22,6 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
-use abc\core\lib\contracts\MailApiResponse;
 use abc\models\customer\CustomerCommunication;
 use abc\models\system\EmailTemplate;
 use Mustache_Engine;

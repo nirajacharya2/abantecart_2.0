@@ -424,6 +424,13 @@ class AConfigManager
             $weight_classes[$v['unit']] = $v['title'];
         }
 
+        $this->load->model('localisation/tax_class');
+        $results = $this->model_localisation_tax_class->getTaxClasses();
+        $tax_classes = ['' => $this->language->get('text_select')];
+        foreach ($results as $v) {
+            $tax_classes[$v['tax_class_id']] = $v['title'];
+        }
+
         $fields['country'] = $form->getFieldHtml($props[] = [
             'type'            => 'zones',
             'name'            => 'config_country_id',
@@ -513,6 +520,13 @@ class AConfigManager
             'name'    => 'config_weight_class',
             'value'   => $data['config_weight_class'],
             'options' => $weight_classes,
+        ]);
+
+        $fields['tax_class'] = $form->getFieldHtml($props[] = [
+            'type'    => 'selectbox',
+            'name'    => 'config_tax_class_id',
+            'value'   => $data['config_tax_class_id'],
+            'options' => $tax_classes,
         ]);
 
         if (isset($data['one_field'])) {
