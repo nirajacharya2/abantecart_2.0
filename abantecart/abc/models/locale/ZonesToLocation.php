@@ -29,8 +29,8 @@ class ZonesToLocation extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'country_id'  => 'int',
-        'zone_id'     => 'int',
+        'country_id' => 'int',
+        'zone_id' => 'int',
         'location_id' => 'int',
     ];
 
@@ -45,6 +45,36 @@ class ZonesToLocation extends BaseModel
         'location_id',
         'date_added',
         'date_modified',
+    ];
+    protected $rules = [
+        'country_id' => [
+            'checks' => [
+                'required',
+                'integer'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'country_id is not integer']
+            ]
+        ],
+        'zone_id' => [
+            'checks' => [
+                'required',
+                'integer',
+                'sometimes'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'zone_id is not integer']
+            ]
+        ],
+        'location_id' => [
+            'checks' => [
+                'required',
+                'integer'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'location_id is not integer']
+            ]
+        ]
     ];
 
     public function zone()

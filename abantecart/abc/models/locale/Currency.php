@@ -23,6 +23,8 @@ use abc\core\lib\AError;
  *
  * @property \Illuminate\Database\Eloquent\Collection $orders
  *
+ * @method static Currency find(int $currency_id) Currency
+ *
  * @package abc\models
  */
 class Currency extends BaseModel
@@ -33,7 +35,7 @@ class Currency extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'value'  => 'float',
+        'value' => 'float',
         'status' => 'int',
     ];
 
@@ -49,7 +51,90 @@ class Currency extends BaseModel
         'decimal_place',
         'value',
         'status',
-        'date_modified',
+
+    ];
+    protected $rules = [
+        'title' => [
+            'checks' => [
+                'string',
+                'sometimes',
+                'between:2,32'
+            ],
+            'message' => [
+                'language_key' => 'error_title',
+                'language_block' => 'localisation/currency',
+                'default_text' => 'Currency Title must be between 2 and 32 characters!',
+                'section' => 'admin'
+            ],
+        ],
+        'code' => [
+            'checks' => [
+                'string',
+                'max:3',
+                'sometimes'
+            ],
+            'message' => [
+                'language_key' => 'error_code',
+                'language_block' => 'localisation/currency',
+                'default_text' => 'Currency Code must contain 3 characters!',
+                'section' => 'admin'
+            ]
+        ],
+        'symbol_left' => [
+            'checks' => [
+                'string',
+                'between:1,12'
+            ],
+            'message' => [
+                'language_key' => 'error_symbol_left',
+                'language_block' => 'localisation/currency',
+                'default_text' => 'Symbol left must be between 1-12 characters',
+                'section' => 'admin'
+            ]
+        ],
+        'symbol_right' => [
+            'checks' => [
+                'string',
+                'between:1,12'
+            ],
+            'message' => [
+                'language_key' => 'error_symbol_right',
+                'language_block' => 'localisation/currency',
+                'default_text' => 'Symbol right must be between 1-12 characters',
+                'section' => 'admin'
+            ]
+        ],
+        'decimal_place' => [
+            'checks' => [
+                'string',
+                'max:1'
+            ],
+            'message' => [
+                'language_key' => 'error_decimal_place',
+                'language_block' => 'localisation/currency',
+                'default_text' => 'Decimal place must be 1 characters',
+                'section' => '??'
+            ]
+        ],
+        'value' => [
+            'checks' => [
+                'min:0',
+                'max:15,8'
+            ],
+            'message' => [
+                'language_key' => 'error_value',
+                'language_blog' => 'localisation/currency',
+                'default_text' => 'Value must be between 0-18.5'
+            ]
+        ],
+        'status' => [
+            'checks' => [
+                'integer',
+            ],
+            'message' => [
+                '*' => ['default_text' => 'status is not integer']
+            ]
+        ],
     ];
 
     public function orders()
@@ -71,28 +156,29 @@ class Currency extends BaseModel
         if (!$this->hasPermission('read')) {
             return false;
         }
-        $currency_data = false;
-        //$currency_data = $this->cache->pull('localization.currency');
+        $currency_data = null;
+        //????
+        //$currency_data = $this->cache->get('localization.currency');
 
-        if ($currency_data === false) {
+        if ($currency_data === null) {
 
             $arCurrencies = $this->orderBy('title', 'ASC')->get()->toArray();
 
             foreach ($arCurrencies as $result) {
-                $currency_data[$result['code']] = array(
-                    'currency_id'   => $result['currency_id'],
-                    'title'         => $result['title'],
-                    'code'          => $result['code'],
-                    'symbol_left'   => $result['symbol_left'],
-                    'symbol_right'  => $result['symbol_right'],
+                $currency_data[$result['code']] = [
+                    'currency_id' => $result['currency_id'],
+                    'title' => $result['title'],
+                    'code' => $result['code'],
+                    'symbol_left' => $result['symbol_left'],
+                    'symbol_right' => $result['symbol_right'],
                     'decimal_place' => $result['decimal_place'],
-                    'value'         => $result['value'],
-                    'status'        => $result['status'],
+                    'value' => $result['value'],
+                    'status' => $result['status'],
                     'date_modified' => $result['date_modified'],
-                );
+                ];
             }
 
-            $this->cache->push('localization.currency', $currency_data);
+            $this->cache->put('localization.currency', $currency_data);
         }
 
         return $currency_data;
@@ -116,23 +202,24 @@ class Currency extends BaseModel
      */
     public function updateCurrencies()
     {
-        $api_key =
-            $this->config->get('alphavantage_api_key') ? $this->config->get('alphavantage_api_key') : 'P6WGY9G9LB22GMBJ';
+        $api_key = $this->config->get('alphavantage_api_key')
+            ? $this->config->get('alphavantage_api_key')
+            : 'P6WGY9G9LB22GMBJ';
 
         $base_currency_code = $this->config->get('config_currency');
 
         $results = $this->where('code', $base_currency_code)
-                        ->where('date_modified', '>', date(strtotime('-1 day')))
-                        ->get()->toArray();
+            ->where('date_modified', '>', date(strtotime('-1 day')))
+            ->get()->toArray();
 
         foreach ($results as $result) {
             $url =
-                'https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency='.$base_currency_code
-                .'&to_currency='.$result['code'].'&apikey='.$api_key;
+                'https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=' . $base_currency_code
+                . '&to_currency=' . $result['code'] . '&apikey=' . $api_key;
             $connect = new AConnect(true);
             $json = $connect->getData($url);
             if (!$json) {
-                $msg = 'Currency Auto Updater Warning: Currency rate code '.$result['code'].' not updated.';
+                $msg = 'Currency Auto Updater Warning: Currency rate code ' . $result['code'] . ' not updated.';
                 $error = new AError($msg);
                 $error->toLog()->toMessages();
                 continue;
@@ -140,17 +227,17 @@ class Currency extends BaseModel
             if (isset($json["Realtime Currency Exchange Rate"]["5. Exchange Rate"])) {
                 $value = (float)$json["Realtime Currency Exchange Rate"]["5. Exchange Rate"];
                 $this->where('code', $result['code'])
-                     ->update(['value' => $value]);
+                    ->update(['value' => $value]);
             } elseif (isset($json['Information'])) {
-                $msg = 'Currency Auto Updater Info: '.$json['Information'];
+                $msg = 'Currency Auto Updater Info: ' . $json['Information'];
                 $error = new AError($msg);
                 $error->toLog()->toMessages();
             }
             usleep(500);
         }
         $this->where('code', $base_currency_code)
-             ->update(['value' => '1.00000']);
-        $this->cache->remove('localization');
+            ->update(['value' => '1.00000']);
+        $this->cache->flush('localization');
 
     }
 

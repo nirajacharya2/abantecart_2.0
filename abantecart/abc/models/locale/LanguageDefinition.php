@@ -30,7 +30,7 @@ class LanguageDefinition extends BaseModel
 
     protected $casts = [
         'language_id' => 'int',
-        'section'     => 'bool',
+        'section' => 'bool',
     ];
 
     protected $dates = [
@@ -42,6 +42,20 @@ class LanguageDefinition extends BaseModel
         'language_value',
         'date_added',
         'date_modified',
+    ];
+    protected $rules = [
+        'language_value' => [
+            'checks' => [
+                'string',
+                'required'
+            ],
+            'messages' => [
+                'language_key' => 'error_language_value',
+                'language_block' => 'localisation/language_definitions',
+                'default_text' => 'Locale required',
+                'section' => 'admin'
+            ]
+        ]
     ];
 
     public function language()
