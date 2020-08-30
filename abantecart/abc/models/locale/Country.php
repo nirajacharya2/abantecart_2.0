@@ -48,10 +48,23 @@ class Country extends BaseModel
         'sort_order',
     ];
     protected $rules = [
+        'country_id'=>[
+            'checks'=>[
+                'integer',
+                'required',
+                'sometimes',
+                'min:0'
+            ],
+            'messages'=>[
+                'language_key' => 'error_country_id',
+                'language_block' => 'localisation/country',
+                'default_text' => 'Country_id required!',
+                'section' => 'admin'
+            ]
+        ],
         'iso_code_2' => [
             'checks' => [
                 'string',
-                'required',
                 'between:1,2'
             ],
             'messages' => [
@@ -64,7 +77,6 @@ class Country extends BaseModel
         'iso_code_3' => [
             'checks' => [
                 'string',
-                'required',
                 'between:1,3'
             ],
             'messages' => [

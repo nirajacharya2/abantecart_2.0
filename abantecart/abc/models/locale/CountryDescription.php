@@ -39,9 +39,22 @@ class CountryDescription extends BaseModel
         'language_id',
     ];
     protected $rules = [
+        'id'=>[
+            'checks'=>[
+                'integer',
+                'required',
+                'sometimes',
+                'min:0'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'language_id is not integer']
+            ],
+        ],
         'name' => [
             'checks' => [
                 'string',
+                'required',
+                'sometimes',
                 'between:2,128'
             ],
             'messages' => [
@@ -54,7 +67,9 @@ class CountryDescription extends BaseModel
         'language_id' => [
             'checks' => [
                 'integer',
-                'required'
+                'required',
+                'sometimes',
+                'min:0'
             ],
             'messages' => [
                 '*' => ['default_text' => 'language_id is not integer']
