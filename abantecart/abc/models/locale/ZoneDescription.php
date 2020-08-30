@@ -35,11 +35,25 @@ class ZoneDescription extends BaseModel
 
     protected $fillable = [
         'name',
+        'id'
     ];
     protected $rules = [
+        'id'=>[
+            'checks' => [
+                'integer',
+                'required',
+                'sometimes',
+                'min:1'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'id is not integer']
+            ]
+        ],
         'name' => [
             'checks' => [
                 'string',
+                'required',
+                'sometimes',
                 'between:2,128'
             ],
             'messages' => [

@@ -16,6 +16,7 @@ class ZoneDescriptonModelTest extends ATestCase
 
         $zone = new ZoneDescription(
             [
+                'id'=> 'dfgdsfdsf',
                 'name' => 43647890965546786543,
 
             ]
@@ -26,11 +27,11 @@ class ZoneDescriptonModelTest extends ATestCase
         } catch (ValidationException $e) {
             $errors = $zone->errors()['validation'];
         }
-        $this->assertEquals(1, count($errors));
+        $this->assertEquals(2, count($errors));
 
         $zone = new ZoneDescription(
             [
-
+                'id'=> 2,
                 'code' => 'somestrng',
             ]
         );
