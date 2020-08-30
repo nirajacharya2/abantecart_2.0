@@ -42,6 +42,17 @@ class Location extends BaseModel
         'date_modified',
     ];
     protected $rules = [
+        'location_id'=>[
+            'checks' => [
+                'integer',
+                'required',
+                'sometimes',
+                'min:1'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'location_id is not integer']
+            ]
+        ],
         'name' => [
             'checks' => [
                 'string',

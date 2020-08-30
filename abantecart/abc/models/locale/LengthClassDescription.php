@@ -47,7 +47,7 @@ class LengthClassDescription extends BaseModel
                 'min:1'
             ],
             'messages' => [
-                '*' => ['default_text' => 'language_definition_id is not integer']
+                '*' => ['default_text' => 'id is not integer']
             ]
         ],
         'title' => [
