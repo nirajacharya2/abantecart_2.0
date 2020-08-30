@@ -30,6 +30,7 @@ class CurrencyModelTest extends ATestCase
 
         $currency = new Currency(
             [
+                'currency_id'=> 'fghfgh',
                 'title' => 'somestrinsomestrinsomestrinsomestrin',
                 'code' => 11111111,
                 'symbol_left' => 111111111,
@@ -48,7 +49,7 @@ class CurrencyModelTest extends ATestCase
         }
 
         var_dump($errors);
-        $this->assertEquals(7, count($errors));
+        $this->assertEquals(8, count($errors));
 
 
         $currency = new Currency(
