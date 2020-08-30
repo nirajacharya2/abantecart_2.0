@@ -59,7 +59,7 @@ class Currency extends BaseModel
                 'integer',
                 'required',
                 'sometimes',
-                'min:0'
+                'min:1'
             ],
             'messages' => [
                 '*' => ['default_text' => 'currency_id is not integer']

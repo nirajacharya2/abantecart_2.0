@@ -17,6 +17,7 @@ class LenguageDefinitionModelTest extends ATestCase
 
         $language = new LanguageDefinition(
             [
+                'language_definition_id'=>'dfsgdg',
                 'language_value' => '',
             ]
         );
@@ -26,11 +27,12 @@ class LenguageDefinitionModelTest extends ATestCase
         } catch (ValidationException $e) {
             $errors = $language->errors()['validation'];
         }
-        $this->assertEquals(1, count($errors));
+
+        $this->assertEquals(2, count($errors));
 
         $language = new LanguageDefinition(
             [
-
+                'language_definition_id'=>2,
                 'language_value' => 'somestring',
 
             ]

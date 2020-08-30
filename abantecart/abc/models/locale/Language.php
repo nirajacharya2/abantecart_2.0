@@ -134,6 +134,17 @@ class Language extends BaseModel
         'status',
     ];
     protected $rules = [
+        'language_id' => [
+            'checks' => [
+                'integer',
+                'required',
+                'sometimes',
+                'min:1'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'language_id is not integer']
+            ]
+        ],
         'name' => [
             'checks' => [
                 'string',
@@ -152,6 +163,7 @@ class Language extends BaseModel
             'checks' => [
                 'string',
                 'required',
+                'sometimes',
                 'max:2'
             ],
             'messages' => [
@@ -164,6 +176,9 @@ class Language extends BaseModel
         'locale' => [
             'checks' => [
                 'string',
+                'required',
+                'sometimes',
+                'max:255'
             ],
             'messages' => [
                 'language_key' => 'error_locale',
@@ -188,6 +203,7 @@ class Language extends BaseModel
             'checks' => [
                 'string',
                 'sometimes',
+                'required',
             ],
             'messages' => [
                 'language_key' => 'error_directory',
@@ -199,7 +215,6 @@ class Language extends BaseModel
         'filename' => [
             'checks' => [
                 'string',
-                'sometimes',
                 'between:2,64'
             ],
             'messages' => [

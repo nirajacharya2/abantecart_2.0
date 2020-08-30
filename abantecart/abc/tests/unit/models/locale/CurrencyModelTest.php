@@ -54,6 +54,7 @@ class CurrencyModelTest extends ATestCase
 
         $currency = new Currency(
             [
+                'currency_id'=> 2,
                 'title' => '',
                 'code' => '',
                 'symbol_left' => 'somestring',

@@ -43,6 +43,7 @@ class CountryModelTest extends ATestCase
 
         $country = new Country(
             [
+                'country_id'=>2,
                 'iso_code_2' => 'fd',
                 'iso_code_3' => 'fdd',
                 'address_format' => 'somestring',

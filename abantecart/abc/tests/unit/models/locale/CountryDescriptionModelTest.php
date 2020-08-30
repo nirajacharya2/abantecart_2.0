@@ -35,6 +35,7 @@ class CountryDescriptionModelTest extends ATestCase
 
         $country = new CountryDescription(
             [
+                'id'=> 2,
                 'name' => 'somestring',
                 'language_id' => 1,
             ]
