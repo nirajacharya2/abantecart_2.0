@@ -36,8 +36,8 @@ class CountryModelTest extends ATestCase
             $errors = $country->errors()['validation'];
         }
 
-        var_dump($errors);die;
-        $this->assertEquals(6, count($errors));
+
+        $this->assertEquals(5, count($errors));
 
 
         $country = new Country(

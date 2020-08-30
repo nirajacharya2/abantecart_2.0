@@ -54,9 +54,21 @@ class Currency extends BaseModel
 
     ];
     protected $rules = [
+        'currency_id' => [
+            'checks' => [
+                'integer',
+                'required',
+                'sometimes',
+                'min:0'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'currency_id is not integer']
+            ]
+        ],
         'title' => [
             'checks' => [
                 'string',
+                'required',
                 'sometimes',
                 'between:2,32'
             ],
@@ -70,6 +82,7 @@ class Currency extends BaseModel
         'code' => [
             'checks' => [
                 'string',
+                'required',
                 'max:3',
                 'sometimes'
             ],

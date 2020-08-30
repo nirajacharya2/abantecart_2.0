@@ -48,18 +48,15 @@ class Country extends BaseModel
         'sort_order',
     ];
     protected $rules = [
-        'country_id'=>[
-            'checks'=>[
+        'country_id' => [
+            'checks' => [
                 'integer',
                 'required',
                 'sometimes',
                 'min:0'
             ],
-            'messages'=>[
-                'language_key' => 'error_country_id',
-                'language_block' => 'localisation/country',
-                'default_text' => 'Country_id required!',
-                'section' => 'admin'
+            'messages' => [
+                '*' => ['default_text' => 'country_id is not integer']
             ]
         ],
         'iso_code_2' => [

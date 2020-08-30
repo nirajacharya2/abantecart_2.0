@@ -39,15 +39,15 @@ class CountryDescription extends BaseModel
         'language_id',
     ];
     protected $rules = [
-        'id'=>[
-            'checks'=>[
+        'id' => [
+            'checks' => [
                 'integer',
                 'required',
                 'sometimes',
                 'min:0'
             ],
             'messages' => [
-                '*' => ['default_text' => 'language_id is not integer']
+                '*' => ['default_text' => 'id is not integer']
             ],
         ],
         'name' => [
