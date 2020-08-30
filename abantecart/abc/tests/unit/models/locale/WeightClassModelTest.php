@@ -18,7 +18,7 @@ class WeightClassModelTest extends ATestCase
 
         $weight = new WeightClass(
             [
-                'value' => 100.8,
+                'weight_class_id' => 'dgffd',
             ]
         );
         $errors = [];
@@ -28,11 +28,11 @@ class WeightClassModelTest extends ATestCase
             $errors = $weight->errors()['validation'];
         }
 
-        $this->assertEquals(0, count($errors));
+        $this->assertEquals(1, count($errors));
 
         $weight = new WeightClass(
             [
-                'value' => 8.5,
+                'weight_class_id' => 2,
             ]
         );
         $errors = [];
