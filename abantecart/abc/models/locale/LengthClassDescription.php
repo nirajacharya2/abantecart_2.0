@@ -39,9 +39,22 @@ class LengthClassDescription extends BaseModel
         'unit',
     ];
     protected $rules = [
+        'id'=>[
+            'checks' => [
+                'integer',
+                'required',
+                'sometimes',
+                'min:1'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'language_definition_id is not integer']
+            ]
+        ],
         'title' => [
             'checks' => [
                 'string',
+                'required',
+                'sometimes',
                 'between:2,32'
             ],
             'message' => [
@@ -54,6 +67,8 @@ class LengthClassDescription extends BaseModel
         'unit' => [
             'checks' => [
                 'string',
+                'required',
+                'sometimes',
                 'between:1,4'
             ],
             'message' => [
