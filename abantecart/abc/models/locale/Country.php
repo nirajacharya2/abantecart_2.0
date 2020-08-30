@@ -41,6 +41,7 @@ class Country extends BaseModel
     ];
 
     protected $fillable = [
+        'country_id',
         'iso_code_2',
         'iso_code_3',
         'address_format',

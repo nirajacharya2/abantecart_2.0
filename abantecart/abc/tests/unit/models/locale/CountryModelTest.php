@@ -22,6 +22,7 @@ class CountryModelTest extends ATestCase
 
         $country = new Country(
             [
+                'country_id'=>'fgfgfg',
                 'iso_code_2' => 121111111,
                 'iso_code_3' => 11111111,
                 'address_format' => 111111111,
@@ -37,7 +38,7 @@ class CountryModelTest extends ATestCase
         }
 
 
-        $this->assertEquals(5, count($errors));
+        $this->assertEquals(6, count($errors));
 
 
         $country = new Country(
