@@ -48,8 +48,20 @@ class Zone extends BaseModel
         'code',
         'status',
         'sort_order',
+        'zone_id'
     ];
     protected $rules = [
+        'zone_id'=>[
+            'checks' => [
+                'integer',
+                'required',
+                'sometimes',
+                'min:1'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'zone_id is not integer']
+            ]
+        ],
         'code' => [
             'checks' => [
                 'string',

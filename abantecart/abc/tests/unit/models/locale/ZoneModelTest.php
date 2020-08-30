@@ -15,6 +15,7 @@ class ZoneModelTest extends ATestCase
 
         $zone = new Zone(
             [
+                'zone_id'=>'fgfgfdcg',
                 'code' => 43647890965546786543,
                 'status' => 'sdgdgsd',
                 'sort_order' => 'sdgsdgsd',
@@ -26,11 +27,11 @@ class ZoneModelTest extends ATestCase
         } catch (ValidationException $e) {
             $errors = $zone->errors()['validation'];
         }
-        $this->assertEquals(3, count($errors));
+        $this->assertEquals(4, count($errors));
 
         $zone = new Zone(
             [
-
+                'id'=> 2,
                 'code' => 'somestrng',
                 'status' => 1,
                 'sort_order' => 2,
