@@ -39,8 +39,21 @@ class LengthClass extends BaseModel
         'value',
         'date_added',
         'date_modified',
+        'length_class_id'
     ];
-
+    protected $rules = [
+        'length_class_id'=>[
+            'checks' => [
+                'integer',
+                'required',
+                'sometimes',
+                'min:1'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'language_definition_id is not integer']
+            ]
+        ]
+    ];
     public function descriptions()
     {
         return $this->HasMany(LengthClassDescription::class, 'length_class_id');

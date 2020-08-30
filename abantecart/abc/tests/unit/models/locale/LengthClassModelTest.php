@@ -17,7 +17,7 @@ class LengthClassModelTest extends ATestCase
 
         $language = new LengthClass(
             [
-                'value' => 16,
+                'length_class_id' => 'gfgfg'
             ]
         );
         $errors = [];
@@ -32,7 +32,7 @@ class LengthClassModelTest extends ATestCase
         $language = new LengthClass(
             [
 
-                'value' => 15.7,
+                'length_class_id'=> 2,
             ]
         );
         $errors = [];
