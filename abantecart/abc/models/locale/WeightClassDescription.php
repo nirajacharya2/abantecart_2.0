@@ -36,13 +36,27 @@ class WeightClassDescription extends BaseModel
     ];
 
     protected $fillable = [
+        'id',
         'title',
         'unit',
     ];
     protected $rules = [
+        'id'=>[
+            'checks' => [
+                'integer',
+                'required',
+                'sometimes',
+                'min:1'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'id is not integer']
+            ]
+        ],
         'title' => [
             'checks' => [
                 'string',
+                'required',
+                'sometimes',
                 'between:2,32'
             ],
             'messages' => [
@@ -55,6 +69,8 @@ class WeightClassDescription extends BaseModel
         'unit' => [
             'checks' => [
                 'string',
+                'required',
+                'sometimes',
                 'max:4'
             ],
             'messages' => [

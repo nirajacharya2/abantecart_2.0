@@ -16,6 +16,7 @@ class WeightClassDescriptionModelTest extends ATestCase
 
         $weight = new WeightClassDescription(
             [
+                'id'=> 'asadadas',
                 'title' => 4567890876543,
                 'unit' => 'ffffffff',
 
@@ -27,7 +28,7 @@ class WeightClassDescriptionModelTest extends ATestCase
         } catch (ValidationException $e) {
             $errors = $weight->errors()['validation'];
         }
-        $this->assertEquals(2, count($errors));
+        $this->assertEquals(3, count($errors));
 
         $weight = new WeightClassDescription(
             [
