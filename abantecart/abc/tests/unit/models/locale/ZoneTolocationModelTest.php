@@ -15,6 +15,7 @@ class ZoneTolocationModelTest extends ATestCase
 
         $zone = new ZonesToLocation(
             [
+                'zone_to_location_id'=> 'dsfdfdsfd',
                 'country_id' => 'fgfg',
                 'zone_id' => 'sdgdgsd',
                 'location_id' => 'sdgsdgsd',
@@ -26,11 +27,11 @@ class ZoneTolocationModelTest extends ATestCase
         } catch (ValidationException $e) {
             $errors = $zone->errors()['validation'];
         }
-        $this->assertEquals(3, count($errors));
+        $this->assertEquals(4, count($errors));
 
         $zone = new ZonesToLocation(
             [
-
+                'zone_to_location_id'=>2,
                 'country_id' => 3,
                 'zone_id' => 1,
                 'location_id' => 2,

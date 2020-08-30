@@ -45,11 +45,24 @@ class ZonesToLocation extends BaseModel
         'location_id',
         'date_added',
         'date_modified',
+        'zone_to_location_id'
     ];
     protected $rules = [
+        'zone_to_location_id'=>[
+            'checks' => [
+                'integer',
+                'required',
+                'sometimes',
+                'min:1'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'zone_to_location_id is not integer']
+            ]
+        ],
         'country_id' => [
             'checks' => [
                 'required',
+                'sometimes',
                 'integer'
             ],
             'messages' => [
@@ -69,6 +82,7 @@ class ZonesToLocation extends BaseModel
         'location_id' => [
             'checks' => [
                 'required',
+                'sometimes',
                 'integer'
             ],
             'messages' => [
