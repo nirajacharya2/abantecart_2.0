@@ -37,6 +37,7 @@ class CountryDescription extends BaseModel
     protected $fillable = [
         'name',
         'language_id',
+        'id'
     ];
     protected $rules = [
         'id' => [
@@ -44,7 +45,7 @@ class CountryDescription extends BaseModel
                 'integer',
                 'required',
                 'sometimes',
-                'min:0'
+                'min:1'
             ],
             'messages' => [
                 '*' => ['default_text' => 'id is not integer']
