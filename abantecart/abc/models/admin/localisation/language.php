@@ -26,13 +26,9 @@ use abc\core\lib\AException;
 use abc\core\lib\AMenu_Storefront;
 use abc\core\lib\ATaskManager;
 
-if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
 class ModelLocalisationLanguage extends Model
 {
-    public $errors = array();
+    public $errors = [];
 
     /**
      * @param $data
@@ -51,7 +47,7 @@ class ModelLocalisationLanguage extends Model
                                 sort_order = '".$this->db->escape($data['sort_order'])."',
                                 STATUS = '".(int)$data['status']."'");
 
-        $this->cache->remove('localization');
+        $this->cache->flush('localization');
 
         $language_id = $this->db->getLastId();
 
@@ -64,25 +60,28 @@ class ModelLocalisationLanguage extends Model
     }
 
     /**
-     * @param int   $language_id
+     * @param int $language_id
      * @param array $data
+     *
+     * @throws \Exception
      */
     public function editLanguage($language_id, $data)
     {
-        $update_data = array();
+        $update_data = [];
         foreach ($data as $key => $val) {
             $update_data[] = "`$key` = '".$this->db->escape($val)."' ";
         }
         $this->db->query("UPDATE ".$this->db->table_name("languages")." SET ".implode(',',
                 $update_data)." WHERE language_id = '".(int)$language_id."'");
 
-        $this->cache->remove('localization');
+        $this->cache->flush('localization');
     }
 
     /**
      * @param int $language_id
      *
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function deleteLanguage($language_id)
     {
@@ -91,7 +90,7 @@ class ModelLocalisationLanguage extends Model
         $this->language->deleteAllLanguageEntries($language_id);
 
         //too many changes and better clear all cache
-        $this->cache->remove('*');
+        $this->cache->flush('*');
 
         //delete menu items for given language
         $menu = new AMenu_Storefront();
@@ -102,6 +101,7 @@ class ModelLocalisationLanguage extends Model
      * @param int $language_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getLanguage($language_id)
     {
@@ -119,15 +119,16 @@ class ModelLocalisationLanguage extends Model
     }
 
     /**
-     * @param array  $data
+     * @param array $data
      * @param string $mode
      *
      * @return int|array
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function getLanguages($data = array(), $mode = 'default')
+    public function getLanguages($data = [], $mode = 'default')
     {
         if ($data || $mode == 'total_only') {
-            $filter = (isset($data['filter']) ? $data['filter'] : array());
+            $filter = (isset($data['filter']) ? $data['filter'] : []);
             if ($mode == 'total_only') {
                 $sql = "SELECT count(*) AS total FROM ".$this->db->table_name("languages")." ";
             } else {
@@ -155,11 +156,11 @@ class ModelLocalisationLanguage extends Model
                 return (int)$query->row['total'];
             }
 
-            $sort_data = array(
+            $sort_data = [
                 'name',
                 'code',
                 'sort_order',
-            );
+            ];
 
             if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
                 $sql .= " ORDER BY ".$data['sort'];
@@ -199,9 +200,9 @@ class ModelLocalisationLanguage extends Model
 
             return $result;
         } else {
-            $language_data = $this->cache->pull('localization.language.admin');
+            $language_data = $this->cache->get('localization.language.admin');
 
-            if ($language_data === false) {
+            if ($language_data === null) {
                 $query = $this->db->query("SELECT *
                                             FROM ".$this->db->table_name("languages")." 
                                             ORDER BY sort_order, name");
@@ -213,7 +214,7 @@ class ModelLocalisationLanguage extends Model
                         }
                     }
 
-                    $language_data[$result['code']] = array(
+                    $language_data[$result['code']] = [
                         'language_id' => $result['language_id'],
                         'name'        => $result['name'],
                         'code'        => $result['code'],
@@ -223,9 +224,9 @@ class ModelLocalisationLanguage extends Model
                         'filename'    => $result['filename'],
                         'sort_order'  => $result['sort_order'],
                         'status'      => $result['status'],
-                    );
+                    ];
                 }
-                $this->cache->push('localization.language.admin', $language_data);
+                $this->cache->put('localization.language.admin', $language_data);
             }
 
             return $language_data;
@@ -236,19 +237,21 @@ class ModelLocalisationLanguage extends Model
      * @param array $data
      *
      * @return array|int
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function getTotalLanguages($data = array())
+    public function getTotalLanguages($data = [])
     {
         return $this->getLanguages($data, 'total_only');
     }
 
     /**
      * @param string $task_name
-     * @param array  $data
+     * @param array $data
      *
      * @return array|bool
+     * @throws \Exception
      */
-    public function createTask($task_name, $data = array())
+    public function createTask($task_name, $data = [])
     {
 
         if ( ! $task_name) {
@@ -278,7 +281,7 @@ class ModelLocalisationLanguage extends Model
 
         //create new task
         $task_id = $tm->addTask(
-            array(
+            [
                 'name'               => $task_name,
                 'starter'            => 1, //admin-side is starter
                 'created_by'         => $this->user->getId(), //get starter id
@@ -291,7 +294,7 @@ class ModelLocalisationLanguage extends Model
                 'run_interval'       => '0',
                 //think that task will execute with some connection errors
                 'max_execution_time' => ($total_desc_count * $time_per_item * 2),
-            )
+            ]
         );
         if ( ! $task_id) {
             $this->errors = array_merge($this->errors, $tm->errors);
@@ -300,24 +303,24 @@ class ModelLocalisationLanguage extends Model
         }
 
         $tm->updateTaskDetails($task_id,
-            array(
+            [
                 'created_by' => $this->user->getId(),
-                'settings'   => array(
+                'settings'   => [
                     'descriptions_count' => $total_desc_count,
-                ),
-            )
+                ],
+            ]
         );
 
         //create steps
         $sort_order = 1;
-        $eta = array();
+        $eta = [];
         foreach ($tables as $table_name => $info) {
 
             if ( ! $info['primary_keys']) {
                 continue;
             }
 
-            $settings = array();
+            $settings = [];
             //get all indexes of descriptions of the table
             $sql = "SELECT ".implode(', ', $info['primary_keys'])."
                     FROM ".$table_name."
@@ -325,50 +328,50 @@ class ModelLocalisationLanguage extends Model
             $result = $this->db->query($sql);
 
             if ($divider >= $info['description_count']) {
-                $items = array();
+                $items = [];
                 foreach ($result->rows as $row) {
                     foreach ($row as $k => $v) {
                         $items[$k][] = $v;
                     }
                 }
 
-                $settings[0] = array(
+                $settings[0] = [
                     'src_language_id'  => $data['source_language'],
                     'language_id'      => $data['language_id'],
                     'translate_method' => $data['translate_method'],
                     'table'            =>
-                        array(
+                        [
                             'table_name'  => $table_name,
                             'items_count' => $info['description_count'],
                             'indexes'     => $items,
-                        ),
-                );
+                        ],
+                ];
             } else {
                 $slices = array_chunk($result->rows, $divider);
 
                 foreach ($slices as $slice) {
-                    $items = array();
+                    $items = [];
                     foreach ($slice as $row) {
                         foreach ($row as $k => $v) {
                             $items[$k][] = $v;
                         }
                     }
-                    $settings[] = array(
+                    $settings[] = [
                         'src_language_id'  => $data['source_language'],
                         'language_id'      => $data['language_id'],
                         'translate_method' => $data['translate_method'],
                         'table'            =>
-                            array(
+                            [
                                 'table_name'  => $table_name,
                                 'items_count' => sizeof($slice),
                                 'indexes'     => $items,
-                            ),
-                    );
+                            ],
+                    ];
                 }
             }
 
             foreach ($settings as $s) {
-                $step_id = $tm->addStep(array(
+                $step_id = $tm->addStep([
                     'task_id'            => $task_id,
                     'sort_order'         => $sort_order,
                     'status'             => 1,
@@ -378,7 +381,7 @@ class ModelLocalisationLanguage extends Model
                     'max_execution_time' => ($time_per_item * $divider * 2),
                     'controller'         => $task_controller,
                     'settings'           => $s,
-                ));
+                ]);
                 $eta[$step_id] = $time_per_item * $divider * 2;
                 $sort_order++;
             }
@@ -405,7 +408,7 @@ class ModelLocalisationLanguage extends Model
 
     protected function _get_tables_info($src_language_id = 0)
     {
-        $output = array();
+        $output = [];
         $lang_tables = $this->language->getLanguageBasedTables();
         if ( ! $lang_tables) {
             return false;
@@ -415,11 +418,11 @@ class ModelLocalisationLanguage extends Model
         if ( ! $src_language_id) {
             return false;
         }
-        $excludes = array(
+        $excludes = [
             $this->db->table_name('languages'),
             $this->db->table_name('language_definitions'),
             $this->db->table_name('orders'),
-        );
+        ];
         foreach ($lang_tables as $table) {
             $table_name = $table['table_name'];
             if (in_array($table_name, $excludes)) {

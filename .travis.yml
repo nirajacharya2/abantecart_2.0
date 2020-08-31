@@ -43,7 +43,8 @@ before_script:
 
 script:
   #run phpunit
-  - php ./vendor/bin/phpunit --color
+  - php ./vendor/bin/phpunit --color --stop-on-failure
+
 
 notifications:
   email:

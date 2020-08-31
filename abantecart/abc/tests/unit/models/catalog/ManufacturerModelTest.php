@@ -1,6 +1,6 @@
 <?php
 
-namespace abc\tests\unit\models\admin;
+namespace abc\tests\unit\models\catalog;
 
 use abc\models\catalog\Manufacturer;
 use abc\tests\unit\ATestCase;

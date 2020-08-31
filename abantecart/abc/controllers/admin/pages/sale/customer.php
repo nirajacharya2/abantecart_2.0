@@ -1157,6 +1157,7 @@ class ControllerPagesSaleCustomer extends AController
      * @param null $customer_id
      *
      * @return bool
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
@@ -1200,6 +1201,7 @@ class ControllerPagesSaleCustomer extends AController
 
     /**
      * @return bool
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */

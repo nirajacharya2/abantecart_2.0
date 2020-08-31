@@ -1,6 +1,6 @@
 <?php
 
-namespace abc\core\lib\contracts;
+namespace abc\core\lib;
 
 class MailApiResponse
 {

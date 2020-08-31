@@ -44,6 +44,9 @@ class ValidationTranslator implements Translator
      * @param  string $locale
      *
      * @return mixed
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function trans($key, array $replace = [], $locale = null)
     {

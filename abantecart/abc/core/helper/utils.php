@@ -1885,7 +1885,9 @@ class AHelperUtils extends AHelper
     /**
      * Function changes and cleans data base on entity codes, such as language_code, sku etc
      *
-     * @param array $data
+     * @param $string
+     * @param int $width
+     * @param bool $addEllipses
      *
      * @return array
      */
@@ -2066,6 +2068,7 @@ class AHelperUtils extends AHelper
      *
      * @return null|string
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      */
     public static function lng(string $key, $block= '', $default_text = '', $section = ''){
@@ -2090,6 +2093,20 @@ class AHelperUtils extends AHelper
         foreach($array as $rule => $msgArr){
             $errors[$rule] = implode(' ', $msgArr);
         }
+    }
+
+    public static function getAppErrorText()
+    {
+        $language = Registry::language();
+        if (!ABC::env('IS_ADMIN')) {
+            return 'Application Error!';
+        }
+        if ($language) {
+            return sprintf($language->get('error_system'), Registry::html()->getSecureURL('tool/error_log'));
+        } else {
+            return 'Application Error! Please check error log for details.';
+        }
+
     }
 
     /**

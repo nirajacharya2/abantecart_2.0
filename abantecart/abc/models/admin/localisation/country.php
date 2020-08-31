@@ -46,15 +46,15 @@ class ModelLocalisationCountry extends Model
 
         foreach ($data['country_name'] as $language_id => $value) {
             $this->language->replaceDescriptions('country_descriptions',
-                array('country_id' => (int)$country_id),
-                array(
-                    $language_id => array(
+                ['country_id' => (int)$country_id],
+                [
+                    $language_id => [
                         'name' => $value['name'],
-                    ),
-                ));
+                    ],
+                ]);
         }
 
-        $this->cache->remove('localization');
+        $this->cache->flush('localization');
         return $country_id;
     }
 
@@ -67,8 +67,8 @@ class ModelLocalisationCountry extends Model
     public function editCountry($country_id, $data)
     {
 
-        $fields = array('status', 'iso_code_2', 'iso_code_3', 'address_format',);
-        $update = array();
+        $fields = ['status', 'iso_code_2', 'iso_code_3', 'address_format',];
+        $update = [];
         foreach ($fields as $f) {
             if (isset($data[$f])) {
                 $update[] = $f." = '".$this->db->escape($data[$f])."'";
@@ -80,18 +80,18 @@ class ModelLocalisationCountry extends Model
                 SET ".implode(',', $update)." 
                 WHERE country_id = '".(int)$country_id."'"
             );
-            $this->cache->remove('localization');
+            $this->cache->flush('localization');
         }
 
         if ($data['country_name']) {
             foreach ($data['country_name'] as $language_id => $value) {
                 $this->language->replaceDescriptions('country_descriptions',
-                    array('country_id' => (int)$country_id),
-                    array(
-                        $language_id => array(
+                    ['country_id' => (int)$country_id],
+                    [
+                        $language_id => [
                             'name' => $value['name'],
-                        ),
-                    ));
+                        ],
+                    ]);
             }
         }
     }
@@ -111,7 +111,7 @@ class ModelLocalisationCountry extends Model
             "DELETE FROM ".$this->db->table_name("country_descriptions")." 
             WHERE country_id = '".(int)$country_id."'"
         );
-        $this->cache->remove('localization');
+        $this->cache->flush('localization');
     }
 
     /**
@@ -144,7 +144,7 @@ class ModelLocalisationCountry extends Model
      */
     public function getCountryDescriptions($country_id)
     {
-        $country_data = array();
+        $country_data = [];
 
         $query = $this->db->query(
             "SELECT *
@@ -153,7 +153,7 @@ class ModelLocalisationCountry extends Model
         );
 
         foreach ($query->rows as $result) {
-            $country_data[$result['language_id']] = array('name' => $result['name']);
+            $country_data[$result['language_id']] = ['name' => $result['name']];
         }
 
         return $country_data;
@@ -165,8 +165,9 @@ class ModelLocalisationCountry extends Model
      *
      * @return array|int
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function getCountries($data = array(), $mode = 'default')
+    public function getCountries($data = [], $mode = 'default')
     {
         $language_id = $this->language->getContentLanguageID();
         $default_language_id = $this->language->getDefaultLanguageID();
@@ -197,12 +198,12 @@ class ModelLocalisationCountry extends Model
                 return $query->row['total'];
             }
 
-            $sort_data = array(
+            $sort_data = [
                 'name'       => 'cd.name',
                 'status'     => 'c.status',
                 'iso_code_2' => 'c.iso_code_2',
                 'iso_code_3' => 'c.iso_code_3',
-            );
+            ];
 
             if (isset($data['sort']) && in_array($data['sort'], array_keys($sort_data))) {
                 $sql .= " ORDER BY ".$sort_data[$data['sort']];
@@ -233,9 +234,9 @@ class ModelLocalisationCountry extends Model
             return $query->rows;
         } else {
             $cache_key = 'localization.country.lang_'.$language_id;
-            $country_data = $this->cache->pull($cache_key);
+            $country_data = $this->cache->get($cache_key);
 
-            if ($country_data === false) {
+            if ($country_data === null) {
                 if ($language_id == $default_language_id) {
                     $query = $this->db->query(
                         "SELECT *
@@ -259,7 +260,7 @@ class ModelLocalisationCountry extends Model
 
                 $country_data = $query->rows;
 
-                $this->cache->push($cache_key, $country_data);
+                $this->cache->put($cache_key, $country_data);
             }
 
             return $country_data;
@@ -271,8 +272,9 @@ class ModelLocalisationCountry extends Model
      *
      * @return int
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function getTotalCountries($data = array())
+    public function getTotalCountries($data = [])
     {
         return $this->getCountries($data, 'total_only');
     }

@@ -89,7 +89,7 @@ class ModelExtensionGdpr extends Model
                         } elseif (in_array($data_type, ['int', 'bigint', 'smallint', 'decimal', 'double'])) {
                             $value = 0;
                         } elseif (in_array($data_type, ['timestamp', 'datetime'])) {
-                            $value = '0000-00-00 00:00:00';
+                            $value = null;
                         } else {
                             $value = '';
                         }

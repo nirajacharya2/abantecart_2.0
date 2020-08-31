@@ -198,6 +198,7 @@ class ControllerResponsesListingGridOrderStatus extends AController
      * update only one field
      *
      * @return void
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
@@ -261,7 +262,6 @@ class ControllerResponsesListingGridOrderStatus extends AController
             foreach ($this->request->post['order_status'] as $id => $value) {
 
                 if (!$this->validateStatusName($value['name'])) {
-                    var_dump($value['name']);
                     $error = new AError('');
                     return $error->toJSONResponse('VALIDATION_ERROR_406',
                         ['error_text' => $this->language->get('error_name')]);

@@ -24,6 +24,7 @@ use abc\core\ABC;
 use abc\core\engine\Registry;
 use H;
 
+
 class AMenu
 {
     /**
@@ -33,13 +34,11 @@ class AMenu
      */
     protected $registry;
     /**
-     * @var ADB
-     */
-    protected $db;
-    /**
      * @var object
      */
     protected $dataset;
+    /** @var ADB */
+    protected $db;
     /**
      * @var integer
      */
@@ -72,8 +71,10 @@ class AMenu
         $this->db = $this->registry->get('db');
         //check for correct menu name
         if (!in_array($menu_name, ['admin', 'storefront'])) {
-            throw new AException (AC_ERR_LOAD,
-                'Error: Could not initialize AMenu class! Unknown menu name: "'.$menu_name.'"');
+            throw new AException (
+                'Error: Could not initialize AMenu class! Unknown menu name: "'.$menu_name.'"',
+                AC_ERR_LOAD
+            );
         }
 
         $this->dataset = new ADataset ('menu', $menu_name);
@@ -275,7 +276,7 @@ class AMenu
         $result = $this->dataset->addRows([$item]);
         // rebuild menu var after changing
         $this->_build_menu($this->dataset->getRows());
-        $this->registry->get('cache')->remove('admin_menu');
+        Registry::cache()->flush('admin_menu');
         return $result;
     }
 
@@ -290,7 +291,7 @@ class AMenu
         //
         $this->dataset->deleteRows(["column_name" => "item_id", "operator" => "=", "value" => $item_id]);
         $this->_build_menu($this->dataset->getRows());
-        $this->registry->get('cache')->remove('admin_menu');
+        Registry::cache()->flush('admin_menu');
         return true;
     }
 
@@ -310,7 +311,7 @@ class AMenu
         $this->dataset->updateRows(["column_name" => "item_id", "operator" => "=", "value" => $item_id],
             $new_values);
         $this->_build_menu($this->dataset->getRows());
-        $this->registry->get('cache')->remove('admin_menu');
+        Registry::cache()->flush('admin_menu');
         return true;
     }
 }

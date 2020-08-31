@@ -178,17 +178,7 @@ class Currency extends BaseModel
             $arCurrencies = $this->orderBy('title', 'ASC')->get()->toArray();
 
             foreach ($arCurrencies as $result) {
-                $currency_data[$result['code']] = [
-                    'currency_id' => $result['currency_id'],
-                    'title' => $result['title'],
-                    'code' => $result['code'],
-                    'symbol_left' => $result['symbol_left'],
-                    'symbol_right' => $result['symbol_right'],
-                    'decimal_place' => $result['decimal_place'],
-                    'value' => $result['value'],
-                    'status' => $result['status'],
-                    'date_modified' => $result['date_modified'],
-                ];
+                $currency_data[$result['code']] = $result;                    
             }
 
             $this->cache->put('localization.currency', $currency_data);
@@ -251,7 +241,6 @@ class Currency extends BaseModel
         $this->where('code', $base_currency_code)
             ->update(['value' => '1.00000']);
         $this->cache->flush('localization');
-
     }
 
     /**

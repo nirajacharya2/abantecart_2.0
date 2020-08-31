@@ -38,11 +38,11 @@
 		<div class="col-md-3 col-sm-6 col-xs-12 product-block">
 			<div class="thumbnail">
 				<?php if ($product['special']) { ?>
-					<span class="sale"></span>
-				<?php } ?>
+                    <span class="sale">Sale</span>
+                <?php } ?>
 				<?php if ($product['new_product']) { ?>
-					<span class="new"></span>
-				<?php } ?>
+                    <span class="new">New</span>
+                <?php } ?>
 				<div class="image">
 					<a href="<?php echo $item['info_url'] ?>"><?php echo $item['image'] ?></a>
 				</div>

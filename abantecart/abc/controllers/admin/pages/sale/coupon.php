@@ -22,14 +22,10 @@ namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\AResource;
 use abc\models\order\Order;
 use H;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 class ControllerPagesSaleCoupon extends AController
 {
@@ -562,7 +558,14 @@ class ControllerPagesSaleCoupon extends AController
         $store_name = 'For store '.$store_info['store_name'].': ';
 
         if ($this->request->get['coupon_id']) {
-            $total = Order::getOrders(['filter_coupon_id' => $this->request->get['coupon_id']], 'total_only');
+            $total = Order::search(
+                [
+                    'filter' => [
+                        'coupon_id' => $this->request->get['coupon_id'],
+                    ],
+                    'mode'   => 'total_only',
+                ]
+            );
             $this->data['form']['fields']['total_coupon_usage'] = $form->getFieldHtml([
                 'type'  => 'input',
                 'name'  => 'total_coupon_usage',

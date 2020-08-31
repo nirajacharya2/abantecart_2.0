@@ -131,10 +131,12 @@ class AImage
             }
             return $res_img;
         } else {
-            throw new AException(AC_ERR_LOAD,
+            throw new AException(
                 'Unable to create internal image from file '.$filename.'. Try to decrease original image size '
                 .$this->info['width'].'x'.$this->info['height']
-                .'px or reduce file size or increase memory limit for PHP.');
+                .'px or reduce file size or increase memory limit for PHP.',
+                AC_ERR_LOAD
+            );
         }
 
     }

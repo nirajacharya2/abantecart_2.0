@@ -52,13 +52,13 @@ class ControllerBlocksMenuNav extends AController {
                 $this->view->setTemplate( $block_data['block_wrapper'] );
             }
 
-            $this->menu_items = $this->cache->pull($cache_key);
-            if($this->menu_items === false){
+            $this->menu_items = $this->cache->get($cache_key);
+            if($this->menu_items === null){
                 $menu = new AMenu_Storefront();
                 $this->menu_items = $menu->getMenuItems();
 
                 //writes into cache result of calling _buildMenu func!
-                $this->cache->push($cache_key, $this->menu_items);
+                $this->cache->put($cache_key, $this->menu_items);
             }
 
             //build menu structure after caching. related to http/https urls

@@ -24,6 +24,7 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\lib\ACurrency;
+use abc\core\lib\AException;
 use abc\core\lib\APromotion;
 use abc\core\engine\AResource;
 use abc\core\engine\HtmlElementFactory;
@@ -36,10 +37,15 @@ use abc\core\lib\contracts\AttributeManagerInterface;
 use abc\models\admin\ModelCatalogDownload;
 use abc\models\catalog\Category;
 use abc\models\catalog\Product;
+use abc\models\catalog\ProductOption;
+use abc\models\catalog\ProductOptionValue;
+use abc\models\catalog\ProductOptionValueDescription;
 use abc\models\order\Order;
 use abc\models\order\OrderProduct;
 use abc\models\order\OrderStatus;
 use H;
+use Psr\Cache\InvalidArgumentException;
+use ReflectionException;
 
 /**
  * Class ControllerResponsesProductProduct
@@ -174,7 +180,7 @@ class ControllerResponsesProductProduct extends AController
         $result = '';
 
         if ($this->request->is_POST()) {
-            $this->model_catalog_product->updateProduct($this->request->get['product_id'], $this->request->post);
+            Product::updateProduct($this->request->get['product_id'], $this->request->post);
             $result = 'Saved!';
         }
 
@@ -314,16 +320,16 @@ class ControllerResponsesProductProduct extends AController
 
     public function get_options_list()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->loadModel('catalog/product');
-        $product_options = $this->model_catalog_product->getProductOptions($this->request->get['product_id']);
+        $product_options = ProductOption::with('description')
+                                        ->where('product_id', '=', $this->request->get['product_id'])
+                                        ->get()->toArray();
 
         $result = [];
         foreach ($product_options as $option) {
-            $option_name = trim($option['language'][$this->language->getContentLanguageID()]['name']);
+            $option_name = trim($option['description']['name']);
             $result[$option['product_option_id']] = $option_name ? $option_name : 'n/a';
         }
 
@@ -337,10 +343,6 @@ class ControllerResponsesProductProduct extends AController
 
     public function update_option()
     {
-
-        //init controller data
-        $this->extensions->hk_InitData($this, __FUNCTION__);
-
         if (!$this->user->canModify('product/product')) {
             $error = new AError('');
             return $error->toJSONResponse('NO_PERMISSIONS_402',
@@ -349,38 +351,53 @@ class ControllerResponsesProductProduct extends AController
                     'reset_value' => true,
                 ]);
         }
+        $get =& $this->request->get;
+        $option = ProductOption::with('description')->find($get['option_id']);
+        if (!$option || $option->product_id != $this->request->get['product_id']) {
+            $error = new AError('');
+            return $error->toJSONResponse('NO_PERMISSIONS_402',
+                [
+                    'error_text'  => $this->language->get('text_not_found'),
+                    'reset_value' => true,
+                ]);
+        }
+
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
+
         //needs to validate attribute properties
         // first - prepare data for validation
-        if (!isset($this->request->get['required'])) {
-            $this->request->get['required'] = 0;
+        if (!isset($get['required'])) {
+            $get['required'] = 0;
         }
 
-        if (H::has_value($this->request->get['regexp_pattern'])) {
-            $this->request->get['regexp_pattern'] = trim($this->request->get['regexp_pattern']);
+        if (H::has_value($get['regexp_pattern'])) {
+            $get['regexp_pattern'] = trim($get['regexp_pattern']);
         }
-        if (H::has_value($this->request->get['option_placeholder'])) {
-            $this->request->get['option_placeholder'] = trim($this->request->get['option_placeholder']);
+        if (H::has_value($get['option_placeholder'])) {
+            $get['option_placeholder'] = trim($get['option_placeholder']);
         }
-
-        $this->loadModel('catalog/product');
 
         $data = $this->request->get;
         /**
          * @var AttributeManagerInterface $attribute_manager
          */
-        $attribute_manager = ABC::getObjectByAlias('AttributeManager',['product_option']);
-        $option_info = $this->model_catalog_product->getProductOption(
-                                                        $this->request->get['product_id'],
-                                                        $this->request->get['option_id']
-        );
-        $data['element_type'] = $option_info['element_type'];
+        $attribute_manager = ABC::getObjectByAlias('AttributeManager', ['product_option']);
+        $data['element_type'] = $option->element_type;
         $data['attribute_type_id'] = $attribute_manager->getAttributeTypeID('product_option');
 
         $errors = $attribute_manager->validateAttributeCommonData($data);
 
         if (!$errors) {
-            $this->model_catalog_product->updateProductOption($this->request->get['option_id'], $this->request->get);
-        } else {
+            try {
+                $option->update($get);
+                $option->description->update($get);
+            } catch (\Exception $e) {
+                $errors['system'] = $e->getMessage();
+            }
+        }
+
+        if ($errors) {
             $error = new AError('');
             return $error->toJSONResponse('', ['error_title' => implode('<br>', $errors)]);
         }
@@ -402,9 +419,14 @@ class ControllerResponsesProductProduct extends AController
         unset($this->session->data['success']);
 
         $product_id = (int)$this->request->get['product_id'];
+        $product = Product::find($product_id);
+        if (!$product) {
+            $error = new AError('');
+            return $error->toJSONResponse('', ['error_title' => 'Product with ID "'.$product_id.'" not found!']);
+        }
         $option_id = (int)$this->request->get['option_id'];
 
-        $this->data['option_data'] = $this->model_catalog_product->getProductOption($product_id, $option_id);
+        $this->data['option_data'] = $product->getProductOption($option_id);
 
         if ($this->data['option_data']) {
 
@@ -427,10 +449,7 @@ class ControllerResponsesProductProduct extends AController
                 'product/product/update_option_values',
                 '&product_id='.$product_id.'&option_id='.$option_id);
 
-            $this->data['option_values'] = $this->model_catalog_product->getProductOptionValues(
-                                                                                                $product_id,
-                                                                                                $option_id
-            );
+            $this->data['option_values'] = ProductOptionValue::getProductOptionValues($option_id);
 
             $this->data['option_name'] = $this->html->buildElement([
                 'type'  => 'input',
@@ -519,7 +538,7 @@ class ControllerResponsesProductProduct extends AController
 
             $this->data['remove_option'] = $this->html->getSecureURL(
                                                 'product/product/del_option',
-                                                '&product_id='.$product_id.'&option_id='.$option_id);
+                '&product_option_id='.$option_id);
 
             $this->data['button_remove_option'] = $this->html->buildElement([
                 'type'  => 'button',
@@ -611,11 +630,19 @@ class ControllerResponsesProductProduct extends AController
         }
 
         $this->loadLanguage('catalog/product');
-        $this->loadModel('catalog/product');
-        $this->model_catalog_product->deleteProductOption(
-                                            $this->request->get['product_id'],
-                                            $this->request->get['option_id']
-        );
+
+        $option = ProductOption::find($this->request->get['product_option_id']);
+        if ($option) {
+            $option->forceDelete();
+        } else {
+            $error = new AError('');
+            return $error->toJSONResponse('NO_PERMISSIONS_402',
+                [
+                    'error_text'  => 'Option ID '.$this->request->get['product_option_id'].' not found!',
+                    'reset_value' => true,
+                ]);
+        }
+
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
         $this->response->setOutput($this->language->get('text_option_removed'));
@@ -638,10 +665,17 @@ class ControllerResponsesProductProduct extends AController
         $this->loadLanguage('catalog/product');
         $this->loadModel('catalog/product');
 
-        $option_info = $this->model_catalog_product->getProductOption(
-            $this->request->get['product_id'],
-            $this->request->get['option_id']
-        );
+        $product = Product::find($this->request->get['product_id']);
+        if (!$product) {
+            $error = new AError('');
+            return $error->toJSONResponse('NOT_FOUND',
+                [
+                    'error_text'  => 'Product ID '.$this->request->get['product_id'].' not found!',
+                    'reset_value' => true,
+                ]);
+        }
+
+        $option_info = $product::getProductOption($this->request->get['option_id']);
 
         //remove html-code from textarea product option
         if (in_array($option_info['element_type'], ['T', 'B'])) {
@@ -651,11 +685,26 @@ class ControllerResponsesProductProduct extends AController
             }
         }
 
-        $this->model_catalog_product->updateProductOptionValues(
-            $this->request->get['product_id'],
-            $this->request->get['option_id'],
-            $this->request->post
-        );
+        $post = $this->request->post;
+        $post['product_id'] = $this->request->get['product_id'];
+        $post['product_option_id'] = $this->request->get['option_id'];
+        foreach ($post['price'] as &$price) {
+            $price = H::preformatFloat($price, $this->language->get('decimal_point'));
+        }
+
+        try {
+            ProductOption::updateProductOptionValues($post);
+        } catch (\Exception $e) {
+            $this->log->error($e->getMessage());
+            $this->log->error($e->getTraceAsString());
+            $error = new AError('');
+            return $error->toJSONResponse('APP_ERROR',
+                [
+                    'error_text'  => H::getAppErrorText(),
+                    'reset_value' => true,
+                ]);
+
+        }
         $this->session->data['success'] = $this->language->get('text_success_option');
 
         //update controller data
@@ -671,7 +720,9 @@ class ControllerResponsesProductProduct extends AController
      * @param $form AForm
      *
      * @return string
-     * @throws \Exception
+     * @throws AException
+     * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     private function _option_value_form($form)
     {
@@ -682,8 +733,11 @@ class ControllerResponsesProductProduct extends AController
         $product_option_value_id = $this->request->get['product_option_value_id'];
         $group_attribute = [];
         if ($this->data['option_attribute']['attribute_id']) {
-            $group_attribute = $this->attribute_manager->getAttributes([], $this->data['language_id'],
-                $this->data['option_attribute']['attribute_id']);
+            $group_attribute = $this->attribute_manager->getAttributes(
+                [],
+                $this->data['language_id'],
+                $this->data['option_attribute']['attribute_id']
+            );
         }
 
         $this->data['elements_with_options'] = HtmlElementFactory::getElementsWithOptions();
@@ -739,57 +793,47 @@ class ControllerResponsesProductProduct extends AController
         if (isset($this->request->get['product_option_value_id'])) {
             $this->data['row_id'] = 'row'.$product_option_value_id;
             $this->data['attr_val_id'] = $product_option_value_id;
-            $item_info = $this->model_catalog_product->getProductOptionValue(
-                $this->request->get['product_id'],
-                $product_option_value_id
-            );
+            $optionValue = ProductOptionValue::with('description')
+                                             ->where('product_id', '=', $this->request->get['product_id'])
+                                             ->where('group_id', '=', 0)
+                                             ->find($product_option_value_id);
         } else {
+            $optionValue = null;
             $this->data['row_id'] = 'new_row';
         }
 
-        $fields = [
-            'default',
-            'name',
-            'sku',
-            'quantity',
-            'subtract',
-            'price',
-            'prefix',
-            'sort_order',
-            'weight',
-            'weight_type',
-            'attribute_value_id',
-            'children_options',
-        ];
+        $fields = array_merge(
+            (new ProductOptionValue())->getFillable(),
+            (new ProductOptionValueDescription())->getFillable()
+        );
         foreach ($fields as $f) {
             if (isset($this->request->post[$f])) {
                 $this->data[$f] = $this->request->post[$f];
-            } elseif (isset($item_info)) {
-                $this->data[$f] = $item_info[$f];
+            } elseif ($optionValue) {
+                $this->data[$f] = $optionValue->{$f} ?? $optionValue->description->{$f};
             } else {
                 $this->data[$f] = '';
             }
         }
 
-        if (isset($this->request->post['name'])) {
-            $this->data['name'] = $this->request->post['name'];
-        } elseif (isset($item_info)) {
-            $this->data['name'] = $item_info['language'][$this->language->getContentLanguageID()]['name'];
-        }
 
         if (isset($this->data['option_attribute']['group'])) {
             //process grouped (parent/child) options
-            $this->data['form']['fields']['option_value'] = '';
+            $this->data['form']['fields']['option_value'] = [];
             foreach ($this->data['option_attribute']['group'] as $attribute_id => $data) {
-                $this->data['form']['fields']['option_value'] .=
-                    '<span style="white-space: nowrap;">'.$data['name'].''.$form->getFieldHtml([
-                        'type'    => $data['type'],
-                        'name'    => 'attribute_value_id['.$product_option_value_id.']['.$attribute_id.']',
-                        'value'   => $this->data['children_options'][$attribute_id],
-                        'options' => $data['values'],
-                        'attr'    => '',
-                    ]).'<span><br class="clr_both">';
-
+                $this->data['form']['fields']['option_value'][] =
+                    [
+                        'name' => $data['name'],
+                        'html' => $form->getFieldHtml(
+                            [
+                                'type'    => $data['type'],
+                                'name'    => 'attribute_value_id['.$product_option_value_id.']['.$attribute_id.']',
+                                'value'   => $this->data['grouped_attribute_data'][$attribute_id],
+                                'options' => $data['values'],
+                                'attr'    => '',
+                            ]
+                        ),
+                    ];
             }
         } else {
             if (in_array($this->data['option_attribute']['element_type'], $this->data['elements_with_options'])) {
@@ -1090,7 +1134,9 @@ class ControllerResponsesProductProduct extends AController
     /**
      * @param int $product_id
      *
-     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     private function _buildSelectForm($product_id)
     {
@@ -1144,6 +1190,7 @@ class ControllerResponsesProductProduct extends AController
      * @param int $download_id
      * @param int $product_id
      *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
@@ -1348,8 +1395,9 @@ class ControllerResponsesProductProduct extends AController
     /**
      * @param AForm $form
      *
-     * @throws \abc\core\lib\AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     private function _buildAttributesSubform($form)
     {
@@ -1456,7 +1504,9 @@ class ControllerResponsesProductProduct extends AController
      * @param array $data
      *
      * @return bool
-     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     private function _validateDownloadForm($data = [])
     {

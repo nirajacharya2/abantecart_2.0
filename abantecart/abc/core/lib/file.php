@@ -21,12 +21,8 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use H;
 
 /**
  * Class to handle file downloads and uploads
@@ -36,7 +32,7 @@ if (!class_exists('abc\core\ABC')) {
 /**
  * @property \abc\core\lib\ALanguageManager $language
  * @property ADB                            $db
- * @property \abc\core\cache\ACache         $cache
+ * @property \abc\core\lib\AbcCache         $cache
  * @property AConfig                        $config
  */
 class AFile
@@ -51,7 +47,7 @@ class AFile
     public function __construct()
     {
         $this->registry = Registry::getInstance();
-        $this->errors = array();
+        $this->errors = [];
     }
 
     /**
@@ -80,11 +76,14 @@ class AFile
      * @param array $data
      *
      * @return array
+     * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
      */
     public function validateFileOption($settings, $data)
     {
 
-        $errors = array();
+        $errors = [];
 
         if (empty($data['name'])) {
             $errors[] = $this->language->get('error_empty_file_name');
@@ -136,12 +135,12 @@ class AFile
     public function getUploadFilePath($upload_sub_dir, $file_name)
     {
         if (empty($file_name)) {
-            return array();
+            return [];
         }
         $uploads_dir = ABC::env('DIR_ROOT').'/admin/system/uploads';
-        AHelperUtils::is_writable_dir($uploads_dir);
+        H::is_writable_dir($uploads_dir);
         $file_path = $uploads_dir.'/'.$upload_sub_dir.'/';
-        AHelperUtils::is_writable_dir($file_path);
+        H::is_writable_dir($file_path);
 
         $ext = strrchr($file_name, '.');
         $file_name = substr($file_name, 0, strlen($file_name) - strlen($ext));
@@ -160,7 +159,7 @@ class AFile
             $i++;
         } while (file_exists($real_path));
 
-        return array('name' => $new_name, 'path' => $real_path);
+        return ['name' => $new_name, 'path' => $real_path];
     }
 
     /**

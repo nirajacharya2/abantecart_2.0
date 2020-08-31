@@ -157,6 +157,7 @@ class ControllerPagesCatalogProductRelations extends AController
             'style'       => 'chosen',
             'placeholder' => $this->language->get('text_select_category'),
         ]);
+
         //load only prior saved products
         $this->data['products'] = [];
         if (count($this->data['product_related'])) {

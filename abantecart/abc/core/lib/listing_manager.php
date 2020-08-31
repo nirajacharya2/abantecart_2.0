@@ -53,7 +53,10 @@ class AListingManager extends AListing
     {
         parent::__construct($custom_block_id);
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access class AListingManager');
+            throw new AException (
+                'Error: permission denied to access class AListingManager',
+                AC_ERR_LOAD
+            );
         }
     }
 
@@ -113,7 +116,7 @@ class AListingManager extends AListing
             );
         }
 
-        $this->cache->remove('blocks.custom.'.$custom_block_id.$data ['store_id']);
+        $this->cache->flush('blocks.custom.'.$custom_block_id.$data ['store_id']);
         return true;
     }
 
@@ -138,7 +141,7 @@ class AListingManager extends AListing
                                             AND id='".$data['id']."'
                                             AND data_type='".$data['data_type']."'";
         $this->db->query($sql);
-        $this->cache->remove('blocks.custom.'.$custom_block_id);
+        $this->cache->flush('blocks.custom.'.$custom_block_id);
     }
 
     // delete all custom list of custom listing block
@@ -156,6 +159,6 @@ class AListingManager extends AListing
                 WHERE custom_block_id = '".$custom_block_id."'
                     AND store_id = '".$store_id."'";
         $this->db->query($sql);
-        $this->cache->remove('blocks.custom.'.$custom_block_id.$store_id);
+        $this->cache->flush('blocks.custom.'.$custom_block_id.$store_id);
     }
 }

@@ -37,7 +37,7 @@ use ReCaptcha\ReCaptcha;
  * @property ALayout $layout
  * @property AHtml $html
  * @property \abc\core\lib\ALanguageManager $language
- * @property \abc\core\cache\ACache $cache
+ * @property \abc\core\lib\AbcCache $cache
  * @property \abc\core\lib\ADB $db
  * @property \abc\core\lib\AConfig $config
  * @property \abc\core\lib\ASession $session
@@ -134,7 +134,7 @@ class AForm
      * @param string $name
      *
      * @return bool
-     * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function loadFromDb($name)
     {
@@ -158,7 +158,7 @@ class AForm
      * @param string $name - unique form name
      *
      * @return bool
-     * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function loadForm($name)
     {
@@ -166,8 +166,8 @@ class AForm
         $store_id = (int)$this->config->get('config_store_id');
         $cache_key = 'forms.'.$name;
         $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id.'_lang_'.$language_id;
-        $form = $this->cache->pull($cache_key);
-        if ($form !== false) {
+        $form = $this->cache->get($cache_key);
+        if ($form !== null) {
             $this->form = $form;
             return false;
         }
@@ -185,7 +185,7 @@ class AForm
             $err->toDebug()->toLog();
             return false;
         }
-        $this->cache->push($cache_key, $query->row);
+        $this->cache->put($cache_key, $query->row);
         $this->form = $query->row;
         return true;
     }
@@ -195,6 +195,7 @@ class AForm
      *
      * @return void
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function loadFields()
     {
@@ -203,8 +204,8 @@ class AForm
         $store_id = (int)$this->config->get('config_store_id');
         $cache_key = 'forms.'.$this->form['form_name'].'.fields';
         $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id.'_lang_'.$language_id;
-        $fields = $this->cache->pull($cache_key);
-        if ($fields !== false) {
+        $fields = $this->cache->get($cache_key);
+        if ($fields !== null) {
             $this->fields = $fields;
             return null;
         }
@@ -240,7 +241,7 @@ class AForm
                 }
             }
         }
-        $this->cache->push($cache_key, $this->fields);
+        $this->cache->put($cache_key, $this->fields);
     }
 
     /**
@@ -262,6 +263,7 @@ class AForm
      *
      * @return void
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function loadGroups()
     {
@@ -269,8 +271,8 @@ class AForm
         $store_id = (int)$this->config->get('config_store_id');
         $cache_key = 'forms.'.$this->form['form_name'].'.groups';
         $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id.'_lang_'.$language_id;
-        $groups = $this->cache->pull($cache_key);
-        if ($groups !== false) {
+        $groups = $this->cache->get($cache_key);
+        if ($groups !== null) {
             $this->groups = $groups;
             return null;
         }
@@ -295,7 +297,7 @@ class AForm
                 $this->groups[$row['group_id']]['fields'][] = $row['field_id'];
             }
         }
-        $this->cache->push($cache_key, $this->groups);
+        $this->cache->put($cache_key, $this->groups);
     }
 
     /**
@@ -343,7 +345,6 @@ class AForm
      * @param string $fname
      *
      * @return array with field data
-     * @throws \ReflectionException
      */
     public function getField($fname)
     {
@@ -440,6 +441,8 @@ class AForm
      *
      * @return string html
      * @throws \abc\core\lib\AException
+     * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function loadExtendedFields()
     {
@@ -503,6 +506,8 @@ class AForm
      * @param bool $fieldsOnly
      *
      * @return string html
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
     public function getFormHtml($fieldsOnly = false)
@@ -638,6 +643,7 @@ class AForm
      *
      * @return array - array with error text for each of invalid field data
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function validateFormData($data = [])
     {
@@ -744,8 +750,8 @@ class AForm
      * @param array $files - usually it's a $_FILES array
      *
      * @return array - list of absolute paths of moved files
-     * @throws \ReflectionException
      * @throws \abc\core\lib\AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function processFileUploads($files = [])
     {

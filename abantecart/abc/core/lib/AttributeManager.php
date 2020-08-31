@@ -39,14 +39,14 @@ class AttributeManager extends Attribute implements AttributeManagerInterface
     {
         parent::__construct($attribute_type, $language_id);
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access class '.__CLASS__);
+            throw new AException ('Error: permission denied to access class '.__CLASS__, AC_ERR_LOAD);
         }
     }
 
     public function clearCache()
     {
-        $this->cache->remove('attribute');
-        $this->cache->remove('attributes');
+        $this->cache->flush('attribute');
+        $this->cache->flush('attributes');
     }
 
     /**
@@ -795,6 +795,7 @@ class AttributeManager extends Attribute implements AttributeManagerInterface
      * @return array
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function validateAttributeCommonData($data = [])
     {

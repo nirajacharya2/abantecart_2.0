@@ -16,14 +16,19 @@
    needs please refer to http://www.abantecart.com for more information.
 */
 
-namespace abc\core\lib;
+namespace abc\core\lib\contracts;
 
 interface JobManagerInterface
 {
-    public function addJob( array $data );
-    public function getJobs( array $data );
-    public function getJobById( $job_id );
-    public function updateJob( $job_id, array $data = [] );
-    public function deleteJob( $job_id );
+    public function addJob(array $data);
+
+    public function getJobs(array $data);
+
+    public function getJobById($job_id);
+
+    public function updateJob($job_id, array $data = []);
+
+    public function deleteJob($job_id);
+
     public function getReadyJob();
 }

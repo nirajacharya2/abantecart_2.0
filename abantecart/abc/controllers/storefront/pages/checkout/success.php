@@ -222,6 +222,7 @@ class ControllerPagesCheckoutSuccess extends AController
      *
      * @return bool
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function validate($order_id)
     {

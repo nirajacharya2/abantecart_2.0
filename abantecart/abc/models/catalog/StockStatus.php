@@ -20,7 +20,6 @@ class StockStatus extends BaseModel
 {
     //TODO: needs to rebuild this table!!!
     public $incrementing = false;
-    public $timestamps = false;
 
     protected $casts = [
         'stock_status_id' => 'int',
@@ -34,5 +33,10 @@ class StockStatus extends BaseModel
     public function language()
     {
         return $this->belongsTo(Language::class, 'language_id');
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'stock_status_id');
     }
 }

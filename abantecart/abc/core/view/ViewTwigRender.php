@@ -16,7 +16,7 @@ class AViewTwigRender extends AViewRender
     {
         //check vendor classes
         if (!class_exists('Twig_Environment')) {
-            throw new AException(AC_ERR_LOAD, 'Twig_Environment class not found!');
+            throw new AException('Twig_Environment class not found!', AC_ERR_LOAD);
         }
         parent::__construct($view, $instance_id);
     }

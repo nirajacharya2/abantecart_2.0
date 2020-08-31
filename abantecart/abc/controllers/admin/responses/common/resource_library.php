@@ -230,6 +230,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
 
     /**
      * @return null | void
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
@@ -310,6 +311,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
     /**
      * @param array $resource
      *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
@@ -491,6 +493,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
     /**
      * @param AResourceManager $rm
      *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
@@ -581,6 +584,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
 
     /**
      * @return mixed
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
@@ -686,6 +690,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
 
     /**
      * @return mixed
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
@@ -1438,6 +1443,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
      * @param int $object_id
      *
      * @return string
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
@@ -1467,6 +1473,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
      * @param int $object_id
      *
      * @return string
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */

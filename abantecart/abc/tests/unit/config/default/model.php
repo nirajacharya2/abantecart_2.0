@@ -31,12 +31,4 @@ return [
             ModelAuditListener::class
         ],
     ],
-
-    //allow to enable/disable soft-deleting for models. Default value "false"
-    //see eloquent documentation for details
-    'FORCE_DELETING' => [
-        /*Product::class => true*/
-        Customer::class => true,
-        Address::class => true,
-    ]
 ];

@@ -285,7 +285,7 @@ class ControllerPagesContentContact extends AController
 
     /**
      * @return bool
-     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     private function _validate()
     {

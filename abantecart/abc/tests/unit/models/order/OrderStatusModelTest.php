@@ -38,6 +38,7 @@ class OrderStatusModelTest extends ATestCase
         //validate
         $data = [
             'status_text_id' => 'test_status',
+            'display_status' => false,
         ];
 
         $orderStatus = new OrderStatus($data);

@@ -24,13 +24,14 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\lib\AMenu;
 use abc\core\lib\AResourceManager;
+use abc\models\admin\ModelToolOnlineNow;
 use abc\models\customer\Customer;
 use H;
 
 /**
  * Class ControllerCommonHeader
  *
- * @property \abc\models\admin\ModelToolOnlineNow $model_tool_online_now
+ * @property ModelToolOnlineNow $model_tool_online_now
  *
  */
 class ControllerCommonHeader extends AController
@@ -183,15 +184,10 @@ class ControllerCommonHeader extends AController
                 'name'  => 'searchform_go',
                 'text'  => $this->language->get('button_go'),
                 'style' => 'button5',
-            ]));
+            ]
+        )
+        );
 
-        //TODO: backwards compatibility from 1.2.1. Can remove this check in the future.
-        if (!ABC::env('ENCRYPTION_KEY')) {
-            $cm_body = "To be compatible with v".ABC::env('VERSION')." add below line to configuration file: <br>\n"
-                .ABC::env('DIR_APP').'/config/config.php';
-            $cm_body .= "<br>\n"."define('ENCRYPTION_KEY', '".$this->config->get('encryption_key')."');\n";;
-            $this->messages->saveWarning('Compatibility warning for v'.ABC::env('VERSION'), $cm_body);
-        }
 
         //prepare quick stats
         $this->loadModel('tool/online_now');
@@ -219,13 +215,13 @@ class ControllerCommonHeader extends AController
         $this->view->assign('today_order_count', $today_order_count);
         $this->view->assign('today_sales_amount', $today_sales_amount);
 
-        $today_customer_count = Customer::getCustomers(
-            [ 'filter' =>
-                  [
-                    'date_added' => date('Y-m-d', time()),
-                  ]
-            ],
-            'total_only'
+        $today_customer_count = Customer::getTotalCustomers(
+            [
+                'filter' =>
+                    [
+                        'date_added' => date('Y-m-d', time()),
+                    ],
+            ]
         );
         $this->view->assign('today_customer_count', $today_customer_count);
 

@@ -17,226 +17,254 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\models\admin;
+
 use abc\core\engine\Model;
 
 if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+    header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
-class ModelLocalisationWeightClass extends Model {
-	public function addWeightClass($data) {
-		$this->db->query("INSERT INTO " . $this->db->table_name("weight_classes") . "
-							SET value = '" . (float)$data['value'] . "',
-								iso_code = UPPER('" . $this->db->escape($data['iso_code']) . "')"
-				);
 
-		$weight_class_id = $this->db->getLastId();
-		foreach ($data['weight_class_description'] as $language_id => $value) {
-			$this->language->replaceDescriptions('weight_class_descriptions',
-											 array('weight_class_id' => (int)$weight_class_id),
-											 array($language_id => array(
-																		'title' => $value['title'],
-																		'unit' => $value['unit']
-											 )) );
-		}
-		
-		$this->cache->remove('localization');
-		return $weight_class_id;
-	}
-	
-	public function editWeightClass($weight_class_id, $data) {
-		if ( isset($data['value']) || isset($data['iso_code'])) {
-			$sql = "UPDATE " . $this->db->table_name("weight_classes") . "
-					SET ";
-			$inc = array();
-			if(isset($data['value'])){
-				$inc[] = "value = '" . (float)$data['value'] . "'";
-			}
-			if(isset($data['iso_code'])){
-				$inc[] = "iso_code = UPPER('" . $this->db->escape($data['iso_code']) . "')";
-			}
-			$sql .= implode(", ", $inc);
-			$sql .= " WHERE weight_class_id = '" . (int)$weight_class_id . "'";
-			$this->db->query( $sql );
-		}
+class ModelLocalisationWeightClass extends Model
+{
+    public function addWeightClass($data)
+    {
+        $this->db->query("INSERT INTO ".$this->db->table_name("weight_classes")."
+                            SET value = '".(float)$data['value']."',
+                                iso_code = UPPER('".$this->db->escape($data['iso_code'])."')"
+        );
 
-		if ( isset($data['weight_class_description']) ) {
-			foreach ($data['weight_class_description'] as $language_id => $value) {
-				$update = array();
-				if ( isset($value['title']) ){
-					$update["title"] = $value['title'];
-				}
-				if ( isset($value['unit']) ){
-					$update["unit"] = $value['unit'];
-				}
-				if ( !empty($update) ){
-					$this->language->replaceDescriptions('weight_class_descriptions',
-														 array('weight_class_id' => (int)$weight_class_id),
-														 array($language_id => $update ));
-				}
-			}
-		}
-		
-		$this->cache->remove('localization');
-	}
+        $weight_class_id = $this->db->getLastId();
+        foreach ($data['weight_class_description'] as $language_id => $value) {
+            $this->language->replaceDescriptions('weight_class_descriptions',
+                ['weight_class_id' => (int)$weight_class_id],
+                [
+                    $language_id => [
+                        'title' => $value['title'],
+                        'unit'  => $value['unit'],
+                    ],
+                ]);
+        }
 
-	/**
-	 * @param int $weight_class_id
-	 */
-	public function deleteWeightClass($weight_class_id) {
-		$this->db->query("DELETE FROM " . $this->db->table_name("weight_classes") . " 
-						WHERE weight_class_id = '" . (int)$weight_class_id . "'");
-		$this->db->query("DELETE FROM " . $this->db->table_name("weight_class_descriptions") . " 
-						WHERE weight_class_id = '" . (int)$weight_class_id . "'");
-		$this->cache->remove('localization');
-	}
+        $this->cache->flush('localization');
+        return $weight_class_id;
+    }
 
-	/**
-	 * @param array $data
-	 * @return false|array
-	 */
-	public function getWeightClasses($data = array()) {
-		if ( !empty($data['content_language_id']) ) {
-			$language_id = ( int )$data['content_language_id'];
-		} else {
-			$language_id = (int)$this->language->getContentLanguageID();
-		}
+    public function editWeightClass($weight_class_id, $data)
+    {
+        if (isset($data['value']) || isset($data['iso_code'])) {
+            $sql = "UPDATE ".$this->db->table_name("weight_classes")."
+                    SET ";
+            $inc = [];
+            if (isset($data['value'])) {
+                $inc[] = "value = '".(float)$data['value']."'";
+            }
+            if (isset($data['iso_code'])) {
+                $inc[] = "iso_code = UPPER('".$this->db->escape($data['iso_code'])."')";
+            }
+            $sql .= implode(", ", $inc);
+            $sql .= " WHERE weight_class_id = '".(int)$weight_class_id."'";
+            $this->db->query($sql);
+        }
 
-		if ($data) {
-			$sql = "SELECT *, wc.weight_class_id
-					FROM " . $this->db->table_name("weight_classes") . " wc
-					LEFT JOIN " . $this->db->table_name("weight_class_descriptions") . " wcd
-						ON (wc.weight_class_id = wcd.weight_class_id 
-							AND wcd.language_id = '" . $language_id . "') ";
+        if (isset($data['weight_class_description'])) {
+            foreach ($data['weight_class_description'] as $language_id => $value) {
+                $update = [];
+                if (isset($value['title'])) {
+                    $update["title"] = $value['title'];
+                }
+                if (isset($value['unit'])) {
+                    $update["unit"] = $value['unit'];
+                }
+                if (!empty($update)) {
+                    $this->language->replaceDescriptions('weight_class_descriptions',
+                        ['weight_class_id' => (int)$weight_class_id],
+                        [$language_id => $update]);
+                }
+            }
+        }
 
-			$sort_data = array(
-				'title',
-				'unit',
-				'value'
-			);
+        $this->cache->flush('localization');
+    }
 
-			if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
-				$sql .= " ORDER BY " . $data['sort'];
-			} else {
-				$sql .= " ORDER BY title";
-			}
+    /**
+     * @param int $weight_class_id
+     *
+     * @throws \Exception
+     */
+    public function deleteWeightClass($weight_class_id)
+    {
+        $this->db->query("DELETE FROM ".$this->db->table_name("weight_classes")." 
+                        WHERE weight_class_id = '".(int)$weight_class_id."'");
+        $this->db->query("DELETE FROM ".$this->db->table_name("weight_class_descriptions")." 
+                        WHERE weight_class_id = '".(int)$weight_class_id."'");
+        $this->cache->flush('localization');
+    }
 
-			if (isset($data['order']) && ($data['order'] == 'DESC')) {
-				$sql .= " DESC";
-			} else {
-				$sql .= " ASC";
-			}
-			if (isset($data['start']) || isset($data['limit'])) {
-				if ($data['start'] < 0) {
-					$data['start'] = 0;
-				}
-				if ($data['limit'] < 1) {
-					$data['limit'] = 20;
-				}
-				$sql .= " LIMIT " . (int)$data['start'] . "," . (int)$data['limit'];
-			}
-			$query = $this->db->query($sql);
-			return $query->rows;
-		} else {
-			$cache_key = 'localization.weight_class.lang_'. $language_id;
-			$weight_class_data = $this->cache->pull($cache_key);
-			if ($weight_class_data === false) {
-				$query = $this->db->query(
-					"SELECT *, wc.weight_class_id
-					FROM " . $this->db->table_name("weight_classes") . " wc
-					LEFT JOIN " . $this->db->table_name("weight_class_descriptions") . " wcd
-						ON (wc.weight_class_id = wcd.weight_class_id AND wcd.language_id = '" . $language_id . "')");
-				$weight_class_data = $query->rows;
-				$this->cache->push($cache_key, $weight_class_data);
-			}
-			return $weight_class_data;
-		}
-	}
+    /**
+     * @param array $data
+     *
+     * @return false|array
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function getWeightClasses($data = [])
+    {
+        if (!empty($data['content_language_id'])) {
+            $language_id = ( int )$data['content_language_id'];
+        } else {
+            $language_id = (int)$this->language->getContentLanguageID();
+        }
 
-	/**
-	 * @param int $weight_class_id
-	 * @param int $language_id
-	 * @return array
-	 */
-	public function getWeightClass($weight_class_id, $language_id = 0) {
-		$language_id = (int)$language_id;
-		if(!$language_id) {
-			$language_id = (int)$this->language->getContentLanguageID();
-		}
-		$query = $this->db->query("SELECT *, wc.weight_class_id
-									FROM " . $this->db->table_name("weight_classes") . " wc
-									LEFT JOIN " . $this->db->table_name("weight_class_descriptions") . " wcd
-										ON (wc.weight_class_id = wcd.weight_class_id 
-											AND wcd.language_id = '" . $language_id . "')
-									WHERE wc.weight_class_id = '" . (int)$weight_class_id . "'");
-		return $query->row;
-	}
+        if ($data) {
+            $sql = "SELECT *, wc.weight_class_id
+                    FROM ".$this->db->table_name("weight_classes")." wc
+                    LEFT JOIN ".$this->db->table_name("weight_class_descriptions")." wcd
+                        ON (wc.weight_class_id = wcd.weight_class_id 
+                            AND wcd.language_id = '".$language_id."') ";
 
-	/**
-	 * @param string $unit
-	 * @param int $language_id
-	 * @return array
-	 */
-	public function getWeightClassDescriptionByUnit($unit, $language_id = 0) {
-		$language_id = (int)$language_id;
-		if(!$language_id) {
-			$language_id = (int)$this->language->getContentLanguageID();
-		}
-		$query = $this->db->query("SELECT *
-									FROM " . $this->db->table_name("weight_class_descriptions") . " 
-									WHERE unit = '" . $this->db->escape($unit) . "'
-										AND language_id = '" . $language_id . "'");
-		if($query->num_rows) {
-			return $query->row;
-		}else{
-			//TODO: remove this in 2.0
-			$query = $this->db->query("SELECT *
-									FROM " . $this->db->table_name("weight_class_descriptions") . " 
-									WHERE unit = '" . $this->db->escape($unit) . "'");
-			return $query->row;
-		}
-	}
+            $sort_data = [
+                'title',
+                'unit',
+                'value',
+            ];
 
-	/**
-	 * @param $iso_code
-	 * @param int $language_id
-	 * @return array
-	 */
-	public function getWeightClassByCode($iso_code, $language_id = 0) {
-		$language_id = (int)$language_id;
-		if(!$language_id) {
-			$language_id = (int)$this->language->getContentLanguageID();
-		}
-		$query = $this->db->query("SELECT *, wc.weight_class_id
-									FROM " . $this->db->table_name("weight_classes") . " wc
-									LEFT JOIN " . $this->db->table_name("weight_class_descriptions") . " wcd
-										ON (wc.weight_class_id = wcd.weight_class_id 
-											AND wcd.language_id = '" . $language_id . "')
-									WHERE wc.iso_code = '" . $this->db->escape($iso_code) . "'");
-		return $query->row;
-	}
+            if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
+                $sql .= " ORDER BY ".$data['sort'];
+            } else {
+                $sql .= " ORDER BY title";
+            }
 
-	/**
-	 * @param int $weight_class_id
-	 * @return array
-	 */
-	public function getWeightClassDescriptions($weight_class_id) {
-		$weight_class_data = array();
-		$query = $this->db->query("SELECT *
-									FROM " . $this->db->table_name("weight_class_descriptions") . " 
-									WHERE weight_class_id = '" . (int)$weight_class_id . "'");
-		foreach ($query->rows as $row) {
-			$weight_class_data[$row['language_id']] = $row;
-		}
-		return $weight_class_data;
-	}
+            if (isset($data['order']) && ($data['order'] == 'DESC')) {
+                $sql .= " DESC";
+            } else {
+                $sql .= " ASC";
+            }
+            if (isset($data['start']) || isset($data['limit'])) {
+                if ($data['start'] < 0) {
+                    $data['start'] = 0;
+                }
+                if ($data['limit'] < 1) {
+                    $data['limit'] = 20;
+                }
+                $sql .= " LIMIT ".(int)$data['start'].",".(int)$data['limit'];
+            }
+            $query = $this->db->query($sql);
+            return $query->rows;
+        } else {
+            $cache_key = 'localization.weight_class.lang_'.$language_id;
+            $weight_class_data = $this->cache->get($cache_key);
+            if ($weight_class_data === null) {
+                $query = $this->db->query(
+                    "SELECT *, wc.weight_class_id
+                    FROM ".$this->db->table_name("weight_classes")." wc
+                    LEFT JOIN ".$this->db->table_name("weight_class_descriptions")." wcd
+                        ON (wc.weight_class_id = wcd.weight_class_id AND wcd.language_id = '".$language_id."')");
+                $weight_class_data = $query->rows;
+                $this->cache->put($cache_key, $weight_class_data);
+            }
+            return $weight_class_data;
+        }
+    }
 
-	/**
-	 * @return int
-	 */
-	public function getTotalWeightClasses() {
-		$query = $this->db->query("SELECT COUNT(*) AS total
-									FROM " . $this->db->table_name("weight_classes"));
-		return (int)$query->row['total'];
-	}
+    /**
+     * @param int $weight_class_id
+     * @param int $language_id
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function getWeightClass($weight_class_id, $language_id = 0)
+    {
+        $language_id = (int)$language_id;
+        if (!$language_id) {
+            $language_id = (int)$this->language->getContentLanguageID();
+        }
+        $query = $this->db->query("SELECT *, wc.weight_class_id
+                                    FROM ".$this->db->table_name("weight_classes")." wc
+                                    LEFT JOIN ".$this->db->table_name("weight_class_descriptions")." wcd
+                                        ON (wc.weight_class_id = wcd.weight_class_id 
+                                            AND wcd.language_id = '".$language_id."')
+                                    WHERE wc.weight_class_id = '".(int)$weight_class_id."'");
+        return $query->row;
+    }
+
+    /**
+     * @param string $unit
+     * @param int $language_id
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function getWeightClassDescriptionByUnit($unit, $language_id = 0)
+    {
+        $language_id = (int)$language_id;
+        if (!$language_id) {
+            $language_id = (int)$this->language->getContentLanguageID();
+        }
+        $query = $this->db->query("SELECT *
+                                    FROM ".$this->db->table_name("weight_class_descriptions")." 
+                                    WHERE unit = '".$this->db->escape($unit)."'
+                                        AND language_id = '".$language_id."'");
+        if ($query->num_rows) {
+            return $query->row;
+        } else {
+            //TODO: remove this in 2.0
+            $query = $this->db->query("SELECT *
+                                    FROM ".$this->db->table_name("weight_class_descriptions")." 
+                                    WHERE unit = '".$this->db->escape($unit)."'");
+            return $query->row;
+        }
+    }
+
+    /**
+     * @param $iso_code
+     * @param int $language_id
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function getWeightClassByCode($iso_code, $language_id = 0)
+    {
+        $language_id = (int)$language_id;
+        if (!$language_id) {
+            $language_id = (int)$this->language->getContentLanguageID();
+        }
+        $query = $this->db->query("SELECT *, wc.weight_class_id
+                                    FROM ".$this->db->table_name("weight_classes")." wc
+                                    LEFT JOIN ".$this->db->table_name("weight_class_descriptions")." wcd
+                                        ON (wc.weight_class_id = wcd.weight_class_id 
+                                            AND wcd.language_id = '".$language_id."')
+                                    WHERE wc.iso_code = '".$this->db->escape($iso_code)."'");
+        return $query->row;
+    }
+
+    /**
+     * @param int $weight_class_id
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function getWeightClassDescriptions($weight_class_id)
+    {
+        $weight_class_data = [];
+        $query = $this->db->query("SELECT *
+                                    FROM ".$this->db->table_name("weight_class_descriptions")." 
+                                    WHERE weight_class_id = '".(int)$weight_class_id."'");
+        foreach ($query->rows as $row) {
+            $weight_class_data[$row['language_id']] = $row;
+        }
+        return $weight_class_data;
+    }
+
+    /**
+     * @return int
+     * @throws \Exception
+     */
+    public function getTotalWeightClasses()
+    {
+        $query = $this->db->query("SELECT COUNT(*) AS total
+                                    FROM ".$this->db->table_name("weight_classes"));
+        return (int)$query->row['total'];
+    }
 }

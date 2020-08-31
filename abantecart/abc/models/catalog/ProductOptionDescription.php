@@ -36,6 +36,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property Language $language
  * @property ProductOption $product_option
  *
+ * @method static ProductOptionDescription create(array $attributes) ProductOptionDescription
+ *
+ *
  * @package abc\models
  */
 class ProductOptionDescription extends BaseModel
@@ -47,12 +50,22 @@ class ProductOptionDescription extends BaseModel
         'product_option_id',
         'language_id',
     ];
-    public $timestamps = false;
+
+    protected $mainClassName = Product::class;
+    protected $mainClassKey = 'product_id';
+
+    protected $touches = ['product_option'];
 
     protected $casts = [
         'product_option_id' => 'int',
         'language_id'       => 'int',
         'product_id'        => 'int',
+    ];
+
+    /** @var array */
+    protected $dates = [
+        'date_added',
+        'date_modified',
     ];
 
     protected $fillable = [
@@ -63,6 +76,87 @@ class ProductOptionDescription extends BaseModel
         'option_placeholder',
         'error_text',
     ];
+
+    protected $rules = [
+        /** @see validate() */
+        'product_option_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:product_options',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Product Option ID is not Integer or absent in product_options table!'],
+            ],
+        ],
+
+        'product_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:products',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Product ID is not Integer or absent in products table!'],
+            ],
+        ],
+
+        'language_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:languages',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Language ID is not Integer or absent in languages table!'],
+            ],
+        ],
+
+        'name' => [
+            'checks'   => [
+                'string',
+                'sometimes',
+                'required',
+                'between:3,255',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Product Option Name must be greater than 3 and less than 255 characters!',
+                ],
+            ],
+        ],
+
+        'option_placeholder' => [
+            'checks'   => [
+                'string',
+                'max:255',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Product Option Placeholder must be less than 255 characters!',
+                ],
+            ],
+        ],
+
+        'error_text' => [
+            'checks'   => [
+                'string',
+                'max:255',
+                'nullable',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Product Option Error Text must be less than 255 characters!',
+                ],
+            ],
+        ],
+
+    ];
+
+    public function getNameAttribute($value)
+    {
+        return $value === '' ? 'n/a' : $value;
+    }
 
     public function product()
     {

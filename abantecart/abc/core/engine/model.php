@@ -20,10 +20,12 @@
 
 namespace abc\core\engine;
 
+use abc\core\lib\AbcCache;
+
 /**
  * @property \abc\core\lib\AConfig $config
  * @property \abc\core\lib\ADB $db
- * @property \abc\core\cache\ACache $cache
+ * @property AbcCache $cache
  * @property AResource $resource
  * @property \abc\core\view\AView $view
  * @property ALoader $load

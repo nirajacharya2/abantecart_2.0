@@ -63,7 +63,7 @@ class AdminCommands implements AdminCommandsInterface
     public function __construct()
     {
         if (!ABC::env('IS_ADMIN')) {
-            throw new AException(AC_ERR_LOAD, 'Error: permission denied to access class AdminCommands');
+            throw new AException('Error: permission denied to access class AdminCommands', AC_ERR_LOAD);
         }
         $this->registry = Registry::getInstance();
 

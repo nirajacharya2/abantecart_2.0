@@ -47,7 +47,7 @@
     {
       "type": "package",
       "package": {
-        "name": "components/jqGrid",
+        "name": "components/jqgrid",
         "version": "5.3.1",
         "dist": {
           "url": "https://github.com/tonytomov/jqGrid/archive/master.zip",
@@ -226,13 +226,15 @@
     "ext-gd": "*",
     "ext-phar": "*",
     "ext-bcmath": "*",
+    "ext-pdo": "*",
+    "ext-json": "*",
     "mnsami/composer-custom-directory-installer": "1.1.*",
     "wikimedia/composer-merge-plugin": "1.4.0",
     "google/recaptcha": "~1.1",
     "components/jquery": "3.3.1",
     "components/jqueryui": "1.12.1",
     "components/jquery-migrate": "3.0.1",
-    "components/jqGrid": "5.3.1",
+    "components/jqgrid": "5.3.1",
     "components/jquery-cookie": "2.2.0",
     "components/popper": "1.4.13",
     "components/modernizr": "3.5.0",
@@ -259,7 +261,8 @@
     "illuminate/database": "5.8.*",
     "illuminate/events": "5.8.*",
     "illuminate/validation": "5.8.*",
-    "illuminate/Cache": "5.8.*",
+    "illuminate/cache": "5.8.*",
+    "illuminate/filesystem": "5.8.*",
     "illuminate/redis": "5.8.*",
     "craftcamp/php-abac": "dev-dev-abc",
     "chelout/laravel-relationship-events": "dev-abc",
@@ -288,8 +291,8 @@
       "./vendor/assets/components/jquery-cookie": [
         "components/jquery-cookie"
       ],
-      "./vendor/assets/components/jqGrid": [
-        "components/jqGrid"
+      "./vendor/assets/components/jqgrid": [
+        "components/jqgrid"
       ],
       "./vendor/assets/components/bootstrap": [
         "components/bootstrap"

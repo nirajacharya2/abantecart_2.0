@@ -23,11 +23,11 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\engine\ALoader;
 use abc\core\engine\ExtensionsApi;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 use abc\models\admin\ModelToolBackup;
 use DirectoryIterator;
 use FilesystemIterator;
+use H;
 
 /**
  * Class ABackup
@@ -71,7 +71,7 @@ class ABackup
     /**
      * @var array
      */
-    public $error = array();
+    public $error = [];
 
     /**
      * @param string $name
@@ -121,7 +121,7 @@ class ABackup
         //first of all check backup directory create or set writable permissions
         // Before backup process need to call validate() method! (see below)
         $app_backup_dir = ABC::env('DIR_BACKUP');
-        if (!AHelperUtils::is_writable_dir($app_backup_dir)) {
+        if (!H::is_writable_dir($app_backup_dir)) {
             $this->error[] = 'Backup-directory "'
                 .$app_backup_dir
                 .'" is not writable or cannot be created! Backup operation is not possible';
@@ -164,9 +164,8 @@ class ABackup
      * @return bool|string - path of dump file or false
      * @throws AException
      * @throws \DebugBar\DebugBarException
-     * @throws \ReflectionException
      */
-    public function dumpTables($tables = array(), $dump_file = '')
+    public function dumpTables($tables = [], $dump_file = '')
     {
         if (!$tables || !is_array($tables) || !$this->backup_dir) {
             $error_text = 'Error: Cannot to dump of tables during sql-dumping. '
@@ -177,7 +176,7 @@ class ABackup
             return false;
         }
 
-        $table_list = array();
+        $table_list = [];
         foreach ($tables as $table) {
             if (!is_string($table)) {
                 continue;
@@ -202,7 +201,7 @@ class ABackup
         }
 
         $result = $this->db->query($sql);
-        $memory_limit = (AHelperUtils::getMemoryLimitInBytes() - memory_get_usage()) / 4;
+        $memory_limit = (H::getMemoryLimitInBytes() - memory_get_usage()) / 4;
 
         // sql-file for small tables
 
@@ -294,11 +293,11 @@ class ABackup
                     $values = '';
                     foreach ($row as $value) {
                         $value = str_replace(
-                            array("\x00", "\x0a", "\x0d", "\x1a"),
-                            array('\0', '\n', '\r', '\Z'),
+                            ["\x00", "\x0a", "\x0d", "\x1a"],
+                            ['\0', '\n', '\r', '\Z'],
                             $value
                         );
-                        $value = str_replace(array("\n", "\r", "\t"), array('\n', '\r', '\t'), $value);
+                        $value = str_replace(["\n", "\r", "\t"], ['\n', '\r', '\t'], $value);
                         $value = str_replace('\\', '\\\\', $value);
                         $value = str_replace('\'', '\\\'', $value);
                         $value = str_replace('\\\n', '\n', $value);
@@ -333,7 +332,6 @@ class ABackup
      * @return bool
      * @throws AException
      * @throws \DebugBar\DebugBarException
-     * @throws \ReflectionException
      */
     public function dumpDatabase()
     {
@@ -368,7 +366,6 @@ class ABackup
      * @return bool
      * @throws AException
      * @throws \DebugBar\DebugBarException
-     * @throws \ReflectionException
      */
     public function dumpTable($table_name)
     {
@@ -384,7 +381,7 @@ class ABackup
             .'_'.$table_name
             .'_dump_'.date("Y-m-d-H-i-s").'.sql';
 
-        $result = $this->dumpTables($tables = array($table_name), $backupFile);
+        $result = $this->dumpTables($tables = [$table_name], $backupFile);
 
         if (!$result) {
             $error_text = "Error: Can't create sql dump of database table during backup";
@@ -435,7 +432,7 @@ class ABackup
             return true;
         }
         // also skip cache & logs dir
-        if (is_int(strpos($dir_path, ABC::env('CACHE')['DIR_CACHE']))
+        if (is_int(strpos($dir_path, ABC::env('CACHE')['stores']['file']['path']))
             || is_int(strpos($dir_path, ABC::env('DIR_LOGS')))
         ) {
             return true;
@@ -539,7 +536,7 @@ class ABackup
         //generate errors: No space on device (log to message as error too), No permissions, Others
         //return Success or failed.
 
-        AHelperUtils::compressTarGZ($archive_filename, $src_dir.$filename, 1);
+        H::compressTarGZ($archive_filename, $src_dir.$filename, 1);
 
         if (!file_exists($archive_filename)) {
             $error_text = 'Error: cannot to pack '.$archive_filename."\n Please see error log for details.";
@@ -673,7 +670,7 @@ class ABackup
     public function validate()
     {
         //reset errors array before validation
-        $this->error = array();
+        $this->error = [];
         //1. check is backup directory is writable
         if (!is_writable(ABC::env('DIR_BACKUP'))) {
             $this->error[] = 'Directory '.ABC::env('DIR_BACKUP')

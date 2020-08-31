@@ -20,14 +20,13 @@
 
 namespace abc\core\lib;
 
-use abc\core\cache\ACache;
 use abc\core\engine\Registry;
 
 /**
  * Class APromotion
  *
  * @property AConfig   $config
- * @property ACache    $cache
+ * @property AbcCache    $cache
  * @property ADB       $db
  */
 class APromotion
@@ -58,8 +57,8 @@ class APromotion
     public $bonus_objects = [];
 
     /**
-     * @param null $customer
-     * @param null $cart
+     * @param ACustomer $customer
+     * @param ACart $cart
      */
     public function __construct(ACustomer $customer = null, ACart $cart = null)
     {
@@ -139,6 +138,7 @@ class APromotion
      *
      * @return float
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getProductQtyDiscount($product_id, $discount_quantity)
     {
@@ -151,8 +151,8 @@ class APromotion
         }
 
         $cache_key = 'product.discount.qty.'.$discount_quantity.'.'.(int)$product_id.'.'.$customer_group_id;
-        $output = $this->cache->pull($cache_key);
-        if ($output !== false) {
+        $output = $this->cache->get($cache_key);
+        if ($output !== null) {
             return $output;
         }
 
@@ -161,13 +161,13 @@ class APromotion
                 WHERE product_id = '".(int)$product_id."'
                         AND customer_group_id = '".$customer_group_id."'
                         AND quantity <= '".(int)$discount_quantity."'
-                        AND ((date_start = '0000-00-00' OR date_start < NOW()) 
-                                AND (date_end = '0000-00-00' OR date_end > NOW()))
+                        AND ((date_start IS NULL OR date_start < NOW()) 
+                                AND (date_end IS NULL OR date_end > NOW()))
                 ORDER BY quantity DESC, priority ASC, price ASC
                 LIMIT 1";
         $product_discount_query = $this->db->query($sql);
         $output = (float)$product_discount_query->row['price'];
-        $this->cache->push($cache_key, $output);
+        $this->cache->put($cache_key, $output);
 
         return $output;
     }
@@ -177,15 +177,16 @@ class APromotion
      *
      * @return bool|float
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getProductDiscount($product_id)
     {
         $product_id = (int)$product_id;
         $customer_group_id = (int)$this->customer_group_id;
         $cache_key = 'product.discount.'.(int)$product_id.'.'.$customer_group_id;
-        $output = $this->cache->pull($cache_key);
+        $output = $this->cache->get($cache_key);
 
-        if ($output !== false) {
+        if ($output !== null) {
             return $output;
         }
 
@@ -194,8 +195,8 @@ class APromotion
                                     WHERE product_id = '".(int)$product_id."'
                                         AND customer_group_id = '".$customer_group_id."'
                                         AND quantity = '1'
-                                        AND ((date_start = '0000-00-00' OR date_start < NOW())
-                                        AND (date_end = '0000-00-00' OR date_end > NOW()))
+                                        AND ((date_start IS NULL OR date_start < NOW())
+                                        AND (date_end  IS NULL OR date_end > NOW()))
                                     ORDER BY priority ASC, price ASC
                                     LIMIT 1");
         if ($query->num_rows) {
@@ -204,7 +205,7 @@ class APromotion
             $output = '';
         }
 
-        $this->cache->push($cache_key, $output);
+        $this->cache->put($cache_key, $output);
 
         return $output;
     }
@@ -214,14 +215,15 @@ class APromotion
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getProductDiscounts($product_id)
     {
         $product_id = (int)$product_id;
         $customer_group_id = (int)$this->customer_group_id;
         $cache_key = 'product.discounts.'.(int)$product_id.'.'.$customer_group_id;
-        $output = $this->cache->pull($cache_key);
-        if ($output !== false) {
+        $output = $this->cache->get($cache_key);
+        if ($output !== null) {
             return $output;
         }
         $query = $this->db->query("	SELECT *
@@ -229,11 +231,11 @@ class APromotion
                                     WHERE product_id = '".(int)$product_id."'
                                         AND customer_group_id = '".(int)$customer_group_id."'
                                         AND quantity > 1
-                                        AND ((date_start = '0000-00-00' OR date_start < NOW())
-                                        AND (date_end = '0000-00-00' OR date_end > NOW()))
+                                        AND ((date_start IS NULL OR date_start < NOW())
+                                        AND (date_end IS NULL OR date_end > NOW()))
                                     ORDER BY quantity ASC, priority ASC, price ASC");
         $output = $query->rows;
-        $this->cache->push($cache_key, $output);
+        $this->cache->put($cache_key, $output);
 
         return $output;
     }
@@ -243,14 +245,15 @@ class APromotion
      *
      * @return null|float
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getProductSpecial($product_id)
     {
         $product_id = (int)$product_id;
         $customer_group_id = (int)$this->customer_group_id;
         $cache_key = 'product.special.'.(int)$product_id.'.'.$customer_group_id;
-        $output = $this->cache->pull($cache_key);
-        if ($output !== false) {
+        $output = $this->cache->get($cache_key);
+        if ($output !== null) {
             return $output;
         }
 
@@ -259,13 +262,13 @@ class APromotion
                                     FROM ".$this->db->table_name("product_specials")."
                                     WHERE product_id = '".(int)$product_id."'
                                         AND customer_group_id = '".$customer_group_id."'
-                                        AND ((date_start = '0000-00-00' OR date_start < NOW())
-                                        AND (date_end = '0000-00-00' OR date_end > NOW()))
+                                        AND ((date_start IS NULL OR date_start < NOW())
+                                        AND (date_end IS NULL OR date_end > NOW()))
                                     ORDER BY priority ASC, price ASC LIMIT 1");
         if ($query->num_rows) {
             $output = (float)$query->row['price'];
         }
-        $this->cache->push($cache_key, $output);
+        $this->cache->put($cache_key, $output);
 
         return $output;
     }
@@ -280,6 +283,7 @@ class APromotion
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getProductSpecials($sort = 'p.sort_order', $order = 'ASC', $start = 0, $limit = 20)
     {
@@ -298,8 +302,8 @@ class APromotion
             ]);
         $cache_key .= '.store_'.$store_id.'.lang_'.$language_id;
 
-        $cache = $this->cache->pull($cache_key);
-        if ($cache !== false) {
+        $cache = $this->cache->get($cache_key);
+        if ($cache !== null) {
             return $cache;
         }
 
@@ -320,8 +324,8 @@ class APromotion
                 WHERE p.status = '1'
                     AND p.date_available <= NOW() AND p2s.store_id = '".$store_id."'
                     AND ps.customer_group_id = '".$customer_group_id."'
-                    AND ((ps.date_start = '0000-00-00' OR ps.date_start < NOW())
-                    AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW()))
+                    AND ((ps.date_start IS NULL OR ps.date_start < NOW())
+                    AND (ps.date_end IS NULL OR ps.date_end > NOW()))
                 GROUP BY ps.product_id";
 
         $sort_data = [
@@ -358,7 +362,7 @@ class APromotion
         $query = $this->db->query($sql);
         $output = $query->rows;
 
-        $this->cache->push($cache_key, $output);
+        $this->cache->put($cache_key, $output);
 
         return $output;
     }
@@ -370,6 +374,7 @@ class APromotion
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getSpecialProducts($data = [])
     {
@@ -387,8 +392,8 @@ class APromotion
         $cache_key .= $this->cache->paramsToString($data);
         $cache_key .= '.store_'.$store_id.'.lang_'.$language_id;
 
-        $cache = $this->cache->pull($cache_key);
-        if ($cache !== false) {
+        $cache = $this->cache->get($cache_key);
+        if ($cache !== null) {
             return $cache;
         }
 
@@ -406,8 +411,8 @@ class APromotion
                     WHERE rd.product_id = ps.product_id
                         AND customer_group_id = '".$customer_group_id."'
                         AND quantity = '1'
-                        AND ((date_start = '0000-00-00' OR date_start < NOW())
-                        AND (date_end = '0000-00-00' OR date_end > NOW()))
+                        AND ((date_start IS NULL OR date_start < NOW())
+                        AND (date_end IS NULL OR date_end > NOW()))
                     ORDER BY priority ASC, price ASC
                     LIMIT 1) as discount_price\n ";
 
@@ -422,8 +427,8 @@ class APromotion
                 WHERE p.status = '1'
                     AND p.date_available <= NOW() AND p2s.store_id = '".$store_id."'
                     AND ps.customer_group_id = '".$customer_group_id."'
-                    AND ((ps.date_start = '0000-00-00' OR ps.date_start < NOW())
-                    AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW()))
+                    AND ((ps.date_start IS NULL OR ps.date_start < NOW())
+                    AND (ps.date_end IS NULL OR ps.date_end > NOW()))
                 GROUP BY ps.product_id";
 
         $sort_data = [
@@ -460,7 +465,7 @@ class APromotion
         $query = $this->db->query($sql);
         $output = $query->rows;
 
-        $this->cache->push($cache_key, $output);
+        $this->cache->put($cache_key, $output);
 
         return $output;
     }
@@ -468,6 +473,7 @@ class APromotion
     /**
      * @return int
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getTotalProductSpecials()
     {
@@ -476,8 +482,8 @@ class APromotion
         $store_id = (int)$this->config->get('config_store_id');
 
         $cache_key = 'product.special.total.'.$customer_group_id.'.store_'.$store_id;
-        $output = $this->cache->pull($cache_key);
-        if ($output !== false) {
+        $output = $this->cache->get($cache_key);
+        if ($output !== null) {
             return $output;
         }
 
@@ -491,11 +497,11 @@ class APromotion
                                         AND p.date_available <= NOW()
                                         AND p2s.store_id = '".(int)$store_id."'
                                         AND ps.customer_group_id = '".(int)$customer_group_id."'
-                                        AND ((ps.date_start = '0000-00-00' OR ps.date_start < NOW())
-                                        AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW()))");
+                                        AND ((ps.date_start IS NULL OR ps.date_start < NOW())
+                                        AND (ps.date_end IS NULL OR ps.date_end > NOW()))");
 
         $output = (int)$query->row['total'];
-        $this->cache->push($cache_key, $output);
+        $this->cache->put($cache_key, $output);
 
         return $output;
     }
@@ -505,6 +511,7 @@ class APromotion
      *
      * @return array
      * @throws AException
+     * @throws \ReflectionException
      */
     public function getCouponData($coupon_code)
     {
@@ -528,8 +535,6 @@ class APromotion
         $coupon_product_data = [];
         if ($coupon_query->num_rows) {
             if ($coupon_query->row['total'] > $this->cart->getSubTotal()) {
-                var_Dump($coupon_query->row['total'], $this->cart->getSubTotal());
-                exit;
                 $status = false;
             }
             $coupon_redeem_query = $this->db->query(

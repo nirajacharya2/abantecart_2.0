@@ -29,7 +29,7 @@ use H;
  *
  * @property \abc\core\lib\ALanguageManager $language
  * @property \abc\core\lib\ADB $db
- * @property \abc\core\cache\ACache $cache
+ * @property \abc\core\lib\AbcCache $cache
  * @property \abc\core\lib\AConfig $config
  * @property \abc\core\lib\ARequest $request
  * @property \abc\core\lib\ASession $session
@@ -55,6 +55,7 @@ class Attribute implements AttributeInterface
      * @param int $language_id
      *
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function __construct($attribute_type = '', $language_id = 0)
     {
@@ -92,7 +93,7 @@ class Attribute implements AttributeInterface
      * @param int $language_id
      *
      * @return bool
-     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function loadAttributeTypes($language_id = 0)
     {
@@ -102,8 +103,8 @@ class Attribute implements AttributeInterface
         }
         $store_id = (int)$this->config->get('config_store_id');
         $cache_key = 'attribute.types.store_'.$store_id.'_lang_'.(int)$language_id;
-        $attribute_types = $this->cache->pull($cache_key);
-        if ($attribute_types !== false) {
+        $attribute_types = $this->cache->get($cache_key);
+        if ($attribute_types !== null) {
             $this->attribute_types = $attribute_types;
             return false;
         }
@@ -117,7 +118,7 @@ class Attribute implements AttributeInterface
             return false;
         }
 
-        $this->cache->push($cache_key, $query->rows);
+        $this->cache->put($cache_key, $query->rows);
 
         $this->attribute_types = $query->rows;
         return true;
@@ -130,7 +131,7 @@ class Attribute implements AttributeInterface
      * @param int $language_id
      *
      * @return array|bool
-     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function loadAttributes($attribute_type_id, $language_id = 0)
     {
@@ -143,10 +144,12 @@ class Attribute implements AttributeInterface
         $store_id = (int)$this->config->get('config_store_id');
 
         $cache_key = 'attributes.'.$attribute_type_id;
-        $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '',
-                $cache_key).'.store_'.$store_id.'_lang_'.(int)$language_id;
-        $attributes = $this->cache->pull($cache_key);
-        if ($attributes !== false) {
+        $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '',$cache_key)
+                    .'.store_'.$store_id
+                    .'_lang_'.(int)$language_id;
+
+        $attributes = $this->cache->get($cache_key);
+        if ($attributes !== null) {
             $this->attributes = $attributes;
             return false;
         }
@@ -163,7 +166,7 @@ class Attribute implements AttributeInterface
             $this->attributes[$row['attribute_id']] = $row;
         }
 
-        $this->cache->push($cache_key, $this->attributes);
+        $this->cache->put($cache_key, $this->attributes);
         return true;
     }
 
@@ -299,6 +302,7 @@ class Attribute implements AttributeInterface
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getAttributesByType($attribute_type, $language_id = 0, $attribute_parent_id = 0)
     {
@@ -366,7 +370,7 @@ class Attribute implements AttributeInterface
      * @param int $language_id - Language id. default 0 (english)
      *
      * @return bool
-     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getAttributeValues($attribute_id, $language_id = 0)
     {
@@ -377,8 +381,8 @@ class Attribute implements AttributeInterface
         //get attribute values
         $cache_key = 'attribute.values.'.$attribute_id;
         $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id.'_lang_'.$language_id;
-        $attribute_vals = $this->cache->pull($cache_key);
-        if ($attribute_vals !== false) {
+        $attribute_vals = $this->cache->get($cache_key);
+        if ($attribute_vals !== null) {
             return $attribute_vals;
         }
 
@@ -391,7 +395,7 @@ class Attribute implements AttributeInterface
             order by gav.sort_order"
         );
         $attribute_vals = $query->rows;
-        $this->cache->push($cache_key, $attribute_vals);
+        $this->cache->put($cache_key, $attribute_vals);
         return $attribute_vals;
     }
 
@@ -401,6 +405,7 @@ class Attribute implements AttributeInterface
      * @param array $data - usually it's a $_POST
      *
      * @return array - array with error text for each of invalid field data
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */

@@ -57,7 +57,7 @@ final class ARequest
         $this->server = $_SERVER;
 
         //generate unique request
-        $this->uniqueId = \H::genRequestId();
+        $this->setRequestId();
 
         //check if there is any encrypted data
         if (isset($this->get['__e']) && $this->get['__e']) {
@@ -67,6 +67,14 @@ final class ARequest
             $this->post = array_replace_recursive($this->post, $this->decodeURI($this->post['__e']));
         }
         $this->detectBrowser();
+    }
+
+    /**
+     * @param string $requestId
+     */
+    public function setRequestId(string $requestId = null)
+    {
+        $this->uniqueId = $requestId ?? \H::genRequestId();
     }
 
     //todo: Include PHP module filter to process input params. http://us3.php.net/manual/en/book.filter.php

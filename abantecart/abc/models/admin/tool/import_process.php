@@ -32,8 +32,8 @@ use abc\models\catalog\Category;
 use abc\models\catalog\CategoryDescription;
 use abc\models\catalog\Manufacturer;
 use abc\models\catalog\Product;
-use abc\models\catalog\ProductOption;
 use abc\models\catalog\ProductOptionValue;
+use abc\models\catalog\ProductOption;
 use abc\modules\events\ABaseEvent;
 use Exception;
 use H;
@@ -187,6 +187,9 @@ class ModelToolImportProcess extends Model
      * @param $settings
      *
      * @return bool
+     * @throws \abc\core\lib\AException
+     * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function process_products_record($task_id, $data, $settings)
     {
@@ -241,6 +244,7 @@ class ModelToolImportProcess extends Model
      * @return bool
      * @throws AException
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function process_categories_record($task_id, $data, $settings)
     {
@@ -260,6 +264,7 @@ class ModelToolImportProcess extends Model
      * @param $settings
      *
      * @return bool
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws AException
      * @throws ReflectionException
      */
@@ -285,6 +290,7 @@ class ModelToolImportProcess extends Model
      * @return bool
      * @throws AException
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function addUpdateProduct($record, $settings, $language_id, $store_id)
     {
@@ -362,7 +368,8 @@ class ModelToolImportProcess extends Model
                     $product_data[$key] = isset($product_data[$key]) ? $product_data[$key] : $val;
                 }
 
-                $product_id = Product::createProduct($product_data);
+                $productModel = Product::createProduct($product_data);
+                $product_id = $productModel->product_id;
                 if ($product_id) {
                     $this->toLog("Created product '".$product_desc['name']."' with ID ".$product_id);
                     $status = true;
@@ -370,13 +377,14 @@ class ModelToolImportProcess extends Model
                     $this->toLog("Error: Failed to create product '".$product_desc['name']."'.");
                 }
 
-            } else {
-                //flat array for description (specific for update)
-                $product_data['product_description'] = $product_desc;
-                Product::updateProduct($product_id, $product_data, $language_id);
-                $this->toLog("Updated product '{$product_desc['name']}' with ID {$product_id}.");
-                $status = true;
-            }
+        } else {
+            //flat array for description (specific for update)
+            $product_data['product_description'] = $product_desc;
+            Product::setCurrentLanguageID($language_id);
+            Product::updateProduct($product_id, $product_data);
+            $this->toLog("Updated product '{$product_desc['name']}' with ID {$product_id}.");
+            $status = true;
+        }
 
             // import category if needed
             $categories = [];
@@ -422,6 +430,7 @@ class ModelToolImportProcess extends Model
      * @return bool
      * @throws AException
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function addUpdateCategory($record, $settings, $language_id, $store_id)
     {
@@ -508,6 +517,7 @@ class ModelToolImportProcess extends Model
      * @return bool
      * @throws AException
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function addUpdateManufacturer($record, $settings, $language_id, $store_id)
     {
@@ -553,8 +563,9 @@ class ModelToolImportProcess extends Model
      * @return bool
      * @throws ReflectionException
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    protected function addUpdateOptions($product_id, $data, $weight_class_id)
+    protected function addUpdateOptions($product_id, $data = [], $weight_class_id)
     {
         if (!is_array($data) || empty($data)) {
             //no option details
@@ -562,8 +573,15 @@ class ModelToolImportProcess extends Model
         }
 
         $this->toLog("Creating product option for product ID {$product_id}.");
+        $product = Product::with('options')->find($product_id);
+        if (!$product) {
+            $this->toLog("Error: Product ID ".$product_id." not found in database.");
+            return false;
+        }
+
         //get existing options and values.
         $this->load->model('catalog/product');
+        $product->options->forceDelete();
 
         //add new options for each option
         for ($i = 0; $i < count($data); $i++) {
@@ -593,7 +611,7 @@ class ModelToolImportProcess extends Model
                 'sort_order'         => isset($data[$i]['sort_order']) ? $data[$i]['sort_order'] : 0
             ];
             if( !$p_option_id ) {
-                $p_option_id = $this->model_catalog_product->addProductOption($product_id, $opt_data);
+                $p_option_id = $product->addProductOption($opt_data);
                 if ($p_option_id) {
                     $this->toLog("Created product option '{$data[$i]['name']}' with ID {$p_option_id}.");
                 }else{
@@ -653,16 +671,17 @@ class ModelToolImportProcess extends Model
     }
 
     /**
-     * @param $product_id
-     * @param $weight_class_id
-     * @param $p_option_id
+     * @param $productId
+     * @param $weightClassId
+     * @param $optionId
      * @param $data
      *
      * @return bool|int|null
      * @throws ReflectionException
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    protected function saveOptionValue($product_id, $weight_class_id, $p_option_id, $data)
+    protected function saveOptionValue($productId, $weightClassId, $optionId, $data)
     {
         if ( empty($data) || !array_filter($data) || !$data['name'] ) {
             //skip empty data
@@ -683,16 +702,19 @@ class ModelToolImportProcess extends Model
                     FROM ".$this->db->table_name('product_option_values')." ov 
                     LEFT JOIN ".$this->db->table_name('product_option_value_descriptions')." ovd
                         ON ovd.product_option_value_id = ov.product_option_value_id
-                    WHERE ov.product_id = '".(int)$product_id."'
+                    WHERE ov.product_id = '".(int)$productId."'
                         AND ".$colName." = '".$this->db->escape($colValue)."'
-                        AND ov.product_option_id = '".(int)$p_option_id."'";
+                        AND ov.product_option_id = '".(int)$optionId."'";
             $result = $this->db->query($sql);
             if($result->num_rows){
                 break;
             }
         }
 
-        $opt_val_data = [];
+        $optionValueData = [
+            'product_id'        => $productId,
+            'product_option_id' => $optionId,
+        ];
         if($result && $result->row){
             $opt_keys = $result->row;
             $update = true;
@@ -711,37 +733,30 @@ class ModelToolImportProcess extends Model
             ];
             $update = false;
         }
-
         foreach ($opt_keys as $k => $v) {
-            $opt_val_data[$k] = $v;
+            $optionValueData[$k] = $v;
             if (isset($data[$k])) {
-                $opt_val_data[$k] = $data[$k];
+                $optionValueData[$k] = $data[$k];
             }
         }
-
-        //enable stock tracking if quantity specified
-        if ($opt_val_data['quantity'] > 0) {
-            $opt_val_data['subtract'] = 1;
+        //enable stock taking if quantity specified
+        if ($optionValueData['quantity'] > 0) {
+            $optionValueData['subtract'] = 1;
         }
 
         $this->load->model('localisation/weight_class');
-        $prd_weight_info = $this->model_localisation_weight_class->getWeightClass($weight_class_id);
+        $prd_weight_info = $this->model_localisation_weight_class->getWeightClass($weightClassId);
         if ($prd_weight_info['unit']) {
-            $opt_val_data['weight_type'] = $prd_weight_info['unit'];
+            $optionValueData['weight_type'] = $prd_weight_info['unit'];
         }
 
         if($update) {
             $pd_opt_val_id = $opt_keys['product_option_value_id'];
             $optionValue = ProductOptionValue::with('description')->find($pd_opt_val_id);
-            $optionValue->update($opt_val_data);
-            $optionValue->description->update($opt_val_data);
+            $optionValue->update($optionValueData);
+            $optionValue->description->update($optionValueData);
         }else{
-            $pd_opt_val_id = $this->model_catalog_product->addProductOptionValueAndDescription(
-                $product_id,
-                $p_option_id,
-                $opt_val_data
-            );
-        }
+            $pd_opt_val_id = ProductOption::addProductOptionValueAndDescription($optionValueData);}
 
         if ($pd_opt_val_id && !empty($data['image'])) {
             //process images
@@ -761,7 +776,9 @@ class ModelToolImportProcess extends Model
      * @param $language_id
      *
      * @return bool
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws ReflectionException
+     * @throws AException
      */
     protected function migrateImages($data = [], $object_txt_id = '', $object_id = 0, $title = '', $language_id)
     {

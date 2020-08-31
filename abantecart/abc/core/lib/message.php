@@ -20,12 +20,8 @@
 
 namespace abc\core\lib;
 
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use H;
 
 /**
  * Class AMessage
@@ -63,11 +59,12 @@ class AMessage
     /**
      * save notice
      *
-     * @param      $title            - string - message title
-     * @param      $message          - string - message body
+     * @param      $title - string - message title
+     * @param      $message - string - message body
      * @param bool $repetition_group - sign to group repetitions of message based on same title of message
      *
      * @void
+     * @throws \Exception
      */
     public function saveNotice($title, $message, $repetition_group = true)
     {
@@ -77,11 +74,12 @@ class AMessage
     /**
      * save warning
      *
-     * @param      $title            - string - message title
-     * @param      $message          - string - message body
+     * @param      $title - string - message title
+     * @param      $message - string - message body
      * @param bool $repetition_group - sign to group repetitions of message based on same title of message
      *
      * @void
+     * @throws \Exception
      */
     public function saveWarning($title, $message, $repetition_group = true)
     {
@@ -91,11 +89,12 @@ class AMessage
     /**
      * save Error
      *
-     * @param      $title            - string - message title
-     * @param      $message          - string - message body
+     * @param      $title - string - message title
+     * @param      $message - string - message body
      * @param bool $repetition_group - sign to group repetitions of message based on same title of message
      *
      * @void
+     * @throws \Exception
      */
     public function saveError($title, $message, $repetition_group = true)
     {
@@ -105,13 +104,14 @@ class AMessage
     /**
      * save notice
      *
-     * @param      $title            - string - message title
-     * @param      $message          - string - message body
-     * @param      $status           - message status ( N - notice, W - warning, E - error )
+     * @param      $title - string - message title
+     * @param      $message - string - message body
+     * @param      $status - message status ( N - notice, W - warning, E - error )
      * @param bool $repetition_group - sign to group repetitions of message based on same title of message
      *
-     * @void
      * @return int
+     * @throws \Exception
+     * @void
      */
     protected function _saveMessage($title, $message, $status, $repetition_group = true)
     {
@@ -120,17 +120,17 @@ class AMessage
         // update counter and update message body as last one can be different
         if ($last_message['title'] == $title && $repetition_group) {
             $this->db->query("UPDATE ".$this->db->table_name("messages")." 
-								SET `repeated` = `repeated` + 1, 
-									`viewed`='0', 
-									`message` = '".$this->db->escape($message)."'
-								WHERE msg_id = '".$last_message['msg_id']."'");
+                                SET `repeated` = `repeated` + 1, 
+                                    `viewed`='0', 
+                                    `message` = '".$this->db->escape($message)."'
+                                WHERE msg_id = '".$last_message['msg_id']."'");
             $msg_id = (int)$last_message['msg_id'];
         } else {
             $this->db->query("INSERT INTO ".$this->db->table_name("messages")." 
-							SET `title` = '".$this->db->escape($title)."',
-								`message` = '".$this->db->escape($message)."',
-								`status` = '".$this->db->escape($status)."',
-								`date_added` = NOW()");
+                            SET `title` = '".$this->db->escape($title)."',
+                                `message` = '".$this->db->escape($message)."',
+                                `status` = '".$this->db->escape($status)."',
+                                `date_added` = NOW()");
             $msg_id = (int)$this->db->getLastId();
         }
         return $msg_id;
@@ -138,24 +138,27 @@ class AMessage
 
     /**
      * @param int $msg_id
+     *
+     * @throws \Exception
      */
     public function deleteMessage($msg_id)
     {
         $this->db->query("DELETE FROM ".$this->db->table_name("messages")." 
-						  WHERE `msg_id` = ".(int)$msg_id);
+                          WHERE `msg_id` = ".(int)$msg_id);
     }
 
     /**
      * @param int $msg_id
      *
      * @return array
+     * @throws \Exception
      */
     public function getMessage($msg_id)
     {
         $this->markAsRead($msg_id);
         $query = $this->db->query("SELECT * 
-									FROM ".$this->db->table_name("messages")." 
-									WHERE msg_id = ".(int)$msg_id);
+                                    FROM ".$this->db->table_name("messages")." 
+                                    WHERE msg_id = ".(int)$msg_id);
         $row = $query->row;
         if ($row) {
             // replace html-links in message
@@ -165,12 +168,13 @@ class AMessage
     }
 
     /**
-     * @param int    $start
-     * @param int    $limit
+     * @param int $start
+     * @param int $limit
      * @param string $sort
      * @param string $order
      *
      * @return array
+     * @throws \Exception
      */
     public function getMessages($start = 0, $limit = 0, $sort = '', $order = 'DESC')
     {
@@ -180,9 +184,9 @@ class AMessage
             $limit_str = "LIMIT ".(int)$start.", ".(int)$limit;
         }
         $sql = "SELECT * 
-				FROM ".$this->db->table_name("messages")." 
-				ORDER BY ".$sort." ".$order.", date_modified DESC, msg_id 
-				DESC ".$limit_str;
+                FROM ".$this->db->table_name("messages")." 
+                ORDER BY ".$sort." ".$order.", date_modified DESC, msg_id 
+                DESC ".$limit_str;
         $query = $this->db->query($sql);
         return $query->rows;
     }
@@ -191,22 +195,24 @@ class AMessage
      * @param string $title
      *
      * @return array
+     * @throws \Exception
      */
     public function getLikeMessage($title)
     {
         $query = $this->db->query("SELECT * 
-									FROM ".$this->db->table_name("messages")." 
-									WHERE title='".$this->db->escape($title)."'");
+                                    FROM ".$this->db->table_name("messages")." 
+                                    WHERE title='".$this->db->escape($title)."'");
         return $query->row;
     }
 
     /**
      * @return int
+     * @throws \Exception
      */
     public function getTotalMessages()
     {
         $query = $this->db->query("SELECT COUNT(*) AS total 
-									FROM ".$this->db->table_name("messages")." ");
+                                    FROM ".$this->db->table_name("messages")." ");
         return (int)$query->row['total'];
     }
 
@@ -214,12 +220,13 @@ class AMessage
      * @param int $msg_id
      *
      * @return bool
+     * @throws \Exception
      */
     public function markAsRead($msg_id)
     {
         $this->db->query("UPDATE ".$this->db->table_name("messages")." 
-		SET viewed = viewed + 1, date_modified = date_modified   
-		WHERE `msg_id` = '".$this->db->escape($msg_id)."'");
+        SET viewed = viewed + 1, date_modified = date_modified   
+        WHERE `msg_id` = '".$this->db->escape($msg_id)."'");
         return true;
     }
 
@@ -227,14 +234,15 @@ class AMessage
      * @param int $msg_id
      *
      * @return bool
+     * @throws \Exception
      */
     public function markAsUnRead($msg_id)
     {
         $msg_info = $this->getMessage($msg_id);
         if ($msg_info['viewed']) {
             $this->db->query("UPDATE ".$this->db->table_name("messages")." 
-			SET viewed = 0, date_modified = date_modified   
-			WHERE `msg_id` = '".$this->db->escape($msg_id)."'");
+            SET viewed = 0, date_modified = date_modified   
+            WHERE `msg_id` = '".$this->db->escape($msg_id)."'");
             return true;
         } else {
             return false;
@@ -248,7 +256,7 @@ class AMessage
      */
     public function saveForDisplay($title, $message, $status)
     {
-        $this->session->data['ac_messages'][] = array($title, $message, $status);
+        $this->session->data['ac_messages'][] = [$title, $message, $status];
     }
 
     /**
@@ -256,7 +264,7 @@ class AMessage
      */
     public function getForDisplay()
     {
-        $messages = array();
+        $messages = [];
         if (!empty($this->session->data['ac_messages'])) {
             $messages = $this->session->data['ac_messages'];
             unset($this->session->data['ac_messages']);
@@ -268,13 +276,14 @@ class AMessage
      * @param array $no_delete
      *
      * @return bool
+     * @throws \Exception
      */
-    public function purgeANTMessages($no_delete = array())
+    public function purgeANTMessages($no_delete = [])
     {
         if (!$no_delete || !is_array($no_delete)) {
             return false;
         }
-        $ids = array();
+        $ids = [];
         foreach ($no_delete as $id) {
             $ids[] = $this->db->escape($id);
         }
@@ -288,8 +297,9 @@ class AMessage
      * @param array $data
      *
      * @return null
+     * @throws \Exception
      */
-    public function saveANTMessage($data = array())
+    public function saveANTMessage($data = [])
     {
         if (!$data || !$data['message_id']) {
             return false;
@@ -298,14 +308,14 @@ class AMessage
         // need to find message with same id and language. If language not set - find for all
         // if language_code is empty it mean that banner shows for all interface languages
         $sql = "SELECT *
-				 FROM ".$this->db->table_name("ant_messages")." 
-				 WHERE id = '".$this->db->escape($data['message_id'])."'
-				 ".($data['language_code'] ? "AND language_code = '".$this->db->escape($data['language_code'])."'" : "")
+                 FROM ".$this->db->table_name("ant_messages")." 
+                 WHERE id = '".$this->db->escape($data['message_id'])."'
+                 ".($data['language_code'] ? "AND language_code = '".$this->db->escape($data['language_code'])."'" : "")
             ."
-				 ORDER BY viewed_date ASC";
+                 ORDER BY viewed_date ASC";
         $result = $this->db->query($sql);
 
-        $exists = array();
+        $exists = [];
         $viewed = 0;
         $last_view = null;
         if ($result->num_rows) {
@@ -321,57 +331,58 @@ class AMessage
             !$data['end_date'] || $data['end_date'] == '0000-00-00 00:00:00' ? '2030-01-01' : $data['end_date'];
         $data['priority'] = !(int)$data['priority'] ? 1 : (int)$data['priority'];
         $sql = "INSERT INTO ".$this->db->table_name("ant_messages")." 
-				(`id`,
-				`priority`,
-				`start_date`,
-				`end_date`,
-				`viewed_date`,
-				`viewed`,
-				`title`,
-				`description`,
-				`html`,
-				`url`,
-				`language_code`)
-				VALUES ('".$this->db->escape($data['message_id'])."',
-						'".$this->db->escape($data['priority'])."',
-						'".$this->db->escape($data['start_date'])."',
-						'".$this->db->escape($data['end_date'])."',
-						'".$this->db->escape($last_view)."',
-						'".(int)$viewed."',
-						'".$this->db->escape($data['title'])."',
-						'".$this->db->escape($data['description'])."',
-						'".$this->db->escape($data['html'])."',
-						'".$this->db->escape($data['url'])."',
-						'".$this->db->escape($data['language_code'])."')";
+                (`id`,
+                `priority`,
+                `start_date`,
+                `end_date`,
+                `viewed_date`,
+                `viewed`,
+                `title`,
+                `description`,
+                `html`,
+                `url`,
+                `language_code`)
+                VALUES ('".$this->db->escape($data['message_id'])."',
+                        '".$this->db->escape($data['priority'])."',
+                        '".$this->db->escape($data['start_date'])."',
+                        '".$this->db->escape($data['end_date'])."',
+                        '".$this->db->escape($last_view)."',
+                        '".(int)$viewed."',
+                        '".$this->db->escape($data['title'])."',
+                        '".$this->db->escape($data['description'])."',
+                        '".$this->db->escape($data['html'])."',
+                        '".$this->db->escape($data['url'])."',
+                        '".$this->db->escape($data['language_code'])."')";
         $this->db->query($sql, true);
         return true;
     }
 
     /**
      * @return array
+     * @throws \Exception
      */
     public function getANTMessage()
     {
         $output = '';
         // delete expired banners first
         $this->db->query("DELETE FROM ".$this->db->table_name("ant_messages")." 
-							WHERE end_date < CURRENT_TIMESTAMP");
+                            WHERE end_date < CURRENT_TIMESTAMP");
         $sql = "SELECT *
-				 FROM ".$this->db->table_name("ant_messages")." 
-				 WHERE start_date< CURRENT_TIMESTAMP and end_date > CURRENT_TIMESTAMP
-					AND ( language_code = '".$this->registry->get('config')->get('admin_language')."'
-							OR COALESCE(language_code,'*') = '*' OR language_code = '*' )
-				 ORDER BY viewed_date ASC, priority DESC, COALESCE(language_code,'') DESC, COALESCE(url,'') DESC";
+                 FROM ".$this->db->table_name("ant_messages")." 
+                 WHERE start_date< CURRENT_TIMESTAMP and end_date > CURRENT_TIMESTAMP
+                    AND ( language_code = '".$this->registry->get('config')->get('admin_language')."'
+                            OR COALESCE(language_code,'*') = '*' OR language_code = '*' )
+                 ORDER BY viewed_date ASC, priority DESC, COALESCE(language_code,'') DESC, COALESCE(url,'') DESC";
         $result = $this->db->query($sql);
         if ($result->num_rows) {
             $output = $result->row['html'] ? $result->row['html'] : $result->row['description'];
             //$this->markViewedANT($result->row['id'],$result->row['language_code']);
         }
-        return array(
+        return [
             'id'     => $result->row['id'],
             'viewed' => $result->row['viewed'],
             'html'   => $output,
-        );
+        ];
     }
 
     /**
@@ -379,30 +390,32 @@ class AMessage
      * @param string $language_code
      *
      * @return string
+     * @throws \Exception
      */
     public function markViewedANT($message_id, $language_code)
     {
-        if (!AHelperUtils::has_value($message_id) || !AHelperUtils::has_value($language_code)) {
+        if (!H::has_value($message_id) || !H::has_value($language_code)) {
             return null;
         }
         $sql = "UPDATE  ".$this->db->table_name("ant_messages")." 
-				SET viewed = viewed+1 , viewed_date = NOW(), date_modified = date_modified 
-				WHERE id = '".$this->db->escape($message_id)."'
-					AND language_code = '".$this->db->escape($language_code)."'";
+                SET viewed = viewed+1 , viewed_date = NOW(), date_modified = date_modified 
+                WHERE id = '".$this->db->escape($message_id)."'
+                    AND language_code = '".$this->db->escape($language_code)."'";
         $this->db->query($sql);
         return $message_id;
     }
 
     /**
      * @return array
+     * @throws \Exception
      */
     public function getShortList()
     {
-        $output = array();
+        $output = [];
         $result = $this->db->query("SELECT UPPER(status) as status, COUNT(msg_id) as count
-									FROM ".$this->db->table_name("messages")." 
-									WHERE viewed<'1'
-									GROUP BY status");
+                                    FROM ".$this->db->table_name("messages")." 
+                                    WHERE viewed<'1'
+                                    GROUP BY status");
         $total = 0;
         foreach ($result->rows as $row) {
             $output['count'][$row['status']] = ( int )$row['count'];
@@ -413,10 +426,10 @@ class AMessage
         //get last 9 messages
         $result = $this->db->query(
             "(SELECT msg_id, title, message, status, viewed, date_modified
-				FROM ".$this->db->table_name('messages')."
-				WHERE viewed<'1'
-				ORDER BY date_modified DESC
-				LIMIT 0,9)");
+                FROM ".$this->db->table_name('messages')."
+                WHERE viewed<'1'
+                ORDER BY date_modified DESC
+                LIMIT 0,9)");
         $output['shortlist'] = $result->rows;
         return $output;
     }

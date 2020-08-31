@@ -3,6 +3,7 @@
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -15,8 +16,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $text
  * @property int $rating
  * @property int $status
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
  *
  * @property Product $product
  *
@@ -27,7 +28,6 @@ class Review extends BaseModel
     use SoftDeletes;
 
     protected $primaryKey = 'review_id';
-    public $timestamps = false;
 
     protected $casts = [
         'product_id'  => 'int',
@@ -48,12 +48,10 @@ class Review extends BaseModel
         'text',
         'rating',
         'status',
-        'date_added',
-        'date_modified',
     ];
 
     public function product()
     {
-        return $this->belongsTo(Product::class, 'product_id');
+        return $this->belongsTo(Product::class, 'product_id', 'product_id');
     }
 }

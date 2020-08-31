@@ -26,13 +26,10 @@ use abc\core\engine\AForm;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
-if ( ! class_exists('abc\core\ABC') || ! ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 class ControllerPagesToolCache extends AController
 {
-    private $error = array();
+    private $error = [];
     public $data;
 
     public function main()
@@ -42,105 +39,105 @@ class ControllerPagesToolCache extends AController
 
         $this->document->setTitle($this->language->get('heading_title'));
 
-        $this->document->initBreadcrumb(array(
+        $this->document->initBreadcrumb([
             'href'      => $this->html->getSecureURL('index/home'),
             'text'      => $this->language->get('text_home'),
             'separator' => false
-        ));
-        $this->document->addBreadcrumb(array(
+        ]);
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSecureURL('tool/cache'),
             'text'      => $this->language->get('heading_title'),
             'separator' => ' :: ',
             'current'   => true
-        ));
+        ]);
 
-        $this->data['sections'] = array(
-            array(
+        $this->data['sections'] = [
+            [
                 'id'          => 'configuration',
                 'text'        => $this->language->get('text_configuration'),
                 'description' => $this->language->get('desc_configuration'),
                 'keywords'    => 'settings,extensions,store,stores,attribute,attributes,'
                                 .'length_class,contents,tax_class,order_status,stock_status,'
                                 .'weight_class,storefront_menu,tables'
-            ),
-            array(
+            ],
+            [
                 'id'          => 'layout',
                 'text'        => $this->language->get('text_layouts_blocks'),
                 'description' => $this->language->get('desc_layouts_blocks'),
                 'keywords'    => 'layout, pages, blocks'
-            ),
-            array(
+            ],
+            [
                 'id'          => 'flexyforms',
                 'text'        => $this->language->get('text_flexyforms'),
                 'description' => $this->language->get('desc_flexyforms'),
                 'keywords'    => 'forms'
-            ),
-            array(
+            ],
+            [
                 'id'          => 'image',
                 'text'        => $this->language->get('text_images'),
                 'description' => $this->language->get('desc_images'),
                 'keywords'    => 'image,resources'
-            ),
-            array(
+            ],
+            [
                 'id'          => 'product',
                 'text'        => $this->language->get('text_products'),
                 'description' => $this->language->get('desc_products'),
                 'keywords'    => 'product'
-            ),
-            array(
+            ],
+            [
                 'id'          => 'category',
                 'text'        => $this->language->get('text_categories'),
                 'description' => $this->language->get('desc_categories'),
                 'keywords'    => 'category'
-            ),
-            array(
+            ],
+            [
                 'id'          => 'manufacturer',
                 'text'        => $this->language->get('text_manufacturers'),
                 'description' => $this->language->get('desc_manufacturers'),
                 'keywords'    => 'manufacturer'
-            ),
-            array(
+            ],
+            [
                 'id'          => 'localisation',
                 'text'        => $this->language->get('text_localisations'),
                 'description' => $this->language->get('desc_localisations'),
                 'keywords'    => 'localization'
-            ),
-            array(
+            ],
+            [
                 'id'          => 'error_log',
                 'text'        => $this->language->get('text_error_log'),
                 'description' => $this->language->get('desc_error_log'),
                 'keywords'    => 'error_log',
-            ),
-            array(
+            ],
+            [
                 'id'          => 'install_upgrade_history',
                 'text'        => $this->language->get('text_install_upgrade_history'),
                 'description' => $this->language->get('desc_install_upgrade_history'),
                 'keywords'    => 'install_upgrade_history',
-            ),
-            array(
+            ],
+            [
                 'id'          => 'html_cache',
                 'text'        => $this->language->get('text_html_cache'),
                 'description' => $this->language->get('desc_html_cache'),
                 'keywords'    => 'html_cache',
-            ),
-        );
+            ],
+        ];
 
         $form = new AForm('ST');
-        $form->setForm(array('form_name' => 'cacheFrm'));
+        $form->setForm(['form_name' => 'cacheFrm']);
         $this->data['form']['form_open'] = $form->getFieldHtml(
-            array(
+            [
                 'type'   => 'form',
                 'name'   => 'cacheFrm',
                 'action' => $this->html->getSecureURL('tool/cache/delete'),
-            ));
+            ]);
 
         $this->data['form']['submit'] = $form->getFieldHtml(
-            array(
+            [
                 'type'  => 'button',
                 'name'  => 'submit',
                 'text'  => $this->language->get('text_clear_cache'),
                 'style' => 'button1',
-            ));
+            ]);
         if (isset($this->error['warning'])) {
             $this->data['error_warning'] = $this->error['warning'];
         } else {
@@ -196,13 +193,13 @@ class ControllerPagesToolCache extends AController
                             $this->model_tool_install_upgrade_history->deleteData();
                             break;
                         case 'html_cache':
-                            $this->cache->remove('html_cache');
+                            $this->cache->flush('html_cache');
                             break;
                         default:
-                            $this->cache->remove($group);
+                            $this->cache->flush($group);
                             foreach ($languages as $lang) {
                                 foreach ($stores as $store) {
-                                    $this->cache->remove($group."_".$store['store_id']."_".$lang['language_id']);
+                                    $this->cache->flush($group."_".$store['store_id']."_".$lang['language_id']);
                                 }
                             }
                     }
@@ -212,7 +209,7 @@ class ControllerPagesToolCache extends AController
         } else {
             if ($this->request->get_or_post('clear_all') == 'all') {
                 //delete entire cache
-                $this->cache->remove('*');
+                $this->cache->flush('*');
                 $this->session->data['success'] = $this->language->get('text_success');
             }
         }

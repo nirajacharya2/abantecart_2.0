@@ -21,12 +21,9 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
+use H;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class AContentManager
@@ -35,7 +32,7 @@ if (!class_exists('abc\core\ABC')) {
  * @property ALanguageManager       $language
  * @property AConfig                $config
  * @property ASession               $session
- * @property \abc\core\cache\ACache $cache
+ * @property AbcCache               $cache
  *
  */
 class AContentManager
@@ -49,7 +46,7 @@ class AContentManager
     public function __construct()
     {
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to change custom content');
+            throw new AException ('Error: permission denied to change custom content', AC_ERR_LOAD);
         }
         $this->registry = Registry::getInstance();
     }
@@ -68,6 +65,7 @@ class AContentManager
      * @param array $data
      *
      * @return int
+     * @throws AException
      */
     public function addContent($data)
     {
@@ -84,14 +82,14 @@ class AContentManager
         unset($data['parent_content_id'][0], $data ['sort_order'][0]);
 
         if (empty ($data['keyword'])) {
-            $seo_key = AHelperUtils::SEOEncode($data['title'], 'content_id', $content_id);
+            $seo_key = H::SEOEncode($data['title'], 'content_id', $content_id);
         } else {
-            $seo_key = AHelperUtils::SEOEncode($data['keyword'], 'content_id', $content_id);
+            $seo_key = H::SEOEncode($data['keyword'], 'content_id', $content_id);
         }
         if ($seo_key) {
             $this->language->replaceDescriptions('url_aliases',
-                array('query' => "content_id=".( int )$content_id),
-                array((int)$this->language->getContentLanguageID() => array('keyword' => $seo_key)));
+                ['query' => "content_id=".( int )$content_id],
+                [(int)$this->language->getContentLanguageID() => ['keyword' => $seo_key]]);
         } else {
             $this->db->query("DELETE
                             FROM ".$this->db->table_name("url_aliases")." 
@@ -113,16 +111,16 @@ class AContentManager
 
         foreach ($languages as $language) {
             $this->language->replaceDescriptions('content_descriptions',
-                array('content_id' => (int)$content_id),
-                array(
-                    ( int )$language['language_id'] => array(
+                ['content_id' => (int)$content_id],
+                [
+                    ( int )$language['language_id'] => [
                         'title'            => $data ['title'],
                         'description'      => $data ['description'],
                         'meta_description' => $data ['meta_description'],
                         'meta_keywords'    => $data ['meta_keywords'],
                         'content'          => $data ['content'],
-                    ),
-                ));
+                    ],
+                ]);
         }
         if ($data ['store_id']) {
             foreach ($data ['store_id'] as $store_id) {
@@ -132,16 +130,17 @@ class AContentManager
             }
         }
 
-        $this->cache->remove('content');
+        $this->cache->flush('content');
 
         return $content_id;
     }
 
     /**
-     * @param int   $content_id
+     * @param int $content_id
      * @param array $data
      *
      * @return bool
+     * @throws AException
      */
     public function editContent($content_id, $data)
     {
@@ -166,24 +165,24 @@ class AContentManager
             $this->db->query($sql);
         }
 
-        $update = array(
+        $update = [
             'title'            => $data ['title'],
             'description'      => $data ['description'],
             'meta_keywords'    => $data ['meta_keywords'],
             'meta_description' => $data ['meta_description'],
             'content'          => $data ['content'],
-        );
+        ];
 
         $this->language->replaceDescriptions('content_descriptions',
-            array('content_id' => (int)$content_id),
-            array((int)$language_id => $update));
+            ['content_id' => (int)$content_id],
+            [(int)$language_id => $update]);
 
         if (isset($data['keyword'])) {
-            $data['keyword'] = AHelperUtils::SEOEncode($data['keyword'], 'content_id', $content_id);
+            $data['keyword'] = H::SEOEncode($data['keyword'], 'content_id', $content_id);
             if ($data['keyword']) {
                 $this->language->replaceDescriptions('url_aliases',
-                    array('query' => "content_id=".( int )$content_id),
-                    array((int)$this->language->getContentLanguageID() => array('keyword' => $data['keyword'])));
+                    ['query' => "content_id=".( int )$content_id],
+                    [(int)$this->language->getContentLanguageID() => ['keyword' => $data['keyword']]]);
             } else {
                 $this->db->query("DELETE
                                 FROM ".$this->db->table_name("url_aliases")." 
@@ -201,18 +200,19 @@ class AContentManager
                 $this->db->query($sql);
             }
         }
-        $this->cache->remove('content');
+        $this->cache->flush('content');
 
         return true;
     }
 
     /**
-     * @param int      $content_id
-     * @param string   $field
-     * @param mixed    $value
+     * @param int $content_id
+     * @param string $field
+     * @param mixed $value
      * @param null|int $parent_content_id
      *
      * @return bool
+     * @throws AException
      */
     public function editContentField($content_id, $field, $value, $parent_content_id = null)
     {
@@ -250,16 +250,16 @@ class AContentManager
             case 'meta_keywords' :
             case 'content' :
                 $this->language->replaceDescriptions('content_descriptions',
-                    array('content_id' => (int)$content_id),
-                    array((int)$language_id => array($field => $value)));
+                    ['content_id' => (int)$content_id],
+                    [(int)$language_id => [$field => $value]]);
 
                 break;
             case 'keyword' :
-                $value = AHelperUtils::SEOEncode($value, 'content_id', $content_id);
+                $value = H::SEOEncode($value, 'content_id', $content_id);
                 if ($value) {
                     $this->language->replaceDescriptions('url_aliases',
-                        array('query' => "content_id=".( int )$content_id),
-                        array((int)$this->language->getContentLanguageID() => array('keyword' => $value)));
+                        ['query' => "content_id=".( int )$content_id],
+                        [(int)$this->language->getContentLanguageID() => ['keyword' => $value]]);
                 } else {
                     $this->db->query("DELETE
                                     FROM ".$this->db->table_name("url_aliases")." 
@@ -271,7 +271,7 @@ class AContentManager
             case 'parent_content_id':
                 // prevent deleting while updating with parent_id==content_id
                 $value = (array)$value;
-                $tmp = array();
+                $tmp = [];
                 foreach ($value as $k => $v) {
                     list(, $parent_id) = explode('_', $v);
                     if ($parent_id == $content_id) {
@@ -289,7 +289,7 @@ class AContentManager
                             FROM ".$this->db->table_name("contents")." 
                             WHERE content_id='".$content_id."'";
                 $result = $this->db->query($query);
-                $sort_orders = array();
+                $sort_orders = [];
                 $status = 0;
                 if ($result->num_rows) {
                     $status = $result->row['status'];
@@ -301,7 +301,7 @@ class AContentManager
                 $query = "DELETE FROM ".$this->db->table_name("contents")." WHERE content_id='".$content_id."'";
                 $this->db->query($query);
 
-                $value = !$value ? array(0) : $value;
+                $value = !$value ? [0] : $value;
                 foreach ($value as $parent_content_id) {
                     $parent_content_id = (int)$parent_content_id;
                     if ($parent_content_id == $content_id) {
@@ -320,7 +320,7 @@ class AContentManager
                     "DELETE FROM ".$this->db->table_name("contents_to_stores")." WHERE content_id='".$content_id."'";
                 $this->db->query($query);
                 foreach ($value as $store_id) {
-                    if (AHelperUtils::has_value($store_id)) {
+                    if (H::has_value($store_id)) {
                         $query = "INSERT INTO ".$this->db->table_name("contents_to_stores")." (content_id,store_id)
                                         VALUES ('".$content_id."','".(int)$store_id."')";
                         $this->db->query($query);
@@ -329,13 +329,16 @@ class AContentManager
                 break;
         }
 
-        $this->cache->remove('content');
+        $this->cache->flush('content');
 
         return true;
     }
 
     /**
      * @param int $content_id
+     *
+     * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function deleteContent($content_id)
     {
@@ -351,7 +354,7 @@ class AContentManager
         $this->db->query("DELETE FROM ".$this->db->table_name("url_aliases")." WHERE `query` = 'content_id="
             .( int )$content_id."'");
 
-        $this->cache->remove('content');
+        $this->cache->flush('content');
     }
 
     /**
@@ -359,12 +362,13 @@ class AContentManager
      * @param int $language_id
      *
      * @return mixed
+     * @throws \Exception
      */
     public function getContent($content_id, $language_id = null)
     {
-        $output = array();
+        $output = [];
         $content_id = (int)$content_id;
-        if (!AHelperUtils::has_value($language_id)) {
+        if (!H::has_value($language_id)) {
             $language_id = ( int )$this->language->getContentLanguageID();
         }
 
@@ -389,8 +393,8 @@ class AContentManager
                     $output[0]['sort_order'][$idx] = $row['sort_order'];
                     continue;
                 }
-                $row['parent_content_id'] = array($row['parent_content_id']);
-                $row['sort_order'] = array($idx => $row['sort_order']);
+                $row['parent_content_id'] = [$row['parent_content_id']];
+                $row['sort_order'] = [$idx => $row['sort_order']];
                 $output[$i] = $row;
                 $i++;
             }
@@ -409,14 +413,15 @@ class AContentManager
     }
 
     /**
-     * @param array  $data
+     * @param array $data
      * @param string $mode
-     * @param int    $store_id
-     * @param bool   $parent_only
+     * @param int $store_id
+     * @param bool $parent_only
      *
      * @return array|int
+     * @throws \Exception
      */
-    public function getContents($data = array(), $mode = 'default', $store_id = 0, $parent_only = false)
+    public function getContents($data = [], $mode = 'default', $store_id = 0, $parent_only = false)
     {
         if ($parent_only) {
             if ($data["subsql_filter"]) {
@@ -429,7 +434,7 @@ class AContentManager
             $data['sort'] = 'i.parent_content_id, i.sort_order';
         }
 
-        $filter = (isset($data['filter']) ? $data['filter'] : array());
+        $filter = (isset($data['filter']) ? $data['filter'] : []);
 
         if ($data['store_id']) {
             $store_id = (int)$data['store_id'];
@@ -483,12 +488,12 @@ class AContentManager
             return $query->row['total'];
         }
 
-        $sort_data = array(
+        $sort_data = [
             'parent_content_id ' => 'i.parent_content_id',
             'title'              => 'id.title',
             'sort_order'         => 'i.sort_order',
             'status'             => 'i.status',
-        );
+        ];
 
         if (isset($data['sort']) && in_array($data['sort'], array_keys($sort_data))) {
             $sql .= " ORDER BY ".$data ['sort'];
@@ -516,7 +521,7 @@ class AContentManager
 
         $query = $this->db->query($sql);
 
-        $output = array();
+        $output = [];
 
         if (!$parent_only) {
             if ($query->num_rows) {
@@ -527,8 +532,8 @@ class AContentManager
                         $output[(int)$row['content_id']]['sort_order'][$parent] = (int)$row['sort_order'];
                     } else {
                         $output[(int)$row['content_id']] = $row;
-                        $output[(int)$row['content_id']]['parent_content_id'] = array($parent => $parent);
-                        $output[(int)$row['content_id']]['sort_order'] = array($parent => (int)$row['sort_order']);
+                        $output[(int)$row['content_id']]['parent_content_id'] = [$parent => $parent];
+                        $output[(int)$row['content_id']]['sort_order'] = [$parent => (int)$row['sort_order']];
                     }
                 }
             }
@@ -541,6 +546,7 @@ class AContentManager
 
     /**
      * @return array
+     * @throws \Exception
      */
     public function getLeafContents()
     {
@@ -549,7 +555,7 @@ class AContentManager
                  FROM ".$this->db->table_name("contents")." AS t1
                  LEFT JOIN ".$this->db->table_name("contents")." AS t2	ON t1.content_id = t2.parent_content_id
                  WHERE t2.content_id IS NULL");
-        $result = array();
+        $result = [];
         foreach ($query->rows as $r) {
             $result[$r['content_id']] = $r['content_id'];
         }
@@ -561,19 +567,21 @@ class AContentManager
      * @param array $data
      *
      * @return int
+     * @throws \Exception
      */
-    public function getTotalContents($data = array())
+    public function getTotalContents($data = [])
     {
         return $this->getContents($data, 'total_only');
     }
 
     /**
      * @param array $data
-     * @param int   $store_id
+     * @param int $store_id
      *
      * @return array
+     * @throws \Exception
      */
-    public function getParentContents($data = array(), $store_id = 0)
+    public function getParentContents($data = [], $store_id = 0)
     {
         return $this->getContents($data, '', $store_id, true);
     }
@@ -581,18 +589,21 @@ class AContentManager
     /**
      * @param bool $parent_only
      * @param bool $without_top
-     * @param int  $store_id
+     * @param int $store_id
      *
      * @return array
+     * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
      */
     public function getContentsForSelect($parent_only = false, $without_top = false, $store_id = 0)
     {
 
         $all = $parent_only
-            ? $this->getParentContents(array(), $store_id)
-            : $this->getContents(array(), '', $store_id, false);
+            ? $this->getParentContents([], $store_id)
+            : $this->getContents([], '', $store_id, false);
         if (!$without_top) {
-            return array_merge(array('0_0' => $this->language->get('text_top_level')),
+            return array_merge(['0_0' => $this->language->get('text_top_level')],
                 $this->buildContentTree($all, 0, 1));
         } else {
             return $this->buildContentTree($all);
@@ -612,7 +623,7 @@ class AContentManager
      */
     public function buildContentTree($all_contents, $parent_id = 0, $level = 0)
     {
-        $output = array();
+        $output = [];
         foreach ($all_contents as $content) {
             foreach ($content['parent_content_id'] as $par_id) {
                 //look for leave content (leave cannot be of 0 ID)
@@ -632,10 +643,11 @@ class AContentManager
      * method returns store list for selectbox for edit form of Content page
      *
      * @return array
+     * @throws \Exception
      */
     public function getContentStores()
     {
-        $output = array();
+        $output = [];
         $query
             = "SELECT s.store_id, COALESCE(cs.content_id,0) AS content_id, s.name
                  FROM ".$this->db->table_name("contents_to_stores")." cs

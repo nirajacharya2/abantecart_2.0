@@ -226,7 +226,7 @@ class Cache extends BaseCommand
     {
         $this->errors = [];
         $registry = Registry::getInstance();
-        $app_cache = $registry->get('cache');
+        $cache = $registry->get('cache');
         $lang_obj = new ALanguageManager($registry);
         $languages = $lang_obj->getActiveLanguages();
         $registry->get('load')->model('setting/store');
@@ -270,12 +270,12 @@ class Cache extends BaseCommand
                     unlink($file);
                 }
             } elseif ($group == 'html_cache') {
-                $app_cache->remove('html_cache');
+                $cache->flush('html_cache');
             } else {
-                $app_cache->remove($group);
+                $cache->flush($group);
                 foreach ($languages as $lang) {
                     foreach ($stores as $store) {
-                        $app_cache->remove($group."_".$store['store_id']."_".$lang['language_id']);
+                        $cache->flush($group."_".$store['store_id']."_".$lang['language_id']);
                     }
                 }
             }

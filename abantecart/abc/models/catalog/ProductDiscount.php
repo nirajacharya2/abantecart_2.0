@@ -3,6 +3,7 @@
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -14,12 +15,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $quantity
  * @property int $priority
  * @property float $price
- * @property \Carbon\Carbon $date_start
- * @property \Carbon\Carbon $date_end
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
+ * @property Carbon|string $date_start
+ * @property Carbon|string $date_end
  *
  * @property Product $product
+ *
+ * @method static ProductDiscount find(int $product_id) ProductDiscount
  *
  * @package abc\models
  */
@@ -28,7 +29,10 @@ class ProductDiscount extends BaseModel
     use SoftDeletes;
 
     protected $primaryKey = 'product_discount_id';
-    public $timestamps = false;
+    protected $mainClassName = Product::class;
+    protected $mainClassKey = 'product_id';
+
+    protected $touches = ['product'];
 
     protected $casts = [
         'product_id'        => 'int',
@@ -53,8 +57,92 @@ class ProductDiscount extends BaseModel
         'price',
         'date_start',
         'date_end',
-        'date_added',
-        'date_modified',
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'product_id' => [
+            'checks'   => [
+                'integer',
+                'sometimes',
+                'required',
+                'exists:products',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Product ID is not Integer or absent in the products table!'],
+            ],
+        ],
+
+        'customer_group_id' => [
+            'checks'   => [
+                'integer',
+                'sometimes',
+                'required',
+                'exists:customer_groups',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Customer Group ID must be an integer or NULL or presents in the customer_groups table!',
+                ],
+            ],
+        ],
+
+        'quantity' => [
+            'checks'   => [
+                'integer',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Product Discount Quantity must be an integer!',
+                ],
+            ],
+        ],
+
+        'priority' => [
+            'checks'   => [
+                'integer',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Priority must be an integer!',
+                ],
+            ],
+        ],
+
+        'price' => [
+            'checks'   => [
+                'numeric',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be numeric!',
+                ],
+            ],
+        ],
+
+        'date_start' => [
+            'checks'   => [
+                'date_format:Y-m-d H:i:s',
+                'nullable',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute. Wrong date format!',
+                ],
+            ],
+        ],
+
+        'date_end' => [
+            'checks'   => [
+                'date_format:Y-m-d H:i:s',
+                'nullable',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute. Wrong date format!',
+                ],
+            ],
+        ],
     ];
 
     public function product()

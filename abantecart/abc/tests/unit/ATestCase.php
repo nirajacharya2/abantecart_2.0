@@ -59,9 +59,13 @@ class ATestCase extends TestCase
         $tb = TestBootstrap::getInstance();
         $this->registry = $tb->registry;
         //add admin to the scope
-        $this->registry->set('request', new ARequest());
-        $this->registry->get('session')->data['user_id'] = 1;
-        $this->registry->set('user', ABC::getObjectByAlias('AUser',[$this->registry]));
+        if (!$this->registry->get('request')) {
+            $this->registry->set('request', new ARequest());
+        }
+        if (!$this->registry->get('user')) {
+            $this->registry->get('session')->data['user_id'] = 1;
+            $this->registry->set('user', ABC::getObjectByAlias('AUser', [$this->registry]));
+        }
     }
 
     public function __get($key)

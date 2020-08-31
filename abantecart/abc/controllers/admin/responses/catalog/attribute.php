@@ -58,6 +58,7 @@ class ControllerResponsesCatalogAttribute extends AController
      *
      * @param array $params
      *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
@@ -243,6 +244,7 @@ class ControllerResponsesCatalogAttribute extends AController
      *
      * @param array $params
      *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
@@ -375,6 +377,7 @@ class ControllerResponsesCatalogAttribute extends AController
      *
      * @param array $params
      *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
@@ -412,13 +415,13 @@ class ControllerResponsesCatalogAttribute extends AController
         $form = $params['aform'];
         $attribute_manager = $params['attribute_manager'];
 
-        $this->data['form']['fields']['attribute_group'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['attribute_group'] = $form->getFieldHtml([
             'type' => 'selectbox',
             'name' => 'attribute_group_id',
             'value' => $this->data['attribute_group_id'],
             'required' => true,
             'options' => $attribute_groups,
-        ));
+        ]);
 
         $this->data['form']['fields']['element_type'] = $form->getFieldHtml([
             'type'     => 'selectbox',

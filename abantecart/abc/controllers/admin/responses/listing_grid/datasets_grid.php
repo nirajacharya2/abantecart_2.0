@@ -17,81 +17,90 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\admin;
+
 use abc\core\engine\AController;
 use abc\core\lib\AJson;
 use stdClass;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-class ControllerResponsesListingGridDatasetsGrid extends AController {
-	public $data = array();
-	public function main() {
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+class ControllerResponsesListingGridDatasetsGrid extends AController
+{
+    public $data = [];
 
-		$this->loadLanguage('tool/datasets_manager');
-		$this->loadModel('tool/datasets_manager');
+    public function main()
+    {
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		$page = $this->request->post [ 'page' ]; // get the requested page
-		$limit = $this->request->post [ 'rows' ];// get how many rows we want to have into the grid
-		$sidx = $this->request->post [ 'sidx' ]; // get index row - i.e. user click to sort
-		$sord = $this->request->post [ 'sord' ]; // get the direction
-		$offset = ($page - 1) * $limit;
+        $this->loadLanguage('tool/datasets_manager');
+        $this->loadModel('tool/datasets_manager');
 
-		$total = $this->model_tool_datasets_manager->getTotalDatasets();
-		if ($total > 0) {
-			$total_pages = ceil($total / $limit);
-		} else {
-			$total_pages = 0;
-		}
+        $page = $this->request->post ['page']; // get the requested page
+        $limit = $this->request->post ['rows'];// get how many rows we want to have into the grid
+        $sidx = $this->request->post ['sidx']; // get index row - i.e. user click to sort
+        $sord = $this->request->post ['sord']; // get the direction
+        $offset = ($page - 1) * $limit;
 
-		if($page > $total_pages){
-			$page = $total_pages;
-			$offset = ($page - 1) * $limit;
-		}
+        $total = $this->model_tool_datasets_manager->getTotalDatasets();
+        if ($total > 0) {
+            $total_pages = ceil($total / $limit);
+        } else {
+            $total_pages = 0;
+        }
 
-		$response = new stdClass ();
-		$response->page = $page;
-		$response->total = $total_pages;
-		$response->records = $total;
+        if ($page > $total_pages) {
+            $page = $total_pages;
+            $offset = ($page - 1) * $limit;
+        }
 
-		$results = $this->model_tool_datasets_manager->getDatasets($sidx . " " . $sord, $limit, $offset);
-		$i = 0;
-		foreach ($results as $result) {
-			$response->rows [ $i ] [ 'id' ] = $result [ 'dataset_id' ];
-			$response->rows [ $i ] [ 'cell' ] = array( $result [ 'dataset_id' ],
-				$result [ 'dataset_name' ],
-				$result [ 'dataset_key' ] );
-			$i++;
-		}
+        $response = new stdClass ();
+        $response->page = $page;
+        $response->total = $total_pages;
+        $response->records = $total;
 
-		$this->data['response'] = $response;
-		//update controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-		$this->load->library('json');
-		$this->response->setOutput(AJson::encode($this->data['response']));
-	}
+        $results = $this->model_tool_datasets_manager->getDatasets($sidx." ".$sord, $limit, $offset);
+        $i = 0;
+        foreach ($results as $result) {
+            $response->rows [$i] ['id'] = $result ['dataset_id'];
+            $response->rows [$i] ['cell'] = [
+                $result ['dataset_id'],
+                $result ['dataset_name'],
+                $result ['dataset_key'],
+            ];
+            $i++;
+        }
 
-	/**
-	 * method return information about dataset
-	 * @return void
-	 */
-	public function info() {
+        $this->data['response'] = $response;
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+        $this->load->library('json');
+        $this->response->setOutput(AJson::encode($this->data['response']));
+    }
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+    /**
+     * method return information about dataset
+     *
+     * @return void
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
+     */
+    public function info()
+    {
 
-		$this->loadLanguage('tool/datasets_manager');
-		$this->loadModel('tool/datasets_manager');
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		$this->document->setTitle($this->language->get('heading_title'));
-		$dataset_info = $this->model_tool_datasets_manager->getDatasetInfo($this->request->get[ 'dataset_id' ]);
-		$this->view->assign('dataset_info', $dataset_info);
-		$this->processTemplate('responses/tool/dataset_info.tpl');
-		//update controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-	}
+        $this->loadLanguage('tool/datasets_manager');
+        $this->loadModel('tool/datasets_manager');
+
+        $this->document->setTitle($this->language->get('heading_title'));
+        $dataset_info = $this->model_tool_datasets_manager->getDatasetInfo($this->request->get['dataset_id']);
+        $this->view->assign('dataset_info', $dataset_info);
+        $this->processTemplate('responses/tool/dataset_info.tpl');
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
 
 }

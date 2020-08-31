@@ -117,14 +117,14 @@ final class AConfig
 
             $this->data = array_merge($this->data, $cfg);
         } else {
-            throw new AException(AC_ERR_LOAD, 'Error: Could not load config '.$filename.'!');
+            throw new AException('Error: Could not load config '.$filename.'!', AC_ERR_LOAD);
         }
     }
 
     private function loadSettings($store_url = '')
     {
         /**
-         * @var \abc\core\cache\ACache $cache
+         * @var \abc\core\lib\AbcCache $cache
          */
         $cache = $this->registry->get('cache');
         /**
@@ -145,22 +145,9 @@ final class AConfig
             $url = '';
         }
 
-        //enable cache storage based on configuration
-        $cache->enableCache();
-        //set configured driver.
-        $cache_driver = 'file';
-
-        if (ABC::env('CACHE')['CACHE_DRIVER']) {
-            $cache_driver = ABC::env('CACHE')['CACHE_DRIVER'];
-        }
-
-        if (!$cache->setCacheStorageDriver($cache_driver)) {
-            $error = new AError ('Cache storage driver "'.$cache_driver.'" can not be loaded!');
-            $error->toLog()->toDebug()->toMessages();
-        }
 
         // Load default store settings
-        $settings = $cache->pull('settings');
+        $settings = $cache->get('settings');
         if (empty($settings)) {
             // set global settings (without extensions settings)
             $sql = "SELECT se.*
@@ -190,7 +177,7 @@ final class AConfig
 
             //fix for rare issue on a database and creation of empty cache
             if (!empty($settings) && $this->cnfg['config_cache_enable']) {
-                $cache->push('settings', $settings);
+                $cache->put('settings', $settings);
             }
 
         } else {
@@ -214,7 +201,7 @@ final class AConfig
         ) {
             // if requested url not a default store URL - do check other stores.
             $cache_key = 'settings.store.'.md5('http://'.$url);
-            $store_settings = $cache->pull($cache_key);
+            $store_settings = $cache->get($cache_key);
 
             if (empty($store_settings)) {
                 $sql = "SELECT se.`key`, se.`value`, st.store_id
@@ -244,7 +231,7 @@ final class AConfig
 
                 //fix for rare issue on a database and creation of empty cache
                 if ($this->cnfg['config_cache_enable']) {
-                    $cache->push($cache_key, $store_settings);
+                    $cache->put($cache_key, $store_settings);
                 }
 
                 $this->cnfg['config_store_id'] = $store_settings[0]['store_id'];
@@ -303,7 +290,7 @@ final class AConfig
 
         // load extension settings
         $cache_suffix = ABC::env('IS_ADMIN') ? 'admin' : $this->cnfg['config_store_id'];
-        $settings = $cache->pull('settings.extension.'.$cache_suffix);
+        $settings = $cache->get('settings.extension.'.$cache_suffix);
         if (empty($settings)) {
             // all extensions settings of store
             $sql = "SELECT se.*, e.type AS extension_type, e.key AS extension_txt_id
@@ -325,7 +312,7 @@ final class AConfig
             }
             //fix for rare issue on a database and creation of empty cache
             if (!empty($settings)) {
-                $cache->push('settings.extension.'.$cache_suffix, $settings);
+                $cache->put('settings.extension.'.$cache_suffix, $settings);
             }
         }
 

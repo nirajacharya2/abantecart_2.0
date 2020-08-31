@@ -33,7 +33,7 @@ class ModelExtensionBannerManager extends Model
      * @return int
      * @throws \Exception
      */
-    public function addBanner($data = array())
+    public function addBanner($data = [])
     {
         if (isset($data['start_date'])) {
             $data['start_date'] = "DATE('".$data['start_date']."')";
@@ -76,16 +76,16 @@ class ModelExtensionBannerManager extends Model
             $this->db->query($sql);
         }
         $this->language->replaceDescriptions('banner_descriptions',
-            array('banner_id' => (int)$banner_id),
-            array(
-                (int)$this->session->data['content_language_id'] => array(
+            ['banner_id' => (int)$banner_id],
+            [
+                (int)$this->session->data['content_language_id'] => [
                     'name'        => $data['name'],
                     'meta'        => $data['meta'],
                     'description' => $data['description'],
-                ),
-            ));
+                ],
+            ]);
 
-        $this->cache->remove('banner');
+        $this->cache->flush('banner');
 
         return $banner_id;
     }
@@ -110,7 +110,7 @@ class ModelExtensionBannerManager extends Model
                 WHERE banner_id='".$banner_id."'
                 ORDER BY language_id ASC";
         $result = $this->db->query($sql);
-        $counts = array();
+        $counts = [];
         foreach ($result->rows as $row) {
             $counts[] = $row['language_id'];
         }
@@ -162,7 +162,7 @@ class ModelExtensionBannerManager extends Model
             $data['end_date'] = 'NULL';
         }
 
-        $flds = array('name', 'description', 'meta');
+        $flds = ['name', 'description', 'meta'];
         $update = [];
         foreach ($flds as $field_name) {
             if (isset($data[$field_name])) {
@@ -172,10 +172,10 @@ class ModelExtensionBannerManager extends Model
 
         if (count($update)) {
             $this->language->replaceDescriptions('banner_descriptions',
-                array('banner_id' => (int)$banner_id),
-                array($language_id => $update));
+                ['banner_id' => (int)$banner_id],
+                [$language_id => $update]);
         }
-        $flds = array(
+        $flds = [
             'status'            => 'int',
             'banner_type'       => 'int',
             'banner_group_name' => '',
@@ -184,10 +184,10 @@ class ModelExtensionBannerManager extends Model
             'blank'             => 'int',
             'sort_order'        => 'int',
             'target_url'        => '',
-        );
+        ];
         $sql = "UPDATE ".$this->db->table_name("banners")." 
                 SET ";
-        $tmp = array();
+        $tmp = [];
         foreach (array_keys($flds) as $field_name) {
             if (isset($data[$field_name])) {
                 $quote = ($flds[$field_name] == 'int'
@@ -203,7 +203,7 @@ class ModelExtensionBannerManager extends Model
         if ($tmp) {
             $this->db->query($sql);
         }
-        $this->cache->remove('banner');
+        $this->cache->flush('banner');
 
         return true;
     }
@@ -228,7 +228,7 @@ class ModelExtensionBannerManager extends Model
         foreach ($sql as $s) {
             $this->db->query($s);
         }
-        $this->cache->remove('banner');
+        $this->cache->flush('banner');
 
         return true;
     }
@@ -264,12 +264,12 @@ class ModelExtensionBannerManager extends Model
             $sql .= " WHERE ".$filter['subsql_filter'];
         }
 
-        $sort_data = array(
+        $sort_data = [
             'name'          => 'bd.name',
             'status'        => 'b.status',
             'sort_order'    => 'b.sort_order',
             'date_modified' => 'b.date_modified',
-        );
+        ];
 
         if (isset($filter['sort']) && in_array($filter['sort'], array_keys($sort_data))) {
             $sql .= " ORDER BY ".$sort_data[$filter['sort']];
@@ -294,7 +294,7 @@ class ModelExtensionBannerManager extends Model
         }
         $result = $this->db->query($sql);
 
-        $output = array();
+        $output = [];
         if ($mode == 'total_only') {
             $output = $result->row['total'];
         } else {
@@ -354,7 +354,7 @@ class ModelExtensionBannerManager extends Model
         }
 
         $result = $this->db->query($sql);
-        $index = array();
+        $index = [];
         if ($mode != 'total_only') {
             foreach ($result->rows as &$row) {
                 $row['clicked'] =
@@ -383,7 +383,7 @@ class ModelExtensionBannerManager extends Model
      * @return bool
      * @throws \Exception
      */
-    public function deleteStatistic($banner_id = 0, $data = array())
+    public function deleteStatistic($banner_id = 0, $data = [])
     {
         $banner_id = (int)$banner_id;
 

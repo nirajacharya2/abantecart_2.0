@@ -36,6 +36,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  *
+ * @method static CustomerCommunication find(int $communication_id) CustomerCommunication
+ *
  * @package abc\models\customer
  */
 class CustomerCommunication extends BaseModel

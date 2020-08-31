@@ -25,7 +25,7 @@ use abc\core\engine\Registry;
 /**
  * Class AListing
  *
- * @property \abc\core\cache\ACache $cache
+ * @property \abc\core\lib\AbcCache $cache
  * @property ADB                    $db
  */
 class AListing
@@ -174,6 +174,7 @@ class AListing
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getCustomList($store_id=0)
     {
@@ -184,7 +185,7 @@ class AListing
 
         $custom_block_id = (int)$this->custom_block_id;
         $cache_key = 'blocks.custom.'.$custom_block_id.$store_id;
-        $output = $this->cache->pull($cache_key);
+        $output = $this->cache->get($cache_key);
 
         if ($output !== false) {
             return $output;
@@ -198,7 +199,7 @@ class AListing
             ORDER BY sort_order"
         );
         $output = $result->rows;
-        $this->cache->push($cache_key, $output);
+        $this->cache->put($cache_key, $output);
         return $output;
     }
 

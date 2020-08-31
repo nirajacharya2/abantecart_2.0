@@ -23,9 +23,6 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 class AError
 {
@@ -104,7 +101,6 @@ class AError
      * write error message to log file
      *
      * @return AError
-     * @throws \ReflectionException
      */
     public function toLog()
     {

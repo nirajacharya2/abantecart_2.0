@@ -29,7 +29,6 @@ class BaseModelTest extends ATestCase
 
     public function testValidationPassed()
     {
-        $result = false;
         $productId = null;
         $arProduct = [
             'status'              => '1',
@@ -65,24 +64,24 @@ class BaseModelTest extends ATestCase
             'stock_checkout'      => '',
             'stock_status_id'     => '1',
             'sku'                 => '124596788',
-            'location'            => 'location-max:128',
-            'keyword'             => '',
-            'date_available'      => '2013-08-29 14:35:30',
-            'sort_order'          => '1',
-            'shipping'            => '1',
-            'free_shipping'       => '0',
-            'ship_individually'   => '0',
-            'shipping_price'      => '0',
-            'length'              => '0.00',
-            'width'               => '0.00',
-            'height'              => '0.00',
-            'length_class_id'     => '0',
-            'weight'              => '75.00',
-            'weight_class_id'     => '2',
+            'location'          => 'location-max:128',
+            'keyword'           => '',
+            'date_available'    => '2013-08-29 14:35:30',
+            'sort_order'        => '1',
+            'shipping'          => '1',
+            'free_shipping'     => '0',
+            'ship_individually' => '0',
+            'shipping_price'    => '0',
+            'length'            => '0.00',
+            'width'             => '0.00',
+            'height'            => '0.00',
+            'length_class_id'   => null,
+            'weight'            => '75.00',
+            'weight_class_id'   => '2',
         ];
         try {
-            $productId = Product::createProduct($arProduct);
-            $result = true;
+            $product = Product::createProduct($arProduct);
+            $productId = $product->getKey();
         } catch (\PDOException $e) {
             $this->fail($e->getMessage());
         } catch (Warning $e) {
@@ -131,69 +130,6 @@ class BaseModelTest extends ATestCase
 
         }
         $this->assertEquals(true, $result);
-    }
-
-    /**
-     * @depends testValidationPassed
-     */
-    public function testEventOnSaved($productId)
-    {
-        $model = new Product();
-        $product = $model->find($productId);
-
-        try {
-            $product->fill(
-                [
-                    'model' => 'testmodel',
-                    'sku'   => '124596788',
-                ]
-            );
-            $product->save();
-        } catch (\PDOException $e) {
-            $this->fail($e->getMessage());
-        } catch (\Exception $e) {
-            $this->fail($e->getMessage());
-        }
-
-        $this->assertEquals(
-            ATestListener::class,
-            $this->registry->get('handler test result')
-        );
-    }
-
-    /**
-     * @depends testValidationPassed
-     */
-    public function testSoftDelete($productId)
-    {
-        $model = new Product();
-        /** @var Product $product */
-        $product = $model->find($productId);
-        $result = false;
-
-        if($product) {
-            $product->delete();
-            Product::onlyTrashed()->where('product_id', $productId)->restore();
-            try {
-                $product = $model->find($productId);
-                if( !$product->date_deleted) {
-                    $result = true;
-                }
-            } catch (\PDOException $e) {
-                $this->fail($e->getTraceAsString());
-            }
-        }
-        $this->assertEquals($result, true);
-
-        if($result) {
-            //test force deleting
-            $model = new Product();
-            $product = $model->find($productId);
-            $product->forceDelete();
-            $exists = Product::onlyTrashed()->where('product_id', $productId)->exists();
-            $this->assertEquals($exists, false);
-        }
-
     }
 
 }

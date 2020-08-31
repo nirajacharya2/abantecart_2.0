@@ -12,6 +12,7 @@ class ModelCategoryListener
      * @return array
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function handle()
     {   /** @var Category $category */
@@ -50,6 +51,7 @@ class ModelCategoryListener
     /**
      * @param Category $category
      *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */

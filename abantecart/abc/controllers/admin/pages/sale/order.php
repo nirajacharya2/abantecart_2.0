@@ -1270,10 +1270,7 @@ class ControllerPagesSaleOrder extends AController
                 $this->session->data['success'] = $this->language->get('text_success');
                 H::event('admin\SendOrderStatusNotifyEmail', [new ABaseEvent($data)]);
             } catch (\Exception $e) {
-                $this->session->data['error'] = sprintf(
-                    $this->language->get('error_system'),
-                    $this->html->getSecureURL('tool/error_log')
-                );
+                $this->session->data['error'] = H::getAppErrorText();
                 $this->db->rollback();
             }
 

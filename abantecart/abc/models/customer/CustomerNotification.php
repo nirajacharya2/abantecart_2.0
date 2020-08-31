@@ -3,19 +3,24 @@
 namespace abc\models\customer;
 
 use abc\models\BaseModel;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class CustomerNotification
  *
- * @property int            $customer_id
- * @property string         $sendpoint
- * @property string         $protocol
- * @property int            $status
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
+ * @property int $customer_id
+ * @property string $sendpoint
+ * @property string $protocol
+ * @property int $status
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
  *
- * @property Customer       $customer
+ * @property Customer $customer
+ *
+ * @method static CustomerNotification find(int $id) CustomerNotification
+ * @method static CustomerNotification UpdateOrCreate(array $data) CustomerNotification
+ * @method static CustomerNotification create(array $data) CustomerNotification
  *
  * @package abc\models
  */
@@ -46,6 +51,8 @@ class CustomerNotification extends BaseModel
         'date_added',
         'date_modified',
     ];
+
+    protected $touches = ['customer'];
 
     public function customer()
     {

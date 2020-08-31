@@ -101,7 +101,7 @@ class ModelCatalogManufacturer extends Model
                     AND language_id = '".(int)$language_id."'");
         }
 
-        $this->cache->remove('manufacturer');
+        $this->cache->flush('manufacturer');
 
         return $manufacturer_id;
     }
@@ -159,7 +159,7 @@ class ModelCatalogManufacturer extends Model
             }
         }
 
-        $this->cache->remove('manufacturer');
+        $this->cache->flush('manufacturer');
     }
 
     /**
@@ -167,6 +167,7 @@ class ModelCatalogManufacturer extends Model
      *
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function deleteManufacturer($manufacturer_id)
     {
@@ -199,7 +200,7 @@ class ModelCatalogManufacturer extends Model
                 $rm->deleteResource($r['resource_id']);
             }
         }
-        $this->cache->remove('manufacturer');
+        $this->cache->flush('manufacturer');
     }
 
     /**
@@ -229,6 +230,7 @@ class ModelCatalogManufacturer extends Model
      *
      * @return array|int
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getManufacturers($data = [], $mode = 'default')
     {
@@ -294,8 +296,8 @@ class ModelCatalogManufacturer extends Model
         } else {
             // this slice of code is duplicate of storefront model for manufacturer
             $cache_key = 'manufacturer.store_'.(int)$this->config->get('config_store_id');
-            $manufacturer_data = $this->cache->pull($cache_key);
-            if ($manufacturer_data === false) {
+            $manufacturer_data = $this->cache->get($cache_key);
+            if ($manufacturer_data === null) {
                 $query = $this->db->query(
                     "SELECT DISTINCT m.*, m2s.store_id
                     FROM ".$this->db->table_name("manufacturers")." m
@@ -305,7 +307,7 @@ class ModelCatalogManufacturer extends Model
                     ORDER BY sort_order, LCASE(m.name) ASC"
                 );
                 $manufacturer_data = $query->rows;
-                $this->cache->push($cache_key, $manufacturer_data);
+                $this->cache->put($cache_key, $manufacturer_data);
             }
             return $manufacturer_data;
         }
@@ -371,6 +373,7 @@ class ModelCatalogManufacturer extends Model
      *
      * @return mixed|null
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getTotalManufacturers($data = [])
     {

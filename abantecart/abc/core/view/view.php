@@ -21,20 +21,22 @@
 namespace abc\core\view;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
+use abc\core\engine\ExtensionsApi;
+use abc\core\lib\AbcCache;
+use abc\core\lib\AConfig;
 use abc\core\lib\ADebug;
 use abc\core\lib\AError;
+use abc\core\lib\AResponse;
 use abc\core\lib\AWarning;
-
-
+use H;
 
 /**
  * Class AView
  *
- * @property \abc\core\lib\AConfig          $config
- * @property \abc\core\engine\ExtensionsAPI $extensions
- * @property \abc\core\lib\AResponse        $response
- * @property \abc\core\cache\ACache         $cache
+ * @property AConfig          $config
+ * @property ExtensionsAPI $extensions
+ * @property AResponse        $response
+ * @property AbcCache         $cache
  *
  */
 class AView
@@ -70,11 +72,11 @@ class AView
     /**
      * @var array
      */
-    protected $hook_vars = array();
+    protected $hook_vars = [];
     /**
      * @var array
      */
-    public $data = array();
+    public $data = [];
     /**
      * @var false | AViewRender | \abc\core\view\AViewDefaultRender
      */
@@ -122,7 +124,7 @@ class AView
         /**
          * @var AViewRenderInterface $render_instance
          */
-        $render_instance = AHelperUtils::getInstance(
+        $render_instance = H::getInstance(
                                                     $view_render_class,
                                                     [$this, $instance_id],
                                                     '\abc\core\view\AViewDefaultRender',
@@ -153,7 +155,7 @@ class AView
     public function __call($function_name, $args)
     {
         if (method_exists($this->render, $function_name) && is_callable([$this->render, $function_name])) {
-            return call_user_func_array(array($this->render, $function_name), $args);
+            return call_user_func_array([$this->render, $function_name], $args);
         } else {
             return null;
         }
@@ -218,7 +220,7 @@ class AView
      */
     public function getVariables($key = '')
     {
-        $variables = array();
+        $variables = [];
         /**
          * @var array $scope
          */
@@ -450,15 +452,16 @@ class AView
             ADebug::checkpoint('fetch '.$filename.' end');
 
             //Write HTML Cache if we need and can write
-            if ($this->config && $this->config->get('config_html_cache') && $this->html_cache_key) {
-                if ($this->cache->save_html_cache($this->html_cache_key, $content) === false) {
+            //if ($this->config && $this->config->get('config_html_cache') && $this->html_cache_key) {
+                //TODO: needs to check this!
+                /*if ($this->cache->save_html_cache($this->html_cache_key, $content) === false) {
                     $error = new AError(
                         'Error: Cannot create HTML cache for file '
                         .$this->html_cache_key.'! Directory to write cache is not writable',
                         AC_ERR_LOAD);
                     $error->toDebug()->toLog();
-                }
-            }
+                }*/
+            //}
             return $content;
         } else {
             $error = new AError(
@@ -508,7 +511,7 @@ class AView
             }
         }
 
-        if (!in_array(pathinfo($filename, PATHINFO_EXTENSION), array('tpl', 'php'))) {
+        if (!in_array(pathinfo($filename, PATHINFO_EXTENSION), ['tpl', 'php'])) {
             $this->extensions->hk_ProcessData($this, __FUNCTION__);
             $http_path = $this->data['http_dir'];
         }
@@ -565,6 +568,7 @@ class AView
      * @param string $key
      *
      * @return bool
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function checkHTMLCache($key)
     {
@@ -572,7 +576,7 @@ class AView
             return false;
         }
         $this->html_cache_key = $key;
-        $html_cache = $this->cache->get_html_cache($key);
+        $html_cache = $this->cache->get($key);
         if ($html_cache) {
             $compression = '';
             if ($this->config) {
@@ -590,9 +594,10 @@ class AView
      * Build or load minified CSS and return an output.
      *
      * @param string $css_file css file with relative name
-     * @param string $group    CSS group name for caching
+     * @param string $group CSS group name for caching
      *
      * @return string
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function LoadMinifyCSS($css_file, $group = 'css')
     {
@@ -605,8 +610,8 @@ class AView
         $key .= $css_file."-".filemtime($this->templateResource($css_file, 'file'));
         $key = $group.".".md5($group.'-'.$key);
         //check if hash is created and load
-        $css_data = $this->cache->pull($key);
-        if ($css_data === false) {
+        $css_data = $this->cache->get($key);
+        if ($css_data === null) {
             require_once(ABC::env('DIR_CORE').'helper/html-css-js-minifier.php');
             //build minified css and save
             $path = dirname($this->templateResource($css_file, 'http'));
@@ -614,7 +619,7 @@ class AView
             //replace relative directories with full path
             $css_data = preg_replace('/\.\.\//', $path.'/../', $new_content);
             $css_data = abc_minify_css($css_data);
-            $this->cache->push($key, $css_data);
+            $this->cache->put($key, $css_data);
         }
 
         return $css_data;
@@ -625,9 +630,10 @@ class AView
      * Preload JavaScript and return an output.
      *
      * @param string|array $js_file file(s) with relative name
-     * @param string       $group   JS group name for caching
+     * @param string $group JS group name for caching
      *
      * @return string
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function PreloadJS($js_file, $group = 'js')
     {
@@ -648,8 +654,8 @@ class AView
 
         $key = $group.".".md5($group.'-'.$key);
         //check if hash is created and load
-        $js_data = $this->cache->pull($key);
-        if ($js_data === false) {
+        $js_data = $this->cache->get($key);
+        if ($js_data === null) {
             //load js and save to cache
             //TODO: Add stable minify method. minify_js in html-css-js-minifier.php is not stable
             $js_data = '';
@@ -661,7 +667,7 @@ class AView
                 $js_data .= file_get_contents($this->templateResource($js_file, 'file'));
             }
             //$js_data = minify_js($js_data);
-            $this->cache->push($key, $js_data);
+            $this->cache->put($key, $js_data);
         }
 
         return $js_data;
@@ -702,9 +708,9 @@ class AView
     protected function extensionsResourceMap($filename, $mode = 'file')
     {
         if (empty($filename)) {
-            return array();
+            return [];
         }
-        $output = array();
+        $output = [];
         $extensions = $this->extensions->getEnabledExtensions();
         //loop through each extension and locate resource to use
         //Note: first extension with exact resource or default resource will be used
@@ -812,10 +818,10 @@ class AView
 
         //return path. Empty path indicates, nothing found
         if ($ret_path) {
-            return array(
+            return [
                 'match' => $match,
                 'path'  => $ret_path,
-            );
+            ];
         } else {
             return null;
         }

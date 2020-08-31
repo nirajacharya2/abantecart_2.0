@@ -17,59 +17,66 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\models\admin;
+
 use abc\core\engine\Model;
 use abc\core\lib\ADataset;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+class ModelToolInstallUpgradeHistory extends Model
+{
+    /**
+     * @param array $data
+     *
+     * @return array
+     * @throws \abc\core\lib\AException
+     */
+    public function getLog($data = [])
+    {
 
-class ModelToolInstallUpgradeHistory extends Model{
-	/**
-	 * @param array $data
-	 * @return array
-	 */
-	public function getLog($data = array ()){
+        if (!isset($data['sort'])) {
+            $data['sort'] = 'date_added';
+        }
 
-		if (!isset($data['sort'])){
-			$data['sort'] = 'date_added';
-		}
+        if ($data['offset'] < 0) {
+            $data['offset'] = 0;
+        }
 
-		if ($data['offset'] < 0){
-			$data['offset'] = 0;
-		}
+        if ($data['limit'] < 1) {
+            $data['limit'] = 10;
+        }
+        $dataset = new ADataset('install_upgrade_history', 'admin');
+        $rows = $dataset->getRows([], $data['sort'], $data['limit'], $data['offset']);
 
-		if ($data['limit'] < 1){
-			$data['limit'] = 10;
-		}
-		$dataset = new ADataset('install_upgrade_history', 'admin');
-		$rows = $dataset->getRows(array (), $data['sort'], $data['limit'], $data['offset']);
+        return $rows;
+    }
 
-		return $rows;
-	}
+    /**
+     * @param array $filter
+     *
+     * @return int
+     * @throws \abc\core\lib\AException
+     */
+    public function getTotalRows($filter = [])
+    {
 
-	/**
-	 * @param array $filter
-	 * @return int
-	 */
-	public function getTotalRows($filter = array ()){
+        if ($filter) {
+            $filter['column_name'] = 'name';
+            $filter['operator'] = 'like';
+        }
 
-		if ($filter){
-			$filter['column_name'] = 'name';
-			$filter['operator'] = 'like';
-		}
+        $dataset = new ADataset('install_upgrade_history', 'admin');
+        $rows = $dataset->getTotalRows($filter);
+        return $rows;
+    }
 
-		$dataset = new ADataset('install_upgrade_history', 'admin');
-		$rows = $dataset->getTotalRows($filter);
-		return $rows;
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function deleteData(){
-		$dataset = new ADataset('install_upgrade_history', 'admin');
-		return $dataset->deleteData();
-	}
+    /**
+     * @return bool
+     * @throws \abc\core\lib\AException
+     */
+    public function deleteData()
+    {
+        $dataset = new ADataset('install_upgrade_history', 'admin');
+        return $dataset->deleteData();
+    }
 }

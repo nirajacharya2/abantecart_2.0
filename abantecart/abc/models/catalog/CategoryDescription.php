@@ -27,6 +27,9 @@ class CategoryDescription extends BaseModel
 
     protected $mainClassName = Category::class;
     protected $mainClassKey = 'category_id';
+
+    protected $touches = ['category'];
+
     /**
      * @var string
      */
@@ -57,6 +60,52 @@ class CategoryDescription extends BaseModel
         'meta_keywords',
         'meta_description',
         'description',
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'language_id' => [
+            'checks'   => [
+                'integer',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Language ID is not Integer!'],
+            ],
+        ],
+        'name'        => [
+            'checks'   => [
+                'string',
+                'required',
+                'max:255',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a string between 1 abd 255 characters!',
+                ],
+            ],
+        ],
+        'meta_keywords'        => [
+            'checks'   => [
+                'string',
+                'max:255',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a string less than 255 characters!',
+                ],
+            ],
+        ],
+        'meta_description'        => [
+            'checks'   => [
+                'string',
+                'max:255',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a string less than 255 characters!',
+                ],
+            ],
+        ],
     ];
 
     public function category()

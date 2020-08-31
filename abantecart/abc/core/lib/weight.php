@@ -20,19 +20,16 @@
 
 namespace abc\core\lib;
 
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
+use H;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class AWeight
  */
 class AWeight
 {
-    protected $weights = array();
+    protected $weights = [];
     /**
      * @var ADB
      */
@@ -42,46 +39,48 @@ class AWeight
      */
     protected $config;
     // TODO: need to changes this in 2.0. Key must be iso-code instead unit name!
-    public $predefined_weights = array(
-        'kg' => array(
+    public $predefined_weights = [
+        'kg' => [
             'weight_class_id' => 1,
             'value'           => 0.02800000,
             'iso_code'        => 'KILO',
             'language_id'     => 1,
             'title'           => 'Kilogram',
             'unit'            => 'kg',
-        ),
-        'g'  => array(
+        ],
+        'g'  => [
             'weight_class_id' => 2,
             'value'           => 28.00000000,
             'iso_code'        => 'GRAM',
             'language_id'     => 1,
             'title'           => 'Gram',
             'unit'            => 'g',
-        ),
+        ],
 
-        'lb' => array(
+        'lb' => [
             'weight_class_id' => 5,
             'value'           => 0.06250000,
             'iso_code'        => 'PUND',
             'language_id'     => 1,
             'title'           => 'Pound',
             'unit'            => 'lb',
-        ),
-        'oz' => array(
+        ],
+        'oz' => [
             'weight_class_id' => 6,
             'value'           => 1.00000000,
             'iso_code'        => 'USOU',
             'language_id'     => 1,
             'title'           => 'Ounce',
             'unit'            => 'oz',
-        ),
-    );
-    public $predefined_weight_ids = array();
+        ],
+    ];
+    public $predefined_weight_ids = [];
     protected $language_id;
 
     /**
      * @param $registry Registry
+     *
+     * @throws \ReflectionException
      */
     public function __construct($registry)
     {
@@ -90,8 +89,8 @@ class AWeight
         $cache = $registry->get('cache');
         $this->language_id = (int)$registry->get('language')->getLanguageID();
         $cache_key = 'localization.weight_classes.lang_'.$this->language_id;
-        $cache_data = $cache->pull($cache_key);
-        if ($cache_data !== false) {
+        $cache_data = $cache->get($cache_key);
+        if ($cache_data !== null) {
             $this->weights = $cache_data;
         } else {
             $sql = "SELECT *, wc.weight_class_id
@@ -109,7 +108,7 @@ class AWeight
                 }
                 $this->weights[strtolower($row['unit'])] = $row;
             }
-            $cache->push($cache_key, $this->weights);
+            $cache->put($cache_key, $this->weights);
         }
 
         foreach ($this->predefined_weights as $unit => $weight) {
@@ -205,13 +204,13 @@ class AWeight
     public function getUnit($weight_class_id)
     {
         $language_id = $this->language_id;
-        $output = array();
+        $output = [];
         foreach ($this->weights as $wth) {
             if ($wth['weight_class_id'] == $weight_class_id) {
                 $output[$wth['language_id']] = $wth['unit'];
             }
         }
-        return AHelperUtils::has_value($output[$language_id]) ? $output[$language_id] : (string)current($output);
+        return H::has_value($output[$language_id]) ? $output[$language_id] : (string)current($output);
     }
 
     /**
@@ -220,6 +219,7 @@ class AWeight
      * @param string $weight_unit
      *
      * @return string|int
+     * @throws \Exception
      */
 
     public function getClassIDByUnit($weight_unit)
@@ -261,6 +261,7 @@ class AWeight
      * @param string $weight_unit
      *
      * @return int|string
+     * @throws \Exception
      */
     public function getClassID($weight_unit)
     {

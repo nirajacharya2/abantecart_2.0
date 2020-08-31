@@ -80,15 +80,15 @@ $rm = new AResourceManager();
 $rm->setType( 'image' );
 
 $language_id = $this->language->getContentLanguageID();
-$data = array();
+$data = [];
 $data['resource_code'] = '<i class="fa fa-picture-o"></i>&nbsp;';
-$data['name'] = array( $language_id => 'Menu Icon Banner Manager' );
-$data['title'] = array( $language_id => '' );
-$data['description'] = array( $language_id => '' );
+$data['name'] = [$language_id => 'Menu Icon Banner Manager'];
+$data['title'] = [$language_id => ''];
+$data['description'] = [$language_id => ''];
 $resource_id = $rm->addResource( $data );
 
 $menu = new AMenu ( "admin" );
-$menu->insertMenuItem( array(
+$menu->insertMenuItem( [
         "item_id"         => "banner_manager",
         "parent_id"       => "design",
         "item_text"       => "banner_manager_name",
@@ -96,16 +96,16 @@ $menu->insertMenuItem( array(
         "item_icon_rl_id" => $resource_id,
         "item_type"       => "extension",
         "sort_order"      => "6",
-    )
+    ]
 );
-$data = array();
+$data = [];
 $data['resource_code'] = '<i class="fa fa-reply-all"></i>&nbsp;';
-$data['name'] = array( $language_id => 'Menu Icon Banner Manager Stat' );
-$data['title'] = array( $language_id => '' );
-$data['description'] = array( $language_id => '' );
+$data['name'] = [$language_id => 'Menu Icon Banner Manager Stat'];
+$data['title'] = [$language_id => ''];
+$data['description'] = [$language_id => ''];
 $resource_id = $rm->addResource( $data );
 
-$menu->insertMenuItem( array(
+$menu->insertMenuItem( [
         "item_id"         => "banner_manager_stat",
         "parent_id"       => "reports",
         "item_text"       => "banner_manager_name_stat",
@@ -113,12 +113,12 @@ $menu->insertMenuItem( array(
         "item_icon_rl_id" => $resource_id,
         "item_type"       => "extension",
         "sort_order"      => "4",
-    )
+    ]
 );
-$exists = $this->db->table_name('blocks')->select('block_id')->where('block_txt_id', '=', 'banner_block')->get()->count();
+$exists = $this->db->table('blocks')->select('block_id')->where('block_txt_id', '=', 'banner_block')->get()->count();
 if ( ! $exists ) {
     $now = $this->db->getORM()::raw('NOW()');
-    $block_id = $this->db->table_name('block_templates')->insertGetId(
+    $block_id = $this->db->table('block_templates')->insertGetId(
         [ "block_txt_id" => 'banner_block', "controller" => 'blocks/banner_block', "date_added" => $now]
     );
 
@@ -134,5 +134,5 @@ if ( ! $exists ) {
         [ "block_id" => $block_id, "parent_block_id" => 8, "template" =>  'blocks/banner_block_header.tpl', "date_added" => $now],
     ]);
 
-    $this->cache->remove( 'layout' );
+    $this->cache->flush( 'layout' );
 }

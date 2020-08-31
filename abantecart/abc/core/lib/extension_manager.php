@@ -21,14 +21,15 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\commands\Publish;
 use abc\core\engine\ExtensionUtils;
-use \H;
+use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 use Exception;
+use H;
 
 /**
  * @property \abc\core\engine\ExtensionsApi      $extensions
  * @property ADB                                 $db
- * @property \abc\core\cache\ACache              $cache
+ * @property \abc\core\lib\AbcCache              $cache
  * @property AConfig                             $config
  * @property \abc\core\engine\ALanguage          $language
  * @property \abc\core\engine\ALoader            $load
@@ -57,7 +58,10 @@ class AExtensionManager
     public function __construct()
     {
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access extension manager');
+            throw new AException (
+                'Error: permission denied to access extension manager',
+                AC_ERR_LOAD
+            );
         }
         $this->registry = Registry::getInstance();
     }
@@ -132,7 +136,7 @@ class AExtensionManager
                              `license_key` = '".$this->db->escape($license_key)."',
                              `date_added` = NOW()");
 
-        $this->cache->remove('extensions');
+        $this->cache->flush('extensions');
 
         return $this->db->getLastId();
     }
@@ -144,6 +148,7 @@ class AExtensionManager
      *
      * @return array
      * @throws Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getParentsExtensionTextId($extension_txt_id)
     {
@@ -168,6 +173,7 @@ class AExtensionManager
      *
      * @return array
      * @throws Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getChildrenExtensions($parent_extension_txt_id)
     {
@@ -194,6 +200,7 @@ class AExtensionManager
      *
      * @return bool
      * @throws Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function addDependant($extension_txt_id, $extension_parent_txt_id)
     {
@@ -215,7 +222,7 @@ class AExtensionManager
                     VALUES ('".$extension_id."', '".$extension_parent_id."')";
             $this->db->query($sql);
         }
-        $this->cache->remove('extensions');
+        $this->cache->flush('extensions');
         return true;
     }
 
@@ -227,6 +234,7 @@ class AExtensionManager
      *
      * @return bool
      * @throws Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function deleteDependant($extension_txt_id = '', $extension_parent_txt_id = '')
     {
@@ -252,7 +260,7 @@ class AExtensionManager
         $sql .= implode(' AND ', $where);
         $this->db->query($sql);
 
-        $this->cache->remove('extensions');
+        $this->cache->flush('extensions');
 
         return true;
     }
@@ -266,6 +274,7 @@ class AExtensionManager
      * @return bool
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function editSetting($extension_txt_id, $data)
     {
@@ -438,9 +447,9 @@ class AExtensionManager
         $this->db->query($sql);
 
 
-        $this->cache->remove('admin_menu');
-        $this->cache->remove('settings');
-        $this->cache->remove('extensions');
+        $this->cache->flush('admin_menu');
+        $this->cache->flush('settings');
+        $this->cache->flush('extensions');
 
         return true;
     }
@@ -454,17 +463,13 @@ class AExtensionManager
      */
     public function deleteSetting($group)
     {
-        $this->db->query(
-            "DELETE FROM ".$this->db->table_name("settings")
-            ." WHERE `group` = '".$this->db->escape($group)."';"
-        );
-        $this->db->query(
-            "DELETE FROM ".$this->db->table_name("language_definitions")
-            ." WHERE `block` = '".$this->db->escape($group)."_".$this->db->escape($group)."';"
-        );
-        $this->cache->remove('settings');
-        $this->cache->remove('extensions');
-        $this->cache->remove('localization');
+        $this->db->query("DELETE FROM ".$this->db->table_name("settings")." WHERE `group` = '".$this->db->escape($group)
+            ."';");
+        $this->db->query("DELETE FROM ".$this->db->table_name("language_definitions")." WHERE `block` = '"
+            .$this->db->escape($group)."_".$this->db->escape($group)."';");
+        $this->cache->flush('settings');
+        $this->cache->flush('extensions');
+        $this->cache->flush('localization');
     }
 
     /**
@@ -476,6 +481,7 @@ class AExtensionManager
      * @return bool
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function install($name, $config)
     {
@@ -589,6 +595,7 @@ class AExtensionManager
      *
      * @return bool|null
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      */
     public function uninstall($name, $config)
@@ -653,6 +660,7 @@ class AExtensionManager
      *
      * @return bool
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      */
     public function delete($extension_txt_id)
@@ -697,7 +705,7 @@ class AExtensionManager
         // refresh data about updates
         $this->load->model('tool/updater');
         $this->model_tool_updater->check4updates();
-        $this->cache->remove('extensions');
+        $this->cache->flush('extensions');
         return true;
     }
 
@@ -705,6 +713,7 @@ class AExtensionManager
      * @param string $extension_txt_id
      *
      * @return bool
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      */
     public function validate($extension_txt_id)
@@ -748,6 +757,7 @@ class AExtensionManager
      *
      * @return bool
      * @throws Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function validateDependencies($extension_txt_id, $config)
     {
@@ -797,6 +807,7 @@ class AExtensionManager
      *
      * @return bool
      * @throws Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function checkDependantsBeforeUninstall($extension_txt_id)
     {

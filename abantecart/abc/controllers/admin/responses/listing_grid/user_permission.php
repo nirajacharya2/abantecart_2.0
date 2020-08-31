@@ -21,18 +21,15 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
+use H;
 use stdClass;
 
-if ( ! class_exists( 'abc\core\ABC' ) || ! \abc\core\ABC::env( 'IS_ADMIN' ) ) {
-    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
-}
 
 class ControllerResponsesListingGridUserPermission extends AController
 {
-    public $data = array();
+    public $data = [];
 
     public function main()
     {
@@ -48,17 +45,17 @@ class ControllerResponsesListingGridUserPermission extends AController
         $sord = $this->request->post['sord']; // get the direction
 
         // process jGrid search parameter
-        $allowedDirection = array( 'asc', 'desc' );
+        $allowedDirection = ['asc', 'desc'];
 
         if ( ! in_array( $sord, $allowedDirection ) ) {
             $sord = $allowedDirection[0];
         }
 
-        $data = array(
+        $data = [
             'order' => strtoupper( $sord ),
             'start' => ( $page - 1 ) * $limit,
             'limit' => $limit,
-        );
+        ];
 
         $total = $this->model_user_user_group->getTotalUserGroups();
         if ( $total > 0 ) {
@@ -82,13 +79,13 @@ class ControllerResponsesListingGridUserPermission extends AController
                 $response->userdata->classes[$id] = 'disable-edit disable-delete';
                 $name = $result['name'];
             } else {
-                $name = $this->html->buildInput( array(
+                $name = $this->html->buildInput([
                     'name'  => 'name['.$id.']',
                     'value' => $result['name'],
-                ) );
+                ]);
             }
             $response->rows[$i]['id'] = $id;
-            $response->rows[$i]['cell'] = array( $name );
+            $response->rows[$i]['cell'] = [$name];
             $i++;
         }
         $this->data['response'] = $response;
@@ -103,46 +100,47 @@ class ControllerResponsesListingGridUserPermission extends AController
      * update only one field
      *
      * @return void
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function update_field()
     {
-
         //init controller data
         $this->extensions->hk_InitData( $this, __FUNCTION__ );
 
         $this->loadLanguage( 'user/user_group' );
         if ( ! $this->user->canModify( 'listing_grid/user_permission' ) ) {
             $error = new AError( '' );
-
             return $error->toJSONResponse( 'NO_PERMISSIONS_402',
-                array(
+                [
                     'error_text'  => sprintf( $this->language->get( 'error_permission_modify' ), 'listing_grid/user_permission' ),
                     'reset_value' => true,
-                ) );
+                ]
+            );
         }
 
         $this->loadModel( 'user/user_group' );
 
         // update user group name
         // request sent from jGrid. ID is key of array
-        $fields = array( 'name' );
+        $fields = ['name'];
         foreach ( $fields as $f ) {
             if ( isset( $this->request->post[$f] ) ) {
                 foreach ( $this->request->post[$f] as $k => $v ) {
                     $err = $this->_validateField( $f, $v );
                     if ( ! empty( $err ) ) {
                         $error = new AError( '' );
-
-                        return $error->toJSONResponse( 'VALIDATION_ERROR_406', array( 'error_text' => $err ) );
+                        return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                     }
-                    $this->model_user_user_group->editUserGroup( $k, array( $f => $v ) );
+                    $this->model_user_user_group->editUserGroup($k, [$f => $v]);
                 }
             }
         }
 
         // update user group permissions
 
-        if ( AHelperUtils::has_value( $this->request->post['permission'] ) && AHelperUtils::has_value( $this->request->get['user_group_id'] ) ) {
+        if (H::has_value($this->request->post['permission']) && H::has_value($this->request->get['user_group_id'])) {
             $this->model_user_user_group->editUserGroup( $this->request->get['user_group_id'], $this->request->post );
         }
 
@@ -174,10 +172,10 @@ class ControllerResponsesListingGridUserPermission extends AController
         $result = $this->model_user_user_group->getUserGroup( $user_group_id );
         $permissions = $result['permission'];
         if ( empty( $permissions ) ) {
-            $permissions = array(
-                'access' => array(),
-                'modify' => array(),
-            );
+            $permissions = [
+                'access' => [],
+                'modify' => [],
+            ];
         }
 
         $page = $this->request->post['page']; // get the requested page
@@ -191,10 +189,12 @@ class ControllerResponsesListingGridUserPermission extends AController
         $this->load->library( 'json' );
         $searchData = json_decode( htmlspecialchars_decode( $this->request->post['filters'] ), true );
         $search_str = $searchData['rules'][0]['data'];
-        $access = $modify = array();
+        $access = $modify = [];
         foreach ( $controllers as $key => $controller ) {
-            $access[$key] = AHelperUtils::has_value( $permissions['access'][$controller] ) ? (int)$permissions['access'][$controller] : null;
-            $modify[$key] = AHelperUtils::has_value( $permissions['modify'][$controller] ) ? (int)$permissions['modify'][$controller] : null;
+            $access[$key] =
+                H::has_value($permissions['access'][$controller]) ? (int)$permissions['access'][$controller] : null;
+            $modify[$key] =
+                H::has_value($permissions['modify'][$controller]) ? (int)$permissions['modify'][$controller] : null;
         }
 
         //filter result by controller name (temporary solution). needs to improve.
@@ -207,7 +207,7 @@ class ControllerResponsesListingGridUserPermission extends AController
         }
 
         // process jGrid search parameter
-        $allowedDirection = array( 'asc', 'desc' );
+        $allowedDirection = ['asc', 'desc'];
 
         if ( ! in_array( $sord, $allowedDirection ) ) {
             $sord = $allowedDirection[0];
@@ -220,11 +220,11 @@ class ControllerResponsesListingGridUserPermission extends AController
             array_multisort( $modify, ( $sord == 'asc' ? SORT_ASC : SORT_DESC ), $controllers );
         }
 
-        $data = array(
+        $data = [
             'order' => strtoupper( $sord ),
             'start' => ( $page - 1 ) * $limit,
             'limit' => $limit,
-        );
+        ];
 
         $total = sizeof( $controllers );
         if ( $total > 0 ) {
@@ -248,20 +248,20 @@ class ControllerResponsesListingGridUserPermission extends AController
             }
 
             $response->rows[$i]['id'] = $k;
-            $response->rows[$i]['cell'] = array(
+            $response->rows[$i]['cell'] = [
                 $k + $data['start'] + 1,
                 '<a style="padding-left: 10px;" href="'.$this->html->getSecureURL( $controller ).'" target="_blank" title="'.$this->language->get( 'text_go_to_page' ).'">'.$controller.'</a>',
-                $this->html->buildCheckbox( array(
+                $this->html->buildCheckbox([
                     'name'  => 'permission[access]['.$controller.']',
                     'value' => ( $permissions['access'][$controller] ? 1 : 0 ),
                     'style' => 'btn_switch',
-                ) ),
-                $this->html->buildCheckbox( array(
+                ]),
+                $this->html->buildCheckbox([
                     'name'  => 'permission[modify]['.$controller.']',
                     'value' => ( $permissions['modify'][$controller] ? 1 : 0 ),
                     'style' => 'btn_switch',
-                ) ),
-            );
+                ]),
+            ];
             $i++;
         }
         $this->data['response'] = $response;

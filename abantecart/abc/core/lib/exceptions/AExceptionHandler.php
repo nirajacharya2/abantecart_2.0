@@ -5,6 +5,7 @@ namespace abc\core\lib\exceptions;
 use abc\core\ABC;
 use abc\core\engine\ARouter;
 use abc\core\engine\Registry;
+use abc\core\lib\ALog;
 use abc\core\lib\contracts\ExceptionHandlerInterface;
 use ErrorException;
 use Exception;
@@ -117,9 +118,9 @@ class AExceptionHandler implements ExceptionHandlerInterface
      * Render an exception into a response.
      *
      * @param  \Exception $e
-     * @param  string     $to - can be http, cli, debug
+     * @param  string $to - can be http, cli, debug
      *
-     * @throws AException
+     * @throws \abc\core\lib\AException
      */
     public function render( Exception $e, $to = 'http')
     {

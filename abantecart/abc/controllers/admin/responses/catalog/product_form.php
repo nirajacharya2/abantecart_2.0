@@ -148,9 +148,10 @@ class ControllerResponsesCatalogProductForm extends AController
             try {
                 $productId = $fields['product_id'];
                 if ($productId) {
-                    $this->productInstance->updateProduct($fields['product_id'], $fields, $this->language->getContentLanguageID());
+                    $this->productInstance->updateProduct($fields['product_id'], $fields);
                 } else {
-                    $productId = $this->productInstance->createProduct($fields);
+                    $product = $this->productInstance->createProduct($fields);
+                    $productId = $product->product_id;
                 }
                 if ($productId) {
                     $this->data['result']['success_message'] = $this->language->get('text_saved');

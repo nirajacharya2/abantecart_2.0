@@ -2,13 +2,14 @@
 
 namespace abc\core\lib;
 
+use abc\core\lib\contracts\ApiClient;
+
 /**
  * Class CategoryApiClient
  *
  * @package abc\core\lib
  * Comment for search     -    a/catalog/category
  */
-
 class CategoryApiClient extends BaseApiClient implements ApiClient
 {
     /**

@@ -73,8 +73,9 @@ class ControllerResponsesListingGridCustomerCommunications extends AController
 
     /**
      * @return mixed
-     * @throws \abc\core\lib\AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function communication_info()
     {

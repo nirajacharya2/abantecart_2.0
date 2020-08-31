@@ -17,66 +17,72 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\admin;
+
 use abc\core\ABC;
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
+use H;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-class ControllerPagesExtensionExtensionSummary extends AController {
-	public $data = array();
-	public function main() {
-		//Load input arguments for gid settings
-		$this->data = func_get_arg(0);
-		  //init controller data
-		$this->extensions->hk_InitData($this,__FUNCTION__);
+class ControllerPagesExtensionExtensionSummary extends AController
+{
+    public $data = [];
 
-		$this->loadLanguage('extension/extensions');
-		$extension = $this->request->get['extension'];
-		if($extension && !$this->data['extension_info']){
-			$this->data['extension_info'] = $this->extensions->getExtensionInfo($extension);
-		}
+    public function main()
+    {
+        //Load input arguments for gid settings
+        $this->data = func_get_arg(0);
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		$icon_ext_img_url = ABC::env('HTTPS_EXT') . $extension . '/images/icon.png';
-		$icon_ext_dir = ABC::env('DIR_EXT') . $extension . '/images/icon.png';
-		$icon = (is_file($icon_ext_dir) ? $icon_ext_img_url : ABC::env('RDIR_ASSETS') . 'images/default_extension.png');
+        $this->loadLanguage('extension/extensions');
+        $extension = $this->request->get['extension'];
+        if ($extension && !$this->data['extension_info']) {
+            $this->data['extension_info'] = $this->extensions->getExtensionInfo($extension);
+        }
 
-		$this->data['extension_info']['icon'] = $icon;
-		$this->data['extension_info']['name'] = $this->language->get($extension . '_name');
+        $icon_ext_img_url = ABC::env('HTTPS_EXT').$extension.'/images/icon.png';
+        $icon_ext_dir = ABC::env('DIR_EXT').$extension.'/images/icon.png';
+        $icon = (is_file($icon_ext_dir) ? $icon_ext_img_url : ABC::env('RDIR_ASSETS').'images/default_extension.png');
 
-		$datetime_format = $this->language->get('date_format_short').' '.$this->language->get('time_format');
+        $this->data['extension_info']['icon'] = $icon;
+        $this->data['extension_info']['name'] = $this->language->get($extension.'_name');
 
-		if($this->data['extension_info']['date_installed']){
-			$this->data['extension_info']['installed'] = AHelperUtils::dateISO2Display($this->data['extension_info']['date_installed'], $datetime_format );
-		}
-		if($this->data['extension_info']['date_added']){
-			$this->data['extension_info']['date_added'] =  AHelperUtils::dateISO2Display($this->data['extension_info']['date_added'], $datetime_format );
-		}
-		$updates = $this->cache->pull('extensions.updates');
+        $datetime_format = $this->language->get('date_format_short').' '.$this->language->get('time_format');
 
-		// if update available
-		if( is_array($updates) && in_array($extension,array_keys($updates)) ){
-			if ($updates[$extension]['installation_key']){
-				$update_now_url = $this->html->getSecureURL('tool/package_installer', '&extension_key=' . $updates[$extension]['installation_key']);
-			} else{
-				$update_now_url = $updates[$extension]['url'];
-			}
-			$this->data['upgrade_button'] = $this->html->buildElement(
-								array(  'type'=> 'button',
-										'name' => 'btn_upgrade',
-										'id' => 'upgradenow',
-										'href' => $update_now_url,
-										'text' => $this->language->get('button_upgrade')
-								));
-		}
+        if ($this->data['extension_info']['date_installed']) {
+            $this->data['extension_info']['installed'] =
+                H::dateISO2Display($this->data['extension_info']['date_installed'], $datetime_format);
+        }
+        if ($this->data['extension_info']['date_added']) {
+            $this->data['extension_info']['date_added'] =
+                H::dateISO2Display($this->data['extension_info']['date_added'], $datetime_format);
+        }
+        $updates = $this->cache->get('extensions.updates');
 
-		$this->data['extension_info']['license'] = $this->data['extension_info']['license_key'];
-		$this->view->batchAssign( $this->data );
-		$this->processTemplate('pages/extension/extension_summary.tpl' );
+        // if update available
+        if (is_array($updates) && in_array($extension, array_keys($updates))) {
+            if ($updates[$extension]['installation_key']) {
+                $update_now_url = $this->html->getSecureURL('tool/package_installer',
+                    '&extension_key='.$updates[$extension]['installation_key']);
+            } else {
+                $update_now_url = $updates[$extension]['url'];
+            }
+            $this->data['upgrade_button'] = $this->html->buildElement(
+                [
+                    'type' => 'button',
+                    'name' => 'btn_upgrade',
+                    'id'   => 'upgradenow',
+                    'href' => $update_now_url,
+                    'text' => $this->language->get('button_upgrade'),
+                ]);
+        }
 
-		//update controller data
-		$this->extensions->hk_UpdateData($this,__FUNCTION__);
-	}
+        $this->data['extension_info']['license'] = $this->data['extension_info']['license_key'];
+        $this->view->batchAssign($this->data);
+        $this->processTemplate('pages/extension/extension_summary.tpl');
+
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
 }

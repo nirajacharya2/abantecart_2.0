@@ -48,7 +48,7 @@ class CurrencyModelTest extends ATestCase
             $errors = $currency->errors()['validation'];
         }
 
-        var_dump($errors);
+        //var_dump($errors);
         $this->assertEquals(8, count($errors));
 
 
@@ -76,16 +76,21 @@ class CurrencyModelTest extends ATestCase
 
     }
 
+
+    /**
+     * @return int
+     * @throws \Exception
+     */
     public function testCreateCurrency()
     {
         $currency = new Currency([
-            'title' => 'Test currency',
-            'code' => 'TCC',
-            'symbol_left' => 'L',
-            'symbol_right' => '',
+            'title'         => 'Test currency',
+            'code'          => 'TCC',
+            'symbol_left'   => 'L',
+            'symbol_right'  => '',
             'decimal_place' => '2',
-            'value' => '50',
-            'status' => 1,
+            'value'         => '50',
+            'status'        => 1,
         ]);
         $currency->save();
         $createdId = $currency->currency_id;

@@ -12,7 +12,6 @@ use abc\core\lib\AEncryption;
 use abc\core\lib\AMail;
 use abc\core\lib\AMessage;
 use abc\core\view\AView;
-use abc\models\customer\CustomerTransaction;
 use abc\models\order\Order;
 use abc\models\order\OrderOption;
 use abc\models\order\OrderProduct;
@@ -20,7 +19,6 @@ use abc\models\order\OrderTotal;
 use abc\models\system\Setting;
 use abc\modules\events\ABaseEvent;
 use H;
-use Illuminate\Validation\ValidationException;
 
 class AdminOrderUpdateProductStatusesChange
 {
@@ -37,7 +35,9 @@ class AdminOrderUpdateProductStatusesChange
      * @param ABaseEvent $event
      *
      * @return bool
-     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function handle(ABaseEvent $event)
     {

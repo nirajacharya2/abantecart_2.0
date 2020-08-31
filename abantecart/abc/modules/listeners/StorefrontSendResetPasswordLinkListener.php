@@ -4,13 +4,10 @@ namespace abc\modules\listeners;
 
 use abc\core\ABC;
 use abc\core\engine\ALanguage;
-use abc\core\engine\AResource;
 use abc\core\engine\Registry;
 use abc\core\lib\AMail;
-use abc\core\view\AView;
 use abc\models\system\Setting;
 use abc\modules\events\ABaseEvent;
-use H;
 
 class StorefrontSendResetPasswordLinkListener
 {
@@ -28,7 +25,9 @@ class StorefrontSendResetPasswordLinkListener
     /**
      * @param ABaseEvent $event
      *
-     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function handle(ABaseEvent $event)
     {

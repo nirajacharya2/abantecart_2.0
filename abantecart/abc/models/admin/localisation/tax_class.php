@@ -54,7 +54,7 @@ class ModelLocalisationTaxClass extends Model
                 ]);
         }
 
-        $this->cache->remove('localization');
+        $this->cache->flush('localization');
         return $tax_class_id;
     }
 
@@ -93,7 +93,7 @@ class ModelLocalisationTaxClass extends Model
                 ]);
         }
 
-        $this->cache->remove('localization');
+        $this->cache->flush('localization');
         return $tax_rate_id;
     }
 
@@ -134,7 +134,7 @@ class ModelLocalisationTaxClass extends Model
                 }
             }
 
-            $this->cache->remove('localization');
+            $this->cache->flush('localization');
         }
     }
 
@@ -143,6 +143,7 @@ class ModelLocalisationTaxClass extends Model
      * @param array $data
      *
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function editTaxRate($tax_rate_id, $data)
     {
@@ -176,7 +177,7 @@ class ModelLocalisationTaxClass extends Model
                                 SET ".implode(',', $update)."
                                 WHERE tax_rate_id = '".(int)$tax_rate_id."'");
 
-            $this->cache->remove('localization');
+            $this->cache->flush('localization');
         }
         if (count($data['tax_rate'])) {
             foreach ($data['tax_rate'] as $language_id => $value) {
@@ -188,7 +189,7 @@ class ModelLocalisationTaxClass extends Model
                         ],
                     ]);
             }
-            $this->cache->remove('localization');
+            $this->cache->flush('localization');
         }
     }
 
@@ -206,7 +207,7 @@ class ModelLocalisationTaxClass extends Model
                             WHERE tax_class_id = '".(int)$tax_class_id."'");
         $this->db->query("DELETE FROM ".$this->db->table_name("tax_classes")." 
                                     WHERE tax_class_id = '".(int)$tax_class_id."'");
-        $this->cache->remove('localization');
+        $this->cache->flush('localization');
     }
 
     /**
@@ -221,7 +222,7 @@ class ModelLocalisationTaxClass extends Model
                             WHERE tax_rate_id = '".(int)$tax_rate_id."'");
         $this->db->query("DELETE FROM ".$this->db->table_name("tax_rates")." 
                                     WHERE tax_rate_id = '".(int)$tax_rate_id."'");
-        $this->cache->remove('localization');
+        $this->cache->flush('localization');
     }
 
     /**
@@ -308,6 +309,7 @@ class ModelLocalisationTaxClass extends Model
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getTaxClasses($data = [], $mode = 'default')
     {
@@ -359,9 +361,9 @@ class ModelLocalisationTaxClass extends Model
             return $query->rows;
         } else {
             $cache_key = 'localization.tax_class.all.lang_'.$language_id;
-            $tax_class_data = $this->cache->pull($cache_key);
+            $tax_class_data = $this->cache->get($cache_key);
 
-            if ($tax_class_data === false) {
+            if ($tax_class_data === null) {
                 if ($language_id == $default_language_id) {
                     $query = $this->db->query("SELECT *
                                             FROM ".$this->db->table_name("tax_classes")." t
@@ -382,7 +384,7 @@ class ModelLocalisationTaxClass extends Model
                                 ");
                 }
                 $tax_class_data = $query->rows;
-                $this->cache->push($cache_key, $tax_class_data);
+                $this->cache->put($cache_key, $tax_class_data);
             }
 
             return $tax_class_data;
@@ -413,6 +415,7 @@ class ModelLocalisationTaxClass extends Model
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getTotalTaxClasses($data = [])
     {

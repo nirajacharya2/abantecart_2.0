@@ -23,12 +23,9 @@ namespace abc\controllers\admin;
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
 use abc\models\order\Order;
-use abc\models\order\OrderProduct;
 
 class ControllerPagesCatalogProductSummary extends AController
 {
-    public $data = array();
-
     public function main()
     {
         //init controller data
@@ -41,34 +38,56 @@ class ControllerPagesCatalogProductSummary extends AController
         $this->data['product'] = $product_info;
         $this->data['product']['product_id'] = '#'.$this->data['product']['product_id'];
         $this->data['product']['price'] = $this->currency->format($this->data['product']['price']);
-        $this->data['product']['condition'] = $this->model_catalog_product
-            ->getProductCondition($this->request->get['product_id']);
+        $this->data['product']['condition'] = $this->model_catalog_product->getProductCondition(
+            $this->request->get['product_id']
+        );
 
         $this->data['text_product_condition'] = $this->language->get('text_product_condition');
         $this->data['text_product_available'] = $this->language->get('text_product_available');
 
         $resource = new AResource('image');
-        $thumbnail = $resource->getMainThumb('products',
+        $thumbnail = $resource->getMainThumb(
+            'products',
             $this->request->get['product_id'],
             $this->config->get('config_image_grid_width'),
-            $this->config->get('config_image_grid_height'), true);
+            $this->config->get('config_image_grid_height'),
+            true
+        );
         $this->data['product']['image'] = $thumbnail;
         $this->data['product']['preview'] = $this->html->getCatalogURL(
             'product/product',
             '&product_id='.$product_info['product_id']
         );
 
-        $this->data['auditLog'] = $this->html->buildElement([
-            'type'   => 'button',
-            'text'  => $this->language->get('text_audit_log'),
-            'href'  => $this->html->getSecureURL('tool/audit_log', '&modal_mode=1&auditable_type=Product&auditable_id='.$this->request->get['product_id']),
-            //quick view port URL
-            'vhref' => $this->html->getSecureURL(
-                'r/common/viewport/modal',
-                '&viewport_rt=tool/audit_log&modal_mode=1&auditable_type=Product&auditable_id='.$this->request->get['product_id']),
-        ]);
+        $this->data['auditLog'] = $this->html->buildElement(
+            [
+                'type'  => 'button',
+                'text'  => $this->language->get('text_audit_log'),
+                'href'  => $this->html->getSecureURL(
+                    'tool/audit_log',
+                    '&modal_mode=1'
+                    .'&auditable_type=Product'
+                    .'&auditable_id='.$this->request->get['product_id']
+                ),
+                //quick view port URL
+                'vhref' => $this->html->getSecureURL(
+                    'r/common/viewport/modal',
+                    '&viewport_rt=tool/audit_log'
+                    .'&modal_mode=1'
+                    .'&auditable_type=Product'
+                    .'&auditable_id='.$this->request->get['product_id']
+                ),
+            ]
+        );
 
-        $this->data['product']['orders'] = Order::getOrders(['filter_product_id' => $product_info['product_id']], 'total_only');
+        $this->data['product']['orders'] = Order::search(
+            [
+                'filter' => [
+                    'product_id' => $product_info['product_id'],
+                ],
+                'mode'   => 'total_only',
+            ]
+        );
 
         $this->data['product']['orders_url'] = $this->html->getSecureURL(
             'sale/order',

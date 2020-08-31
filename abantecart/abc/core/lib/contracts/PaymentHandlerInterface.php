@@ -16,12 +16,12 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace abc\core\lib;
+namespace abc\core\lib\contracts;
 
 interface PaymentHandlerInterface
 {
 
-    public function getErrors() : array;
+    public function getErrors(): array;
 
     public function processPayment(array $data = []);
 

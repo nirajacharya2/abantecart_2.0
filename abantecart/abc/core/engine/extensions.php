@@ -233,7 +233,7 @@ class ExtensionCollection
  * long description.
  *
  * @property \abc\core\lib\ADb      $db
- * @property \abc\core\cache\ACache $cache
+ * @property \abc\core\lib\AbcCache $cache
  * @method hk_InitData(object $baseObject, string $baseObjectMethod)
  * @method hk_UpdateData(object $baseObject, string $baseObjectMethod)
  * @method hk_ProcessData(object $baseObject, string $point_name = '', mixed $array = null)
@@ -387,17 +387,18 @@ class ExtensionsApi
      *
      * @return array
      * @throws Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getInstalled($type = '')
     {
         $cache_key = '';
-        if ($this->cache && $this->cache->isCacheEnabled()) {
+        if ($this->cache) {
             $cache_key = 'extensions.installed';
             if ($type) {
                 $cache_key .= ".type=".$type;
             }
-            $load_data = $this->cache->pull($cache_key);
-            if ($load_data !== false) {
+            $load_data = $this->cache->get($cache_key);
+            if ($load_data !== null) {
                 //if we have cache, return
                 return $load_data;
             }
@@ -431,8 +432,8 @@ class ExtensionsApi
             }
         }
 
-        if ($this->cache && $this->cache->isCacheEnabled()) {
-            $this->cache->push($cache_key, $extension_data);
+        if ($this->cache) {
+            $this->cache->put($cache_key, $extension_data);
         }
 
         return $extension_data;
@@ -443,17 +444,18 @@ class ExtensionsApi
      *
      * @return array
      * @throws Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getExtensionInfo($key = '')
     {
         $cache_key = '';
-        if ($this->cache && $this->cache->isCacheEnabled()) {
+        if ($this->cache) {
             $cache_key = 'extensions.details';
             if ($key) {
                 $cache_key .= ".key=".$key;
             }
-            $load_data = $this->cache->pull($cache_key);
-            if ($load_data !== false) {
+            $load_data = $this->cache->get($cache_key);
+            if ($load_data !== null) {
                 //if we have cache, return
                 return $load_data;
             }
@@ -474,8 +476,8 @@ class ExtensionsApi
             }
         }
 
-        if ($this->cache && $this->cache->isCacheEnabled()) {
-            $this->cache->push($cache_key, $extension_data);
+        if ($this->cache) {
+            $this->cache->put($cache_key, $extension_data);
         }
 
         return $extension_data;
@@ -484,7 +486,7 @@ class ExtensionsApi
     /**
      * Load extensions list from database
      *
-     * @param array  $data
+     * @param array $data
      *                     key - search extensions by key and name
      *                     category - search extensions by category
      *                     page - page number ( limit should be defined also )
@@ -492,19 +494,19 @@ class ExtensionsApi
      * @param string $mode - can be "force" to prevent cache load
      *
      * @return bool|\stdClass object array of extensions
-     * @throws Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getExtensionsList($data = [], $mode = '')
     {
         $cache_key = '';
-        if ($mode == '' && $this->cache && $this->cache->isCacheEnabled()) {
+        if ($mode == '' && $this->cache) {
             $cache_key = 'extensions.list';
             if (!empty($data)) {
                 $cache_key .= $this->cache->paramsToString($data);
             }
 
-            $load_data = $this->cache->pull($cache_key);
-            if ($load_data !== false) {
+            $load_data = $this->cache->get($cache_key);
+            if ($load_data !== null) {
                 //if we have cache, return
                 return $load_data;
             }
@@ -600,8 +602,8 @@ class ExtensionsApi
         }
 
         $result->total = $total ? $total->num_rows : $result->num_rows;
-        if ($this->cache && $this->cache->isCacheEnabled()) {
-            $this->cache->push($cache_key, $result);
+        if ($this->cache) {
+            $this->cache->put($cache_key, $result);
         }
 
         return $result;
@@ -845,7 +847,7 @@ class ExtensionsApi
      * @param bool $force_enabled_off
      *
      * @void
-     * @throws \ReflectionException
+     * @throws Exception
      */
     public function loadEnabledExtensions($force_enabled_off = false)
     {
@@ -1237,8 +1239,9 @@ class ExtensionsApi
         if ($this->extensions->$property !== false) {
             return $this->extensions->$property;
         }
-        throw new AException(AC_ERR_LOAD,
-            'Extensions of name "'.$property.'" not found in ExtensionsApi '
+        throw new AException(
+            'Extensions of name "'.$property.'" not found in ExtensionsApi ',
+            AC_ERR_LOAD
         );
     }
 
@@ -1667,6 +1670,7 @@ class ExtensionUtils
 
     /**
      * @return array
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      */
     public function getDefaultSettings()

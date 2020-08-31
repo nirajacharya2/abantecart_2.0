@@ -20,12 +20,14 @@ use abc\models\locale\Zone;
 use abc\models\QueryBuilder;
 use abc\models\system\Store;
 use abc\modules\events\ABaseEvent;
+use Carbon\Carbon;
 use Exception;
 use H;
 use Iatstuti\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
+use Psr\SimpleCache\InvalidArgumentException;
 
 /**
  * Class Order
@@ -78,8 +80,8 @@ use Illuminate\Support\Collection;
  * @property int $currency_id
  * @property float $value
  * @property int $coupon_id
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
  * @property string $ip
  * @property string $payment_method_data
  *
@@ -731,7 +733,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'coupon_id' => [
+        'coupon_id'      => [
             'checks'   => [
                 'int',
                 'nullable',
@@ -743,7 +745,7 @@ class Order extends BaseModel
                 ],
             ],
         ],
-        'ip'        => [
+        'ip'             => [
             'checks'   => [
                 'ip',
                 'max:50',
@@ -756,6 +758,32 @@ class Order extends BaseModel
         ],
     ];
 
+    /**
+     * @var string
+     * @see Order::getOrders()
+     */
+    public static $searchMethod = 'getOrders',
+        $searchParams = [
+        'filter' => [
+            'order_id',
+            'customer_id',
+            'coupon_id',
+            'order_status_id',
+            'product_id',
+            'customer_name',
+            'date_added',
+            'date_start',
+            'date_end',
+            'store_id',
+            'total',
+        ],
+        //pagination
+        'sort',
+        'order',
+        'start',
+        'limit',
+    ];
+
     public function setPaymentMethodDataAttribute($value)
     {
         $this->attributes['payment_method_data'] = serialize($value);
@@ -765,14 +793,17 @@ class Order extends BaseModel
     {
         $this->attributes['customer_id'] = empty($value) ? null : (int)$value;
     }
+
     public function setCouponIdAttribute($value)
     {
         $this->attributes['coupon_id'] = empty($value) ? null : (int)$value;
     }
+
     public function setShippingZoneIdAttribute($value)
     {
         $this->attributes['shipping_zone_id'] = empty($value) ? null : (int)$value;
     }
+
     public function setPaymentZoneIdAttribute($value)
     {
         $this->attributes['payment_zone_id'] = empty($value) ? null : (int)$value;
@@ -782,7 +813,7 @@ class Order extends BaseModel
      * @param array $options
      *
      * @return bool
-     * @throws \abc\core\lib\AException
+     * @throws AException
      */
     public function save(array $options = [])
     {
@@ -797,6 +828,7 @@ class Order extends BaseModel
         }
 
         $this->attributes = $data;
+        Registry::cache()->flush('order');
         return parent::save($options);
     }
 
@@ -879,13 +911,8 @@ class Order extends BaseModel
                     if ($orderOptions) {
                         foreach ($orderOptions as $orderOption) {
                             /** @var ProductOptionValue $option */
-                            $option = ProductOptionValue::where(
-                                [
-                                    'product_option_value_id' => $orderOption['product_option_value_id'],
-                                    'subtract'                => 1,
-                                ]
-                            )->get();
-                            if ($option) {
+                            $option = ProductOptionValue::find($orderOption['product_option_value_id']);
+                            if ($option->subtract) {
                                 $option->update(
                                     [
                                         'quantity' => $option->quantity + $orderProduct['quantity'],
@@ -898,6 +925,8 @@ class Order extends BaseModel
             }
         }
         parent::delete();
+        Registry::cache()->flush('order');
+
     }
 
     /**
@@ -906,7 +935,7 @@ class Order extends BaseModel
      * @param int|null $customer_id
      *
      * @return array
-     * @throws \abc\core\lib\AException
+     * @throws AException
      */
     public static function getOrderArray($order_id, $order_status_id = null, $customer_id = null)
     {
@@ -1012,7 +1041,7 @@ class Order extends BaseModel
                 'order_status_descriptions.name as order_status_name',
             ])
                       ->where('orders.order_status_id', '>', 0)
-            ->leftJoin(
+                      ->leftJoin(
                           'order_status_descriptions',
                           function ($join) {
                               /**
@@ -1030,7 +1059,7 @@ class Order extends BaseModel
                                   );
                           }
                       )
-            ->where('orders.customer_id', '=', $customer_id);
+                      ->where('orders.customer_id', '=', $customer_id);
         if ($order_id) {
             $query->where('order_id', '=', $order_id);
         }
@@ -1045,7 +1074,7 @@ class Order extends BaseModel
      * @param $order_id
      * @param $order_product_id
      *
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
     public function getOrderOptions($order_id, $order_product_id)
     {
@@ -1078,7 +1107,7 @@ class Order extends BaseModel
     /**
      * @param int $order_id
      *
-     * @return  Collection
+     * @return Collection
      */
     public static function getOrderHistories($order_id)
     {
@@ -1126,7 +1155,7 @@ class Order extends BaseModel
      * @param int $customer_id
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public static function getImFromOrderData(int $order_id, $customer_id)
     {
@@ -1141,8 +1170,8 @@ class Order extends BaseModel
         }
 
         $dataTypes = OrderDataType::whereIn('name', $protocols)
-            ->get()
-            ->pluck('type_id');
+                                  ->get()
+                                  ->pluck('type_id');
         /**
          * @var QueryBuilder $query
          */
@@ -1151,11 +1180,11 @@ class Order extends BaseModel
                 'order_id' => $order_id,
             ]);
         $query->whereIn('order_data.type_id', $dataTypes)
-            ->leftJoin('order_data_types',
-                'order_data.type_id',
-                '=',
-                'order_data_types.type_id'
-            );
+              ->leftJoin('order_data_types',
+                  'order_data.type_id',
+                  '=',
+                  'order_data_types.type_id'
+              );
         $query->whereNotIn('order_data_types.name', ['email']);
 
         //allow to extends this method from extensions
@@ -1171,7 +1200,7 @@ class Order extends BaseModel
                     continue;
                 }
                 $uri = $im->getCustomerURI($protocol, $customer_id, $order_id);
-                if($uri) {
+                if ($uri) {
                     $output[$protocol] = ['uri' => $uri];
                 }
             }
@@ -1186,14 +1215,14 @@ class Order extends BaseModel
      *
      * @return bool
      * @throws AException
+     * @throws InvalidArgumentException
      */
     public static function editOrder(int $order_id, array $data)
     {
-
         if (!$data || !$order_id) {
             return false;
         }
-
+        $old_language = Product::getCurrentLanguageID();
         Registry::db()->beginTransaction();
         try {
             $order = Order::find($order_id);
@@ -1208,13 +1237,18 @@ class Order extends BaseModel
 
             $order->update($data);
 
+            if (!$data['order_totals']) {
+                H::event('abc\models\admin\order@update', [new ABaseEvent($order_id, $data)]);
+                Registry::db()->commit();
+                return true;
+            }
+
             $orderInfo = Order::getOrderArray($order_id, 'any');
             $language = Language::find($orderInfo['language_id']);
             $oLanguage = new ALanguage(Registry::getInstance(), $language->code);
             $oLanguage->load($language->directory);
 
-            if($data['product']) {
-                $old_language = Product::getCurrentLanguageID();
+            if ($data['product']) {
                 Product::setCurrentLanguageID($orderInfo['language_id']);
                 static::editOrderProducts($orderInfo, $data, $oLanguage);
             }
@@ -1234,10 +1268,12 @@ class Order extends BaseModel
             }
 
             Registry::db()->commit();
+            Registry::cache()->flush('order');
             //revert language for model back
             Product::setCurrentLanguageID($old_language);
+
             H::event('abc\models\admin\order@update', [new ABaseEvent($order_id, $data)]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Registry::log()->write(__CLASS__.': '.$e->getMessage()."\nTrace: ".$e->getTraceAsString());
             Registry::db()->rollback();
             throw new AException('Error during order saving process. See log for details.');
@@ -1253,19 +1289,21 @@ class Order extends BaseModel
      *
      * @return bool
      * @throws Exception
+     * @throws InvalidArgumentException
      */
 
     protected static function editOrderProducts(array $orderInfo, array $data, $language = null)
     {
         $language_id = $language ? $language->getLanguageID() : Registry::language()->getLanguageID();
         $order_id = $orderInfo['order_id'];
+        $qnt_diff = 0;
 
         if (!$order_id) {
             return false;
         }
 
         $elements_with_options = HtmlElementFactory::getElementsWithOptions();
-        $qnt_diff = 0;
+
         if (isset($data['product'])) {
             foreach ($data['product'] as $orderProduct) {
                 $order_product_id = $orderProduct['order_product_id'];
@@ -1286,17 +1324,17 @@ class Order extends BaseModel
                     $old_qnt = $order_product->quantity;
                     $update = $orderProduct;
                     $update['price'] = H::preformatFloat(
-                                            $orderProduct['price'],
-                                            $language->get('decimal_point')) / $orderInfo['value'];
+                            $orderProduct['price'],
+                            $language->get('decimal_point')) / $orderInfo['value'];
 
                     $update['total'] = H::preformatFloat(
-                                            $orderProduct['total'],
-                                            $language->get('decimal_point')) / $orderInfo['value'];
+                            $orderProduct['total'],
+                            $language->get('decimal_point')) / $orderInfo['value'];
 
-                    $order_product->update( $update);
+                    $order_product->update($update);
 
                     //update stock quantity if product presents
-                    if( $product_info['quantity'] !== null ) {
+                    if ($product_info['quantity'] !== null) {
                         $stock_qnt = $product_info['quantity'];
                         $qnt_diff = $old_qnt - $orderProduct['quantity'];
                         if ($qnt_diff != 0) {
@@ -1322,14 +1360,14 @@ class Order extends BaseModel
                     $new_data['model'] = $product->model;
                     $new_data['sku'] = $product->sku;
                     $new_data['price'] = H::preformatFloat(
-                                            $orderProduct['price'],
-                                            $language->get('decimal_point')) / $orderInfo['value'];
+                            $orderProduct['price'],
+                            $language->get('decimal_point')) / $orderInfo['value'];
 
                     $new_data['total'] = H::preformatFloat(
-                                            $orderProduct['total'],
-                                            $language->get('decimal_point')) / $orderInfo['value'];
+                            $orderProduct['total'],
+                            $language->get('decimal_point')) / $orderInfo['value'];
 
-                    $order_product = new OrderProduct( $new_data );
+                    $order_product = new OrderProduct($new_data);
                     $order_product->save();
                     $order_product_id = $order_product->order_product_id;
 
@@ -1338,7 +1376,7 @@ class Order extends BaseModel
                     $stock_qnt = $product->quantity;
                     $new_qnt = $stock_qnt - (int)$orderProduct['quantity'];
                     //if product presents in database
-                    if( $product_info['quantity'] !== null ) {
+                    if ($product_info['quantity'] !== null) {
                         if ($product_info['subtract']) {
                             $product->update(
                                 [
@@ -1418,7 +1456,9 @@ class Order extends BaseModel
 
                         $curr_subtract_options = [];
                         foreach ($values as $value) {
-                            if(!$value){ continue;}
+                            if (!$value) {
+                                continue;
+                            }
                             $arr_key = $opt_id.'_'.$value;
                             $optionData = $option_value_info[$arr_key];
                             unset($optionData['date_added'], $optionData['date_modified']);
@@ -1428,7 +1468,7 @@ class Order extends BaseModel
                             $optionData['name'] = $option_value_info[$arr_key]['option_name'];
                             $optionData['value'] = $option_value_info[$arr_key]['option_value_name'];
 
-                            $orderOption = new OrderOption( $optionData );
+                            $orderOption = new OrderOption($optionData);
                             $orderOption->save();
 
                             if ($option_value_info[$arr_key]['subtract']) {
@@ -1454,7 +1494,7 @@ class Order extends BaseModel
                                         $productOptionValue->update(
                                             [
                                                 'quantity' => ($productOptionValue->quantity
-                                                                + $orderProduct['quantity']),
+                                                    + $orderProduct['quantity']),
                                             ]
                                         );
                                     }
@@ -1515,28 +1555,29 @@ class Order extends BaseModel
          */
         $table_name = Registry::db()->table_name('orders');
         $query = OrderProduct::where('order_products.product_id', '=', $product_id)
-            ->whereRaw("COALESCE(".$table_name.".customer_id,0) = 0")
-            ->join(
-                'orders',
-                'orders.order_id',
-                '=',
-                'order_products.order_id'
-            );
+                             ->whereRaw("COALESCE(".$table_name.".customer_id,0) = 0")
+                             ->join(
+                                 'orders',
+                                 'orders.order_id',
+                                 '=',
+                                 'order_products.order_id'
+                             );
 
         //allow to extends this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
+        $query->useCache('order');
         return $query->get();
     }
 
     /**
      * @param array $inputData
-     * @param string $mode - can be empty or "total_only" (for counting rows)
      *
-     * @return int|\Illuminate\Support\Collection
+     * @return int|Collection
      * @throws AException
      */
-    public static function getOrders($inputData = [], $mode = '')
+    public static function getOrders($inputData = [])
     {
+        $mode = (string)$inputData['mode'];
         $language_id = static::$current_language_id;
         /**
          * @var ADataEncryption $dcrypt
@@ -1575,102 +1616,109 @@ class Order extends BaseModel
         }
         $query->addSelect($select);
 
-        if ($inputData['filter_order_status_id'] == 'all') {
+        $filter = $inputData['filter'];
+        if ($filter['order_status_id'] == 'all') {
             $query->where('orders.order_status_id', '>=', '0');
         } else {
-            if (H::has_value($inputData['filter_order_status_id'])) {
-                $query->where('orders.order_status_id', '=', (int)$inputData['filter_order_status_id']);
+            if (H::has_value($filter['order_status_id'])) {
+                $query->where('orders.order_status_id', '=', (int)$filter['order_status_id']);
             } else {
                 $query->where('orders.order_status_id', '>', '0');
 
             }
         }
 
-        if (H::has_value($inputData['filter_product_id'])) {
+        if (H::has_value($filter['product_id'])) {
             $query->leftJoin(
                 'order_products',
                 'orders.order_id',
                 '=',
                 'order_products.order_id'
             );
-            $query->where('order_products.product_id', '=', $inputData['filter_product_id']);
+            $query->where('order_products.product_id', '=', $filter['product_id']);
         }
 
-        if (H::has_value($inputData['filter_coupon_id'])) {
-            $query->where('orders.coupon_id', '=', $inputData['filter_coupon_id']);
+        if (H::has_value($inputData['filter']['coupon_id'])) {
+            $query->where('orders.coupon_id', '=', $inputData['filter']['coupon_id']);
         }
 
-        if (H::has_value($inputData['filter_customer_id'])) {
-            $query->where('orders.customer_id', '=', $inputData['filter_customer_id']);
+        if (H::has_value($filter['customer_id'])) {
+            $query->where('orders.customer_id', '=', $filter['customer_id']);
         }
 
-        if (H::has_value($inputData['filter_order_id'])) {
-            $query->where('orders.order_id', '=', $inputData['filter_order_id']);
+        if (H::has_value($filter['order_id'])) {
+            $query->where('orders.order_id', '=', $filter['order_id']);
         }
 
-        if (H::has_value($inputData['filter_name'])) {
-            $query->whereRaw("CONCAT(".$aliasO.".firstname, ' ', ".$aliasO.".lastname) LIKE '%"
-                .$inputData['filter_name']."%'");
+        if (H::has_value($filter['customer_name'])) {
+            $query->whereRaw(
+                "CONCAT(".$aliasO.".firstname, ' ', ".$aliasO.".lastname) LIKE '%".$filter['customer_name']."%'"
+            );
         }
 
-        if (H::has_value($inputData['filter_date_added'])) {
-            $query->whereRaw("DATE(".$aliasO.".date_added) = DATE('".$db->escape($inputData['filter_date_added'])."')");
+        if (H::has_value($filter['date_added'])) {
+            $query->whereRaw(
+                "DATE(".$aliasO.".date_added) = DATE('".$db->escape($filter['date_added'])."')"
+            );
         }
 
-        if (H::has_value($inputData['filter_date_start'])) {
-            $query->whereRaw("DATE(".$aliasO.".date_added) >= DATE('".$db->escape($inputData['filter_date_start'])."')");
+        if (H::has_value($filter['date_start'])) {
+            $query->whereRaw(
+                "DATE(".$aliasO.".date_added) >= DATE('".$db->escape($filter['date_start'])."')"
+            );
         }
 
-        if (H::has_value($inputData['filter_date_end'])) {
-            $query->whereRaw("DATE(".$aliasO.".date_added) <= DATE('".$db->escape($inputData['filter_date_end'])."')");
+        if (H::has_value($filter['date_end'])) {
+            $query->whereRaw(
+                "DATE(".$aliasO.".date_added) <= DATE('".$db->escape($filter['date_end'])."')"
+            );
         }
 
-
-        if ($inputData['store_id'] !== null) {
-            $query->where('orders.store_id', '=', (int)$inputData['store_id']);
+        if ($filter['store_id'] !== null) {
+            $query->where('orders.store_id', '=', (int)$filter['store_id']);
         }
 
-        if (H::has_value($inputData['filter_total'])) {
-            $inputData['filter_total'] = trim($inputData['filter_total']);
+        if (H::has_value($filter['total'])) {
+            $filter['total'] = trim($filter['total']);
             //check if compare signs are used in the request
             $compare = '';
-            if (in_array(substr($inputData['filter_total'], 0, 2), ['>=', '<='])) {
-                $compare = substr($inputData['filter_total'], 0, 2);
-                $inputData['filter_total'] = substr($inputData['filter_total'], 2, strlen($inputData['filter_total']));
-                $inputData['filter_total'] = trim($inputData['filter_total']);
+            if (in_array(substr($filter['total'], 0, 2), ['>=', '<='])) {
+                $compare = substr($filter['total'], 0, 2);
+                $filter['total'] = substr($filter['total'], 2, strlen($filter['total']));
+                $filter['total'] = trim($filter['total']);
             } else {
-                if (in_array(substr($inputData['filter_total'], 0, 1), ['>', '<', '='])) {
-                    $compare = substr($inputData['filter_total'], 0, 1);
-                    $inputData['filter_total'] = substr(
-                        $inputData['filter_total'],
+                if (in_array(substr($filter['total'], 0, 1), ['>', '<', '='])) {
+                    $compare = substr($filter['total'], 0, 1);
+                    $filter['total'] = substr(
+                        $filter['total'],
                         1,
-                        strlen($inputData['filter_total'])
+                        strlen($filter['total'])
                     );
-                    $inputData['filter_total'] = trim($inputData['filter_total']);
+                    $filter['total'] = trim($filter['total']);
                 }
             }
 
-            $inputData['filter_total'] = (float)$inputData['filter_total'];
+            $filter['total'] = (float)$filter['total'];
             //if we compare, easier select
             if ($compare) {
                 $query->whereRaw(
                     "FLOOR(
                             CAST(".$aliasO.".total as DECIMAL(15,4))) ".
                     $compare
-                    ."  FLOOR(CAST(".$inputData['filter_total']." as DECIMAL(15,4)))");
+                    ."  FLOOR(CAST(".$filter['total']." as DECIMAL(15,4)))");
             } else {
                 $currencies = $currency->getCurrencies();
                 $temp = $temp2 = [
-                    $inputData['filter_total'],
-                    ceil($inputData['filter_total']),
-                    floor($inputData['filter_total']),
+                    $filter['total'],
+                    ceil($filter['total']),
+                    floor($filter['total']),
                 ];
                 foreach ($currencies as $currency1) {
                     foreach ($currencies as $currency2) {
                         if ($currency1['code'] != $currency2['code']) {
-                            $temp[] = floor($currency->convert($inputData['filter_total'], $currency1['code'],
+                            $temp[] = floor($currency->convert($filter['total'], $currency1['code'],
                                 $currency2['code']));
-                            $temp2[] = ceil($currency->convert($inputData['filter_total'], $currency1['code'],
+                            $temp2[] = ceil($currency->convert($filter['total'], $currency1['code'],
                                 $currency2['code']));
                         }
                     }
@@ -1731,6 +1779,7 @@ class Order extends BaseModel
 
         //allow to extends this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $inputData);
+        $query->useCache('order');
         $result_rows = $query->get();
 
         //finally decrypt data and return result
@@ -1748,7 +1797,7 @@ class Order extends BaseModel
      * @param array $customers_ids
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public static function getCountOrdersByCustomerIds($customers_ids)
     {
@@ -1768,10 +1817,10 @@ class Order extends BaseModel
          * @var QueryBuilder $query
          */
         $query = Order::select('customer_id')
-            ->selectRaw('COUNT(*) as count')
-            ->whereIn('customer_id', $ids)
-            ->where('order_status_id', '>', '0')
-            ->groupBy('customer_id');
+                      ->selectRaw('COUNT(*) as count')
+                      ->whereIn('customer_id', $ids)
+                      ->where('order_status_id', '>', '0')
+                      ->groupBy('customer_id');
         //allow to extends this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $customers_ids);
         return $query->get()->pluck('count', 'customer_id')->toArray();

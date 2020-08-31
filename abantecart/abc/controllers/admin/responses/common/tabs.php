@@ -63,7 +63,7 @@ class ControllerResponsesCommonTabs extends AController
             'start' => 0,
             'limit' => 10,
         ];
-        $top_customers = Customer::getCustomers($filter);
+        $top_customers = Customer::search($filter);
         foreach ($top_customers as $idx => $customer) {
             $top_customers[$idx]['url'] = $this->html->getSecureURL(
                 'sale/customer/update',
@@ -89,16 +89,16 @@ class ControllerResponsesCommonTabs extends AController
             'start' => 0,
             'limit' => 10,
         ];
-        $top_orders = Order::getOrders($filter)->toArray();
+        $top_orders = Order::search($filter)->toArray();
         foreach ($top_orders as $idx => &$order) {
             $top_orders[$idx]['url'] = $this->html->getSecureURL(
-                                            'sale/order/details',
-                                            '&order_id='.$order['order_id']
+                'sale/order/details',
+                '&order_id='.$order['order_id']
             );
 
             $top_orders[$idx]['total'] = $this->currency->format(
-                                            $order['total'],
-                                            $this->config->get('config_currency')
+                $order['total'],
+                $this->config->get('config_currency')
             );
             $order['date_added'] = H::dateISO2Display(
                 $order['date_added'],

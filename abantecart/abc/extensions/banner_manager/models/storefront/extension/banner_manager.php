@@ -22,9 +22,6 @@ namespace abc\extensions\banner_manager\models\storefront\extension;
 
 use abc\core\engine\Model;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 class ModelExtensionBannerManager extends Model
 {
@@ -34,6 +31,7 @@ class ModelExtensionBannerManager extends Model
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getBanner($banner_id, $language_id)
     {
@@ -47,8 +45,8 @@ class ModelExtensionBannerManager extends Model
             'banner.banner_id_'.$banner_id
             .'_store_'.(int)$this->config->get('config_store_id')
             .'_lang_'.$language_id;
-        $ret_data = $this->cache->pull($cache_key);
-        if ($ret_data !== false) {
+        $ret_data = $this->cache->get($cache_key);
+        if ($ret_data !== null) {
             //return result 
             return $ret_data;
         }
@@ -59,7 +57,7 @@ class ModelExtensionBannerManager extends Model
                 WHERE banner_id='".$banner_id."'
                 ORDER BY language_id ASC";
         $result = $this->db->query($sql);
-        $counts = array();
+        $counts = [];
         foreach ($result->rows as $row) {
             $counts[] = $row['language_id'];
         }
@@ -74,7 +72,7 @@ class ModelExtensionBannerManager extends Model
                      ON bd.banner_id = b.banner_id AND bd.language_id = '".$language_id."'
                 WHERE b.banner_id='".$banner_id."'";
         $result = $this->db->query($sql);
-        $this->cache->push($cache_key, $result->row);
+        $this->cache->put($cache_key, $result->row);
 
         return $result->row;
     }
@@ -84,12 +82,13 @@ class ModelExtensionBannerManager extends Model
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getBanners($custom_block_id)
     {
         $custom_block_id = (int)$custom_block_id;
         if (!$custom_block_id) {
-            return array();
+            return [];
         }
 
         if (!empty($data['content_language_id'])) {
@@ -98,11 +97,11 @@ class ModelExtensionBannerManager extends Model
             $language_id = (int)$this->config->get('storefront_language_id');
         }
 
-        $cache_key =
-            'banner.group.block_id_'.$custom_block_id.'_store_'.(int)$this->config->get('config_store_id').'_lang_'
-            .$language_id;
-        $ret_data = $this->cache->pull($cache_key);
-        if ($ret_data !== false) {
+        $cache_key = 'banner.group.block_id_'.$custom_block_id
+                    .'_store_'.(int)$this->config->get('config_store_id')
+                    .'_lang_'.$language_id;
+        $ret_data = $this->cache->get($cache_key);
+        if ($ret_data !== null) {
             //return result 
             return $ret_data['banners'];
         }
@@ -124,12 +123,11 @@ class ModelExtensionBannerManager extends Model
                 LEFT JOIN ".$this->db->table_name("banner_descriptions")." bd ON (b.banner_id = bd.banner_id)
                 WHERE bd.language_id = '".$language_id."'
                     AND b.status='1'
-                    AND (NOW() BETWEEN CASE WHEN `start_date`= '0000-00-00 00:00:00'
+                    AND (NOW() BETWEEN CASE WHEN `start_date` IS NULL
                                             OR COALESCE(`start_date`, '1970-01-01 00:00:00') = '1970-01-01 00:00:00'
                                             THEN NOW() ELSE `start_date` END
                         AND
-                        CASE WHEN `end_date`='0000-00-00 00:00:00'
-                                    OR COALESCE(`end_date`, '1970-01-01 00:00:00') = '1970-01-01 00:00:00'
+                        CASE WHEN `end_date` IS NULL OR COALESCE(`end_date`, '1970-01-01 00:00:00') = '1970-01-01 00:00:00'
                             THEN  NOW() + INTERVAL 1 MONTH ELSE `end_date` END)
                     AND (`banner_group_name` = '".$this->db->escape($banner_group_name)."'
                         OR b.banner_id IN (SELECT DISTINCT id
@@ -137,7 +135,7 @@ class ModelExtensionBannerManager extends Model
                                     WHERE custom_block_id = '".$custom_block_id."' AND data_type='banner_id'))
                 ORDER BY `banner_group_name` ASC, b.sort_order ASC";
         $result = $this->db->query($sql);
-        $this->cache->push($cache_key, array('banners' => $result->rows));
+        $this->cache->put($cache_key, ['banners' => $result->rows]);
 
         return $result->rows;
     }
@@ -154,12 +152,12 @@ class ModelExtensionBannerManager extends Model
         $banner_id = (int)$banner_id;
         $type = (int)$type;
 
-        $user_info = array(
+        $user_info = [
             'user_id'   => (is_object($this->user) ? $this->user->getId() : ''),
             'user_ip'   => $this->request->getRemoteIP(),
             'user_host' => $this->request->server['REMOTE_HOST'],
             'rt'        => $this->request->get['rt'],
-        );
+        ];
 
         $sql = "INSERT INTO ".$this->db->table_name("banner_stat")." (`banner_id`, `type`, `store_id`, `user_info`)
                 VALUES ('".$banner_id."',

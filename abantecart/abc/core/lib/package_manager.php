@@ -66,7 +66,7 @@ class APackageManager
     public function __construct($package_info)
     {
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access package manager');
+            throw new AException ('Error: permission denied to access package manager', AC_ERR_LOAD);
         }
         /**
          * @var Registry
@@ -363,6 +363,7 @@ class APackageManager
      * @throws AException
      * @throws \DebugBar\DebugBarException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function backupPreviousExtension($ext_txt_id)
     {
@@ -421,6 +422,7 @@ class APackageManager
 
     /**
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function installPackageExtensions()
     {
@@ -671,6 +673,7 @@ class APackageManager
      * @return bool
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function installExtension($ext_txt_id = '', $type = '', $version = '', $install_mode = 'install')
     {
@@ -780,6 +783,8 @@ class APackageManager
      * @param string $ext_txt_id
      *
      * @return bool
+     * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      */
     public function uninstallExtension($ext_txt_id)
@@ -811,7 +816,7 @@ class APackageManager
     public function upgradeCore()
     {
         //clear all cache
-        $this->registry->get('cache')->remove('*');
+        Registry::cache()->flush();
 
         $package_dirname = $this->package_info['package_dir'];
         $config_file = $package_dirname.'package.xml';
@@ -842,7 +847,7 @@ class APackageManager
                 /** @noinspection PhpIncludeInspection */
                 try {
                     include($file);
-                } catch (AException $e) {
+                } catch (\Exception $e) {
                     $this->errors[] = $e->getMessage();
                     return false;
                 }
@@ -1029,6 +1034,7 @@ class APackageManager
      * @return bool
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function checkCartVersion(\SimpleXMLElement $config_xml = null)
     {

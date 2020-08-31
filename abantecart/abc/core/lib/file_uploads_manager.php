@@ -37,7 +37,10 @@ class AFile_Uploads_Manager extends AFile
     {
         parent::__construct();
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access class AFile_Uploads_Manager');
+            throw new AException (
+                'Error: permission denied to access class AFile_Uploads_Manager',
+                AC_ERR_LOAD
+            );
         }
     }
 }

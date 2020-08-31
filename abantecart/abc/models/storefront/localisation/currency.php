@@ -17,37 +17,42 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\models\storefront;
+
 use abc\core\engine\Model;
 
 if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+    header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
-class ModelLocalisationCurrency extends Model {
-	public function getCurrencies() {
-		$currency_data = $this->cache->pull('localization.currency');
 
-		if ($currency_data === false) {
-			$query = $this->db->query("SELECT * FROM " . $this->db->table_name("currencies") . " ORDER BY title ASC");
-	
-			foreach ($query->rows as $result) {
-      			$currency_data[$result['code']] = array(
-        			'currency_id'   => $result['currency_id'],
-        			'title'         => $result['title'],
-        			'code'          => $result['code'],
-					'symbol_left'   => $result['symbol_left'],
-					'symbol_right'  => $result['symbol_right'],
-					'decimal_place' => $result['decimal_place'],
-					'value'         => $result['value'],
-					'status'        => $result['status'],
-					'date_modified' => $result['date_modified']
-      			);
-    		}	
+class ModelLocalisationCurrency extends Model
+{
+    public function getCurrencies()
+    {
+        $currency_data = $this->cache->get('localization.currency');
 
-			$this->cache->push('localization.currency', $currency_data);
-		}
+        if ($currency_data === null) {
+            $query = $this->db->query("SELECT * FROM ".$this->db->table_name("currencies")." ORDER BY title ASC");
 
-		return $currency_data;	
-	}	
+            foreach ($query->rows as $result) {
+                $currency_data[$result['code']] = [
+                    'currency_id'   => $result['currency_id'],
+                    'title'         => $result['title'],
+                    'code'          => $result['code'],
+                    'symbol_left'   => $result['symbol_left'],
+                    'symbol_right'  => $result['symbol_right'],
+                    'decimal_place' => $result['decimal_place'],
+                    'value'         => $result['value'],
+                    'status'        => $result['status'],
+                    'date_modified' => $result['date_modified'],
+                ];
+            }
+
+            $this->cache->put('localization.currency', $currency_data);
+        }
+
+        return $currency_data;
+    }
 
 }

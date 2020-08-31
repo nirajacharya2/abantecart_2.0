@@ -23,13 +23,13 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\lib\AError;
-use abc\core\lib\AException;
 use abc\core\lib\AJson;
 use abc\core\lib\AMail;
+use abc\core\lib\AMailIM;
 use abc\core\lib\ATaskManager;
 use abc\core\view\AView;
 use abc\models\customer\Customer;
-use abc\models\user\User;
+use Exception;
 
 class ControllerTaskSaleContact extends AController
 {
@@ -237,7 +237,13 @@ class ControllerTaskSaleContact extends AController
         $text_unsubscribe = $this->language->get('text_unsubscribe');
         $message_body = $data['message'];
         if ($data['subscriber']) {
-            $customer_info = Customer::getCustomers(['filter' => ['email'=> $email ]]);
+            $customer_info = Customer::search(
+                [
+                    'filter' => [
+                        'email' => $email,
+                    ],
+                ]
+            );
             $customer_id = $customer_info[0]['customer_id'];
             if ($customer_id) {
                 $message_body .= "\n\n<br><br>".sprintf($text_unsubscribe,
@@ -306,10 +312,11 @@ class ControllerTaskSaleContact extends AController
                 return false;
             }
             /**
-             * @var \abc\core\lib\AMailIM $driver
+             * @var AMailIM $driver
              */
             $driver = new $classname();
-        } catch (AException $e) {}
+        } catch (Exception $e) {
+        }
 
         if ($driver === null) {
             return false;
@@ -322,7 +329,7 @@ class ControllerTaskSaleContact extends AController
             //use safe call
             try {
                 $result = $driver->send($to, $text);
-            } catch (AException $e) {
+            } catch (Exception $e) {
                 return false;
             }
         }

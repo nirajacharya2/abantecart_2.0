@@ -19,65 +19,71 @@
 ------------------------------------------------------------------------------*/
 namespace abc\models\storefront;
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Model;
 use abc\core\lib\AWarning;
-
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use H;
 
 class ModelToolImage extends Model{
-	public $data = array ();
+    public $data = [];
 
-	/**
-	 * @param $filename - relative file path
-	 * @param int $width - in pixels
-	 * @param int $height - in pixels
-	 * @param null $alias - alias filename for saving
-	 * @param string $mode - can be url or file.
-	 * @return null|string - string is URL or abs file path
-	 */
-	public function resize($filename, $width = 0, $height = 0, $alias = null, $mode = 'url'){
-		if (!is_file(ABC::env('DIR_IMAGES') . $filename) && !is_file(ABC::env('DIR_RESOURCES') . 'image/' . $filename)){
-			return null;
-		}
+    /**
+     * @param $filename - relative file path
+     * @param int $width - in pixels
+     * @param int $height - in pixels
+     * @param null $alias - alias filename for saving
+     * @param string $mode - can be url or file.
+     *
+     * @return null|string - string is URL or abs file path
+     * @throws \ReflectionException
+     */
+    public function resize($filename, $width = 0, $height = 0, $alias = null, $mode = 'url')
+    {
+        if (!is_file(ABC::env('DIR_IMAGES').$filename) && !is_file(ABC::env('DIR_RESOURCES').'image/'.$filename)) {
+            return null;
+        }
 
-		$orig_image_filepath = is_file(ABC::env('DIR_IMAGES') . $filename) ? ABC::env('DIR_IMAGES') . $filename : '';
-		$orig_image_filepath = $orig_image_filepath == '' && is_file(ABC::env('DIR_RESOURCES') . 'image/' . $filename) ? ABC::env('DIR_RESOURCES') . 'image/' . $filename : $orig_image_filepath;
+        $orig_image_filepath = is_file(ABC::env('DIR_IMAGES').$filename) ? ABC::env('DIR_IMAGES').$filename : '';
+        $orig_image_filepath = $orig_image_filepath == ''
+        && is_file(ABC::env('DIR_RESOURCES').'image/'.$filename) ? ABC::env('DIR_RESOURCES').'image/'
+            .$filename : $orig_image_filepath;
 
-		$info = pathinfo($filename);
-		$extension = $info['extension'];
+        $info = pathinfo($filename);
+        $extension = $info['extension'];
 
-		$alias = !$alias ? $filename : dirname($filename) . '/' . basename($alias);
-		$new_image = 'thumbnails/' . substr($alias, 0, strrpos($alias, '.')) . '-' . $width . 'x' . $height . '.' . $extension;
-		$new_image2x = '';
+        $alias = !$alias ? $filename : dirname($filename).'/'.basename($alias);
+        $new_image = 'thumbnails/'.substr($alias, 0, strrpos($alias, '.')).'-'.$width.'x'.$height.'.'.$extension;
+        $new_image2x = '';
 
-		if(!AHelperUtils::check_resize_image($orig_image_filepath, $new_image, $width, $height, $this->config->get('config_image_quality'))) {
-			$err= new AWarning('Resize image error. File: '.$orig_image_filepath.'. Try to increase memory limit for PHP or decrease image size.');
-			$err->toLog()->toDebug();
-		}
+        if (!H::check_resize_image($orig_image_filepath, $new_image, $width, $height,
+            $this->config->get('config_image_quality'))) {
+            $err = new AWarning('Resize image error. File: '.$orig_image_filepath
+                .'. Try to increase memory limit for PHP or decrease image size.');
+            $err->toLog()->toDebug();
+        }
 
-		if ($this->config->get('config_retina_enable')){
-			//retina variant
-			$new_image2x = 'thumbnails/' . substr($alias, 0, strrpos($alias, '.')) . '-' . $width . 'x' . $height . '@2x.' . $extension;
-			if(!AHelperUtils::check_resize_image($orig_image_filepath, $new_image2x, $width*2, $height*2, $this->config->get('config_image_quality'))) {
-				$err= new AWarning('Resize image error. File: '.$orig_image_filepath.'. Try to increase memory limit for PHP or decrease image size.');
-				$err->toLog()->toDebug();
-			}
-		}
+        if ($this->config->get('config_retina_enable')) {
+            //retina variant
+            $new_image2x =
+                'thumbnails/'.substr($alias, 0, strrpos($alias, '.')).'-'.$width.'x'.$height.'@2x.'.$extension;
+            if (!H::check_resize_image($orig_image_filepath, $new_image2x, $width * 2, $height * 2,
+                $this->config->get('config_image_quality'))) {
+                $err = new AWarning('Resize image error. File: '.$orig_image_filepath
+                    .'. Try to increase memory limit for PHP or decrease image size.');
+                $err->toLog()->toDebug();
+            }
+        }
 
-		if ($this->config->get('config_retina_enable') && isset($this->request->cookie['HTTP_IS_RETINA'])){
-			$new_image = $new_image2x;
-		}
+        if ($this->config->get('config_retina_enable') && isset($this->request->cookie['HTTP_IS_RETINA'])) {
+            $new_image = $new_image2x;
+        }
 
-		//when need to get abs path of result
-		if ($mode == 'path'){
-			$http_path = ABC::env('DIR_IMAGES');
-		}else{
-			//use auto-path without protocol (AUTO_SERVER)
-			$http_path = ABC::env('HTTPS_IMAGE');
-		}
-		return $http_path . $new_image;
-	}
+        //when need to get abs path of result
+        if ($mode == 'path') {
+            $http_path = ABC::env('DIR_IMAGES');
+        } else {
+            //use auto-path without protocol (AUTO_SERVER)
+            $http_path = ABC::env('HTTPS_IMAGE');
+        }
+        return $http_path.$new_image;
+    }
 }

@@ -68,7 +68,6 @@ class AHandleExceptions
      * @param  \Throwable $e
      *
      * @return void
-     * @throws AException
      */
     public function handleException($e)
     {
@@ -99,7 +98,6 @@ class AHandleExceptions
      * @param  \Exception $e
      *
      * @return void
-     * @throws AException
      */
     protected function renderForConsole(Exception $e)
     {
@@ -112,7 +110,6 @@ class AHandleExceptions
      * @param  \Exception $e
      *
      * @return void
-     * @throws AException
      */
     protected function renderHttpResponse(Exception $e)
     {
@@ -123,7 +120,6 @@ class AHandleExceptions
      * Handle the PHP shutdown event.
      *
      * @return void
-     * @throws AException
      */
     public function handleShutdown()
     {

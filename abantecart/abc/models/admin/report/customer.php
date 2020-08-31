@@ -120,6 +120,7 @@ class ModelReportCustomer extends Model
      * @param string $mode
      *
      * @return mixed
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
@@ -223,6 +224,7 @@ class ModelReportCustomer extends Model
      * @return int
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getTotalCustomerOrders($data = [])
     {
@@ -234,6 +236,7 @@ class ModelReportCustomer extends Model
      * @param string $mode
      *
      * @return array
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
@@ -339,6 +342,7 @@ class ModelReportCustomer extends Model
      * @return mixed
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getTotalCustomerTransactions($data = [])
     {

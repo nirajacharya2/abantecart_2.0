@@ -94,6 +94,7 @@ class ControllerBlocksCategory extends AController
      * @param int $parent_id
      *
      * @return array
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \abc\core\lib\AException
      */
     protected function buildCategoryTree($all_categories = [], $parent_id = 0)
@@ -141,6 +142,7 @@ class ControllerBlocksCategory extends AController
      * @param int $parent_id
      *
      * @return array
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \abc\core\lib\AException
      */
     protected function buildNestedCategoryList($parent_id = 0)

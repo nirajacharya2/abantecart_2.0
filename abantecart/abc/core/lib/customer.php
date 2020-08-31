@@ -20,6 +20,8 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\ALanguage;
+use abc\core\engine\ALoader;
+use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
 use abc\models\customer\Address;
 use abc\models\customer\Customer;
@@ -29,9 +31,13 @@ use abc\models\customer\CustomerTransaction;
 use abc\models\storefront\ModelCatalogContent;
 use abc\models\storefront\ModelToolOnlineNow;
 use abc\modules\events\ABaseEvent;
+use Exception;
 use H;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\ValidationException;
+use Psr\SimpleCache\InvalidArgumentException;
 use ReCaptcha\ReCaptcha;
+use ReflectionException;
 
 /**
  * Class ACustomer
@@ -96,7 +102,7 @@ class ACustomer extends ALibBase
      */
     protected $config;
     /**
-     * @var \abc\core\cache\ACache
+     * @var AbcCache
      */
     protected $cache;
     /**
@@ -104,7 +110,7 @@ class ACustomer extends ALibBase
      */
     protected $db;
     /**
-     * @var \abc\core\engine\ALoader
+     * @var ALoader
      */
     protected $load;
     /**
@@ -120,7 +126,7 @@ class ACustomer extends ALibBase
      */
     protected $dcrypt;
     /**
-     * @var \abc\core\engine\ExtensionsApi
+     * @var ExtensionsApi
      */
     protected $extensions;
 
@@ -130,11 +136,13 @@ class ACustomer extends ALibBase
     protected $unauth_customer = [];
 
     /**
-     * @param  \abc\core\engine\Registry $registry
+     * @param Registry $registry
      *
      * @param int $customer_id
      *
      * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function __construct($registry, $customer_id = 0)
     {
@@ -236,17 +244,18 @@ class ACustomer extends ALibBase
         }
         $config = Registry::config();
         $filter = [
-                'search_operator' => 'equal',
-                'loginname' => $loginname,
-                'password' => $password,
-                'status' => 1,
+            'search_operator' => 'equal',
+            'loginname'       => $loginname,
+            'password'        => $password,
+            'status'          => 1,
 
         ];
         if ($config->get('config_customer_approval')) {
             $filter['approved'] = 1;
         }
 
-        $customer_data = Customer::getCustomers(['filter' => $filter])->first();
+        /** @var Collection $customer_data */
+        $customer_data = Customer::search(['filter' => $filter])->first();
         if ($customer_data) {
             $this->customerInit($customer_data->toArray());
 
@@ -260,7 +269,7 @@ class ACustomer extends ALibBase
 
             //set cookie for unauthenticated user (expire in 1 year)
             /**
-             * @var AEncryption $enc
+             * @var AEncryption $encryption
              */
             $encryption = ABC::getObjectByAlias('AEncryption', [$config->get('encryption_key')]);
             $customer_data = $encryption->encrypt(serialize([
@@ -597,7 +606,7 @@ class ACustomer extends ALibBase
      * Return customer account balance in customer currency based on debit/credit calculation
      *
      * @return float|bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function getBalance()
     {
@@ -614,7 +623,8 @@ class ACustomer extends ALibBase
      * @param array $data - amount, order_id, transaction_type, description, comments, creator
      *
      * @return bool
-     * @throws \Exception|ValidationException
+     * @throws Exception|ValidationException
+     * @throws InvalidArgumentException
      */
     public function debitTransaction($data)
     {
@@ -629,7 +639,8 @@ class ACustomer extends ALibBase
      * @param array $data - amount, order_id, transaction_type, description, comments, creator
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
+     * @throws InvalidArgumentException
      */
     public function creditTransaction($data)
     {
@@ -676,7 +687,7 @@ class ACustomer extends ALibBase
      * Confirm that current customer is valid
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function isValidEnabledCustomer()
     {
@@ -699,7 +710,7 @@ class ACustomer extends ALibBase
      * Get cart content
      *
      * @return array()
-     * @throws \Exception
+     * @throws Exception
      */
     public function getCustomerCart()
     {
@@ -780,7 +791,7 @@ class ACustomer extends ALibBase
      * Clear cart from database content
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function clearCustomerCart()
     {
@@ -827,7 +838,7 @@ class ACustomer extends ALibBase
      * @param int $product_id
      *
      * @return null
-     * @throws \Exception
+     * @throws Exception
      */
     public function addToWishList($product_id)
     {
@@ -847,7 +858,7 @@ class ACustomer extends ALibBase
      * @param int $product_id
      *
      * @return null
-     * @throws \Exception
+     * @throws Exception
      */
     public function removeFromWishList($product_id)
     {
@@ -867,7 +878,7 @@ class ACustomer extends ALibBase
      * @param array $whishlist
      *
      * @return null
-     * @throws \Exception
+     * @throws Exception
      */
     public function saveWishList($whishlist = [])
     {
@@ -886,7 +897,7 @@ class ACustomer extends ALibBase
      * Get cart content
      *
      * @return array()
-     * @throws \Exception
+     * @throws Exception
      */
     public function getWishList()
     {
@@ -910,7 +921,8 @@ class ACustomer extends ALibBase
      * @param array $data - amount, order_id, transaction_type, description, comments, creator
      *
      * @return bool
-     * @throws \Exception|ValidationException
+     * @throws Exception|ValidationException
+     * @throws InvalidArgumentException
      */
     protected function recordTransaction($data)
     {
@@ -931,7 +943,7 @@ class ACustomer extends ALibBase
             $transaction_id = $transaction->customer_transaction_id;
         } catch (ValidationException $e) {
             $errors = [];
-            \H::SimplifyValidationErrors($transaction->errors()['validation'], $errors);
+            H::SimplifyValidationErrors($transaction->errors()['validation'], $errors);
             Registry::log()->write(var_export($errors, true));
             return false;
         }
@@ -946,7 +958,8 @@ class ACustomer extends ALibBase
      * @return Customer
      * @throws AException
      * @throws ValidationException
-     * @throws \ReflectionException
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public static function createCustomer($data, $subscribe_only = false)
     {
@@ -1027,10 +1040,10 @@ class ACustomer extends ALibBase
             }
 
             $db->commit();
-        }catch(ValidationException $e){
+        } catch (ValidationException $e) {
             $db->rollback();
             throw $e;
-        }catch(\Exception $e){
+        } catch (Exception $e) {
             $db->rollback();
             throw new AException(__CLASS__.': '.$e->getMessage(), 0, __FILE__);
         }
@@ -1064,7 +1077,8 @@ class ACustomer extends ALibBase
      *
      * @return bool
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public function editCustomer( $data )
     {
@@ -1122,7 +1136,8 @@ class ACustomer extends ALibBase
      *
      * @return bool
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public function editPassword( $loginname, $password )
     {
@@ -1146,7 +1161,7 @@ class ACustomer extends ALibBase
     }
 
     /**
-     * @return \abc\models\customer\Customer
+     * @return Customer
      */
     public function model()
     {
@@ -1182,7 +1197,8 @@ class ACustomer extends ALibBase
      *
      * @return array
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public static function validateRegistrationData( $data )
     {
@@ -1259,7 +1275,7 @@ class ACustomer extends ALibBase
         if ($im_drivers) {
             foreach ($im_drivers as $protocol => $driver_obj) {
                 /**
-                 * @var \abc\core\lib\AMailIM $driver_obj
+                 * @var AMailIM $driver_obj
                  */
                 if (!is_object($driver_obj) || $protocol == 'email') {
                     continue;
@@ -1280,7 +1296,8 @@ class ACustomer extends ALibBase
      *
      * @return array
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public static function validateSubscribeData( $data )
     {
@@ -1329,7 +1346,7 @@ class ACustomer extends ALibBase
         if ($im_drivers) {
             foreach ($im_drivers as $protocol => $driver_obj) {
                 /**
-                 * @var \abc\core\lib\AMailIM $driver_obj
+                 * @var AMailIM $driver_obj
                  */
                 if (!is_object($driver_obj) || $protocol == 'email') {
                     continue;

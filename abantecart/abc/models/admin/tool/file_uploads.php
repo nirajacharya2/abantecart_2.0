@@ -17,75 +17,88 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\models\admin;
-use abc\core\helper\AHelperUtils;
+
 use abc\core\engine\Model;
 use abc\core\lib\ADataset;
-
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use H;
 
 /**
  * Class ModelToolFileUploads
  */
-class ModelToolFileUploads extends Model {
+class ModelToolFileUploads extends Model
+{
 
-	/**
-	 * @param array $data
-	 * @return array
-	 */
-	public function getLog($data = array()) {
+    /**
+     * @param array $data
+     *
+     * @return array
+     * @throws \abc\core\lib\AException
+     */
+    public function getLog($data = [])
+    {
 
-		if (!isset($data[ 'sort' ])) {
-			$data[ 'sort' ] = 'date_added';
-		}
+        if (!isset($data['sort'])) {
+            $data['sort'] = 'date_added';
+        }
 
-		if ($data[ 'offset' ] < 0) {
-			$data[ 'offset' ] = 0;
-		}
+        if ($data['offset'] < 0) {
+            $data['offset'] = 0;
+        }
 
-		if ($data[ 'limit' ] < 1) {
-			$data[ 'limit' ] = 10;
-		}
-		$dataset = new ADataset('file_uploads', 'admin');
-		$rows = $dataset->getRows(array(), $data[ 'sort' ], $data[ 'limit' ], $data[ 'offset' ]);
+        if ($data['limit'] < 1) {
+            $data['limit'] = 10;
+        }
+        $dataset = new ADataset('file_uploads', 'admin');
+        $rows = $dataset->getRows([], $data['sort'], $data['limit'], $data['offset']);
 
-		return $rows;
-	}
+        return $rows;
+    }
 
-	/**
-	 * @param array $filter
-	 * @return int
-	 */
-	public function getTotalRows($filter = array()) {
+    /**
+     * @param array $filter
+     *
+     * @return int
+     * @throws \abc\core\lib\AException
+     */
+    public function getTotalRows($filter = [])
+    {
 
-		if ($filter) {
-			$filter[ 'column_name' ] = 'name';
-			$filter[ 'operator' ] = 'like';
+        if ($filter) {
+            $filter['column_name'] = 'name';
+            $filter['operator'] = 'like';
 
-		}
+        }
 
-		$dataset = new ADataset('file_uploads', 'admin');
-		$rows = $dataset->getTotalRows($filter);
-		return $rows;
-	}
+        $dataset = new ADataset('file_uploads', 'admin');
+        $rows = $dataset->getTotalRows($filter);
+        return $rows;
+    }
 
-	/**
-	 * @param int $field_id
-	 * @return array
-	 */
-	public function getField($field_id) {
-		$result = $this->db->query('SELECT * FROM ' . $this->db->table_name('fields') . ' WHERE field_id =	"' . (int)$field_id . '"');
+    /**
+     * @param int $field_id
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function getField($field_id)
+    {
+        $result =
+            $this->db->query(
+                'SELECT * 
+                FROM '.$this->db->table_name('fields').' 
+                WHERE field_id = "'.(int)$field_id.'"'
+            );
 
-		if ( $result->num_rows ) {
+        if ($result->num_rows) {
 
-			if ( AHelperUtils::has_value($result->row['settings']) ) {
-				$result->row['settings'] = unserialize($result->row['settings']);
-			}
+            if (H::has_value($result->row['settings'])) {
+                $result->row['settings'] = unserialize($result->row['settings']);
+            }
 
-			return $result->row;
-		}
-		return array();
-	}
+            return $result->row;
+        }
+        return [];
+    }
 }
