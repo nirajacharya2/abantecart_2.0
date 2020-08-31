@@ -41,6 +41,47 @@ class Location extends BaseModel
         'date_added',
         'date_modified',
     ];
+    protected $rules = [
+        'location_id'=>[
+            'checks' => [
+                'integer',
+                'required',
+                'sometimes',
+                'min:1'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'location_id is not integer']
+            ]
+        ],
+        'name' => [
+            'checks' => [
+                'string',
+                'between:2,32',
+                'required',
+                'sometimes'
+            ],
+            'messages' => [
+                'language_key' => 'error_name',
+                'language_block' => 'localisation/location',
+                'default_text' => 'Name must be between 2 and 32 characters!',
+                'section' => 'admin'
+            ]
+        ],
+        'description' => [
+            'checks' => [
+                'string',
+                'between:2,255',
+                'required',
+                'sometimes'
+            ],
+            'messages' => [
+                'language_key' => 'error_description',
+                'language_block' => 'localisation/location',
+                'default_text' => 'Description Name must be between 2 and 255 characters!',
+                'section' => 'admin'
+            ]
+        ]
+    ];
 
     public function tax_rates()
     {

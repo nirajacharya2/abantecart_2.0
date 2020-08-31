@@ -725,6 +725,7 @@ class Customer extends BaseModel
      * @param string $mode - can be quick(without orders_count), default, total_only(returns row count)
      *
      * @return array|Collection|int
+     * @throws AException
      */
     public static function getCustomer($customer_id, $mode = 'quick')
     {
@@ -1080,6 +1081,7 @@ class Customer extends BaseModel
      * @param array $data
      *
      * @return Collection|int
+     * @throws AException
      */
     public static function getTotalCustomers($data = [])
     {

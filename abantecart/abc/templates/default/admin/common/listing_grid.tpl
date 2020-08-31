@@ -74,7 +74,11 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 		$col = array('resizable: false', 'title: false', 'searchoptions: { sopt:[\'cn\'] }');
 		foreach ($m as $k => $v) {
 			if (is_string($v)) {
-				$col[] = "$k: '" . addslashes($v) . "'";
+                if ($k == 'cellattr') {
+                    $col[] = "$k: ".$v;
+                } else {
+                    $col[] = "$k: '".addslashes($v)."'";
+                }
 			} else if (is_int($v)) {
 				$col[] = "$k: " . (int)($v);
 			} else if (is_bool($v)) {

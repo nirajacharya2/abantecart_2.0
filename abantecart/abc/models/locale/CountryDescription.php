@@ -30,13 +30,52 @@ class CountryDescription extends BaseModel
     protected $touches = ['country'];
 
     protected $casts = [
-        'country_id'  => 'int',
+        'country_id' => 'int',
         'language_id' => 'int',
     ];
 
     protected $fillable = [
         'name',
         'language_id',
+        'id'
+    ];
+    protected $rules = [
+        'id' => [
+            'checks' => [
+                'integer',
+                'required',
+                'sometimes',
+                'min:1'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'id is not integer']
+            ],
+        ],
+        'name' => [
+            'checks' => [
+                'string',
+                'required',
+                'sometimes',
+                'between:2,128'
+            ],
+            'messages' => [
+                'language_key' => 'error_name',
+                'language_block' => 'localisation/country',
+                'default_text' => 'Country Name must be between 2 and 128 characters!',
+                'section' => 'admin'
+            ],
+        ],
+        'language_id' => [
+            'checks' => [
+                'integer',
+                'required',
+                'sometimes',
+                'min:0'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'language_id is not integer']
+            ],
+        ]
     ];
 
     public function country()

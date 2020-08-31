@@ -76,7 +76,11 @@ echo $this->html->buildElement(
                 $col = ['resizable: false', 'title: false', 'searchoptions: { sopt:[\'cn\'] }'];
                 foreach ($m as $k => $v) {
                     if (is_string($v)) {
-                        $col[] = "$k: '".addslashes($v)."'";
+                        if ($k == 'cellattr') {
+                            $col[] = "$k: ".$v;
+                        } else {
+                            $col[] = "$k: '".addslashes($v)."'";
+                        }
                     } else {
                         if (is_int($v)) {
                             $col[] = "$k: ".(int)($v);

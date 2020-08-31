@@ -38,9 +38,23 @@ class WeightClass extends BaseModel
     ];
 
     protected $fillable = [
+        'weight_class_id',
         'value',
         'date_added',
         'date_modified',
+    ];
+    protected $rules = [
+        'weight_class_id'=>[
+            'checks' => [
+                'integer',
+                'required',
+                'sometimes',
+                'min:1'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'weight_class_id is not integer']
+            ]
+        ],
     ];
 
     public function description()
