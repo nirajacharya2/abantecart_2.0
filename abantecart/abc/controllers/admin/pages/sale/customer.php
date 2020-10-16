@@ -1224,7 +1224,7 @@ class ControllerPagesSaleCustomer extends AController
             $this->error['zone_id'] = $this->language->get('error_zone');
         }
 
-        if (mb_strlen($this->request->post['company']) > 32) {
+        if (mb_strlen($this->request->post['company']) > 64) {
             $this->error['company'] = $this->language->get('error_company');
         }
 
