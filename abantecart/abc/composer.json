@@ -47,7 +47,7 @@
     {
       "type": "package",
       "package": {
-        "name": "components/jqGrid",
+        "name": "components/jqgrid",
         "version": "5.3.1",
         "dist": {
           "url": "https://github.com/tonytomov/jqGrid/archive/master.zip",
