@@ -1208,7 +1208,7 @@ class ACustomer extends ALibBase
         //If captcha enabled, validate
         if ( $config->get( 'config_account_create_captcha' ) && !$isLogged) {
             if ( $config->get( 'config_recaptcha_secret_key' ) ) {
-                require_once ABC::env( 'DIR_VENDOR' ).'/google_recaptcha/autoload.php';
+                require_once ABC::env('DIR_VENDOR').'google/recaptcha/src/autoload.php';
                 $recaptcha = new ReCaptcha( $config->get( 'config_recaptcha_secret_key' ) );
                 $resp = $recaptcha->verify( $data['g-recaptcha-response'],
                     $request->getRemoteIP() );
@@ -1301,7 +1301,7 @@ class ACustomer extends ALibBase
         //If captcha enabled, validate
         if ( $config->get( 'config_account_create_captcha' ) ) {
             if ( $config->get( 'config_recaptcha_secret_key' ) ) {
-                require_once ABC::env( 'DIR_VENDOR' ).'/google_recaptcha/autoload.php';
+                require_once ABC::env('DIR_VENDOR').'google/recaptcha/src/autoload.php';
                 $recaptcha = new ReCaptcha( $config->get( 'config_recaptcha_secret_key' ) );
                 $resp = $recaptcha->verify( $data['g-recaptcha-response'],
                     $request->getRemoteIP() );
