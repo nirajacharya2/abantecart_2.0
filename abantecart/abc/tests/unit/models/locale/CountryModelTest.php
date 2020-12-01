@@ -26,7 +26,7 @@ class CountryModelTest extends ATestCase
                 'iso_code_2' => 121111111,
                 'iso_code_3' => 11111111,
                 'address_format' => 111111111,
-                'status' => 'zero',
+                'status' => 'fgfgf',
                 'sort_order' => 'fgnbfgnfgn',
             ]
         );

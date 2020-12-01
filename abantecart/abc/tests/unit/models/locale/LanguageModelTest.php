@@ -17,10 +17,11 @@ class LenguageModelTest extends ATestCase
 
         $language = new Language(
             [
-                'name' => 43647890965,
-                'code' => 456456,
-                'locale' => '',
-                'image' => 'dfgdsxfhgxfdghsfghjfgdhfgjhdfjdfhjfdgjcfgjhdgfhdfhgdfgdfgdfgdfgdfgdfgdfgdfgdfgdfgdfgdf',
+                'language_id' => 0,
+                'name' => 'd',
+                'code' => 6,
+                'locale' => 6,
+                'image' => 1,
                 'directory' => '',
                 'filename' => 'sdhjfdzgfsdfgghfgfdggdfgdfghfdtgdsfgfdghfghbdfhfghdfgdfgdfgdfgdfgdfgdfgdfgdfgdfgdfgdfg',
                 'sort_order' => 'fdjfgfh',
@@ -33,11 +34,11 @@ class LenguageModelTest extends ATestCase
         } catch (ValidationException $e) {
             $errors = $language->errors()['validation'];
         }
-        $this->assertEquals(8, count($errors));
+        $this->assertEquals(9, count($errors));
 
         $language = new Language(
             [
-
+                'language_id' => 2,
                 'name' => 'somestring',
                 'code' => 'g',
                 'locale' => 'somestring',

@@ -122,7 +122,7 @@ class Country extends BaseModel
                 'string',
             ],
             'messages' => [
-                '*' => [
+                'string' => [
                     'language_key' => 'error_address_format',
                     'language_block' => 'localisation/country',
                     'default_text' => 'Address format must be string',
@@ -135,7 +135,12 @@ class Country extends BaseModel
                 'integer',
             ],
             'messages' => [
-                '*' => ['default_text' => 'Tax_exempt is not integer']
+                'integer' => [
+                    'language_key' => 'error_status',
+                    'language_block' => 'localisation/country',
+                    'default_text' => 'Status is not integer!',
+                    'section' => 'admin'
+                ]
             ]
         ],
         'sort_order' => [
@@ -143,7 +148,12 @@ class Country extends BaseModel
                 'integer',
             ],
             'messages' => [
-                '*' => ['default_text' => 'Tax_exempt is not integer']
+                'integer' => [
+                    'language_key' => 'error_sort_order',
+                    'language_block' => 'localisation/country',
+                    'default_text' => 'Sort order is not integer!',
+                    'section' => 'admin'
+                ]
             ]
         ],
     ];
