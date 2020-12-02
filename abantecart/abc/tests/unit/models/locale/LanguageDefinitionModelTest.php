@@ -17,8 +17,8 @@ class LenguageDefinitionModelTest extends ATestCase
 
         $language = new LanguageDefinition(
             [
-                'language_definition_id'=>'dfsgdg',
-                'language_value' => '',
+                'language_definition_id' => 0,
+                'language_value' => 1,
             ]
         );
         $errors = [];
@@ -32,7 +32,7 @@ class LenguageDefinitionModelTest extends ATestCase
 
         $language = new LanguageDefinition(
             [
-                'language_definition_id'=>2,
+                'language_definition_id' => 2,
                 'language_value' => 'somestring',
 
             ]
