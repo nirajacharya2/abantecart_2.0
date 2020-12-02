@@ -53,19 +53,19 @@ class LengthClass extends BaseModel
                 '*' => ['default_text' => 'language_definition_id is not integer'],
                 'integer' => [
                     'language_key' => 'error_length_class_id',
-                    'language_block' => 'localisation/length',
+                    'language_block' => 'localisation/length_class',
                     'default_text' => 'Length class id must be integer!',
                     'section' => 'admin'
                 ],
                 'required' => [
                     'language_key' => 'error_length_class_id',
-                    'language_block' => 'localisation/length',
+                    'language_block' => 'localisation/length_class',
                     'default_text' => 'Length class id required!',
                     'section' => 'admin'
                 ],
                 'min' => [
                     'language_key' => 'error_length_class_id',
-                    'language_block' => 'localisation/length',
+                    'language_block' => 'localisation/length_class',
                     'default_text' => 'Length class id must be more 1!',
                     'section' => 'admin'
                 ],
