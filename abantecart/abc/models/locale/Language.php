@@ -148,19 +148,19 @@ class Language extends BaseModel
                 'integer' => [
                     'language_key' => 'error_language_id',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'language_id must be integer!',
+                    'default_text' => 'language id must be integer!',
                     'section' => 'admin'
                 ],
                 'required' => [
                     'language_key' => 'error_language_id',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'language_id required!',
+                    'default_text' => 'language id required!',
                     'section' => 'admin'
                 ],
                 'min' => [
                     'language_key' => 'error_language_id',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'language_id must be more 1!',
+                    'default_text' => 'language id must be more 1!',
                     'section' => 'admin'
                 ],
             ],
