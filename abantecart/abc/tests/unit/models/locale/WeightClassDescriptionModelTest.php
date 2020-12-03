@@ -16,7 +16,7 @@ class WeightClassDescriptionModelTest extends ATestCase
 
         $weight = new WeightClassDescription(
             [
-                'id'=> 'asadadas',
+                'id' => 0,
                 'title' => 4567890876543,
                 'unit' => 'ffffffff',
 

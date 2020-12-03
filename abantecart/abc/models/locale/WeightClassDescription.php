@@ -41,7 +41,7 @@ class WeightClassDescription extends BaseModel
         'unit',
     ];
     protected $rules = [
-        'id'=>[
+        'id' => [
             'checks' => [
                 'integer',
                 'required',
@@ -49,7 +49,24 @@ class WeightClassDescription extends BaseModel
                 'min:1'
             ],
             'messages' => [
-                '*' => ['default_text' => 'id is not integer']
+                'integer' => [
+                    'language_key' => 'error_id',
+                    'language_block' => 'localisation/weight_class',
+                    'default_text' => 'id must be integer!',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_id',
+                    'language_block' => 'localisation/weight_class',
+                    'default_text' => 'id required!',
+                    'section' => 'admin'
+                ],
+                'min' => [
+                    'language_key' => 'error_id',
+                    'language_block' => 'localisation/weight_class',
+                    'default_text' => 'id must be more 1!',
+                    'section' => 'admin'
+                ],
             ]
         ],
         'title' => [
@@ -57,13 +74,34 @@ class WeightClassDescription extends BaseModel
                 'string',
                 'required',
                 'sometimes',
-                'between:2,32'
+                'min:2',
+                'max:32'
             ],
             'messages' => [
-                'language_key' => 'error_title',
-                'language_block' => 'localisation/weight_class',
-                'default_text' => 'Title must be between 2 and 32 characters!',
-                'section' => 'admin'
+                'min' => [
+                    'language_key' => 'error_title',
+                    'language_block' => 'localisation/weight_class',
+                    'default_text' => 'Title must be more 2 characters',
+                    'section' => 'admin'
+                ],
+                'max' => [
+                    'language_key' => 'error_title',
+                    'language_block' => 'localisation/weight_class',
+                    'default_text' => 'Title must be no more than 32 characters',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_title',
+                    'language_block' => 'localisation/weight_class',
+                    'default_text' => 'Title required!',
+                    'section' => 'admin'
+                ],
+                'string' => [
+                    'language_key' => 'error_title',
+                    'language_block' => 'localisation/weight_class',
+                    'default_text' => 'name must be string!',
+                    'section' => 'admin'
+                ],
             ]
         ],
         'unit' => [
@@ -74,10 +112,25 @@ class WeightClassDescription extends BaseModel
                 'max:4'
             ],
             'messages' => [
-                'language_key' => 'error_unit',
-                'language_block' => 'localisation/weight_class',
-                'default_text' => 'Unit must be between 0 and 4 characters!',
-                'section' => 'admin'
+                'max' => [
+                    'language_key' => 'error_unit',
+                    'language_block' => 'localisation/weight_class',
+                    'default_text' => 'unit must be no more than 4 characters',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_unit',
+                    'language_block' => 'localisation/weight_class',
+                    'default_text' => 'unit required!',
+                    'section' => 'admin'
+                ],
+                'string' => [
+                    'language_key' => 'error_unit',
+                    'language_block' => 'localisation/weight_class',
+                    'default_text' => 'unit must be string!',
+                    'section' => 'admin'
+                ],
+
             ]
         ]
     ];

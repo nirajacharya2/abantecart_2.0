@@ -28,7 +28,6 @@ class LengthClassDescriptionModelTest extends ATestCase
         } catch (ValidationException $e) {
             $errors = $language->errors()['validation'];
         }
-        var_dump($errors);die;
         $this->assertEquals(3, count($errors));
 
         $language = new LengthClassDescription(
