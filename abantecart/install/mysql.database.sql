@@ -8812,20 +8812,20 @@ VALUES
 --
 -- NOTE: If update table keep in mind ac_addresses_enc
 --
-CREATE TABLE `ac_addresses` (
-  `address_id` int(11) NOT NULL AUTO_INCREMENT,
-  `customer_id` int(11) NOT NULL,
-  `company` varchar(32) COLLATE utf8_general_ci NOT NULL,
-  `firstname` varchar(32) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `lastname` varchar(32) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `address_1` varchar(128) COLLATE utf8_general_ci NOT NULL,
-  `address_2` varchar(128) COLLATE utf8_general_ci NOT NULL,
-  `postcode` varchar(10) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `city` varchar(128) COLLATE utf8_general_ci NOT NULL,
-  `country_id` int(11) NOT NULL DEFAULT '0',
-  `zone_id` int(11),
-  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+CREATE TABLE `ac_addresses`(
+                               `address_id`    INT(11)                              NOT NULL AUTO_INCREMENT,
+                               `customer_id`   INT(11)                              NOT NULL,
+                               `company`       VARCHAR(64) COLLATE utf8_general_ci  NOT NULL,
+                               `firstname`     VARCHAR(32) COLLATE utf8_general_ci  NOT NULL DEFAULT '',
+                               `lastname`      VARCHAR(32) COLLATE utf8_general_ci  NOT NULL DEFAULT '',
+                               `address_1`     VARCHAR(128) COLLATE utf8_general_ci NOT NULL,
+                               `address_2`     VARCHAR(128) COLLATE utf8_general_ci NOT NULL,
+                               `postcode`      VARCHAR(10) COLLATE utf8_general_ci  NOT NULL DEFAULT '',
+                               `city`          VARCHAR(128) COLLATE utf8_general_ci NOT NULL,
+                               `country_id`    INT(11)                              NOT NULL DEFAULT '0',
+                               `zone_id`       INT(11),
+                               `date_added`    TIMESTAMP                            NULL     DEFAULT CURRENT_TIMESTAMP,
+                               `date_modified` TIMESTAMP                            NULL     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `date_deleted` timestamp NULL,
   PRIMARY KEY (`address_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;

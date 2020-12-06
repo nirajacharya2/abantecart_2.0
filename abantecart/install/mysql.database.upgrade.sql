@@ -1451,10 +1451,11 @@ ALTER TABLE `ac_weight_classes`
 
 
 ALTER TABLE `ac_addresses`
-CHANGE COLUMN `zone_id` `zone_id` int(11) NULL DEFAULT NULL,
-ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
-ADD COLUMN `date_deleted` timestamp NULL;
+    CHANGE COLUMN `company` `company` VARCHAR(64) NOT NULL DEFAULT '',
+    CHANGE COLUMN `zone_id` `zone_id` INT(11)     NULL     DEFAULT NULL,
+    ADD COLUMN `date_added`           TIMESTAMP   NULL     DEFAULT CURRENT_TIMESTAMP,
+    ADD COLUMN `date_modified`        TIMESTAMP   NULL     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    ADD COLUMN `date_deleted`         TIMESTAMP   NULL;
 
 
 
