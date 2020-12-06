@@ -232,26 +232,11 @@ class ControllerPagesCheckoutSuccess extends AController
         if ((int)$order_info['order_status_id'] == $this->order_status->getStatusByTextId('incomplete')) {
 
             $new_status_id = $this->order_status->getStatusByTextId('failed');
-            $this->db->beginTransaction();
             try {
-                $this->checkout->getOrder()->confirm($order_id, $new_status_id);
-                //debit transaction
-                //amount in default currency
-                $amount = $this->session->data['used_balance'];
-                $data = [
-                    'order_id'         => $order_id,
-                    'amount'            => $amount,
-                    'transaction_type' => 'order',
-                    'created_by'       => $this->customer->getId(),
-                    'description'      => sprintf($this->language->get('text_applied_balance_to_order'),
-                        $this->currency->format($this->currency->convert($amount,
-                            $this->config->get('config_currency'),
-                            $this->session->data['currency']),
-                            $this->session->data['currency'], 1),
-                        $order_id),
-                ];
-                $this->customer->debitTransaction($data);
-
+                $this->checkout->getOrder()->confirm($order_id, $new_status_id,
+                    sprintf($this->language->get('text_title_failed_order_to_admin'), $order_id),
+                    $this->language->get('text_message_failed_order_to_admin').' '
+                    .'#admin#rt=sale/order/details&order_id='.$order_id);
                 $this->messages->saveWarning(
                     sprintf($this->language->get('text_title_failed_order_to_admin'), $order_id),
                     $this->language->get('text_message_failed_order_to_admin').' '

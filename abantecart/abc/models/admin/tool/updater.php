@@ -139,7 +139,7 @@ class ModelToolUpdater extends Model
 
         //filter data
         $output = [];
-        foreach ($info as $key => $versions) {
+        foreach ((array)$info as $key => $versions) {
             foreach ($versions as $version => $version_info) {
                 //skip not installed
                 if (!isset($installed[$key])) {

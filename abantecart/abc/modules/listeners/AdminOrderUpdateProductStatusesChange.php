@@ -320,8 +320,9 @@ class AdminOrderUpdateProductStatusesChange
             $mail->setTo($order_info['email']);
             $mail->setFrom($config->get('store_main_email'));
             $mail->setSender($order_info['store_name']);
-            $mail->setTemplate('admin_order_update_product_statuses', $this->data, $order_info['language_id']);
-            $mail->send();
+            if($mail->setTemplate('admin_order_update_product_statuses', $this->data, $order_info['language_id'])) {
+                $mail->send();
+            }
 
             //send alert email for merchant
             if ($config->get('config_alert_mail')) {
@@ -340,8 +341,9 @@ class AdminOrderUpdateProductStatusesChange
                 $this->data['order_total'] = $order_total;
 
                 $mail->setTo($config->get('store_main_email'));
-                $mail->setTemplate('admin_order_update_product_statuses_alert', $this->data);
-                $mail->send();
+                if($mail->setTemplate('admin_order_update_product_statuses_alert', $this->data)) {
+                    $mail->send();
+                }
 
                 // Send to additional alert emails
                 $emails = explode(',', $config->get('config_alert_emails'));

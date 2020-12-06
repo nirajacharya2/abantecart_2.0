@@ -97,15 +97,20 @@ class StorefrontSendActivateLinkEmailListener
             $mail->setFrom($store_info->store_main_email);
             $mail->setSender($store_info->store_name);
 
-            $mail->setTemplate('storefront_send_activate_link', $this->data, $this->registry->get('language')->getLanguageID());
-
-            if (is_file(ABC::env('DIR_RESOURCES').$store_info->config_mail_logo)) {
-                $mail->addAttachment(
-                    ABC::env('DIR_RESOURCES').$store_info->config_mail_logo,
-                    md5(pathinfo($store_info->config_mail_logo, PATHINFO_FILENAME))
-                    .'.'.pathinfo($store_info->config_mail_logo, PATHINFO_EXTENSION));
+            if($mail->setTemplate(
+                    'storefront_send_activate_link',
+                    $this->data,
+                    $this->registry->get('language')->getLanguageID()
+                )
+            ){
+                if (is_file(ABC::env('DIR_RESOURCES').$store_info->config_mail_logo)) {
+                    $mail->addAttachment(
+                        ABC::env('DIR_RESOURCES').$store_info->config_mail_logo,
+                        md5(pathinfo($store_info->config_mail_logo, PATHINFO_FILENAME))
+                        .'.'.pathinfo($store_info->config_mail_logo, PATHINFO_EXTENSION));
+                }
+                $mail->send();
             }
-            $mail->send();
         }
 
     }
