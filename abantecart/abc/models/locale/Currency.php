@@ -122,7 +122,7 @@ class Currency extends BaseModel
             'checks' => [
                 'string',
                 'required',
-                'max:3',
+                'size:3',
                 'sometimes'
             ],
             'messages' => [
@@ -149,6 +149,7 @@ class Currency extends BaseModel
         'symbol_left' => [
             'checks' => [
                 'string',
+                'sometimes',
                 'min:1',
                 'max:12'
             ],

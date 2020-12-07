@@ -80,7 +80,7 @@ class Country extends BaseModel
         'iso_code_2' => [
             'checks' => [
                 'string',
-                'max:2'
+                'size:2'
             ],
             'messages' => [
                 'string' => [
@@ -100,7 +100,7 @@ class Country extends BaseModel
         'iso_code_3' => [
             'checks' => [
                 'string',
-                'max:3'
+                'size:3'
             ],
             'messages' => [
                 'string' => [
