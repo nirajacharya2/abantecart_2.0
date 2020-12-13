@@ -16,7 +16,7 @@ class ZoneDescriptonModelTest extends ATestCase
 
         $zone = new ZoneDescription(
             [
-                'id'=> 'dfgdsfdsf',
+                'id' => 0,
                 'name' => 43647890965546786543,
 
             ]
@@ -31,7 +31,7 @@ class ZoneDescriptonModelTest extends ATestCase
 
         $zone = new ZoneDescription(
             [
-                'id'=> 2,
+                'id' => 2,
                 'code' => 'somestrng',
             ]
         );

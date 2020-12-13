@@ -37,9 +37,10 @@ class LengthClassDescription extends BaseModel
     protected $fillable = [
         'title',
         'unit',
+        'id'
     ];
     protected $rules = [
-        'id'=>[
+        'id' => [
             'checks' => [
                 'integer',
                 'required',
@@ -47,7 +48,24 @@ class LengthClassDescription extends BaseModel
                 'min:1'
             ],
             'messages' => [
-                '*' => ['default_text' => 'id is not integer']
+                'integer' => [
+                    'language_key' => 'error_id',
+                    'language_block' => 'localisation/length_class',
+                    'default_text' => 'id must be integer!',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_language_id',
+                    'language_block' => 'localisation/length_class',
+                    'default_text' => 'id required!',
+                    'section' => 'admin'
+                ],
+                'min' => [
+                    'language_key' => 'error_language_id',
+                    'language_block' => 'localisation/length_class',
+                    'default_text' => 'id must be more 1!',
+                    'section' => 'admin'
+                ],
             ]
         ],
         'title' => [
@@ -55,13 +73,34 @@ class LengthClassDescription extends BaseModel
                 'string',
                 'required',
                 'sometimes',
-                'between:2,32'
+                'min:2',
+                'max:32'
             ],
-            'message' => [
-                'language_key' => 'error_title',
-                'language_block' => 'localisation/length_class',
-                'default_text' => 'Length Title must be between 2 and 32 characters!',
-                'section' => 'admin'
+            'messages' => [
+                'min' => [
+                    'language_key' => 'error_title',
+                    'language_block' => 'localisation/length_class',
+                    'default_text' => 'Length Title must be more 2 characters',
+                    'section' => 'admin'
+                ],
+                'max' => [
+                    'language_key' => 'error_title',
+                    'language_block' => 'localisation/length_class',
+                    'default_text' => 'Length Title must be no more than 32 characters',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_title',
+                    'language_block' => 'localisation/length_class',
+                    'default_text' => 'Length Title required!',
+                    'section' => 'admin'
+                ],
+                'string' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/length_class',
+                    'default_text' => 'Length Title must be string!',
+                    'section' => 'admin'
+                ],
             ]
         ],
         'unit' => [
@@ -69,13 +108,34 @@ class LengthClassDescription extends BaseModel
                 'string',
                 'required',
                 'sometimes',
-                'between:1,4'
+                'min:1',
+                'max:4'
             ],
-            'message' => [
-                'language_key' => 'error_unit',
-                'language_block' => 'localisation/country',
-                'default_text' => 'Length Unit must be between 1 and 4 characters!',
-                'section' => 'admin'
+            'messages' => [
+                'min' => [
+                    'language_key' => 'error_unit',
+                    'language_block' => 'localisation/length_class',
+                    'default_text' => 'Unit must be more 1 characters',
+                    'section' => 'admin'
+                ],
+                'max' => [
+                    'language_key' => 'error_unit',
+                    'language_block' => 'localisation/length_class',
+                    'default_text' => 'Unit must be no more than 4 characters',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_unit',
+                    'language_block' => 'localisation/length_class',
+                    'default_text' => 'Unit required!',
+                    'section' => 'admin'
+                ],
+                'string' => [
+                    'language_key' => 'error_unit',
+                    'language_block' => 'localisation/length_class',
+                    'default_text' => 'Unit must be string!',
+                    'section' => 'admin'
+                ],
             ]
         ]
     ];

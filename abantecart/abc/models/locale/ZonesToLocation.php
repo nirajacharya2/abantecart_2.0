@@ -56,7 +56,24 @@ class ZonesToLocation extends BaseModel
                 'min:1'
             ],
             'messages' => [
-                '*' => ['default_text' => 'zone_to_location_id is not integer']
+                'integer' => [
+                    'language_key' => 'error_zone_to_location_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'zone to location id must be integer!',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_zone_to_location_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'zone to location id required!',
+                    'section' => 'admin'
+                ],
+                'min' => [
+                    'language_key' => 'error_zone_to_location_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'zone to location id must be more 1!',
+                    'section' => 'admin'
+                ],
             ]
         ],
         'country_id' => [
@@ -66,7 +83,18 @@ class ZonesToLocation extends BaseModel
                 'integer'
             ],
             'messages' => [
-                '*' => ['default_text' => 'country_id is not integer']
+                'integer' => [
+                    'language_key' => 'error_country_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'country id must be integer!',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_country_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'country id required!',
+                    'section' => 'admin'
+                ],
             ]
         ],
         'zone_id' => [
@@ -76,7 +104,18 @@ class ZonesToLocation extends BaseModel
                 'sometimes'
             ],
             'messages' => [
-                '*' => ['default_text' => 'zone_id is not integer']
+                'integer' => [
+                    'language_key' => 'error_zone_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'zone id must be integer!',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_zone_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'zone id required!',
+                    'section' => 'admin'
+                ],
             ]
         ],
         'location_id' => [
@@ -86,7 +125,18 @@ class ZonesToLocation extends BaseModel
                 'integer'
             ],
             'messages' => [
-                '*' => ['default_text' => 'location_id is not integer']
+                'integer' => [
+                    'language_key' => 'error_location_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'location id must be integer!',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_location_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'location id required!',
+                    'section' => 'admin'
+                ],
             ]
         ]
     ];

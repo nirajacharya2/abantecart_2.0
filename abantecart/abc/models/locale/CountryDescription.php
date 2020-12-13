@@ -48,7 +48,24 @@ class CountryDescription extends BaseModel
                 'min:1'
             ],
             'messages' => [
-                '*' => ['default_text' => 'id is not integer']
+                'integer' => [
+                    'language_key' => 'error_country_description_id',
+                    'language_block' => 'localisation/country',
+                    'default_text' => 'id must be integer!',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_country_description_id',
+                    'language_block' => 'localisation/country',
+                    'default_text' => 'id required!',
+                    'section' => 'admin'
+                ],
+                'min' => [
+                    'language_key' => 'error_country_description_id',
+                    'language_block' => 'localisation/country',
+                    'default_text' => 'id must be more 0!',
+                    'section' => 'admin'
+                ],
             ],
         ],
         'name' => [
@@ -56,13 +73,34 @@ class CountryDescription extends BaseModel
                 'string',
                 'required',
                 'sometimes',
-                'between:2,128'
+                'min:2',
+                'max:128'
             ],
             'messages' => [
-                'language_key' => 'error_name',
-                'language_block' => 'localisation/country',
-                'default_text' => 'Country Name must be between 2 and 128 characters!',
-                'section' => 'admin'
+                'min' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/country',
+                    'default_text' => 'Country Name must be more 2!',
+                    'section' => 'admin'
+                ],
+                'max' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/country',
+                    'default_text' => 'Country Name must not exceed 128 characters!',
+                    'section' => 'admin'
+                ],
+                'string' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/country',
+                    'default_text' => 'Country Name must be string!',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/country',
+                    'default_text' => 'Country Name required!',
+                    'section' => 'admin'
+                ],
             ],
         ],
         'language_id' => [
@@ -70,10 +108,27 @@ class CountryDescription extends BaseModel
                 'integer',
                 'required',
                 'sometimes',
-                'min:0'
+                'min:1'
             ],
             'messages' => [
-                '*' => ['default_text' => 'language_id is not integer']
+                'integer' => [
+                    'language_key' => 'error_language_id',
+                    'language_block' => 'localisation/country',
+                    'default_text' => 'language_id must be integer!',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_language_id',
+                    'language_block' => 'localisation/country',
+                    'default_text' => 'language_id required!',
+                    'section' => 'admin'
+                ],
+                'min' => [
+                    'language_key' => 'error_language_id',
+                    'language_block' => 'localisation/country',
+                    'default_text' => 'language_id must be more 0!',
+                    'section' => 'admin'
+                ],
             ],
         ]
     ];

@@ -22,11 +22,11 @@ class CountryModelTest extends ATestCase
 
         $country = new Country(
             [
-                'country_id'=>'fgfgfg',
+                'country_id' => 0,
                 'iso_code_2' => 121111111,
                 'iso_code_3' => 11111111,
                 'address_format' => 111111111,
-                'status' => 'zeo',
+                'status' => 'fgfgf',
                 'sort_order' => 'fgnbfgnfgn',
             ]
         );
@@ -43,7 +43,6 @@ class CountryModelTest extends ATestCase
 
         $country = new Country(
             [
-                'country_id'=>2,
                 'iso_code_2' => 'fd',
                 'iso_code_3' => 'fdd',
                 'address_format' => 'somestring',

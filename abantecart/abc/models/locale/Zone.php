@@ -51,7 +51,7 @@ class Zone extends BaseModel
         'zone_id'
     ];
     protected $rules = [
-        'zone_id'=>[
+        'zone_id' => [
             'checks' => [
                 'integer',
                 'required',
@@ -59,19 +59,51 @@ class Zone extends BaseModel
                 'min:1'
             ],
             'messages' => [
-                '*' => ['default_text' => 'zone_id is not integer']
+                'integer' => [
+                    'language_key' => 'error_zone_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'Zone id must be integer!',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_zone_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'Zone id required!',
+                    'section' => 'admin'
+                ],
+                'min' => [
+                    'language_key' => 'error_zone_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'Zone id must be more 1!',
+                    'section' => 'admin'
+                ],
             ]
         ],
         'code' => [
             'checks' => [
                 'string',
-                'between:2,32'
+                'min:2',
+                'max:32'
             ],
             'messages' => [
-                'language_key' => 'error_code',
-                'language_block' => 'localisation/zone',
-                'default_text' => 'Code must be between 2 and 32 characters!',
-                'section' => 'admin'
+                'min' => [
+                    'language_key' => 'error_code',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'Code must be more 2 characters',
+                    'section' => 'admin'
+                ],
+                'max' => [
+                    'language_key' => 'error_code',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'Code must be no more than 32 characters',
+                    'section' => 'admin'
+                ],
+                'string' => [
+                    'language_key' => 'error_code',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'Code must be string!',
+                    'section' => 'admin'
+                ],
             ]
         ],
         'status' => [
@@ -79,7 +111,12 @@ class Zone extends BaseModel
                 'integer'
             ],
             'messages' => [
-                '*' => ['default_text' => 'status is not integer']
+                'integer' => [
+                    'language_key' => 'error_status',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'status must be integer!',
+                    'section' => 'admin'
+                ],
             ]
         ],
         'sort_order' => [
@@ -87,7 +124,12 @@ class Zone extends BaseModel
                 'integer'
             ],
             'messages' => [
-                '*' => ['default_text' => 'sort_order is not integer']
+                'integer' => [
+                    'language_key' => 'error_sort_order',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'sort order must be integer!',
+                    'section' => 'admin'
+                ],
             ]
         ]
     ];

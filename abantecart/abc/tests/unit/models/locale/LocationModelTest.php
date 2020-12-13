@@ -16,9 +16,9 @@ class LocationModelTest extends ATestCase
 
         $location = new Location(
             [
-                'location_id'=> 'sdsd',
+                'location_id' => 0,
                 'name' => 'somestringsomestringsomestringsomestringsomestringsomestringsomestringsomestringsomestring',
-                'description' => 43434
+                'description' => ''
             ]
         );
         $errors = [];
@@ -31,7 +31,7 @@ class LocationModelTest extends ATestCase
 
         $location = new Location(
             [
-                'location_id'=> 2,
+                'location_id' => 2,
                 'name' => 'USA',
                 'description' => 'All States'
             ]

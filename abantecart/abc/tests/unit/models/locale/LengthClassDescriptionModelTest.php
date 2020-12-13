@@ -17,7 +17,7 @@ class LengthClassDescriptionModelTest extends ATestCase
 
         $language = new LengthClassDescription(
             [
-                'id'=> 'dfdfd',
+                'id'=> 0,
                 'title' => '',
                 'unit' => 'somestring'
             ]
@@ -28,7 +28,6 @@ class LengthClassDescriptionModelTest extends ATestCase
         } catch (ValidationException $e) {
             $errors = $language->errors()['validation'];
         }
-        var_dump($errors);
         $this->assertEquals(3, count($errors));
 
         $language = new LengthClassDescription(

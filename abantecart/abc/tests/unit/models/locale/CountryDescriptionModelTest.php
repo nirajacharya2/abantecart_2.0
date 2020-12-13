@@ -17,8 +17,8 @@ class CountryDescriptionModelTest extends ATestCase
 
         $country = new CountryDescription(
             [
-                'id'=> 'gfdg',
-                'name' => 43647890965,
+                'id' => -1,
+                'name' => '',
                 'language_id' => 'fvf',
             ]
         );
@@ -29,13 +29,12 @@ class CountryDescriptionModelTest extends ATestCase
             $errors = $country->errors()['validation'];
         }
 
-
         $this->assertEquals(3, count($errors));
 
 
         $country = new CountryDescription(
             [
-                'id'=> 2,
+                'id' => 2,
                 'name' => 'somestring',
                 'language_id' => 1,
             ]

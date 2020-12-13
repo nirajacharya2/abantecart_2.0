@@ -53,19 +53,45 @@ class LanguageDefinition extends BaseModel
                 'min:1'
             ],
             'messages' => [
-                '*' => ['default_text' => 'language_definition_id is not integer']
-            ]
+                'integer' => [
+                    'language_key' => 'error_language_definition_id',
+                    'language_block' => 'localisation/language_definitions',
+                    'default_text' => 'language definition id must be integer!',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_language_definition_id',
+                    'language_block' => 'localisation/language',
+                    'default_text' => 'language definition id required!',
+                    'section' => 'admin'
+                ],
+                'min' => [
+                    'language_key' => 'error_language_definition_id',
+                    'language_block' => 'localisation/language',
+                    'default_text' => 'language definition id must be more 1!',
+                    'section' => 'admin'
+                ],
+            ],
         ],
         'language_value' => [
             'checks' => [
                 'string',
+                'sometimes',
                 'required'
             ],
             'messages' => [
-                'language_key' => 'error_language_value',
-                'language_block' => 'localisation/language_definitions',
-                'default_text' => 'Locale required',
-                'section' => 'admin'
+                'required' => [
+                    'language_key' => 'error_language_value',
+                    'language_block' => 'localisation/language',
+                    'default_text' => 'language value required!',
+                    'section' => 'admin'
+                ],
+                'string' => [
+                    'language_key' => 'error_language_value',
+                    'language_block' => 'localisation/language',
+                    'default_text' => 'language value must be string!',
+                    'section' => 'admin'
+                ],
             ]
         ]
     ];

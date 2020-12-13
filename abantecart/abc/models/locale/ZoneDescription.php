@@ -38,7 +38,7 @@ class ZoneDescription extends BaseModel
         'id'
     ];
     protected $rules = [
-        'id'=>[
+        'id' => [
             'checks' => [
                 'integer',
                 'required',
@@ -46,7 +46,24 @@ class ZoneDescription extends BaseModel
                 'min:1'
             ],
             'messages' => [
-                '*' => ['default_text' => 'id is not integer']
+                'integer' => [
+                    'language_key' => 'error_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'id must be integer!',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'id required!',
+                    'section' => 'admin'
+                ],
+                'min' => [
+                    'language_key' => 'error_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'id must be more 1!',
+                    'section' => 'admin'
+                ],
             ]
         ],
         'name' => [
@@ -54,13 +71,34 @@ class ZoneDescription extends BaseModel
                 'string',
                 'required',
                 'sometimes',
-                'between:2,128'
+                'min:2',
+                'max:128'
             ],
             'messages' => [
-                'language_key' => 'error_name',
-                'language_block' => 'localisation/zone',
-                'default_text' => 'Name must be between 2 and 128 characters!',
-                'section' => 'admin'
+                'min' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'Name must be more 2 characters',
+                    'section' => 'admin'
+                ],
+                'max' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'Name must be no more than 255 characters',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'Name required!',
+                    'section' => 'admin'
+                ],
+                'string' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'Name must be string!',
+                    'section' => 'admin'
+                ],
             ]
         ]
     ];

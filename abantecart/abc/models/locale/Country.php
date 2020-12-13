@@ -57,31 +57,64 @@ class Country extends BaseModel
                 'min:1'
             ],
             'messages' => [
-                '*' => ['default_text' => 'country_id is not integer']
-            ]
+                'integer' => [
+                    'language_key' => 'error_country_id',
+                    'language_block' => 'localisation/country',
+                    'default_text' => 'country_id must be integer!',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_country_id',
+                    'language_block' => 'localisation/country',
+                    'default_text' => 'country_id required!',
+                    'section' => 'admin'
+                ],
+                'min' => [
+                    'language_key' => 'error_country_id',
+                    'language_block' => 'localisation/country',
+                    'default_text' => 'country_id must be between 0!',
+                    'section' => 'admin'
+                ],
+            ],
         ],
         'iso_code_2' => [
             'checks' => [
                 'string',
-                'between:1,2'
+                'size:2'
             ],
             'messages' => [
-                'language_key' => 'error_iso_code_2',
-                'language_block' => 'localisation/country',
-                'default_text' => 'Iso code 2 must be between 1-2 characters',
-                'section' => 'admin'
+                'string' => [
+                    'language_key' => 'error_iso_code_2',
+                    'language_block' => 'localisation/country',
+                    'default_text' => 'Iso code 2 must be string!',
+                    'section' => 'admin'
+                ],
+                'max' => [
+                    'language_key' => 'error_iso_code_2',
+                    'language_block' => 'localisation/country',
+                    'default_text' => 'Iso code 2 must be between 2 characters!',
+                    'section' => 'admin'
+                ]
             ]
         ],
         'iso_code_3' => [
             'checks' => [
                 'string',
-                'between:1,3'
+                'size:3'
             ],
             'messages' => [
-                'language_key' => 'error_iso_code_3',
-                'language_block' => 'localisation/country',
-                'default_text' => 'Iso code 3 must be between 1-3 characters',
-                'section' => 'admin'
+                'string' => [
+                    'language_key' => 'error_iso_code_3',
+                    'language_block' => 'localisation/country',
+                    'default_text' => 'Iso code 3 must be between 1-3 characters',
+                    'section' => 'admin'
+                ],
+                'max' => [
+                    'language_key' => 'error_iso_code_3',
+                    'language_block' => 'localisation/country',
+                    'default_text' => 'Iso code 3 must be between 1-3 characters',
+                    'section' => 'admin'
+                ]
             ]
         ],
         'address_format' => [
@@ -89,10 +122,12 @@ class Country extends BaseModel
                 'string',
             ],
             'messages' => [
-                'language_key' => 'error_address_format',
-                'language_block' => 'localisation/country',
-                'default_text' => 'Address format must be string',
-                'section' => 'admin'
+                'string' => [
+                    'language_key' => 'error_address_format',
+                    'language_block' => 'localisation/country',
+                    'default_text' => 'Address format must be string',
+                    'section' => 'admin'
+                ]
             ]
         ],
         'status' => [
@@ -100,7 +135,12 @@ class Country extends BaseModel
                 'integer',
             ],
             'messages' => [
-                '*' => ['default_text' => 'Tax_exempt is not integer']
+                'integer' => [
+                    'language_key' => 'error_status',
+                    'language_block' => 'localisation/country',
+                    'default_text' => 'Status is not integer!',
+                    'section' => 'admin'
+                ]
             ]
         ],
         'sort_order' => [
@@ -108,7 +148,12 @@ class Country extends BaseModel
                 'integer',
             ],
             'messages' => [
-                '*' => ['default_text' => 'Tax_exempt is not integer']
+                'integer' => [
+                    'language_key' => 'error_sort_order',
+                    'language_block' => 'localisation/country',
+                    'default_text' => 'Sort order is not integer!',
+                    'section' => 'admin'
+                ]
             ]
         ],
     ];

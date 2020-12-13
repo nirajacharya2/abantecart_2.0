@@ -40,9 +40,10 @@ class Location extends BaseModel
         'description',
         'date_added',
         'date_modified',
+        'location_id'
     ];
     protected $rules = [
-        'location_id'=>[
+        'location_id' => [
             'checks' => [
                 'integer',
                 'required',
@@ -50,35 +51,94 @@ class Location extends BaseModel
                 'min:1'
             ],
             'messages' => [
-                '*' => ['default_text' => 'location_id is not integer']
+                'integer' => [
+                    'language_key' => 'error_location_id',
+                    'language_block' => 'localisation/location',
+                    'default_text' => 'location id must be integer!',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_location_id',
+                    'language_block' => 'localisation/location',
+                    'default_text' => 'location id required!',
+                    'section' => 'admin'
+                ],
+                'min' => [
+                    'language_key' => 'error_location_id',
+                    'language_block' => 'localisation/location',
+                    'default_text' => 'location id must be more 1!',
+                    'section' => 'admin'
+                ],
             ]
         ],
         'name' => [
             'checks' => [
                 'string',
-                'between:2,32',
+                'min:2',
+                'max:32',
                 'required',
                 'sometimes'
             ],
             'messages' => [
-                'language_key' => 'error_name',
-                'language_block' => 'localisation/location',
-                'default_text' => 'Name must be between 2 and 32 characters!',
-                'section' => 'admin'
+                'min' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/location',
+                    'default_text' => 'Name must be more 2 characters',
+                    'section' => 'admin'
+                ],
+                'max' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/location',
+                    'default_text' => 'Name must be no more than 32 characters',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/location',
+                    'default_text' => 'name required!',
+                    'section' => 'admin'
+                ],
+                'string' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/language',
+                    'default_text' => 'name must be string!',
+                    'section' => 'admin'
+                ],
             ]
         ],
         'description' => [
             'checks' => [
                 'string',
-                'between:2,255',
+                'min:2',
+                'max:255',
                 'required',
                 'sometimes'
             ],
             'messages' => [
-                'language_key' => 'error_description',
-                'language_block' => 'localisation/location',
-                'default_text' => 'Description Name must be between 2 and 255 characters!',
-                'section' => 'admin'
+                'min' => [
+                    'language_key' => 'error_description',
+                    'language_block' => 'localisation/location',
+                    'default_text' => 'Description must be more 2 characters',
+                    'section' => 'admin'
+                ],
+                'max' => [
+                    'language_key' => 'error_description',
+                    'language_block' => 'localisation/location',
+                    'default_text' => 'Description must be no more than 255 characters',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_description',
+                    'language_block' => 'localisation/location',
+                    'default_text' => 'Description required!',
+                    'section' => 'admin'
+                ],
+                'string' => [
+                    'language_key' => 'error_description',
+                    'language_block' => 'localisation/language',
+                    'default_text' => 'Description must be string!',
+                    'section' => 'admin'
+                ],
             ]
         ]
     ];
