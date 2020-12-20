@@ -36,9 +36,8 @@ before_script:
   - if [[ "$DB" == "mysql" ]]; then mysql -e "CREATE DATABASE IF NOT EXISTS abc_test_build;" -uroot; fi
   - cd ./abantecart/abc/
   #initiate project with composer
-  - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-  - php -r "if (hash_file('sha384', 'composer-setup.php') === '756890a4488ce9024fc62c56153228907f1545c228516cbf63f885e036d37e9a59d27d63f46af1d4d07ee0f76181c7d3') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
-  - php composer-setup.php --version=1.10.19
+  - composer install
+  - composer self-update --rollback
   #run cli-installer
   - php abcexec install:app --db_host=localhost  --db_user=root  --db_password=  --db_name=abc_test_build  --db_driver=mysql  --db_prefix=abc_  --cache-driver=file  --admin_secret=admin  --username=admin  --password=admin  --email=dsuprunenko@abantecart.com  --http_server=http://abantecart_2.0.travis-ci.org/public/  --with-sample-data  --skip-caching
 
