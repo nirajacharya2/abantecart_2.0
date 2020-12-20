@@ -36,6 +36,7 @@ before_script:
   - if [[ "$DB" == "mysql" ]]; then mysql -e "CREATE DATABASE IF NOT EXISTS abc_test_build;" -uroot; fi
   - cd ./abantecart/abc/
 #initiate project with composer
+  - composer self-update --rollback
   - composer install
 #run cli-installer
   - php abcexec install:app --db_host=localhost  --db_user=root  --db_password=  --db_name=abc_test_build  --db_driver=mysql  --db_prefix=abc_  --cache-driver=file  --admin_secret=admin  --username=admin  --password=admin  --email=dsuprunenko@abantecart.com  --http_server=http://abantecart_2.0.travis-ci.org/public/  --with-sample-data  --skip-caching
