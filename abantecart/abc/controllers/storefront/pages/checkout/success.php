@@ -40,26 +40,10 @@ class ControllerPagesCheckoutSuccess extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $order_id = (int)$this->session->data['order_id'];
+        $this->db->beginTransaction();
 
         if ($order_id && $this->validate($order_id)) {
-            $this->db->beginTransaction();
-            //debit transaction
-            //amount in default currency
-            $amount = $this->session->data['used_balance'];
-            $data = [
-                'order_id'         => $order_id,
-                'amount'           => $amount,
-                'transaction_type' => 'order',
-                'created_by'       => $this->customer->getId(),
-                'description'      => sprintf($this->language->get('text_applied_balance_to_order'),
-                                                $this->currency->format($this->currency->convert($amount,
-                                                    $this->config->get('config_currency'),
-                                                    $this->session->data['currency']),
-                                                    $this->session->data['currency'], 1),
-                                                $order_id),
-            ];
             try {
-                $this->customer->debitTransaction($data);
                 //clear session before redirect
                 $this->_clear_order_session();
 
