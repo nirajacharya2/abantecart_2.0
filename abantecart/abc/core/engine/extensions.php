@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,14 +21,22 @@
 namespace abc\core\engine;
 
 use abc\core\ABC;
+use abc\core\lib\AbcCache;
+use abc\core\lib\ADb;
 use abc\core\lib\ADebug;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AWarning;
 use abc\models\BaseModel;
 use abc\models\QueryBuilder;
+use DOMDocument;
+use DOMElement;
 use Exception;
 use H;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
+use SimpleXMLElement;
+use stdClass;
 
 /**
  * ExtensionsApi
@@ -102,11 +110,8 @@ abstract class Extension
     {
         if ((strpos($method, 'hk') === 0) && ($this->ExtensionsApi !== null)) {
             array_unshift($args, $this);
-            $return = call_user_func_array([$this->ExtensionsApi, $method], $args);
-
-            return $return;
+            return call_user_func_array([$this->ExtensionsApi, $method], $args);
         }
-
         return null;
     }
 }
@@ -232,8 +237,8 @@ class ExtensionCollection
  *
  * long description.
  *
- * @property \abc\core\lib\ADb      $db
- * @property \abc\core\lib\AbcCache $cache
+ * @property ADb $db
+ * @property AbcCache $cache
  * @method hk_InitData(object $baseObject, string $baseObjectMethod)
  * @method hk_UpdateData(object $baseObject, string $baseObjectMethod)
  * @method hk_ProcessData(object $baseObject, string $point_name = '', mixed $array = null)
@@ -364,6 +369,7 @@ class ExtensionsApi
             //check if we have extensions in dir that has no record in db
             $diff = array_diff($this->extensions_dir, $this->db_extensions);
             if (!empty($diff)) {
+                $sessionData = $this->registry->get('session')->data;
                 foreach ($diff as $ext) {
                     $data['key'] = $ext;
                     $data['status'] = 0;
@@ -372,6 +378,7 @@ class ExtensionsApi
                     $data['version'] = $misext->getConfig('version');
                     $data['priority'] = $misext->getConfig('priority');
                     $data['category'] = $misext->getConfig('category');
+                    $data['license_key'] = $sessionData['package_info']['extension_key'] ?? null;
                     $data['license_key'] = $this->registry->get('session')->data['package_info']['extension_key'];
 
                     if ($this->registry->has('extension_manager')) {
@@ -387,7 +394,7 @@ class ExtensionsApi
      *
      * @return array
      * @throws Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getInstalled($type = '')
     {
@@ -444,7 +451,7 @@ class ExtensionsApi
      *
      * @return array
      * @throws Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getExtensionInfo($key = '')
     {
@@ -493,8 +500,10 @@ class ExtensionsApi
      *                     limit - number of rows in page ( page should be defined also )
      * @param string $mode - can be "force" to prevent cache load
      *
-     * @return bool|\stdClass object array of extensions
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @return bool|stdClass object array of extensions
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function getExtensionsList($data = [], $mode = '')
     {
@@ -649,9 +658,9 @@ class ExtensionsApi
 
         if (file_exists($filename)) {
             /**
-             * @var \DOMDocument $xml
+             * @var SimpleXMLElement $xml
              */
-            $xml = simplexml_load_file($filename);
+            $xml = @simplexml_load_file($filename);
             if ($xml && $xml->definition) {
                 foreach ($xml->definition as $def) {
                     if ((string)$def->key == $seek_key) {
@@ -848,6 +857,7 @@ class ExtensionsApi
      *
      * @void
      * @throws Exception
+     * @throws InvalidArgumentException
      */
     public function loadEnabledExtensions($force_enabled_off = false)
     {
@@ -968,12 +978,13 @@ class ExtensionsApi
      * check if resource ( model, language, template ) is an extension resource
      *
      * @param  $resource_type - resource type - M, L, T  ( model, language, template )
-     * @param  $route         - resource route to check
-     * @param  $ext_status    - extension mode for resource route to check (enabled and all)
-     * @param  $mode          - mode to force storefront
+     * @param  $route - resource route to check
+     * @param  $ext_status - extension mode for resource route to check (enabled and all)
+     * @param  $mode - mode to force storefront
      *
      * @return array|bool - false if not found, array with extension name and file name if found
      * @throws Exception
+     * @throws InvalidArgumentException
      */
     public function isExtensionResource($resource_type, $route, $ext_status = '', $mode = '')
     {
@@ -1092,6 +1103,9 @@ class ExtensionsApi
      * @param string $route - relative path of file.
      *
      * @return array|bool
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function getAllPrePostTemplates($route)
     {
@@ -1342,7 +1356,7 @@ class ExtensionUtils
      */
     protected $name;
     /**
-     * @var \SimpleXmlElement|\DOMDocument|false $config
+     * @var SimpleXmlElement|false $config
      */
     protected $config;
     /**
@@ -1362,7 +1376,7 @@ class ExtensionUtils
      * @param string $ext
      * @param int $store_id
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function __construct($ext, $store_id = 0)
     {
@@ -1390,7 +1404,7 @@ class ExtensionUtils
     /**
      * @param null $val
      *
-     * @return bool|\DOMElement|null|\SimpleXMLElement|string
+     * @return bool|null|SimpleXMLElement|string
      */
     public function getConfig($val = null)
     {
@@ -1639,7 +1653,7 @@ class ExtensionUtils
 
         if (isset($this->config->settings->item)) {
             /**
-             * @var $items \SimpleXmlElement
+             * @var $items SimpleXmlElement
              */
             $items = $this->config->settings->item;
             foreach ($items as $item) {
@@ -1670,8 +1684,8 @@ class ExtensionUtils
 
     /**
      * @return array
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function getDefaultSettings()
     {

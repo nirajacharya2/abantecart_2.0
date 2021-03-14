@@ -65,7 +65,7 @@ class ABC extends ABCBase
         //load config and classmap from abc/config and extensions/*/config directories
         static::loadConfig($stage_name);
         //register autoloader
-        spl_autoload_register([$this, 'loadClass'], false);
+        spl_autoload_register([$this, 'loadClass']);
     }
 
     /**
@@ -77,6 +77,7 @@ class ABC extends ABCBase
      */
     function loadClass($className)
     {
+
         $rootName = explode('\\',$className)[0];
         if (!in_array($rootName, ['abc'])) {
             return false;
@@ -85,9 +86,18 @@ class ABC extends ABCBase
         $path = str_replace('\\', DS, $className);
 
         $fileName = ABC::env('DIR_ROOT').$path.'.php';
+
         if (is_file($fileName)) {
             require_once $fileName;
             return true;
+        } else {
+            //try to find class with low case name
+            $lcPath = strtolower($path);
+            $fName = ABC::env('DIR_ROOT').$lcPath.'.php';
+            if (is_file($fName)) {
+                require_once $fName;
+                return true;
+            }
         }
 
         //try to find by Abantecart prefix

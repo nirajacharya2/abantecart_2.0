@@ -31,11 +31,10 @@ class AHandleExceptions
         $this->registry = $config;
         $this->handler = $handler;
 
-        error_reporting(E_ALL & ~E_NOTICE);
-        set_error_handler([$this, 'handleError'], E_ALL & ~E_NOTICE);
+        error_reporting(E_ERROR);
+        set_error_handler([$this, 'handleError'], E_ERROR);
         set_exception_handler([$this, 'handleException']);
         register_shutdown_function([$this, 'handleShutdown']);
-
     }
 
     /**
@@ -57,6 +56,13 @@ class AHandleExceptions
             //throw
         }
     }
+//    не работает КЕШ! см модель продукта, сохранение в кеш в методе getProducts
+//    Добить изменения вызовов для php8 (instance_id)
+//    composer.json: удалил форк
+//{
+//        "type": "git",
+//        "url": "https://github.com/abolabo/laravel-relationship-events.git"
+//    }
 
     /**
      * Handle an uncaught exception from the application.
@@ -65,7 +71,7 @@ class AHandleExceptions
      * the HTTP and Console kernels. But, fatal error exceptions must
      * be handled differently since they are not normal exceptions.
      *
-     * @param  \Throwable $e
+     * @param \Throwable $e
      *
      * @return void
      */

@@ -79,48 +79,60 @@ class ControllerPagesDesignLayout extends AController
         $layout_data['templates'] = [];
         $directories = glob(ABC::env('DIR_TEMPLATES').DS.'*'.DS.ABC::env('DIRNAME_STORE'), GLOB_ONLYDIR);
         foreach ($directories as $directory) {
-            $layout_data['templates'][] = basename(dirname($directory)) ;
+            $layout_data['templates'][] = basename(dirname($directory));
         }
-        $enabled_templates = $this->extensions->getExtensionsList([
-            'filter' => 'template',
-            'status' => 1,
-        ]);
+        $enabled_templates = $this->extensions->getExtensionsList(
+            [
+                'filter' => 'template',
+                'status' => 1,
+            ]
+        );
         foreach ($enabled_templates->rows as $template) {
             $layout_data['templates'][] = $template['key'];
         }
 
         // breadcrumb path
-        $this->document->initBreadcrumb([
-            'href' => $this->html->getSecureURL('index/home'),
-            'text' => $this->language->get('text_home'),
-        ]);
-        $this->document->addBreadcrumb([
-            'href'    => $this->html->getSecureURL('design/layout'),
-            'text'    => $this->language->get('heading_title').' - '.$params['tmpl_id'],
-            'current' => true,
-        ]);
+        $this->document->initBreadcrumb(
+            [
+                'href' => $this->html->getSecureURL('index/home'),
+                'text' => $this->language->get('text_home'),
+            ]
+        );
+        $this->document->addBreadcrumb(
+            [
+                'href'    => $this->html->getSecureURL('design/layout'),
+                'text'    => $this->language->get('heading_title').' - '.$params['tmpl_id'],
+                'current' => true,
+            ]
+        );
 
         // Layout form data
         $form = new AForm('HT');
-        $form->setForm([
-            'form_name' => 'layout_form',
-        ]);
+        $form->setForm(
+            [
+                'form_name' => 'layout_form',
+            ]
+        );
 
-        $layout_data['form_begin'] = $form->getFieldHtml([
-            'type'   => 'form',
-            'name'   => 'layout_form',
-            'attr'   => 'data-confirm-exit="true"',
-            'action' => $this->html->getSecureURL('design/layout/save'),
-        ]);
+        $layout_data['form_begin'] = $form->getFieldHtml(
+            [
+                'type'   => 'form',
+                'name'   => 'layout_form',
+                'attr'   => 'data-confirm-exit="true"',
+                'action' => $this->html->getSecureURL('design/layout/save'),
+            ]
+        );
 
         $layout_data['hidden_fields'] = '';
         foreach ($params as $name => $value) {
             $layout_data[$name] = $value;
-            $layout_data['hidden_fields'] .= $form->getFieldHtml([
-                'type'  => 'hidden',
-                'name'  => $name,
-                'value' => $value,
-            ]);
+            $layout_data['hidden_fields'] .= $form->getFieldHtml(
+                [
+                    'type'  => 'hidden',
+                    'name'  => $name,
+                    'value' => $value,
+                ]
+            );
         }
 
         $layout_data['page_url'] = $this->html->getSecureURL('design/layout');
@@ -161,11 +173,13 @@ class ControllerPagesDesignLayout extends AController
             $page_id = $this->request->post['page_id'];
             $layout_id = $this->request->post['layout_id'];
 
-            $url = '&'.$this->html->buildURI([
-                    'tmpl_id'   => $tmpl_id,
-                    'page_id'   => $page_id,
-                    'layout_id' => $layout_id,
-                ]);
+            $url = '&'.$this->html->buildURI(
+                    [
+                        'tmpl_id'   => $tmpl_id,
+                        'page_id'   => $page_id,
+                        'layout_id' => $layout_id,
+                    ]
+                );
 
             $layout = new ALayoutManager($tmpl_id, $page_id, $layout_id);
             $layout_data = $layout->prepareInput($this->request->post);
@@ -214,12 +228,14 @@ class ControllerPagesDesignLayout extends AController
             $layout = new ALayoutManager($tmpl_id, $page_id, $layout_id);
             $draft_layout_id = $layout->savePageLayoutAsDraft($layout_data);
 
-            $url = '&'.$this->html->buildURI([
-                    'tmpl_id'    => $tmpl_id,
-                    'page_id'    => $page_id,
-                    'layout_id'  => $layout_id,
-                    'preview_id' => $draft_layout_id,
-                ]);
+            $url = '&'.$this->html->buildURI(
+                    [
+                        'tmpl_id'    => $tmpl_id,
+                        'page_id'    => $page_id,
+                        'layout_id'  => $layout_id,
+                        'preview_id' => $draft_layout_id,
+                    ]
+                );
         }
 
         abc_redirect($this->html->getSecureURL('design/layout', $url));

@@ -22,22 +22,24 @@ namespace abc\controllers\admin;
 
 use abc\core\ABC;
 use abc\core\engine\AController;
+use Exception;
 
 class ControllerCommonPageLayout extends AController
 {
+    protected $installed_blocks = [];
 
-    private $installed_blocks = [];
-
-    public function main()
+    public function main($layout)
     {
         // use to init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         if (!$this->registry->has('layouts_manager_script')) {
-            $this->document->addStyle([
-                'href' => ABC::env('RDIR_ASSETS').'css/layouts-manager.css',
-                'rel'  => 'stylesheet',
-            ]);
+            $this->document->addStyle(
+                [
+                    'href' => ABC::env('RDIR_ASSETS').'css/layouts-manager.css',
+                    'rel'  => 'stylesheet',
+                ]
+            );
 
             $this->document->addScript(ABC::env('RDIR_ASSETS').'js/jquery/sortable.js');
             $this->document->addScript(ABC::env('RDIR_ASSETS').'js/layouts-manager.js');
@@ -50,8 +52,6 @@ class ControllerCommonPageLayout extends AController
         $this->session->data['content_language_id'] = $this->config->get('storefront_language_id');
 
         // build layout data from passed layout object
-        $layout = func_get_arg(0);
-
         $this->installed_blocks = $layout->getInstalledBlocks();
 
         $layout_main_blocks = $layout->getLayoutBlocks();
@@ -69,7 +69,7 @@ class ControllerCommonPageLayout extends AController
      * @param array $sections
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     private function _buildPageSections($sections)
     {
@@ -79,15 +79,17 @@ class ControllerCommonPageLayout extends AController
         foreach ($sections as $section) {
             $blocks = $this->_buildBlocks($section['block_id'], $section['children']);
 
-            $partialView->batchAssign([
-                'id'          => $section['instance_id'],
-                'blockId'     => $section['block_id'],
-                'name'        => $section['block_txt_id'],
-                'status'      => $section['status'],
-                'controller'  => $section['controller'],
-                'blocks'      => implode('', $blocks),
-                'addBlockUrl' => $this->html->getSecureURL('design/blocks_manager'),
-            ]);
+            $partialView->batchAssign(
+                [
+                    'id'          => $section['instance_id'],
+                    'blockId'     => $section['block_id'],
+                    'name'        => $section['block_txt_id'],
+                    'status'      => $section['status'],
+                    'controller'  => $section['controller'],
+                    'blocks'      => implode('', $blocks),
+                    'addBlockUrl' => $this->html->getSecureURL('design/blocks_manager'),
+                ]
+            );
 
             // render partial view
             $page_sections[$section['block_txt_id']] = $partialView->fetch('common/section.tpl');
@@ -101,9 +103,9 @@ class ControllerCommonPageLayout extends AController
      * @param array $section_blocks
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
-    private function _buildBlocks($section_id, $section_blocks)
+    protected function _buildBlocks($section_id, $section_blocks)
     {
         $blocks = [];
         $partialView = $this->view;
@@ -118,8 +120,10 @@ class ControllerCommonPageLayout extends AController
 
             if ($block['custom_block_id']) {
                 $customName = $this->_getCustomBlockName($block['custom_block_id']);
-                $edit_url = $this->html->getSecureURL('design/blocks/edit',
-                    '&custom_block_id='.$block['custom_block_id']);
+                $edit_url = $this->html->getSecureURL(
+                    'design/blocks/edit',
+                    '&custom_block_id='.$block['custom_block_id']
+                );
             }
 
             //if template for section/block is not present, block is not allowed here.
@@ -128,22 +132,24 @@ class ControllerCommonPageLayout extends AController
                 $template_availability = false;
             }
 
-            $partialView->batchAssign([
-                'id'                    => $block['instance_id'],
-                'blockId'               => $block['block_id'],
-                'customBlockId'         => $block['custom_block_id'],
-                'name'                  => $block['block_txt_id'],
-                'customName'            => $customName,
-                'editUrl'               => $edit_url,
-                'status'                => $block['status'],
-                'parentBlock'           => $section_id,
-                'block_info_url'        => $this->html->getSecureURL('design/blocks_manager/block_info'),
-                'template_availability' => $template_availability,
-                'validate_url'          => $this->html->getSecureURL(
-                    'design/blocks_manager/validate_block',
-                    '&block_id='.$block['block_id']
-                ),
-            ]);
+            $partialView->batchAssign(
+                [
+                    'id'                    => $block['instance_id'],
+                    'blockId'               => $block['block_id'],
+                    'customBlockId'         => $block['custom_block_id'],
+                    'name'                  => $block['block_txt_id'],
+                    'customName'            => $customName,
+                    'editUrl'               => $edit_url,
+                    'status'                => $block['status'],
+                    'parentBlock'           => $section_id,
+                    'block_info_url'        => $this->html->getSecureURL('design/blocks_manager/block_info'),
+                    'template_availability' => $template_availability,
+                    'validate_url'          => $this->html->getSecureURL(
+                        'design/blocks_manager/validate_block',
+                        '&block_id='.$block['block_id']
+                    ),
+                ]
+            );
 
             // render partial view
             $blocks[] = $partialView->fetch('common/block.tpl');
@@ -157,7 +163,7 @@ class ControllerCommonPageLayout extends AController
      *
      * @return string
      */
-    private function _getCustomBlockName($custom_block_id)
+    protected function _getCustomBlockName($custom_block_id)
     {
         foreach ($this->installed_blocks as $block) {
             if ($block['custom_block_id'] == $custom_block_id) {

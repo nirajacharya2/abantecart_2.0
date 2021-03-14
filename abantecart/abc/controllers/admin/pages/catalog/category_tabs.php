@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -26,13 +26,10 @@ use abc\core\lib\AException;
 class ControllerPagesCatalogCategoryTabs extends AController
 {
 
-    public $data = [];
-
-    public function main()
+    public function main($data = [])
     {
-
         //Load input arguments for gid settings
-        $this->data = func_get_arg(0);
+        $this->data = $data;
         if (!is_array($this->data)) {
             throw new AException (
                 'Error: Could not create grid. Grid definition is not array.',
@@ -46,16 +43,19 @@ class ControllerPagesCatalogCategoryTabs extends AController
         $category_id = $this->data['category_id'];
 
         $groups = [
-            'general'    => 'catalog/category/update',
-            'data'       => 'catalog/category/update',
-            'layout'     => 'catalog/category/edit_layout',
+            'general' => 'catalog/category/update',
+            'data'    => 'catalog/category/update',
+            'layout'  => 'catalog/category/edit_layout',
         ];
 
-        foreach($groups as $group => $group_rt){
+        foreach ($groups as $group => $group_rt) {
             $text_key = 'tab_'.$group;
             $this->data['groups'][$group] = [
-                                'text' => $this->language->get($text_key),
-                                'href' => $this->html->getSecureURL($group_rt, '&category_id='.$category_id).'#'.$group
+                'text' => $this->language->get($text_key),
+                'href' => $this->html->getSecureURL(
+                        $group_rt,
+                        '&category_id='.$category_id
+                    ).'#'.$group,
             ];
         }
 

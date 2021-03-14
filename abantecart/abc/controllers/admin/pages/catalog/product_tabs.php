@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -25,12 +25,10 @@ use abc\core\lib\AException;
 
 class ControllerPagesCatalogProductTabs extends AController
 {
-    public $data = [];
-
-    public function main()
+    public function main($data = [])
     {
         //Load input arguments for gid settings
-        $this->data = func_get_arg(0);
+        $this->data = $data;
         if (!is_array($this->data)) {
             throw new AException (
                 'Error: Could not create tabs. Tab definition is not array.',
@@ -46,22 +44,24 @@ class ControllerPagesCatalogProductTabs extends AController
 
         $groups = [
             'general'    => 'catalog/product/update',
-            'images'      => 'catalog/product_images',
-            'options'     => 'catalog/product_options',
+            'images'     => 'catalog/product_images',
+            'options'    => 'catalog/product_options',
             'files'      => 'catalog/product_files',
             'relations'  => 'catalog/product_relations',
             'promotions' => 'catalog/product_promotions',
-           // 'extensions' => 'catalog/product_extensions',
-            'layout'     => 'catalog/product_layout'
+            'layout'     => 'catalog/product_layout',
         ];
 
-        foreach($groups as $group => $group_rt){
+        foreach ($groups as $group => $group_rt) {
             $text_key = 'tab_'.$group;
-            $text_key = $group=='images' ? 'tab_media' : $text_key;
-            $text_key = $group=='options' ? 'tab_option' : $text_key;
+            $text_key = $group == 'images' ? 'tab_media' : $text_key;
+            $text_key = $group == 'options' ? 'tab_option' : $text_key;
             $this->data['groups'][$group] = [
-                                'text' => $this->language->get($text_key),
-                                'href' => $this->html->getSecureURL($group_rt, '&product_id='.$product_id)
+                'text' => $this->language->get($text_key),
+                'href' => $this->html->getSecureURL(
+                    $group_rt,
+                    '&product_id='.$product_id
+                ),
             ];
         }
         $this->extensions->hk_UpdateData($this, __FUNCTION__);

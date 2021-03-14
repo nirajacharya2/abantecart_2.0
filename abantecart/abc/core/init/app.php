@@ -75,7 +75,6 @@ if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
 
 $dir_app = ABC::env('DIR_APP');
 $dir_public = ABC::env('DIR_PUBLIC');
-
 ABC::env(
     [
         'DIR_VENDOR'         => $dir_app.'vendor'.DS,
@@ -96,13 +95,13 @@ ABC::env(
     ]
 );
 
-
-
 //load vendors classes
 require ABC::env('DIR_VENDOR').'autoload.php';
 
 // Error Reporting
 error_reporting(E_ALL);
+// Registry
+$registry = Registry::getInstance();
 $dir_lib = $dir_app.'core'.DS.'lib'.DS;
 require_once $dir_lib.'debug.php';
 ADebug::register();
@@ -233,9 +232,6 @@ ABC::env(
 
 //load base libraries
 require_once __DIR__.DS.'base.php';
-
-// Registry
-$registry = Registry::getInstance();
 
 // Loader
 registerClass($registry, 'load', 'ALoader', [$registry], '\abc\core\engine\ALoader', [$registry]);
