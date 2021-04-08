@@ -75,7 +75,10 @@ abstract class ABaseWorker implements AWorkerInterface
                 $result = call_user_func([$this, $method], $job_params);
             } catch (Exception $e) {
                 $this->echoCli('!!!!!!!!!!! Exception !!!!!!!!!!!!!');
-                $error_message = 'Message: '.$e->getMessage().PHP_EOL.$e->getTraceAsString();
+                $error_message = 'Message: '.$e->getMessage();
+                if($e->getCode() != AC_ERR_USER_WARNING) {
+                    $error_message .= PHP_EOL.$e->getTraceAsString();
+                }
                 $this->errors[] = $error_message;
                 $this->echoCli($error_message);
             }
