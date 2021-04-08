@@ -120,9 +120,8 @@ class AdminSendOrderStatusNotifyEmailListener
         $mail->setTo($customer_email);
         $mail->setFrom($config->get('store_main_email'));
         $mail->setSender($orderInfo['store_name']);
-        if($mail->setTemplate('admin_order_status_notify', $this->data, $orderInfo['language_id'])) {
-            $mail->send();
-        }
+        $mail->setTemplate('admin_order_status_notify', $this->data, $orderInfo['language_id']);
+        $mail->send();
 
         //send IMs except emails.
         //TODO: add notifications for guest checkout

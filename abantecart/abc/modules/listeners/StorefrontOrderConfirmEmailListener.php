@@ -242,16 +242,12 @@ class StorefrontOrderConfirmEmailListener
             $mail->setTo($order_info['email']);
             $mail->setFrom($config->get('store_main_email'));
             $mail->setSender($order_info['store_name']);
-            if($mail->setTemplate(
-                'storefront_order_confirm',
-                $this->data,
-                $order_info['language_id'])
-            ) {
-                $mail->send();
-            }
+            $mail->setTemplate('storefront_order_confirm', $this->data, $order_info['language_id']);
+            $mail->send();
 
             //send alert email for merchant
             if ($config->get('config_alert_mail')) {
+
                 //allow to change email data from extensions
                 Registry::extensions()->hk_ProcessData($this, 'sf_order_confirm_alert_mail');
 
@@ -266,9 +262,8 @@ class StorefrontOrderConfirmEmailListener
                 $this->data['order_total'] = $order_total;
 
                 $mail->setTo($config->get('store_main_email'));
-                if($mail->setTemplate('storefront_order_confirm_alert', $this->data)) {
-                    $mail->send();
-                }
+                $mail->setTemplate('storefront_order_confirm_alert', $this->data);
+                $mail->send();
 
                 // Send to additional alert emails
                 $emails = explode(',', $config->get('config_alert_emails'));
