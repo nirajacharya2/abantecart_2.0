@@ -70,6 +70,9 @@ class ControllerApiCommonAccess extends AControllerAPI
         //allow access to listed controllers with no login
         if (isset($request['rt']) && !isset($request['token'])) {
             $route = '';
+            $request['rt'] = ltrim($request['rt'],'a/');
+            $request['rt'] = ltrim($request['rt'],'r/');
+            $request['rt'] = ltrim($request['rt'],'p/');
             $part = explode('/', $request['rt']);
 
             if (isset($part[0])) {
@@ -107,6 +110,9 @@ class ControllerApiCommonAccess extends AControllerAPI
 
         if (isset($request['rt'])) {
             $route = '';
+            $request['rt'] = ltrim($request['rt'],'a/');
+            $request['rt'] = ltrim($request['rt'],'r/');
+            $request['rt'] = ltrim($request['rt'],'p/');
             $part = explode('/', $request['rt']);
 
             if (isset($part[0])) {
