@@ -271,8 +271,8 @@ class ControllerTaskSaleContact extends AController
         }
         $mail->send();
 
-        if ($mail->errors) {
-            $error = new AError('AMail Errors: '.implode("\n", $mail->errors));
+        if ($mail->error) {
+            $error = new AError('AMail Errors: '.implode("\n", $mail->error));
             $error->toLog()->toDebug();
             return false;
         }
