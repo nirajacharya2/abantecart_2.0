@@ -59,6 +59,7 @@ class ControllerPagesProductSearch extends AController
         } else {
             $cart_rt = 'checkout/cart';
         }
+        $this->loadModel('catalog/product');
 
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
@@ -179,7 +180,6 @@ class ControllerPagesProductSearch extends AController
         ]);
 
         if (isset($request['keyword'])) {
-            $this->loadModel('catalog/product');
             $promotion = new APromotion();
             if (isset($request['category_id'])) {
                 $category_id = explode(',', $request['category_id']);

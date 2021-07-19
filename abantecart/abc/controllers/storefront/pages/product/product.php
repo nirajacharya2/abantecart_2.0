@@ -81,7 +81,7 @@ class ControllerPagesProductProduct extends AController
     {
         $request = $this->request->get;
         $this->init();
-
+        $this->loadModel('catalog/product');
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -166,7 +166,6 @@ class ControllerPagesProductProduct extends AController
         ];
         $this->view->assign('urls', $urls);
 
-        $this->loadModel('catalog/product');
         $promotion = new APromotion();
 
         $product_info = $this->model_catalog_product->getProduct($product_id);

@@ -36,15 +36,15 @@ class ControllerBlocksFeatured extends AController
             && $this->html_cache()) {
             return null;
         }
+        $this->loadModel('catalog/product');
+        $this->loadModel('catalog/review');
+        $this->loadModel('tool/image');
 
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->data['heading_title'] = $this->language->get('heading_title', 'blocks/featured');
 
-        $this->loadModel('catalog/product');
-        $this->loadModel('catalog/review');
-        $this->loadModel('tool/image');
         $this->data['button_add_to_cart'] = $this->language->get('button_add_to_cart');
         $this->data['products'] = [];
         $results = $this->model_catalog_product->getFeaturedProducts(
