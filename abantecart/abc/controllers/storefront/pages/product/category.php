@@ -68,6 +68,9 @@ class ControllerPagesProductCategory extends AController
         } else {
             $cart_rt = 'checkout/cart';
         }
+        $this->loadModel('catalog/product');
+        $this->loadModel('tool/seo_url');
+        $this->loadModel('catalog/review');
 
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
@@ -84,7 +87,7 @@ class ControllerPagesProductCategory extends AController
             abc_redirect($this->html->getSecureURL('account/login'));
         }
 
-        $this->loadModel('tool/seo_url');
+
 
         if (!isset($request['path']) && isset($request['category_id'])) {
             $request['path'] = $request['category_id'];
@@ -181,7 +184,8 @@ class ControllerPagesProductCategory extends AController
                 $url .= '&order='.$request['order'];
             }
 
-            $this->loadModel('catalog/product');
+
+
             $category_total = Category::getTotalCategoriesByCategoryId($category_id);
             $product_total = $this->model_catalog_product->getTotalProductsByCategoryId($category_id);
 
@@ -214,8 +218,8 @@ class ControllerPagesProductCategory extends AController
                     ];
                 }
                 $this->view->assign('categories', $categories);
-                $this->loadModel('catalog/review');
                 $this->view->assign('button_add_to_cart', $this->language->get('button_add_to_cart'));
+                $products_result = Category::find($category_id)->products()->get();
                 $products_result = $this->model_catalog_product->getProductsByCategoryId(
                     $category_id,
                     $sort,

@@ -228,6 +228,7 @@ class AMail
                 $this->addHeader($parts[0], $parts[1]);
             }
         }
+        return true;
     }
 
     /**

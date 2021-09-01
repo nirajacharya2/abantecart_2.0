@@ -57,6 +57,8 @@ class ControllerPagesProductSpecial extends AController
 
     public function main()
     {
+        $this->loadModel('catalog/product');
+
         $request = $this->request->get;
 
         //init controller data
@@ -115,7 +117,6 @@ class ControllerPagesProductSpecial extends AController
             $sort = 'ps.price';
         }
 
-        $this->loadModel('catalog/product');
         $promotion = new APromotion();
 
         $product_total = $promotion->getTotalProductSpecials();

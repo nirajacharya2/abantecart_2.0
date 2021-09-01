@@ -35,7 +35,9 @@ class ControllerBlocksLatest extends AController {
 			&&	$this->html_cache()	){
 			return null;
 		}
-
+        $this->loadModel('catalog/product');
+        $this->loadModel('catalog/review');
+        $this->loadModel('tool/image');
 		//init controller data
 		$this->extensions->hk_InitData($this,__FUNCTION__);
 
