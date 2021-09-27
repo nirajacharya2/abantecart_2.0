@@ -1107,8 +1107,8 @@ class Product extends BaseModel
         }
 
         $result = $resource_mdl->updateImageResourcesByUrls($data, 'products', $this->product_id, $title, $language_id);
-        if (!$result) {
-            $this->errors = array_merge($this->errors, $resource_mdl->errors());
+        if ($resource_mdl->errors()) {
+            $this->errors = array_merge((array)$this->errors, $resource_mdl->errors());
         }
         $this->cache->remove('product');
         return $result;

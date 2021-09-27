@@ -235,6 +235,9 @@ class ControllerApiCatalogProduct extends AControllerAPI
         }
 
         $product->updateImages($data);
+        if($product->errors()){
+            $this->log->write(__CLASS__.': '.implode("\n",$product->errors()));
+        }
 
         UrlAlias::replaceKeywords($data['keywords'], $product->getKeyName(), $product->getKey());
 
@@ -266,6 +269,9 @@ class ControllerApiCatalogProduct extends AControllerAPI
         $product->replaceOptions((array)$data['options']);
         $product->updateRelationships($rels);
         $product->updateImages($data);
+        if($product->errors()){
+            $this->log->write(__CLASS__.': '.implode("\n",$product->errors()));
+        }
 
         //touch category to run recalculation of products count in it
         foreach( array_merge($prev_categories, (array)$data['category_uuids']) as $uuid ){
