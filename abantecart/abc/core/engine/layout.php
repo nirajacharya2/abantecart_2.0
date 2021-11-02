@@ -112,7 +112,7 @@ class ALayout
             $key_value = (int)substr($key_value, strrpos($key_value, '_') + 1);
         }
 
-        $key_param = is_null($key_value) ? null : $key_param;
+        $key_param = !$key_value ? null : $key_param;
 
         $pages = $this->getPages($controller, $key_param, $key_value);
         if (empty($pages)) {
