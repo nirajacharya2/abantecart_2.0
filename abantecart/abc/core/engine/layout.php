@@ -211,7 +211,7 @@ class ALayout
                     // so if we have key_param key_value pair we select
                     // pages with controller and with or without key_param
                     $where .= " AND ( COALESCE( key_param, '' ) = ''
-                                        OR
+                                      OR
                                         ( key_param = '".$this->db->escape($key_param)."'
                                             AND key_value = '".$this->db->escape($key_value)."' ) )
                                 AND template_id = '".$this->tmpl_id."' ";
@@ -223,6 +223,7 @@ class ALayout
                                 .$this->request->server['REQUEST_SCHEME'].'://'
                                 .$this->request->server['HTTP_HOST'].$this->request->server['REQUEST_URI']."\n";
                     $message .= "Referer URL: ".$this->request->server['HTTP_REFERER'];
+                    $message .= "Page Key Parameter: ".$key_param;
                     $error = new AError ($message);
                     $error->toLog()->toDebug();
                 }
