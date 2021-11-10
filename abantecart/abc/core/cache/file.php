@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,6 +22,7 @@ namespace abc\core\cache;
 
 use abc\core\helper\AHelperUtils;
 use abc\core\lib\AError;
+use ReflectionException;
 
 if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -30,7 +31,6 @@ if (!class_exists('abc\core\ABC')) {
 /**
  * File cache driver (default)
  *
- * @since  1.2.7
  */
 class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
 {
@@ -38,7 +38,6 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
      * Cache directory path
      *
      * @var    string
-     * @since  1.2.7
      */
     protected $path;
 
@@ -46,7 +45,6 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
      * Cache security code
      *
      * @var    string
-     * @since  1.2.7
      */
     protected $security_code = "<?php die('Restricted Access!'); ?>#AbanteCart#";
 
@@ -57,7 +55,6 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
      * @param int $expiration
      * @param int $lock_time
      *
-     * @since   1.2.7
      */
     public function __construct(array $config, $expiration, $lock_time = 0)
     {
@@ -74,7 +71,6 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
      *
      * @return  boolean
      *
-     * @since   1.2.7
      */
     public function isSupported()
     {
@@ -84,13 +80,13 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
     /**
      * Get cached data from a file by key and group
      *
-     * @param   string $key The cache data key
-     * @param   string $group The cache data group
-     * @param   boolean $check_expire True to verify cache time expiration
+     * @param string $key The cache data key
+     * @param string $group The cache data group
+     * @param boolean $check_expire True to verify cache time expiration
      *
-     * @return  mixed  Boolean false on failure or a cached data string
+     * @return  mixed|false  Boolean false on failure or a cached data string
      *
-     * @since   1.2.7
+     * @throws ReflectionException
      */
     public function get($key, $group, $check_expire = true)
     {
@@ -115,22 +111,31 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
     /**
      * Save data to a file by key and group
      *
-     * @param   string $key The cache data key
-     * @param   string $group The cache data group
-     * @param   string $data The data to store in cache
+     * @param string $key The cache data key
+     * @param string $group The cache data group
+     * @param string $data The data to store in cache
      *
      * @return  boolean
-     *
-     * @since   1.2.7
+     * @throws ReflectionException
      */
     public function put($key, $group, $data)
     {
         $path = $this->buildFilePath($key, $group);
+        if ($path === false) {
+            $err_text = sprintf(
+                'Error: Cannot build cache file path for key %s and group %s!',
+                $key,
+                $group
+            );
+            $error = new AError($err_text);
+            $error->toLog()->toDebug();
+            return false;
+        }
         $saved = false;
 
         $data = $this->security_code.$data;
-        if (!is_dir(dirname($path))) {
-            mkdir(dirname($path));
+        if (!file_exists(dirname($path))) {
+            mkdir(dirname($path), 0775);
             //change permissions by separate call. can be problems with it on some systems
             chmod(dirname($path), 0775);
         }
@@ -143,7 +148,7 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
                 touch($path);
             }
             @fclose($fileopen);
-            chmod($path,0664);
+            chmod($path, 0664);
         }
 
         if ($saved) {
@@ -161,12 +166,11 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
     /**
      * Remove a cached data file by key and group
      *
-     * @param   string $key The cache data key
-     * @param   string $group The cache data group
+     * @param string $key The cache data key
+     * @param string $group The cache data group
      *
      * @return  boolean
-     *
-     * @since   1.2.7
+     * @throws ReflectionException
      */
     public function remove($key, $group)
     {
@@ -181,12 +185,11 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
     /**
      * Clean cache for a group provided.
      *
-     * @param   string $group The cache data group, passed '*' indicate all cache removal
+     * @param string $group The cache data group, passed '*' indicate all cache removal
      *
      * @return  boolean
      *
-     * @since   1.2.7
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function clean($group)
     {
@@ -213,14 +216,13 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
      *
      * @return  boolean  True on success, false otherwise.
      *
-     * @since   1.2.7
      */
     public function gc()
     {
         $result = true;
 
         // Files older than lifeTime get deleted from cache
-        $files = $this->getFiles($this->path, true, array('.svn', 'CVS', '.DS_Store', '__MACOSX', 'index.php'));
+        $files = $this->getFiles($this->path, true, ['.svn', 'CVS', '.DS_Store', '__MACOSX', 'index.php']);
         foreach ($files as $file) {
             $time = @filemtime($file);
             if (($time + $this->expire) < $this->now || empty($time)) {
@@ -236,17 +238,17 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
     /**
      * Lock cached item
      *
-     * @param   string $key The cache data key
-     * @param   string $group The cache data group
-     * @param   integer $locktime Cached item max lock time
+     * @param string $key The cache data key
+     * @param string $group The cache data group
+     * @param integer $locktime Cached item max lock time
      *
      * @return  array
      *
-     * @since   1.2.7
+     * @throws ReflectionException
      */
     public function lock($key, $group, $locktime)
     {
-        $ret = array();
+        $ret = [];
         $ret['waited'] = false;
 
         $loops = $this->lock_time * 10;
@@ -255,10 +257,9 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
         }
 
         $path = $this->buildFilePath($key, $group);
-        //consider locked if file does not exists yet
+        //consider locked if file does not exist yet
         if (!file_exists($path)) {
             $ret['locked'] = true;
-
             return $ret;
         }
 
@@ -283,20 +284,18 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
                 $lock_counter++;
             }
         }
-
         $ret['locked'] = $data_lock;
-
         return $ret;
     }
 
     /**
      * Unlock cached item
      *
-     * @param   string $key The cache data key
-     * @param   string $group The cache data group
+     * @param string $key The cache data key
+     * @param string $group The cache data group
      *
      * @return  boolean
-     * @since   1.2.7
+     * @throws ReflectionException
      */
     public function unlock($key, $group = null)
     {
@@ -318,12 +317,12 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
     /**
      * Check to make sure cache is still valid, if not, delete it.
      *
-     * @param   string $key Cache key to expire.
-     * @param   string $group The cache data group.
+     * @param string $key Cache key to expire.
+     * @param string $group The cache data group.
      *
      * @return  boolean
      *
-     * @since   1.2.7
+     * @throws ReflectionException
      */
     protected function checkExpire($key, $group)
     {
@@ -341,14 +340,14 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
     }
 
     /**
-     * Get a cache file path from an key/group pair
+     * Get a cache file path from a key/group pair
      *
-     * @param   string $key The cache data key
-     * @param   string $group The cache data group
+     * @param string $key The cache data key
+     * @param string $group The cache data group
      *
-     * @return  mixed   False / The cache file path
+     * @return  string|false   False / The cache file path
      *
-     * @since   1.2.7
+     * @throws ReflectionException
      */
     protected function buildFilePath($key, $group)
     {
@@ -356,11 +355,10 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
         $dir = $this->path.$group;
 
         // If the folder doesn't exist try to create it
-        if (!is_dir($dir)) {
+        if (!file_exists($dir)) {
             // Make sure the index file is there
             $indexFile = $dir.'/index.php';
-
-            if(mkdir($dir)) {
+            if (mkdir($dir, 0775)) {
                 file_put_contents($indexFile, "<?php die('Restricted Access!'); ?>");
                 //change permissions by separate call. can be problems with it on some systems
                 chmod($dir, 0775);
@@ -368,7 +366,14 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
         }
 
         // Double check that folder now exists
-        if (!is_dir($dir)) {
+        if (!file_exists($dir)) {
+            $err_text = sprintf(
+                    'Error: Cannot create cache folder: %s! ',
+                    $dir
+                )
+                .$this->getPermsAndUserInfo($dir);
+            $error = new AError($err_text);
+            $error->toLog()->toDebug();
             return false;
         }
 
@@ -378,22 +383,21 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
     /**
      * Fast delete of a folder with content files
      *
-     * @param   string $path Full path to the folder to delete.
+     * @param string $path Full path to the folder to delete.
      *
      * @return  boolean
-     * @since   1.2.7
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     protected function deleteDirectory($path)
     {
         if (!$path || !is_dir($path) || empty($this->path)) {
             $err_text = sprintf(
-                'Error: Cannot delete cache folder: %s! Specified folder does not exist.',
-                $path
-            );
+                    'Error: Cannot delete cache folder: %s! Specified folder does not exist.',
+                    $path
+                )
+                .$this->getPermsAndUserInfo($path);
             $error = new AError($err_text);
             $error->toLog()->toDebug();
-
             return false;
         }
 
@@ -401,21 +405,21 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
         $match = strpos($path, $this->path);
         if ($match === false || $match > 0) {
             $err_text = sprintf(
-                'Error: Cannot delete cache folder: %s! Specified path in not within cache folder.',
-                $path
-            );
+                    'Error: Cannot delete cache folder: %s! Specified path in not within cache folder.',
+                    $path
+                )
+                .$this->getPermsAndUserInfo($path);
             $error = new AError($err_text);
             $error->toLog()->toDebug();
-
             return false;
         }
 
         //check permissions before rename
         if (!AHelperUtils::is_writable_dir($path)) {
-            $err_text = sprintf('Error: Cannot delete cache folder: %s! Permission denied.', $path);
+            $err_text = sprintf('Error: Cannot delete cache folder: %s! Permission denied.', $path)
+                .$this->getPermsAndUserInfo($path);
             $error = new AError($err_text);
             $error->toLog()->toDebug();
-
             return false;
         }
         //rename folder to prevent recreation by other process
@@ -429,31 +433,28 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
         }
 
         // Remove all the files in folder if they exist; disable all filtering
-        $files = $this->getFiles($path, false, array(), array());
-        if (!empty($files) && !is_array($files)) {
-            if (@unlink($files) !== true) {
-                return false;
-            }
+        $files = $this->getFiles($path, false, [], []);
+        if ($files === false) {
+            return false;
         } else {
-            if (!empty($files) && is_array($files)) {
-                foreach ($files as $file) {
-                    if (@unlink($file) !== true) {
-                        //no permissions to delete
-                        $filename = basename($file);
-                        $err_text = sprintf(
+            foreach ($files as $file) {
+                if (@unlink($file) !== true) {
+                    //no permissions to delete
+                    $filename = basename($file);
+                    $err_text = sprintf(
                             'Error: Cannot delete cache file: %s! No permissions to delete.',
                             $filename
-                        );
-                        $error = new AError($err_text);
-                        $error->toLog()->toDebug();
-                        return false;
-                    }
+                        )
+                        .$this->getPermsAndUserInfo($path);
+                    $error = new AError($err_text);
+                    $error->toLog()->toDebug();
+                    return false;
                 }
             }
         }
 
         //one level directories
-        $folders = $this->getDirectories($path, false);
+        $folders = $this->getDirectories($path);
         foreach ($folders as $folder) {
             if (is_link($folder)) {
                 //Delete links
@@ -472,7 +473,11 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
             if (@rmdir($path)) {
                 $ret = true;
             } else {
-                $err_text = sprintf('Error: Cannot delete cache directory: %s! No permissions to delete.', $path);
+                $err_text = sprintf(
+                        'Error: Cannot delete cache directory: %s! No permissions to delete.',
+                        $path
+                    )
+                    .$this->getPermsAndUserInfo($path);
                 $error = new AError($err_text);
                 $error->toLog()->toDebug();
                 $ret = false;
@@ -485,15 +490,13 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
     /**
      * Fast files read in provided directory.
      *
-     * @param   string $path The path of the folder to read.
-     * @param   mixed $recurse True to recursively search into sub-folders, or an
+     * @param string $path The path of the folder to read.
+     * @param mixed $recurse True to recursively search into sub-folders, or an
      *                                   integer to specify the maximum depth.
-     * @param   array $exclude Array with names of files which should be skipped
-     * @param   array $exclude_filter Array of folder names to skip
+     * @param array $exclude Array with names of files which should be skipped
+     * @param array $exclude_filter Array of folder names to skip
      *
      * @return  array|false    Files in the given folder.
-     *
-     * @since   1.2.7
      */
     protected function getFiles(
         $path,
@@ -501,14 +504,13 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
         $exclude = ['.svn', 'CVS', '.DS_Store', '__MACOSX'],
         $exclude_filter = ['^\..*', '.*~']
     ) {
-        $ret_arr = array();
+        $ret_arr = [];
         if (!is_dir($path)) {
             return false;
         }
 
         if (!($handle = @opendir($path))) {
-            //return nothing
-            return $ret_arr;
+            return [];
         }
 
         if (count($exclude_filter)) {
@@ -520,7 +522,8 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
         while (($file = readdir($handle)) !== false) {
             if (($file != '.') && ($file != '..')
                 && (!in_array($file, $exclude))
-                && (!$exclude_filter || !preg_match($exclude_filter, $file))) {
+                && (!$exclude_filter || !preg_match($exclude_filter, $file))
+            ) {
                 $dir = $path.'/'.$file;
                 if (is_dir($dir)) {
                     //process directory
@@ -545,15 +548,14 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
     /**
      * Read the folders in a directory path.
      *
-     * @param   string $path The path to directory.
-     * @param   mixed $recurse True to recursively search into sub-folders, or an integer to specify the maximum depth.
-     * @param   array $exclude Array with names of folders which should not be shown in the result.
-     * @param   array $exclude_filter Array with regular expressions
+     * @param string $path The path to directory.
+     * @param mixed $recurse True to recursively search into sub-folders, or an integer to specify the maximum depth.
+     * @param array $exclude Array with names of folders which should not be shown in the result.
+     * @param array $exclude_filter Array with regular expressions
      *                                  matching folders which should not be shown in the result.
      *
      * @return  array|false  with full path sub-directories.
      *
-     * @since   1.2.7
      */
     protected function getDirectories(
         $path,
@@ -561,7 +563,7 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
         $exclude = ['.svn', 'CVS', '.DS_Store', '__MACOSX'],
         $exclude_filter = ['^\..*']
     ) {
-        $ret_arr = array();
+        $ret_arr = [];
 
         if (!is_dir($path)) {
             return false;
@@ -598,7 +600,16 @@ class ACacheDriverFile extends ACacheDriver implements ACacheDriverInterface
             }
         }
         closedir($handle);
-
         return $ret_arr;
+    }
+
+    protected function getPermsAndUserInfo($path)
+    {
+        $posixUser = posix_getpwuid(posix_geteuid());
+        return "\n ".substr(sprintf('%o', fileperms($path)), -4)
+            .'   '
+            .$posixUser['name']
+            .":"
+            .posix_getgrgid($posixUser['gid'])['name'];
     }
 }

@@ -219,7 +219,6 @@ class ControllerPagesProductCategory extends AController
                 }
                 $this->view->assign('categories', $categories);
                 $this->view->assign('button_add_to_cart', $this->language->get('button_add_to_cart'));
-                $products_result = Category::find($category_id)->products()->get();
                 $products_result = $this->model_catalog_product->getProductsByCategoryId(
                     $category_id,
                     $sort,
