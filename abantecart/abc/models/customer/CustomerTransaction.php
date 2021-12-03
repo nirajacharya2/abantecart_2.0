@@ -253,12 +253,11 @@ class CustomerTransaction extends BaseModel
             ->where('customer_id', '=', $customer_id)
             ->whereRaw($transTable.".date_added BETWEEN '".$customer->running_balance_datetime."' AND NOW()" )
             ->first();
-
         $balance = $query->balance + $customer->running_balance;
         if($update){
             Customer::find($customer_id)->update(
                 [
-                    'running_balance' => $query->balance,
+                    'running_balance' => $balance,
                     'running_balance_datetime' => date('Y-m-d H:i:s')
                 ]
             );
