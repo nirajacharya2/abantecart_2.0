@@ -1962,10 +1962,10 @@ class ControllerPagesSaleOrder extends AController
                     $this->session->data['admin_order']['shipping_method'] = $shippings[$shp_name]['quote'][$shp_quote];
                     $this->session->data['admin_order']['shipping_address_id'] = $post['shipping_address_id'];
                 }
+                $checkout->setPaymentAddress($post['payment_address_id']);
                 $payments = $checkout->getPaymentList();
                 $checkout->setPaymentMethod($payments[$post['payment_method']]);
-                $this->session->data['admin_order']['payment_method'] =
-                    $payments[$post['payment_method']];
+                $this->session->data['admin_order']['payment_method'] = $payments[$post['payment_method']];
                 $this->session->data['admin_order']['payment_address_id'] = $post['payment_address_id'];
 
                 $checkout->getOrder()->buildOrderData($this->session->data['admin_order']);

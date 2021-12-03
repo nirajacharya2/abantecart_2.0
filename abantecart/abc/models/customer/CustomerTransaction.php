@@ -242,12 +242,28 @@ class CustomerTransaction extends BaseModel
         return $this->belongsTo(Customer::class, 'customer_id');
     }
 
-    public static function getBalance(int $customer_id)
+    public static function getBalance(int $customer_id, $update = false)
     {
-        $query = static::where('customer_id', '=', $customer_id)
-            ->selectRaw('sum(credit) - sum(debit) AS balance')
+        $customer = Customer::find($customer_id);
+        $customer->running_balance_datetime = $customer->running_balance_datetime ?: '1970-01-01';
+
+        $customerTransaction = new static;
+        $transTable = $customerTransaction->getConnection()->getTablePrefix().$customerTransaction->getTable();
+        $query = static::selectRaw('sum(credit) - sum(debit) as balance ')
+            ->where('customer_id', '=', $customer_id)
+            ->whereRaw($transTable.".date_added BETWEEN '".$customer->running_balance_datetime."' AND NOW()" )
             ->first();
-        return (float)$query->balance;
+
+        $balance = $query->balance + $customer->running_balance;
+        if($update){
+            Customer::find($customer_id)->update(
+                [
+                    'running_balance' => $query->balance,
+                    'running_balance_datetime' => date('Y-m-d H:i:s')
+                ]
+            );
+        }
+        return $balance;
     }
 
     /**
