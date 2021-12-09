@@ -254,22 +254,9 @@ class CustomerTransaction extends BaseModel
             ->selectRaw('sum(credit) as credit')
             ->selectRaw('sum(debit) as debit')
             ->where('customer_id', '=', $customer_id)
-            ->whereRaw(
-                $transTable.".date_added > '".$customer->running_balance_datetime."' AND ".$transTable.".date_added < '".$now."'" )
+            ->whereRaw( $transTable.".date_added > '".$customer->running_balance_datetime."' AND ".$transTable.".date_added < '".$now."'" )
             ->first();
         $balance = $query->balance + $customer->running_balance;
-        $credit = $query->credit + $customer->running_credit;
-        $debit = $query->debit + $customer->running_debit;
-        if($update){
-            Customer::find($customer_id)->update(
-                [
-                    'running_balance' => $balance,
-                    'running_credit' => $credit,
-                    'running_debit' => $debit,
-                    'running_balance_datetime' => $now
-                ]
-            );
-        }
         return $balance;
     }
 
@@ -409,7 +396,7 @@ class CustomerTransaction extends BaseModel
             ->distinct(['transaction_type'])
             ->orderBy('transaction_type')
             ->withTrashed();
-        //allow to extends this method from extensions
+        //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
         $result_rows = $query->get();
         return $result_rows;
