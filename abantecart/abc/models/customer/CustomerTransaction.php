@@ -249,11 +249,13 @@ class CustomerTransaction extends BaseModel
 
         $customerTransaction = new static;
         $transTable = $customerTransaction->getConnection()->getTablePrefix().$customerTransaction->getTable();
+        $now = date('Y-m-d H:i:s');
         $query = static::selectRaw('sum(credit) - sum(debit) as balance')
             ->selectRaw('sum(credit) as credit')
             ->selectRaw('sum(debit) as debit')
             ->where('customer_id', '=', $customer_id)
-            ->whereRaw($transTable.".date_added BETWEEN '".$customer->running_balance_datetime."' AND NOW()" )
+            ->whereRaw(
+                $transTable.".date_added > '".$customer->running_balance_datetime."' AND ".$transTable.".date_added < '".$now."'" )
             ->first();
         $balance = $query->balance + $customer->running_balance;
         $credit = $query->credit + $customer->running_credit;
@@ -264,7 +266,7 @@ class CustomerTransaction extends BaseModel
                     'running_balance' => $balance,
                     'running_credit' => $credit,
                     'running_debit' => $debit,
-                    'running_balance_datetime' => date('Y-m-d H:i:s')
+                    'running_balance_datetime' => $now
                 ]
             );
         }
