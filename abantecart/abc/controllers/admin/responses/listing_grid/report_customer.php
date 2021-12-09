@@ -168,9 +168,6 @@ class ControllerResponsesListingGridReportCustomer extends AController
 
         $this->loadModel('report/customer');
 
-        $this->request->post['date_start'] = $this->request->post['date_start'] ?: H::dateInt2Display(strtotime('-7 day'));
-        $this->request->post['date_end'] = $this->request->post['date_end'] ?: H::dateInt2Display(time());
-
         //Prepare filter config
         $filter_params = array_merge(['date_start', 'date_end'], (array) $this->data['filter_params']);
         $filter_form = new AFilter(['method' => 'get', 'filter_params' => $filter_params]);
@@ -188,14 +185,17 @@ class ControllerResponsesListingGridReportCustomer extends AController
                 $data['filter'][$rule['field']] = $rule['data'];
             }
         }
+        $data['filter']['date_start'] = $data['filter']['date_start'] ? H::dateDisplay2ISO($data['filter']['date_start']) : date('Y-m-d',strtotime('-7 day'));
+        $data['filter']['date_end'] = $data['filter']['date_end'] ? H::dateDisplay2ISO($data['filter']['date_end']) : date('Y-m-d');
 
-        $total = $this->model_report_customer->getTotalCustomerTransactions($data);
-        $response = new stdClass();
-        $response->page = $filter_grid->getParam('page');
-        $response->total = $filter_grid->calcTotalPages($total);
-        $response->records = $total;
 
         $results = $this->model_report_customer->getCustomerTransactions($data);
+        $response = new stdClass();
+        $response->page = $filter_grid->getParam('page');
+        $response->total = $filter_grid->calcTotalPages($results[0]['total_num_rows']);
+        $response->records = $results[0]['total_num_rows'];
+
+
         $i = 0;
         foreach ($results as $result) {
             $response->rows[$i]['id'] = $result['customer_transaction_id'];

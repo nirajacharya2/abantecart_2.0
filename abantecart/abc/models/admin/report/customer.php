@@ -21,6 +21,7 @@
 namespace abc\models\admin;
 
 use abc\core\engine\Model;
+use Exception;
 use H;
 
 class ModelReportCustomer extends Model
@@ -30,7 +31,7 @@ class ModelReportCustomer extends Model
      * @param string $mode
      *
      * @return array|int
-     * @throws \Exception
+     * @throws Exception
      */
     public function getOnlineCustomers($data = [], $mode = 'default')
     {
@@ -108,7 +109,7 @@ class ModelReportCustomer extends Model
      * @param array $data
      *
      * @return int
-     * @throws \Exception
+     * @throws Exception
      */
     public function getTotalOnlineCustomers($data = [])
     {
@@ -243,7 +244,7 @@ class ModelReportCustomer extends Model
             $total_sql = 'SELECT COUNT(DISTINCT c.customer_id) as total';
         } else {
             $total_sql
-                = "SELECT 	ct.customer_transaction_id,
+                = "SELECT ".$this->db->raw_sql_row_count()." ct.customer_transaction_id,
                                     c.customer_id,
                                     CONCAT(c.firstname, ' ', c.lastname) AS customer,
                                     ct.date_added,
@@ -261,20 +262,16 @@ class ModelReportCustomer extends Model
                                 LEFT JOIN `".$this->db->table_name("users")."` u ON u.user_id = ct.created_by 
                             ";
 
-        $filter = (isset($data['filter']) ? $data['filter'] : []);
+        $filter = ($data['filter'] ?? []);
         $implode = [];
         $where = '';
         if (H::has_value($filter['customer_id'])) {
             $implode[] = " c.customer_id = ".(int)$filter['customer_id']." ";
         }
-        if ( ! empty($filter['date_start'])) {
-            $date_start = H::dateDisplay2ISO($filter['date_start'], $this->language->get('date_format_short'));
-            $implode[] = " DATE_FORMAT(ct.date_added,'%Y-%m-%d') >= DATE_FORMAT('".$this->db->escape($date_start)."','%Y-%m-%d') ";
+        if ( $filter['date_start'] && $filter['date_end']) {
+            $implode[] = " ct.date_added BETWEEN '".$this->db->escape($filter['date_start'])."' AND '".$this->db->escape($filter['date_end'])." 23:59:59'";
         }
-        if ( ! empty($filter['date_end'])) {
-            $date_end = H::dateDisplay2ISO($filter['date_end'], $this->language->get('date_format_short'));
-            $implode[] = " DATE_FORMAT(ct.date_added,'%Y-%m-%d') <= DATE_FORMAT('".$this->db->escape($date_end)."','%Y-%m-%d') ";
-        }
+
         //filter for first and last name
         if (H::has_value($filter['customer'])) {
             $implode[] = "CONCAT(c.firstname, ' ', c.lastname) LIKE '%".$this->db->escape($filter['customer'], true)."%' collate utf8_general_ci";
@@ -292,7 +289,7 @@ class ModelReportCustomer extends Model
             $sql .= " WHERE ".$where;
         }
 
-        //If for total, we done building the query
+        //If for total, we're done building the query
         if ($mode == 'total_only') {
             $query = $this->db->query($sql);
 
@@ -329,8 +326,13 @@ class ModelReportCustomer extends Model
         }
 
         $query = $this->db->query($sql);
+        $output = $query->rows;
+        $totalNumRows = $this->db->sql_get_row_count();
+        for ($i = 0; $i < $query->num_rows; $i++) {
+            $output[$i]['total_num_rows'] = $totalNumRows;
+        }
 
-        return $query->rows;
+        return $output;
     }
 
     /**
@@ -347,7 +349,7 @@ class ModelReportCustomer extends Model
 
     /**
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getCustomersCountByDay()
     {
@@ -376,7 +378,7 @@ class ModelReportCustomer extends Model
 
     /**
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getCustomersCountByWeek()
     {
@@ -406,7 +408,7 @@ class ModelReportCustomer extends Model
 
     /**
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getCustomersCountByMonth()
     {
@@ -436,7 +438,7 @@ class ModelReportCustomer extends Model
 
     /**
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getCustomersCountByYear()
     {
