@@ -378,7 +378,6 @@ class CustomerTransaction extends BaseModel
 
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query, $data);
-        Registry::log()->write($query->toSql());
         $result_rows = $query->get();
 
         //finally decrypt data and return result
