@@ -25,7 +25,6 @@ use abc\core\engine\AForm;
 use abc\models\customer\CustomerTransaction;
 use H;
 
-
 class ControllerPagesAccountTransactions extends AController
 {
     /**
@@ -34,7 +33,6 @@ class ControllerPagesAccountTransactions extends AController
      */
     public function main()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -50,19 +48,22 @@ class ControllerPagesAccountTransactions extends AController
                 'href'      => $this->html->getHomeURL(),
                 'text'      => $this->language->get('text_home'),
                 'separator' => false,
-            ]);
+            ]
+        );
         $this->document->addBreadcrumb(
             [
                 'href'      => $this->html->getSecureURL('account/account'),
                 'text'      => $this->language->get('text_account'),
                 'separator' => $this->language->get('text_separator'),
-            ]);
+            ]
+        );
         $this->document->addBreadcrumb(
             [
                 'href'      => $this->html->getSecureURL('account/transactions'),
                 'text'      => $this->language->get('text_transactions'),
                 'separator' => $this->language->get('text_separator'),
-            ]);
+            ]
+        );
 
         $this->data['action'] = $this->html->getSecureURL('account/transactions');
 
@@ -73,60 +74,64 @@ class ControllerPagesAccountTransactions extends AController
         }
 
         if (isset($this->request->get['limit'])) {
-            $limit = (int)$this->request->get['limit'];
-            $limit = $limit > 50 ? 50 : $limit;
+            $limit = (int) $this->request->get['limit'];
+            $limit = min($limit, 50);
         } else {
             $limit = $this->config->get('config_catalog_limit');
         }
 
         $trans = [];
 
-        $page = $this->request->get['page']; // get the requested page
         $sidx = $this->request->get['sidx']; // get index row - i.e. user click to sort
         $sord = $this->request->get['sord']; // get the direction
 
-
-        $this->data['selected_transactions'] = $results;
-
-        if ($results && isset($results[0]['total_num_rows'])) {
-            $trans_total = $results[0]['total_num_rows'];
-        }
-
         $balance = $this->customer->getBalance();
         $this->data['balance_amount'] = $this->currency->format($balance);
-        
+
         $form = new AForm();
         $form->setForm([
-            'form_name' => 'transactions_search',
-        ]);
-        $this->data['form_open'] = $form->getFieldHtml([
-            'type'   => 'form',
-            'name'   => 'transactions_search',
-            'action' => $this->html->getSecureURL('account/transactions'),
-            'method' => 'GET'
-        ]);
-        $this->data['rt'] = $form->getFieldHtml([
-            'type'    => 'hidden',
-            'name'    => 'rt',
-            'value'   => 'account/transactions'
-        ]);
+                           'form_name' => 'transactions_search',
+                       ]);
+        $this->data['form_open'] = $form->getFieldHtml(
+            [
+                'type'   => 'form',
+                'name'   => 'transactions_search',
+                'action' => $this->html->getSecureURL(
+                    'account/transactions'
+                ),
+                'method' => 'GET',
+            ]
+        );
+        $this->data['rt'] = $form->getFieldHtml(
+            [
+                'type'  => 'hidden',
+                'name'  => 'rt',
+                'value' => 'account/transactions',
+            ]
+        );
         $this->data['js_date_format'] = H::format4Datepicker($this->language->get('date_format_short'));
-        $this->data['date_start'] = $form->getFieldHtml([
-            'type'    => 'date',
-            'name'    => 'date_start',
-            'value'   => $this->request->get['date_start'] ?: H::dateInt2Display(strtotime('-7 day')),
-        ]);
-        $this->data['date_end'] = $form->getFieldHtml([
-            'type'    => 'date',
-            'name'    => 'date_end',
-            'value'   => $this->request->get['date_end'] ?: H::dateInt2Display(time()),
-        ]);
+        $this->data['date_start'] = $form->getFieldHtml(
+            [
+                'type'  => 'date',
+                'name'  => 'date_start',
+                'value' => $this->request->get['date_start']
+                    ? : H::dateInt2Display(strtotime('-7 day')),
+            ]
+        );
+        $this->data['date_end'] = $form->getFieldHtml(
+            [
+                'type'  => 'date',
+                'name'  => 'date_end',
+                'value' => $this->request->get['date_end']
+                    ? : H::dateInt2Display(time()),
+            ]
+        );
 
         $this->data['submit'] = $this->html->buildElement(
             [
-                'type'       => 'submit',
-                'name'       => 'Go',
-                'style'      => 'btn-primary lock-on-click'
+                'type'  => 'submit',
+                'name'  => 'Go',
+                'style' => 'btn-primary lock-on-click',
             ]
         );
 
@@ -135,13 +140,21 @@ class ControllerPagesAccountTransactions extends AController
             'order'       => $sord,
             'start'       => ($page - 1) * $limit,
             'limit'       => $limit,
-            'filter' => [
-                'date_start'  => date('Y-m-d',strtotime(H::dateDisplay2ISO($this->data['date_start']->value))),
-                'date_end'    => date('Y-m-d', strtotime(H::dateDisplay2ISO($this->data['date_end']->value))),
+            'filter'      => [
+                'date_start' => date(
+                    'Y-m-d',
+                    strtotime(H::dateDisplay2ISO($this->data['date_start']->value))
+                ),
+                'date_end'   => date(
+                    'Y-m-d',
+                    strtotime(H::dateDisplay2ISO($this->data['date_end']->value))
+                ),
             ],
-            'customer_id' => (int)$this->customer->getId(),
+            'customer_id' => (int) $this->customer->getId(),
         ];
+
         $results = CustomerTransaction::getTransactions($data);
+
         $trans_total = $results[0]['total_num_rows'];
         if (count($results)) {
             foreach ($results as $result) {
@@ -154,8 +167,8 @@ class ControllerPagesAccountTransactions extends AController
                     'transaction_type'        => $result['transaction_type'],
                     'description'             => $result['description'],
                     'date_added'              => H::dateISO2Display(
-                                                        $result['date_added'],
-                                                        $this->language->get('date_format_short')
+                        $result['date_added'],
+                        $this->language->get('date_format_short')
                     ),
                 ];
             }
@@ -171,10 +184,13 @@ class ControllerPagesAccountTransactions extends AController
                     'limit'      => $limit,
                     'url'        => $this->html->getSecureURL(
                         'account/transactions',
-                        '&date_start='.$this->data['date_start']->value.'&date_end='.$this->data['date_end']->value
-                            .'&limit='.$limit.'&page={page}'),
+                        '&date_start='.$this->data['date_start']->value
+                        .'&date_end='.$this->data['date_end']->value
+                        .'&limit='.$limit.'&page={page}'
+                    ),
                     'style'      => 'pagination',
-                ]);
+                ]
+            );
 
             $this->data['continue'] = $this->html->getSecureURL('account/account');
             $this->view->setTemplate('pages/account/transactions.tpl');
@@ -190,7 +206,8 @@ class ControllerPagesAccountTransactions extends AController
                 'name'  => 'continue_button',
                 'text'  => $this->language->get('button_continue'),
                 'style' => 'button',
-            ]);
+            ]
+        );
 
         $this->view->batchAssign($this->data);
         $this->processTemplate();
