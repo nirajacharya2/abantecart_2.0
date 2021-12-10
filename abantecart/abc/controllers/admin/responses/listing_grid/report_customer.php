@@ -24,6 +24,7 @@ use abc\core\engine\AController;
 use abc\core\helper\AHelperUtils;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
+use H;
 use stdClass;
 
 if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
@@ -37,8 +38,6 @@ if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
  */
 class ControllerResponsesListingGridReportCustomer extends AController
 {
-    public $data = array();
-
     public function online()
     {
 
@@ -49,14 +48,14 @@ class ControllerResponsesListingGridReportCustomer extends AController
         $this->load->library('json');
 
         //Prepare filter config
-        $grid_filter_params = array_merge(array(
+        $grid_filter_params = array_merge([
             'customer' => 'c.lastname',
             'ip'       => 'co.ip',
             'url'      => 'co.url',
             'time'     => 'co.date_added',
-        ), (array)$this->data['grid_filter_params']);
+                                          ], (array) $this->data['grid_filter_params']);
 
-        $filter_grid = new AFilter(array('method' => 'post', 'grid_filter_params' => $grid_filter_params));
+        $filter_grid = new AFilter(['method' => 'post', 'grid_filter_params' => $grid_filter_params]);
 
         $filter_params = $filter_grid->getFilterData();
         $filters = AJson::decode(html_entity_decode($this->request->post['filters']), true);
@@ -79,13 +78,13 @@ class ControllerResponsesListingGridReportCustomer extends AController
             if ($result['status'] != 1) {
                 $response->userdata->classes[$result['customer_id']] = 'attention';
             }
-            $response->rows[$i]['cell'] = array(
+            $response->rows[$i]['cell'] = [
                 $result['customer'],
                 $result['ip'],
                 AHelperUtils::dateISO2Display($result['date_added'],
                     $this->language->get('date_format_short').' '.$this->language->get('time_format')),
                 $result['url'],
-            );
+            ];
             $i++;
         }
 
@@ -105,14 +104,15 @@ class ControllerResponsesListingGridReportCustomer extends AController
         $this->loadModel('report/customer');
 
         //Prepare filter config
-        $filter_params = array_merge(array('date_start', 'date_end', 'order_status'),
+        $filter_params = array_merge(
+            ['date_start', 'date_end', 'order_status'],
             (array)$this->data['filter_params']);
-        $filter_form = new AFilter(array('method' => 'get', 'filter_params' => $filter_params));
-        $filter_grid = new AFilter(array('method' => 'post'));
+        $filter_form = new AFilter(['method' => 'get', 'filter_params' => $filter_params]);
+        $filter_grid = new AFilter(['method' => 'post']);
         $data = array_merge($filter_form->getFilterData(), $filter_grid->getFilterData());
 
         //add filters for custom processing
-        $allowedFields = array('customer_id', 'customer');
+        $allowedFields = ['customer_id', 'customer'];
         if (isset($this->request->post['_search']) && $this->request->post['_search'] == 'true') {
             $searchData = AJson::decode(htmlspecialchars_decode($this->request->post['filters']), true);
             foreach ($searchData['rules'] as $rule) {
@@ -143,13 +143,13 @@ class ControllerResponsesListingGridReportCustomer extends AController
             if ($result['status'] != 1) {
                 $response->userdata->classes[$result['customer_id']] = 'attention';
             }
-            $response->rows[$i]['cell'] = array(
+            $response->rows[$i]['cell'] = [
                 $result['customer_id'],
                 $result['customer'],
                 $result['customer_group'],
                 $result['order_count'],
                 $this->currency->format($result['total'], $this->config->get('config_currency')),
-            );
+            ];
             $i++;
         }
 
@@ -169,13 +169,13 @@ class ControllerResponsesListingGridReportCustomer extends AController
         $this->loadModel('report/customer');
 
         //Prepare filter config
-        $filter_params = array_merge(array('date_start', 'date_end'), (array)$this->data['filter_params']);
-        $filter_form = new AFilter(array('method' => 'get', 'filter_params' => $filter_params));
-        $filter_grid = new AFilter(array('method' => 'post'));
+        $filter_params = array_merge(['date_start', 'date_end'], (array) $this->data['filter_params']);
+        $filter_form = new AFilter(['method' => 'get', 'filter_params' => $filter_params]);
+        $filter_grid = new AFilter(['method' => 'post']);
         $data = array_merge($filter_form->getFilterData(), $filter_grid->getFilterData());
 
         //add filters for custom processing
-        $allowedFields = array_merge(array('customer'), (array)$this->data['allowed_fields']);
+        $allowedFields = array_merge(['customer'], (array) $this->data['allowed_fields']);
         if (isset($this->request->post['_search']) && $this->request->post['_search'] == 'true') {
             $searchData = AJson::decode(htmlspecialchars_decode($this->request->post['filters']), true);
             foreach ($searchData['rules'] as $rule) {
@@ -185,14 +185,17 @@ class ControllerResponsesListingGridReportCustomer extends AController
                 $data['filter'][$rule['field']] = $rule['data'];
             }
         }
+        $data['filter']['date_start'] = $data['filter']['date_start'] ? H::dateDisplay2ISO($data['filter']['date_start']) : date('Y-m-d',strtotime('-7 day'));
+        $data['filter']['date_end'] = $data['filter']['date_end'] ? H::dateDisplay2ISO($data['filter']['date_end']) : date('Y-m-d');
 
-        $total = $this->model_report_customer->getTotalCustomerTransactions($data);
-        $response = new stdClass();
-        $response->page = $filter_grid->getParam('page');
-        $response->total = $filter_grid->calcTotalPages($total);
-        $response->records = $total;
 
         $results = $this->model_report_customer->getCustomerTransactions($data);
+        $response = new stdClass();
+        $response->page = $filter_grid->getParam('page');
+        $response->total = $filter_grid->calcTotalPages($results[0]['total_num_rows']);
+        $response->records = $results[0]['total_num_rows'];
+
+
         $i = 0;
         foreach ($results as $result) {
             $response->rows[$i]['id'] = $result['customer_transaction_id'];
@@ -200,14 +203,14 @@ class ControllerResponsesListingGridReportCustomer extends AController
             if ($result['status'] != 1) {
                 $response->userdata->classes[$result['customer_transaction_id']] = 'attention';
             }
-            $response->rows[$i]['cell'] = array(
+            $response->rows[$i]['cell'] = [
                 $result['date_added'],
                 $result['customer'],
                 $this->currency->format($result['debit'], $this->config->get('config_currency')),
                 $this->currency->format($result['credit'], $this->config->get('config_currency')),
                 $result['transaction_type'],
                 $result['created_by'],
-            );
+            ];
             $i++;
         }
 

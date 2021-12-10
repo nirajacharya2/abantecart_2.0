@@ -182,7 +182,7 @@ class ControllerPagesSaleCustomerTransaction extends AController
         $this->data['grid_search_form']['fields']['date_start'] = $form->getFieldHtml( [
             'type'    => 'input',
             'name'    => 'date_start',
-            'default' => H::dateInt2Display( time() ),
+            'default' => H::dateInt2Display( mktime(0, 0, 0, date("m")-1, date("d"), date("Y"))),
         ]);
 
         $this->data['grid_search_form']['fields']['date_end'] = $form->getFieldHtml( [

@@ -21,14 +21,13 @@
 namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
+use abc\core\engine\AForm;
 use abc\models\customer\CustomerTransaction;
 use H;
 
 
 class ControllerPagesAccountTransactions extends AController
 {
-    public $data = [];
-
     /**
      * Main Controller function to show transaction history.
      * Note: Regular orders are considered in the transactions.
@@ -86,14 +85,7 @@ class ControllerPagesAccountTransactions extends AController
         $sidx = $this->request->get['sidx']; // get index row - i.e. user click to sort
         $sord = $this->request->get['sord']; // get the direction
 
-        $data = [
-            'sort'        => $sidx,
-            'order'       => $sord,
-            'start'       => ($page - 1) * $limit,
-            'limit'       => $limit,
-            'customer_id' => (int)$this->customer->getId(),
-        ];
-        $results = CustomerTransaction::getTransactions($data);
+
         $this->data['selected_transactions'] = $results;
 
         if ($results && isset($results[0]['total_num_rows'])) {
@@ -102,8 +94,55 @@ class ControllerPagesAccountTransactions extends AController
 
         $balance = $this->customer->getBalance();
         $this->data['balance_amount'] = $this->currency->format($balance);
+        
+        $form = new AForm();
+        $form->setForm([
+            'form_name' => 'transactions_search',
+        ]);
+        $this->data['form_open'] = $form->getFieldHtml([
+            'type'   => 'form',
+            'name'   => 'transactions_search',
+            'action' => $this->html->getSecureURL('account/transactions'),
+            'method' => 'GET'
+        ]);
+        $this->data['rt'] = $form->getFieldHtml([
+            'type'    => 'hidden',
+            'name'    => 'rt',
+            'value'   => 'account/transactions'
+        ]);
+        $this->data['js_date_format'] = H::format4Datepicker($this->language->get('date_format_short'));
+        $this->data['date_start'] = $form->getFieldHtml([
+            'type'    => 'date',
+            'name'    => 'date_start',
+            'value'   => $this->request->get['date_start'] ?: H::dateInt2Display(strtotime('-7 day')),
+        ]);
+        $this->data['date_end'] = $form->getFieldHtml([
+            'type'    => 'date',
+            'name'    => 'date_end',
+            'value'   => $this->request->get['date_end'] ?: H::dateInt2Display(time()),
+        ]);
 
-        if ($trans_total) {
+        $this->data['submit'] = $this->html->buildElement(
+            [
+                'type'       => 'submit',
+                'name'       => 'Go',
+                'style'      => 'btn-primary lock-on-click'
+            ]
+        );
+
+        $data = [
+            'sort'        => $sidx,
+            'order'       => $sord,
+            'start'       => ($page - 1) * $limit,
+            'limit'       => $limit,
+            'filter' => [
+                'date_start'  => date('Y-m-d',strtotime(H::dateDisplay2ISO($this->data['date_start']->value))),
+                'date_end'    => date('Y-m-d', strtotime(H::dateDisplay2ISO($this->data['date_end']->value))),
+            ],
+            'customer_id' => (int)$this->customer->getId(),
+        ];
+        $results = CustomerTransaction::getTransactions($data);
+        if (count($results)) {
             foreach ($results as $result) {
                 $trans[] = [
                     'customer_transaction_id' => $result['customer_transaction_id'],
@@ -120,8 +159,6 @@ class ControllerPagesAccountTransactions extends AController
                 ];
             }
 
-            $this->data['transactions'] = $trans;
-
             $this->data['pagination_bootstrap'] = $this->html->buildElement(
                 [
                     'type'       => 'Pagination',
@@ -136,13 +173,12 @@ class ControllerPagesAccountTransactions extends AController
                 ]);
 
             $this->data['continue'] = $this->html->getSecureURL('account/account');
-
             $this->view->setTemplate('pages/account/transactions.tpl');
         } else {
             $this->data['continue'] = $this->html->getSecureURL('account/account');
-
             $this->view->setTemplate('pages/account/transactions.tpl');
         }
+        $this->data['transactions'] = $trans;
 
         $this->data['button_continue'] = $this->html->buildElement(
             [
@@ -159,4 +195,3 @@ class ControllerPagesAccountTransactions extends AController
     }
 
 }
-
