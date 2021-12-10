@@ -142,6 +142,7 @@ class ControllerPagesAccountTransactions extends AController
             'customer_id' => (int)$this->customer->getId(),
         ];
         $results = CustomerTransaction::getTransactions($data);
+        $trans_total = $results[0]['total_num_rows'];
         if (count($results)) {
             foreach ($results as $result) {
                 $trans[] = [
@@ -168,7 +169,10 @@ class ControllerPagesAccountTransactions extends AController
                     'total'      => $trans_total,
                     'page'       => $page,
                     'limit'      => $limit,
-                    'url'        => $this->html->getSecureURL('account/transactions', '&limit='.$limit.'&page={page}'),
+                    'url'        => $this->html->getSecureURL(
+                        'account/transactions',
+                        '&date_start='.$this->data['date_start']->value.'&date_end='.$this->data['date_end']->value
+                            .'&limit='.$limit.'&page={page}'),
                     'style'      => 'pagination',
                 ]);
 
