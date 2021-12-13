@@ -23,6 +23,7 @@ namespace abc\controllers\storefront;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\models\customer\CustomerTransaction;
+use Cake\Database\Exception;
 use H;
 
 class ControllerPagesAccountTransactions extends AController
@@ -158,19 +159,9 @@ class ControllerPagesAccountTransactions extends AController
         $trans_total = $results[0]['total_num_rows'];
         if (count($results)) {
             foreach ($results as $result) {
-                $trans[] = [
-                    'customer_transaction_id' => $result['customer_transaction_id'],
-                    'order_id'                => $result['order_id'],
-                    'section'                 => $result['section'],
-                    'credit'                  => $this->currency->format($result['credit']),
-                    'debit'                   => $this->currency->format($result['debit']),
-                    'transaction_type'        => $result['transaction_type'],
-                    'description'             => $result['description'],
-                    'date_added'              => H::dateISO2Display(
-                        $result['date_added'],
-                        $this->language->get('date_format_short')
-                    ),
-                ];
+                $result['credit'] = $this->currency->format($result['credit']);
+                $result['debit'] = $this->currency->format($result['debit']);
+                $trans[] = $result;
             }
 
             $this->data['pagination_bootstrap'] = $this->html->buildElement(
