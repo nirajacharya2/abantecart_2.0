@@ -155,7 +155,7 @@ class ControllerPagesAccountTransactions extends AController
         ];
 
         $results = CustomerTransaction::getTransactions($data);
-
+        $results = $results->toArray();
         $trans_total = $results[0]['total_num_rows'];
         if (count($results)) {
             foreach ($results as $result) {
@@ -190,7 +190,6 @@ class ControllerPagesAccountTransactions extends AController
             $this->view->setTemplate('pages/account/transactions.tpl');
         }
         $this->data['transactions'] = $trans;
-
         $this->data['button_continue'] = $this->html->buildElement(
             [
                 'type'  => 'button',
