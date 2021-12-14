@@ -241,10 +241,9 @@ class ModelReportCustomer extends Model
     public function getCustomerTransactions($data = [], $mode = 'default')
     {
         if ($mode == 'total_only') {
-            $total_sql = 'SELECT COUNT(DISTINCT c.customer_id) as total';
+            $sql = 'SELECT COUNT(DISTINCT c.customer_id) as total';
         } else {
-            $total_sql
-                = "SELECT ".$this->db->raw_sql_row_count()." ct.customer_transaction_id,
+            $sql = "SELECT ".$this->db->raw_sql_row_count()." ct.customer_transaction_id,
                                     c.customer_id,
                                     CONCAT(c.firstname, ' ', c.lastname) AS customer,
                                     ct.date_added,
@@ -257,10 +256,10 @@ class ModelReportCustomer extends Model
                         ";
         }
 
-        $sql = $total_sql." FROM `".$this->db->table_name("customer_transactions")."` ct 
-                                LEFT JOIN `".$this->db->table_name("customers")."` c ON (ct.customer_id = c.customer_id) 
-                                LEFT JOIN `".$this->db->table_name("users")."` u ON u.user_id = ct.created_by 
-                            ";
+        $sql .= " FROM `".$this->db->table_name("customer_transactions")."` ct 
+            LEFT JOIN `".$this->db->table_name("customers")."` c ON (ct.customer_id = c.customer_id) 
+            LEFT JOIN `".$this->db->table_name("users")."` u ON u.user_id = ct.created_by 
+        ";
 
         $filter = ($data['filter'] ?? []);
         $implode = [];
@@ -322,17 +321,11 @@ class ModelReportCustomer extends Model
             if ($data['limit'] < 1) {
                 $data['limit'] = 20;
             }
-            $sql .= " LIMIT ".(int)$data['start'].",".(int)$data['limit'];
+            $sql .= " LIMIT ".(int)$data['start'].",".(int)$data['limit'].";";
         }
 
         $query = $this->db->query($sql);
-        $output = $query->rows;
-        $totalNumRows = $this->db->sql_get_row_count();
-        for ($i = 0; $i < $query->num_rows; $i++) {
-            $output[$i]['total_num_rows'] = $totalNumRows;
-        }
-
-        return $output;
+        return $query->rows;
     }
 
     /**
