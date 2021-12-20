@@ -5,7 +5,7 @@ namespace abc\models\catalog;
 use abc\models\BaseModel;
 use abc\models\order\OrderDownload;
 use abc\models\order\OrderDownloadsHistory;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**

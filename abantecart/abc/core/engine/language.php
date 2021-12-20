@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -30,6 +30,7 @@ use abc\core\lib\AException;
 use abc\models\storefront\ModelLocalisationLanguage;
 use Exception;
 use H;
+use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 
 /**
@@ -112,7 +113,7 @@ class ALanguage
         }
 
         $this->db = $registry->get('db');
-        $this->cache = $registry->get('cache');
+        $this->cache = Registry::cache();
 
         //current active language details
         $this->language_details = $this->getLanguageDetails($this->code);
@@ -213,7 +214,7 @@ class ALanguage
      * @param string $block - RT (block) for corresponding key.
      *                          Block will be loaded to memory if not yet loaded
      *
-     * @return array- Array with key/definition
+     * @return array  Array with key/definition
      * @throws ReflectionException
      * @throws AException
      */
@@ -293,7 +294,7 @@ class ALanguage
     /**
      * Load all information about specified language from language table.
      *
-     * @param string $code - Language two letter code
+     * @param string $code - Language two-letter code
      *
      * @return array - Array with language details
      */
@@ -357,13 +358,13 @@ class ALanguage
                     if (!$browser_language) {
                         continue;
                     }
-                    foreach ($this->getActiveLanguages() as $key => $value) {
+                    foreach ($this->getActiveLanguages() as $value) {
                         $locale = array_map('trim', explode(',', $value['locale']));
                         if (!$locale) {
                             continue;
                         }
                         //match browser language code with AbanteCart language locales
-                        if (preg_grep("/".$browser_language."/i", $locale)) {
+                        if (preg_grep("/^(".$browser_language.")/i", $locale)) {
                             //matching language was found
                             return $value['code'];
                         }
@@ -395,12 +396,7 @@ class ALanguage
         //language code is provided as input. Higher priority
         $request_lang = $request->get['language'] ?? '';
         $request_lang = $request->post['language'] ?? $request_lang;
-        if( isset($_GET['language']) ) {
-            unset($_GET['language']);
-        }
-        if( isset($_POST['language']) ) {
-            unset($_POST['language']);
-        }
+        unset($_GET['language'], $_POST['language']);
 
         if ($request_lang && array_key_exists($request_lang, $languages)) {
             $lang_code = $request_lang;
@@ -493,7 +489,7 @@ class ALanguage
      *
      * @return string
      * @throws AException
-     * @throws ReflectionException
+     * @throws ReflectionException|InvalidArgumentException
      */
     public function getDefaultLanguageCode()
     {
@@ -507,7 +503,7 @@ class ALanguage
      *
      * @return int
      * @throws AException
-     * @throws ReflectionException
+     * @throws ReflectionException|InvalidArgumentException
      */
     public function getDefaultLanguageID()
     {
@@ -743,9 +739,7 @@ class ALanguage
             }
 
             $load_data = $_;
-            if ($this->cache) {
-                $this->cache->push($cache_key, $load_data);
-            }
+            $this->cache?->push($cache_key, $load_data);
         }
 
         ADebug::checkpoint('ALanguage '.$this->language_details['name'].' '.$filename.' is loaded');
@@ -1138,6 +1132,6 @@ class ALanguage
                        AND `language_value` =  '".$data['language_value']."'";
         $exist = $this->db->query($sql);
 
-        return ($exist->num_rows ? true : false);
+        return (bool) $exist->num_rows;
     }
 }

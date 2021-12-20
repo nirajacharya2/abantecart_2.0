@@ -6,7 +6,7 @@ use abc\core\ABC;
 use abc\core\lib\AFile;
 use abc\core\lib\AResourceManager;
 use abc\models\BaseModel;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**

@@ -4,7 +4,7 @@ namespace abc\models\catalog;
 
 use abc\core\engine\AResource;
 use abc\models\BaseModel;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -19,144 +19,157 @@
 ------------------------------------------------------------------------------*/
 
 namespace abc\controllers\admin;
+
 use abc\core\ABC;
 use abc\core\engine\AController;
+use Exception;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+class ControllerCommonPageLayout extends AController
+{
+    protected $installed_blocks = [];
 
-class ControllerCommonPageLayout extends AController{
+    public function main($layout)
+    {
+        // use to init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-	private $installed_blocks = array ();
+        if (!$this->registry->has('layouts_manager_script')) {
+            $this->document->addStyle(
+                [
+                    'href' => ABC::env('RDIR_ASSETS').'css/layouts-manager.css',
+                    'rel'  => 'stylesheet',
+                ]
+            );
 
-	public function main(){
-		// use to init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+            $this->document->addScript(ABC::env('RDIR_ASSETS').'js/jquery/sortable.js');
+            $this->document->addScript(ABC::env('RDIR_ASSETS').'js/layouts-manager.js');
 
-		if (!$this->registry->has('layouts_manager_script')) {
-			$this->document->addStyle(array (
-					'href' => ABC::env('RDIR_ASSETS') . 'css/layouts-manager.css',
-					'rel'  => 'stylesheet'
-			));
+            //set flag to not include scripts/css twice
+            $this->registry->set('layouts_manager_script', true);
+        }
 
-			$this->document->addScript(ABC::env('RDIR_ASSETS') . 'js/jquery/sortable.js');
-			$this->document->addScript(ABC::env('RDIR_ASSETS') . 'js/layouts-manager.js');
+        // set language used
+        $this->session->data['content_language_id'] = $this->config->get('storefront_language_id');
 
-			//set flag to not include scripts/css twice
-			$this->registry->set('layouts_manager_script', true);
-		}
+        // build layout data from passed layout object
+        $this->installed_blocks = $layout->getInstalledBlocks();
 
-		// set language used
-		$this->session->data['content_language_id'] = $this->config->get('storefront_language_id');
+        $layout_main_blocks = $layout->getLayoutBlocks();
+        // Build Page Sections and Blocks
+        $page_sections = $this->_buildPageSections($layout_main_blocks);
 
-		// build layout data from passed layout object
-		$layout = func_get_arg(0);
+        $this->view->batchAssign($page_sections);
+        $this->processTemplate('common/page_layout.tpl');
 
-		$this->installed_blocks = $layout->getInstalledBlocks();
+        // update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
 
-		$layout_main_blocks = $layout->getLayoutBlocks();
-		// Build Page Sections and Blocks
-		$page_sections = $this->_buildPageSections($layout_main_blocks);
+    /**
+     * @param array $sections
+     *
+     * @return array
+     * @throws Exception
+     */
+    private function _buildPageSections($sections)
+    {
+        $page_sections = [];
+        $partialView = $this->view;
 
-		$this->view->batchAssign($page_sections);
-		$this->processTemplate('common/page_layout.tpl');
+        foreach ($sections as $section) {
+            $blocks = $this->_buildBlocks($section['block_id'], $section['children']);
 
-		// update controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-	}
+            $partialView->batchAssign(
+                [
+                    'id'          => $section['instance_id'],
+                    'blockId'     => $section['block_id'],
+                    'name'        => $section['block_txt_id'],
+                    'status'      => $section['status'],
+                    'controller'  => $section['controller'],
+                    'blocks'      => implode('', $blocks),
+                    'addBlockUrl' => $this->html->getSecureURL('design/blocks_manager'),
+                ]
+            );
 
-	/**
-	 * @param array $sections
-	 * @return array
-	 */
-	private function _buildPageSections($sections){
-		$page_sections = array ();
-		$partialView = $this->view;
+            // render partial view
+            $page_sections[$section['block_txt_id']] = $partialView->fetch('common/section.tpl');
+        }
 
-		foreach ($sections as $section) {
-			$blocks = $this->_buildBlocks($section['block_id'], $section['children']);
+        return $page_sections;
+    }
 
-			$partialView->batchAssign(array (
-					'id'          => $section['instance_id'],
-					'blockId'     => $section['block_id'],
-					'name'        => $section['block_txt_id'],
-					'status'      => $section['status'],
-					'controller'  => $section['controller'],
-					'blocks'      => implode('', $blocks),
-					'addBlockUrl' => $this->html->getSecureURL('design/blocks_manager'),
-			));
+    /**
+     * @param array $section_id
+     * @param array $section_blocks
+     *
+     * @return array
+     * @throws Exception
+     */
+    protected function _buildBlocks($section_id, $section_blocks)
+    {
+        $blocks = [];
+        $partialView = $this->view;
 
-			// render partial view
-			$page_sections[$section['block_txt_id']] = $partialView->fetch('common/section.tpl');
-		}
+        if (empty($section_blocks)) {
+            return $blocks;
+        }
 
-		return $page_sections;
-	}
+        foreach ($section_blocks as $block) {
+            $customName = $edit_url = '';
+            $this->loadLanguage('design/blocks');
 
-	/**
-	 * @param array $section_id
-	 * @param array $section_blocks
-	 * @return array
-	 */
-	private function _buildBlocks($section_id, $section_blocks){
-		$blocks = array ();
-		$partialView = $this->view;
+            if ($block['custom_block_id']) {
+                $customName = $this->_getCustomBlockName($block['custom_block_id']);
+                $edit_url = $this->html->getSecureURL(
+                    'design/blocks/edit',
+                    '&custom_block_id='.$block['custom_block_id']
+                );
+            }
 
-		if (empty($section_blocks)) {
-			return $blocks;
-		}
+            //if template for section/block is not present, block is not allowed here.
+            $template_availability = true;
+            if (!$block['template']) {
+                $template_availability = false;
+            }
 
-		foreach ($section_blocks as $block) {
-			$customName = $edit_url = '';
-			$this->loadLanguage('design/blocks');
+            $partialView->batchAssign(
+                [
+                    'id'                    => $block['instance_id'],
+                    'blockId'               => $block['block_id'],
+                    'customBlockId'         => $block['custom_block_id'],
+                    'name'                  => $block['block_txt_id'],
+                    'customName'            => $customName,
+                    'editUrl'               => $edit_url,
+                    'status'                => $block['status'],
+                    'parentBlock'           => $section_id,
+                    'block_info_url'        => $this->html->getSecureURL('design/blocks_manager/block_info'),
+                    'template_availability' => $template_availability,
+                    'validate_url'          => $this->html->getSecureURL(
+                        'design/blocks_manager/validate_block',
+                        '&block_id='.$block['block_id']
+                    ),
+                ]
+            );
 
-			if ($block['custom_block_id']) {
-				$customName = $this->_getCustomBlockName($block['custom_block_id']);
-				$edit_url = $this->html->getSecureURL('design/blocks/edit',
-						'&custom_block_id=' . $block['custom_block_id']);
-			}
+            // render partial view
+            $blocks[] = $partialView->fetch('common/block.tpl');
+        }
 
-			//if template for section/block is not present, block is not allowed here.
-			$template_availability = true;
-			if (!$block['template']) {
-				$template_availability = false;
-			}
+        return $blocks;
+    }
 
-			$partialView->batchAssign(array (
-					'id'                    => $block['instance_id'],
-					'blockId'               => $block['block_id'],
-					'customBlockId'         => $block['custom_block_id'],
-					'name'                  => $block['block_txt_id'],
-					'customName'            => $customName,
-					'editUrl'               => $edit_url,
-					'status'                => $block['status'],
-					'parentBlock'           => $section_id,
-					'block_info_url'        => $this->html->getSecureURL('design/blocks_manager/block_info'),
-					'template_availability' => $template_availability,
-					'validate_url'          => $this->html->getSecureURL(
-							'design/blocks_manager/validate_block',
-							'&block_id=' . $block['block_id']
-					)
-			));
-
-			// render partial view
-			$blocks[] = $partialView->fetch('common/block.tpl');
-		}
-
-		return $blocks;
-	}
-
-	/**
-	 * @param int $custom_block_id
-	 * @return string
-	 */
-	private function _getCustomBlockName($custom_block_id){
-		foreach ($this->installed_blocks as $block) {
-			if ($block['custom_block_id'] == $custom_block_id) {
-				return $block['block_name'];
-			}
-		}
-		return '';
-	}
+    /**
+     * @param int $custom_block_id
+     *
+     * @return string
+     */
+    protected function _getCustomBlockName($custom_block_id)
+    {
+        foreach ($this->installed_blocks as $block) {
+            if ($block['custom_block_id'] == $custom_block_id) {
+                return $block['block_name'];
+            }
+        }
+        return '';
+    }
 }

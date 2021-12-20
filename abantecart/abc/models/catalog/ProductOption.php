@@ -24,7 +24,7 @@ use abc\core\engine\Registry;
 use abc\core\lib\AResourceManager;
 use abc\models\BaseModel;
 use abc\models\QueryBuilder;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**

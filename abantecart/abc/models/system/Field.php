@@ -3,7 +3,7 @@
 namespace abc\models\system;
 
 use abc\models\BaseModel;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**

@@ -30,6 +30,7 @@ use abc\core\lib\ALanguageManager;
 use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
 use abc\core\lib\AError;
+use Exception;
 use H;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Events\Dispatcher;
@@ -45,7 +46,6 @@ if (!isset($_SERVER['HTTP_HOST'])) {
     $_SERVER['HTTP_HOST'] = 'localhost';
 }
 
-
 // Detect https
 if (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] == '1')) {
     ABC::env('HTTPS', true);
@@ -55,9 +55,9 @@ if (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] 
         || $_SERVER['HTTP_X_FORWARDED_SERVER'] == 'ssl')
 ) {
     ABC::env('HTTPS', true);
-} elseif (isset($_SERVER['SCRIPT_URI']) && (substr($_SERVER['SCRIPT_URI'], 0, 5) == 'https')) {
+} elseif (isset($_SERVER['SCRIPT_URI']) && (str_starts_with($_SERVER['SCRIPT_URI'], 'https'))) {
     ABC::env('HTTPS', true);
-} elseif (isset($_SERVER['HTTP_HOST']) && (strpos($_SERVER['HTTP_HOST'], ':443') !== false)) {
+} elseif (isset($_SERVER['HTTP_HOST']) && (str_contains($_SERVER['HTTP_HOST'], ':443'))) {
     ABC::env('HTTPS', true);
 } else {
     ABC::env('HTTPS', false);
@@ -74,7 +74,6 @@ if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
 
 $dir_app = ABC::env('DIR_APP');
 $dir_public = ABC::env('DIR_PUBLIC');
-
 ABC::env(
     [
         'DIR_VENDOR'         => $dir_app.'vendor'.DS,
@@ -95,13 +94,13 @@ ABC::env(
     ]
 );
 
-
-
 //load vendors classes
 require ABC::env('DIR_VENDOR').'autoload.php';
 
 // Error Reporting
 error_reporting(E_ALL);
+// Registry
+$registry = Registry::getInstance();
 $dir_lib = $dir_app.'core'.DS.'lib'.DS;
 require_once $dir_lib.'debug.php';
 ADebug::register();
@@ -123,7 +122,7 @@ if (isset($_GET['rt']) && $_GET['rt']) {
 
 //detect API call
 $path_nodes = explode('/', ABC::env('ROUTE'));
-ABC::env('IS_API', ($path_nodes[0] == 'a' ? true : false));
+ABC::env('IS_API', $path_nodes[0] == 'a');
 
 //Detect the section of the cart to access and build the path definitions
 // s=admin or s=storefront (default nothing)
@@ -226,15 +225,12 @@ ABC::env(
         'DIRNAME_TEMPLATES'   => 'templates'.DS,
         'DIRNAME_TEMPLATE'    => 'template'.DS,
         'DIRNAME_VENDOR'      => 'vendor'.DS,
-        'DIR_ASSETS_EXT'     => $dir_public.'extensions'.DS,
+        'DIR_ASSETS_EXT'      => $dir_public.'extensions'.DS,
     ]
 );
 
 //load base libraries
 require_once __DIR__.DS.'base.php';
-
-// Registry
-$registry = Registry::getInstance();
 
 // Loader
 registerClass($registry, 'load', 'ALoader', [$registry], '\abc\core\engine\ALoader', [$registry]);
@@ -268,20 +264,20 @@ if (php_sapi_name() == 'cli') {
 }
 
 // Cache
+/*registerClass(
+    $registry,
+    'cache',
+    'AbcCache',
+    [ABC::env('CACHE')['driver']],
+    '\abc\core\lib\AbcCache',
+    ['file']
+);*/
+
 registerClass($registry, 'cache', 'ACache', [], '\abc\core\cache\ACache', []);
 $cache_driver = ABC::env('CACHE')['CACHE_DRIVER'];
 $cache_driver = !$cache_driver ? 'file' : $cache_driver;
 $registry->get('cache')->setCacheStorageDriver($cache_driver);
 
-//Laravel cache
-$container = new \Illuminate\Container\Container();
-$container['config'] = [
-    'cache.default' => 'file',
-    'cache.stores.file' => [
-        'driver' => 'file',
-        'path' => ABC:: env('CACHE')['DIR_CACHE']
-    ]
-];
 // To use the file cache driver we need an instance of Illuminate's Filesystem, also stored in the container
 $container['files'] = new Filesystem;
 // Create the CacheManager
@@ -290,7 +286,6 @@ $cache = $cacheManager->store();
 // Or, if you have multiple drivers:
 // $cache = $cacheManager->store('file');
 $registry->set('Cache', $cache);
-
 
 // Config
 registerClass($registry, 'config', 'AConfig', [$registry], '\abc\core\lib\AConfig', [$registry]);
@@ -426,11 +421,11 @@ registerClass(
     'ALayout',
     [$registry, $template],
     "\abc\core\\engine\ALayout",
-    [$registry, $template]);
+    [$registry, $template]
+);
 
 // load download class
 registerClass($registry, 'download', 'ADownload', [], "\abc\core\lib\ADownload", []);
-
 
 //load main language section
 $registry->set('language', $lang_obj);
@@ -438,12 +433,10 @@ $lang_obj->load();
 unset($lang_obj);
 $hook->hk_InitEnd();
 
-
 //load order status class
 registerClass($registry, 'order_status', 'AOrderStatus', [$registry], "\abc\core\lib\AOrderStatus", [$registry]);
 //load order class
 registerClass($registry, 'order', 'AOrder', [$registry], "\abc\core\lib\AOrder", [$registry]);
-
 
 //IM
 
@@ -464,14 +457,14 @@ if (!ABC::env('IS_ADMIN')) { // storefront load
     // Cart
     registerClass($registry, 'cart', 'ACart', [$registry], '\abc\core\lib\ACart', [$registry]);
     $checkout_data = [
-        'cart' => $registry->get('cart'),
-        'customer' => $registry->get('customer'),
-        'guest' => $registry->get('session')->data['guest'],
-        'order_id' => $registry->get('session')->data['order_id'],
+        'cart'                => $registry->get('cart'),
+        'customer'            => $registry->get('customer'),
+        'guest'               => $registry->get('session')->data['guest'],
+        'order_id'            => $registry->get('session')->data['order_id'],
         'shipping_address_id' => $registry->get('session')->data['shipping_address_id'],
-        'shipping_method' => $registry->get('session')->data['shipping_method'],
-        'payment_address_id' => $registry->get('session')->data['payment_address_id'],
-        'payment_method' => $registry->get('session')->data['payment_method']
+        'shipping_method'     => $registry->get('session')->data['shipping_method'],
+        'payment_address_id'  => $registry->get('session')->data['payment_address_id'],
+        'payment_method'      => $registry->get('session')->data['payment_method'],
     ];
     // checkout
     registerClass(
@@ -487,7 +480,7 @@ if (!ABC::env('IS_ADMIN')) { // storefront load
     registerClass($registry, 'user', 'AUser', [$registry], '\abc\core\lib\AUser', [$registry]);
     H::setDBUserVars();
     // checkout
-    registerClass($registry, 'checkout', 'CheckoutAdmin', [$registry,[]], '\abc\core\lib\Checkout', [$registry,[]]);
+    registerClass($registry, 'checkout', 'CheckoutAdmin', [$registry, []], '\abc\core\lib\Checkout', [$registry, []]);
 }// end admin load
 
 // Currency
@@ -498,8 +491,8 @@ registerClass($registry, 'currency', 'ACurrency', [$registry], '\abc\core\lib\AC
  * @var Dispatcher $evd
  */
 $evd = ABC::getObjectByAlias('EventDispatcher');
-if(is_object($evd)) {
-    foreach ((array)ABC::env('EVENTS') as $event_alias => $listeners) {
+if (is_object($evd)) {
+    foreach ((array) ABC::env('EVENTS') as $event_alias => $listeners) {
         foreach ($listeners as $listener) {
             $evd->listen($event_alias, $listener);
         }
@@ -507,26 +500,24 @@ if(is_object($evd)) {
     $registry->set('events', $evd);
 }
 
-
-
 //register ABAC
 /**
  * @var Abac $abac
  */
-$abac = ABC::getObjectByAlias('ABAC', [ $registry ]);
-if(is_object($abac)) {
+$abac = ABC::getObjectByAlias('ABAC', [$registry]);
+if (is_object($abac)) {
     $registry->set('abac', $abac);
-}else{
-    throw new \Exception('Class with alias "ABAC" not found in the classmap!');
+} else {
+    throw new Exception('Class with alias "ABAC" not found in the classmap!');
 }
 
 /**
  * @param Registry $registry
- * @param string   $item_name
- * @param string   $alias
- * @param array    $arguments
- * @param string   $default_class
- * @param array    $default_arguments
+ * @param string $item_name
+ * @param string $alias
+ * @param array $arguments
+ * @param string $default_class
+ * @param array $default_arguments
  *
  * @throws core\lib\AException
  */

@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2021 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -19,8 +19,11 @@
 namespace abc\models;
 
 use abc\core\ABC;
+use abc\core\cache\ACache;
 use abc\core\engine\Registry;
 use abc\core\lib\Abac;
+use abc\core\lib\AConfig;
+use abc\core\lib\ADB;
 use abc\core\lib\AException;
 use Carbon\Carbon;
 use Chelout\RelationshipEvents\Concerns\HasBelongsToEvents;
@@ -31,6 +34,7 @@ use Chelout\RelationshipEvents\Concerns\HasMorphOneEvents;
 use Chelout\RelationshipEvents\Concerns\HasMorphToEvents;
 use Chelout\RelationshipEvents\Concerns\HasMorphToManyEvents;
 use Chelout\RelationshipEvents\Concerns\HasOneEvents;
+use Closure;
 use H;
 use Illuminate\Database\ConnectionResolver;
 use Illuminate\Database\Eloquent\Model as OrmModel;
@@ -42,6 +46,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Validator;
 use ReflectionClass;
+use ReflectionException;
 use ReflectionMethod;
 
 /**
@@ -51,13 +56,13 @@ use ReflectionMethod;
  * @method static QueryBuilder|Builder where(string|array $column, string $operator = null, mixed $value = null, string $boolean = 'and') QueryBuilder
  * @method static QueryBuilder|Builder whereRaw(string $sql) QueryBuilder
  * @method static QueryBuilder|Builder whereIn(string $column, array $keys) QueryBuilder
- * @method static QueryBuilder select(string|array $select = '*' ) QueryBuilder
+ * @method static QueryBuilder select(string|array $select = '*') QueryBuilder
  * @method static QueryBuilder selectRaw(string $sql) QueryBuilder
  * @method static QueryBuilder updateOrCreate(array $data) QueryBuilder
  * @method static QueryBuilder active() QueryBuilder
- * @method static QueryBuilder join( string $table, \Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
- * @method static QueryBuilder leftJoin( string $table, \Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
- * @method static QueryBuilder rightJoin( string $table, \Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
+ * @method static QueryBuilder join(string $table, Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
+ * @method static QueryBuilder leftJoin(string $table, Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
+ * @method static QueryBuilder rightJoin(string $table, Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
  * @const  string DELETED_AT
  */
 class BaseModel extends OrmModel
@@ -103,17 +108,17 @@ class BaseModel extends OrmModel
     protected static $current_language_id;
 
     /**
-     * @var \abc\core\lib\AConfig
+     * @var AConfig
      */
     protected $config;
 
     /**
-     * @var \abc\core\cache\ACache
+     * @var ACache
      */
     protected $cache;
 
     /**
-     * @var \abc\core\lib\ADB
+     * @var ADB
      */
     protected $db;
 
@@ -223,8 +228,8 @@ class BaseModel extends OrmModel
         //set current language for getting single description from relation
         if (!static::$current_language_id) {
             static::$current_language_id = ABC::env('IS_ADMIN')
-                                            ? $this->registry->get('language')->getContentLanguageID()
-                                            : $this->registry->get('language')->getLanguageID();
+                ? $this->registry->get('language')->getContentLanguageID()
+                : $this->registry->get('language')->getLanguageID();
         }
         $this->config = $this->registry->get('config');
         $this->cache = Registry::cache();
@@ -237,10 +242,10 @@ class BaseModel extends OrmModel
         $this->newBaseQueryBuilder();
 
         //process validation rules
-        if($this->actor['user_type_name']) {
-            $userTypeRulesModel = (array)$this->{'rules'.ucfirst($this->actor['user_type_name'])};
+        if ($this->actor['user_type_name']) {
+            $userTypeRulesModel = (array) $this->{'rules'.ucfirst($this->actor['user_type_name'])};
             $ruleAlias = 'rules'.ucfirst($this->actor['user_type_name']);
-            $userTypeRulesEnv = (array)ABC::env('MODEL')['INITIALIZE'][$this->getClass()]['properties'][$ruleAlias];
+            $userTypeRulesEnv = (array) ABC::env('MODEL')['INITIALIZE'][$this->getClass()]['properties'][$ruleAlias];
             $userTypeRules = array_merge($userTypeRulesModel, $userTypeRulesEnv);
 
             if ($userTypeRules) {
@@ -260,7 +265,7 @@ class BaseModel extends OrmModel
     /**
      * @return string
      */
-    public function getClass()
+    static public function getClass()
     {
         return get_called_class();
     }
@@ -270,11 +275,8 @@ class BaseModel extends OrmModel
      */
     public function isUser()
     {
-        return (isset ($this->actor['user_type'])
-            && ($this->actor['user_type'] == self::USER
-                || $this->actor['user_type'] == self::CLI
-            )
-        ) ? true : false;
+        return isset ($this->actor['user_type'])
+                && ($this->actor['user_type'] == self::USER || $this->actor['user_type'] == self::CLI);
     }
 
     /**
@@ -284,10 +286,10 @@ class BaseModel extends OrmModel
      */
     public static function setCurrentLanguageID($language_id)
     {
-        if(!(int)$language_id){
+        if (!(int) $language_id) {
             return false;
         }
-        static::$current_language_id = (int)$language_id;
+        static::$current_language_id = (int) $language_id;
         return true;
     }
 
@@ -304,9 +306,7 @@ class BaseModel extends OrmModel
      */
     public function isCustomer()
     {
-        return (isset ($this->actor['user_type'])
-            && $this->actor['user_type'] == self::CUSTOMER
-        ) ? true : false;
+        return isset ($this->actor['user_type']) && $this->actor['user_type'] == self::CUSTOMER;
     }
 
     /**
@@ -323,7 +323,7 @@ class BaseModel extends OrmModel
     }
 
     /**
-     * @param       $operation
+     * @param string $operation
      *
      * @param array $columns
      *
@@ -331,9 +331,8 @@ class BaseModel extends OrmModel
      */
     public function hasPermission(string $operation, array $columns = ['*']): bool
     {
-
         if ($columns[0] == '*') {
-            $this->affectedColumns = (array)$this->fillable + (array)$this->dates;
+            $this->affectedColumns = (array) $this->fillable + (array) $this->dates;
         } else {
             $this->affectedColumns = $columns;
         }
@@ -342,7 +341,7 @@ class BaseModel extends OrmModel
          * @var Abac $abac
          */
         $abac = $this->registry->get('abac');
-        if(!$abac){
+        if (!$abac) {
             return true;
         }
         $resourceObject = new \stdClass();
@@ -355,7 +354,7 @@ class BaseModel extends OrmModel
     /**
      * Extend save the model to the database.
      *
-     * @param  array $options
+     * @param array $options
      *
      *
      * @throws Exception
@@ -364,10 +363,10 @@ class BaseModel extends OrmModel
     {
         if ($this->hasPermission('update')) {
             //if ($this->validate($this->toArray())) {
-                parent::save();
+            parent::save();
             //}
         } else {
-            throw new \Exception('No permission for object (class '.$this->getClass().') to save the model.');
+            throw new Exception('No permission for object (class '.$this->getClass().') to save the model.');
         }
     }
 
@@ -379,7 +378,7 @@ class BaseModel extends OrmModel
         if ($this->hasPermission('delete')) {
             return parent::delete();
         } else {
-            throw new \Exception('No permission for object to delete the model.');
+            throw new Exception('No permission for object to delete the model.');
         }
     }
 
@@ -399,55 +398,57 @@ class BaseModel extends OrmModel
      *
      * @return bool
      * @throws ValidationException
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws ReflectionException
+     * @throws AException
      */
-    public function validate(array $data= [], array $messages = [], array $customAttributes = [])
+    public function validate(array $data = [], array $messages = [], array $customAttributes = [])
     {
         /*
          * Disable Temporary strict mode of Carbon class (date-conversion)
-         * to prevent it's exception during validation
+         * to prevent exception during validation
          */
         $carbonStrictMode = Carbon::isStrictModeEnabled();
-        Carbon::useStrictMode(false);
+        Carbon::useStrictMode(false); ///????
         $data = !$data ? $this->getDirty() : $data;
 
         if ($rules = $this->rules()) {
-            $validateRules = array_combine(array_keys($rules), array_column($rules,'checks'));
+            $validateRules = array_combine(array_keys($rules), array_column($rules, 'checks'));
 
             //override rule by lambda function to implement logic of rule depends on model data
             //This lambda function must to return Rule validation of
-            foreach($rules as $key => $rule){
-                if($rule['lambda'] instanceof \Closure){
+            foreach ($rules as $key => $rule) {
+                if ($rule['lambda'] instanceof Closure) {
                     $lambdaResult = $rule['lambda']($this);
-                    if(!($lambdaResult instanceof Rule)){
-                        throw new \Exception('Lambda-function as model rule must return instance of '.Rule::class.'!');
+                    if (!($lambdaResult instanceof Rule)) {
+                        throw new Exception('Lambda-function as model rule must return instance of '.Rule::class.'!');
                     }
-                    $validateRules[$key] = [ $lambdaResult ];
+                    $validateRules[$key] = [$lambdaResult];
                 }
             }
 
-            if(!$messages){
-                foreach($rules as $attributeName => $item){
+            if (!$messages) {
+                foreach ($rules as $attributeName => $item) {
                     //check data for confirmation such as password
-                    if( isset($rules[$attributeName.'_confirmation']) ){
+                    if (isset($rules[$attributeName.'_confirmation'])) {
                         $data[$attributeName.'_confirmation'] = $data[$attributeName];
                     }
                     $msg = $item['messages'];
                     if (!is_array($msg)) {
-                        throw new AException('Validation messages not found for attribute '.$attributeName.' of model '
-                            .$this->getClass());
+                        throw new AException(
+                            'Validation messages not found for attribute '.$attributeName.' of model '
+                            .$this->getClass()
+                        );
                     }
-                    foreach($msg as $subRule => $langParams) {
+                    foreach ($msg as $subRule => $langParams) {
                         $subRule = $attributeName.'.'.$subRule;
-                        if($langParams['language_key']) {
+                        if ($langParams['language_key']) {
                             $messages[$subRule] = H::lng(
                                 $langParams['language_key'],
                                 $langParams['language_block'],
                                 $langParams['default_text'],
                                 $langParams['section']
                             );
-                        }else{
+                        } else {
                             $messages[$subRule] = $langParams['default_text'];
                         }
                     }
@@ -466,15 +467,15 @@ class BaseModel extends OrmModel
                 $v->validate();
             } catch (ValidationException $e) {
                 $this->errors['validation'] = $v->errors()->toArray();
-                Carbon::useStrictMode($carbonStrictMode);
+                Carbon::useStrictMode($carbonStrictMode); //????
                 throw $e;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->errors['validator'] = $e->getMessage();
-                Carbon::useStrictMode($carbonStrictMode);
+                Carbon::useStrictMode($carbonStrictMode); //??????
                 throw $e;
             }
         }
-        Carbon::useStrictMode($carbonStrictMode);
+        Carbon::useStrictMode($carbonStrictMode); //??????
         return true;
     }
 
@@ -547,7 +548,7 @@ class BaseModel extends OrmModel
     /**
      * @param array $data
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function updateRelationships(array $data)
     {
@@ -580,7 +581,7 @@ class BaseModel extends OrmModel
 
     /**
      * @param string $relationship_name
-     * @param array  $data
+     * @param array $data
      */
     private function syncHasOneRelationship($relationship_name, array $data)
     {
@@ -614,7 +615,7 @@ class BaseModel extends OrmModel
                     if ($key == $this->primaryKey) {
                         $related[$key] = $this->$key;
                     }
-                    $conditions[$key] = isset($related[$key]) ? $related[$key] : null;
+                    $conditions[$key] = $related[$key] ?? null;
                 }
                 $updated = $relObj->updateOrCreate($conditions, $related);
                 $keys = [];
@@ -628,7 +629,7 @@ class BaseModel extends OrmModel
             $id = $relObj->primaryKey;
             foreach ($data as $related) {
                 $conditions = [
-                    $id => isset($this->$id) ? $this->$id : null,
+                    $id => $this->$id ?? null,
                 ];
                 $presentIds[] = $relObj->updateOrCreate($conditions, $related)->$id;
             }
@@ -638,7 +639,7 @@ class BaseModel extends OrmModel
 
     /**
      * @param string $relationship_name
-     * @param array  $data
+     * @param array $data
      *
      * @return mixed
      */
@@ -653,12 +654,11 @@ class BaseModel extends OrmModel
      * @param string|array $typesOnly - filter output by relation type or few
      *
      * @return array
-     * @throws \ReflectionException
      */
     public static function getRelationships($typesOnly = null)
     {
         $typesOnly = is_string($typesOnly) ? func_get_args() : $typesOnly;
-        $typesOnly = (array)$typesOnly;
+        $typesOnly = (array) $typesOnly;
         foreach ($typesOnly as &$t) {
             $t = strtolower($t);
         }
@@ -688,7 +688,6 @@ class BaseModel extends OrmModel
                     }
                 }
             } catch (Exception $e) {
-
             }
         }
         return $relationships;
@@ -697,11 +696,11 @@ class BaseModel extends OrmModel
     /**
      * Set the keys for a save update query.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param Builder $query
      *
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
-    protected function setKeysForSaveQuery(Builder $query)
+    protected function setKeysForSaveQuery($query)
     {
         if (isset($this->primaryKeySet)) {
             foreach ($this->primaryKeySet as $key) {
@@ -775,7 +774,8 @@ class BaseModel extends OrmModel
      * from extension hooks
      *
      */
-    public function _extendQuery($query){
+    public function _extendQuery($query)
+    {
         return $query;
     }
 }

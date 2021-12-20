@@ -19,7 +19,7 @@ use abc\models\system\TaxClass;
 use Dyrynda\Database\Support\GeneratesUuid;
 use Exception;
 use H;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;

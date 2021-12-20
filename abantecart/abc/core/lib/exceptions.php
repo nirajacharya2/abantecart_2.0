@@ -29,12 +29,12 @@ require_once(ABC::env('DIR_LIB').'exceptions/libException.php');
 require_once(ABC::env('DIR_LIB').'exceptions/exception_codes.php');
 
 $config = [
-    'debug' => (ABC::env('DEBUG') ? true : false),
+    'debug' => (bool) ABC::env('DEBUG'),
 ];
 
 /**
  * @var ExceptionHandlerInterface $exceptionHandler
  */
-$exceptionHandler = ABC::getObjectByAlias('AExceptionHandler', [ $config['debug'] ]);
+$exceptionHandler = ABC::getObjectByAlias('AExceptionHandler', [$config['debug']]);
 
 new AHandleExceptions($config, $exceptionHandler);

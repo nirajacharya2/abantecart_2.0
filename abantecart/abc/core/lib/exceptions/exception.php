@@ -3,11 +3,13 @@
 namespace abc\core\lib;
 
 use abc\core\lib\contracts\ExceptionHandlerInterface;
+use Error;
 use ErrorException;
 use Exception;
 use Symfony\Component\Console\Output\ConsoleOutput;
-use Symfony\Component\Debug\Exception\FatalErrorException;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
+use Symfony\Component\HttpKernel\Exception\FatalErrorException;
+use Throwable;
 
 class AHandleExceptions
 {
@@ -20,7 +22,7 @@ class AHandleExceptions
     /**
      * Bootstrap the given application.
      *
-     * @param array                      $config
+     * @param array $config
      *
      * @param ExceptionHandlerInterface $handler
      *
@@ -31,20 +33,19 @@ class AHandleExceptions
         $this->registry = $config;
         $this->handler = $handler;
 
-        error_reporting(E_ALL & ~E_NOTICE);
-        set_error_handler([$this, 'handleError'], E_ALL & ~E_NOTICE);
+        error_reporting(E_ERROR);
+        set_error_handler([$this, 'handleError'], E_ERROR);
         set_exception_handler([$this, 'handleException']);
         register_shutdown_function([$this, 'handleShutdown']);
-
     }
 
     /**
      * Convert PHP errors to ErrorException instances.
      *
-     * @param  int    $level
-     * @param  string $message
-     * @param  string $file
-     * @param  int    $line
+     * @param int $level
+     * @param string $message
+     * @param string $file
+     * @param int $line
      *
      * @return void
      *
@@ -65,14 +66,13 @@ class AHandleExceptions
      * the HTTP and Console kernels. But, fatal error exceptions must
      * be handled differently since they are not normal exceptions.
      *
-     * @param  \Throwable $e
+     * @param Throwable $e
      *
      * @return void
-     * @throws AException
      */
     public function handleException($e)
     {
-        if (!$e instanceof Exception) {
+        if (!$e instanceof Exception && !$e instanceof Error) {
             $e = new FatalThrowableError($e);
         }
 
@@ -96,10 +96,9 @@ class AHandleExceptions
     /**
      * Render an exception to the console.
      *
-     * @param  \Exception $e
+     * @param Exception $e
      *
      * @return void
-     * @throws AException
      */
     protected function renderForConsole(Exception $e)
     {
@@ -109,12 +108,11 @@ class AHandleExceptions
     /**
      * Render an exception as an HTTP response and send it.
      *
-     * @param  \Exception $e
+     * @param Exception|Error $e
      *
      * @return void
-     * @throws AException
      */
-    protected function renderHttpResponse(Exception $e)
+    protected function renderHttpResponse(Exception|Error $e)
     {
         $this->getExceptionHandler()->render($e, 'http');
     }
@@ -123,7 +121,6 @@ class AHandleExceptions
      * Handle the PHP shutdown event.
      *
      * @return void
-     * @throws AException
      */
     public function handleShutdown()
     {
@@ -135,10 +132,10 @@ class AHandleExceptions
     /**
      * Create a new fatal exception instance from an error array.
      *
-     * @param  array    $error
-     * @param  int|null $traceOffset
+     * @param array $error
+     * @param int|null $traceOffset
      *
-     * @return \Symfony\Component\Debug\Exception\FatalErrorException
+     * @return FatalErrorException
      */
     protected function fatalExceptionFromError(array $error, $traceOffset = null)
     {
@@ -150,7 +147,7 @@ class AHandleExceptions
     /**
      * Determine if the error type is fatal.
      *
-     * @param  int $type
+     * @param int $type
      *
      * @return bool
      */
