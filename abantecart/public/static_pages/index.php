@@ -54,7 +54,7 @@ ABC::env('HTTP_ABANTECART', 'http://'.$_SERVER['HTTP_HOST'].dirname($dirname, 2)
 
 //check if this is admin and show option to report this issue 
 $from_admin = false;
-$session_id = '';
+$session_id = 'AC_';
 if (isset($_GET['mode']) && $_GET['mode'] == 'admin') {
     $from_admin = true;
 }

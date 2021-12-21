@@ -7,8 +7,8 @@ use Error;
 use ErrorException;
 use Exception;
 use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Debug\Exception\FatalErrorException;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
-use Symfony\Component\HttpKernel\Exception\FatalErrorException;
 use Throwable;
 
 class AHandleExceptions
@@ -16,8 +16,8 @@ class AHandleExceptions
     /**
      * The ABC instance.
      */
-    protected $registry;
-    protected $handler;
+    protected array $registry;
+    protected ExceptionHandlerInterface $handler;
 
     /**
      * Bootstrap the given application.

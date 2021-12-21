@@ -278,6 +278,15 @@ $cache_driver = ABC::env('CACHE')['CACHE_DRIVER'];
 $cache_driver = !$cache_driver ? 'file' : $cache_driver;
 $registry->get('cache')->setCacheStorageDriver($cache_driver);
 
+//Laravel cache
+$container = new \Illuminate\Container\Container();
+$container['config'] = [
+    'cache.default' => 'file',
+    'cache.stores.file' => [
+        'driver' => 'file',
+        'path' => ABC:: env('CACHE')['DIR_CACHE']
+    ]
+];
 // To use the file cache driver we need an instance of Illuminate's Filesystem, also stored in the container
 $container['files'] = new Filesystem;
 // Create the CacheManager

@@ -1549,7 +1549,7 @@ class AData
             // Date validation
             // TODO Add field type to table configuration
             if ($col_name == 'date_added' || $col_name == 'date_modified') {
-                if ((string)$col_value == '0000-00-00 00:00:00') {
+                if ((string)$col_value == '') {
                     $cols[] = "`".$col_name."` = '".$this->db->escape($col_value)."'";
                 } else {
                     $cols[] = "`".$col_name."` = '".date('Y-m-d H:i:s', strtotime($col_value))."'";
