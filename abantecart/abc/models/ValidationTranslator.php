@@ -20,7 +20,10 @@ namespace abc\models;
 
 use abc\core\engine\ALanguage;
 use abc\core\engine\Registry;
+use abc\core\lib\AException;
+use Countable;
 use Illuminate\Contracts\Translation\Translator;
+use ReflectionException;
 
 class ValidationTranslator implements Translator
 {
@@ -39,16 +42,18 @@ class ValidationTranslator implements Translator
     /**
      * Get the translation for a given key.
      *
-     * @param  string $key
-     * @param  array $replace
-     * @param  string $locale
+     * @param string $key
+     * @param array $replace
+     * @param null $locale
      *
      * @return mixed
+     * @throws ReflectionException
+     * @throws AException
      */
     public function trans($key, array $replace = [], $locale = null)
     {
         $parts = explode('.',$key);
-        $field_name = isset($parts[2]) ? $parts[2] : null;
+        $field_name = $parts[2] ?? null;
         if($field_name) {
             return $this->language->get('error_'.$field_name);
         }else{
@@ -61,7 +66,7 @@ class ValidationTranslator implements Translator
      * Get a translation according to an integer value.
      *
      * @param  string $key
-     * @param  int|array|\Countable $number
+     * @param  int|array|Countable $number
      * @param  array $replace
      * @param  string $locale
      *
@@ -92,5 +97,28 @@ class ValidationTranslator implements Translator
     public function setLocale($locale)
     {
     }
+    //TODO: check realization in laravel!
+    /**
+     * Get the translation for a given key.
+     *
+     * @param  string  $key
+     * @param  array  $replace
+     * @param  string|null  $locale
+     * @return mixed
+     */
+    public function get($key, array $replace = [], $locale = null)
+    {}
+
+    /**
+     * Get a translation according to an integer value.
+     *
+     * @param  string  $key
+     * @param  \Countable|int|array  $number
+     * @param  array  $replace
+     * @param  string|null  $locale
+     * @return string
+     */
+    public function choice($key, $number, array $replace = [], $locale = null)
+    {}
 
 }

@@ -16,7 +16,7 @@ use abc\tests\unit\ATestCase;
 class CustomerCommunicationTest extends ATestCase
 {
 
-    protected function tearDown()
+    protected function tearDown():void
     {
         //init
     }

@@ -48,6 +48,7 @@ use Illuminate\Validation\Validator;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
+use stdClass;
 
 /**
  * Class BaseModel
@@ -131,7 +132,7 @@ class BaseModel extends OrmModel
      * @var string
      */
     /**
-     * @var RBAC-ABAC policy setup
+     * @var //RBAC-ABAC policy setup
      *
      */
     protected $policyGroup, $policyObject;
@@ -150,6 +151,11 @@ class BaseModel extends OrmModel
      * @var array Data Validation rules
      */
     protected $rules = [];
+
+    /**
+     * @var array of field list for 3dParty js such as vue.js etc
+     */
+    protected $fields = [];
 
     /**
      *
@@ -415,7 +421,7 @@ class BaseModel extends OrmModel
             $validateRules = array_combine(array_keys($rules), array_column($rules, 'checks'));
 
             //override rule by lambda function to implement logic of rule depends on model data
-            //This lambda function must to return Rule validation of
+            //This lambda-function must to return Rule validation of
             foreach ($rules as $key => $rule) {
                 if ($rule['lambda'] instanceof Closure) {
                     $lambdaResult = $rule['lambda']($this);
@@ -548,7 +554,6 @@ class BaseModel extends OrmModel
     /**
      * @param array $data
      *
-     * @throws ReflectionException
      */
     public function updateRelationships(array $data)
     {

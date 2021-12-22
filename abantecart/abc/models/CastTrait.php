@@ -59,8 +59,8 @@ trait CastTrait
             case 'array':
             case 'json':
                 return $this->fromJson($value);
-            case 'collection':
-                return new BaseCollection($this->fromJson($value));
+//            case 'collection':
+//                return new BaseCollection($this->fromJson($value));
             case 'date':
                 return $this->asDate($value);
             case 'datetime':

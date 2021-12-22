@@ -10,7 +10,8 @@ use Illuminate\Validation\ValidationException;
 class CustomerModelTest extends ATestCase{
 
 
-    protected function setUp(){
+    protected function setUp():void
+    {
         //init
     }
 

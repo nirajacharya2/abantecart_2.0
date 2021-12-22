@@ -31,7 +31,7 @@ use abc\tests\unit\ATestCase;
 class testCurrencyModel extends ATestCase
 {
 
-    protected function tearDown()
+    protected function tearDown():void
     {
         //init
     }
