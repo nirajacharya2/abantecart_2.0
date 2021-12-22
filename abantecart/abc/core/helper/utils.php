@@ -923,6 +923,7 @@ class AHelperUtils extends AHelper
         if (!$data['merchant']) {
             return false;
         }
+        unset(Registry::session()->data['curl_handler']);
         session_write_close();
         $session = new ASession(ABC::env('UNIQUE_ID')
             ? 'AC_SF_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10))
