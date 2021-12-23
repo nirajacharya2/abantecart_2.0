@@ -98,7 +98,7 @@ ABC::env(
 require ABC::env('DIR_VENDOR').'autoload.php';
 
 // Error Reporting
-error_reporting(E_ALL);
+error_reporting(E_ERROR & ~E_NOTICE);
 // Registry
 $registry = Registry::getInstance();
 $dir_lib = $dir_app.'core'.DS.'lib'.DS;

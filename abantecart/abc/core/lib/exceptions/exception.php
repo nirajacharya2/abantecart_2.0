@@ -33,7 +33,7 @@ class AHandleExceptions
         $this->registry = $config;
         $this->handler = $handler;
 
-        error_reporting(E_ERROR);
+        error_reporting(E_ERROR & ~E_NOTICE);
         set_error_handler([$this, 'handleError'], E_ERROR);
         set_exception_handler([$this, 'handleException']);
         register_shutdown_function([$this, 'handleShutdown']);

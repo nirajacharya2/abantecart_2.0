@@ -36,5 +36,6 @@ $config = [
  * @var ExceptionHandlerInterface $exceptionHandler
  */
 $exceptionHandler = ABC::getObjectByAlias('AExceptionHandler', [$config['debug']]);
-
-new AHandleExceptions($config, $exceptionHandler);
+if($exceptionHandler) {
+    new AHandleExceptions($config, $exceptionHandler);
+}
