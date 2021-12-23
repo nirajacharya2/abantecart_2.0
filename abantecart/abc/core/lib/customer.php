@@ -19,7 +19,10 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
+use abc\core\cache\ACache;
 use abc\core\engine\ALanguage;
+use abc\core\engine\ALoader;
+use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
 use abc\models\customer\Address;
 use abc\models\customer\Customer;
@@ -29,9 +32,11 @@ use abc\models\customer\CustomerTransaction;
 use abc\models\storefront\ModelCatalogContent;
 use abc\models\storefront\ModelToolOnlineNow;
 use abc\modules\events\ABaseEvent;
+use Exception;
 use H;
 use Illuminate\Validation\ValidationException;
 use ReCaptcha\ReCaptcha;
+use ReflectionException;
 
 /**
  * Class ACustomer
@@ -96,7 +101,7 @@ class ACustomer extends ALibBase
      */
     protected $config;
     /**
-     * @var \abc\core\cache\ACache
+     * @var ACache
      */
     protected $cache;
     /**
@@ -104,7 +109,7 @@ class ACustomer extends ALibBase
      */
     protected $db;
     /**
-     * @var \abc\core\engine\ALoader
+     * @var ALoader
      */
     protected $load;
     /**
@@ -120,7 +125,7 @@ class ACustomer extends ALibBase
      */
     protected $dcrypt;
     /**
-     * @var \abc\core\engine\ExtensionsApi
+     * @var ExtensionsApi
      */
     protected $extensions;
 
@@ -130,11 +135,11 @@ class ACustomer extends ALibBase
     protected $unauth_customer = [];
 
     /**
-     * @param  \abc\core\engine\Registry $registry
+     * @param Registry $registry
      *
      * @param int $customer_id
      *
-     * @throws AException
+     * @throws AException|ReflectionException
      */
     public function __construct($registry, $customer_id = 0)
     {
@@ -260,7 +265,7 @@ class ACustomer extends ALibBase
 
             //set cookie for unauthenticated user (expire in 1 year)
             /**
-             * @var AEncryption $enc
+             * @var AEncryption $encryption
              */
             $encryption = ABC::getObjectByAlias('AEncryption', [$config->get('encryption_key')]);
             $customer_data = $encryption->encrypt(serialize([
@@ -529,7 +534,7 @@ class ACustomer extends ALibBase
     }
 
     /**
-     * @return mixed
+     * @return int
      */
     public function getNewsletter()
     {
@@ -597,7 +602,7 @@ class ACustomer extends ALibBase
      * Return customer account balance in customer currency based on debit/credit calculation
      *
      * @return float|bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function getBalance()
     {
@@ -614,7 +619,7 @@ class ACustomer extends ALibBase
      * @param array $data - amount, order_id, transaction_type, description, comments, creator
      *
      * @return bool
-     * @throws \Exception|ValidationException
+     * @throws Exception|ValidationException
      */
     public function debitTransaction($data)
     {
@@ -629,7 +634,7 @@ class ACustomer extends ALibBase
      * @param array $data - amount, order_id, transaction_type, description, comments, creator
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function creditTransaction($data)
     {
@@ -676,7 +681,7 @@ class ACustomer extends ALibBase
      * Confirm that current customer is valid
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function isValidEnabledCustomer()
     {
@@ -699,7 +704,7 @@ class ACustomer extends ALibBase
      * Get cart content
      *
      * @return array()
-     * @throws \Exception
+     * @throws Exception
      */
     public function getCustomerCart()
     {
@@ -780,7 +785,7 @@ class ACustomer extends ALibBase
      * Clear cart from database content
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function clearCustomerCart()
     {
@@ -810,7 +815,7 @@ class ACustomer extends ALibBase
             return false;
         }
         $keys = array_keys($cart_data);
-        if (is_array($keys) && !empty($keys)) {
+        if (!empty($keys)) {
             foreach ($keys as $k) {
                 if (is_int(strpos($k, 'store_'))) {
                     return true;
@@ -827,7 +832,7 @@ class ACustomer extends ALibBase
      * @param int $product_id
      *
      * @return null
-     * @throws \Exception
+     * @throws Exception
      */
     public function addToWishList($product_id)
     {
@@ -847,7 +852,7 @@ class ACustomer extends ALibBase
      * @param int $product_id
      *
      * @return null
-     * @throws \Exception
+     * @throws Exception
      */
     public function removeFromWishList($product_id)
     {
@@ -867,7 +872,7 @@ class ACustomer extends ALibBase
      * @param array $whishlist
      *
      * @return null
-     * @throws \Exception
+     * @throws Exception
      */
     public function saveWishList($whishlist = [])
     {
@@ -886,7 +891,7 @@ class ACustomer extends ALibBase
      * Get cart content
      *
      * @return array()
-     * @throws \Exception
+     * @throws Exception
      */
     public function getWishList()
     {
@@ -910,7 +915,7 @@ class ACustomer extends ALibBase
      * @param array $data - amount, order_id, transaction_type, description, comments, creator
      *
      * @return bool
-     * @throws \Exception|ValidationException
+     * @throws Exception
      */
     protected function recordTransaction($data)
     {
@@ -931,7 +936,7 @@ class ACustomer extends ALibBase
             $transaction_id = $transaction->customer_transaction_id;
         } catch (ValidationException $e) {
             $errors = [];
-            \H::SimplifyValidationErrors($transaction->errors()['validation'], $errors);
+            H::SimplifyValidationErrors($transaction->errors()['validation'], $errors);
             Registry::log()->write(var_export($errors, true));
             return false;
         }
@@ -946,7 +951,7 @@ class ACustomer extends ALibBase
      * @return Customer
      * @throws AException
      * @throws ValidationException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public static function createCustomer($data, $subscribe_only = false)
     {
@@ -954,9 +959,6 @@ class ACustomer extends ALibBase
          * @var AConfig $config
          */
         $config = Registry::config();
-        /**
-         * @var ADB $db
-         */
         $db = Registry::db();
         if (!$config || !$db) {
             throw new AException('AConfig or ADB not found!');
@@ -1030,7 +1032,7 @@ class ACustomer extends ALibBase
         }catch(ValidationException $e){
             $db->rollback();
             throw $e;
-        }catch(\Exception $e){
+        }catch(Exception $e){
             $db->rollback();
             throw new AException(__CLASS__.': '.$e->getMessage(), 0, __FILE__);
         }
@@ -1064,7 +1066,7 @@ class ACustomer extends ALibBase
      *
      * @return bool
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function editCustomer( $data )
     {
@@ -1082,9 +1084,6 @@ class ACustomer extends ALibBase
         $language->load( 'common/im' );
 
         //get existing data and compare
-        /**
-         * @var $customer Customer
-         */
         $customer = Customer::find($customer_id);
         foreach ( $customer->toArray() as $rec => $val ) {
             if (!empty($data['loginname']) && $rec == 'loginname' && $val != $data['loginname']) {
@@ -1122,7 +1121,7 @@ class ACustomer extends ALibBase
      *
      * @return bool
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function editPassword( $loginname, $password )
     {
@@ -1146,7 +1145,7 @@ class ACustomer extends ALibBase
     }
 
     /**
-     * @return \abc\models\customer\Customer
+     * @return Customer
      */
     public function model()
     {
@@ -1182,7 +1181,7 @@ class ACustomer extends ALibBase
      *
      * @return array
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public static function validateRegistrationData( $data )
     {
@@ -1259,7 +1258,7 @@ class ACustomer extends ALibBase
         if ($im_drivers) {
             foreach ($im_drivers as $protocol => $driver_obj) {
                 /**
-                 * @var \abc\core\lib\AMailIM $driver_obj
+                 * @var AMailIM $driver_obj
                  */
                 if (!is_object($driver_obj) || $protocol == 'email') {
                     continue;
@@ -1280,7 +1279,7 @@ class ACustomer extends ALibBase
      *
      * @return array
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public static function validateSubscribeData( $data )
     {
@@ -1329,7 +1328,7 @@ class ACustomer extends ALibBase
         if ($im_drivers) {
             foreach ($im_drivers as $protocol => $driver_obj) {
                 /**
-                 * @var \abc\core\lib\AMailIM $driver_obj
+                 * @var AMailIM $driver_obj
                  */
                 if (!is_object($driver_obj) || $protocol == 'email') {
                     continue;

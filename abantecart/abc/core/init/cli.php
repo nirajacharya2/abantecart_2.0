@@ -27,6 +27,9 @@ use Exception;
 use H;
 use Illuminate\Events\Dispatcher;
 
+// Error Reporting
+error_reporting(E_ERROR & ~E_NOTICE);
+
 // do check for vendor autoload file first
 if (!is_file(dirname(__DIR__, 2).DS.'vendor'.DS.'autoload.php')) {
     echo "Initialisation...\n";

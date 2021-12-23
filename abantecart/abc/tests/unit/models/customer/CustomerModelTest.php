@@ -8,7 +8,7 @@ use Illuminate\Validation\ValidationException;
  * Class CustomerModelTest
  */
 class CustomerModelTest extends ATestCase{
-
+    const PASSWORD = '1234567890';
 
     protected function setUp():void
     {
@@ -42,7 +42,7 @@ class CustomerModelTest extends ATestCase{
             $errors = $customer->errors()['validation'];
         }
 
-        $this->assertEquals(11, count($errors));
+        $this->assertCount(11, $errors);
 
         //validate with customer_id
 
@@ -64,20 +64,21 @@ class CustomerModelTest extends ATestCase{
             $errors = $customer->errors()['validation'];
         }
 
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
     }
 
     public function testUpdate()
     {
-        /**
-         * @var Customer $customer
-         */
         $customer = Customer::find(9);
+        $customer->update(
+                    [
+                        'sms' => '123456789',
+                        'password' => microtime()]);
         $customer->update(
             [
                 'sms' => '123456789',
-                'password' => '1234567890',
+                'password' => self::PASSWORD,
                 'loginname' => 'unittest',
                 'email' => 'unittest@abantecart.com'
             ]
@@ -95,7 +96,7 @@ class CustomerModelTest extends ATestCase{
             $errors = $customer->errors()['validation'];
             var_Dump($errors);
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
         try {
             //change customer and try check unique loginname for him
@@ -104,14 +105,11 @@ class CustomerModelTest extends ATestCase{
         }catch (ValidationException $e){
             $errors = $customer->errors()['validation'];
         }
-        $this->assertEquals(1, count($errors));
+        $this->assertCount(1, $errors);
 
     }
 
     public function testEditCustomerNotifications(){
-        /**
-         * @var Customer $customer
-         */
         $customer = Customer::find(2);
         $customer->editCustomerNotifications(['sms'=>'qwqwqw']);
         $this->assertEquals('qwqwqw', $customer->sms);
@@ -311,10 +309,10 @@ class CustomerModelTest extends ATestCase{
                 'filter' => [
                     'search_operator' => 'equal',
                     'loginname'=> 'unittest',
-                    'password' => '1234567890'
+                    'password' => self::PASSWORD
                 ],
                 'limit'=> 1 ]);
-        $this->assertEquals(1, count($account));
+        $this->assertCount(1, $account);
         $this->assertEquals(9, $account->first()->customer_id);
 
     }
@@ -322,10 +320,10 @@ class CustomerModelTest extends ATestCase{
     public function testGetCustomersByProduct()
     {
         $result = Customer::getCustomersByProduct(51);
-        $this->assertEquals(2, count($result));
+        $this->assertCount(2, $result);
 
         $result = Customer::getCustomersByProduct(66);
-        $this->assertEquals(1, count($result));
+        $this->assertCount(1, $result);
     }
 
     public function testIsUniqueLoginName()

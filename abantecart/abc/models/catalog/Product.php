@@ -4,9 +4,10 @@ namespace abc\models\catalog;
 
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
-use abc\core\lib\ADB;
+use abc\core\lib\AException;
 use abc\models\BaseModel;
 use abc\core\engine\AResource;
+use abc\models\casts\Serialized;
 use abc\models\locale\LengthClass;
 use abc\models\locale\WeightClass;
 use abc\models\order\CouponsProduct;
@@ -16,13 +17,19 @@ use abc\models\system\Audit;
 use abc\models\system\Setting;
 use abc\models\system\Store;
 use abc\models\system\TaxClass;
+use Carbon\Carbon;
 use Dyrynda\Database\Support\GeneratesUuid;
 use Exception;
 use H;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
+use ReflectionException;
 
 /**
  * Class Product
@@ -42,7 +49,7 @@ use Illuminate\Support\Collection;
  * @property float                         $shipping_price
  * @property float                         $price
  * @property int                           $tax_class_id
- * @property \Carbon\Carbon                $date_available
+ * @property Carbon                        $date_available
  * @property float                         $weight
  * @property int                           $weight_class_id
  * @property float                         $length
@@ -58,8 +65,8 @@ use Illuminate\Support\Collection;
  * @property float                         $cost
  * @property int                           $call_to_order
  * @property string                        $settings
- * @property \Carbon\Carbon                $date_added
- * @property \Carbon\Carbon                $date_modified
+ * @property Carbon                $date_added
+ * @property Carbon                $date_modified
  * @property ProductDescription            $description
  * @property ProductDescription            $descriptions
  * @property Collection                    $categories
@@ -195,7 +202,7 @@ class Product extends BaseModel
         'product_id'        => 'integer',
         'model'             => 'string|max:64',
         //NOTE
-        //if need sku as mandatory use "present" instead "required"
+        //use "present" instead "required" if you need sku as mandatory
         'sku'               => 'string|max:64|nullable',
         'location'          => 'string|max:128',
         'quantity'          => 'integer',
@@ -636,7 +643,7 @@ class Product extends BaseModel
      * @param array $options
      *
      * @return bool|void
-     * @throws \Exception
+     * @throws Exception
      */
     public function save(array $options = [])
     {
@@ -649,7 +656,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function coupons()
     {
@@ -657,7 +664,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function descriptions()
     {
@@ -665,7 +672,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return HasOne
      */
     public function description()
     {
@@ -674,7 +681,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function discounts()
     {
@@ -682,7 +689,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function options()
     {
@@ -690,7 +697,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function option_descriptions()
     {
@@ -698,7 +705,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function option_values()
     {
@@ -706,7 +713,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function option_value_descriptions()
     {
@@ -714,7 +721,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function specials()
     {
@@ -722,7 +729,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function tags()
     {
@@ -730,7 +737,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function tagLanguaged()
     {
@@ -739,7 +746,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return HasOne
      */
     public function featured()
     {
@@ -747,7 +754,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function related()
     {
@@ -755,7 +762,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function reviews()
     {
@@ -763,7 +770,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return BelongsToMany
      */
     public function categories()
     {
@@ -771,7 +778,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return HasOne
      */
     public function manufacturer()
     {
@@ -779,7 +786,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return BelongsToMany
      */
     public function downloads()
     {
@@ -787,7 +794,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return BelongsToMany
      */
     public function stores()
     {
@@ -795,7 +802,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     * @return MorphMany
      */
     public function attributes()
     {
@@ -823,8 +830,8 @@ class Product extends BaseModel
 
     /**
      * @return array
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function getProductCategories()
     {
@@ -872,6 +879,8 @@ class Product extends BaseModel
 
     /**
      * @return array
+     * @throws AException
+     * @throws ReflectionException
      */
     public function getStockCheckouts()
     {
@@ -936,8 +945,8 @@ class Product extends BaseModel
 
     /**
      * @return mixed
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function getAllData()
     {
@@ -966,8 +975,8 @@ class Product extends BaseModel
 
     /**
      * @return mixed
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function thumbnail()
     {
@@ -987,8 +996,8 @@ class Product extends BaseModel
 
     /**
      * @return array
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function images()
     {
@@ -1077,7 +1086,7 @@ class Product extends BaseModel
                     $notrack_qnt += 10000000;
                     continue;
                 }
-                $total_quantity += $row->quantity < 0 ? 0 : $row->quantity;
+                $total_quantity += max($row->quantity, 0);
             }
         } else {
             //get product quantity without options
@@ -1118,7 +1127,7 @@ class Product extends BaseModel
      * @param array $data - nested array of options with descriptions, values and value descriptions
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function replaceOptions($data)
     {
@@ -1239,12 +1248,12 @@ class Product extends BaseModel
     /**
      * @param array $product_data
      *
-     * @return int
+     * @return int|false
      * @throws Exception
      */
     public static function createProduct(array $product_data)
     {
-        if (!isset($product_data['product_store']) || empty($product_data['product_store'])) {
+        if (empty($product_data['product_store'])) {
             $product_data['product_store'] = [0 => 0];
         }
         $product = new Product($product_data);
@@ -1258,6 +1267,7 @@ class Product extends BaseModel
             self::updateProductLinks($product, $product_data);
             return $productId;
         }
+        return false;
     }
 
     /**
@@ -1281,7 +1291,7 @@ class Product extends BaseModel
         // Temporary solution for serializing of additional columns from extensions
         $casts = $product->getCasts();
         foreach($product_data as $k=>&$v){
-            if($casts[$k] == 'serialized' && !is_string($v)){
+            if(in_array($casts[$k],[ 'serialized', Serialized::class]) && !is_string($v)){
                 $v = serialize($v);
             }
         }
@@ -1301,7 +1311,7 @@ class Product extends BaseModel
         }
 
         $attributes = array_filter($product_data, function ($k) {
-            return (strpos($k, 'attribute_') === 0);
+            return (str_starts_with($k, 'attribute_'));
         }, ARRAY_FILTER_USE_KEY);
 
         if (is_array($attributes) && !empty($attributes) && $product_data['product_type_id']) {
@@ -1438,6 +1448,8 @@ class Product extends BaseModel
      * @param int $productId
      *
      * @return array|bool
+     * @throws ReflectionException
+     * @throws AException
      */
     public static function getProductTypeSettings(int $productId)
     {
@@ -1548,7 +1560,7 @@ class Product extends BaseModel
                                    ]
                                )->active()
                                 ->orderBy('sort_order');
-        //allow to extends this method from extensions
+        //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
 
         $productOptions = $query->get()->toArray();
@@ -1564,12 +1576,11 @@ class Product extends BaseModel
      * @param array $data
      *
      * @return array|bool|false|mixed
+     * @throws AException
+     * @throws ReflectionException
      */
     public static function getBestSellerProductIds(array $data)
     {
-        /**
-         * @var ADB $db
-         */
         $db = Registry::db();
         $cache = Registry::getInstance()->get('cache');
         $config = Registry::getInstance()->get('config');
@@ -1601,9 +1612,8 @@ class Product extends BaseModel
                 ->groupBy('order_products.product_id')
                 ->orderBy($db->raw('SUM('.$aliasOP.'.quantity) '), 'DESC');
 
-            //allow to extends this method from extensions
+            //allow to extend this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $data);
-            /** @var Collection $result_rows */
             $result_rows = $query->get();
             if ($result_rows) {
                 $product_data = $result_rows->toArray();
@@ -1618,6 +1628,8 @@ class Product extends BaseModel
      * @param array $data
      *
      * @return array|bool|false|mixed
+     * @throws AException
+     * @throws ReflectionException
      */
     public static function getBestSellerProducts(array $data)
     {
@@ -1627,9 +1639,6 @@ class Product extends BaseModel
         $start = (int)$data['start'];
         $sort = $data['sort'];
         $total = $data['total'];
-        /**
-         * @var ADB $db
-         */
         $db = Registry::db();
         $cache = Registry::getInstance()->get('cache');
         $config = Registry::getInstance()->get('config');
@@ -1656,9 +1665,6 @@ class Product extends BaseModel
 
             $bestSellerIds = self::getBestSellerProductIds($data);
 
-            /**
-             * @var QueryBuilder $query
-             */
             $query = self::selectRaw($db->raw_sql_row_count()." ".$aliasPD.".*")
                 ->addSelect($select)
                 ->leftJoin('product_descriptions', function ($subQuery) use ($language_id) {
@@ -1712,7 +1718,7 @@ class Product extends BaseModel
                 $query = $query->offset($start)->limit($limit);
             }
 
-            //allow to extends this method from extensions
+            //allow to extend this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $data);
             $result_rows = $query->get();
             if ($result_rows) {
@@ -1727,14 +1733,13 @@ class Product extends BaseModel
      * @param array $productIds
      *
      * @return array
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws ReflectionException
+     * @throws AException
      */
     public static function getProductsAllInfo(array $productIds)
     {
         $result = [];
         foreach ($productIds as $productId) {
-            /** @var Category $category */
             $category = Category::find($productId);
             if ($category) {
                 $result[] = $category->getAllData();

@@ -68,7 +68,7 @@ use stdClass;
  */
 class BaseModel extends OrmModel
 {
-    use CastTrait;
+    //use CastTrait;
     use HasOneEvents,
         HasBelongsToEvents,
         HasManyEvents,
