@@ -28,7 +28,8 @@ class OrderHistoryModelTest extends ATestCase
                 'comment'         => [],
                 'order_status_id' => 'fail',
             ];
-            $order = new OrderHistory($data);
+            $order = new OrderHistory();
+            $order->fill($data);
             $order->validate();
         } catch (ValidationException $e) {
             $errors = $order->errors()['validation'];

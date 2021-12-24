@@ -182,7 +182,7 @@ class AExceptionHandler implements ExceptionHandlerInterface
      */
     public function renderForConsole($output, Exception|Error $e)
     {
-        (new ConsoleApplication)->renderException($e, $output);
+        (new ConsoleApplication)->renderThrowable( $e, $output);
     }
 
     /**
