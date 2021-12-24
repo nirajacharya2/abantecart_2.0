@@ -245,6 +245,9 @@ class CustomerTransaction extends BaseModel
     public static function getBalance(int $customer_id, $update = false)
     {
         $customer = Customer::find($customer_id);
+        if(!$customer){
+            return null;
+        }
         $customer->running_balance_datetime = $customer->running_balance_datetime ?: '1970-01-01';
 
         $customerTransaction = new static;

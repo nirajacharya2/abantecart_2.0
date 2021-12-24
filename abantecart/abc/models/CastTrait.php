@@ -20,6 +20,9 @@ namespace abc\models;
 
 use Illuminate\Database\Eloquent\Concerns\HasAttributes;
 
+/**
+ * @deprecated. remove later
+ */
 trait CastTrait
 {
 
