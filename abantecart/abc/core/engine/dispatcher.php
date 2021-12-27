@@ -29,6 +29,7 @@ use abc\core\lib\AResponse;
 use abc\core\lib\AWarning;
 use abc\core\view\AView;
 use H;
+use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 
@@ -221,7 +222,7 @@ final class ADispatcher
      * @param string $route
      *
      * @return string
-     * @throws ReflectionException
+     * @throws ReflectionException|AException
      */
     protected function dispatchPrePost($route)
     {
@@ -249,7 +250,7 @@ final class ADispatcher
      * @param string $controller
      *
      * @return string
-     * @throws ReflectionException
+     * @throws ReflectionException|AException
      */
     public function dispatchGetOutput($controller = '')
     {
@@ -269,7 +270,7 @@ final class ADispatcher
      */
     public function dispatch($parent_controller = '')
     {
-        ADebug::checkpoint(''.$this->class.'/'.$this->method.' dispatch START');
+        ADebug::checkpoint($this->class.'/'.$this->method.' dispatch START');
 
         //Process the controller, layout and children
 
@@ -287,7 +288,7 @@ final class ADispatcher
             $url = $this->request->server['REQUEST_URI'];
             $error = new AError(
                 'Error: URL: '.$url.' Could not load controller '
-                    .$this->controller.'! Call stack: '.$function_stack.'',
+                    .$this->controller.'! Call stack: '.$function_stack,
                 AC_ERR_CLASS_CLASS_NOT_EXIST);
             $error->toLog()->toDebug();
             return null;
@@ -331,6 +332,25 @@ final class ADispatcher
                     $args = [];
                 } else {
                     $args = $this->args;
+                }
+
+                $rfl = new ReflectionClass($controller);
+                $method = $rfl->getMethod($this->method);
+                if($method) {
+                    $allParameters = $method->getParameters();
+                    if($allParameters) {
+                        $methodParams = [];
+                        foreach ($allParameters as $p) {
+                            if (isset($args[$p->name])) {
+                                $methodParams[$p->name] = $args[$p->name];
+                            }
+                        }
+                        if($methodParams && H::isAssocArray($args)) {
+                            $args = $methodParams;
+                        }elseif(!$methodParams && H::isAssocArray($args)){
+                            $args = [];
+                        }
+                    }
                 }
 
                 $dispatch = call_user_func_array([$controller, $this->method], $args);

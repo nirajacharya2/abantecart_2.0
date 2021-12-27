@@ -2106,4 +2106,14 @@ class AHelperUtils extends AHelper
         $joins = new Collection($query->getQuery()->joins);
         return $joins->pluck('table')->contains($table);
     }
+
+    /**
+     * @param $array
+     *
+     * @return bool
+     */
+    public static function isAssocArray($array){
+       $keys = array_keys($array);
+       return $keys !== array_keys($keys);
+    }
 }
