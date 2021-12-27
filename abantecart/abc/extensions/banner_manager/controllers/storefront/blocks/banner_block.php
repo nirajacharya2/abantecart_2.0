@@ -36,7 +36,7 @@ if ( ! class_exists( 'abc\core\ABC' ) ) {
 class ControllerBlocksBannerBlock extends AController
 {
 
-    public function main($instance_id = 0)
+    public function main(...$instance_id)
     {
 
         //load JS to register clicks before html-cache
