@@ -21,7 +21,7 @@ namespace abc\models\storefront;
 class Currency extends \abc\models\locale\Currency
 {
     /**
-     * @param $operation
+     * @param string $operation
      *
      * @param array $columns
      *
@@ -35,7 +35,7 @@ class Currency extends \abc\models\locale\Currency
     /**
      * Return array with list of Currencies
      *
-     * @return array
+     * @return array|false
      */
     public function getCurrencies(): array
     {
@@ -50,17 +50,19 @@ class Currency extends \abc\models\locale\Currency
             $arCurrencies = $this->orderBy('title', 'ASC')->get()->toArray();
 
             foreach ($arCurrencies as $result) {
-                $currency_data[$result['code']] = array(
-                    'currency_id'   => $result['currency_id'],
-                    'title'         => $result['title'],
-                    'code'          => $result['code'],
-                    'symbol_left'   => $result['symbol_left'],
-                    'symbol_right'  => $result['symbol_right'],
-                    'decimal_place' => $result['decimal_place'],
-                    'value'         => $result['value'],
-                    'status'        => $result['status'],
-                    'date_modified' => $result['date_modified']
-                );
+                $currency_data = [
+                    $result['code'] => [
+                        'currency_id'   => $result['currency_id'],
+                        'title'         => $result['title'],
+                        'code'          => $result['code'],
+                        'symbol_left'   => $result['symbol_left'],
+                        'symbol_right'  => $result['symbol_right'],
+                        'decimal_place' => $result['decimal_place'],
+                        'value'         => $result['value'],
+                        'status'        => $result['status'],
+                        'date_modified' => $result['date_modified']
+                    ]
+                ];
             }
 
             $this->cache->push('localization.currency', $currency_data);

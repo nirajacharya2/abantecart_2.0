@@ -36,6 +36,9 @@ use abc\models\order\OrderOption;
 use abc\models\order\OrderProduct;
 use abc\models\order\OrderStatus;
 use abc\models\order\OrderTotal;
+use abc\models\storefront\ModelCheckoutExtension;
+use abc\models\storefront\ModelTotalSubTotal;
+use abc\models\storefront\ModelTotalTotal;
 use abc\modules\events\ABaseEvent;
 use H;
 use Illuminate\Support\Carbon;
@@ -156,8 +159,9 @@ class AOrder extends ALibBase
         $this->registry->get('load')->model('checkout/extension', 'storefront');
 
         $sort_order = [];
-
-        $results = $this->registry->get('model_checkout_extension')->getExtensions('total');
+        /** @var ModelCheckoutExtension $mdl */
+        $mdl = $this->registry->get('model_checkout_extension');
+        $results = $mdl->getExtensions('total');
 
         foreach ($results as $key => $value) {
             $sort_order[$key] = $this->config->get($value['key'].'_sort_order');
@@ -166,8 +170,9 @@ class AOrder extends ALibBase
         array_multisort($sort_order, SORT_ASC, $results);
 
         foreach ($results as $result) {
-            $this->registry->get('load')->model('total/'.$result['key'], 'storefront');
-            $this->registry->get('model_total_'.$result['key'])->getTotal($total_data, $total, $taxes, $indata);
+            /** @var ModelTotalTotal|ModelTotalSubTotal $mdl */
+            $mdl = $this->registry->get('load')->model('total/'.$result['key'], 'storefront');
+            $mdl->getTotal($total_data, $total, $taxes, $indata);
         }
 
         $sort_order = [];
@@ -201,7 +206,7 @@ class AOrder extends ALibBase
                             'zone_id'     => $shipping_address['zone_id'],
                             'language_id' => Registry::language()->getContentLanguageID(),
                         ]
-                    )->first()->name;
+                    )->first()?->name;
                     $country = Country::with('description')->find($shipping_address['country_id']);
                     $shipping_address['country'] = (string)$country->description->name;
                     $shipping_address['address_format'] = (string)$country->address_format;

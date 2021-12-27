@@ -1239,11 +1239,10 @@ class ACustomer extends ALibBase
         }
 
         if (!$isLogged && $config->get('config_account_id')) {
-            Registry::load()->model('catalog/content');
-            /**
-             * @var ModelCatalogContent $model_catalog_content
-             TODO: replace it in the future */
-            $content_info = Registry::model_catalog_content()->getContent($config->get('config_account_id'));
+            /** @var ModelCatalogContent $mdl
+            TODO: replace it in the future */
+            $mdl = Registry::load()->model('catalog/content');
+            $content_info = $mdl->getContent($config->get('config_account_id'));
 
             if ($content_info) {
                 if (!isset($data['agree'])) {

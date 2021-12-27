@@ -37,6 +37,7 @@ use Chelout\RelationshipEvents\Concerns\HasOneEvents;
 use Closure;
 use H;
 use Illuminate\Database\ConnectionResolver;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model as OrmModel;
 use Illuminate\Database\Eloquent\Builder;
 use Exception;
@@ -54,16 +55,21 @@ use stdClass;
  * Class BaseModel
  *
  * @package abc\models
+ * @method static Collection find(int $Id) Collection
+ * @method static Collection get() Collection
  * @method static QueryBuilder|Builder where(string|array $column, string $operator = null, mixed $value = null, string $boolean = 'and') QueryBuilder
  * @method static QueryBuilder|Builder whereRaw(string $sql) QueryBuilder
+ * @method static QueryBuilder|Builder whereNull(string $column) QueryBuilder
  * @method static QueryBuilder|Builder whereIn(string $column, array $keys) QueryBuilder
  * @method static QueryBuilder select(string|array $select = '*') QueryBuilder
+ * @method static integer max() int
  * @method static QueryBuilder selectRaw(string $sql) QueryBuilder
  * @method static QueryBuilder updateOrCreate(array $data) QueryBuilder
  * @method static QueryBuilder active() QueryBuilder
  * @method static QueryBuilder join(string $table, Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
  * @method static QueryBuilder leftJoin(string $table, Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
  * @method static QueryBuilder rightJoin(string $table, Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
+ * @method static QueryBuilder|Builder OrderBy(string $column, string $order) QueryBuilder
  * @const  string DELETED_AT
  */
 class BaseModel extends OrmModel

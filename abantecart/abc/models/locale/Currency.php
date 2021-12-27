@@ -2,11 +2,15 @@
 
 namespace abc\models\locale;
 
+use abc\core\lib\AException;
 use abc\models\BaseModel;
 use abc\models\order\Order;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use abc\core\lib\AConnect;
 use abc\core\lib\AError;
+use ReflectionException;
 
 /**
  * Class Currency
@@ -19,9 +23,9 @@ use abc\core\lib\AError;
  * @property string $decimal_place
  * @property float $value
  * @property int $status
- * @property \Carbon\Carbon $date_modified
+ * @property Carbon $date_modified
  *
- * @property \Illuminate\Database\Eloquent\Collection $orders
+ * @property Collection $orders
  *
  * @package abc\models
  */
@@ -64,7 +68,7 @@ class Currency extends BaseModel
     /**
      * Return array with list of Currencies
      *
-     * @return array
+     * @return array|false
      */
     public function getCurrencies(): array
     {
@@ -79,17 +83,19 @@ class Currency extends BaseModel
             $arCurrencies = $this->orderBy('title', 'ASC')->get()->toArray();
 
             foreach ($arCurrencies as $result) {
-                $currency_data[$result['code']] = array(
-                    'currency_id'   => $result['currency_id'],
-                    'title'         => $result['title'],
-                    'code'          => $result['code'],
-                    'symbol_left'   => $result['symbol_left'],
-                    'symbol_right'  => $result['symbol_right'],
-                    'decimal_place' => $result['decimal_place'],
-                    'value'         => $result['value'],
-                    'status'        => $result['status'],
-                    'date_modified' => $result['date_modified'],
-                );
+                $currency_data = [
+                    $result['code'] => [
+                        'currency_id'   => $result['currency_id'],
+                        'title'         => $result['title'],
+                        'code'          => $result['code'],
+                        'symbol_left'   => $result['symbol_left'],
+                        'symbol_right'  => $result['symbol_right'],
+                        'decimal_place' => $result['decimal_place'],
+                        'value'         => $result['value'],
+                        'status'        => $result['status'],
+                        'date_modified' => $result['date_modified'],
+                    ]
+                ];
             }
 
             $this->cache->push('localization.currency', $currency_data);
@@ -99,7 +105,7 @@ class Currency extends BaseModel
     }
 
     /**
-     * @param       $operation
+     * @param string $operation
      *
      * @param array $columns
      *
@@ -111,13 +117,12 @@ class Currency extends BaseModel
     }
 
     /**
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function updateCurrencies()
     {
-        $api_key =
-            $this->config->get('alphavantage_api_key') ? $this->config->get('alphavantage_api_key') : 'P6WGY9G9LB22GMBJ';
+        $api_key = $this->config->get('alphavantage_api_key') ? : 'P6WGY9G9LB22GMBJ';
 
         $base_currency_code = $this->config->get('config_currency');
 
@@ -126,8 +131,7 @@ class Currency extends BaseModel
                         ->get()->toArray();
 
         foreach ($results as $result) {
-            $url =
-                'https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency='.$base_currency_code
+            $url = 'https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency='.$base_currency_code
                 .'&to_currency='.$result['code'].'&apikey='.$api_key;
             $connect = new AConnect(true);
             $json = $connect->getData($url);
