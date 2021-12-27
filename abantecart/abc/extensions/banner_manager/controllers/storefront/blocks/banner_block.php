@@ -49,7 +49,7 @@ class ControllerBlocksBannerBlock extends AController
         //init controller data
         $this->extensions->hk_InitData( $this, __FUNCTION__ );
 
-        $instance_id = func_get_arg( 0 );
+        $instance_id = func_get_args() ? func_get_arg( 0 ) : 0;
         $block_data = $this->getBlockContent( $instance_id );
         $this->view->assign( 'block_framed', $block_data['block_framed'] );
         $this->view->assign( 'content', $block_data['content'] );
