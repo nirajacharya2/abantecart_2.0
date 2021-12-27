@@ -281,7 +281,7 @@ class Job extends BaseCommand
                 $this->errors = array_merge($this->errors, $worker->errors);
             }
         } catch (AException $e) {
-            $this->errors[] = $e->getMessage();
+            $this->errors[] = $e->getMessage(). $e->getTraceAsString();
         }
 
         return $result;
