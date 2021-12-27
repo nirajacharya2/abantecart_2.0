@@ -1628,7 +1628,7 @@ class AHelperUtils extends AHelper
                     $instance = $reflection->newInstanceArgs($arguments);
                 } catch (\ReflectionException $e) {
                     Registry::getInstance()->get('log')->write(
-                        'AHelperUtils Error: '.$e->getMessage().' '.$e->getLine()
+                        'AHelperUtils Error: '.$e->getMessage().' '.$e->getLine().' (Class: '.$class.', args: '.var_export($arguments, true).' )'
                     );
                 }
             }
