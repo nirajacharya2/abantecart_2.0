@@ -17,57 +17,53 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\storefront;
+
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
 use abc\core\helper\AHelperUtils;
 use abc\models\catalog\Product;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-class ControllerBlocksLatest extends AController {
-	public $data;
-	public function main() {
-
-		//disable cache when login display price setting is off or enabled showing of prices with taxes
-		if( ($this->config->get('config_customer_price') && !$this->config->get('config_tax'))
-			&&	$this->html_cache()	){
-			return null;
-		}
+class ControllerBlocksLatest extends AController
+{
+    public function main()
+    {
+        //disable cache when login display price setting is off or enabled showing of prices with taxes
+        if (($this->config->get('config_customer_price') && !$this->config->get('config_tax'))
+            && $this->html_cache()) {
+            return null;
+        }
         $this->loadModel('catalog/product');
         $this->loadModel('catalog/review');
         $this->loadModel('tool/image');
-		//init controller data
-		$this->extensions->hk_InitData($this,__FUNCTION__);
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		$this->loadLanguage('blocks/latest');
-		$this->view->assign('heading_title', $this->language->get('heading_title', 'blocks/latest') );
+        $this->loadLanguage('blocks/latest');
+        $this->view->assign('heading_title', $this->language->get('heading_title', 'blocks/latest'));
 
-		$this->loadModel('catalog/product');
-		$this->loadModel('catalog/review');
-		$this->loadModel('tool/image');
+        $this->loadModel('catalog/product');
+        $this->loadModel('catalog/review');
+        $this->loadModel('tool/image');
 
-		$this->view->assign('button_add_to_cart', $this->language->get('button_add_to_cart') );
-		$this->data['products'] = array();
+        $this->view->assign('button_add_to_cart', $this->language->get('button_add_to_cart'));
+        $this->data['products'] = [];
 
-		$results = $this->model_catalog_product->getLatestProducts($this->config->get('config_latest_limit'));
-		$product_ids = array();
-		foreach($results as $result){
-			$product_ids[] = $result['product_id'];
-		}
+        $results = $this->model_catalog_product->getLatestProducts($this->config->get('config_latest_limit'));
+        $product_ids = array_column($results, 'product_id');
 
-		$products_info = $this->model_catalog_product->getProductsAllInfo($product_ids);
+        $products_info = $this->model_catalog_product->getProductsAllInfo($product_ids);
 
-		//get thumbnails by one pass
-		$resource = new AResource('image');
-		$thumbnails = $resource->getMainThumbList(
-						'products',
-						$product_ids,
-						$this->config->get('config_image_product_width'),
-						$this->config->get('config_image_product_height')
-		);
-		$stock_info = $this->model_catalog_product->getProductsStockInfo($product_ids);
+        //get thumbnails by one pass
+        $resource = new AResource('image');
+        $thumbnails = $resource->getMainThumbList(
+            'products',
+            $product_ids,
+            $this->config->get('config_image_product_width'),
+            $this->config->get('config_image_product_height')
+        );
+        $stock_info = $this->model_catalog_product->getProductsStockInfo($product_ids);
 
         $this->data['is_customer'] = true;
         if ($this->customer->isLogged() || $this->customer->isUnauthCustomer()) {
@@ -75,48 +71,55 @@ class ControllerBlocksLatest extends AController {
             $whishlist = $this->customer->getWishList();
         }
 
-		foreach ($results as $result) {
-			$thumbnail = $thumbnails[ $result['product_id'] ];
-			$rating = $products_info[$result['product_id']]['rating'];
-			$special = FALSE;
-			$discount = $products_info[$result['product_id']]['discount'];
+        foreach ($results as $k => $result) {
+            $thumbnail = $thumbnails[$result['product_id']];
+            $rating = $products_info[$result['product_id']]['rating'];
+            $special = false;
+            $discount = $products_info[$result['product_id']]['discount'];
 
-			if ($discount) {
-				$price = $this->currency->format($this->tax->calculate($discount, $result['tax_class_id'], $this->config->get('config_tax')));
-			} else {
-				$price = $this->currency->format($this->tax->calculate($result['price'], $result['tax_class_id'], $this->config->get('config_tax')));
-				$special = $products_info[$result['product_id']]['special'];
-				if ($special) {
-					$special = $this->currency->format($this->tax->calculate($special, $result['tax_class_id'], $this->config->get('config_tax')));
-				}
-			}
+            if ($discount) {
+                $price = $this->currency->format(
+                    $this->tax->calculate($discount, $result['tax_class_id'], $this->config->get('config_tax'))
+                );
+            } else {
+                $price = $this->currency->format(
+                    $this->tax->calculate($result['price'], $result['tax_class_id'], $this->config->get('config_tax'))
+                );
+                $special = $products_info[$result['product_id']]['special'];
+                if ($special) {
+                    $special = $this->currency->format(
+                        $this->tax->calculate($special, $result['tax_class_id'], $this->config->get('config_tax'))
+                    );
+                }
+            }
 
-			$options = $products_info[$result['product_id']]['options'];
+            $options = $products_info[$result['product_id']]['options'];
 
-			if ($options) {
-				$add = $this->html->getSEOURL('product/product','&product_id=' . $result['product_id'], '&encode');
-			} else {
-				if($this->config->get('config_cart_ajax')){
-					$add = '#';
-				}else{
-					$add = $this->html->getSecureURL('checkout/cart', '&product_id=' . $result['product_id'], '&encode');
-				}
-			}
+            if ($options) {
+                $add = $this->html->getSEOURL('product/product', '&product_id='.$result['product_id'], '&encode');
+            } else {
+                if ($this->config->get('config_cart_ajax')) {
+                    $add = '#';
+                } else {
+                    $add = $this->html->getSecureURL('checkout/cart', '&product_id='.$result['product_id'], '&encode');
+                }
+            }
 
-			//check for stock status, availability and config
-			$track_stock = false;
-			$in_stock = false;
-			$no_stock_text = $this->language->get('text_out_of_stock');
-			$total_quantity = 0;
-			$stock_checkout = $result['stock_checkout'] === '' ?  $this->config->get('config_stock_checkout') : $result['stock_checkout'];
-			if ( $stock_info[$result['product_id']]['subtract'] ) {
-				$track_stock = true;
-				$total_quantity = $stock_info[$result['product_id']]['quantity'];
-				//we have stock or out of stock checkout is allowed
-				if ($total_quantity > 0 || $stock_checkout) {
-					$in_stock = true;
-				}
-			}
+            //check for stock status, availability and config
+            $track_stock = false;
+            $in_stock = false;
+            $no_stock_text = $this->language->get('text_out_of_stock');
+            $total_quantity = 0;
+            $stock_checkout = $result['stock_checkout'] === '' ? $this->config->get('config_stock_checkout')
+                : $result['stock_checkout'];
+            if ($stock_info[$result['product_id']]['subtract']) {
+                $track_stock = true;
+                $total_quantity = $stock_info[$result['product_id']]['quantity'];
+                //we have stock or out of stock checkout is allowed
+                if ($total_quantity > 0 || $stock_checkout) {
+                    $in_stock = true;
+                }
+            }
 
             $in_wishlist = false;
             if ($whishlist && $whishlist[$result['product_id']]) {
@@ -125,64 +128,59 @@ class ControllerBlocksLatest extends AController {
 
             $catalog_mode = false;
             if ($result['product_type_id']) {
-                $prodTypeSettings = Product::getProductTypeSettings((int)$result['product_id']);
+                $prodTypeSettings = Product::getProductTypeSettings((int) $result['product_id']);
 
                 if ($prodTypeSettings && is_array($prodTypeSettings) && isset($prodTypeSettings['catalog_mode'])) {
-                    $catalog_mode = (bool)$prodTypeSettings['catalog_mode'];
+                    $catalog_mode = (bool) $prodTypeSettings['catalog_mode'];
                 }
             }
 
-			$this->data['products'][] = array(
-				'product_id'    => $result['product_id'],
-				'name'    		=> $result['name'],
-				'blurb' => $result['blurb'],
-				'model'   		=> $result['model'],
-				'rating'  		=> $rating,
-				'stars'   		=> sprintf($this->language->get('text_stars'), $rating),
-				'price'   		=> $price,
-				'call_to_order'=> $result['call_to_order'],
-				'options'   	=> $options,
-				'special' 		=> $special,
-				'thumb'   		=> $thumbnail,
-				'href'    		=> $this->html->getSEOURL('product/product','&product_id=' . $result['product_id'], '&encode'),
-				'add'    		=> $add,
-				'track_stock' 	=> $track_stock,
-				'in_stock'		=> $in_stock,
-				'no_stock_text' => $no_stock_text,
-				'total_quantity'=> $total_quantity,
-				'date_added'    => $result['date_added'],
-				'tax_class_id'  => $result['tax_class_id'],
-                'in_wishlist'   => $in_wishlist,
-                'product_wishlist_add_url' => $this->html->getURL(
-                    'product/wishlist/add',
-                    '&product_id='.$result['product_id']
-                ),
-                'product_wishlist_remove_url' => $this->html->getURL(
-                    'product/wishlist/remove',
-                    '&product_id='.$result['product_id']
-                ),
-                'catalog_mode'               => $catalog_mode,
-			);
-		}
-
-		//$this->view->assign('products', $this->data['products'] );
+            $this->data['products'][$k] = $result
+                + [
+                    'rating'                      => $rating,
+                    'stars'                       => sprintf($this->language->get('text_stars'), $rating),
+                    'price'                       => $price,
+                    'options'                     => $options,
+                    'special'                     => $special,
+                    'thumb'                       => $thumbnail,
+                    'href'                        => $this->html->getSEOURL(
+                        'product/product',
+                        '&product_id='.$result['product_id'],
+                        '&encode'
+                    ),
+                    'add'                         => $add,
+                    'track_stock'                 => $track_stock,
+                    'in_stock'                    => $in_stock,
+                    'no_stock_text'               => $no_stock_text,
+                    'total_quantity'              => $total_quantity,
+                    'in_wishlist'                 => $in_wishlist,
+                    'product_wishlist_add_url'    => $this->html->getURL(
+                        'product/wishlist/add',
+                        '&product_id='.$result['product_id']
+                    ),
+                    'product_wishlist_remove_url' => $this->html->getURL(
+                        'product/wishlist/remove',
+                        '&product_id='.$result['product_id']
+                    ),
+                    'catalog_mode'                => $catalog_mode,
+                ];
+        }
 
         $this->view->batchAssign($this->data);
 
-		if ($this->config->get('config_customer_price')) {
-			$display_price = TRUE;
-		}elseif ($this->customer->isLogged()) {
-			$display_price = TRUE;
-		} else {
-			$display_price = FALSE;
-		}
-		$this->view->assign('block_framed', true );
-		$this->view->assign('display_price', $display_price );
-		$this->view->assign('review_status', $this->config->get('enable_reviews'));
-		$this->processTemplate();
+        if ($this->config->get('config_customer_price')) {
+            $display_price = true;
+        } elseif ($this->customer->isLogged()) {
+            $display_price = true;
+        } else {
+            $display_price = false;
+        }
+        $this->view->assign('block_framed', true);
+        $this->view->assign('display_price', $display_price);
+        $this->view->assign('review_status', $this->config->get('enable_reviews'));
+        $this->processTemplate();
 
-		//init controller data
-		$this->extensions->hk_UpdateData($this,__FUNCTION__);
-
-	}
+        //init controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
 }

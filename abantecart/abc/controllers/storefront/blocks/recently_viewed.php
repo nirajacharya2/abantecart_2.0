@@ -17,6 +17,7 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
@@ -30,14 +31,11 @@ use abc\models\storefront\ModelCatalogProduct;
  * @package abc\controllers\storefront
  * @property ModelCatalogProduct $model_catalog_product
  */
-
 class ControllerBlocksRecentlyViewed extends AController
 {
-    public $data;
 
     public function main()
     {
-
         //disable cache when login display price setting is off or enabled showing of prices with taxes
         if (($this->config->get('config_customer_price') && !$this->config->get('config_tax'))
             && $this->html_cache()) {
@@ -55,7 +53,7 @@ class ControllerBlocksRecentlyViewed extends AController
         $this->data['button_add_to_cart'] = $this->language->get('button_add_to_cart');
         $this->data['products'] = [];
 
-        $results = $this->model_catalog_product->getProductsByIds( $this->session->data['recently_viewed'] );
+        $results = $this->model_catalog_product->getProductsByIds($this->session->data['recently_viewed']);
         $product_ids = array_column($results, 'product_id');
 
         $products_info = $this->model_catalog_product->getProductsAllInfo($product_ids);
@@ -76,7 +74,7 @@ class ControllerBlocksRecentlyViewed extends AController
             $whishlist = $this->customer->getWishList();
         }
 
-        foreach ($results as $result) {
+        foreach ($results as $k => $result) {
             $thumbnail = $thumbnails[$result['product_id']];
             $rating = $products_info[$result['product_id']]['rating'];
             $special = false;
@@ -91,11 +89,11 @@ class ControllerBlocksRecentlyViewed extends AController
                 );
             } else {
                 $price = $this->currency->format(
-                        $this->tax->calculate(
-                            $result['price'],
-                            $result['tax_class_id'],
-                            $this->config->get('config_tax')
-                        )
+                    $this->tax->calculate(
+                        $result['price'],
+                        $result['tax_class_id'],
+                        $this->config->get('config_tax')
+                    )
                 );
                 $special = $products_info[$result['product_id']]['special'];
                 if ($special) {
@@ -126,8 +124,8 @@ class ControllerBlocksRecentlyViewed extends AController
             $no_stock_text = $this->language->get('text_out_of_stock');
             $total_quantity = 0;
             $stock_checkout = $result['stock_checkout'] === ''
-                            ? $this->config->get('config_stock_checkout')
-                            : $result['stock_checkout'];
+                ? $this->config->get('config_stock_checkout')
+                : $result['stock_checkout'];
 
             if ($stock_info[$result['product_id']]['subtract']) {
                 $track_stock = true;
@@ -145,48 +143,43 @@ class ControllerBlocksRecentlyViewed extends AController
 
             $catalog_mode = false;
             if ($result['product_type_id']) {
-                $prodTypeSettings = Product::getProductTypeSettings((int)$result['product_id']);
+                $prodTypeSettings = Product::getProductTypeSettings((int) $result['product_id']);
 
                 if ($prodTypeSettings && is_array($prodTypeSettings) && isset($prodTypeSettings['catalog_mode'])) {
-                    $catalog_mode = (bool)$prodTypeSettings['catalog_mode'];
+                    $catalog_mode = (bool) $prodTypeSettings['catalog_mode'];
                 }
             }
 
-            $this->data['products'][] = [
-                'product_id'                  => $result['product_id'],
-                'name'                        => $result['name'],
-                'blurb'                       => $result['blurb'],
-                'model'                       => $result['model'],
-                'rating'                      => $rating,
-                'stars'                       => sprintf($this->language->get('text_stars'), $rating),
-                'price'                       => $price,
-                'call_to_order'               => $result['call_to_order'],
-                'options'                     => $options,
-                'special'                     => $special,
-                'thumb'                       => $thumbnail,
-                'href'                        => $this->html->getSEOURL(
-                                                                        'product/product',
-                                                                        '&product_id='.$result['product_id'],
-                                                                        '&encode'
-                                                                    ),
-                'add'                         => $add,
-                'track_stock'                 => $track_stock,
-                'in_stock'                    => $in_stock,
-                'no_stock_text'               => $no_stock_text,
-                'total_quantity'              => $total_quantity,
-                'date_added'                  => $result['date_added'],
-                'tax_class_id'                => $result['tax_class_id'],
-                'in_wishlist'                 => $in_wishlist,
-                'product_wishlist_add_url'    => $this->html->getURL(
-                                                                        'product/wishlist/add',
-                                                                        '&product_id='.$result['product_id']
-                                                                    ),
-                'product_wishlist_remove_url' => $this->html->getURL(
-                                                                        'product/wishlist/remove',
-                                                                        '&product_id='.$result['product_id']
-                                                                    ),
-                'catalog_mode'               => $catalog_mode,
-            ];
+            $this->data['products'][$k] = $result
+                +
+                [
+                    'rating'                      => $rating,
+                    'stars'                       => sprintf($this->language->get('text_stars'), $rating),
+                    'price'                       => $price,
+                    'options'                     => $options,
+                    'special'                     => $special,
+                    'thumb'                       => $thumbnail,
+                    'href'                        => $this->html->getSEOURL(
+                        'product/product',
+                        '&product_id='.$result['product_id'],
+                        '&encode'
+                    ),
+                    'add'                         => $add,
+                    'track_stock'                 => $track_stock,
+                    'in_stock'                    => $in_stock,
+                    'no_stock_text'               => $no_stock_text,
+                    'total_quantity'              => $total_quantity,
+                    'in_wishlist'                 => $in_wishlist,
+                    'product_wishlist_add_url'    => $this->html->getURL(
+                        'product/wishlist/add',
+                        '&product_id='.$result['product_id']
+                    ),
+                    'product_wishlist_remove_url' => $this->html->getURL(
+                        'product/wishlist/remove',
+                        '&product_id='.$result['product_id']
+                    ),
+                    'catalog_mode'                => $catalog_mode,
+                ];
         }
 
         if ($this->config->get('config_customer_price')) {
@@ -201,7 +194,6 @@ class ControllerBlocksRecentlyViewed extends AController
         //If tpl used by listing block framed was set by listing block settings
         $this->data['block_framed'] = true;
         $this->view->batchAssign($this->data);
-//var_dump($this->data); exit;
         $this->processTemplate();
 
         //init controller data
