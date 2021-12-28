@@ -124,6 +124,9 @@ class ControllerPagesDesignLayout extends AController
         }
 
         $layout_data['page_url'] = $this->html->getSecureURL('design/layout');
+
+        $layout_data['page_builder_url'] = $this->html->getSecureURL('r/design/page_builder');
+
         $layout_data['generate_preview_url'] = $this->html->getSecureURL('design/layout/preview');
         $layout_data['current_url'] = $this->html->getSecureURL('design/layout', $url);
         $layout_data['page_delete_url'] = $this->html->getSecureURL('design/layout/delete');
@@ -230,21 +233,9 @@ class ControllerPagesDesignLayout extends AController
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-        if (isset($this->request->get['tmpl_id'])) {
-            $tmpl_id = $this->request->get['tmpl_id'];
-        } else {
-            $tmpl_id = null;
-        }
-        if (isset($this->request->get['page_id'])) {
-            $page_id = $this->request->get['page_id'];
-        } else {
-            $page_id = null;
-        }
-        if (isset($this->request->get['layout_id'])) {
-            $layout_id = $this->request->get['layout_id'];
-        } else {
-            $layout_id = null;
-        }
+        $tmpl_id = $this->request->get['tmpl_id'] ?? null;
+        $page_id = $this->request->get['page_id'];
+        $layout_id = $this->request->get['layout_id'];
 
         $success = false;
         if (($this->request->is_GET() && $this->request->get['confirmed_delete'] == 'yes')) {

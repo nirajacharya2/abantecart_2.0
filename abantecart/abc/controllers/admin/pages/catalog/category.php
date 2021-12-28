@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -29,7 +29,6 @@ use H;
 
 /**
  * Class ControllerPagesCatalogCategory
- *
  */
 class ControllerPagesCatalogCategory extends AController
 {
@@ -82,51 +81,51 @@ class ControllerPagesCatalogCategory extends AController
                     'text'     => $this->language->get('text_edit'),
                     'href'     => $this->html->getSecureURL('catalog/category/update', '&category_id=%ID%'),
                     'children' => array_merge(
-                                                                                                               [
-                                                                                                                   'quickview' => [
-                                                                                                                       'text'  => $this->language->get(
-                                                                                                                           'text_quick_view'
-                                                                                                                       ),
-                                                                                                                       'href'  => $this->html->getSecureURL(
-                                                                                                                           'catalog/category/update',
-                                                                                                                           '&category_id=%ID%'
-                                                                                                                       ),
-                                                                                                                       //quick view port URL
-                                                                                                                       'vhref' => $this->html->getSecureURL(
-                                                                                                                           'r/common/viewport/modal',
-                                                                                                                           '&viewport_rt=catalog/category/update&category_id=%ID%'
-                                                                                                                       ),
-                                                                                                                   ],
-                                                                                                                   'general'   => [
-                                                                                                                       'text' => $this->language->get(
-                                                                                                                           'tab_general'
-                                                                                                                       ),
-                                                                                                                       'href' => $this->html->getSecureURL(
-                                                                                                                           'catalog/category/update',
-                                                                                                                           '&category_id=%ID%'
-                                                                                                                       ),
-                                                                                                                   ],
-                                                                                                                   'data'      => [
-                                                                                                                       'text' => $this->language->get(
-                                                                                                                           'tab_data'
-                                                                                                                       ),
-                                                                                                                       'href' => $this->html->getSecureURL(
-                                                                                                                               'catalog/category/update',
-                                                                                                                               '&category_id=%ID%'
-                                                                                                                           )
-                                                                                                                           .'#data',
-                                                                                                                   ],
-                                                                                                                   'layout'    => [
-                                                                                                                       'text' => $this->language->get(
-                                                                                                                           'tab_layout'
-                                                                                                                       ),
-                                                                                                                       'href' => $this->html->getSecureURL(
-                                                                                                                           'catalog/category/edit_layout',
-                                                                                                                           '&category_id=%ID%'
-                                                                                                                       ),
-                                                                                                                   ],
-                                                                                                               ],
-                                                                                                               (array) $this->data['grid_edit_expand']
+                        [
+                            'quickview' => [
+                                'text'  => $this->language->get(
+                                    'text_quick_view'
+                                ),
+                                'href'  => $this->html->getSecureURL(
+                                    'catalog/category/update',
+                                    '&category_id=%ID%'
+                                ),
+                                //quick view port URL
+                                'vhref' => $this->html->getSecureURL(
+                                    'r/common/viewport/modal',
+                                    '&viewport_rt=catalog/category/update&category_id=%ID%'
+                                ),
+                            ],
+                            'general'   => [
+                                'text' => $this->language->get(
+                                    'tab_general'
+                                ),
+                                'href' => $this->html->getSecureURL(
+                                    'catalog/category/update',
+                                    '&category_id=%ID%'
+                                ),
+                            ],
+                            'data'      => [
+                                'text' => $this->language->get(
+                                    'tab_data'
+                                ),
+                                'href' => $this->html->getSecureURL(
+                                        'catalog/category/update',
+                                        '&category_id=%ID%'
+                                    )
+                                    .'#data',
+                            ],
+                            'layout'    => [
+                                'text' => $this->language->get(
+                                    'tab_layout'
+                                ),
+                                'href' => $this->html->getSecureURL(
+                                    'catalog/category/edit_layout',
+                                    '&category_id=%ID%'
+                                ),
+                            ],
+                        ],
+                        (array) $this->data['grid_edit_expand']
                     ),
                 ],
                 'save'   => [

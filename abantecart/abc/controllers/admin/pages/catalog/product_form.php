@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2021 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -21,7 +21,7 @@ namespace abc\controllers\admin;
 use abc\core\engine\AController;
 use abc\core\lib\FormBuilder;
 use abc\models\catalog\Product;
-use Laracasts\Utilities\JavaScript\PHPToJavaScriptTransformer;
+use Laracasts\Utilities\JavaScript\Transformers\Transformer;
 
 class ControllerPagesCatalogProductForm extends AController
 {
@@ -97,7 +97,7 @@ class ControllerPagesCatalogProductForm extends AController
         $form = new FormBuilder(Product::class, $product_type_id, $formData);
         $this->data['form'] = $form->getForm()->toArray();
 
-        $transformer = new PHPToJavaScriptTransformer($this->document, 'abc');
+        $transformer = new Transformer($this->document, 'abc');
         $transformer->put(['form' => $this->data['form']]);
 
         $this->view->batchAssign($this->data);

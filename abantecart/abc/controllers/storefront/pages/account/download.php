@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -28,8 +28,6 @@ use H;
 
 class ControllerPagesAccountDownload extends AController
 {
-    public $data = [];
-
     public function main()
     {
         //init controller data
@@ -75,17 +73,13 @@ class ControllerPagesAccountDownload extends AController
 
         if (isset($this->request->get['limit'])) {
             $limit = (int)$this->request->get['limit'];
-            $limit = $limit > 50 ? 50 : $limit;
+            $limit = min($limit, 50);
         } else {
             $limit = $this->config->get('config_catalog_limit');
         }
 
         if ($this->config->get('config_download')) {
-            if (isset($this->request->get['page'])) {
-                $page = $this->request->get['page'];
-            } else {
-                $page = 1;
-            }
+            $page = $this->request->get['page'] ?? 1;
             $downloads = [];
             //get only enabled, not expired, which have remaining count > 0 and available
             if ($guest) {
@@ -156,11 +150,13 @@ class ControllerPagesAccountDownload extends AController
                         $this->language->get('date_format_short')),
                     'name'        => $download_info['name'],
                     'remaining'   => $download_info['remaining_count'],
-                    'size'        => round(substr($size, 0, strpos($size, '.') + 4), 2).$suffix[$i],
+                    'size'        => round((float)(substr($size, 0, strpos($size, '.') + 4)), 2).$suffix[$i],
                     'button'      => $download_button,
                     'text'        => $download_text,
-                    'expire_date' => H::dateISO2Display($download_info['expire_date'],
-                        $this->language->get('date_format_short').' '.$this->language->get('time_format_short')),
+                    'expire_date' => H::dateISO2Display(
+                        $download_info['expire_date'],
+                        $this->language->get('date_format_short').' '.$this->language->get('time_format_short')
+                    ),
                 ];
 
             }

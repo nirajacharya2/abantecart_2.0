@@ -281,7 +281,7 @@ class ABC extends ABCBase
      * @param mixed|null $value
      * @param bool $override - force set
      *
-     * @return null
+     * @return null|string|array
      */
     public static function env($name, $value = null, $override = false)
     {

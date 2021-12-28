@@ -32,6 +32,7 @@ use abc\models\catalog\UrlAlias;
 use abc\models\QueryBuilder;
 use H;
 use Laracasts\Utilities\JavaScript\PHPToJavaScriptTransformer;
+use Laracasts\Utilities\JavaScript\Transformers\Transformer;
 
 /**
  * Class ControllerPagesCatalogProduct
@@ -45,7 +46,7 @@ class ControllerPagesCatalogProduct extends AController
     public $error = [];
     public $data = [];
     /**
-     * @var $productInstance \abc\models\catalog\Product
+     * @var $productInstance Product
      */
     private $productInstance;
 
@@ -361,11 +362,8 @@ class ControllerPagesCatalogProduct extends AController
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
-    public function update()
+    public function update(...$args)
     {
-
-        $args = func_get_args();
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -533,7 +531,7 @@ class ControllerPagesCatalogProduct extends AController
         $form = new FormBuilder(ABC::getFullClassName('Product'), $product_type_id, $formData);
         $this->data['form'] = $form->getForm()->toArray();
 
-        $transformer = new PHPToJavaScriptTransformer($this->document, 'abc');
+        $transformer = new Transformer($this->document, 'abc');
         $transformer->put(['form' => $this->data['form']]);
 
         //update controller data
@@ -584,7 +582,7 @@ class ControllerPagesCatalogProduct extends AController
     {
         $product_id = null;
         $product_info = [];
-        $viewport_mode = isset($args[0]['viewport_mode']) ? $args[0]['viewport_mode'] : '';
+        $viewport_mode = $args[0]['viewport_mode'] ?? '';
         $content_language_id = $this->language->getContentLanguageID();
         if (isset($this->request->get['product_id'])) {
             $product_id = $this->request->get['product_id'];
@@ -1134,7 +1132,7 @@ class ControllerPagesCatalogProduct extends AController
         $this->data['form']['fields']['data']['shipping_price'] = $form->getFieldHtml([
             'type'  => 'input',
             'name'  => 'shipping_price',
-            'value' => round($this->data['shipping_price'], 3),
+            'value' => round((float)$this->data['shipping_price'], 3),
             'style' => 'tiny-field',
         ]);
 

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -23,12 +23,11 @@ namespace abc\controllers\storefront;
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
 use abc\core\lib\AJson;
+use Exception;
 use H;
 
 class ControllerResponsesProductProduct extends AController
 {
-    public $data = [];
-
     public function main()
     {
         //init controller data
@@ -38,7 +37,8 @@ class ControllerResponsesProductProduct extends AController
             $this->config->set('embed_mode', true);
             $cntr = $this->dispatch('pages/product/product');
             $this->data['output'] = $cntr->dispatchGetOutput();
-        }catch(\Exception $e){}
+        } catch (Exception $e) {
+        }
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
         $this->response->setOutput($this->data['output']);
@@ -78,8 +78,8 @@ class ControllerResponsesProductProduct extends AController
     {
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
-        $product_id = (int)$this->request->post['product_id'];
-        $attribute_value_id = (int)$this->request->post['attribute_value_id'];
+        $product_id = (int) $this->request->post_or_get('product_id');
+        $attribute_value_id = (int) $this->request->post_or_get('attribute_value_id');
         $output = [];
         if ($attribute_value_id && is_int($attribute_value_id)) {
             $resource = new AResource('image');
@@ -123,17 +123,40 @@ class ControllerResponsesProductProduct extends AController
                     ],
             ];
 
-            $output['images'] =
-                $resource->getResourceAllObjects('product_option_value', $attribute_value_id, $oSizes, 0, false);
+            $output['images'] = $resource->getResourceAllObjects(
+                'product_option_value',
+                $attribute_value_id,
+                $oSizes,
+                0,
+                false
+            );
+
+            //no image? see images for other selected options
+            if (!$output['images'] && $product_id && $this->request->post['selected_options']) {
+                foreach ($this->request->post['selected_options'] as $optValId) {
+                    $images = $resource->getResourceAllObjects(
+                        'product_option_value',
+                        $optValId,
+                        $oSizes,
+                        0,
+                        false
+                    );
+                    if ($images) {
+                        $output['main'] = $resource->getResourceAllObjects(
+                            'product_option_value',
+                            $optValId,
+                            $mSizes,
+                            1,
+                            false
+                        );
+                        $output['images'] = $images;
+                        break;
+                    }
+                }
+            }
             if (!$output['images']) {
                 unset($output['images']);
             }
-
-            //no image? return main product images
-            if (!count($output) && $product_id) {
-                $output = [];
-            }
-
         }
         $this->data['output'] = $output;
         //update controller data
@@ -152,12 +175,14 @@ class ControllerResponsesProductProduct extends AController
         $this->loadModel('catalog/product');
         $product_info = $this->model_catalog_product->getProduct($this->request->get['product_id']);
         if ($product_info) {
-            $this->cart->add($this->request->get['product_id'],
-                ($product_info['minimum'] ? $product_info['minimum'] : 1));
+            $this->cart->add(
+                $this->request->get['product_id'],
+                ($product_info['minimum'] ? : 1)
+            );
         }
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
-        return $this->getCartContent();
+        $this->getCartContent();
     }
 
     public function getCartContent()
@@ -166,11 +191,11 @@ class ControllerResponsesProductProduct extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $display_totals = $this->cart->buildTotalDisplay();
-
+        /** @see get_cart_details() */
         $dispatch = $this->dispatch('responses/product/product/get_cart_details', [$display_totals]);
 
         $this->data['cart_details'] = $dispatch->dispatchGetOutput();
-        $this->data['item_count'] = $this->cart->countProducts();
+        $this->data['item_count'] = $this->cart->countProducts() + count($this->cart->getVirtualProducts());
 
         $this->data['total'] = $this->currency->format($display_totals['total']);
         //update controller data
@@ -188,27 +213,24 @@ class ControllerResponsesProductProduct extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         if (!$this->view->isTemplateExists('responses/checkout/cart_details.tpl')) {
-            return '';
+            return;
         }
 
-        $cart_products = $this->cart->getProducts();
-
-        $product_ids = [];
-        foreach ($cart_products as $result) {
-            $product_ids[] = (int)$result['product_id'];
-        }
-
+        $cart_products = $this->cart->getProducts() + $this->cart->getVirtualProducts();
+        $product_ids = array_column($cart_products, 'product_id');
         $resource = new AResource('image');
-        $thumbnails = $resource->getMainThumbList(
-            'products',
-            $product_ids,
-            $this->config->get('config_image_product_width'),
-            $this->config->get('config_image_product_height')
-        );
-
+        $thumbnails = $product_ids
+            ? $resource->getMainThumbList(
+                'products',
+                $product_ids,
+                $this->config->get('config_image_product_width'),
+                $this->config->get('config_image_product_height')
+            )
+            : $product_ids;
+        $qty = 0;
         foreach ($cart_products as $result) {
             $option_data = [];
-            $thumbnail = $thumbnails[$result['product_id']];
+            $thumbnail = $thumbnails[$result['product_id']] ? : $result['thumb'];
             foreach ($result['option'] as $option) {
                 $value = $option['value'];
                 // hide binary value for checkbox
@@ -236,18 +258,19 @@ class ControllerResponsesProductProduct extends AController
                 $mSizes = [
                     'main'  =>
                         [
-                            'width' => $this->config->get('config_image_cart_width'),
-                            'height' => $this->config->get('config_image_cart_height')
+                            'width'  => $this->config->get('config_image_cart_width'),
+                            'height' => $this->config->get('config_image_cart_height'),
                         ],
                     'thumb' => [
-                        'width' =>  $this->config->get('config_image_cart_width'),
-                        'height' => $this->config->get('config_image_cart_height')
+                        'width'  => $this->config->get('config_image_cart_width'),
+                        'height' => $this->config->get('config_image_cart_height'),
                     ],
                 ];
 
-
                 $main_image =
-                    $resource->getResourceAllObjects('product_option_value', $option['product_option_value_id'], $mSizes, 1, false);
+                    $resource->getResourceAllObjects(
+                        'product_option_value', $option['product_option_value_id'], $mSizes, 1, false
+                    );
 
                 if (!empty($main_image)) {
                     $thumbnail['origin'] = $main_image['origin'];
@@ -258,6 +281,8 @@ class ControllerResponsesProductProduct extends AController
                 }
             }
 
+            $qty += $result['quantity'];
+
             $this->data['products'][] = [
                 'key'      => $result['key'],
                 'name'     => $result['name'],
@@ -265,20 +290,29 @@ class ControllerResponsesProductProduct extends AController
                 'quantity' => $result['quantity'],
                 'stock'    => $result['stock'],
                 'price'    => $this->currency->format(
-                                    $this->tax->calculate($result['price'],
-                                    $result['tax_class_id'],
-                                    $this->config->get('config_tax'))
+                    $this->tax->calculate(
+                        $result['price'] ? : $result['amount'],
+                        $result['tax_class_id'],
+                        $this->config->get('config_tax')
+                    )
                 ),
-                'href'     => $this->html->getSEOURL('product/product', '&product_id='.$result['product_id']),
+                'href'     => $result['product_id']
+                    ? $this->html->getSEOURL(
+                        'product/product',
+                        '&product_id='.$result['product_id']
+                    )
+                    : null,
                 'thumb'    => $thumbnail,
             ];
         }
 
         $this->data['totals'] = $totals['total_data'];
         $this->data['subtotal'] = $this->currency->format(
-                                    $this->tax->calculate($totals['total'],
-                                    $result['tax_class_id'],
-                                    $this->config->get('config_tax'))
+            $this->tax->calculate(
+                $totals['total'],
+                $result['tax_class_id'],
+                $this->config->get('config_tax')
+            )
         );
         $this->data['taxes'] = $totals['taxes'];
         $this->data['view'] = $this->html->getURL('checkout/cart');
@@ -295,40 +329,42 @@ class ControllerResponsesProductProduct extends AController
      * */
     public function calculateTotal()
     {
+        $this->load->library('json');
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $output = [];
         //can not show price
         if (!$this->config->get('config_customer_price') && !$this->customer->isLogged()) {
-            return $output;
+            $this->response->setOutput(AJson::encode($output));
+            return;
         }
 
         if (H::has_value($this->request->post['product_id'])
             && is_numeric($this->request->post['product_id'])) {
             $product_id = $this->request->post['product_id'];
             if (isset($this->request->post['option'])) {
-                $option = $this->request->post['option'];
+                $option = $this->request->post['option'] ?? [];
             } else {
                 $option = [];
             }
 
             if (isset($this->request->post['quantity'])) {
-                $quantity = (int)$this->request->post['quantity'];
+                $quantity = (int) $this->request->post['quantity'];
             } else {
                 $quantity = 1;
             }
             $result = $this->cart->buildProductDetails($product_id, $quantity, $option);
 
-            $output['total'] = (float)$this->tax->calculate(
+            $output['total'] = (float) $this->tax->calculate(
                 $result['total'],
                 $result['tax_class_id'],
-                (int)$this->config->get('config_tax')
+                (int) $this->config->get('config_tax')
             );
-            $output['price'] = (float)$this->tax->calculate(
+            $output['price'] = (float) $this->tax->calculate(
                 $result['price'],
                 $result['tax_class_id'],
-                (int)$this->config->get('config_tax')
+                (int) $this->config->get('config_tax')
             );
 
             $output['total'] = $this->currency->format_total($output['price'], $quantity);
@@ -345,7 +381,6 @@ class ControllerResponsesProductProduct extends AController
 
     public function editCartProduct()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $this->loadLanguage('checkout/cart');
@@ -362,7 +397,7 @@ class ControllerResponsesProductProduct extends AController
             );
             $this->extensions->hk_UpdateData($this, __FUNCTION__);
         }
-        return $this->getCartContent();
+        $this->getCartContent();
     }
 
     public function removeFromCart()
@@ -383,6 +418,6 @@ class ControllerResponsesProductProduct extends AController
             );
             $this->extensions->hk_UpdateData($this, __FUNCTION__);
         }
-        return $this->getCartContent();
+        $this->getCartContent();
     }
 }

@@ -108,6 +108,7 @@ class ControllerCommonPageLayout extends AController
     protected function _buildBlocks($section_id, $section_blocks)
     {
         $blocks = [];
+        $edit_url = '';
         $partialView = $this->view;
 
         if (empty($section_blocks)) {
@@ -115,7 +116,7 @@ class ControllerCommonPageLayout extends AController
         }
 
         foreach ($section_blocks as $block) {
-            $customName = $edit_url = '';
+            $customName = '';
             $this->loadLanguage('design/blocks');
 
             if ($block['custom_block_id']) {

@@ -21,25 +21,27 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
+use abc\core\engine\ALoader;
 use abc\core\engine\Registry;
+use abc\models\admin\ModelToolTableRelationships;
 use DOMDocument;
+use Exception;
 use H;
+use ReflectionException;
+use SimpleXMLElement;
 
 /**
  * Class AData
  *
- * @property \abc\models\admin\ModelToolTableRelationships $model_tool_table_relationships
- * @property \abc\core\lib\ALanguageManager                $language
- * @property \abc\core\engine\ALoader                      $load
- * @property AConfig                                       $config
- * @property ADataEncryption                               $dcrypt
- * @property ADB                                           $db
+ * @property ModelToolTableRelationships $model_tool_table_relationships
+ * @property ALanguageManager $language
+ * @property ALoader $load
+ * @property AConfig $config
+ * @property ADataEncryption $dcrypt
+ * @property ADB $db
  */
 class AData
 {
-    /**
-     * @var \abc\core\engine\Registry
-     */
     protected $registry;
     /**
      * NOTE: use double quotes here for special chars like tab!
@@ -94,9 +96,7 @@ class AData
 
     protected function toLog($text)
     {
-        if ($this->imp_log) {
-            $this->imp_log->write($text);
-        }
+        $this->imp_log?->write($text);
     }
 
     /**
@@ -118,7 +118,7 @@ class AData
     /**
      * @param string $table_name
      *
-     * @return mixed
+     * @return array
      */
     public function getTableColumns($table_name)
     {
@@ -130,7 +130,7 @@ class AData
      * @param array $skip_inner_ids - Exclude IDs for nested structured related to parent level
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function exportData($request, $skip_inner_ids = [])
     {
@@ -142,8 +142,10 @@ class AData
         foreach ($request as $table_name => $sub_request) {
             //check if valid main table
             if ($table_cfg = $this->model_tool_table_relationships->find_table_cfg($table_name)) {
-                $idx = array_push($result_arr['tables'],
-                    $this->processSection($table_name, $sub_request, $table_cfg, $skip_inner_ids));
+                $idx = array_push(
+                    $result_arr['tables'],
+                    $this->processSection($table_name, $sub_request, $table_cfg, $skip_inner_ids)
+                );
             } else {
                 $result_arr['tables'][$idx]['table'] = $table_name;
                 $result_arr['tables'][$idx]['error'] =
@@ -160,7 +162,7 @@ class AData
      * @param string $mode - commit or test
      *
      * @return array
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws AException
      */
     public function importData($data_array, $mode = 'commit')
@@ -187,7 +189,7 @@ class AData
     /**
      * Specific Data Array conversion to XML format
      *
-     * @param array  $data_array
+     * @param array $data_array
      * @param string $file_output
      *
      * @return int|string
@@ -218,7 +220,7 @@ class AData
      * @param int $offset
      *
      * @return array
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function CSV2ArrayFromFile($file, $delimIndex, $start_row = 0, $offset = 0)
     {
@@ -252,7 +254,7 @@ class AData
      * @param bool $asFile
      *
      * @return bool|string
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function array2CSV(
         $in_array,
@@ -263,7 +265,6 @@ class AData
         $escape = '"',
         $asFile = false
     ) {
-
         if (!is_dir(ABC::env('DIR_DATA'))) {
             mkdir(ABC::env('DIR_DATA'), 0777, true);
         }
@@ -288,7 +289,6 @@ class AData
         }
 
         if (count($in_array)) {
-
             $d_name = str_replace('.tar.gz', '', $fileName);
             $dirName = ABC::env('DIR_DATA').$d_name;
 
@@ -302,7 +302,6 @@ class AData
 
             if ($res) {
                 foreach ($in_array['tables'] as $table) {
-
                     $flat_array = $this->flattenArray($table);
                     $col_names = $this->buildColumns($table);
                     $str = '';
@@ -340,7 +339,6 @@ class AData
             }
 
             return file_get_contents($archive);
-
         }
 
         return false;
@@ -352,7 +350,7 @@ class AData
      * @param string $filename
      *
      * @return bool
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     protected function archive($tar_filename, $tar_dir, $filename)
     {
@@ -378,7 +376,7 @@ class AData
      * @param string $dir
      *
      * @return boolean
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     protected function removeDir($dir = '')
     {
@@ -408,9 +406,9 @@ class AData
     /**
      * generate 1 dimension array per row of the main table
      *
-     * @param array  $data_array
+     * @param array $data_array
      * @param string $append
-     * @param bool   $root
+     * @param bool $root
      *
      * @return array
      */
@@ -466,7 +464,7 @@ class AData
      * @param int $offset
      *
      * @return array|bool
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     protected function csvFile2array($file, $delimiter = ',', $enclose = '"', $escape = '"', $start = 0, $offset = 0)
     {
@@ -613,12 +611,12 @@ class AData
      *
      * @void
      *
-     * @param array      $data
+     * @param array $data
      * @param array|null $parent
-     * @param mixed      $parent_key
-     * @param int        $i
+     * @param mixed $parent_key
+     * @param int $i
      */
-    protected function filterEmpty(& $data, & $parent = null, $parent_key = null, & $i = 0)
+    protected function filterEmpty(&$data, &$parent = null, $parent_key = null, &$i = 0)
     {
         @ini_set('max_execution_time', 300);
         if (!empty($data)) {
@@ -653,7 +651,7 @@ class AData
      */
     protected function isEmptyArray($data)
     {
-        foreach ($data as $key => $val) {
+        foreach ($data as $val) {
             if (!empty($val) || (!is_array($val) && $val != '')) {
                 return false;
             }
@@ -708,7 +706,7 @@ class AData
      * @param array $skip_inner_ids
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     protected function processSection($table_name, $request, $table_cfg, $skip_inner_ids)
     {
@@ -780,15 +778,16 @@ class AData
                         }
 
                         //recurse
-                        array_push($row_arr['tables'],
-                            $this->processSection($sub_table_name, $sub_request, $sub_table_cfg, $skip_inner_ids));
+                        array_push(
+                            $row_arr['tables'],
+                            $this->processSection($sub_table_name, $sub_request, $sub_table_cfg, $skip_inner_ids)
+                        );
                     } else {
                         $row_arr['error'] = "Incorrectly configured input array. ".$sub_table_name." cannot be found";
                     }
                 }
                 array_push($result_arr['rows'], $row_arr);
             }
-
         } else {
             //last node, just process all
             foreach ($node_data as $row) {
@@ -807,7 +806,7 @@ class AData
      * @param array $request
      *
      * @return null
-     * @throws \Exception
+     * @throws Exception
      */
     protected function getTableData($table_name, $table_cfg, $request)
     {
@@ -831,7 +830,7 @@ class AData
                     if ($sub_sql) {
                         $sub_sql .= " AND ";
                     }
-                    $sub_sql .= '`'.$relation_id."` = ".(int)$request[$relation_id];
+                    $sub_sql .= '`'.$relation_id."` = ".(int) $request[$relation_id];
                 }
             }
         }
@@ -862,9 +861,9 @@ class AData
             if ($sub_sql) {
                 $sub_sql .= " AND ";
             }
-            $sub_sql .= '`'.$id.'` >= '.(int)$request['start_id'];
+            $sub_sql .= '`'.$id.'` >= '.(int) $request['start_id'];
             if (isset($request['end_id']) && !empty($request['end_id'])) {
-                $sub_sql .= ' AND `'.$id.'` <= '.(int)$request['end_id'];
+                $sub_sql .= ' AND `'.$id.'` <= '.(int) $request['end_id'];
             }
         }
         //check if special filter provided
@@ -873,7 +872,6 @@ class AData
                 $sub_sql .= " ORDER BY ";
             }
             $sub_sql .= $request['filter']['columns']." ASC";
-
         }
 
         if ($sub_sql) {
@@ -895,7 +893,7 @@ class AData
      * @param bool $action_delete
      *
      * @return array
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws AException
      */
     protected function processImportTable(
@@ -905,7 +903,6 @@ class AData
         $parent_vals = [],
         $action_delete = false
     ) {
-
         ADebug::checkpoint('AData::importData processing table '.$table_name);
         if (!isset($data_arr['rows'])) {
             $this->status2array('error', 'Incorrect structure of '.$table_name.' node. Row node is expected');
@@ -919,7 +916,7 @@ class AData
             return $new_vals;
         }
 
-        foreach ($data_arr['rows'] as $count => $rnode) {
+        foreach ($data_arr['rows'] as $rnode) {
             //Set action for the row
             if (!$action_delete) {
                 $action = $this->getAction($table_name, $table_cfg, $rnode);
@@ -967,12 +964,12 @@ class AData
                         $set_action_delete = false;
                     }
                     $resource_data = $this->processImportTable(
-                                                                $new_table['name'],
-                                                                $sub_table_cfg,
-                                                                $new_table,
-                                                                $new_vals,
-                                                                $set_action_delete
-                                                            );
+                        $new_table['name'],
+                        $sub_table_cfg,
+                        $new_table,
+                        $new_vals,
+                        $set_action_delete
+                    );
                     $new_vals['resource_id'] = $resource_data['resource_id'];
 
                     //Now do the action for the row if any data provided besides keys
@@ -984,7 +981,7 @@ class AData
                     $this->status2array(
                         'error',
                         'Unknown table: "'.$new_table['name']
-                            .'" requested in relation to table '.$table_name.'. Exit this node'
+                        .'" requested in relation to table '.$table_name.'. Exit this node'
                     );
                 }
             } else {
@@ -1004,9 +1001,9 @@ class AData
                             $set_action_delete = false;
                         }
                         $sub_table_cfg = $this->model_tool_table_relationships->find_table_cfg(
-                                                                                        $new_table['name'],
-                                                                                        $table_cfg
-                                                                                    );
+                            $new_table['name'],
+                            $table_cfg
+                        );
                         if ($sub_table_cfg) {
                             $this->processImportTable(
                                 $new_table['name'],
@@ -1019,13 +1016,12 @@ class AData
                             $this->status2array(
                                 'error',
                                 'Unknown table: "'.$new_table['name'].'" requested in relation to table '.$table_name
-                                    .'. Exit this node'
+                                .'. Exit this node'
                             );
                             continue;
                         }
                     }
                 }
-
             }
         }
         //return last row new (updated) values
@@ -1038,8 +1034,8 @@ class AData
      * Note update_or_insert is best guess action
      *
      * @param string $table_name
-     * @param array  $table_cfg
-     * @param array  $data_arr
+     * @param array $table_cfg
+     * @param array $data_arr
      *
      * @return string
      */
@@ -1070,8 +1066,8 @@ class AData
      *
      * @param string $action
      * @param string $table_name
-     * @param array  $table_cfg
-     * @param array  $new_vals
+     * @param array $table_cfg
+     * @param array $new_vals
      *
      * @return bool
      */
@@ -1095,7 +1091,7 @@ class AData
                             $this->status2array(
                                 'error',
                                 'Missing special relation ID '.$sp_value.' for '
-                                    .$action.' action in table '.$table_name.'. Skipping.'
+                                .$action.' action in table '.$table_name.'. Skipping.'
                             );
                             return false;
                         }
@@ -1103,7 +1099,6 @@ class AData
                 }
             } else {
                 if ($table_cfg['relation_ids']) {
-
                     foreach ($table_cfg['relation_ids'] as $relation_id) {
                         //check if we have required ids in array or from parent nodes
 
@@ -1111,12 +1106,11 @@ class AData
                             $this->status2array(
                                 'error',
                                 'Missing relation ID '.$relation_id.' for '.$action.' action in table '.$table_name
-                                    .'. Skipping.'
+                                .'. Skipping.'
                             );
                             return false;
                         }
                     }
-
                 }
             }
         }
@@ -1183,7 +1177,7 @@ class AData
      * @param array $parent_vals
      *
      * @return array
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     protected function doAllResources($table_cfg, $data, $parent_vals)
     {
@@ -1229,8 +1223,10 @@ class AData
                         continue;
                     }
                     if (!$this->createResource($rm, $object_name, $object_id, $image_basename)) {
-                        $this->status2array('error',
-                            "Unable to create new media resource type $type for $image_basename");
+                        $this->status2array(
+                            'error',
+                            "Unable to create new media resource type $type for $image_basename"
+                        );
                         continue;
                     }
                 }
@@ -1273,7 +1269,7 @@ class AData
      * @param string $code
      *
      * @return null
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     protected function createResource($rm, $object_txt_id, $object_id, $image_basename = '', $code = '')
     {
@@ -1310,7 +1306,7 @@ class AData
      */
     protected function updateFromArray($table_name, $table_cfg, $data_row, $parent_vals)
     {
-        $cols = $where = [];
+        $cols = [];
         //set ids to where from parent they might not be in there
         $where = $this->buildIdColumns($table_cfg, $parent_vals);
 
@@ -1347,8 +1343,10 @@ class AData
             if (empty($where)) {
                 $this->status2array('error', "Update data error in ".$table_name.". Data missing");
             } else {
-                $this->status2array('error', "Warning: Update ".$table_name
-                    .". All columns are keys, update action is not allowed. Please use insert.");
+                $this->status2array(
+                    'error', "Warning: Update ".$table_name
+                           .". All columns are keys, update action is not allowed. Please use insert."
+                );
             }
             return [];
         }
@@ -1408,7 +1406,6 @@ class AData
             }
 
             $cols[$col_name] = "`".$col_name."` = '".$this->db->escape($col_value)."'";
-
         }
 
         if (empty($cols)) {
@@ -1451,11 +1448,10 @@ class AData
      * @param array $parent_vals
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     protected function deleteFromArray($table_name, $table_cfg, $data_row, $parent_vals)
     {
-
         //set ids to where from parent they might not be in there
         $where = $this->buildIdColumns($table_cfg, $parent_vals);
 
@@ -1549,14 +1545,14 @@ class AData
             // Date validation
             // TODO Add field type to table configuration
             if ($col_name == 'date_added' || $col_name == 'date_modified') {
-                if ((string)$col_value == '') {
+                if ((string) $col_value == '') {
                     $cols[] = "`".$col_name."` = '".$this->db->escape($col_value)."'";
                 } else {
                     $cols[] = "`".$col_name."` = '".date('Y-m-d H:i:s', strtotime($col_value))."'";
                 }
             } else {
                 if ($col_name == 'date_available') {
-                    if ((string)$col_value == '0000-00-00') {
+                    if ((string) $col_value == '0000-00-00') {
                         $cols[] = "`".$col_name."` = '".$this->db->escape($col_value)."'";
                     } else {
                         $cols[] = "`".$col_name."` = '".date('Y-m-d', strtotime($col_value))."'";
@@ -1674,7 +1670,7 @@ class AData
      * recursive function to convert nested array to XML
      *
      * @param                   $data_array
-     * @param \SimpleXMLElement $xml - it is a reference!!!
+     * @param SimpleXMLElement $xml - it is a reference!!!
      */
     protected function arrayPart2XML($data_array, $xml)
     {
@@ -1706,7 +1702,7 @@ class AData
     /**
      * recursive function to convert nested XML to array
      *
-     * @param \SimpleXMLElement $xml
+     * @param SimpleXMLElement $xml
      *
      * @return array
      */
@@ -1715,7 +1711,7 @@ class AData
         $results = [];
         foreach ($xml->children() as $column) {
             /**
-             * @var $column \SimpleXMLElement
+             * @var $column SimpleXMLElement
              */
             $col_name = $column->getName();
             if ($col_name == "tables" || $col_name == "rows") {
@@ -1725,7 +1721,7 @@ class AData
                 if ($col_name == "table" || $col_name == "row") {
                     array_push($results, $this->XMLPart2array($column));
                 } else {
-                    $results[$col_name] = (string)$column;
+                    $results[$col_name] = (string) $column;
                 }
             }
         }
@@ -1735,9 +1731,9 @@ class AData
     /**
      * append message to current node
      *
-     * @param \SimpleXMLElement $node
+     * @param SimpleXMLElement $node
      * @param                   $err_message
-     * @param string            $type
+     * @param string $type
      *
      * @return null
      */
@@ -1810,7 +1806,7 @@ class AData
      * @param string $level
      *
      * @return string
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     protected function processError($title, $error, $level = 'warning')
     {
@@ -1824,7 +1820,7 @@ class AData
      * @param string $table_name
      * @param string $id
      *
-     * @throws \Exception
+     * @throws Exception
      */
     protected function clearLayoutsTables($table_name, $id)
     {
@@ -1871,7 +1867,7 @@ class AData
      * @param string $key_value
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     protected function getLayoutIds($key_param, $key_value)
     {
@@ -1881,7 +1877,7 @@ class AData
             INNER JOIN ".$this->db->table_name("pages_layouts")." pl 
                 ON p.page_id = pl.page_id
             WHERE p.key_param = '".$this->db->escape($key_param)."'
-                    AND p.key_value = '".(int)$key_value."'"
+                    AND p.key_value = '".(int) $key_value."'"
         );
 
         if ($result->num_rows) {
@@ -1893,17 +1889,17 @@ class AData
     /**
      * @param int $page_id
      *
-     * @throws \Exception
+     * @throws Exception
      */
     protected function clearPages($page_id)
     {
         $this->db->query(
             "DELETE FROM ".$this->db->table_name("pages")."
-             WHERE page_id = '".(int)$page_id."'"
+             WHERE page_id = '".(int) $page_id."'"
         );
         $this->db->query(
             "DELETE FROM ".$this->db->table_name("page_descriptions")."
-             WHERE page_id = '".(int)$page_id."'"
+             WHERE page_id = '".(int) $page_id."'"
         );
     }
 
@@ -1911,13 +1907,13 @@ class AData
      * @param int $page_id
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     protected function clearPagesLayouts($page_id)
     {
         $this->db->query(
             "DELETE FROM ".$this->db->table_name("pages_layouts")."
-             WHERE page_id = '".(int)$page_id."'"
+             WHERE page_id = '".(int) $page_id."'"
         );
         return true;
     }
@@ -1926,13 +1922,13 @@ class AData
      * @param int $layout_id
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     protected function clearLayouts($layout_id)
     {
         $this->db->query(
             "DELETE FROM ".$this->db->table_name("layouts")."
-             WHERE layout_id = '".(int)$layout_id."'"
+             WHERE layout_id = '".(int) $layout_id."'"
         );
         return true;
     }
