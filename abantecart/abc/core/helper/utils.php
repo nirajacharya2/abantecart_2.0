@@ -138,7 +138,7 @@ class AHelperUtils extends AHelper
 
         // detect if need to show raw number for decimal points
         // In admin, this is regardless of currency format. Need to show real number
-        if ($mode == 'no_round' && $value != round($value, $decimal_place)) {
+        if ($mode == 'no_round' && $value != round((float)$value, $decimal_place)) {
             //count if we have more decimal than currency configuration
             $decim_portion = explode('.', $value);
             if ($decimal_place < strlen($decim_portion[1])) {
@@ -147,7 +147,7 @@ class AHelperUtils extends AHelper
         }
 
         //if only zeros after decimal point - hide zeros
-        if ($mode == 'hide_zero_decimal' && round($value) == round($value, $decimal_place)) {
+        if ($mode == 'hide_zero_decimal' && round((float)$value) == round((float)$value, $decimal_place)) {
             $decimal_place = 0;
         }
 
