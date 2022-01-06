@@ -1,5 +1,6 @@
 <?php
 namespace abc\models\casts;
+use abc\core\engine\Registry;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Concerns\HasAttributes;
 use Illuminate\Database\Eloquent\Model;
@@ -37,6 +38,6 @@ class Serialized implements CastsAttributes
 
     protected function asSerialized($value)
     {
-        return unserialize($value);
+        return serialize($value);
     }
 }
