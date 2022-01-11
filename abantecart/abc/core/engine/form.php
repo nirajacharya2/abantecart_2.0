@@ -438,7 +438,7 @@ class AForm
      */
     public function getFieldHtml($data)
     {
-        $data['form'] = $this->form['form_name'] ?? '';
+        $data['form'] = $this->form['form_name'] ?: '';
 
         if ($data['type'] == 'form') {
             $data['javascript'] = $this->addFormJs();

@@ -754,11 +754,11 @@ class Product extends BaseModel
     }
 
     /**
-     * @return HasMany
+     * @return BelongsToMany
      */
     public function related()
     {
-        return $this->hasMany(ProductsRelated::class, 'product_id');
+        return $this->belongsToMany(ProductsRelated::class, 'products_related','product_id','related_id');
     }
 
     /**
@@ -1420,6 +1420,11 @@ class Product extends BaseModel
         }
 
         if (isset($product_data['product_related'])) {
+            $product_data['product_related'] = array_map('intval', $product_data['product_related']);
+            $product_data['product_related'] = array_filter(
+                $product_data['product_related'],
+                function($val){ return $val>0;}
+            );
             $model->related()->sync($product_data['product_related']);
         }
         if (isset($product_data['product_tags'])) {

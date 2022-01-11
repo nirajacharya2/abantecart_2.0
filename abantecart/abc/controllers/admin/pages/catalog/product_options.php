@@ -188,8 +188,7 @@ class ControllerPagesCatalogProductOptions extends AController
             $product_opt[$option['product_option_id']] = $option['language'][$content_language_id]['name'];
         }
         $product_option_id = $this->request->get['product_option_id']
-            ? $this->request->get['product_option_id']
-            : $this->data['product_option_id'];
+                            ? : $this->data['product_option_id'];
         $this->data['options'] = $form->getFieldHtml([
             'type'    => 'selectbox',
             'name'    => 'option',
