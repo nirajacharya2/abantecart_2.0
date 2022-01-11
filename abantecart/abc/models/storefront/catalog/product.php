@@ -914,6 +914,7 @@ class ModelCatalogProduct extends Model
      */
     public function getFeaturedProducts($options)
     {
+
         $limit = (int)$options['limit'];
         $order = $options['order'];
         $start = (int)$options['start'];
@@ -927,6 +928,7 @@ class ModelCatalogProduct extends Model
                     .md5($limit.$order.$start.$sort.$total);
         $product_data = $this->cache->pull($cache_key);
         if ($product_data === false) {
+            $product_data = [];
             $sql = "SELECT f.*, pd.*, ss.name AS stock, p.*
                     FROM ".$this->db->table_name("products_featured")." f
                     LEFT JOIN ".$this->db->table_name("products")." p
@@ -974,8 +976,8 @@ class ModelCatalogProduct extends Model
             }
 
             $query = $this->db->query($sql);
+
             if ($query->num_rows) {
-                $product_data=[];
                 foreach ($query->rows as $result) {
                     $product_data[$result['product_id']] = $result;
                 }
