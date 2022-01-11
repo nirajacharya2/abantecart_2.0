@@ -500,7 +500,7 @@ class ControllerPagesExtensionBannerManager extends AController
                 'responses/common/resource_library/get_resources_scripts',
                 [
                     'object_name' => 'banners',
-                    'object_id'   => $this->data['banner_id'],
+                    'object_id'   => (int)$this->data['banner_id'],
                     'types'       => ['image'],
                 ]
             );

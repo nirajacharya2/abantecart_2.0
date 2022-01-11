@@ -133,7 +133,7 @@ class ControllerPagesCatalogProductImages extends AController{
 				'responses/common/resource_library/get_resources_scripts',
 				array (
 						'object_name' => 'products',
-						'object_id'   => $this->request->get['product_id'],
+						'object_id'   => (int)$this->request->get['product_id'],
 						'types'       => array ('image', 'audio', 'video', 'pdf', 'archive'),
 				)
 		);

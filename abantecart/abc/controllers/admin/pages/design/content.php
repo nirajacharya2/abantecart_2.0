@@ -541,7 +541,7 @@ class ControllerPagesDesignContent extends AController
             'responses/common/resource_library/get_resources_scripts',
             array(
                 'object_name' => 'contents',
-                'object_id'   => $this->data['parent_content_id'],
+                'object_id'   => (int)$this->data['parent_content_id'],
                 'types'       => array('image'),
             )
         );
