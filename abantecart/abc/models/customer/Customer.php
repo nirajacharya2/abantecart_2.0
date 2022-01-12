@@ -538,30 +538,15 @@ public function __construct(array $attributes = [])
         $this->attributes['email'] = mb_strtolower($value, ABC::env('APP_CHARSET'));
     }
 
-    public function setDataAttribute($value)
-    {
-        $this->attributes['data'] = serialize($value);
-    }
-
-    public function setCartAttribute($value)
-    {
-        $this->attributes['cart'] = serialize($value);
-    }
-
-    public function setWishlistAttribute($value)
-    {
-        $this->attributes['wishlist'] = serialize($value);
-    }
-
     public function setPasswordAttribute($password)
     {
-        if (!empty(trim($password)) && !$this->originalIsEquivalent('password')) {
+        /** @var AEncryption $enc */
+        $enc = ABC::getObjectByAlias('AEncryption');
+        if (!empty(trim($password))
+            && $enc::getHash($password, $this->attributes['salt']) != $this->attributes['password']
+        ) {
             $salt_key = H::genToken(8);
             $this->fill(['salt' => $salt_key]);
-            /**
-             * @var AEncryption $enc
-             */
-            $enc = ABC::getObjectByAlias('AEncryption');
             $this->attributes['password'] = $enc::getHash($password, $salt_key);
         } else {
             unset($this->attributes['password']);
