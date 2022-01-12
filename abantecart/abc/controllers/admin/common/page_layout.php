@@ -22,12 +22,22 @@ namespace abc\controllers\admin;
 
 use abc\core\ABC;
 use abc\core\engine\AController;
+use abc\core\lib\AException;
+use abc\core\lib\ALayoutManager;
 use Exception;
+use ReflectionException;
 
 class ControllerCommonPageLayout extends AController
 {
     protected $installed_blocks = [];
 
+    /**
+     * @param ALayoutManager $layout
+     *
+     * @return void
+     * @throws ReflectionException
+     * @throws AException
+     */
     public function main($layout)
     {
         // use to init controller data
@@ -136,8 +146,8 @@ class ControllerCommonPageLayout extends AController
             $partialView->batchAssign(
                 [
                     'id'                    => $block['instance_id'],
-                    'blockId'               => $block['block_id'],
-                    'customBlockId'         => $block['custom_block_id'],
+                    'blockId'               => (int)$block['block_id'],
+                    'customBlockId'         => (int)$block['custom_block_id'],
                     'name'                  => $block['block_txt_id'],
                     'customName'            => $customName,
                     'editUrl'               => $edit_url,

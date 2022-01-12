@@ -124,9 +124,7 @@ class ControllerPagesDesignLayout extends AController
         }
 
         $layout_data['page_url'] = $this->html->getSecureURL('design/layout');
-
         $layout_data['page_builder_url'] = $this->html->getSecureURL('r/design/page_builder');
-
         $layout_data['generate_preview_url'] = $this->html->getSecureURL('design/layout/preview');
         $layout_data['current_url'] = $this->html->getSecureURL('design/layout', $url);
         $layout_data['page_delete_url'] = $this->html->getSecureURL('design/layout/delete');
@@ -143,7 +141,7 @@ class ControllerPagesDesignLayout extends AController
             unset($this->session->data['success']);
         }
 
-        $layoutform = $this->dispatch('common/page_layout', [$layout]);
+        $layoutform = $this->dispatch('common/page_layout', ['layout' => $layout]);
         $layout_data['layoutform'] = $layoutform->dispatchGetOutput();
 
         $this->view->batchAssign($layout_data);
