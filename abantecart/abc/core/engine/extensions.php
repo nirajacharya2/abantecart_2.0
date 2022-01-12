@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2021 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -618,19 +618,19 @@ class ExtensionsApi
         }
         $name = '';
         $seek_key = $extension.'_name';
-        $lang_dir = $this->registry->get('language')->language_details['directory'];
+        $lang_dir = Registry::language()->language_details['directory'];
         $filename = ABC::env('DIR_APP_EXTENSIONS')
             .$extension.DS
-            .'admin'.DS
             .'languages'.DS
+            .'admin'.DS
             .$lang_dir.DS
             .$extension.DS
             .$extension.'.xml';
         if (!file_exists($filename)) {
             $filename = ABC::env('DIR_APP_EXTENSIONS')
                 .$extension.DS
-                .'admin'.DS
                 .'languages'.DS
+                .'admin'.DS
                 .'english'.DS
                 .$extension.DS
                 .$extension.'.xml';
@@ -1494,7 +1494,7 @@ class ExtensionUtils
                     strlen($true_item_id) - 2
                 ) : $true_item_id;
 
-                $value = $settings[(string)$item['id']];
+                $value = $settings[$item['id']];
                 if (H::is_serialized($value)) {
                     $value = unserialize($value);
                 }
@@ -1549,7 +1549,7 @@ class ExtensionUtils
      */
     public function validateSettings($data = [])
     {
-        // if values not set or we change only status of extension
+        // if values not set, or we change only status of extension
         if (!$data
             || (isset($data['one_field'])
                 && isset($data[$this->name.'_status'])
@@ -1657,13 +1657,12 @@ class ExtensionUtils
             }
         }
 
-        // at last we need to validate data
         return true;
     }
 
     /**
      * @return array
-     * @throws ReflectionException
+     * @throws ReflectionException|AException
      */
     public function getDefaultSettings()
     {
