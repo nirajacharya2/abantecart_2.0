@@ -27,12 +27,10 @@ use abc\core\lib\ALength;
 
 class ControllerPagesLocalisationLengthClass extends AController
 {
-    public $data = array();
-    public $error = array();
+    public $error = [];
 
     public function main()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -43,19 +41,19 @@ class ControllerPagesLocalisationLengthClass extends AController
             unset($this->session->data['success']);
         }
 
-        $this->document->initBreadcrumb(array(
+        $this->document->initBreadcrumb([
             'href'      => $this->html->getSecureURL('index/home'),
             'text'      => $this->language->get('text_home'),
             'separator' => false,
-        ));
-        $this->document->addBreadcrumb(array(
+                                        ]);
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSecureURL('localisation/length_class'),
             'text'      => $this->language->get('heading_title'),
             'separator' => ' :: ',
             'current'   => true,
-        ));
+                                       ]);
 
-        $grid_settings = array(
+        $grid_settings = [
             'table_id'       => 'length_grid',
             'url'            => $this->html->getSecureURL('listing_grid/length_class'),
             'editurl'        => $this->html->getSecureURL('listing_grid/length_class/update'),
@@ -63,50 +61,50 @@ class ControllerPagesLocalisationLengthClass extends AController
             'sortname'       => 'title',
             'sortorder'      => 'asc',
             'columns_search' => false,
-            'actions'        => array(
-                'edit'   => array(
+            'actions'        => [
+                'edit'   => [
                     'text' => $this->language->get('text_edit'),
                     'href' => $this->html->getSecureURL('localisation/length_class/update', '&length_class_id=%ID%'),
-                ),
-                'save'   => array(
+                ],
+                'save'   => [
                     'text' => $this->language->get('button_save'),
-                ),
-                'delete' => array(
+                ],
+                'delete' => [
                     'text' => $this->language->get('button_delete'),
-                ),
-            ),
-        );
+                ],
+            ],
+        ];
 
-        $grid_settings['colNames'] = array(
+        $grid_settings['colNames'] = [
             $this->language->get('column_title'),
             $this->language->get('column_unit'),
             $this->language->get('column_value'),
             $this->language->get('column_iso_code'),
-        );
-        $grid_settings['colModel'] = array(
-            array(
+        ];
+        $grid_settings['colModel'] = [
+            [
                 'name'  => 'title',
                 'index' => 'title',
                 'align' => 'left',
-            ),
-            array(
+            ],
+            [
                 'name'  => 'unit',
                 'index' => 'unit',
                 'align' => 'center',
-            ),
-            array(
+            ],
+            [
                 'name'  => 'value',
                 'index' => 'value',
                 'align' => 'center',
-            ),
-            array(
+            ],
+            [
                 'name'  => 'iso_code',
                 'index' => 'iso_code',
                 'align' => 'center',
-            ),
-        );
+            ],
+        ];
 
-        $grid = $this->dispatch('common/listing_grid', array($grid_settings));
+        $grid = $this->dispatch('common/listing_grid', [$grid_settings]);
         $this->view->assign('listing_grid', $grid->dispatchGetOutput());
 
         $this->view->assign('insert', $this->html->getSecureURL('localisation/length_class/insert'));
@@ -172,24 +170,25 @@ class ControllerPagesLocalisationLengthClass extends AController
     protected function getForm()
     {
 
-        $this->data = array();
+        $this->data = [];
         $this->data['error'] = $this->error;
         $this->data['cancel'] = $this->html->getSecureURL('localisation/length_class');
 
-        $this->document->initBreadcrumb(array(
+        $this->document->initBreadcrumb([
             'href'      => $this->html->getSecureURL('index/home'),
             'text'      => $this->language->get('text_home'),
             'separator' => false,
-        ));
-        $this->document->addBreadcrumb(array(
+                                        ]);
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSecureURL('localisation/length_class'),
             'text'      => $this->language->get('heading_title'),
             'separator' => ' :: ',
-        ));
+                                       ]);
 
         if (isset($this->request->get['length_class_id']) && $this->request->is_GET()) {
-            $length_class_info =
-                $this->model_localisation_length_class->getLengthClass($this->request->get['length_class_id']);
+            $length_class_info = $this->model_localisation_length_class->getLengthClass(
+                $this->request->get['length_class_id']
+            );
         }
 
         if (isset($this->request->post['length_class_description'])) {
@@ -200,7 +199,7 @@ class ControllerPagesLocalisationLengthClass extends AController
                     $this->request->get['length_class_id']
                 );
         } else {
-            $this->data['length_class_description'] = array();
+            $this->data['length_class_description'] = [];
         }
 
         if (isset($this->request->post['value'])) {
@@ -238,70 +237,70 @@ class ControllerPagesLocalisationLengthClass extends AController
             $is_predefined = in_array($this->request->get['length_class_id'], $a_length->predefined_length_ids);
         }
 
-        $this->document->addBreadcrumb(array(
+        $this->document->addBreadcrumb([
             'href'      => $this->data['action'],
             'text'      => $this->data['heading_title'],
             'separator' => ' :: ',
             'current'   => true,
-        ));
+                                       ]);
 
-        $form->setForm(array(
+        $form->setForm([
             'form_name' => 'editFrm',
             'update'    => $this->data['update'],
-        ));
+                       ]);
 
         $this->data['form']['id'] = 'editFrm';
-        $this->data['form']['form_open'] = $form->getFieldHtml(array(
+        $this->data['form']['form_open'] = $form->getFieldHtml([
             'type'   => 'form',
             'name'   => 'editFrm',
             'attr'   => 'data-confirm-exit="true" class="aform form-horizontal"',
             'action' => $this->data['action'],
-        ));
-        $this->data['form']['submit'] = $form->getFieldHtml(array(
+                                                               ]);
+        $this->data['form']['submit'] = $form->getFieldHtml([
             'type'  => 'button',
             'name'  => 'submit',
             'text'  => $this->language->get('button_save'),
             'style' => 'button1',
-        ));
-        $this->data['form']['cancel'] = $form->getFieldHtml(array(
+                                                            ]);
+        $this->data['form']['cancel'] = $form->getFieldHtml([
             'type'  => 'button',
             'name'  => 'cancel',
             'text'  => $this->language->get('button_cancel'),
             'style' => 'button2',
-        ));
+                                                            ]);
 
         $content_language_id = $this->language->getContentLanguageID();
 
-        $this->data['form']['fields']['title'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['title'] = $form->getFieldHtml([
             'type'         => 'input',
             'name'         => 'length_class_description['.$content_language_id.'][title]',
             'value'        => $this->data['length_class_description'][$content_language_id]['title'],
             'required'     => true,
             'style'        => 'large-field',
             'multilingual' => true,
-        ));
-        $this->data['form']['fields']['unit'] = $form->getFieldHtml(array(
+                                                                     ]);
+        $this->data['form']['fields']['unit'] = $form->getFieldHtml([
             'type'         => 'input',
             'name'         => 'length_class_description['.$content_language_id.'][unit]',
             'value'        => $this->data['length_class_description'][$content_language_id]['unit'],
             'required'     => true,
             'style'        => 'large-field',
             'multilingual' => true,
-        ));
-        $this->data['form']['fields']['iso_code'] = $form->getFieldHtml(array(
+                                                                    ]);
+        $this->data['form']['fields']['iso_code'] = $form->getFieldHtml([
             'type'     => 'input',
             'name'     => 'iso_code',
             'value'    => $this->data['iso_code'],
             'required' => true,
             'attr'     => 'maxlength="4" '.($is_predefined ? 'readonly' : ''),
             'style'    => 'tiny-field',
-        ));
-        $this->data['form']['fields']['value'] = $form->getFieldHtml(array(
+                                                                        ]);
+        $this->data['form']['fields']['value'] = $form->getFieldHtml([
             'type'  => 'input',
             'name'  => 'value',
             'value' => $this->data['value'],
             'attr'  => $is_predefined ? 'readonly' : '',
-        ));
+                                                                     ]);
 
         $this->view->batchAssign($this->data);
         $this->view->assign('form_language_switch', $this->html->getContentLanguageSwitcher());
@@ -316,13 +315,13 @@ class ControllerPagesLocalisationLengthClass extends AController
             $this->error['warning'] = $this->language->get('error_permission');
         }
 
-        foreach ($this->request->post['length_class_description'] as $language_id => $value) {
+        foreach ($this->request->post['length_class_description'] as $value) {
             if (mb_strlen($value['title']) < 2 || mb_strlen($value['title']) > 32) {
-                $this->error['title'][$language_id] = $this->language->get('error_title');
+                $this->error['title'] = $this->language->get('error_title');
             }
 
             if ((!$value['unit']) || mb_strlen($value['unit']) > 4) {
-                $this->error['unit'][$language_id] = $this->language->get('error_unit');
+                $this->error['unit'] = $this->language->get('error_unit');
             }
         }
         $iso_code = strtoupper(preg_replace('/[^a-z]/i', '', $this->request->post['iso_code']));
@@ -332,8 +331,7 @@ class ControllerPagesLocalisationLengthClass extends AController
         else {
             $length = $this->model_localisation_length_class->getLengthClassByCode($iso_code);
             $length_class_id = (int)$this->request->get['id']
-                            ? (int)$this->request->get['id']
-                            : (int)$this->request->get['length_class_id'];
+                            ? : (int)$this->request->get['length_class_id'];
             if ($length) {
                 if (!$length_class_id
                     || ($length_class_id && $length['length_class_id'] != $length_class_id)) {
@@ -344,11 +342,7 @@ class ControllerPagesLocalisationLengthClass extends AController
 
         $this->extensions->hk_ValidateData($this);
 
-        if (!$this->error) {
-            return true;
-        } else {
-            return false;
-        }
+        return (!$this->error);
     }
 
 }
