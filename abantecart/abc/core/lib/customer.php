@@ -905,7 +905,7 @@ class ACustomer extends ALibBase
 
         $customer = $this->model();
         if($customer && $customer->status == 1){
-            return (array)$customer->wishlist;
+            return $customer->wishlist ?: [];
         }
 
         return [];

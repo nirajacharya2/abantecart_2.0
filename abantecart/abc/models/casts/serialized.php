@@ -19,7 +19,8 @@ class Serialized implements CastsAttributes
      */
     public function get($model, $key, $value, $attributes)
     {
-        return unserialize($value);
+        $output = unserialize($value);
+        return  $output === false ? [] : $output;
     }
 
     /**
