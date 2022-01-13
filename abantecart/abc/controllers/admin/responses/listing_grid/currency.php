@@ -175,7 +175,7 @@ class ControllerResponsesListingGridCurrency extends AController
                             }
 
                             if (isset($this->request->post[$f][$id])) {
-                                $err = $this->_validateField($f, $this->request->post[$f][$id]);
+                                $err = $this->_validateField($f, $this->request->post[$f][$id], $id);
                                 if (!empty($err)) {
                                     $error = new AError('');
                                     return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
@@ -226,7 +226,7 @@ class ControllerResponsesListingGridCurrency extends AController
         if (isset($this->request->get['id'])) {
             //request sent from edit form. ID in url
             foreach ($this->request->post as $key => $value) {
-                $err = $this->_validateField($key, $value);
+                $err = $this->_validateField($key, $value, $this->request->get['id']);
                 if (!empty($err)) {
                     $error = new AError('');
                     $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
@@ -243,25 +243,14 @@ class ControllerResponsesListingGridCurrency extends AController
         foreach ($allowedFields as $f) {
             if (isset($this->request->post[$f])) {
                 foreach ($this->request->post[$f] as $k => $v) {
-                    $err = $this->_validateField($f, $v);
+                    $err = $this->_validateField($f, $v, $k);
+
                     if (!empty($err)) {
                         $error = new AError('');
                         $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                         return;
                     }
                     Currency::find($k)->update([$f => $v]);
-                    if ($f == 'status') {
-                        $errText = 'You tried to disable the only enabled currency of cart!';
-                        $error = new AError($errText);
-                        $error->toMessages('Currency validation notice');
-                        return $error->toJSONResponse(
-                            'VALIDATION_ERROR_406',
-                            [
-                              'error_text' => $errText,
-                              'error_title'=> 'Warning: '
-                            ]
-                        );
-                    }
                 }
             }
         }
@@ -270,7 +259,7 @@ class ControllerResponsesListingGridCurrency extends AController
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
-    private function _validateField($field, $value)
+    protected function _validateField($field, $value, $id = 0)
     {
         $err = '';
         switch ($field) {
@@ -282,6 +271,20 @@ class ControllerResponsesListingGridCurrency extends AController
             case 'code':
                 if (mb_strlen($value) != 3) {
                     $err = $this->language->get('error_code');
+                }
+                break;
+            case 'status':
+                // prevent disabling the only enabled currency in cart
+                $enabled = [];
+                $all = Currency::all();
+                foreach ($all as $c) {
+                    if ($c->status && $c->currency_id != $id) {
+                        $enabled[] = $c;
+                    }
+                }
+
+                if (!$enabled && !$value) {
+                    $err = 'You tried to disable the only enabled currency of cart!';
                 }
                 break;
             default:
