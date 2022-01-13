@@ -219,7 +219,8 @@ class ControllerPagesDesignContent extends AController
         $this->_initTabs('form');
         $this->view->assign('content_id', $content_id);
         $this->view->assign(
-            'insert', $this->html->getSecureURL('design/content/insert', '&parent_content_id='.$content_id)
+            'insert',
+            $this->html->getSecureURL('design/content/insert', '&parent_content_id='.$content_id)
         );
         $this->_getForm($content_id);
         //update controller data
@@ -341,7 +342,10 @@ class ControllerPagesDesignContent extends AController
         } else {
             $this->data['action'] = $this->html->getSecureURL('design/content/update', '&content_id='.$content_id);
             $this->data['form_title'] = $this->language->get('update_title');
-            $this->data['update'] = $this->html->getSecureURL('listing_grid/content/update_field', '&id='.$content_id);
+            $this->data['update'] = $this->html->getSecureURL(
+                'listing_grid/content/update_field',
+                '&id='.$content_id.'_'.$content_info
+            );
             $form = new AForm('HS');
         }
 
@@ -463,19 +467,23 @@ class ControllerPagesDesignContent extends AController
             ]
         );
 
-        $this->data['form']['fields']['meta_keywords'] = $form->getFieldHtml([
-                                                                                 'type'         => 'textarea',
-                                                                                 'name'         => 'meta_keywords',
-                                                                                 'value'        => $this->data['meta_keywords'],
-                                                                                 'multilingual' => true,
-                                                                             ]);
+        $this->data['form']['fields']['meta_keywords'] = $form->getFieldHtml(
+            [
+                'type'         => 'textarea',
+                'name'         => 'meta_keywords',
+                'value'        => $this->data['meta_keywords'],
+                'multilingual' => true,
+            ]
+        );
 
-        $this->data['form']['fields']['meta_description'] = $form->getFieldHtml([
-                                                                                    'type'         => 'textarea',
-                                                                                    'name'         => 'meta_description',
-                                                                                    'value'        => $this->data['meta_description'],
-                                                                                    'multilingual' => true,
-                                                                                ]);
+        $this->data['form']['fields']['meta_description'] = $form->getFieldHtml(
+            [
+                'type'         => 'textarea',
+                'name'         => 'meta_description',
+                'value'        => $this->data['meta_description'],
+                'multilingual' => true,
+            ]
+        );
 
         $this->data['form']['fields']['content'] = $form->getFieldHtml(
             [
@@ -674,7 +682,7 @@ class ControllerPagesDesignContent extends AController
             'layout_id'  => $layout_id,
             'tmpl_id'    => $tmpl_id,
         ];
-        $url = '&'.$this->html->buildURI($params);
+        $urlParams = '&'.$this->html->buildURI($params);
 
         // get templates
         $this->data['templates'] = [];
@@ -721,7 +729,7 @@ class ControllerPagesDesignContent extends AController
         }
 
         $this->data['page_url'] = $page_url;
-        $this->data['current_url'] = $this->html->getSecureURL('design/content/edit_layout', $url);
+        $this->data['current_url'] = $this->html->getSecureURL('design/content/edit_layout', $urlParams);
 
         // insert external form of layout
         $layout = new ALayoutManager($tmpl_id, $page_id, $layout_id);

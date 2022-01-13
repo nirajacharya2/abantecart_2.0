@@ -230,6 +230,7 @@ class AContentManager
      * @param null|int $parent_content_id
      *
      * @return bool
+     * @throws AException
      */
     public function editContentField($content_id, $field, $value, $parent_content_id = null)
     {
@@ -239,7 +240,7 @@ class AContentManager
             return false;
         }
 
-        if ((int) $parent_content_id > 0) {
+        if (!is_null($parent_content_id)) {
             $whereParent = " AND parent_content_id='".(int) $parent_content_id."'";
         } else {
             $whereParent = " AND parent_content_id IS NULL";
@@ -481,7 +482,7 @@ class AContentManager
             $select_columns = 'count(*) as total';
         } else {
             $select_columns =
-                        "id.*,
+                "id.*,
                         cd.title as parent_name,
                         ( SELECT COUNT(*) FROM ".$this->db->table_name("contents")." 
                         WHERE parent_content_id=i.content_id ) as cnt,
@@ -506,17 +507,16 @@ class AContentManager
             $sql .= " AND ".str_replace('`name`', 'id.name', $data ['subsql_filter']);
         }
 
-        if (isset($filter['id.title']) && !is_null($filter['id.title'])) {
+        if (isset($filter['id.title'])) {
             $sql .= " AND id.title LIKE '%".(float) $filter['pfrom']."%' ";
         }
-        if (isset($filter['status']) && !is_null($filter['status'])) {
+        if (isset($filter['status'])) {
             $sql .= " AND i.status = '".(int) $filter['status']."'";
         }
-        if (isset($filter['parent_id']) && !is_null($filter['parent_id'])) {
+        if (isset($filter['parent_id'])) {
             $sql .= " AND i.parent_content_id = '".(int) $filter['parent_id']."'";
         }
 
-        //If for total, we done building the query
         if ($mode == 'total_only') {
             $query = $this->db->query($sql);
 
@@ -536,7 +536,7 @@ class AContentManager
             $sql .= " ORDER BY i.parent_content_id, i.sort_order";
         }
 
-        if (isset($data['order']) && (strtoupper($data['order']) == 'DESC')) {
+        if (strtoupper($data['order']) === 'DESC') {
             $sql .= " DESC";
         } else {
             $sql .= " ASC";
