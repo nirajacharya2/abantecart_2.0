@@ -42,17 +42,17 @@ class ModelReportSale extends Model
         if ($mode == 'total_only') {
             switch ($group) {
                 case 'day';
-                    $inc_sql = "COUNT(DISTINCT YEAR(date_added), MONTH(date_added), DAY(date_added))";
+                    $inc_sql = "COUNT(DISTINCT YEAR(o.date_added), MONTH(o.date_added), DAY(o.date_added))";
                     break;
                 default:
                 case 'week':
-                    $inc_sql = "COUNT(DISTINCT YEAR(date_added), WEEK(date_added))";
+                    $inc_sql = "COUNT(DISTINCT YEAR(date_added), WEEK(o.date_added))";
                     break;
                 case 'month':
-                    $inc_sql = "COUNT(DISTINCT YEAR(date_added), MONTH(date_added))";
+                    $inc_sql = "COUNT(DISTINCT YEAR(date_added), MONTH(o.date_added))";
                     break;
                 case 'year':
-                    $inc_sql = "COUNT(DISTINCT YEAR(date_added))";
+                    $inc_sql = "COUNT(DISTINCT YEAR(o.date_added))";
                     break;
             }
             $inc_sql .= " AS total ";
@@ -69,7 +69,7 @@ class ModelReportSale extends Model
         }
 
         $sql = "SELECT ".$inc_sql." 
-                FROM `".$this->db->table_name("orders")."`";
+                FROM `".$this->db->table_name("orders")."` o";
 
         if ($filter['order_status'] == 'confirmed') {
             $sql .= " WHERE order_status_id > 0 ";
@@ -104,17 +104,17 @@ class ModelReportSale extends Model
 
         switch ($group) {
             case 'day';
-                $sql .= " GROUP BY DATE(date_added)";
+                $sql .= " GROUP BY DATE(o.date_added)";
                 break;
             default:
             case 'week':
-                $sql .= " GROUP BY WEEK(date_added)";
+                $sql .= " GROUP BY WEEK(o.date_added)";
                 break;
             case 'month':
-                $sql .= " GROUP BY MONTH(date_added)";
+                $sql .= " GROUP BY MONTH(o.date_added)";
                 break;
             case 'year':
-                $sql .= " GROUP BY YEAR(date_added)";
+                $sql .= " GROUP BY YEAR(o.date_added)";
                 break;
         }
 
@@ -302,13 +302,13 @@ class ModelReportSale extends Model
                     break;
                 default:
                 case 'week':
-                    $inc_sql = "COUNT(DISTINCT YEAR(date_added), WEEK(date_added), ot.title)";
+                    $inc_sql = "COUNT(DISTINCT YEAR(o.date_added), WEEK(o.date_added), ot.title)";
                     break;
                 case 'month':
-                    $inc_sql = "COUNT(DISTINCT YEAR(date_added), MONTH(date_added), ot.title)";
+                    $inc_sql = "COUNT(DISTINCT YEAR(o.date_added), MONTH(o.date_added), ot.title)";
                     break;
                 case 'year':
-                    $inc_sql = "COUNT(DISTINCT YEAR(date_added), ot.title)";
+                    $inc_sql = "COUNT(DISTINCT YEAR(o.date_added), ot.title)";
                     break;
             }
             $inc_sql .= " AS total ";
@@ -358,17 +358,17 @@ class ModelReportSale extends Model
 
         switch ($group) {
             case 'day';
-                $sql .= " GROUP BY DATE(date_added)";
+                $sql .= " GROUP BY DATE(o.date_added)";
                 break;
             default:
             case 'week':
-                $sql .= " GROUP BY WEEK(date_added)";
+                $sql .= " GROUP BY WEEK(o.date_added)";
                 break;
             case 'month':
-                $sql .= " GROUP BY MONTH(date_added)";
+                $sql .= " GROUP BY MONTH(o.date_added)";
                 break;
             case 'year':
-                $sql .= " GROUP BY YEAR(date_added)";
+                $sql .= " GROUP BY YEAR(o.date_added)";
                 break;
         }
 
