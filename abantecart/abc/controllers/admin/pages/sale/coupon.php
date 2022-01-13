@@ -583,7 +583,7 @@ class ControllerPagesSaleCoupon extends AController
         $this->data['products'] = [];
         if (count($this->data['coupon_product'])) {
             $this->loadModel('catalog/product');
-            $ids = array_map('intval', array_values($this->data['coupon_products']));
+            $ids = array_map('intval', array_values($this->data['coupon_product']));
             $filter = ['subsql_filter' => 'p.product_id in ('.implode(',', $ids).')'];
             $results = $this->model_catalog_product->getProducts($filter);
 
