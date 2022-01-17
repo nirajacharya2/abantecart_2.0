@@ -895,20 +895,26 @@ class ACustomer extends ALibBase
      */
     public function getWishList()
     {
+        $output = [];
         $customer_id = $this->customer_id;
         if (!$customer_id) {
             $customer_id = $this->unauth_customer['customer_id'];
         }
         if (!$customer_id) {
-            return [];
+            return $output;
         }
 
         $customer = $this->model();
         if($customer && $customer->status == 1){
-            return $customer->wishlist ?: [];
+            $output = $customer->wishlist
+                ? array_filter($customer->wishlist, function($value){
+                    return (bool)$value;
+                })
+                : [];
+
         }
 
-        return [];
+        return $output;
     }
 
     /**

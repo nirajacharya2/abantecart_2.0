@@ -42,8 +42,8 @@ use ReflectionException;
  * @property string $sms
  * @property string $salt
  * @property string $password
- * @property string $cart
- * @property string $wishlist
+ * @property array $cart
+ * @property array $wishlist
  * @property int $newsletter
  * @property int $address_id
  * @property int $status

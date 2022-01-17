@@ -83,6 +83,7 @@ class ControllerPagesAccountWishlist extends AController
         );
 
         $whishlist = $this->customer->getWishList();
+
         if ($whishlist) {
             $this->loadModel('tool/seo_url');
             $this->loadModel('catalog/product');
