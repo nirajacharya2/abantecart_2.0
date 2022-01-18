@@ -56,7 +56,7 @@ class ControllerPagesAccountEdit extends AController
             abc_redirect($this->html->getSecureURL('account/login'));
         }
 
-        $this->document->setTitle($this->language->get('heading_title'));
+        $this->document->setTitle($this->language->get('heading_title','account/edit'));
 
         $request_data = $this->request->post;
         if ($this->request->is_POST()) {
