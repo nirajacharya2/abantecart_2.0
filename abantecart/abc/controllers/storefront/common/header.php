@@ -1,11 +1,11 @@
-<?php   
+<?php
 /*------------------------------------------------------------------------------
   $Id$
 
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -17,48 +17,44 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\storefront;
+
 use abc\core\ABC;
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\AResource;
+use H;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-class ControllerCommonHeader extends AController {
-	public $data = array();
-	public function main() {
+class ControllerCommonHeader extends AController
+{
+    public function main()
+    {
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		//init controller data
-        $this->extensions->hk_InitData($this,__FUNCTION__);
-
-		$this->data['store'] = $this->config->get('store_name');
+        $this->data['store'] = $this->config->get('store_name');
         $this->data['logo'] = $this->config->get('config_logo');
         $this->data['homepage'] = $this->html->getHomeURL();
-		$logo_path = ABC::env('DIR_RESOURCES') . $this->data['logo'];
-        
-		//see if we have a resource ID instead of path	
-		if (is_numeric($this->data['logo'])) {
-			$resource = new AResource('image');
-		    $image_data = $resource->getResource( $this->data['logo'] );
-			$img_sub_path = $image_data['type_name'].'/'.$image_data['resource_path'];
- 			if ( is_file(ABC::env('DIR_RESOURCES') . $img_sub_path) ) {
- 				$this->data['logo'] = $img_sub_path;
- 				$logo_path = ABC::env('DIR_RESOURCES') . $img_sub_path;
-			} else {
-				$this->data['logo'] = $image_data['resource_code'];
-			}
-		}
+        //see if we have a resource ID instead of path
+        if (is_numeric($this->data['logo'])) {
+            $resource = new AResource('image');
+            $image_data = $resource->getResource($this->data['logo']);
+            $img_sub_path = $image_data['type_name'].'/'.$image_data['resource_path'];
+            if (is_file(ABC::env('DIR_RESOURCES').$img_sub_path)) {
+                $this->data['logo'] = $img_sub_path;
+                $logo_path = ABC::env('DIR_RESOURCES').$img_sub_path;
+                //get logo image dimensions
+                $info = H::get_image_size($logo_path);
+                $this->data['logo_width'] = $info['width'];
+                $this->data['logo_height'] = $info['height'];
+            } else {
+                $this->data['logo'] = $image_data['resource_code'];
+            }
+        }
 
-		//get logo image dimensions
-		$info = AHelperUtils::get_image_size($logo_path);
-		$this->data['logo_width'] = $info['width'];
-		$this->data['logo_height'] = $info['height'];
-
-		$this->view->batchAssign($this->data);
-		$this->processTemplate('common/header.tpl');
+        $this->view->batchAssign($this->data);
+        $this->processTemplate('common/header.tpl');
         //init controller data
-        $this->extensions->hk_UpdateData($this,__FUNCTION__);
-	}
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
 }
