@@ -30,7 +30,6 @@ use abc\core\lib\AException;
 use abc\models\storefront\ModelLocalisationLanguage;
 use Exception;
 use H;
-use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 
 /**
@@ -83,7 +82,7 @@ class ALanguage
         if ($section === '') {
             $this->is_admin = (!ABC::env('IS_ADMIN') ? 0 : 1);
         } else {
-            $this->is_admin = (int)$section;
+            $this->is_admin = (int) $section;
         }
 
         //Load available languages;
@@ -184,7 +183,6 @@ class ALanguage
      */
     public function get_error($key)
     {
-
         $result = $this->get($key);
 
         if ($key == $result || trim($result) == '') {
@@ -345,7 +343,7 @@ class ALanguage
     public function getClientBrowserLanguage()
     {
         $request = $this->registry->get('request');
-        $browser_langs = (string)$request->server['HTTP_ACCEPT_LANGUAGE'];
+        $browser_langs = (string) $request->server['HTTP_ACCEPT_LANGUAGE'];
 
         if ($browser_langs) {
             $parse = explode(';', $browser_langs);
@@ -385,7 +383,7 @@ class ALanguage
     {
         $config = $this->registry->get('config');
         $session = $this->registry->get('session');
-        $request = (object)$this->registry->get('request');
+        $request = (object) $this->registry->get('request');
 
         //build code based array
         $languages = [];
@@ -428,11 +426,12 @@ class ALanguage
             $session->data['language'] = $lang_code;
         }
 
-        if ( ! headers_sent()
+        if (!headers_sent()
             && (!isset($request->cookie['language']) || $request->cookie['language'] != $lang_code)
         ) {
             //Set cookie for the language code
-            setcookie('language',
+            setcookie(
+                'language',
                 $lang_code,
                 time() + 60 * 60 * 24 * 30,
                 dirname($request->server['PHP_SELF']),
@@ -489,7 +488,7 @@ class ALanguage
      *
      * @return string
      * @throws AException
-     * @throws ReflectionException|InvalidArgumentException
+     * @throws ReflectionException
      */
     public function getDefaultLanguageCode()
     {
@@ -503,7 +502,7 @@ class ALanguage
      *
      * @return int
      * @throws AException
-     * @throws ReflectionException|InvalidArgumentException
+     * @throws ReflectionException
      */
     public function getDefaultLanguageID()
     {
@@ -584,7 +583,7 @@ class ALanguage
     }
 
     /**
-     * Check if block id a special case with main file (english, russian, etc ).
+     * Check if block id a special case with main file (english, russian e.t.c. ).
      * NOTE: Candidate for improvement. Rename these files to main.xml
      *
      * @param string $block - block name
@@ -624,7 +623,7 @@ class ALanguage
             $xml = simplexml_load_file($file);
             if (isset($xml->definition)) {
                 foreach ($xml->definition as $item) {
-                    $definitions[(string)$item->key] = trim((string)$item->value, "\t\n\r\0\x0B");
+                    $definitions[(string) $item->key] = trim((string) $item->value, "\t\n\r\0\x0B");
                 }
             }
         }
@@ -654,7 +653,6 @@ class ALanguage
      */
     public function _load($filename, $mode = '')
     {
-
         if (empty($filename)) {
             return null;
         }
@@ -669,11 +667,8 @@ class ALanguage
         $cache_key = 'localization.lang.'.$this->code.'.'.(($this->is_admin) ? 'a' : 's').'.'.$filename;
         $cache_key = str_replace('/', '_', $cache_key);
 
-        if ($this->cache) {
-            $load_data = $this->cache->pull($cache_key);
-        }
+        $load_data = $this->cache?->pull($cache_key);
         if ($load_data === false) {
-
             //Check that filename has proper name with no other special characters.
             $block_name = str_replace('/', '_', $filename);
             //prevent error for pre and post controllers
@@ -700,7 +695,7 @@ class ALanguage
                 //Do this silently in case language file is missing, Not a big problem
                 $xml_vals = $this->loadFromXml($filename, $directory, 'silent');
                 $diff = array_diff_assoc($xml_vals, $_);
-                if($diff){
+                if ($diff) {
                     foreach ($diff as $key => $value) {
                         //missing value for $key
                         if (!isset($_[$key])) {
@@ -762,7 +757,6 @@ class ALanguage
         $entries = [];
         //if no rt look in all languages for last available translation
         if (empty ($block)) {
-
             $look_in_list = $this->current_languages_scope;
             //look in all languages and merge
             if (empty($look_in_list)) {
@@ -784,7 +778,7 @@ class ALanguage
     /**
      * Find language ID by provided language code
      *
-     * @param string $code - two letter code
+     * @param string $code - two-letter code
      *
      * @return null
      */
@@ -850,13 +844,13 @@ class ALanguage
         $lang_array = [];
 
         $language_query = $this->db->table("language_definitions")
-            ->where(
-                [
-                    'language_id' => (int)$language_id,
-                    'section' => (int)$section,
-                    'block' => $block_name
-                ]
-            )->get();
+                                   ->where(
+                                       [
+                                           'language_id' => (int) $language_id,
+                                           'section'     => (int) $section,
+                                           'block'       => $block_name,
+                                       ]
+                                   )->get();
         if ($language_query) {
             foreach ($language_query as $language) {
                 $lang_array[$language->language_key] = trim($language->language_value, "\t\n\r\0\x0B");
@@ -868,7 +862,7 @@ class ALanguage
 
     /**
      * @param        $filename
-     * @param  array $definitions
+     * @param array $definitions
      *
      * @return bool
      * @throws Exception
@@ -888,7 +882,7 @@ class ALanguage
         foreach ($definitions as $k => $v) {
             //preventing duplication sql-error by unique index
             $check_array = [
-                'language_id'    => (int)$this->language_details['language_id'],
+                'language_id'    => (int) $this->language_details['language_id'],
                 'block'          => $this->db->escape($block),
                 'section'        => $this->is_admin,
                 'language_key'   => $this->db->escape($k),
@@ -898,7 +892,7 @@ class ALanguage
                 continue;
             }
 
-            $values[] = "('".(int)$this->language_details['language_id']."',
+            $values[] = "('".(int) $this->language_details['language_id']."',
                           '".$this->db->escape($block)."',
                           '".$this->is_admin."',
                           '".$this->db->escape($k)."',
@@ -921,19 +915,22 @@ class ALanguage
      *
      * @return null|string
      */
-    protected function detectLanguageXmlFile($filename, $language_dir_name = 'english')
+    protected function detectLanguageXmlFile($filename, $language_dir_name = 'english', $language_path = '')
     {
         if (empty($filename)) {
             return null;
         }
-        $file_path = $this->language_path.$filename.'.xml';
+        $file_path = ($language_path ? : $this->language_path).$filename.'.xml';
         if ($this->registry->has('extensions')
-            && $result = $this->registry->get('extensions')->isExtensionLanguageFile($filename, $language_dir_name, $this->is_admin)
+            && $result = $this->registry->get('extensions')->isExtensionLanguageFile(
+                $filename, $language_dir_name, $this->is_admin
+            )
         ) {
             if (is_file($file_path)) {
-                $warning =
-                    new AWarning("Extension <b>".$result['extension']."</b> overrides language file <b>".$filename
-                        ."</b>");
+                $warning = new AWarning(
+                    "Extension <b>".$result['extension']
+                    ."</b> overrides language file <b>".$filename."</b>"
+                );
                 $warning->toDebug();
             }
             $file_path = $result['file'];
@@ -959,8 +956,10 @@ class ALanguage
             return null;
         }
         $definitions = [];
-        ADebug::checkpoint('ALanguage '.$this->language_details['name'].' '.$filename
-            .' prepare loading language from XML');
+        ADebug::checkpoint(
+            'ALanguage '.$this->language_details['name'].' '.$filename
+            .' prepare loading language from XML'
+        );
 
         //get default extension language file
         $default_language_info = $this->getDefaultLanguage();
@@ -982,11 +981,13 @@ class ALanguage
             // if default language file path wrong - takes english as a fallback
             if (!file_exists($default_file_path) && $default_language_info['directory'] != 'english') {
                 $file_name = $filename == $directory ? 'english' : $file_name;
-                $default_file_path = $this->detectLanguageXmlFile($file_name, 'english');
+                $default_file_path = $this->detectLanguageXmlFile($file_name);
             }
             if (file_exists($default_file_path)) {
-                ADebug::checkpoint('ALanguage '.$this->language_details['name'].' loading default language XML file '
-                    .$default_file_path);
+                ADebug::checkpoint(
+                    'ALanguage '.$this->language_details['name'].' loading default language XML file '
+                    .$default_file_path
+                );
                 $definitions = $this->ReadXmlFile($default_file_path);
             } else {
                 if ($mode != 'silent') {
@@ -1039,7 +1040,7 @@ class ALanguage
         $caller_file = '',
         $caller_file_line = '',
         $silent = false
-    ){
+    ) {
         if (empty ($key)) {
             return null;
         }
