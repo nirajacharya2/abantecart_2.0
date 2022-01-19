@@ -60,12 +60,10 @@ class ControllerPagesAccountEdit extends AController
 
         $request_data = $this->request->post;
         if ($this->request->is_POST()) {
-            $request_data = $this->request->post;
             $request_data['customer_id'] = $this->customer->getId();
 
             if ($this->csrftoken->isTokenValid()) {
                 $this->error = $this->customer::validateRegistrationData($request_data);
-
                 //if no update for loginname do not allow edit of username/loginname
                 if ($this->customer->isLoginnameAsEmail()) {
                     //if allow login as email, need to set loginname = email in case email changed
