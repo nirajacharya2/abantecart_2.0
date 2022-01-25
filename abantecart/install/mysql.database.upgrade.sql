@@ -2215,13 +2215,20 @@ INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
 VALUES  (12,'design/email_templates',137);
 -- PARENT_ID
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
-VALUES   (13,'design',137);
+VALUES
+    (13, 'design', 137);
 -- SORT_ORDER
-INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_integer`,`row_id`)
-	VALUES  (14,8,137);
+INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_integer`, `row_id`)
+VALUES
+    (14, 8, 137);
 -- ITEM_TYPE
-INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
-VALUES (15,'extension',136);
+INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`, `row_id`)
+VALUES
+    (15, 'extension', 136);
 -- ITEM_RL_ID
-INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
-VALUES  (40,'281',137);
+INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`, `row_id`)
+VALUES
+    (40, '281', 137);
+
+
+##TODO: update datasources of listing blocks (see $this->data_sources = [] in the core/lib/listing.php. (use camelcase array keys!!!))

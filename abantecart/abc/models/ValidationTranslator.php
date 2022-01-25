@@ -28,10 +28,11 @@ class ValidationTranslator implements Translator
      * @var ALanguage
      */
     protected $language;
+
     public function __construct(string $language_rt = '')
     {
         $this->language = Registry::getInstance()->get('language');
-        if($language_rt){
+        if ($language_rt) {
             $this->language->load($language_rt);
         }
     }
@@ -39,9 +40,37 @@ class ValidationTranslator implements Translator
     /**
      * Get the translation for a given key.
      *
-     * @param  string $key
-     * @param  array $replace
-     * @param  string $locale
+     * @param string $key
+     * @param array $replace
+     * @param string|null $locale
+     *
+     * @return mixed
+     */
+    public function get($key, array $replace = [], $locale = null)
+    {
+        return $this->trans($key, $replace, $locale);
+    }
+
+    /**
+     * Get a translation according to an integer value.
+     *
+     * @param string $key
+     * @param \Countable|int|array $number
+     * @param array $replace
+     * @param string|null $locale
+     *
+     * @return string
+     */
+    public function choice($key, $number, array $replace = [], $locale = null)
+    {
+    }
+
+    /**
+     * Get the translation for a given key.
+     *
+     * @param string $key
+     * @param array $replace
+     * @param string $locale
      *
      * @return mixed
      * @throws \Psr\SimpleCache\InvalidArgumentException
@@ -50,8 +79,8 @@ class ValidationTranslator implements Translator
      */
     public function trans($key, array $replace = [], $locale = null)
     {
-        $parts = explode('.',$key);
-        $field_name = isset($parts[2]) ? $parts[2] : null;
+        $parts = explode('.', $key);
+        $field_name = $parts[2] ?? null;
         if($field_name) {
             return $this->language->get('error_'.$field_name);
         }else{

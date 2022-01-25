@@ -43,7 +43,7 @@ return [
             'debug'    => 'debug.log',
         ],
     ],
-    'ABAC'              => Abac::class,
+    //'ABAC'              => Abac::class,
     'ABACFactory'       => AbacFactory::class,
     'Checkout'          => CheckOut::class,
     'CheckoutAdmin'     => CheckOutAdmin::class,

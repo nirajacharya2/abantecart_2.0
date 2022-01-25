@@ -57,12 +57,6 @@ class AHandleExceptions
         }
     }
 //    не работает КЕШ! см модель продукта, сохранение в кеш в методе getProducts
-//    Добить изменения вызовов для php8 (instance_id)
-//    composer.json: удалил форк
-//{
-//        "type": "git",
-//        "url": "https://github.com/abolabo/laravel-relationship-events.git"
-//    }
 
     /**
      * Handle an uncaught exception from the application.

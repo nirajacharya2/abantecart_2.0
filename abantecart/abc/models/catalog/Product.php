@@ -2410,21 +2410,17 @@ class Product extends BaseModel
      */
     public static function getBestSellerProducts(array $data)
     {
-
-        $limit = (int)$data['limit'];
+        $limit = (int) $data['limit'] ? : 20;
         $order = $data['order'];
-        $start = (int)$data['start'];
+        $start = (int) $data['start'];
         $sort = $data['sort'];
         $total = $data['total'];
-        /**
-         * @var ADB $db
-         */
         $db = Registry::db();
-        $cache = Registry::getInstance()->get('cache');
-        $config = Registry::getInstance()->get('config');
+        $cache = Registry::cache();
+        $config = Registry::config();
 
-        $language_id = (int)$config->get('storefront_language_id');
-        $store_id = (int)$config->get('config_store_id');
+        $language_id = (int) $config->get('storefront_language_id');
+        $store_id = (int) $config->get('config_store_id');
         $cache_key = 'product.bestseller.'
             .'.store_'.$store_id
             .'_lang_'.$language_id
@@ -2445,9 +2441,6 @@ class Product extends BaseModel
 
             $bestSellerIds = self::getBestSellerProductIds($data);
 
-            /**
-             * @var QueryBuilder $query
-             */
             $query = self::selectRaw($db->raw_sql_row_count()." ".$aliasPD.".*")
                          ->addSelect($select)
                          ->leftJoin('product_descriptions', function ($subQuery) use ($language_id) {
@@ -2502,7 +2495,7 @@ class Product extends BaseModel
                 $query = $query->offset($start)->limit($limit);
             }
 
-            //allow to extends this method from extensions
+            //allow to extend this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $data);
             $result_rows = $query->get();
             if ($result_rows) {
@@ -2743,25 +2736,25 @@ class Product extends BaseModel
     {
         $params['sort'] = $params['sort'] ?? 'products.sort_order';
         $params['order'] = $params['order'] ?? 'ASC';
-        $params['start'] = $params['start'] > 0 ? $params['start'] : 0;
+        $params['start'] = max($params['start'], 0);
         $params['limit'] = $params['limit'] >= 1 ? $params['limit'] : 20;
 
-        $filter = (array)$params['filter'];
+        $filter = (array) $params['filter'];
         $filter['include'] = $filter['include'] ?? [];
         $filter['exclude'] = $filter['exclude'] ?? [];
         $filter['category_id'] = $filter['category_id'] ?? 0;
         $filter['description'] = $filter['description'] ?? false;
         $filter['model'] = $filter['model'] ?? false;
 
-        $filter['only_enabled'] = isset($filter['only_enabled']) ? (bool)$filter['only_enabled'] : true;
-        $filter['customer_group_id'] =
-            $filter['customer_group_id'] ?? Registry::config()->get('config_customer_group_id');
+        $filter['only_enabled'] = isset($filter['only_enabled']) ? (bool) $filter['only_enabled'] : true;
+        $filter['customer_group_id'] = $filter['customer_group_id']
+            ?? Registry::config()->get('config_customer_group_id');
         $filter['keyword'] = trim($filter['keyword']);
-        $filter['language_id'] = (int)$filter['language_id'];
+        $filter['language_id'] = (int) $filter['language_id'];
         if (!$filter['language_id']) {
             $filter['language_id'] = static::getCurrentLanguageID();
         }
-        $filter['store_id'] = (int)$filter['store_id'];
+        $filter['store_id'] = (int) $filter['store_id'];
         if (!$filter['store_id']) {
             $filter['store_id'] = ABC::env('IS_ADMIN') === true
                 ? Registry::session()->data['current_store_id']
@@ -2780,6 +2773,7 @@ class Product extends BaseModel
             $p_table = $db->table_name('products');
             $pt_table = $db->table_name('product_tags');
             $pd_table = $db->table_name('product_descriptions');
+            $pSpecialsTable = $db->table_name('product_specials');
 
             /** @var Product|QueryBuilder $query */
             $query = self::selectRaw(Registry::db()->raw_sql_row_count().' '.$p_table.'.*');
@@ -2868,15 +2862,33 @@ class Product extends BaseModel
                 }
             );
 
+            if ($filter['only_specials']) {
+                $query->join(
+                    'product_specials',
+                    function ($join) use ($filter, $pSpecialsTable) {
+                        /** @var JoinClause $join */
+                        $join->on('product_specials.product_id', '=', 'products.product_id')
+                             ->where('product_specials.customer_group_id', '=', (int) $filter['customer_group_id'])
+                             ->whereRaw("COALESCE(".$pSpecialsTable.".date_start, '1970-01-01')< NOW()")
+                             ->whereRaw("COALESCE(".$pSpecialsTable.".date_end, NOW() ) >= NOW()");
+                    }
+                );
+            }
+            if ($filter['only_featured']) {
+                $query->where('products.featured', '=', 1);
+            }
+
             if ($filter['keyword']) {
                 $tags = explode(' ', trim($filter['keyword']));
                 $query->where(
                     function ($query) use ($filter, $tags, $db, $pt_table, $pd_table, $p_table) {
                         /** @var QueryBuilder $query */
                         if (sizeof($tags) > 1) {
-                            $query->orWhereRaw("LCASE(".$pt_table.".tag) = '"
+                            $query->orWhereRaw(
+                                "LCASE(".$pt_table.".tag) = '"
                                 .$db->escape(mb_strtolower(trim($filter['keyword'])))
-                                ."'");
+                                ."'"
+                            );
                         }
                         foreach ($tags as $tag) {
                             $query->orWhereRaw("LCASE(".$pt_table.".tag) = '".$db->escape(mb_strtolower(trim($tag)))
@@ -2948,13 +2960,16 @@ class Product extends BaseModel
                 'rating'        => "rating",
                 'date_modified' => $p_table.".date_modified",
                 'review'        => "review",
+                'viewed'        => $p_table.".viewed",
             ];
-            $orderBy = $sort_data[$params['sort']] ? $sort_data[$params['sort']] : 'name';
+
+            $orderBy = $sort_data[$params['sort']] ? : 'name';
             if (isset($params['order']) && (strtoupper($params['order']) == 'DESC')) {
                 $sorting = "desc";
             } else {
                 $sorting = "asc";
             }
+
             $query->orderByRaw($orderBy." ".$sorting);
 
             //pagination
@@ -2968,8 +2983,9 @@ class Product extends BaseModel
                 $query->offset((int)$params['start'])->limit((int)$params['limit']);
             }
 
-            //allow to extends this method from extensions
+            //allow to extend this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
+
             $cache = $query->get();
             //add total number of rows into each row
             $totalNumRows = $db->sql_get_row_count();
@@ -2981,4 +2997,96 @@ class Product extends BaseModel
 
         return $cache;
     }
+
+    /**
+     * Wrapper. Needs to be used in the abstract calls for listing blocks etc
+     *
+     * @param int $limit
+     * @param array $filter
+     *
+     * @return array|false|Collection|mixed
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     */
+    public static function getPopularProducts($limit = 0, $filter = [])
+    {
+        $limit = (int) $limit;
+        return static::getProducts(
+            [
+                'with_all' => true,
+                'sort'     => 'viewed',
+                'order'    => 'DESC',
+                'limit'    => $limit,
+                'filter'   => $filter,
+            ]
+        );
+    }
+
+    /**
+     * @param $limit
+     * @param $filter
+     *
+     * @return array|false|Collection|mixed
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     */
+    public static function getLatestProducts($limit = 0, $filter = [])
+    {
+        $limit = (int) $limit;
+        return static::getProducts(
+            [
+                'with_all' => true,
+                'sort'     => 'date_modified',
+                'order'    => 'DESC',
+                'limit'    => $limit ? : 20,
+                'filter'   => $filter,
+            ]
+        );
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return array|false|Collection|mixed
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     *
+     */
+    public static function getProductSpecials($data = [])
+    {
+        return static::getProducts(
+            [
+                'with_all' => true,
+                'sort'     => $data['sort'] ? : 'sort_order',
+                'order'    => $data['order'] ? : 'ASC',
+                'start'    => (int) $data['start'],
+                'limit'    => (int) $data['limit'],
+                'filter'   => array_merge(
+                    (array) $data['filter'],
+                    ['only_specials' => true]
+                ),
+            ]
+        );
+    }
+
+    public static function getFeaturedProducts($data = [])
+    {
+        return static::getProducts(
+            [
+                'with_all' => true,
+                'sort'     => $data['sort'] ? : 'sort_order',
+                'order'    => $data['order'] ? : 'ASC',
+                'start'    => (int) $data['start'],
+                'limit'    => (int) $data['limit'] ? : 20,
+                'filter'   => array_merge(
+                    (array) $data['filter'],
+                    ['only_featured' => true]
+                ),
+            ]
+        );
+    }
+
 }

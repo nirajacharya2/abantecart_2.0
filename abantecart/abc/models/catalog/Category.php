@@ -662,26 +662,26 @@ class Category extends BaseModel
     }
 
     /**
-     * @param $inputData
+     * @param $params
      *
      * @return Collection|bool
      * @throws ReflectionException
      * @throws AException
      * @throws InvalidArgumentException
      */
-    public static function getCategoriesData($inputData)
+    public static function getCategoriesData($params)
     {
         $db = Registry::db();
-        if ($inputData['language_id']) {
-            $language_id = (int)$inputData['language_id'];
+        if ($params['language_id']) {
+            $language_id = (int) $params['language_id'];
         } else {
             $language_id = static::$current_language_id;
         }
 
-        if ($inputData['store_id']) {
-            $store_id = (int)$inputData['store_id'];
+        if ($params['store_id']) {
+            $store_id = (int) $params['store_id'];
         } else {
-            $store_id = (int)Registry::config()->get('config_store_id');
+            $store_id = (int) Registry::config()->get('config_store_id');
         }
 
         $arSelect = [];
@@ -702,67 +702,62 @@ class Category extends BaseModel
                       /** @var JoinClause $join */
                       $join->on('categories_to_stores.category_id', '=', 'categories.category_id')
                            ->where('categories_to_stores.store_id', '=', $store_id);
-                  });
+                  }
+              );
 
-        $inputData['parent_id'] =
-            (isset($inputData['parent_id']) && (int)$inputData['parent_id'] > 0) ? (int)$inputData['parent_id'] : null;
+        $params['parent_id'] = (isset($params['parent_id']) && (int) $params['parent_id'] > 0)
+            ? (int) $params['parent_id'] : null;
 
-        $query->where('categories.parent_id', '=', $inputData['parent_id']);
+        $query->where('categories.parent_id', '=', $params['parent_id']);
 
-        if (H::has_value($inputData['status'])) {
-            $query->where('categories.status', '=', (int)$inputData['status']);
+        if (H::has_value($params['status'])) {
+            $query->where('categories.status', '=', (int) $params['status']);
         }
         //include ids set
-        if (H::has_value($inputData['include'])) {
-            $filter['include'] = (array)$inputData['include'];
-            foreach ($filter['include'] as &$id) {
-                $id = (int)$id;
-            }
+        if (H::has_value($params['include'])) {
+            $filter['include'] = array_map('intval', (array) $params['include']);
             $query->whereIn('categories.category_id', $filter['include']);
         }
         //exclude already selected in chosen element
-        if (H::has_value($inputData['exclude'])) {
-            $filter['exclude'] = (array)$inputData['exclude'];
-            foreach ($filter['exclude'] as &$id) {
-                $id = (int)$id;
-            }
+        if (H::has_value($params['exclude'])) {
+            $filter['exclude'] = array_map('intval', (array) $params['exclude']);
             $query->whereNotIn('categories.category_id', $filter['exclude']);
         }
 
-        if (H::has_value($inputData['name'])) {
-            $query->where(function ($query) use ($inputData) {
+        if (H::has_value($params['name'])) {
+            $query->where(function ($query) use ($params) {
                 /** @var QueryBuilder $query */
-                if ($inputData['search_operator'] == 'equal') {
+                if ($params['search_operator'] == 'equal') {
                     $query->orWhere(
                         'category_descriptions.name',
                         '=',
-                        mb_strtolower($inputData['name'])
+                        mb_strtolower($params['name'])
                     );
                     $query->orWhere(
                         'category_descriptions.description',
                         '=',
-                        mb_strtolower($inputData['name'])
+                        mb_strtolower($params['name'])
                     );
                     $query->orWhere(
                         'category_descriptions.meta_keywords',
                         '=',
-                        mb_strtolower($inputData['name'])
+                        mb_strtolower($params['name'])
                     );
                 } else {
                     $query->orWhere(
                         'category_descriptions.name',
                         'like',
-                        "%".mb_strtolower($inputData['name'])."%"
+                        "%".mb_strtolower($params['name'])."%"
                     );
                     $query->orWhere(
                         'category_descriptions.description',
                         'like',
-                        "%".mb_strtolower($inputData['name'])."%"
+                        "%".mb_strtolower($params['name'])."%"
                     );
                     $query->orWhere(
                         'category_descriptions.meta_keywords',
                         'like',
-                        "%".mb_strtolower($inputData['name'])."%"
+                        "%".mb_strtolower($params['name'])."%"
                     );
                 }
 
@@ -777,13 +772,13 @@ class Category extends BaseModel
 
         $desc = false;
 
-        if (isset($inputData['sort']) && in_array($inputData['sort'], array_keys($sort_data))) {
-            $sortBy = $inputData['sort'];
+        if (isset($params['sort']) && in_array($params['sort'], array_keys($sort_data))) {
+            $sortBy = $params['sort'];
         } else {
             $sortBy = 'categories.sort_order';
         }
 
-        if (isset($inputData['order']) && ($inputData['order'] == 'DESC')) {
+        if (isset($params['order']) && ($params['order'] == 'DESC')) {
             $desc = true;
         }
 
@@ -805,26 +800,26 @@ class Category extends BaseModel
             }
         }
 
-        if (isset($inputData['start']) || isset($inputData['limit'])) {
-            if ($inputData['start'] < 0) {
-                $inputData['start'] = 0;
+        if (isset($params['start']) || isset($params['limit'])) {
+            if ($params['start'] < 0) {
+                $params['start'] = 0;
             }
 
-            if ($inputData['limit'] < 1) {
-                $inputData['limit'] = 20;
+            if ($params['limit'] < 1) {
+                $params['limit'] = 20;
             }
 
-            $query->limit($inputData['limit'])
-                  ->offset($inputData['start']);
+            $query->limit($params['limit'])
+                  ->offset($params['start']);
         }
 
-        //allow to extends this method from extensions
-        Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $inputData);
+        //allow to extend this method from extensions
+        Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
         $result_rows = $query->get();
         $total_num_rows = Registry::db()->sql_get_row_count();
         foreach ($result_rows as &$result) {
             $result['total_num_rows'] = $total_num_rows;
-            if ($inputData['basename'] == true) {
+            if ($params['basename'] == true) {
                 $result->name = $result->basename;
             } else {
                 $result->name = static::getPath($result->category_id, 'name');

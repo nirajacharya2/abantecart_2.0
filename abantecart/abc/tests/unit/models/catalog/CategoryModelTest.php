@@ -80,14 +80,11 @@ class CategoryModelTest extends ATestCase
         $path = $category->getPath($category->category_id, 'id');
         $this->assertEquals($path, $category->category_id);
     }
-//    public function testGetChildrenIDs()
-//    {
-//        /** @var Category $category */
-//        $children = Category::getChildrenIDs(90);
-//
-//
-//var_Dump($children);
-////        $this->assertEquals($path, $category->category_id);
-//    }
+
+    public function testGetTotalProductsOfCategory()
+    {
+        $count = Category::getTotalProductsByCategoryId(40, 0);
+        $this->assertEquals(4, $count);
+    }
 
 }

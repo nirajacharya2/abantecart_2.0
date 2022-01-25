@@ -490,26 +490,24 @@ if(is_object($evd)) {
     $registry->set('events', $evd);
 }
 
-
-
 //register ABAC
-/**
- * @var Abac $abac
- */
-$abac = ABC::getObjectByAlias('ABAC', [ $registry ]);
-if(is_object($abac)) {
-    $registry->set('abac', $abac);
-}else{
-    throw new \Exception('Class with alias "ABAC" not found in the classmap!');
-}
+///**
+// * @var Abac $abac
+// */
+//$abac = ABC::getObjectByAlias('ABAC', [ $registry ]);
+//if(is_object($abac)) {
+//    $registry->set('abac', $abac);
+//}else{
+//    throw new \Exception('Class with alias "ABAC" not found in the classmap!');
+//}
 
 /**
  * @param Registry $registry
- * @param string   $item_name
- * @param string   $alias
- * @param array    $arguments
- * @param string   $default_class
- * @param array    $default_arguments
+ * @param string $item_name
+ * @param string $alias
+ * @param array $arguments
+ * @param string $default_class
+ * @param array $default_arguments
  *
  * @throws core\lib\AException
  */

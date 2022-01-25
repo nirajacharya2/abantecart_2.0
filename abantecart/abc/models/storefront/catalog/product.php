@@ -902,27 +902,27 @@ class ModelCatalogProduct extends Model
      * @return array
      * @throws Exception
      */
-    public function getPopularProducts($limit = 0)
-    {
-        $limit = (int)$limit;
-        $sql = "SELECT *,
-                        pd.name AS name,
-                        m.name AS manufacturer,
-                        ss.name AS stock,
-                        ".$this->sqlAvgRatingString().",
-                        ".$this->sqlReviewCountString()."
-                        ".$this->sqlJoinString()."
-                WHERE ".$this->getProductFilters()."
-                        AND p2s.store_id = '".(int)$this->config->get('config_store_id')."'
-                ORDER BY p.viewed DESC, p.date_added DESC";
-
-        if ((int)$limit) {
-            $sql .= " LIMIT ".(int)$limit;
-        }
-        $query = $this->db->query($sql);
-
-        return $query->rows;
-    }
+//    public function getPopularProducts($limit = 0)
+//    {
+//        $limit = (int)$limit;
+//        $sql = "SELECT *,
+//                        pd.name AS name,
+//                        m.name AS manufacturer,
+//                        ss.name AS stock,
+//                        ".$this->sqlAvgRatingString().",
+//                        ".$this->sqlReviewCountString()."
+//                        ".$this->sqlJoinString()."
+//                WHERE ".$this->getProductFilters()."
+//                        AND p2s.store_id = '".(int)$this->config->get('config_store_id')."'
+//                ORDER BY p.viewed DESC, p.date_added DESC";
+//
+//        if ((int)$limit) {
+//            $sql .= " LIMIT ".(int)$limit;
+//        }
+//        $query = $this->db->query($sql);
+//
+//        return $query->rows;
+//    }
 
     /**
      * @param $options

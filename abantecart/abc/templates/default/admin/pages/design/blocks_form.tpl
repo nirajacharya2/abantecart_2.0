@@ -1,15 +1,18 @@
-<?php include($tpl_common_dir . 'action_confirm.tpl');
+<?php
+
+include($tpl_common_dir.'action_confirm.tpl');
 echo $tabs;
 ?>
 
-<div id="content" class="panel panel-default">
-	<div class="panel-heading col-xs-12">
-		<div class="primary_content_actions pull-left">
-		</div>
-		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>
-	</div>
+    <div id="content" class="panel panel-default">
+        <div class="panel-heading col-xs-12">
+            <div class="primary_content_actions pull-left">
+            </div>
+            <?php
+            include($tpl_common_dir.'content_buttons.tpl'); ?>
+        </div>
 
-	<?php echo $form['form_open']; ?>
+        <?php echo $form['form_open']; ?>
 	<div class="panel-body panel-body-nopadding tab-content col-xs-12">
 		<label class="h4 heading"><?php echo $form_title; ?></label>
 			<?php foreach ($form['fields'] as $name => $field) {

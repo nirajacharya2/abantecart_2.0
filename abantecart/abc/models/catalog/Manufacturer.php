@@ -18,10 +18,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * Class Manufacturer
  *
- * @property int                                      $manufacturer_id
- * @property string                                   $name
- * @property string                                   $uuid
- * @property int                                      $sort_order
+ * @property int $manufacturer_id
+ * @property string $name
+ * @property string $uuid
+ * @property int $sort_order
  *
  * @property \Illuminate\Database\Eloquent\Collection $manufacturers_to_stores
  *
@@ -324,12 +324,99 @@ class Manufacturer extends BaseModel
                 }
             }
         } catch (\ReflectionException $e) {
-
         } catch (\Exception $e) {
-
         }
         $this->cache->flush('manufacturer');
         return true;
+    }
+
+    public function getManufacturers($params = [])
+    {
+        $db = Registry::db();
+        $storeId = $params['store_id'] ?? (int) $this->config->get('config_store_id');
+        $cacheKey = 'manufacturers.'.md5(implode('', $params));
+        $cache = $this->cache->get($cacheKey);
+        $manTable = $db->table_name('manufacturers');
+
+        if ($cache !== null) {
+            return $cache;
+        }
+
+        $query = self::selectRaw(Registry::db()->raw_sql_row_count().' '.$manTable.'.*')
+                     ->leftJoin(
+                         'manufacturers_to_stores',
+                         'manufacturers_to_stores.manufacturer_id',
+                         '=',
+                         'manufacturers.manufacturer_id'
+                     );
+        $query->where('manufacturers_to_stores.store_id', '=', $storeId);
+        //include ids set
+        if (H::has_value($params['include'])) {
+            $filter['include'] = array_map('intval', (array) $params['include']);
+            $query->whereIn('manufacturers.manufacturer_id', $filter['include']);
+        }
+        //exclude already selected in chosen element
+        if (H::has_value($params['exclude'])) {
+            $filter['exclude'] = array_map('intval', (array) $params['exclude']);
+            $query->whereNotIn('manufacturers.manufacturer_id', $filter['exclude']);
+        }
+
+        if (H::has_value($params['name'])) {
+            if ($params['search_operator'] == 'equal') {
+                $query->orWhere(
+                    'manufacturers.name',
+                    '=',
+                    mb_strtolower($params['name'])
+                );
+            } else {
+                $query->orWhere(
+                    'manufacturers.name',
+                    'like',
+                    "%".mb_strtolower($params['name'])."%"
+                );
+            }
+        }
+
+        $sort_data = [
+            'name'       => $manTable.'.name',
+            'sort_order' => $manTable.'.sort_order',
+        ];
+
+        if (isset($params['sort']) && in_array($params['sort'], array_keys($sort_data))) {
+            $orderBy = $params['sort'];
+        } else {
+            $orderBy = $sort_data['sort_order'];
+        }
+
+        if (isset($params['order']) && (strtoupper($params['order']) == 'DESC')) {
+            $sorting = "desc";
+        } else {
+            $sorting = "asc";
+        }
+        $query->orderByRaw($orderBy." ".$sorting);
+        //pagination
+        if (isset($params['start']) || isset($params['limit'])) {
+            if ($params['start'] < 0) {
+                $params['start'] = 0;
+            }
+            if ($params['limit'] < 1) {
+                $params['limit'] = 20;
+            }
+            $query->offset((int) $params['start'])->limit((int) $params['limit']);
+        }
+        //allow to extend this method from extensions
+        Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
+
+        $cache = $query->get();
+
+        //add total number of rows into each row
+        $totalNumRows = $db->sql_get_row_count();
+        for ($i = 0; $i < $cache->count(); $i++) {
+            $cache[$i]['total_num_rows'] = $totalNumRows;
+        }
+        Registry::cache()->put($cacheKey, $cache);
+        Registry::log()->write(var_export($params, true));
+        return $cache;
     }
 
 }
