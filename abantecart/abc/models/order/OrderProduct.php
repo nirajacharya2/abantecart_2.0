@@ -6,7 +6,7 @@ use abc\core\engine\Registry;
 use abc\models\BaseModel;
 use abc\models\catalog\Product;
 use abc\models\QueryBuilder;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**

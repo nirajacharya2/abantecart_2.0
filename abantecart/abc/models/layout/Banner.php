@@ -4,7 +4,7 @@ namespace abc\models\layout;
 
 use abc\models\BaseModel;
 use abc\models\content\BannerStat;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**

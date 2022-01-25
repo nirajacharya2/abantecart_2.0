@@ -4,7 +4,7 @@ namespace abc\models\locale;
 
 use abc\models\BaseModel;
 use abc\models\system\TaxRate;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**

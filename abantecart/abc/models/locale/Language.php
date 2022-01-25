@@ -28,7 +28,7 @@ use abc\models\system\FormDescription;
 use abc\models\system\StoreDescription;
 use abc\models\system\TaxClassDescription;
 use abc\models\system\TaxRateDescription;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**

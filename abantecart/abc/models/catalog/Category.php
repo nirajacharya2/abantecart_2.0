@@ -16,7 +16,7 @@ use Carbon\Carbon;
 use Dyrynda\Database\Support\GeneratesUuid;
 use Exception;
 use H;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
@@ -1255,5 +1255,28 @@ class Category extends BaseModel
         //allow to extends this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
         return $query->first();
+    }
+
+    public static function getTotalProductsByCategoryId($categoryId = 0, $storeId = 0)
+    {
+        $storeId = $storeId ?? (int) Registry::config()->get('config_store_id');
+        //get all children category ids
+        $subCategories = (new Category())->getChildrenIDs((int) $categoryId);
+        $categList = array_merge($subCategories, [(int) $categoryId]);
+        $query = Product::whereHas(
+            'categories',
+            function ($query) use ($categList) {
+                $query->whereIn('products_to_categories.category_id', $categList);
+            }
+        )->whereHas('stores',
+            function ($query) use ($storeId) {
+                $query->where('products_to_stores.store_id', $storeId);
+            }
+        )->active('products')
+                        ->whereRaw('date_available <= NOW()');
+
+        //allow to extend this method from extensions
+        Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
+        return $query->get()->count();
     }
 }

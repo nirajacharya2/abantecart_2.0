@@ -24,7 +24,7 @@ use Chelout\RelationshipEvents\HasOne;
 use Dyrynda\Database\Support\GeneratesUuid;
 use Exception;
 use H;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -2764,7 +2764,7 @@ class Product extends BaseModel
         $cacheKey = 'product.list.'
             .md5(var_export($params, true))
             .'_side_'.(int)ABC::env('IS_ADMIN');
-        $cache = Registry::cache()->get($cacheKey);
+        //$cache = Registry::cache()->get($cacheKey);
 
         if ($cache === null) {
             $db = Registry::db();

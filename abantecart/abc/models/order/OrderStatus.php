@@ -8,7 +8,7 @@ use abc\core\lib\ADB;
 use abc\core\lib\AException;
 use abc\models\BaseModel;
 use abc\models\QueryBuilder;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Validation\Rule;

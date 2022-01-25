@@ -28,7 +28,7 @@ use abc\models\BaseModel;
 use abc\models\QueryBuilder;
 use Carbon\Carbon;
 use Exception;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -471,7 +471,7 @@ class ProductOption extends BaseModel
     /**
      * @param array $indata - must contains product_id
      *
-     * @return bool|mixed
+     * @return bool|int
      * @throws Exception
      */
     public static function addProductOption($indata)
@@ -689,7 +689,7 @@ class ProductOption extends BaseModel
      * @param $attribute_id
      *
      * @return int
-     * @throws \Exception
+     * @throws Exception
      */
     public static function isProductGroupOption($product_id, $attribute_id = null)
     {

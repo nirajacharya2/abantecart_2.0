@@ -44,7 +44,7 @@ final class ALog
      * @param array  $file_names
      * @param string $dir_logs
      *
-     * @throws \DebugBar\DebugBarException
+     * @throw \DebugBar\DebugBarException
      */
     public function __construct(array $file_names, $dir_logs = '')
     {

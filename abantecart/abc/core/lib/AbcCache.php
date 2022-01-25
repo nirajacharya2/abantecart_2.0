@@ -56,11 +56,11 @@ class AbcCache
 
         $config = Registry::config();
         if (!$config) {
-            $this->enableCache();
+            $this->disableCache();
         } elseif ($config->get('config_cache_enable')) {
             $this->enableCache();
         } else {
-            $this->enableCache();
+            $this->disableCache();
         }
     }
 

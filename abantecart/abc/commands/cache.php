@@ -30,6 +30,7 @@ use abc\core\lib\ALanguageManager;
 use abc\models\admin\ModelSettingStore;
 use abc\models\admin\ModelToolInstallUpgradeHistory;
 use abc\models\catalog\Category;
+use abc\models\catalog\Product;
 
 /**
  * Class Cache
@@ -177,22 +178,19 @@ class Cache extends BaseCommand
             }
 
             //loop by all products of store
-            $registry->get('load')->model('catalog/product', 'storefront');
-            /**
-             * @var \abc\models\storefront\ModelCatalogProduct $model
-             */
-            $model = $registry->get('model_catalog_product');
-            $total_products = $model->getTotalProducts(['store_id' => $store['store_id']]);
+            $total_products = Product::where(['store_id' => $store['store_id']])->count();
             $i = 0;
+            $html = $registry->get('html');
             while ($i <= $total_products) {
-                $products = $model->getProducts(
+                $products = Product::getProducts(
                     [
                         'store_id' => $store['store_id'],
                         'start'    => $i,
                         'limit'    => 20,
-                    ]);
+                    ]
+                );
                 foreach ($products as $product) {
-                    $seo_url = $registry->get('html')->getSEOURL(
+                    $seo_url = $html->getSEOURL(
                         'product/product',
                         '&product_id='.$product['product_id']
                     );
