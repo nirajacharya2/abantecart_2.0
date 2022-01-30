@@ -10,6 +10,7 @@ use abc\core\lib\AException;
 use abc\core\lib\AttributeManager;
 use abc\models\BaseModel;
 use abc\core\engine\AResource;
+use abc\models\casts\Serialized;
 use abc\models\locale\LengthClass;
 use abc\models\locale\WeightClass;
 use abc\models\order\Coupon;
@@ -27,6 +28,7 @@ use H;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
@@ -54,7 +56,7 @@ use ReflectionException;
  * @property float $shipping_price
  * @property float $price
  * @property int $tax_class_id
- * @property Carbon $date_available
+ * @property Carbon                        $date_available
  * @property float $weight
  * @property int $weight_class_id
  * @property float $length
@@ -71,7 +73,7 @@ use ReflectionException;
  * @property float $cost
  * @property int $call_to_order
  * @property string $settings
- * @property Carbon $date_added
+ * @property Carbon                $date_added
  * @property Carbon $date_modified
  * @property ProductDescription $description
  * @property ProductDescription $descriptions
@@ -160,7 +162,7 @@ class Product extends BaseModel
         'cost'              => 'float',
         'call_to_order'     => 'int',
         'product_type_id'   => 'int',
-        'settings'          => 'serialized',
+        'settings'          => Serialized:class,
     ];
 
     /** @var array */
@@ -1241,6 +1243,31 @@ class Product extends BaseModel
     }
 
     /**
+     * TODO: ???is needed?
+     * @return HasMany
+     */
+    public function option_descriptions()
+    {
+        return $this->hasMany(ProductOptionDescription::class, 'product_id');
+    }
+
+    /**TODO: ???is needed?
+     * @return HasMany
+     */
+    public function option_values()
+    {
+        return $this->hasMany(ProductOptionValue::class, 'product_id');
+    }
+
+    /**TODO: ???is needed?
+     * @return HasMany
+     */
+    public function option_value_descriptions()
+    {
+        return $this->hasMany(ProductOptionValueDescription::class, 'product_id');
+    }
+
+    /**
      * @return HasMany
      */
     public function specials()
@@ -1266,11 +1293,20 @@ class Product extends BaseModel
     }
 
     /**
+     * @return HasOne
+     */
+    public function featured()
+    {
+        return $this->hasOne(ProductsFeatured::class, 'product_id');
+    }
+
+    /**
      * @return BelongsToMany
      */
     public function related()
     {
-        return $this->belongsToMany(Product::class, 'products_related', 'product_id', 'related_id');
+        return $this->belongsToMany(ProductsRelated::class, 'products_related','product_id','related_id');
+        //???return $this->belongsToMany(Product::class, 'products_related', 'product_id', 'related_id');
     }
 
     /**
@@ -1433,8 +1469,8 @@ class Product extends BaseModel
     {
         $language_id = $language_id ?: static::$current_language_id;
         $stock_statuses = StockStatus::where('language_id', '=', $language_id)
-                                     ->select(['stock_status_id as id', 'name'])
-                                     ->get();
+                             ->select(['stock_status_id as id', 'name'])
+                             ->get();
         $result = [];
         foreach ($stock_statuses as $stock_status) {
             $result[] = (object)[
@@ -1604,7 +1640,7 @@ class Product extends BaseModel
                     $notrack_qnt += 10000000;
                     continue;
                 }
-                $total_quantity += $row->quantity < 0 ? 0 : $row->quantity;
+                $total_quantity += max($row->quantity, 0);
             }
         } else {
             //get product quantity without options
@@ -1634,8 +1670,8 @@ class Product extends BaseModel
         }
 
         $result = $resource_mdl->updateImageResourcesByUrls($data, 'products', $this->product_id, $title, $language_id);
-        if (!$result) {
-            $this->errors = array_merge($this->errors, $resource_mdl->errors());
+        if ($resource_mdl->errors()) {
+            $this->errors = array_merge((array)$this->errors, $resource_mdl->errors());
         }
         $this->cache->flush('product');
         return $result;
@@ -2023,16 +2059,6 @@ class Product extends BaseModel
             $product->load('tags');
         }
 
-        // Temporary solution for serializing of additional columns from extensions
-        $casts = $product->getCasts();
-        foreach ($product_data as $k => &$v) {
-            if ($casts[$k] == 'serialized' && !is_string($v)) {
-                $v = serialize($v);
-            }
-        }
-        unset($v);
-        //remove it after solving problem with extendability of baseModel
-
         $product->update($product_data);
         if ($product_data['product_description']) {
             if (!isset($product_data['product_description']['language_id'])) {
@@ -2051,7 +2077,7 @@ class Product extends BaseModel
         $attributes = array_filter(
             $product_data,
             function ($k) {
-                return (strpos($k, 'attribute_') === 0);
+                return (str_starts_with($k, 'attribute_'));
             },
             ARRAY_FILTER_USE_KEY
         );
@@ -2327,12 +2353,12 @@ class Product extends BaseModel
                               ->where(
                                   [
                                       'product_id' => $product_id,
-                                      'group_id'   => 0,
+                                      'group_id'   => 0
                                   ]
                               )->active()
                               ->orderBy('sort_order');
-        //allow to extends this method from extensions
-        Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query);
+        //allow to extend this method from extensions
+        Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
 
         $productOptions = $query->get()->toArray();
 
@@ -2353,9 +2379,6 @@ class Product extends BaseModel
      */
     public static function getBestSellerProductIds(array $data)
     {
-        /**
-         * @var ADB $db
-         */
         $db = Registry::db();
         $cache = Registry::getInstance()->get('cache');
         $config = Registry::getInstance()->get('config');
@@ -2387,9 +2410,8 @@ class Product extends BaseModel
                   ->groupBy('order_products.product_id')
                   ->orderBy($db->raw('SUM('.$aliasOP.'.quantity) '), 'DESC');
 
-            //allow to extends this method from extensions
+            //allow to extend this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $data);
-            /** @var Collection $result_rows */
             $result_rows = $query->get();
             if ($result_rows) {
                 $product_data = $result_rows->toArray();
@@ -2518,7 +2540,6 @@ class Product extends BaseModel
     {
         $result = [];
         foreach ($productIds as $productId) {
-            /** @var Category $category */
             $category = Category::find($productId);
             if ($category) {
                 $result[] = $category->getAllData();

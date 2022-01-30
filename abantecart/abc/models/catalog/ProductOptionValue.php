@@ -31,13 +31,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property Carbon $date_modified
  *
  * @property ProductOption $product_option
+ * @property ProductOptionValueDescription $description
  * @property Product $product
  * @property Collection $order_options
  * @property ProductOptionDescription $descriptions
  * @property ProductOptionDescription $description
  *
- * @method static ProductOptionValue find(int $product_option_value_id) ProductOptionValue
- * @method static ProductOptionValue create(array $attributes) ProductOptionValue
  *
  * @package abc\models
  */

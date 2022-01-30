@@ -19,6 +19,7 @@ class CustomerNotes extends BaseModel
         'customer_id' => 'int',
         'user_id'      => 'int',
         'stage_id'      => 'int',
+        'note'      => 'string',
     ];
 
     protected $dates = [

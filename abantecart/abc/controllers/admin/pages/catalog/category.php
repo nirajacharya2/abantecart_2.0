@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -29,7 +29,6 @@ use H;
 
 /**
  * Class ControllerPagesCatalogCategory
- *
  */
 class ControllerPagesCatalogCategory extends AController
 {
@@ -88,7 +87,9 @@ class ControllerPagesCatalogCategory extends AController
                     'children' => array_merge(
                         [
                             'quickview' => [
-                                'text'  => $this->language->get('text_quick_view'),
+                                'text'  => $this->language->get(
+                                    'text_quick_view'
+                                ),
                                 'href'  => $this->html->getSecureURL(
                                     'catalog/category/update',
                                     '&category_id=%ID%'
@@ -100,27 +101,35 @@ class ControllerPagesCatalogCategory extends AController
                                 ),
                             ],
                             'general'   => [
-                                'text' => $this->language->get('tab_general'),
+                                'text' => $this->language->get(
+                                    'tab_general'
+                                ),
                                 'href' => $this->html->getSecureURL(
                                     'catalog/category/update',
                                     '&category_id=%ID%'
                                 ),
                             ],
                             'data'      => [
-                                'text' => $this->language->get('tab_data'),
+                                'text' => $this->language->get(
+                                    'tab_data'
+                                ),
                                 'href' => $this->html->getSecureURL(
                                         'catalog/category/update',
                                         '&category_id=%ID%'
-                                    ).'#data',
+                                    )
+                                    .'#data',
                             ],
                             'layout'    => [
-                                'text' => $this->language->get('tab_layout'),
+                                'text' => $this->language->get(
+                                    'tab_layout'
+                                ),
                                 'href' => $this->html->getSecureURL(
                                     'catalog/category/edit_layout',
                                     '&category_id=%ID%'
                                 ),
                             ],
-                        ], (array) $this->data['grid_edit_expand']
+                        ],
+                        (array) $this->data['grid_edit_expand']
                     ),
                 ],
                 'save'   => [
@@ -657,7 +666,7 @@ class ControllerPagesCatalogCategory extends AController
             'responses/common/resource_library/get_resources_scripts',
             [
                 'object_name' => 'categories',
-                'object_id'   => $category_id,
+                'object_id'   => (int)$category_id,
                 'types'       => ['image'],
             ]
         );
@@ -694,7 +703,7 @@ class ControllerPagesCatalogCategory extends AController
             $this->error['warning'][] = $this->language->get('error_permission');
         }
 
-        foreach ($this->request->post['category_description'] as $language_id => $value) {
+        foreach ($this->request->post['category_description'] as $value) {
             $len = mb_strlen($value['name']);
             if (($len < 2) || ($len > 255)) {
                 $this->error['warning'][] = $this->language->get('error_name');
@@ -801,11 +810,7 @@ class ControllerPagesCatalogCategory extends AController
         $page_layout = $layout->getPageLayoutIDs($page_controller, $page_key_param, $category_id);
         $page_id = $page_layout['page_id'];
         $layout_id = $page_layout['layout_id'];
-        if (isset($this->request->get['tmpl_id'])) {
-            $tmpl_id = $this->request->get['tmpl_id'];
-        } else {
-            $tmpl_id = $this->config->get('config_storefront_template');
-        }
+        $tmpl_id = $this->request->get['tmpl_id'] ?? $this->config->get('config_storefront_template');
         $params = [
             'category_id' => $category_id,
             'page_id'     => $page_id,

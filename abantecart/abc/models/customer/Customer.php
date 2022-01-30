@@ -9,6 +9,7 @@ use abc\core\lib\ADB;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AException;
 use abc\models\BaseModel;
+use abc\models\casts\Serialized;
 use abc\models\order\Order;
 use abc\models\order\OrderProduct;
 use abc\models\QueryBuilder;
@@ -44,8 +45,8 @@ use ReflectionException;
  * @property string $sms
  * @property string $salt
  * @property string $password
- * @property string $cart
- * @property string $wishlist
+ * @property array $cart
+ * @property array $wishlist
  * @property int $newsletter
  * @property int $address_id
  * @property int $status
@@ -85,9 +86,9 @@ class Customer extends BaseModel
         'status'            => 'int',
         'approved'          => 'int',
         'customer_group_id' => 'int',
-        'cart'              => 'serialized',
-        'data'              => 'serialized',
-        'wishlist'          => 'serialized',
+        'cart'              => Serialized::class,
+        'data'              => Serialized::class,
+        'wishlist'          => Serialized::class,
     ];
 
     protected $dates = [
@@ -571,30 +572,15 @@ class Customer extends BaseModel
         $this->attributes['email'] = mb_strtolower($value, ABC::env('APP_CHARSET'));
     }
 
-    public function setDataAttribute($value)
-    {
-        $this->attributes['data'] = serialize($value);
-    }
-
-    public function setCartAttribute($value)
-    {
-        $this->attributes['cart'] = serialize($value);
-    }
-
-    public function setWishlistAttribute($value)
-    {
-        $this->attributes['wishlist'] = serialize($value);
-    }
-
     public function setPasswordAttribute($password)
     {
-        if (!empty(trim($password)) && !$this->originalIsEquivalent('password', $password)) {
+        /** @var AEncryption $enc */
+        $enc = ABC::getObjectByAlias('AEncryption');
+        if (!empty(trim($password))
+            && $enc::getHash($password, $this->attributes['salt']) != $this->attributes['password']
+        ) {
             $salt_key = H::genToken(8);
             $this->fill(['salt' => $salt_key]);
-            /**
-             * @var AEncryption $enc
-             */
-            $enc = ABC::getObjectByAlias('AEncryption');
             $this->attributes['password'] = $enc::getHash($password, $salt_key);
         } else {
             unset($this->attributes['password']);
@@ -614,7 +600,7 @@ class Customer extends BaseModel
 
         //remove serialized fields
         foreach ($this->casts as $k => $v) {
-            if ($v == 'serialized') {
+            if ($v == Serialized::class) {
                 unset($data[$k]);
             }
         }
@@ -625,9 +611,6 @@ class Customer extends BaseModel
             }
         }
 
-        /**
-         * @var ADataEncryption $dcrypt
-         */
         $dcrypt = Registry::dcrypt();
         if ($dcrypt->active) {
             $data = $dcrypt->encrypt_data($data, 'customers');
@@ -760,9 +743,6 @@ class Customer extends BaseModel
          * @var ADataEncryption $dcrypt
          */
         $dcrypt = Registry::dcrypt();
-        /**
-         * @var ADB $db
-         */
         $db = Registry::db();
         $customer = new Customer();
 
@@ -805,7 +785,7 @@ class Customer extends BaseModel
             'customers.customer_group_id'
         );
 
-        $filter = (isset($inputData['filter']) ? $inputData['filter'] : []);
+        $filter = ($inputData['filter'] ?? []);
 
         if (H::has_value($filter['name'])) {
             $query->whereRaw(
@@ -832,21 +812,17 @@ class Customer extends BaseModel
 
         if (H::has_value($filter['firstname'])) {
             if ($filter['search_operator'] == 'equal') {
-                $query->whereRaw("LOWER(".$aliasC.".firstname) =  '".$db->escape(mb_strtolower($filter['firstname']))
-                    ."'");
+                $query->whereRaw("LOWER(".$aliasC.".firstname) =  '".$db->escape(mb_strtolower($filter['firstname']))."'");
             } else {
-                $query->whereRaw("LOWER(".$aliasC.".firstname) LIKE '".$db->escape(mb_strtolower($filter['firstname']))
-                    ."%'");
+                $query->whereRaw("LOWER(".$aliasC.".firstname) LIKE '".$db->escape(mb_strtolower($filter['firstname']))."%'");
             }
         }
 
         if (H::has_value($filter['lastname'])) {
             if ($filter['search_operator'] == 'equal') {
-                $query->whereRaw("LOWER(".$aliasC.".lastname) =  '".$db->escape(mb_strtolower($filter['lastname']))
-                    ."'");
+                $query->whereRaw("LOWER(".$aliasC.".lastname) =  '".$db->escape(mb_strtolower($filter['lastname']))."'");
             } else {
-                $query->whereRaw("LOWER(".$aliasC.".lastname) LIKE '".$db->escape(mb_strtolower($filter['lastname']))
-                    ."%'");
+                $query->whereRaw("LOWER(".$aliasC.".lastname) LIKE '".$db->escape(mb_strtolower($filter['lastname']))."%'");
             }
         }
 
@@ -909,7 +885,7 @@ class Customer extends BaseModel
         // select only subscribers (group + customers with subscription)
         $subscriberGroupId = CustomerGroup::where('name', '=', self::SUBSCRIBERS_GROUP_NAME)
                                           ->first()
-            ->customer_group_id;
+                                          ->customer_group_id;
 
         if (H::has_value($filter['only_subscribers'])) {
             $query->where(function ($query) use ($subscriberGroupId) {
@@ -994,7 +970,7 @@ class Customer extends BaseModel
 
         //If for total, we done building the query
         if ($mode == 'total_only' && !$dcrypt->active) {
-            //allow to extends this method from extensions
+            //allow to extend this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $inputData);
             $result = $query->first();
             return (int)$result->total;
@@ -1020,7 +996,7 @@ class Customer extends BaseModel
         //Total calculation for encrypted mode
         // NOTE: Performance slowdown might be noticed or larger search results
         if ($mode != 'total_only') {
-            $orderBy = $sort_data[$inputData['sort']] ? $sort_data[$inputData['sort']] : 'name';
+            $orderBy = $sort_data[$inputData['sort']] ? : 'name';
             if (isset($inputData['order']) && (strtoupper($inputData['order']) == 'DESC')) {
                 $sorting = "desc";
             } else {
@@ -1038,7 +1014,7 @@ class Customer extends BaseModel
                 $query->offset((int)$inputData['start'])->limit((int)$inputData['limit']);
             }
         }
-        //allow to extends this method from extensions
+        //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $inputData);
 
         if ($filter['include'] && count($filter['include']) == 1) {
@@ -1067,7 +1043,7 @@ class Customer extends BaseModel
             //we get here only if in data encryption mode
             return $result_rows->count();
         }
-        //finally decrypt data and return result
+        //finally, decrypt data and return result
         $totalNumRows = $db->sql_get_row_count();
         for ($i = 0; $i < $result_rows->count(); $i++) {
             $result_rows[$i] = $dcrypt->decrypt_data($result_rows[$i], 'customers');
@@ -1115,9 +1091,7 @@ class Customer extends BaseModel
                 continue;
             }
             foreach ($im_protocols as $protocol) {
-                $update[$sendpoint][$protocol] = isset($settings[$sendpoint][$protocol])
-                    ? (int)$settings[$sendpoint][$protocol]
-                    : 0;
+                $update[$sendpoint][$protocol] = (int) $row[$protocol];
             }
         }
 
@@ -1134,11 +1108,11 @@ class Customer extends BaseModel
                 }
             }
 
-            //for newsletter subscription do changes inside customers table
+            //for newsletter subscription do changes inside customer table
             //if at least one protocol enabled - set 1, otherwise - 0
             if (H::has_value($update['newsletter'])) {
                 $newsletter_status = 0;
-                foreach ($update['newsletter'] as $protocol => $status) {
+                foreach ($update['newsletter'] as $status) {
                     if ($status) {
                         $newsletter_status = 1;
                         break;
@@ -1162,14 +1136,8 @@ class Customer extends BaseModel
             return [];
         }
 
-        /**
-         * @var ADataEncryption $dcrypt
-         */
         $dcrypt = Registry::dcrypt();
 
-        /**
-         * @var ADB $db
-         */
         $db = Registry::db();
 
         $query = OrderProduct::where('order_products.product_id', '=', $product_id);
@@ -1188,7 +1156,7 @@ class Customer extends BaseModel
               ->where('orders.order_status_id', '>', 0)
               ->distinct();
 
-        //allow to extends this method from extensions
+        //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query);
 
         $result_rows = $query->useCache('customer')->get();
@@ -1213,9 +1181,6 @@ class Customer extends BaseModel
         if (empty($loginname)) {
             return false;
         }
-        /**
-         * @var ADB $db
-         */
         $db = Registry::db();
         $aliasC = $db->table_name('customers');
 
@@ -1225,7 +1190,7 @@ class Customer extends BaseModel
         if ($customer_id) {
             $query->where('customer_id', '<>', $customer_id);
         }
-        //allow to extends this method from extensions
+        //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query);
         return !($query->get()->count());
     }

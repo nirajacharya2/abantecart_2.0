@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2021 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -25,7 +25,12 @@ use abc\core\engine\Registry;
 use abc\core\lib\{
     AbcCache, AConfig, ADB, AError, AException, AExtensionManager, ALanguageManager, APackageManager
 };
+use DebugBar\DebugBarException;
+use Exception;
 use H;
+use JetBrains\PhpStorm\ArrayShape;
+use JetBrains\PhpStorm\Pure;
+use ReflectionException;
 
 /**
  * Class Install
@@ -44,16 +49,12 @@ class Install extends BaseCommand
             }
         }
 
-        switch ($action) {
-            case 'app':
-                return $this->validateAppInstall($options);
-            case 'extension':
-                return $this->validateExtensionOptions($options);
-            case 'package':
-                return $this->validatePackageOptions($options);
-            default:
-                return [];
-        }
+        return match ($action) {
+            'app' => $this->validateAppInstall($options),
+            'extension' => $this->validateExtensionOptions($options),
+            'package' => $this->validatePackageOptions($options),
+            default => [],
+        };
     }
 
     /**
@@ -92,8 +93,8 @@ class Install extends BaseCommand
      *
      * @return array|bool
      * @throws AException
-     * @throws \DebugBar\DebugBarException
-     * @throws \ReflectionException
+     * @throws DebugBarException
+     * @throws ReflectionException
      */
     protected function installApp($options)
     {
@@ -143,7 +144,7 @@ class Install extends BaseCommand
      * @param $options
      *
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function installPackage($options)
@@ -282,7 +283,7 @@ class Install extends BaseCommand
      * @param $file_path
      *
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     protected function showConfirmation($file_path)
     {
@@ -313,7 +314,7 @@ class Install extends BaseCommand
      *
      * @return bool|null
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function uninstallExtension($options)
@@ -350,7 +351,7 @@ class Install extends BaseCommand
      *
      * @return bool
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function installExtension($options)
@@ -388,7 +389,7 @@ class Install extends BaseCommand
      *
      * @return bool|null
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function removeExtension($options)
@@ -432,7 +433,7 @@ class Install extends BaseCommand
      * @param string $error_text
      *
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     protected function stopRun(APackageManager $pm, $error_text = '')
     {
@@ -472,7 +473,7 @@ class Install extends BaseCommand
         if (!isset($options['db_driver']) || !$options['db_driver']) {
             $options['db_driver'] = 'mysql';
         }
-        if (substr($options['http_server'], -1) != '/') {
+        if (!str_ends_with($options['http_server'], '/')) {
             $options['http_server'] .= '/';
         }
 
@@ -483,7 +484,7 @@ class Install extends BaseCommand
      * @param string $action
      * @param array $options
      *
-     * @return bool|void
+     * @return void
      */
     public function finish(string $action, array $options)
     {
@@ -638,7 +639,7 @@ class Install extends BaseCommand
      *
      * @return array
      * @throws AException
-     * @throws \DebugBar\DebugBarException
+     * @throws DebugBarException
      */
     public function configure(array $options)
     {
@@ -674,13 +675,13 @@ class Install extends BaseCommand
 <?php
 return [
         'APP_NAME' => 'AbanteCart',
-        'MIN_PHP_VERSION' => '7.0.0',
+        'MIN_PHP_VERSION' => '8.1.0',
         'DIR_ROOT' => '{$dirs['root']}',
         'DIR_APP' => '{$dirs['app']}',
         'DIR_PUBLIC' => '{$dirs['public']}',
-        'SERVER_NAME' => '{$server_name}',
+        'SERVER_NAME' => '$server_name',
         'ADMIN_SECRET' => '{$options['admin_secret']}',
-        'UNIQUE_ID' => '{$unique_id}',
+        'UNIQUE_ID' => '$unique_id',
         // SEO URL Keyword separator
         'SEO_URL_SEPARATOR' => '-',
         // EMAIL REGEXP PATTERN
@@ -812,7 +813,7 @@ EOD;
      *
      * @return array
      * @throws AException
-     * @throws \DebugBar\DebugBarException
+     * @throws DebugBarException
      */
     public function runSQL(array $options)
     {
@@ -833,8 +834,8 @@ EOD;
         $query = '';
         foreach ($sql as $line) {
             $tsl = trim($line);
-            if (($sql != '') && (substr($tsl, 0, 2) != "--")
-                && (substr($tsl, 0, 1) != '#')
+            if (($sql != '') && (!str_starts_with($tsl, "--"))
+                && (!str_starts_with($tsl, '#'))
             ) {
                 $query .= $line;
                 if (preg_match('/;\s*$/', $line)) {
@@ -902,7 +903,7 @@ EOD;
      *
      * @return array
      * @throws AException
-     * @throws \DebugBar\DebugBarException
+     * @throws DebugBarException
      */
     public function loadDemoData($options)
     {
@@ -925,7 +926,7 @@ EOD;
         $query = '';
         foreach ($sql as $line) {
             $tsl = trim($line);
-            if (($sql != '') && (substr($tsl, 0, 2) != "--") && (substr($tsl, 0, 1) != '#')) {
+            if (($sql != '') && (!str_starts_with($tsl, "--")) && (!str_starts_with($tsl, '#'))) {
                 $query .= $line;
 
                 if (preg_match('/;\s*$/', $line)) {
@@ -953,7 +954,7 @@ EOD;
      *
      * @return array
      */
-    public function help($options = [])
+    #[Pure] public function help($options = [])
     {
         $options = $this->getOptionList();
         foreach ($options as $action => $help_info) {
@@ -984,6 +985,7 @@ EOD;
     /**
      * @return array
      */
+    #[ArrayShape(['app' => "array", 'package' => "array", 'extension' => "array"])]
     protected function getOptionList()
     {
         return [
@@ -1157,7 +1159,7 @@ EOD;
      * @param $options
      *
      * @return array
-     * @throws \DebugBar\DebugBarException
+     * @throws DebugBarException
      */
     public function validateAppInstall($options)
     {
@@ -1245,8 +1247,8 @@ EOD;
                     'DB_COLLATION' => 'utf8_unicode_ci',
                     'DB_PREFIX'    => $options['db_prefix'],
                 ]);
-            } catch (AException $e) {
-                $errors['error'] = $e->getMessage()."\n";
+            } catch (Exception $e) {
+                $errors['database connection error'] = $e->getMessage()."\n";
             }
         }
 
@@ -1272,8 +1274,8 @@ EOD;
      * @param $options
      *
      * @return array
-     * @throws AException
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws AException|Exception
      */
     public function validateExtensionOptions($options)
     {
@@ -1289,7 +1291,7 @@ EOD;
             ];
         }
 
-        $deleting = isset($options['uninstall']) || isset($options['remove']) ? true : false;
+        $deleting = isset($options['uninstall']) || isset($options['remove']);
 
         if ($deleting) {
             $registry = Registry::getInstance();

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -23,18 +23,17 @@ namespace abc\controllers\admin;
 use abc\core\engine\AController;
 use abc\core\lib\AContentManager;
 use abc\core\lib\AError;
+use abc\core\lib\AException;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
 use H;
+use ReflectionException;
 use stdClass;
 
 class ControllerResponsesListingGridContent extends AController
 {
-    public $data = [];
-    /**
-     * @var AContentManager
-     */
-    private $acm;
+    /** @var AContentManager */
+    protected $acm;
 
     public function main()
     {
@@ -125,8 +124,8 @@ class ControllerResponsesListingGridContent extends AController
                 ]),
                 'action',
                 $new_level,
-                ($this->request->post['nodeid'] ? $this->request->post['nodeid'] : null),
-                ($result['content_id'] == $leaf_nodes[$result['content_id']] ? true : false),
+                ($this->request->post['nodeid'] ? : null),
+                ($result['content_id'] == $leaf_nodes[$result['content_id']]),
                 false,
             ];
             $i++;
@@ -148,17 +147,16 @@ class ControllerResponsesListingGridContent extends AController
         $this->acm = new AContentManager();
         if ( ! $this->user->canModify('listing_grid/content')) {
             $error = new AError('');
-
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            $error->toJSONResponse('NO_PERMISSIONS_402',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/content'),
                     'reset_value' => true,
                 ]);
+            return;
         }
-
+        $ids = explode(',', $this->request->post['id']);
         switch ($this->request->post['oper']) {
             case 'del':
-                $ids = explode(',', $this->request->post['id']);
                 if ( ! empty($ids)) {
                     foreach ($ids as $id) {
                         if (is_int(strpos($id, '_'))) {
@@ -170,13 +168,13 @@ class ControllerResponsesListingGridContent extends AController
                         if ($this->config->get('config_account_id') == $content_id) {
                             $this->response->setOutput($this->language->get('error_account'));
 
-                            return null;
+                            return;
                         }
 
                         if ($this->config->get('config_checkout_id') == $content_id) {
                             $this->response->setOutput($this->language->get('error_checkout'));
 
-                            return null;
+                            return;
                         }
 
                         $this->acm->deleteContent($content_id);
@@ -185,7 +183,6 @@ class ControllerResponsesListingGridContent extends AController
                 break;
             case 'save':
                 $allowedFields = array_merge(['sort_order', 'status', 'hide_title'], (array)$this->data['allowed_fields']);
-                $ids = explode(',', $this->request->post['id']);
                 if ( ! empty($ids)) //resort required.
                 {
                     if ($this->request->post['resort'] == 'yes') {
@@ -233,8 +230,8 @@ class ControllerResponsesListingGridContent extends AController
      *
      * @return void
      * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function update_field()
     {
@@ -245,11 +242,13 @@ class ControllerResponsesListingGridContent extends AController
         $this->acm = new AContentManager();
         if ( ! $this->user->canModify('listing_grid/content')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            $error->toJSONResponse('NO_PERMISSIONS_402',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/content'),
                     'reset_value' => true,
-                ]);
+                ]
+            );
+            return;
         }
         $allowedFields = array_merge(
             [
@@ -289,7 +288,7 @@ class ControllerResponsesListingGridContent extends AController
                 $this->acm->editContentField($this->request->get['id'], $field, $value, $parent_content_id);
             }
 
-            return null;
+            return;
         }
 
         //request sent from jGrid. ID is key of array

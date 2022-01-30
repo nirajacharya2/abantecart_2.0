@@ -162,6 +162,7 @@ class AdminOrderUpdateProductStatusesChange
             }
 
             $this->data['logo'] = $config_mail_logo;
+            //TODO: see belong! why override ?
             $this->data['store_name'] = $order_info['store_name'];
             $this->data['address'] = nl2br($config->get('config_address'));
             $this->data['telephone'] = $config->get('config_telephone');
@@ -320,9 +321,8 @@ class AdminOrderUpdateProductStatusesChange
             $mail->setTo($order_info['email']);
             $mail->setFrom($config->get('store_main_email'));
             $mail->setSender($order_info['store_name']);
-            if($mail->setTemplate('admin_order_update_product_statuses', $this->data, $order_info['language_id'])) {
-                $mail->send();
-            }
+            $mail->setTemplate('admin_order_update_product_statuses', $this->data, $order_info['language_id']);
+            $mail->send();
 
             //send alert email for merchant
             if ($config->get('config_alert_mail')) {
@@ -341,9 +341,8 @@ class AdminOrderUpdateProductStatusesChange
                 $this->data['order_total'] = $order_total;
 
                 $mail->setTo($config->get('store_main_email'));
-                if($mail->setTemplate('admin_order_update_product_statuses_alert', $this->data)) {
-                    $mail->send();
-                }
+                $mail->setTemplate('admin_order_update_product_statuses_alert', $this->data);
+                $mail->send();
 
                 // Send to additional alert emails
                 $emails = explode(',', $config->get('config_alert_emails'));

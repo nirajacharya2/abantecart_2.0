@@ -2,11 +2,15 @@
 
 namespace abc\models\locale;
 
+use abc\core\lib\AException;
 use abc\models\BaseModel;
 use abc\models\order\Order;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use abc\core\lib\AConnect;
 use abc\core\lib\AError;
+use ReflectionException;
 
 /**
  * Class Currency
@@ -19,11 +23,9 @@ use abc\core\lib\AError;
  * @property string $decimal_place
  * @property float $value
  * @property int $status
- * @property \Carbon\Carbon $date_modified
+ * @property Carbon $date_modified
  *
- * @property \Illuminate\Database\Eloquent\Collection $orders
- *
- * @method static Currency find(int $currency_id) Currency
+ * @property Collection $orders
  *
  * @package abc\models
  */
@@ -294,7 +296,7 @@ class Currency extends BaseModel
     }
 
     /**
-     * @param       $operation
+     * @param string $operation
      *
      * @param array $columns
      *
@@ -306,8 +308,8 @@ class Currency extends BaseModel
     }
 
     /**
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function updateCurrencies()
     {

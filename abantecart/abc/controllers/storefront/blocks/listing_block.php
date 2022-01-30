@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2021 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -31,18 +31,24 @@ use ReflectionException;
 
 class ControllerBlocksListingBlock extends AController
 {
-
-    public function main($instance_id = 0)
+    public function __construct($registry, $instance_id, $controller, $parent_controller = '')
     {
-        //disable cache when login display price setting is off or enabled showing of prices with taxes
-        if (($this->config->get('config_customer_price') && !$this->config->get('config_tax')) && $this->html_cache()) {
-            return null;
+        parent::__construct($registry, $instance_id, $controller, $parent_controller);
+        $this->data['empty_render_text'] =
+            'To view content of block you should be logged in and prices must be without taxes';
+    }
+
+    public function main($instance_id = 0, $custom_block_id = 0)
+    {
+        //set default template first for case singleton usage
+        if (!$this->view->getTemplate()) {
+            $this->view->setTemplate('blocks/listing_block.tpl');
         }
 
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $block_data = $this->getBlockContent($instance_id);
+        $block_data = $this->getBlockContent($instance_id, $custom_block_id);
 
         $block_details = $this->layout->getBlockDetails($instance_id);
         $parent_block = $this->layout->getBlockDetails($block_details['parent_instance_id']);
@@ -67,6 +73,7 @@ class ControllerBlocksListingBlock extends AController
                     [
                         'collection',
                         'custom_products',
+                        'catalog_product_getRelatedProducts',
                         'catalog_product_getPopularProducts',
                         'catalog_product_getSpecialProducts',
                         'catalog_product_getFeatured',
@@ -213,10 +220,11 @@ class ControllerBlocksListingBlock extends AController
      * @param array $content
      *
      * @return array
-     * @throws InvalidArgumentException
+     * @throws AException|ReflectionException
      */
     protected function prepareItems($content = [])
     {
+        $item_name = '';
         if (isset($content[0]['category_id'])) {
             $item_name = 'category';
         } else {
@@ -228,8 +236,6 @@ class ControllerBlocksListingBlock extends AController
                 } else {
                     if (isset($content[0]['resource_id'])) {
                         $item_name = 'resource';
-                    } else {
-                        $item_name = '';
                     }
                 }
             }
@@ -259,17 +265,20 @@ class ControllerBlocksListingBlock extends AController
 
     /**
      * @param int $instance_id
+     * @param int $custom_block_id
      *
      * @return array
-     * @throws AException
-     * @throws InvalidArgumentException
-     * @throws ReflectionException
+     * @throws AException|InvalidArgumentException|ReflectionException
      */
-    protected function getBlockContent($instance_id)
+    protected function getBlockContent($instance_id = 0, $custom_block_id = 0)
     {
         $output = [];
-        $this->data['block_info'] = $this->layout->getBlockDetails($instance_id);
-        $this->data['custom_block_id'] = $this->data['block_info']['custom_block_id'];
+        if ($custom_block_id) {
+            $this->data['custom_block_id'] = $custom_block_id;
+        } else {
+            $this->data['block_info'] = $this->layout->getBlockDetails($instance_id);
+            $this->data['custom_block_id'] = $this->data['block_info']['custom_block_id'];
+        }
 
         //getting block properties
         $this->data['descriptions'] = $this->layout->getBlockDescriptions($this->data['custom_block_id']);
@@ -300,7 +309,6 @@ class ControllerBlocksListingBlock extends AController
             return false;
         }
         $result = [];
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $listing = new AListing($this->data['custom_block_id']);
@@ -534,12 +542,14 @@ class ControllerBlocksListingBlock extends AController
             //build list of ids
             $ids = array_column($inData, $data_source['data_type']);
 
-            $thumbnails = $resource->getMainThumbList(
+            $thumbnails = $ids
+                ? $resource->getMainThumbList(
                 $data_source['rl_object_name'],
                 $ids,
                 $image_sizes['thumb']['width'],
                 $image_sizes['thumb']['height']
-            );
+                )
+                : [];
 
             foreach ($inData as &$item) {
                 $thumbnail = $thumbnails[$item[$data_source['data_type']]];

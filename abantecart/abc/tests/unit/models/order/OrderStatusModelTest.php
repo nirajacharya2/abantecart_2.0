@@ -12,7 +12,7 @@ use Illuminate\Validation\ValidationException;
 class OrderStatusModelTest extends ATestCase
 {
 
-    protected function setUp()
+    protected function setUp():void
     {
         //init
     }

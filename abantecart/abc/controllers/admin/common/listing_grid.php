@@ -89,7 +89,7 @@ class ControllerCommonListingGrid extends AController
             ];
         }
 
-        //check for reserved column name
+        //check for reserved column "name"
         // name "parent" broke expanding of grid tree
         foreach ($this->data['colModel'] as $col) {
             if ($col['name'] == 'parent') {

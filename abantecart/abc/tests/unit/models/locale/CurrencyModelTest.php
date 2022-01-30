@@ -75,7 +75,6 @@ class CurrencyModelTest extends ATestCase
 
     }
 
-
     /**
      * @return int
      * @throws \Exception

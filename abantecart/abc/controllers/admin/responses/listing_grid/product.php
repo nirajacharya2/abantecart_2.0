@@ -326,11 +326,13 @@ class ControllerResponsesListingGridProduct extends AController
 
         if (!$this->user->canModify('listing_grid/product')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            $error->toJSONResponse('NO_PERMISSIONS_402',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/product'),
                     'reset_value' => true,
-                ]);
+                ]
+            );
+            return;
         }
 
         $this->loadLanguage('catalog/product');
@@ -340,17 +342,21 @@ class ControllerResponsesListingGridProduct extends AController
             foreach ($this->request->post as $key => $value) {
                 $data = [$key => $value];
                 $discount = ProductDiscount::find($this->request->get['id']);
-                if ($discount) {
-                    $discount->update($data);
-                }
+                $discount?->update($data);
             }
 
-            return null;
+            $this->extensions->hk_ProcessData(
+                $this,
+                __FUNCTION__,
+                [
+                    'product_id' => $this->request->get['id']
+                ]
+            );
+            return;
         }
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
-        return null;
     }
 
     public function update_special_field()
@@ -376,17 +382,21 @@ class ControllerResponsesListingGridProduct extends AController
             foreach ($this->request->post as $key => $value) {
                 $data = [$key => $value];
                 $special = ProductSpecial::find($this->request->get['id']);
-                if ($special) {
-                    $special->update($data);
-                }
+                $special?->update($data);
             }
 
-            return null;
+            $this->extensions->hk_ProcessData(
+                $this,
+                __FUNCTION__,
+                [
+                    'product_id' => $this->request->get['id']
+                ]
+            );
+            return;
         }
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
-        return null;
     }
 
     public function update_relations_field()
@@ -414,12 +424,18 @@ class ControllerResponsesListingGridProduct extends AController
                 Product::updateProductLinks($this->request->get['id'], $data);
             }
 
-            return null;
+            $this->extensions->hk_ProcessData(
+                $this,
+                __FUNCTION__,
+                [
+                    'product_id' => $this->request->get['id']
+                ]
+            );
+            return;
         }
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
-        return null;
     }
 
     protected function validateField($field, $value)

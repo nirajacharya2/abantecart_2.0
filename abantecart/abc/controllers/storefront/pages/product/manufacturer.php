@@ -59,11 +59,15 @@ class ControllerPagesProductManufacturer extends AController
 
     public function main()
     {
-        $request = $this->request->get;
+
+        $this->loadModel('catalog/manufacturer');
+        $this->loadModel('catalog/product');
+        $this->loadModel('tool/seo_url');
+        $this->loadModel('tool/image');
 
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
-
+        $request = $this->request->get;
         if ($this->config->get('embed_mode') == true) {
             $cart_rt = 'r/checkout/cart/embed';
 
@@ -79,11 +83,6 @@ class ControllerPagesProductManufacturer extends AController
         if ($this->config->get('config_require_customer_login') && !$this->customer->isLogged()) {
             abc_redirect($this->html->getSecureURL('account/login'));
         }
-
-        $this->loadModel('catalog/manufacturer');
-        $this->loadModel('catalog/product');
-        $this->loadModel('tool/seo_url');
-        $this->loadModel('tool/image');
 
         $this->document->resetBreadcrumbs();
         $this->document->addBreadcrumb([

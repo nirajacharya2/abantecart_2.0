@@ -3,6 +3,7 @@
 namespace abc\models\order;
 
 use abc\models\BaseModel;
+use abc\models\casts\Serialized;
 use abc\models\catalog\ProductOption;
 use abc\models\catalog\ProductOptionValue;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -46,7 +47,7 @@ class OrderOption extends BaseModel
         'product_option_id'       => 'int',
         'product_option_value_id' => 'int',
         'price'                   => 'float',
-        'settings'                => 'serialized',
+        'settings'                => Serialized::class,
         'weight'                  => 'float'
     ];
 

@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2021 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -35,9 +35,9 @@ use Chelout\RelationshipEvents\Concerns\HasMorphOneEvents;
 use Chelout\RelationshipEvents\Concerns\HasMorphToEvents;
 use Chelout\RelationshipEvents\Concerns\HasMorphToManyEvents;
 use Chelout\RelationshipEvents\Concerns\HasOneEvents;
-use Closure;
 use H;
 use Illuminate\Database\ConnectionResolver;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model as OrmModel;
 use Illuminate\Database\Eloquent\Builder;
 use Exception;
@@ -56,26 +56,27 @@ use stdClass;
  * Class BaseModel
  *
  * @package abc\models
- * @method static Collection find(int $Id) Collection
+ * @method static Collection find(int|array $Id) Collection
  * @method static Collection get() Collection
  * @method static QueryBuilder|Builder where(string|array|Closure $column, string $operator = null, mixed $value = null, string $boolean = 'and') QueryBuilder
  * @method static QueryBuilder|Builder whereRaw(string $sql) QueryBuilder
  * @method static QueryBuilder|Builder whereNull(string $column) QueryBuilder
  * @method static QueryBuilder|Builder whereIn(string $column, array $keys) QueryBuilder
  * @method static QueryBuilder select(string|array $select = '*') QueryBuilder
+ * @method static integer max() int
  * @method static QueryBuilder selectRaw(string $sql) QueryBuilder
  * @method static QueryBuilder distinct(array $columns) QueryBuilder
  * @method static QueryBuilder|Builder withTrashed()
+ * * @method static QueryBuilder updateOrCreate(array $data) QueryBuilder
  * @method static QueryBuilder active() QueryBuilder
- * @method static int max()
- * @method static QueryBuilder join(string $table, Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
- * @method static QueryBuilder leftJoin(string $table, Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
- * @method static QueryBuilder rightJoin(string $table, Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
+ * @method static QueryBuilder join( string $table, \Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
+ * @method static QueryBuilder leftJoin( string $table, \Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
+ * @method static QueryBuilder rightJoin( string $table, \Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
+ * @method static QueryBuilder|Builder OrderBy(string $column, string $order) QueryBuilder
  * @const  string DELETED_AT
  */
 class BaseModel extends OrmModel
 {
-    use CastTrait;
     use HasOneEvents,
         HasBelongsToEvents,
         HasManyEvents,
@@ -139,7 +140,7 @@ class BaseModel extends OrmModel
      * @var string
      */
     /**
-     * @var RBAC-ABAC policy setup
+     * @var //RBAC-ABAC policy setup
      *
      */
     protected $policyGroup, $policyObject;
@@ -158,6 +159,11 @@ class BaseModel extends OrmModel
      * @var array Data Validation rules
      */
     protected $rules = [];
+
+    /**
+     * @var array of field list for 3dParty js such as vue.js etc
+     */
+    protected $fields = [];
 
     /**
      *
@@ -262,7 +268,7 @@ class BaseModel extends OrmModel
         if ($this->actor['user_type_name']) {
             $userTypeRulesModel = (array)$this->{'rules'.ucfirst($this->actor['user_type_name'])};
             $ruleAlias = 'rules'.ucfirst($this->actor['user_type_name']);
-            $userTypeRulesEnv = (array)ABC::env('MODEL')['INITIALIZE'][$this->getClass()]['properties'][$ruleAlias];
+            $userTypeRulesEnv = (array) ABC::env('MODEL')['INITIALIZE'][$this->getClass()]['properties'][$ruleAlias];
             $userTypeRules = array_merge($userTypeRulesModel, $userTypeRulesEnv);
 
             if ($userTypeRules) {
@@ -317,7 +323,7 @@ class BaseModel extends OrmModel
     /**
      * @return string
      */
-    public function getClass()
+    static public function getClass()
     {
         return get_called_class();
     }
@@ -327,11 +333,8 @@ class BaseModel extends OrmModel
      */
     public function isUser()
     {
-        return (isset ($this->actor['user_type'])
-            && ($this->actor['user_type'] == self::USER
-                || $this->actor['user_type'] == self::CLI
-            )
-        ) ? true : false;
+        return isset ($this->actor['user_type'])
+                && ($this->actor['user_type'] == self::USER || $this->actor['user_type'] == self::CLI);
     }
 
     /**
@@ -341,10 +344,10 @@ class BaseModel extends OrmModel
      */
     public static function setCurrentLanguageID($language_id)
     {
-        if (!(int)$language_id) {
+        if (!(int) $language_id) {
             return false;
         }
-        static::$current_language_id = (int)$language_id;
+        static::$current_language_id = (int) $language_id;
         return true;
     }
 
@@ -369,9 +372,7 @@ class BaseModel extends OrmModel
      */
     public function isCustomer()
     {
-        return (isset ($this->actor['user_type'])
-            && $this->actor['user_type'] == self::CUSTOMER
-        ) ? true : false;
+        return isset ($this->actor['user_type']) && $this->actor['user_type'] == self::CUSTOMER;
     }
 
     /**
@@ -388,7 +389,7 @@ class BaseModel extends OrmModel
     }
 
     /**
-     * @param       $operation
+     * @param string $operation
      *
      * @param array $columns
      *
@@ -396,9 +397,8 @@ class BaseModel extends OrmModel
      */
     public function hasPermission(string $operation, array $columns = ['*']): bool
     {
-
         if ($columns[0] == '*') {
-            $this->affectedColumns = (array)$this->fillable + (array)$this->dates;
+            $this->affectedColumns = (array) $this->fillable + (array) $this->dates;
         } else {
             $this->affectedColumns = $columns;
         }
@@ -472,7 +472,7 @@ class BaseModel extends OrmModel
     {
         /*
          * Disable Temporary strict mode of Carbon class (date-conversion)
-         * to prevent it's exception during validation
+         * to prevent exception during validation
          */
         $carbonStrictMode = Carbon::isStrictModeEnabled();
         Carbon::useStrictMode(false);
@@ -482,7 +482,7 @@ class BaseModel extends OrmModel
             $validateRules = array_combine(array_keys($rules), array_column($rules, 'checks'));
 
             //override rule by lambda function to implement logic of rule depends on model data
-            //This lambda function must to return Rule validation of
+            //This lambda-function must to return Rule validation of
             foreach ($rules as $key => $rule) {
                 if ($rule['lambda'] instanceof Closure) {
                     $lambdaResult = $rule['lambda']($this);
@@ -501,8 +501,10 @@ class BaseModel extends OrmModel
                     }
                     $msg = $item['messages'];
                     if (!is_array($msg)) {
-                        throw new AException('Validation messages not found for attribute '.$attributeName.' of model '
-                            .$this->getClass());
+                        throw new AException(
+                            'Validation messages not found for attribute '.$attributeName.' of model '
+                            .$this->getClass()
+                        );
                     }
                     foreach ($msg as $subRule => $langParams) {
                         $subRule = $attributeName.'.'.$subRule;
@@ -680,7 +682,7 @@ class BaseModel extends OrmModel
                     if ($key == $this->primaryKey) {
                         $related[$key] = $this->$key;
                     }
-                    $conditions[$key] = isset($related[$key]) ? $related[$key] : null;
+                    $conditions[$key] = $related[$key] ?? null;
                 }
                 $updated = $relObj->updateOrCreate($conditions, $related);
                 $keys = [];
@@ -694,7 +696,7 @@ class BaseModel extends OrmModel
             $id = $relObj->primaryKey;
             foreach ($data as $related) {
                 $conditions = [
-                    $id => isset($this->$id) ? $this->$id : null,
+                    $id => $this->$id ?? null,
                 ];
                 $presentIds[] = $relObj->updateOrCreate($conditions, $related)->$id;
             }
@@ -724,7 +726,7 @@ class BaseModel extends OrmModel
     public static function getRelationships($typesOnly = null)
     {
         $typesOnly = is_string($typesOnly) ? func_get_args() : $typesOnly;
-        $typesOnly = (array)$typesOnly;
+        $typesOnly = (array) $typesOnly;
         foreach ($typesOnly as &$t) {
             $t = strtolower($t);
         }
@@ -767,7 +769,7 @@ class BaseModel extends OrmModel
      *
      * @return Builder
      */
-    protected function setKeysForSaveQuery($query)
+    protected function setKeysForSaveQuery(Builder $query)
     {
         if (isset($this->primaryKeySet)) {
             foreach ($this->primaryKeySet as $key) {
@@ -779,17 +781,17 @@ class BaseModel extends OrmModel
         return $query;
     }
 
-//    public static function __callStatic($method, $parameters)
-//    {
-//        //check permissions for static methods of model
-//        /*
-//         * ??? comment it yet. Need to resolve issues with abac-rbac class
-//         * $abac = Registry::getInstance()->get('abac');
-//        if($abac && !$abac->hasAccess(__CLASS__)){
-//            throw new AException('Forbidden');
-//        }*/
-//        return parent::__callStatic($method, $parameters);
-//    }
+    public static function __callStatic($method, $parameters)
+    {
+        //check permissions for static methods of model
+        /*
+         * ??? comment it yet. Need to resolve issues with abac-rbac class
+         * $abac = Registry::getInstance()->get('abac');
+        if($abac && !$abac->hasAccess(__CLASS__)){
+            throw new AException('Forbidden');
+        }*/
+        return parent::__callStatic($method, $parameters);
+    }
 
     public function getTableColumns()
     {

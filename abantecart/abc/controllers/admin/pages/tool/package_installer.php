@@ -594,7 +594,7 @@ class ControllerPagesToolPackageInstaller extends AController
         if (!$already_downloaded) {
             $this->data['pack_info'] .= sprintf(
                 $this->language->get('text_preloading'),
-                $package_name.' ('.(round($package_info['package_size'] / 1024, 1)).'kb)'
+                $package_name.' ('.(round((int)$package_info['package_size'] / 1024, 1)).'kb)'
             );
         }
 

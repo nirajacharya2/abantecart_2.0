@@ -3,6 +3,7 @@
 namespace abc\models\order;
 
 use abc\models\BaseModel;
+use abc\models\casts\Serialized;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -44,7 +45,7 @@ class OrderTotal extends BaseModel
     protected $casts = [
         'order_id'   => 'int',
         'value'      => 'float',
-        'data'       => 'serialized',
+        'data'       => Serialized::class,
         'sort_order' => 'int',
     ];
 

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2020 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -27,10 +27,6 @@ use abc\extensions\banner_manager\models\storefront\extension\ModelExtensionBann
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
 /**
  * Class ControllerBlocksBannerBlock
  *
@@ -39,8 +35,9 @@ if (!class_exists('abc\core\ABC')) {
 class ControllerBlocksBannerBlock extends AController
 {
 
-    public function main($instance_id = 0)
+    public function main($instance_id = 0, $custom_block_id = 0)
     {
+
         //load JS to register clicks before html-cache
         $this->document->addScriptBottom($this->view->templateResource('assets/js/banner_manager.js'));
 
@@ -51,7 +48,7 @@ class ControllerBlocksBannerBlock extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $block_data = $this->getBlockContent($instance_id);
+        $block_data = $this->getBlockContent($instance_id, $custom_block_id);
         $this->view->assign('block_framed', $block_data['block_framed']);
         $this->view->assign('content', $block_data['content']);
         $this->view->assign('heading_title', $block_data['title']);
@@ -68,18 +65,12 @@ class ControllerBlocksBannerBlock extends AController
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
-    /**
-     * @param $instance_id
-     *
-     * @return array
-     * @throws InvalidArgumentException
-     * @throws ReflectionException
-     * @throws AException
-     */
-    protected function getBlockContent($instance_id)
+    protected function getBlockContent($instance_id, $custom_block_id = 0)
     {
-        $block_info = $this->layout->getBlockDetails($instance_id);
-        $custom_block_id = $block_info['custom_block_id'];
+        if ($instance_id) {
+            $block_info = $this->layout->getBlockDetails($instance_id);
+            $custom_block_id = $block_info['custom_block_id'];
+        }
         $descriptions = $this->layout->getBlockDescriptions($custom_block_id);
         if ($descriptions[$this->config->get('storefront_language_id')]) {
             $key = $this->config->get('storefront_language_id');
@@ -94,12 +85,14 @@ class ControllerBlocksBannerBlock extends AController
             $rl = new AResource('image');
             foreach ($results as $row) {
                 if ($row['banner_type'] == 1) { // if graphic type
-                    /** @var array */
                     $row['images'] = $rl->getResourceAllObjects('banners', $row['banner_id']);
                     //add click registration wrapper to each URL
                     //NOTE: You can remove below line to use tracking javascript instead. Javascript tracks HTML banner clicks
-                    $row['target_url'] =
-                        $this->html->getURL('r/extension/banner_manager/click', '&banner_id='.$row['banner_id'], true);
+                    $row['target_url'] = $this->html->getURL(
+                        'r/extension/banner_manager/click',
+                        '&banner_id='.$row['banner_id'],
+                        true
+                    );
                 } else {
                     $row['description'] = html_entity_decode($row['description']);
                 }

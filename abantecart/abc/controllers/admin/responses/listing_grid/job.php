@@ -32,9 +32,6 @@ use stdClass;
 
 class ControllerResponsesListingGridJob extends AController
 {
-    private $error = [];
-    public $data = [];
-
     /**
      * @var JobManager
      */
@@ -43,7 +40,7 @@ class ControllerResponsesListingGridJob extends AController
     public function __construct(Registry $registry, int $instance_id, string $controller, $parent_controller = '')
     {
         parent::__construct($registry, $instance_id, $controller, $parent_controller);
-        $this->jm = ABC::getObjectByAlias('JobManager',[$registry]);
+        $this->jm = ABC::getObjectByAlias('JobManager', [$registry]);
     }
 
     public function main()
@@ -53,6 +50,7 @@ class ControllerResponsesListingGridJob extends AController
         $this->loadLanguage('tool/job');
         if (!$this->user->canAccess('tool/job')) {
             $response = new stdClass();
+            $response->userdata = new stdClass();
             $response->userdata->error = sprintf($this->language->get('error_permission_access'), 'tool/job');
             $this->load->library('json');
             $this->response->setOutput(AJson::encode($response));
@@ -63,7 +61,7 @@ class ControllerResponsesListingGridJob extends AController
         $limit = $this->request->post ['rows']; // get how many rows we want to have into the grid
 
         //Prepare filter config
-        $grid_filter_params = array_merge(['name'], (array)$this->data['grid_filter_params']);
+        $grid_filter_params = array_merge(['name'], (array) $this->data['grid_filter_params']);
         $filter = new AFilter(['method' => 'post', 'grid_filter_params' => $grid_filter_params]);
         $filter_data = $filter->getFilterData();
 
@@ -124,7 +122,7 @@ class ControllerResponsesListingGridJob extends AController
                     break;
                 default: // disabled
                     $response->userdata->classes[$id] = 'attention disable-run disable-restart '
-                                                        .'disable-continue disable-edit disable-delete';
+                        .'disable-continue disable-edit disable-delete';
                     $text_status = $this->language->get('text_disabled');
             }
 
@@ -149,7 +147,6 @@ class ControllerResponsesListingGridJob extends AController
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
         $this->load->library('json');
         $this->response->setOutput(AJson::encode($this->data['response']));
-
     }
 
     public function restart()
@@ -160,7 +157,7 @@ class ControllerResponsesListingGridJob extends AController
         $this->load->library('json');
         $this->load->language('tool/job');
         $this->response->addJSONHeader();
-        $job_id = (int)$this->request->post_or_get('job_id');
+        $job_id = (int) $this->request->post_or_get('job_id');
 
         $job = $this->jm->getJobById($job_id);
 
@@ -169,7 +166,7 @@ class ControllerResponsesListingGridJob extends AController
             return $err->toJSONResponse(
                 'APP_ERROR_402',
                 [
-                    'error_text' => $this->language->get('text_job_not_found')
+                    'error_text' => $this->language->get('text_job_not_found'),
                 ]
             );
         }
@@ -185,13 +182,15 @@ class ControllerResponsesListingGridJob extends AController
         }
 
         //check status
-        if (!in_array($job['status'],
+        if (!in_array(
+            $job['status'],
             [
                 $this->jm::STATUS_RUNNING,
                 $this->jm::STATUS_FAILED,
                 $this->jm::STATUS_COMPLETED,
                 $this->jm::STATUS_INCOMPLETE,
-            ])
+            ]
+        )
         ) {
             $err = new AError('Task runtime error');
             return $err->toJSONResponse(
@@ -213,14 +212,13 @@ class ControllerResponsesListingGridJob extends AController
             $restart_all = true;
         }
 
-
         $this->jm->updateJob($job_id,
-            [
-                'status' => $this->jm::STATUS_READY,
-                'start_time' => date('Y-m-d H:i:s'),
-            ]
+                             [
+                                 'status' => $this->jm::STATUS_READY,
+                                 'start_time' => date('Y-m-d H:i:s'),
+                             ]
         );
-        $this->runJob($job_id, (!$restart_all ? 'continue' : ''));
+        // $this->runJob($job_id, (!$restart_all ? 'continue' : ''));
 
         $this->data['output'] = '{}';
         //update controller data
@@ -228,48 +226,48 @@ class ControllerResponsesListingGridJob extends AController
         $this->response->setOutput($this->data['output']);
     }
 
-   /* public function run()
-    {
-        //init controller data
-        $this->extensions->hk_InitData($this, __FUNCTION__);
+    /* public function run()
+     {
+         //init controller data
+         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->load->library('json');
-        $this->response->addJSONHeader();
+         $this->load->library('json');
+         $this->response->addJSONHeader();
 
-        if (H::has_value($this->request->post_or_get('job_id'))) {
+         if (H::has_value($this->request->post_or_get('job_id'))) {
 
-            $job = $this->jm->getJobById($this->request->post_or_get('job_id'));
-            $job_id = null;
-            //check
-            if ($job && $job['status'] == $this->jm::STATUS_READY) {
-                $this->jm->updateJob($job['job_id'], [
-                    'start_time' => date('Y-m-d H:i:s'),
-                ]);
-                $job_id = $job['job_id'];
-            }
-            $this->runJob($job_id);
-        } else {
-            $this->response->setOutput(AJson::encode(['result' => false]));
-        }
-        $this->data['output'] = '{}';
-        //update controller data
-        $this->extensions->hk_UpdateData($this, __FUNCTION__);
-        $this->response->setOutput($this->data['output']);
-    }
+             $job = $this->jm->getJobById($this->request->post_or_get('job_id'));
+             $job_id = null;
+             //check
+             if ($job && $job['status'] == $this->jm::STATUS_READY) {
+                 $this->jm->updateJob($job['job_id'], [
+                     'start_time' => date('Y-m-d H:i:s'),
+                 ]);
+                 $job_id = $job['job_id'];
+             }
+             $this->runJob($job_id);
+         } else {
+             $this->response->setOutput(AJson::encode(['result' => false]));
+         }
+         $this->data['output'] = '{}';
+         //update controller data
+         $this->extensions->hk_UpdateData($this, __FUNCTION__);
+         $this->response->setOutput($this->data['output']);
+     }
 
-    // run job in separate process
-    private function runJob($job_id = 0, $run_mode = '')
-    {
-        $connect = new AConnect(true);
-        $url = $this->config->get('config_url').'job.php?mode=html&job_api_key='.$this->config->get('job_api_key');
-        if ($job_id) {
-            $url .= '&job_id='.$job_id;
-        }
-        if ($run_mode) {
-            $url .= '&run_mode='.$run_mode;
-        }
-        $connect->getDataHeaders($url);
-        session_write_close();
-    }*/
+     // run job in separate process
+     private function runJob($job_id = 0, $run_mode = '')
+     {
+         $connect = new AConnect(true);
+         $url = $this->config->get('config_url').'job.php?mode=html&job_api_key='.$this->config->get('job_api_key');
+         if ($job_id) {
+             $url .= '&job_id='.$job_id;
+         }
+         if ($run_mode) {
+             $url .= '&run_mode='.$run_mode;
+         }
+         $connect->getDataHeaders($url);
+         session_write_close();
+     }*/
 
 }

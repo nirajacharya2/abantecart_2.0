@@ -299,7 +299,7 @@ class ALanguage
     /**
      * Load all information about specified language from language table.
      *
-     * @param string $code - Language two letter code
+     * @param string $code - Language two-letter code
      *
      * @return array - Array with language details
      */
@@ -363,7 +363,7 @@ class ALanguage
                     if (!$browser_language) {
                         continue;
                     }
-                    foreach ($this->getActiveLanguages() as $key => $value) {
+                    foreach ($this->getActiveLanguages() as $value) {
                         $locale = array_map('trim', explode(',', $value['locale']));
                         if (!$locale) {
                             continue;
@@ -590,7 +590,7 @@ class ALanguage
     }
 
     /**
-     * Check if block id a special case with main file (english, russian, etc ).
+     * Check if block id a special case with main file (english, russian e.t.c. ).
      * NOTE: Candidate for improvement. Rename these files to main.xml
      *
      * @param string $block - block name
@@ -790,7 +790,7 @@ class ALanguage
     /**
      * Find language ID by provided language code
      *
-     * @param string $code - two letter code
+     * @param string $code - two-letter code
      *
      * @return null
      */
@@ -927,23 +927,22 @@ class ALanguage
      *
      * @return null|string
      */
-    protected function detectLanguageXmlFile($filename, $language_dir_name = 'english')
+    protected function detectLanguageXmlFile($filename, $language_dir_name = 'english', $language_path = '')
     {
         if (empty($filename)) {
             return null;
         }
-        $file_path = $this->language_path.$filename.'.xml';
+        $file_path = ($language_path ? : $this->language_path).$filename.'.xml';
         if ($this->registry->has('extensions')
             && $result = $this->registry->get('extensions')->isExtensionLanguageFile(
                 $filename, $language_dir_name, $this->is_admin
             )
         ) {
             if (is_file($file_path)) {
-                $warning =
-                    new AWarning(
-                        "Extension <b>".$result['extension']."</b> overrides language file <b>".$filename
-                        ."</b>"
-                    );
+                $warning = new AWarning(
+                    "Extension <b>".$result['extension']
+                    ."</b> overrides language file <b>".$filename."</b>"
+                );
                 $warning->toDebug();
             }
             $file_path = $result['file'];
@@ -994,7 +993,7 @@ class ALanguage
             // if default language file path wrong - takes english as a fallback
             if (!file_exists($default_file_path) && $default_language_info['directory'] != 'english') {
                 $file_name = $filename == $directory ? 'english' : $file_name;
-                $default_file_path = $this->detectLanguageXmlFile($file_name, 'english');
+                $default_file_path = $this->detectLanguageXmlFile($file_name);
             }
             if (file_exists($default_file_path)) {
                 ADebug::checkpoint(
@@ -1147,6 +1146,6 @@ class ALanguage
                        AND `language_value` =  '".$data['language_value']."'";
         $exist = $this->db->query($sql);
 
-        return ($exist->num_rows ? true : false);
+        return (bool) $exist->num_rows;
     }
 }

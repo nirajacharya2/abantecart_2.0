@@ -56,12 +56,11 @@ class ControllerPagesProductFeatured extends AController
 
     public function main()
     {
-
-        $request = $this->request->get;
-
+        $this->loadModel('catalog/product');
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
+        $request = $this->request->get;
         $this->loadLanguage('product/featured');
         $this->document->setTitle($this->language->get('heading_title'));
         $this->document->resetBreadcrumbs();
@@ -110,7 +109,6 @@ class ControllerPagesProductFeatured extends AController
             $sort = 'ps.'.$sort;
         }
 
-        $this->loadModel('catalog/product');
         $promotion = new APromotion();
 
         $product_total =  $this->model_catalog_product->getFeaturedProducts(['total' => true]);

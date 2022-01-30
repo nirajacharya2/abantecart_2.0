@@ -9,6 +9,7 @@ use abc\core\lib\ADataEncryption;
 use abc\core\lib\ADB;
 use abc\core\lib\AException;
 use abc\models\BaseModel;
+use abc\models\casts\Serialized;
 use abc\models\catalog\Product;
 use abc\models\catalog\ProductOption;
 use abc\models\catalog\ProductOptionValue;
@@ -138,7 +139,7 @@ class Order extends BaseModel
         'currency_id'         => 'int',
         'value'               => 'float',
         'coupon_id'           => 'int',
-        'payment_method_data' => 'serialized',
+        'payment_method_data' => Serialized::class,
     ];
 
     protected $dates = [

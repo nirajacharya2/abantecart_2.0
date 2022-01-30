@@ -3,6 +3,7 @@
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
+use abc\models\casts\Html;
 use abc\models\locale\Language;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -40,9 +41,9 @@ class ProductDescription extends BaseModel
     protected $casts = [
         'product_id'  => 'int',
         'language_id' => 'int',
-        'description' => 'html',
-        'name'        => 'html',
-        'blurb'       => 'html',
+        'description' => Html::class,
+        'name'        => Html::class,
+        'blurb'       => Html::class,
     ];
 
     /** @var array */

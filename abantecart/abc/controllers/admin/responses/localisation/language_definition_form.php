@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -24,16 +24,16 @@ use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
+use abc\models\admin\ModelLocalisationLanguageDefinitions;
 
 /**
  * Class ControllerResponsesLocalisationLanguageDefinitionForm
  *
  * @package abc\controllers\admin
- * @property \abc\models\admin\ModelLocalisationLanguageDefinitions $model_localisation_language_definitions
+ * @property ModelLocalisationLanguageDefinitions $model_localisation_language_definitions
  */
 class ControllerResponsesLocalisationLanguageDefinitionForm extends AController
 {
-    public $data = [];
     public $error = [];
     protected $rt = 'localisation/language_definition_form';
 
@@ -44,14 +44,19 @@ class ControllerResponsesLocalisationLanguageDefinitionForm extends AController
 
         if (!$this->user->canModify($this->rt)) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
-                [
-                    'error_text'  => sprintf($this->language->get('error_permission_modify'), $this->rt),
-                    'reset_value' => true,
-                ]);
+            $error->toJSONResponse('NO_PERMISSIONS_402',
+                                   [
+                                       'error_text'  => sprintf(
+                                           $this->language->get('error_permission_modify'), $this->rt
+                                       ),
+                                       'reset_value' => true,
+                                   ]
+            );
+            return;
         }
 
-        $this->loadModel('localisation/language_definitions');
+        /** @var ModelLocalisationLanguageDefinitions $mdl */
+        $mdl = $this->loadModel('localisation/language_definitions');
         $this->loadLanguage('localisation/language_definitions');
 
         if (($this->request->is_POST())) {
@@ -66,9 +71,9 @@ class ControllerResponsesLocalisationLanguageDefinitionForm extends AController
                         'language_value' => $this->request->post['language_value'][$lang_id],
                     ];
                     if ($id) {
-                        $this->model_localisation_language_definitions->editLanguageDefinition($id, $data);
+                        $mdl->editLanguageDefinition($id, $data);
                     } else {
-                        $this->model_localisation_language_definitions->addLanguageDefinition($data);
+                        $mdl->addLanguageDefinition($data);
                     }
                 }
 
@@ -83,18 +88,19 @@ class ControllerResponsesLocalisationLanguageDefinitionForm extends AController
                     }
                 }
                 $error = new AError('');
-                return $error->toJSONResponse('NO_PERMISSIONS_406',
-                    [
-                        'error_text'  => $error_text,
-                        'reset_value' => true,
-                    ]);
+                $error->toJSONResponse('NO_PERMISSIONS_406',
+                                       [
+                                           'error_text'  => $error_text,
+                                           'reset_value' => true,
+                                       ]
+                );
+                return;
             }
 
             $this->load->library('json');
             $this->response->addJSONHeader();
             $this->response->setOutput(AJson::encode($output));
         } else {
-
             $this->view->assign('success', $this->session->data['success']);
             if (isset($this->session->data['success'])) {
                 unset($this->session->data['success']);
@@ -102,7 +108,6 @@ class ControllerResponsesLocalisationLanguageDefinitionForm extends AController
 
             $this->document->setTitle($this->language->get('heading_title'));
             $this->_getForm();
-
         }
 
         //update controller data
@@ -111,56 +116,61 @@ class ControllerResponsesLocalisationLanguageDefinitionForm extends AController
 
     protected function _getForm()
     {
-
-        if (isset($this->error['warning'])) {
-            $this->data['error_warning'] = $this->error['warning'];
-        } else {
-            $this->data['error_warning'] = '';
-        }
-
+        $this->data['error_warning'] = $this->error['warning'] ?? '';
         $this->data['error'] = $this->error;
 
         $this->data['action'] = $this->html->getSecureURL(
-                'localisation/language_definition_form/update',
-                '&target='.$this->request->get['target']);
+            'localisation/language_definition_form/update',
+            '&target='.$this->request->get['target']
+        );
 
         if (!isset($this->request->get['language_definition_id'])) {
             $this->data['heading_title'] = $this->language->get('text_insert')
-                                            .' '.$this->language->get('text_definition');
+                .' '.$this->language->get('text_definition');
             $this->data['update'] = '';
             $form = new AForm('ST');
             $this->data['check_url'] = $this->html->getSecureURL('listing_grid/language_definitions/checkdefinition');
         } else {
             $this->data['heading_title'] = $this->language->get('text_edit')
-                                            .' '.$this->language->get('text_definition');
+                .' '.$this->language->get('text_definition');
             $this->data['update'] = $this->html->getSecureURL(
-                                                    'listing_grid/language_definitions/update_field',
-                                                    '&id='.$this->request->get['language_definition_id']
-                                    );
+                'listing_grid/language_definitions/update_field',
+                '&id='.$this->request->get['language_definition_id']
+            );
             $form = new AForm('HS');
-            $this->data['language_definition_id'] = (int)$this->request->get['language_definition_id'];
+            $this->data['language_definition_id'] = (int) $this->request->get['language_definition_id'];
         }
         $this->data['title'] = $this->data['heading_title'];
 
-        $this->document->addBreadcrumb([
-            'href'      => $this->data['action'],
-            'text'      => $this->data['heading_title'],
-            'separator' => ' :: ',
-        ]);
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->data['action'],
+                'text'      => $this->data['heading_title'],
+                'separator' => ' :: ',
+            ]
+        );
 
-        $form->setForm([
-            'form_name' => 'definitionQFrm',
-            'update'    => $this->data['update'],
-        ]);
+        $form->setForm(
+            [
+                'form_name' => 'definitionQFrm',
+                'update'    => $this->data['update'],
+            ]
+        );
         $this->data['form']['id'] = 'definitionQFrm';
-        $this->data['form']['form_open'] = $form->getFieldHtml([
-            'type'   => 'form',
-            'name'   => 'definitionQFrm',
-            'action' => $this->data['action'],
-        ]);
+        $this->data['form']['form_open'] = $form->getFieldHtml(
+            [
+                'type'   => 'form',
+                'name'   => 'definitionQFrm',
+                'action' => $this->data['action'],
+            ]
+        );
 
         //build the rest of the form and data
-        $ret_data = $this->model_localisation_language_definitions->buildFormData($this->request, $this->data, $form);
+        $ret_data = $this->model_localisation_language_definitions->buildFormData(
+            $this->request,
+            $this->data,
+            $form
+        );
         if ($ret_data['redirect_params']) {
             abc_redirect($this->data['action'].$ret_data['redirect_params']);
         }
@@ -195,13 +205,6 @@ class ControllerResponsesLocalisationLanguageDefinitionForm extends AController
         }
 
         $this->extensions->hk_ValidateData($this);
-
-        if (!$this->error) {
-            return true;
-        } else {
-            return false;
-        }
+        return (!$this->error);
     }
-
 }
-

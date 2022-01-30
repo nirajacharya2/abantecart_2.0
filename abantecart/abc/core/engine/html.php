@@ -21,13 +21,19 @@
 namespace abc\core\engine;
 
 use abc\core\ABC;
+use abc\core\lib\ADocument;
 use abc\core\lib\ALanguageManager;
 use abc\core\view\AView;
 use abc\core\lib\ADebug;
 use abc\core\lib\ARequest;
 use abc\core\lib\AException;
+use abc\models\admin\ModelLocalisationLanguage;
+use abc\models\admin\ModelSettingStore;
+use abc\models\storefront\ModelLocalisationZone;
 use abc\models\storefront\ModelToolSeoUrl;
+use Exception;
 use H;
+use ReflectionException;
 
 /**
  * Class AHtml
@@ -98,7 +104,7 @@ class AHtml
      * @param $args
      *
      * @return null|string
-     * @throws \Exception
+     * @throws Exception
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function __call($function_name, $args)
@@ -127,6 +133,8 @@ class AHtml
      * @param string $mode - can be 'storefront' or empty
      *
      * @return string
+     * @throws AException
+     * @throws ReflectionException
      */
     private function buildURL($rt, $params = '', $mode = '')
     {
@@ -143,7 +151,7 @@ class AHtml
         //if in embed mode add response prefix
         if ($this->registry->get('config')->get('embed_mode') == true) {
             $suburl .= '&embed_mode=1';
-            if (substr($rt, 0, 2) != 'r/') {
+            if (!str_starts_with($rt, 'r/')) {
                 $rt = 'r/'.$rt;
             }
         }
@@ -153,11 +161,13 @@ class AHtml
     }
 
     /**
-     * Get non secure home URL.
+     * Get non-secure home URL.
      *
      * @return string
      *
-     * Note: Non secure URL is base on store_url setting. If this setting is using https URL, all URLs will be secure
+     * Note: Non-secure URL is base on store_url setting. If this setting is using https URL, all URLs will be secure
+     * @throws AException
+     * @throws ReflectionException
      */
     public function getHomeURL()
     {
@@ -178,7 +188,7 @@ class AHtml
     }
 
     /**
-     * Get non secure URL. Read note below.
+     * Get non-secure URL. Read note below.
      *
      * @param string $rt
      * @param string $params
@@ -186,7 +196,9 @@ class AHtml
      *
      * @return string
      *
-     * Note: Non secure URL is base on store_url setting. If this setting is using https URL, all URLs will be secure
+     * Note: non-secure URL is base on store_url setting. If this setting is using https URL, all URLs will be secure
+     * @throws AException
+     * @throws ReflectionException
      */
     public function getNonSecureURL($rt, $params = '', $encode = '')
     {
@@ -194,14 +206,16 @@ class AHtml
     }
 
     /**
-     * Get URL with auto detection for protocol
+     * Get URL with auto-detection for protocol
      *
      * @param string $rt
      * @param string $params
      * @param string $encode
-     * @param bool   $non_secure - force to be non secure
+     * @param bool $non_secure - force to be non-secure
      *
      * @return string
+     * @throws AException
+     * @throws ReflectionException
      */
     public function getURL($rt, $params = '', $encode = '', $non_secure = false)
     {
@@ -246,6 +260,8 @@ class AHtml
      * @param string $mode - can be empty for auto-mode or 'storefront'
      *
      * @return string
+     * @throws AException
+     * @throws ReflectionException
      */
     public function getSecureURL($rt, $params = '', $encode = '', $mode = '')
     {
@@ -288,6 +304,7 @@ class AHtml
      *
      * @return string
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws AException|ReflectionException
      */
     public function getSEOURL($rt, $params = '', $encode = '')
     {
@@ -300,7 +317,7 @@ class AHtml
          */
         $model = $this->registry->get('load')->model('tool/seo_url', 'storefront');
         //#PR Generate SEO URL based on standard URL
-        //NOTE: SEO URL is non secure url
+        //NOTE: SEO URL is non-secure url
         //and can be generated only for storefront-side
         return $this->url_encode($model->rewrite($this->getCatalogURL($rt, $params)), $encode);
     }
@@ -313,6 +330,7 @@ class AHtml
      * @param string $encode
      *
      * @return string
+     * @throws AException|ReflectionException
      */
     public function getSecureSEOURL($rt, $params = '', $encode = '')
     {
@@ -326,14 +344,17 @@ class AHtml
         return $this->url_encode($model->rewrite($this->getSecureURL($rt, $params)), $encode);
     }
 
-    /**This builds URL to the catalog to be used in admin
+    /**
+     * This builds URL to the catalog to be used in admin
      *
      * @param string $rt
      * @param string $params
      * @param string $encode
-     * @param bool   $ssl
+     * @param bool $ssl
      *
      * @return string
+     * @throws AException
+     * @throws ReflectionException
      */
     public function getCatalogURL($rt, $params = '', $encode = '', $ssl = false)
     {
@@ -375,6 +396,8 @@ class AHtml
      * @param $filter_params array - array of vars to filter
      *
      * @return string - url without unwanted filter parameters
+     * @throws AException
+     * @throws ReflectionException
      */
     public function currentURL($filter_params = [])
     {
@@ -480,7 +503,7 @@ class AHtml
      * @param string $keyword
      *
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     public function isSEOKeywordExists($query, $keyword = '')
     {
@@ -512,7 +535,7 @@ class AHtml
      *               $data = array(
      *               'type' => 'input' //(hidden, textarea, selectbox, file...)
      *               'name' => 'input name'
-     *               'value' => 'input value' // could be array for select
+     *               'value' => 'input value' // could be an array for select
      *               'style' => 'my-form'
      *               'form' => 'form id' // needed for unique element ID     *
      *               );
@@ -527,8 +550,8 @@ class AHtml
 
     /**
      * @return string
-     * @throws AException
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws AException|ReflectionException
      */
     public function getStoreSwitcher()
     {
@@ -543,7 +566,7 @@ class AHtml
         $registry->get('load')->model('setting/store');
 
         /**
-         * @var \abc\models\admin\ModelSettingStore $model
+         * @var ModelSettingStore $model
          */
         $model = $registry->get('model_setting_store');
         //if loaded not default store - hide store switcher
@@ -555,7 +578,7 @@ class AHtml
         if (sizeof($result_stores) > 0) {
             foreach ($result_stores as $rs) {
                 $stores[$rs['store_id']] = [
-                    'name'     => $rs['alias'] ? $rs['alias'] : $rs['name'],
+                    'name'     => $rs['alias'] ? : $rs['name'],
                     'store_id' => $rs['store_id']
                 ];
             }
@@ -584,12 +607,9 @@ class AHtml
     public function getContentLanguageSwitcher()
     {
         $registry = $this->registry;
-        $view = new AView($this->registry, 0);
-        $registry->get('load')->model('localisation/language');
-        /**
-         * @var \abc\models\admin\ModelLocalisationLanguage $mdl
-         */
-        $mdl = $registry->get('model_localisation_language');
+        $view = new AView($registry, 0);
+        /** @var ModelLocalisationLanguage $mdl */
+        $mdl = $registry->get('load')->model('localisation/language');
         $results = $mdl->getLanguages();
         $template['languages'] = [];
 
@@ -627,12 +647,9 @@ class AHtml
     public function getContentLanguageFlags()
     {
         $registry = $this->registry;
-        $view = new AView($this->registry, 0);
-        $registry->get('load')->model('localisation/language');
-        /**
-         * @var \abc\models\admin\ModelLocalisationLanguage $mdl
-         */
-        $mdl = $registry->get('model_localisation_language');
+        $view = new AView($registry, 0);
+        /** @var ModelLocalisationLanguage $mdl */
+        $mdl = $registry->get('load')->model('localisation/language');
         $results = $mdl->getLanguages();
         $template['languages'] = [];
 
@@ -663,21 +680,28 @@ class AHtml
     }
 
     /**
-     * @param        $html      - text that might contain internal links #admin# or #storefront#
+     * @param        $html - text that might contain internal links #admin# or #storefront#
      *                          $mode  - 'href' create complete a tag or default just replace URL
-     * @param string $type      - can be 'message' to convert url into <a> tag or empty
-     * @param bool   $for_admin - force mode for converting links
-     *                              to admin side from storefront scope (see AIM-class etc)
+     * @param string $type - can be 'message' to convert url into <a> tag or empty
+     * @param bool $for_admin - force mode for converting links
+     *                              to admin side from storefront scope (see AIM-class e.t.c.)
      *
      * @return string - html code with parsed internal URLs
+     * @throws AException
+     * @throws ReflectionException
      */
     public function convertLinks($html, $type = '', $for_admin = false)
     {
-        $is_admin = (ABC::env('IS_ADMIN') === true || $for_admin) ? true : false;
+        $is_admin = ABC::env('IS_ADMIN') === true || $for_admin;
         $route_sections = $is_admin ? ["admin", "storefront"] : ["storefront"];
         foreach ($route_sections as $rt_type) {
-            preg_match_all('/(#'.$rt_type.'#rt=){1}[a-z0-9\/_\-\?\&=\%#]{1,255}(\b|\")/', $html, $matches,
-                PREG_OFFSET_CAPTURE);
+            preg_match_all(
+                '/(#'.$rt_type.'#rt=){1}[a-z0-9\/_\-\?\&=\%#]{1,255}(\b|\")/',
+                $html,
+                $matches,
+                PREG_OFFSET_CAPTURE
+            );
+
             if ($matches) {
                 foreach ($matches[0] as $match) {
                     $href = str_replace('?', '&', $match[0]);
@@ -717,8 +741,8 @@ class AHtml
  */
 class HtmlElementFactory
 {
-    static private $available_elements
-        = [
+    static private $available_elements =
+        [
             'I' => [
                 'type'   => 'input',
                 'method' => 'buildInput',
@@ -827,8 +851,8 @@ class HtmlElementFactory
 
         ];
 
-    static private $elements_with_options
-        = [
+    static private $elements_with_options =
+        [
             'S',
             'M',
             'R',
@@ -836,14 +860,14 @@ class HtmlElementFactory
             'O',
             'Z',
         ];
-    static private $multivalue_elements
-        = [
+    static private $multivalue_elements =
+        [
             'M',
             'R',
             'G',
         ];
-    static private $elements_with_placeholder
-        = [
+    static private $elements_with_placeholder =
+        [
             'S',
             'I',
             'M',
@@ -967,7 +991,7 @@ abstract class HtmlElement
      */
     protected $data = [];
     /**
-     * @var \abc\core\view\AView
+     * @var AView
      */
     protected $view;
     /**
@@ -979,7 +1003,7 @@ abstract class HtmlElement
      */
     protected $registry;
     /**
-     * @var \abc\core\engine\ALanguage $language
+     * @var ALanguage $language
      */
     protected $language;
 
@@ -1002,14 +1026,14 @@ abstract class HtmlElement
 
         $this->registry = Registry::getInstance();
         /**
-         * @var \abc\core\engine\ALanguage $lang
+         * @var ALanguage $lang
          */
         $lang = $this->registry->get('language');
         $this->language = $lang;
         $this->view = new AView($this->registry, 0);
         $this->data = $data;
         $this->element_id = H::preformatTextID($data['name']);
-        if (isset($data['form'])) {
+        if ($data['form']) {
             $this->element_id = $data['form'].'_'.$this->element_id;
         }
     }
@@ -1082,7 +1106,7 @@ abstract class HtmlElement
             if ($this->required) {
                 $url = ABC::env('HTTPS_SERVER');
                 $query_string = $this->registry->get('request')->server['QUERY_STRING'];
-                if (strpos($query_string, '_route_=') === false) {
+                if (!str_contains($query_string, '_route_=')) {
                     $url .= '?';
                 } else {
                     $query_string = str_replace('_route_=', '', $query_string);
@@ -1111,7 +1135,7 @@ class HiddenHtmlElement extends HtmlElement
 {
     /**
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     public function getHtml()
     {
@@ -1147,7 +1171,7 @@ class MultivalueListHtmlElement extends HtmlElement
 {
     /**
      * @return string
-     * @throws \Exception
+     * @throws Exception
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getHtml()
@@ -1162,15 +1186,13 @@ class MultivalueListHtmlElement extends HtmlElement
             'form_name'            => $this->form,
             'multivalue_hidden_id' => $this->multivalue_hidden_id,
             'return_to'            => ($this->return_to
-                                        ? $this->return_to
-                                        : $this->form.'_'.$this->multivalue_hidden_id.'_item_count'),
+                                        ? : $this->form.'_'.$this->multivalue_hidden_id.'_item_count'),
             'with_sorting'         => $this->with_sorting
         ];
 
-        $data['text']['delete'] = $this->text['delete'] ? $this->text['delete'] : 'delete';
+        $data['text']['delete'] = $this->text['delete'] ? : 'delete';
         $data['text']['delete_confirm'] = $this->text['delete_confirm']
-                                            ? $this->text['delete_confirm']
-                                            : 'Confirm to delete?';
+                                            ? : 'Confirm to delete?';
         $data['text']['column_action'] = $this->language->get('column_action');
         $data['text']['column_sort_order'] = $this->language->get('text_sort_order');
         $this->view->batchAssign($data);
@@ -1201,23 +1223,23 @@ class MultivalueHtmlElement extends HtmlElement
 {
     /**
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     public function getHtml()
     {
         $data = [
             'id'            => $this->element_id,
             'name'          => $this->name,
-            'selected_name' => ($this->selected_name ? $this->selected_name : 'selected[]'),
+            'selected_name' => ($this->selected_name ? : 'selected[]'),
             'title'         => $this->title,
             'selected'      => $this->selected,
             'content_url'   => $this->content_url,
             'postvars'      => ($this->postvars ? json_encode($this->postvars) : ''),
             'form_name'     => $this->form,
-            'return_to'     => ($this->return_to ? $this->return_to : $this->element_id.'_item_count'),
+            'return_to'     => ($this->return_to ? : $this->element_id.'_item_count'),
             'no_save'       => (isset($this->no_save) ? (bool)$this->no_save : false),
-            'popup_height'  => ((int)$this->popup_height ? (int)$this->popup_height : 620),
-            'popup_width'   => ((int)$this->popup_width ? (int)$this->popup_width : 800),
+            'popup_height'  => ((int)$this->popup_height ? : 620),
+            'popup_width'   => ((int)$this->popup_width ?  : 800),
             // custom triggers for dialog events (custom functions calls)
             'js'            => [
                 'apply'  => $this->js['apply'],
@@ -1226,10 +1248,10 @@ class MultivalueHtmlElement extends HtmlElement
         ];
 
         $data['text_selected'] = $this->text['selected'];
-        $data['text_edit'] = $this->text['edit'] ? $this->text['edit'] : 'Add / Edit';
-        $data['text_apply'] = $this->text['apply'] ? $this->text['apply'] : 'apply';
-        $data['text_save'] = $this->text['save'] ? $this->text['save'] : 'save';
-        $data['text_reset'] = $this->text['reset'] ? $this->text['reset'] : 'reset';
+        $data['text_edit'] = $this->text['edit'] ? : 'Add / Edit';
+        $data['text_apply'] = $this->text['apply'] ? : 'apply';
+        $data['text_save'] = $this->text['save'] ? : 'save';
+        $data['text_reset'] = $this->text['reset'] ? : 'reset';
 
         $this->view->batchAssign($data);
 
@@ -1252,7 +1274,7 @@ class SubmitHtmlElement extends HtmlElement
 {
     /**
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     public function getHtml()
     {
@@ -1292,7 +1314,7 @@ class InputHtmlElement extends HtmlElement
 {
     /**
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     public function getHtml()
     {
@@ -1350,7 +1372,7 @@ class PasswordHtmlElement extends HtmlElement
 {
     /**
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     public function getHtml()
     {
@@ -1405,7 +1427,7 @@ class TextareaHtmlElement extends HtmlElement
 {
     /**
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     public function getHtml()
     {
@@ -1508,7 +1530,7 @@ class SelectboxHtmlElement extends HtmlElement
 {
     /**
      * @return string
-     * @throws \Exception
+     * @throws Exception
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getHtml()
@@ -1567,7 +1589,7 @@ class SelectboxHtmlElement extends HtmlElement
         if ( ! empty($this->help_url)) {
             $this->view->assign('help_url', $this->help_url);
         }
-        if (strpos($this->style, 'chosen') !== false) {
+        if (str_contains($this->style, 'chosen')) {
             $this->view->batchAssign(
                 [
                     'ajax_url'             => $this->ajax_url, //if mode of data load is ajax based
@@ -1607,7 +1629,7 @@ class MultiSelectboxHtmlElement extends HtmlElement
 {
     /**
      * @return string
-     * @throws \Exception
+     * @throws Exception
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getHtml()
@@ -1637,7 +1659,7 @@ class MultiSelectboxHtmlElement extends HtmlElement
             $this->view->assign('help_url', $this->help_url);
         }
 
-        if (strpos($this->style, 'chosen') !== false) {
+        if (str_contains($this->style, 'chosen')) {
 
             $option_attr = $this->option_attr && ! is_array($this->option_attr) ? [$this->option_attr] : $this->option_attr;
             $option_attr = ! $option_attr ? [] : $option_attr;
@@ -1677,13 +1699,13 @@ class CheckboxHtmlElement extends HtmlElement
 {
     /**
      * @return string
-     * @throws \Exception
+     * @throws Exception
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getHtml()
     {
 
-        if (strpos($this->style, 'btn_switch') !== false) { //for switch button NOTE: value is binary (1 or 0)!!!
+        if (str_contains($this->style, 'btn_switch')) { //for switch button NOTE: value is binary (1 or 0)!!!
             $checked = is_null($this->checked) && $this->value ? true : (bool)$this->checked;
             if ($checked) {
                 $this->value = 1;
@@ -1777,7 +1799,7 @@ class CheckboxGroupHtmlElement extends HtmlElement
             $this->view->assign('help_url', $this->help_url);
         }
 
-        if (strpos($this->style, 'chosen') !== false) {
+        if (str_contains($this->style, 'chosen')) {
             $return = $this->view->fetch('form/chosen_select.tpl');
         } else {
             $return = $this->view->fetch('form/checkboxgroup.tpl');
@@ -1802,7 +1824,7 @@ class FileHtmlElement extends HtmlElement
 {
     /**
      * @return string
-     * @throws \Exception
+     * @throws Exception
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getHtml()
@@ -1970,9 +1992,7 @@ class RatingHtmlElement extends HtmlElement
     {
         parent::__construct($data);
         if ( ! $this->registry->has('star-rating')) {
-            /**
-             * @var $doc \abc\core\lib\ADocument
-             */
+            /** @var $doc ADocument */
             $doc = $this->registry->get('document');
             $doc->addScript($this->view->templateResource('assets/js/jquery/star-rating/jquery.MetaData.js'));
             $doc->addScript($this->view->templateResource('assets/js/jquery/star-rating/jquery.rating.pack.js'));
@@ -2135,7 +2155,7 @@ class ResourceHtmlElement extends HtmlElement
             'object_name'   => $this->object_name,
             'object_id'     => $this->object_id,
             'rl_type'       => $this->rl_type,
-            'hide'          => ($this->hide ? true : false)
+            'hide'          => (bool) $this->hide
         ];
         if ( ! $data['resource_id'] && $data['resource_path']) {
             $path = ltrim($data['resource_path'], $data['rl_type'].'/');
@@ -2225,7 +2245,7 @@ class DateHtmlElement extends HtmlElement
 
     /**
      * @return string
-     * @throws \Exception
+     * @throws Exception
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getHtml()
@@ -2249,7 +2269,7 @@ class DateHtmlElement extends HtmlElement
                 'attr'       => 'aform_field_type="date" '.$this->attr.' data-aform-field-type="captcha"',
                 'required'   => $this->required,
                 'style'      => $this->style,
-                'dateformat' => $this->dateformat ? $this->dateformat : H::format4Datepicker($this->language->get('date_format_short')),
+                'dateformat' => $this->dateformat ? : H::format4Datepicker($this->language->get('date_format_short')),
                 'highlight'  => $this->highlight
             ]
         );
@@ -2280,7 +2300,7 @@ class EmailHtmlElement extends HtmlElement
 {
     /**
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     public function getHtml()
     {
@@ -2333,7 +2353,7 @@ class NumberHtmlElement extends HtmlElement
 {
     /**
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     public function getHtml()
     {
@@ -2387,7 +2407,7 @@ class PhoneHtmlElement extends HtmlElement
 {
     /**
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     public function getHtml()
     {
@@ -2574,7 +2594,7 @@ class ZonesHtmlElement extends HtmlElement
         $this->registry->get('load')->model('localisation/zone');
 
         /**
-         * @var \abc\models\storefront\ModelLocalisationZone $model_zone
+         * @var ModelLocalisationZone $model_zone
          */
         $model_zone = $this->registry->get('model_localisation_zone');
         $config_country_id = $this->registry->get('config')->get('config_country_id');
@@ -2614,15 +2634,15 @@ class ZonesHtmlElement extends HtmlElement
             [
                 'name'            => $this->name,
                 'id'              => $this->element_id,
-                'value'           => $this->value ? $this->value : $this->default_value,
+                'value'           => $this->value ? : $this->default_value,
                 'options'         => $this->options,
                 'attr'            => $this->attr,
                 'required'        => $this->required,
                 'style'           => $this->style,
                 'url'             => $url,
-                'zone_field_name' => $this->zone_field_name ? $this->zone_field_name : $this->default_zone_field_name,
-                'zone_name'       => $this->zone_name ? $this->zone_name : $this->default_zone_name,
-                'zone_value'      => (array)($this->zone_value ? $this->zone_value : $this->default_zone_value),
+                'zone_field_name' => $this->zone_field_name ? : $this->default_zone_field_name,
+                'zone_name'       => $this->zone_name ? : $this->default_zone_name,
+                'zone_value'      => (array)($this->zone_value ? : $this->default_zone_value),
                 'zone_options'    => $this->zone_options,
                 'submit_mode'     => $this->submit_mode,
                 'placeholder'     => $this->placeholder
@@ -2682,7 +2702,7 @@ class PaginationHtmlElement extends HtmlElement
 
     /**
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     public function getHtml()
     {
@@ -2703,7 +2723,7 @@ class PaginationHtmlElement extends HtmlElement
 
         //count limits if needed
         if ( ! $s['no_perpage'] && ! $s['limits']) {
-            $s['limits'][0] = $x = ($s['split'] ? $s['split'] : $registry->get('config')->get('config_catalog_limit'));
+            $s['limits'][0] = $x = ($s['split'] ? : $registry->get('config')->get('config_catalog_limit'));
             while ($x <= 50) {
                 $s['limits'][] = $x;
                 $x += $s['limits'][0];
@@ -2787,12 +2807,8 @@ class PaginationHtmlElement extends HtmlElement
             '{limit}'
         ];
         $s['text'] = str_replace($find, $replace, $s['text']);
-
         $this->view->batchAssign($s);
-
-        $return = $this->view->fetch('form/pagination.tpl');
-
-        return $return;
+        return $this->view->fetch('form/pagination.tpl');
     }
 
 }
@@ -2825,12 +2841,12 @@ class ModalHtmlElement extends HtmlElement
 
     /**
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     public function getHtml()
     {
 
-        $modal_type = $this->modal_type ? $this->modal_type : 'lg';
+        $modal_type = $this->modal_type ? : 'lg';
 
         $this->view->batchAssign(
             [
@@ -2847,12 +2863,8 @@ class ModalHtmlElement extends HtmlElement
                 'js_onclose'  => (string)$this->js_onclose,
             ]
         );
-
         $tpl = 'form/modal.tpl';
-
-        $return = $this->view->fetch($tpl);
-
-        return $return;
+        return  $this->view->fetch($tpl);
     }
 
 }
@@ -2872,7 +2884,7 @@ class LabelHtmlElement extends HtmlElement
 {
     /**
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     public function getHtml()
     {
@@ -2886,7 +2898,7 @@ class LabelHtmlElement extends HtmlElement
             [
                 'name'  => $this->name,
                 'id'    => $this->element_id,
-                'text'  => str_replace('"', '&quot;', ($this->text ? $this->text : $this->value)),
+                'text'  => str_replace('"', '&quot;', ($this->text ? : $this->value)),
                 'attr'  => $this->attr,
                 'style' => $this->style
             ]

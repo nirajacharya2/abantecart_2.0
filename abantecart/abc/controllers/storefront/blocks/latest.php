@@ -28,11 +28,8 @@ use Illuminate\Support\Collection;
 
 class ControllerBlocksLatest extends AController
 {
-    public $data;
-
     public function main()
     {
-
         //disable cache when login display price setting is off or enabled showing of prices with taxes
         if (($this->config->get('config_customer_price') && !$this->config->get('config_tax'))
             && $this->html_cache()) {

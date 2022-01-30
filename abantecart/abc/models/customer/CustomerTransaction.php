@@ -249,12 +249,25 @@ class CustomerTransaction extends BaseModel
         return $this->belongsTo(Customer::class, 'customer_id');
     }
 
-    public static function getBalance(int $customer_id)
+    public static function getBalance(int $customer_id, $update = false)
     {
-        $query = static::where('customer_id', '=', $customer_id)
-            ->selectRaw('sum(credit) - sum(debit) AS balance')
+        $customer = Customer::find($customer_id);
+        if(!$customer){
+            return null;
+        }
+        $customer->running_balance_datetime = $customer->running_balance_datetime ?: '1970-01-01';
+
+        $customerTransaction = new static;
+        $transTable = $customerTransaction->getConnection()->getTablePrefix().$customerTransaction->getTable();
+        $now = date('Y-m-d H:i:s');
+        $query = static::selectRaw('sum(credit) - sum(debit) as balance')
+            ->selectRaw('sum(credit) as credit')
+            ->selectRaw('sum(debit) as debit')
+            ->where('customer_id', '=', $customer_id)
+            ->whereRaw( $transTable.".date_added > '".$customer->running_balance_datetime."' AND ".$transTable.".date_added < '".$now."'" )
             ->first();
-        return (float)$query->balance;
+        $balance = $query->balance + $customer->running_balance;
+        return $balance;
     }
 
     /**
@@ -304,15 +317,17 @@ class CustomerTransaction extends BaseModel
                       'customers.customer_id',
                       '=',
                       'customer_transactions.created_by'
-                  )
-                ->where(['customer_transactions.customer_id'=> (int)$data['customer_id']]);
+                  );
+        if($data['customer_id']) {
+            $query->where(['customer_transactions.customer_id' => (int) $data['customer_id']]);
+        }
 
-        $filter = (isset($data['filter']) ? $data['filter'] : []);
+        $filter = $data['filter'] ?? [];
 
         if (H::has_value($filter['date_start']) && H::has_value($filter['date_end'])) {
-            $query->whereRaw( "DATE(".$aliasC.".date_added) 
-                                BETWEEN DATE('".$db->escape($filter['date_start'])."') 
-                                    AND DATE('".$db->escape($filter['date_end'])."')" );
+            $query->whereRaw( $aliasC.".date_added 
+                                BETWEEN '".$db->escape($filter['date_start'])."' 
+                                    AND '".$db->escape($filter['date_end'])." 23:59:59'" );
         }
 
         if (H::has_value($filter['debit'])) {
@@ -334,9 +349,9 @@ class CustomerTransaction extends BaseModel
             $query->whereRaw( "LOWER(".$rawInc.") like '%".mb_strtolower($db->escape($filter['user']))."%'");
         }
 
-        //If for total, we done building the query
+        //If for total, we're done building the query
         if ($mode == 'total_only') {
-            //allow to extends this method from extensions
+            //allow to extend this method from extensions
             Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query, $data);
             $result = $query->first();
             return (int)$result->total;
@@ -352,7 +367,7 @@ class CustomerTransaction extends BaseModel
 
          // NOTE: Performance slowdown might be noticed or larger search results
          if ($mode != 'total_only') {
-             $orderBy = $sort_data[$data['sort']] ? $sort_data[$data['sort']] : 'customer_transactions.date_added';
+             $orderBy = $sort_data[$data['sort']] ? : 'customer_transactions.date_added';
              if (isset($data['order']) && (strtoupper($data['order']) == 'DESC')) {
                  $sorting = "desc";
              } else {
@@ -371,7 +386,7 @@ class CustomerTransaction extends BaseModel
              }
          }
 
-        //allow to extends this method from extensions
+        //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query, $data);
         $query->useCache('customer_transactions');
         $result_rows = $query->get();
@@ -396,7 +411,7 @@ class CustomerTransaction extends BaseModel
                      ->distinct(['transaction_type'])
                      ->orderBy('transaction_type')
                      ->useCache('customer_transaction');
-        //allow to extends this method from extensions
+        //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
         return $query->get();
     }

@@ -138,7 +138,7 @@ if($scripts_bottom && is_array($scripts_bottom)) {
 	/**
 	 * @see ControllerPagesCheckoutSuccess::_google_analytics()
 	 */
-	$ga_data = $this->registry->get('google_analytics_data');
+	$ga_data = \abc\core\engine\Registry::getInstance()->get('google_analytics_data');
 ?>
 <script>
 	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

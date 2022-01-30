@@ -40,6 +40,7 @@ class ControllerResponsesListingGridTask extends AController {
 		if (! $this->user->canAccess('tool/task' )) {
 
 			$response = new stdClass();
+            $response->userdata = new stdClass();
 			$response->userdata->error = sprintf( $this->language->get( 'error_permission_access' ), 'tool/task' );
 			$this->load->library('json');
 			$this->response->setOutput(AJson::encode($response));

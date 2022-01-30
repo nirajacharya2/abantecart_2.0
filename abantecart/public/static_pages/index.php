@@ -54,7 +54,7 @@ ABC::env('HTTP_ABANTECART', 'http://'.$_SERVER['HTTP_HOST'].dirname($dirname, 2)
 
 //check if this is admin and show option to report this issue 
 $from_admin = false;
-$session_id = '';
+$session_id = 'AC_';
 if (isset($_GET['mode']) && $_GET['mode'] == 'admin') {
     $from_admin = true;
 }
@@ -90,28 +90,30 @@ if ($from_admin) {
     $t = '';
     $count = 0;
     $log_contents_end = "Log file tail: \n\n";
-    $log_handle = fopen(ABC::env('DIR_APP')."system/logs/error.txt", "r");
-    //read 100 lines backwards from the eof or less 
-    $max_lines = 100;
-    $max_bytes = filesize(ABC::env('DIR_APP')."system/logs/error.txt");
-    $lines = array();
-    while ($count < $max_lines) {
-        //read one line back
-        while ($t != "\n") {
-            if (abs($pos) >= $max_bytes) {
-                break;
+    $log_handle = fopen(ABC::env('DIR_LOGS')."application.log", "r");
+    if($log_handle !== false) {
+        //read 100 lines backwards from the eof or less
+        $max_lines = 100;
+        $max_bytes = filesize(ABC::env('DIR_LOGS')."application.log");
+        $lines = [];
+        while ($count < $max_lines) {
+            //read one line back
+            while ($t != "\n") {
+                if (abs($pos) >= $max_bytes) {
+                    break;
+                }
+                fseek($log_handle, $pos, SEEK_END);
+                $t = fgetc($log_handle);
+                $pos = $pos - 1;
             }
-            fseek($log_handle, $pos, SEEK_END);
-            $t = fgetc($log_handle);
-            $pos = $pos - 1;
+            $lines[] = fgets($log_handle);
+            $count++;
+            $t = '';
         }
-        $lines[] = fgets($log_handle);
-        $count++;
-        $t = '';
-    }
-    fclose($log_handle);
+        fclose($log_handle);
 
-    $body = rawurlencode($log_contents_end.implode("", array_reverse($lines)));
+        $body = rawurlencode($log_contents_end.implode("", array_reverse($lines)));
+    }
 }
 
 ?>

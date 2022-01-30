@@ -281,7 +281,7 @@ class ABC extends ABCBase
      * @param mixed|null $value
      * @param bool $override - force set
      *
-     * @return null
+     * @return null|string|array
      */
     public static function env($name, $value = null, $override = false)
     {
@@ -503,7 +503,7 @@ class ABC extends ABCBase
 
         //Show cache stats if debugging
         if ($registry->get('config')->get('config_debug')) {
-            /*
+            /* ??????????????
             //TODO. how to collect statistic for laravel cache???
             ADebug::variable('Cache statistics: ',
                  $registry->get('cache')->stats()."\n");*/

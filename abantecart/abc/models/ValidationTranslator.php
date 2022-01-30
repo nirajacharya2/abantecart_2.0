@@ -20,7 +20,10 @@ namespace abc\models;
 
 use abc\core\engine\ALanguage;
 use abc\core\engine\Registry;
+use abc\core\lib\AException;
+use Countable;
 use Illuminate\Contracts\Translation\Translator;
+use ReflectionException;
 
 class ValidationTranslator implements Translator
 {
@@ -74,12 +77,12 @@ class ValidationTranslator implements Translator
      *
      * @return mixed
      * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function trans($key, array $replace = [], $locale = null)
     {
-        $parts = explode('.', $key);
+        $parts = explode('.',$key);
         $field_name = $parts[2] ?? null;
         if($field_name) {
             return $this->language->get('error_'.$field_name);
@@ -93,7 +96,7 @@ class ValidationTranslator implements Translator
      * Get a translation according to an integer value.
      *
      * @param  string $key
-     * @param  int|array|\Countable $number
+     * @param  int|array|Countable $number
      * @param  array $replace
      * @param  string $locale
      *

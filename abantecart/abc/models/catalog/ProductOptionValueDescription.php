@@ -19,6 +19,7 @@
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
+use abc\models\casts\Serialized;
 use abc\models\locale\Language;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -62,7 +63,7 @@ class ProductOptionValueDescription extends BaseModel
         'product_option_value_id' => 'int',
         'language_id'             => 'int',
         'product_id'              => 'int',
-        'grouped_attribute_names' => 'serialized',
+        'grouped_attribute_names' => Serialized::class
     ];
 
     /** @var array */

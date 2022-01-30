@@ -100,7 +100,7 @@ class OrderHistory extends BaseModel
 
     public function SetCommentAttribute($value)
     {
-        $this->attributes['comment'] = strip_tags($value);
+        $this->attributes['comment'] = is_string($value) ?  strip_tags($value) : $value;
     }
 
     public function order_status()

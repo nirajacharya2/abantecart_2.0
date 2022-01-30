@@ -34,7 +34,7 @@ class ObjectFieldSetting extends BaseModel
         'field_setting_value'
     ];
 
-    protected function setKeysForSaveQuery(Builder $query)
+    protected function setKeysForSaveQuery($query):Builder
     {
         $query
             ->where('object_type', '=', $this->getAttribute('object_type'))

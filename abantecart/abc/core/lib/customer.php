@@ -538,7 +538,7 @@ class ACustomer extends ALibBase
     }
 
     /**
-     * @return mixed
+     * @return int
      */
     public function getNewsletter()
     {
@@ -901,6 +901,7 @@ class ACustomer extends ALibBase
      */
     public function getWishList()
     {
+        $output = [];
         $customer_id = $this->customer_id;
         if (!$customer_id) {
             $customer_id = $this->unauth_customer['customer_id'];
@@ -911,10 +912,15 @@ class ACustomer extends ALibBase
 
         $customer = $this->model();
         if($customer && $customer->status == 1){
-            return (array)$customer->wishlist;
+            $output = $customer->wishlist
+                ? array_filter($customer->wishlist, function($value){
+                    return (bool)$value;
+                })
+                : [];
+
         }
 
-        return [];
+        return $output;
     }
 
     /**
@@ -967,9 +973,6 @@ class ACustomer extends ALibBase
          * @var AConfig $config
          */
         $config = Registry::config();
-        /**
-         * @var ADB $db
-         */
         $db = Registry::db();
         if (!$config || !$db) {
             throw new AException('AConfig or ADB not found!');
@@ -1096,9 +1099,6 @@ class ACustomer extends ALibBase
         $language->load( 'common/im' );
 
         //get existing data and compare
-        /**
-         * @var $customer Customer
-         */
         $customer = Customer::find($customer_id);
         foreach ( $customer->toArray() as $rec => $val ) {
             if (!empty($data['loginname']) && $rec == 'loginname' && $val != $data['loginname']) {
@@ -1256,11 +1256,10 @@ class ACustomer extends ALibBase
         }
 
         if (!$isLogged && $config->get('config_account_id')) {
-            Registry::load()->model('catalog/content');
-            /**
-             * @var ModelCatalogContent $model_catalog_content
-             TODO: replace it in the future */
-            $content_info = Registry::model_catalog_content()->getContent($config->get('config_account_id'));
+            /** @var ModelCatalogContent $mdl
+            TODO: replace it in the future */
+            $mdl = Registry::load()->model('catalog/content');
+            $content_info = $mdl->getContent($config->get('config_account_id'));
 
             if ($content_info) {
                 if (!isset($data['agree'])) {

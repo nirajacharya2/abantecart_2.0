@@ -324,7 +324,6 @@ class Manufacturer extends BaseModel
                     $rm->deleteResource($r['resource_id']);
                 }
             }
-        } catch (\ReflectionException $e) {
         } catch (\Exception $e) {
         }
         $this->cache->flush('manufacturer');

@@ -114,7 +114,6 @@ final class AConnect
         //check available connections on the server.
         $this->_check();
         $this->request_headers['User-Agent'] = ABC::env('APP_NAME').'/'.ABC::env('VERSION');
-        //??? $this->request_referer = $this->uri;
     }
 
     /**
@@ -165,9 +164,7 @@ final class AConnect
         if (!$url = $this->_checkURL($url)) {
             return false;
         }
-        $output = $this->getData($url);
-
-        return $output;
+        return $this->getData($url);
     }
 
     /**
@@ -181,9 +178,7 @@ final class AConnect
         if (!$url = $this->_checkURL($url, true)) {
             return false;
         }
-        $output = $this->getData($url, 443);
-
-        return $output;
+        return $this->getData($url, 443);
     }
 
     /**
@@ -251,17 +246,17 @@ final class AConnect
 
             return false;
         }
-        if (substr($url, 0, 4) != 'http') {
+        if (!str_starts_with($url, 'http')) {
             $url = ($secure ? 'https' : 'http').'://'.base64_decode('d3d3LmFiYW50ZWNhcnQuY29t').$url;
         } else {
             if ($secure) {
                 $url = str_replace("http://", "https://", $url);
-                if (substr($url, 0, 8) != 'https://') {
+                if (!str_starts_with($url, 'https://')) {
                     $url = "https://".$url;
                 }
             } else {
                 $url = str_replace("https://", "http://", $url);
-                if (substr($url, 0, 7) != 'http://') {
+                if (!str_starts_with($url, 'http://')) {
                     $url = "http://".$url;
                 }
             }
@@ -296,7 +291,7 @@ final class AConnect
     public function getDataLength($url, $port = 80)
     {
         $url .= !is_int(strpos($url, '?')) ? '?file_size=1' : '&file_size=1';
-        if (!$url = $this->_checkURL($url, ($port == 443 ? true : false))) {
+        if (!$url = $this->_checkURL($url, $port == 443)) {
             return false;
         }
 
@@ -312,7 +307,7 @@ final class AConnect
      */
     public function getDataHeaders($url, $port = 80)
     {
-        if (!($url = $this->_checkURL($url, ($port == 443 ? true : false)))) {
+        if (!($url = $this->_checkURL($url, $port == 443))) {
             return false;
         }
 
@@ -365,7 +360,6 @@ final class AConnect
                 } else {
                     throw new AException('No connect method available ( curl | socket )', AC_ERR_CONNECT_METHOD);
                 }
-                break;
         }
 
         if (!$ret_buffer) {
@@ -400,11 +394,9 @@ final class AConnect
         //???? will be developed later
         if (is_callable($this->config) && $this->config->get('connection_method')) {
             $this->connect_method = $this->config->get('connection_method');
-
-            return null;
         }
-        //We prefer Curl first, Curl is the fastest performing
-        if ($this->_check_curl()) {
+        //We prefer Curl as default, Curl is the fastest performing
+        elseif ($this->_check_curl()) {
             $this->connect_method = 'curl';
         } else {
             // we have no choice to use socket.
@@ -426,8 +418,6 @@ final class AConnect
         //Curl Connection for HTTP and HTTPS
         $authentication = $this->auth['name'] ? 1 : 0;
         $curl_sock = curl_init();
-        // write handler into session for response-preloader.
-        $this->session->data['curl_handler'] = $curl_sock;
         // set default options for curl
         if (!$this->curl_options) {
             $this->curl_options = [
@@ -536,10 +526,9 @@ final class AConnect
             }
         }
         curl_close($curl_sock);
-        unset($this->session->data['curl_handler']);
 
         $content_length = $content_length ? (int)$content_length : -1;
-        $content_type = $content_type ? $content_type : -1;
+        $content_type = $content_type ? : -1;
 
         return ["mime" => $content_type, "length" => $content_length, "data" => $response];
     }
@@ -575,7 +564,7 @@ final class AConnect
                     $sent_headers .= $request_header."\r\n";
                 }
             } else {
-                $sent_headers .= $this->socket_options."\r\n";
+                $sent_headers .= implode("\r\n",$this->socket_options)."\r\n";
             }
         }
         if ($authentication) {
@@ -587,7 +576,7 @@ final class AConnect
         $response = '';
         if ($length_only || $headers_only) {
             $i = 0;
-            while (strpos($response, "\r\n\r\n") === false && $i < 50000) {
+            while (!str_contains($response, "\r\n\r\n") && $i < 50000) {
                 $response .= fgets($sock, 1280);
                 $i++;
             }
@@ -603,7 +592,7 @@ final class AConnect
             fclose($sock);
             if (in_array($status, [0, 300, 301, 302, 304, 305, 307])) { // if redirected
                 if ($headers['Location']) {
-                    if (strpos($headers['Location'], 'https://') !== false) {
+                    if (str_contains($headers['Location'], 'https://')) {
                         $headers['Location'] = str_replace('https://', 'ssl://', $headers['Location']);
                         $port = 443;
                     }
@@ -646,7 +635,7 @@ final class AConnect
 
         if (in_array($status, [0, 300, 301, 302, 304, 305, 307])) { // if redirected
             if ($headers['Location']) {
-                if (strpos($headers['Location'], 'https://') !== false) {
+                if (str_contains($headers['Location'], 'https://')) {
                     $headers['Location'] = str_replace('https://', 'ssl://', $headers['Location']);
                     $port = 443;
                 }
@@ -656,7 +645,7 @@ final class AConnect
         }
 
         $content_length = $headers['Content-Length'] ? (int)$headers['Content-Length'] : -1;
-        $content_type = $headers['Content-Type'] ? $headers['Content-Type'] : -1;
+        $content_type = $headers['Content-Type'] ? : -1;
 
         return ["mime" => $content_type, "length" => $content_length, "data" => $response];
     }
@@ -768,7 +757,7 @@ final class AConnect
         $headers_data = [];
         foreach ($headers as $value) {
             $header = explode(": ", $value);
-            if (strpos($value, ':') === false && strpos($value, 'HTTP') !== false) {
+            if (!str_contains($value, ':') && str_contains($value, 'HTTP')) {
                 $headers_data['status'] = $header[0];
             } elseif ($header[0] && $header[1]) {
                 $headers_data[$header[0]] = $header[1];

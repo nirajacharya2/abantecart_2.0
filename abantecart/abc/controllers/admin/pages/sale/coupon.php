@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -29,9 +29,8 @@ use H;
 
 class ControllerPagesSaleCoupon extends AController
 {
-    public $data = [];
     public $error = [];
-    private $fields = [
+    protected $fields = [
         'coupon_description',
         'code',
         'type',
@@ -49,7 +48,6 @@ class ControllerPagesSaleCoupon extends AController
 
     public function main()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -221,7 +219,6 @@ class ControllerPagesSaleCoupon extends AController
 
     public function insert()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -260,7 +257,6 @@ class ControllerPagesSaleCoupon extends AController
 
     public function update()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -290,8 +286,12 @@ class ControllerPagesSaleCoupon extends AController
             $this->model_sale_coupon->editCoupon($this->request->get['coupon_id'], $post);
             $this->model_sale_coupon->editCouponProducts($this->request->get['coupon_id'], $post);
             $this->session->data['success'] = $this->language->get('text_success');
-            abc_redirect($this->html->getSecureURL('sale/coupon/update',
-                '&coupon_id='.$this->request->get['coupon_id']));
+            abc_redirect(
+                $this->html->getSecureURL(
+                    'sale/coupon/update',
+                    '&coupon_id='.$this->request->get['coupon_id']
+                )
+            );
         }
         $this->_getForm();
         $this->view->assign('form_language_switch', $this->html->getContentLanguageSwitcher());
@@ -302,13 +302,14 @@ class ControllerPagesSaleCoupon extends AController
 
     private function _getForm()
     {
-
         $this->data['token'] = $this->session->data['token'];
         $this->data['cancel'] = $this->html->getSecureURL('sale/coupon');
         $this->data['error'] = $this->error;
         $cont_lang_id = $this->language->getContentLanguageID();
-        $this->view->assign('category_products_url',
-            $this->html->getSecureURL('r/product/product/category', '&language_id='.$cont_lang_id));
+        $this->view->assign(
+            'category_products_url',
+            $this->html->getSecureURL('r/product/product/category', '&language_id='.$cont_lang_id)
+        );
 
         $this->document->initBreadcrumb([
             'href'      => $this->html->getSecureURL('index/home'),
@@ -529,7 +530,8 @@ class ControllerPagesSaleCoupon extends AController
                 'dateformat' => H::format4Datepicker($this->language->get('date_format_short')),
                 'highlight'  => 'future',
                 'required'   => true,
-            ]);
+            ]
+        );
 
         $this->data['form']['fields']['date_end'] = $form->getFieldHtml([
             'type'       => 'date',
@@ -578,25 +580,23 @@ class ControllerPagesSaleCoupon extends AController
         $this->data['products'] = [];
         if (count($this->data['coupon_product'])) {
             $this->loadModel('catalog/product');
-            $ids = [];
-            foreach ($this->data['coupon_product'] as $id) {
-                $ids[] = (int)$id;
-            }
+            $ids = array_map('intval', array_values($this->data['coupon_product']));
             $filter = ['subsql_filter' => 'p.product_id in ('.implode(',', $ids).')'];
             $results = $this->model_catalog_product->getProducts($filter);
 
-            $product_ids = [];
-            foreach ($results as $result) {
-                $product_ids[] = (int)$result['product_id'];
-            }
+            $product_ids = array_column($results, 'product_id');
+            $product_ids = array_map('intval', $product_ids);
+
             //get thumbnails by one pass
             $resource = new AResource('image');
-            $thumbnails = $resource->getMainThumbList(
-                'products',
-                $product_ids,
-                $this->config->get('config_image_grid_width'),
-                $this->config->get('config_image_grid_height')
-            );
+            $thumbnails = $product_ids
+                ? $resource->getMainThumbList(
+                    'products',
+                    $product_ids,
+                    $this->config->get('config_image_grid_width'),
+                    $this->config->get('config_image_grid_height')
+                )
+                : [];
 
             foreach ($results as $r) {
                 $thumbnail = $thumbnails[$r['product_id']];
@@ -614,7 +614,8 @@ class ControllerPagesSaleCoupon extends AController
                 'style'       => 'chosen',
                 'ajax_url'    => $this->html->getSecureURL('r/product/product/products'),
                 'placeholder' => $store_name.$this->language->get('text_select_from_lookup'),
-            ]);
+            ]
+        );
 
         $this->view->assign('help_url', $this->gen_help_url('coupon_edit'));
         $this->view->assign('form_store_switch', $this->html->getStoreSwitcher());
@@ -660,11 +661,7 @@ class ControllerPagesSaleCoupon extends AController
 
         $this->extensions->hk_ValidateData($this);
 
-        if (!$this->error) {
-            return true;
-        } else {
-            return false;
-        }
+        return (!$this->error);
     }
 
 }

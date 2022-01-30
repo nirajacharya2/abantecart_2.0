@@ -28,10 +28,10 @@ use abc\models\BaseModel;
 use abc\models\QueryBuilder;
 use Carbon\Carbon;
 use Exception;
-use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
@@ -58,10 +58,6 @@ use Psr\SimpleCache\InvalidArgumentException;
  * @property Product $product
  * @property ProductOptionDescription $description
  * @property ProductOptionDescription $descriptions
- *
- * @method static ProductOption find(int $product_option_id) ProductOption
- * @method static ProductOption create(array $attributes) ProductOption
- * @method static ProductOption first() ProductOption
  *
  * @package abc\models
  */
@@ -90,7 +86,7 @@ class ProductOption extends BaseModel
         'sort_order'   => 'int',
         'status'       => 'int',
         'required'     => 'int',
-        'settings'     => 'serialized',
+        'settings'     => Serialization::class,
     ];
 
     /** @var array */

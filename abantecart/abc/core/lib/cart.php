@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,26 +22,32 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\ALanguage;
+use abc\core\engine\ALoader;
 use abc\core\engine\contracts\AttributeInterface;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use abc\models\catalog\Product;
 use abc\models\order\OrderProduct;
+use abc\models\storefront\ModelCatalogProduct;
+use abc\models\storefront\ModelCheckoutExtension;
+use abc\models\storefront\ModelTotalTotal;
+use Exception;
 use H;
+use ReflectionException;
 
 /**
  * Class ACart
  *
- * @property \abc\models\storefront\ModelCatalogProduct    $model_catalog_product
- * @property ATax                                          $tax
- * @property ADB                                           $db
- * @property AWeight                                       $weight
- * @property AConfig                                       $config
- * @property \abc\core\engine\ALoader                      $load
- * @property \abc\models\storefront\ModelCheckoutExtension $model_checkout_extension
- * @property ADownload                                     $download
+ * @property ModelCatalogProduct $model_catalog_product
+ * @property ATax $tax
+ * @property ADB $db
+ * @property AWeight $weight
+ * @property AConfig $config
+ * @property ALoader $load
+ * @property ModelCheckoutExtension $model_checkout_extension
+ * @property ADownload $download
  */
-class ACart  extends ALibBase
+class ACart extends ALibBase
 {
     /**
      * @var Registry
@@ -99,15 +105,15 @@ class ACart  extends ALibBase
      * @param $registry Registry
      * @param $c_data   array  - ref (Customer data array passed by ref)
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function __construct($registry, &$c_data = null)
     {
         $this->registry = $registry;
-        $this->attribute = ABC::getObjectByAlias('Attribute',['product_option']);
-        $this->customer = $registry->get('customer') ?: $c_data['customer'];
+        $this->attribute = ABC::getObjectByAlias('Attribute', ['product_option']);
+        $this->customer = $registry->get('customer') ? : $c_data['customer'];
         $this->session = $registry->get('session');
-        $this->language = $registry->get('language') ?: $c_data['language'];
+        $this->language = $registry->get('language') ? : $c_data['language'];
 
         //if nothing is passed (default) use session array. Customer session, can function on storefront only
         if ($c_data == null) {
@@ -137,7 +143,7 @@ class ACart  extends ALibBase
 
     /**
      * @param string $key
-     * @param mixed  $value
+     * @param mixed $value
      */
     public function __set($key, $value)
     {
@@ -161,11 +167,10 @@ class ACart  extends ALibBase
      * @return array
      * @throws AException
      * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function getProducts($recalculate = false)
     {
-
         //check if cart data was built before
         if (count($this->cart_data) && !$recalculate) {
             return $this->cart_data;
@@ -182,25 +187,24 @@ class ACart  extends ALibBase
             $quantity = $data['qty'];
 
             if (isset($data['options'])) {
-                $options = (array)$data['options'];
+                $options = (array) $data['options'];
             } else {
                 $options = [];
             }
 
             $custom_price = ($this->conciergeMode && isset($data['custom_price']))
-                            ? $data['custom_price']
-                            : null;
+                ? $data['custom_price']
+                : null;
             $product = Product::find($product_id);
             $productDetails = [];
-            if($product) {
+            if ($product) {
                 $productDetails = $this->buildProductDetails($product_id, $quantity, $options, $custom_price);
-            }
-            //When use conciergeMode and product already deleted from database
-            elseif($this->conciergeMode && $data['order_product_id']){
+            } //When use conciergeMode and product already deleted from database
+            elseif ($this->conciergeMode && $data['order_product_id']) {
                 $productDetails = $this->buildProductDetailsByOrderProduct(
-                                                                    $data['order_product_id'],
-                                                                    $quantity,
-                                                                    $custom_price
+                    $data['order_product_id'],
+                    $quantity,
+                    $custom_price
                 );
             }
 
@@ -236,7 +240,7 @@ class ACart  extends ALibBase
      *
      * @return array
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getProduct($key, $recalculate = false)
@@ -272,14 +276,14 @@ class ACart  extends ALibBase
 
         $stock = true;
         /**
-         * @var  \abc\models\storefront\ModelCatalogProduct $sf_product_mdl
+         * @var  ModelCatalogProduct $sf_product_mdl
          */
         $sf_product_mdl = $this->load->model('catalog/product', 'storefront');
         //remove restrictions of model in concierge mode
         if ($this->conciergeMode) {
             $sf_product_mdl->filter = [];
             if ($custom_price !== null) {
-                $custom_price = (float)$custom_price;
+                $custom_price = (float) $custom_price;
             }
         } else {
             $custom_price = null;
@@ -288,8 +292,8 @@ class ACart  extends ALibBase
         $elements_with_options = HtmlElementFactory::getElementsWithOptions();
 
         $productInfo = $sf_product_mdl->getProductDataForCart($product_id);
-        if ( count($productInfo) <= 0 || (!$this->conciergeMode && $productInfo['call_to_order'])
-        ){
+        if (count($productInfo) <= 0 || (!$this->conciergeMode && $productInfo['call_to_order'])
+        ) {
             return [];
         }
 
@@ -319,7 +323,7 @@ class ACart  extends ALibBase
                 $option_value_query = $sf_product_mdl->getProductOptionValues($product_id, $product_option_id);
                 $option_value_query = $option_value_query[0];
                 //Set value from input
-                $option_value_query['name'] = $this->db->escape($options[$product_option_id]);
+                $option_value_query['name'] = $this->db->escape($product_option_value_id);
             } else {
                 //is multivalue option type
                 if (is_array($product_option_value_id)) {
@@ -328,8 +332,8 @@ class ACart  extends ALibBase
                     }
                 } else {
                     $option_value_query = $sf_product_mdl->getProductOptionValue(
-                                                                            $product_id,
-                                                                            (int)$product_option_value_id
+                        $product_id,
+                        (int) $product_option_value_id
                     );
                 }
             }
@@ -338,8 +342,8 @@ class ACart  extends ALibBase
                 //if group option load price from parent value
                 if ($option_value_query['group_id'] && !in_array($option_value_query['group_id'], $groups)) {
                     $group_value_query = $sf_product_mdl->getProductOptionValue(
-                                                                            $product_id,
-                                                                            $option_value_query['group_id']
+                        $product_id,
+                        $option_value_query['group_id']
                     );
                     $option_value_query['prefix'] = $group_value_query['prefix'];
                     $option_value_query['price'] = $group_value_query['price'];
@@ -353,14 +357,14 @@ class ACart  extends ALibBase
                     'settings'                => $option_query['settings'],
                     'value'                   => $option_value_query['name'],
                     'prefix'                  => $option_value_query['prefix'],
-                    'price'                   => ( $custom_price !== null
-                                                   ? $custom_price
-                                                   : $option_value_query['price']
-                                                 ),
+                    'price'                   => ($custom_price !== null
+                        ? $custom_price
+                        : $option_value_query['price']
+                    ),
                     'sku'                     => $option_value_query['sku'],
                     'inventory_quantity'      => (
                     $option_value_query['subtract']
-                        ? (int)$option_value_query['quantity']
+                        ? (int) $option_value_query['quantity']
                         : 1000000
                     ),
                     'weight'                  => $option_value_query['weight'],
@@ -391,7 +395,7 @@ class ACart  extends ALibBase
                                 : $item['price']
                             ),
                             'sku'                     => $item['sku'],
-                            'inventory_quantity'      => ($item['subtract'] ? (int)$item['quantity'] : 1000000),
+                            'inventory_quantity'      => ($item['subtract'] ? (int) $item['quantity'] : 1000000),
                             'weight'                  => $item['weight'],
                             'weight_type'             => $item['weight_type'],
                         ];
@@ -406,7 +410,7 @@ class ACart  extends ALibBase
             }
         } // end of options build
 
-        if($custom_price === null){
+        if ($custom_price === null) {
             //needed for promotion
             $discount_quantity = 0; // this is used to calculate total QTY of 1 product in the cart
 
@@ -434,7 +438,7 @@ class ACart  extends ALibBase
             //Need to round price after discounts and specials
             //round base currency price to 2 decimal place
             $decimal_place = 2;
-            $price = round($price, $decimal_place);
+            $price = round((float) $price, $decimal_place);
             foreach ($option_data as $item) {
                 if ($item['prefix'] == '%') {
                     $option_price += $price * $item['price'] / 100;
@@ -443,9 +447,9 @@ class ACart  extends ALibBase
                 }
             }
             //round option price to currency decimal_place setting (most common 2, but still...)
-            $option_price = round($option_price, $decimal_place);
+            $option_price = round((float) $option_price, $decimal_place);
             $final_price = $price + $option_price;
-        }else{
+        } else {
             $final_price = $custom_price;
         }
 
@@ -454,14 +458,14 @@ class ACart  extends ALibBase
 
         $common_quantity = $quantity;
         //check if this product with another option values already in the cart
-        if($this->cust_data['cart']) {
-            foreach($this->cust_data['cart'] as $key => $cart_product){
-                list($pId,) = explode(':',$key);
+        if ($this->cust_data['cart']) {
+            foreach ($this->cust_data['cart'] as $key => $cart_product) {
+                list($pId,) = explode(':', $key);
                 $uuid = ($options ? serialize($options) : '').$custom_price;
-                if($product_id != $pId || $key == $product_id.':'.md5($uuid)){
+                if ($product_id != $pId || $key == $product_id.':'.md5($uuid)) {
                     continue;
                 }
-                if(!$op_stock_trackable){
+                if (!$op_stock_trackable) {
                     $common_quantity += $cart_product['qty'];
                 }
             }
@@ -494,9 +498,9 @@ class ACart  extends ALibBase
         $result['option']             = $option_data;
         $result['download']           = $download_data;
         $result['inventory_quantity'] =
-                                    $productInfo['subtract']
-                                    ? (int)$productInfo['quantity']
-                                    : 1000000;
+            $productInfo['subtract']
+                ? (int) $productInfo['quantity']
+                : 1000000;
 
         $result['quantity']           = $quantity;
         $result['stock']              = $stock;
@@ -519,8 +523,8 @@ class ACart  extends ALibBase
         int $order_product_id,
         int $quantity = 0,
         float $custom_price = null
-    ){
-        if(!$this->conciergeMode){
+    ) {
+        if (!$this->conciergeMode) {
             throw new AException('Method '.__FUNCTION__.' can be called only in Concierge Mode of cart!');
         }
 
@@ -529,11 +533,11 @@ class ACart  extends ALibBase
         }
 
         $orderProduct = OrderProduct::with('order_downloads', 'order_options')->find($order_product_id);
-        if(!$orderProduct){
+        if (!$orderProduct) {
             return [];
         }
         $productDetails = $orderProduct->toArray();
-        $option_data = (array)$productDetails['order_options'];
+        $option_data = (array) $productDetails['order_options'];
         $download_data = $productDetails['order_downloads'];
         unset(
             $productDetails['order_options'],
@@ -544,10 +548,9 @@ class ACart  extends ALibBase
         $final_price = $custom_price ?? $orderProduct->price;
 
         $options = [];
-        foreach($option_data as $row){
-            $options[ $row['product_option_id'] ][] = $row['product_option_value_id'];
+        foreach ($option_data as $row) {
+            $options[$row['product_option_id']][] = $row['product_option_value_id'];
         }
-
 
         // group sku for each options if presents
         $SKUs = [];
@@ -576,37 +579,38 @@ class ACart  extends ALibBase
      * @param array $options
      * @param null $custom_price
      * @param null $order_product_id
+     *
      * @return string
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function add($product_id, $qty = 1, $options = [], $custom_price = null, $order_product_id = null)
     {
-        $product_id = (int)$product_id;
+        $product_id = (int) $product_id;
         $uuid = ($options ? serialize($options) : '').$custom_price;
         if (!$uuid) {
-            $key = (string)$product_id;
+            $key = (string) $product_id;
         } else {
             $key = $product_id.':'.md5($uuid);
         }
 
-        if ((int)$qty && ((int)$qty > 0)) {
+        if ((int) $qty && ((int) $qty > 0)) {
             if (!isset($this->cust_data['cart'][$key])) {
-                $this->cust_data['cart'][$key]['qty'] = (int)$qty;
+                $this->cust_data['cart'][$key]['qty'] = (int) $qty;
             } else {
-                $this->cust_data['cart'][$key]['qty'] += (int)$qty;
+                $this->cust_data['cart'][$key]['qty'] += (int) $qty;
             }
             //TODO Add validation for correct options for the product and add error return or more stable behaviour
             $this->cust_data['cart'][$key]['options'] = $options;
-            if($this->conciergeMode) {
+            if ($this->conciergeMode) {
                 if ($order_product_id) {
                     $this->cust_data['cart'][$key]['order_product_id'] = $order_product_id;
                 }
 
                 //allow custom price in conciergeMode
                 if ($custom_price !== null) {
-                    $this->cust_data['cart'][$key]['custom_price'] = (float)$custom_price;
+                    $this->cust_data['cart'][$key]['custom_price'] = (float) $custom_price;
                 }
             }
         }
@@ -646,7 +650,7 @@ class ACart  extends ALibBase
      */
     public function getVirtualProducts()
     {
-        return (array)$this->cust_data['cart']['virtual'];
+        return (array) $this->cust_data['cart']['virtual'];
     }
 
     /**
@@ -667,13 +671,13 @@ class ACart  extends ALibBase
      * @param int $qty
      *
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function update($key, $qty)
     {
-        if ((int)$qty && ((int)$qty > 0)) {
-            $this->cust_data['cart'][$key]['qty'] = (int)$qty;
+        if ((int) $qty && ((int) $qty > 0)) {
+            $this->cust_data['cart'][$key]['qty'] = (int) $qty;
         } else {
             $this->remove($key);
         }
@@ -716,7 +720,7 @@ class ACart  extends ALibBase
      *
      * @return int
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getWeight($product_ids = [])
@@ -724,7 +728,7 @@ class ACart  extends ALibBase
         $weight = 0;
         $products = $this->getProducts();
         foreach ($products as $product) {
-            if (count($product_ids) > 0 && !in_array((string)$product['product_id'], $product_ids)) {
+            if (count($product_ids) > 0 && !in_array((string) $product['product_id'], $product_ids)) {
                 continue;
             }
 
@@ -745,18 +749,25 @@ class ACart  extends ALibBase
                             }
 
                             $hard = true;
-                            $product_weight = $this->weight->convert($option['weight'], $option['weight_type'],
-                                $product['weight_class']);
+                            $product_weight = $this->weight->convert(
+                                $option['weight'], $option['weight_type'],
+                                $product['weight_class']
+                            );
                         } else {
                             //We need product base weight for % calculation
                             $temp = ($option['weight'] * $product['weight'] / 100) + $product['weight'];
-                            $product_weight = $this->weight->convert($temp, $option['weight_type'],
-                                $this->config->get('config_weight_class'));
+                            $product_weight = $this->weight->convert(
+                                $temp, $option['weight_type'],
+                                $this->config->get('config_weight_class')
+                            );
                         }
                     }
                 }
-                $weight += $this->weight->convert($product_weight * $product['quantity'], $product['weight_class'],
-                    $this->config->get('config_weight_class'));
+                $weight += $this->weight->convert(
+                    $product_weight * $product['quantity'],
+                    $product['weight_class'],
+                    $this->config->get('config_weight_class')
+                );
             }
         }
         return $weight;
@@ -767,7 +778,7 @@ class ACart  extends ALibBase
      *
      * @return array
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function basicShippingProducts()
@@ -788,7 +799,7 @@ class ACart  extends ALibBase
      *
      * @return array
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function specialShippingProducts()
@@ -810,7 +821,7 @@ class ACart  extends ALibBase
      *
      * @return bool
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function areAllFreeShipping()
@@ -869,8 +880,9 @@ class ACart  extends ALibBase
      *
      * @return float
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
      */
     public function getSubTotal($recalculate = false)
     {
@@ -892,7 +904,7 @@ class ACart  extends ALibBase
      *
      * @return array
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getTaxes()
@@ -908,7 +920,7 @@ class ACart  extends ALibBase
      *
      * @return array
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getAppliedTaxes($recalculate = false)
@@ -937,7 +949,7 @@ class ACart  extends ALibBase
                         $this->tax->calcTotalTaxAmount($product['total'], $product['tax_class_id']);
                 }
                 $this->taxes[$product['tax_class_id']]['tax'] =
-                    round($this->taxes[$product['tax_class_id']]['tax'], $decimal_place);
+                    round((float) $this->taxes[$product['tax_class_id']]['tax'], $decimal_place);
             }
         }
         //tax for shipping
@@ -950,7 +962,7 @@ class ACart  extends ALibBase
                 $this->taxes[$tax_id]['tax'] += $this->tax->calcTotalTaxAmount($cost, $tax_id);
             }
             //round
-            $this->taxes[$tax_id]['tax'] = round($this->taxes[$tax_id]['tax'], $decimal_place);
+            $this->taxes[$tax_id]['tax'] = round((float) $this->taxes[$tax_id]['tax'], $decimal_place);
         }
         return $this->taxes;
     }
@@ -964,7 +976,7 @@ class ACart  extends ALibBase
      *
      * @return float
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getTotal($recalculate = false)
@@ -977,7 +989,7 @@ class ACart  extends ALibBase
         $products = $this->getProducts();
         foreach ($products as $product) {
             $this->total_value +=
-                $product['total'] + $this->tax->calcTotalTaxAmount( $product['total'], $product['tax_class_id'] );
+                $product['total'] + $this->tax->calcTotalTaxAmount($product['total'], $product['tax_class_id']);
         }
         return $this->total_value;
     }
@@ -991,7 +1003,7 @@ class ACart  extends ALibBase
      * @return float
      * @throws AException
      * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function getFinalTotal($recalculate = false)
     {
@@ -1015,21 +1027,20 @@ class ACart  extends ALibBase
         $taxes = $this->getAppliedTaxes($recalculate);
         //force storefront load (if called from admin)
         /**
-         * @var $sf_checkout_mdl \abc\models\storefront\ModelCheckoutExtension
+         * @var $sf_checkout_mdl ModelCheckoutExtension
          */
         $sf_checkout_mdl = $this->load->model('checkout/extension', 'storefront');
         $total_extns = $sf_checkout_mdl->getExtensions('total');
         foreach ($total_extns as $value) {
-            $calc_order[$value['key']] = (int)$this->config->get($value['key'].'_calculation_order');
+            $calc_order[$value['key']] = (int) $this->config->get($value['key'].'_calculation_order');
         }
         array_multisort($calc_order, SORT_ASC, $total_extns);
         foreach ($total_extns as $extn) {
-
             $sf_total_mdl = $this->load->model('total/'.$extn['key'], 'storefront');
             /**
              * parameters are references!!!
              *
-             * @var \abc\models\storefront\ModelTotalTotal $sf_total_mdl
+             * @var ModelTotalTotal $sf_total_mdl
              */
             $sf_total_mdl->getTotal($total_data, $total, $taxes, $this->cust_data);
             $sf_total_mdl = null;
@@ -1050,9 +1061,9 @@ class ACart  extends ALibBase
      *
      * @param bool $recalculate
      *
-     * @return mixed
+     * @return array
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getFinalTotalData($recalculate = false)
@@ -1076,12 +1087,11 @@ class ACart  extends ALibBase
      *
      * @return array
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function buildTotalDisplay($recalculate = false)
     {
-
         $taxes = $this->getAppliedTaxes($recalculate);
         $total = $this->getFinalTotal($recalculate);
         $total_data = $this->getFinalTotalData();
@@ -1093,9 +1103,9 @@ class ACart  extends ALibBase
         array_multisort($sort_order, SORT_ASC, $total_data);
         //return result in array
         return [
-            'total' => $total,
+            'total'      => $total,
             'total_data' => $total_data,
-            'taxes' => $taxes
+            'taxes'      => $taxes,
         ];
     }
 
@@ -1104,7 +1114,7 @@ class ACart  extends ALibBase
      *
      * @return float
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getTotalAmount($recalc = false)
@@ -1117,7 +1127,7 @@ class ACart  extends ALibBase
      *
      * @return bool
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function hasMinRequirement()
@@ -1134,7 +1144,7 @@ class ACart  extends ALibBase
      *
      * @return bool
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function hasMaxRequirement()
@@ -1175,7 +1185,7 @@ class ACart  extends ALibBase
      *
      * @return bool
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function hasStock()
@@ -1195,7 +1205,7 @@ class ACart  extends ALibBase
      *
      * @return bool
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function hasShipping()
@@ -1216,7 +1226,7 @@ class ACart  extends ALibBase
      *
      * @return bool
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function hasDownload()

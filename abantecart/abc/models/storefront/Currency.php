@@ -21,7 +21,7 @@ namespace abc\models\storefront;
 class Currency extends \abc\models\locale\Currency
 {
     /**
-     * @param $operation
+     * @param string $operation
      *
      * @param array $columns
      *

@@ -69,7 +69,7 @@ class ResourceLibrary extends BaseModel
         $object_txt_id = '',
         $object_id = 0,
         $title = '',
-        $language_id
+        $language_id = 1
     ) {
         $objects = [
             'products'             => 'Product',

@@ -22,16 +22,17 @@ namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
 use abc\core\lib\AError;
+use abc\core\lib\AException;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
 use H;
+use ReflectionException;
 use stdClass;
 
 
 class ControllerResponsesListingGridMessageGrid extends AController
 {
     public $error = [];
-    public $data = [];
 
     public function main()
     {
@@ -41,9 +42,10 @@ class ControllerResponsesListingGridMessageGrid extends AController
         $this->loadLanguage('tool/message_manager');
         if (!$this->user->canAccess('tool/message_manager')) {
             $response = new stdClass ();
+            $response->userdata = new stdClass();
             $response->userdata->error = sprintf(
-                                                $this->language->get('error_permission_access'),
-                                                'tool/message_manager'
+                $this->language->get('error_permission_access'),
+                'tool/message_manager'
             );
             $this->load->library('json');
             $this->response->setOutput(AJson::encode($response));
@@ -54,8 +56,8 @@ class ControllerResponsesListingGridMessageGrid extends AController
 
         //Prepare filter config
         $grid_filter_params = array_merge(
-                                ['title', 'date_added', 'status'],
-                                (array)$this->data['grid_filter_params']
+            ['title', 'date_added', 'status'],
+            (array) $this->data['grid_filter_params']
         );
         $filter = new AFilter(['method' => 'post', 'grid_filter_params' => $grid_filter_params]);
 
@@ -108,27 +110,27 @@ class ControllerResponsesListingGridMessageGrid extends AController
 
         $this->load->library('json');
         $this->response->setOutput(AJson::encode($this->data['response']));
-
     }
 
     /**
-     * @return mixed
      * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws AException|ReflectionException
      */
     public function update()
     {
-
         if (!$this->user->canModify('listing_grid/message_grid')) {
             $error = new AError('');
-            return $error->toJSONResponse(
+            $error->toJSONResponse(
                 'NO_PERMISSIONS_402',
                 [
-                    'error_text'  => sprintf($this->language->get('error_permission_modify'),
-                        'listing_grid/message_grid'),
+                    'error_text'  => sprintf(
+                        $this->language->get('error_permission_modify'),
+                        'listing_grid/message_grid'
+                    ),
                     'reset_value' => true,
-                ]);
+                ]
+            );
+            return;
         }
 
         //init controller data
@@ -150,9 +152,9 @@ class ControllerResponsesListingGridMessageGrid extends AController
                 if ($this->data['message']) {
                     $this->loadLanguage('tool/message_manager');
                     $this->data['message']["message"] = str_replace(
-                                                                    "#link-text#",
-                                                                    $this->language->get('text_linktext'),
-                                                                    $this->data['message'] ["message"]
+                        "#link-text#",
+                        $this->language->get('text_linktext'),
+                        $this->data['message'] ["message"]
                     );
                     switch ($this->data['message'] ['status']) {
                         case 'W' :
@@ -165,10 +167,10 @@ class ControllerResponsesListingGridMessageGrid extends AController
                             $this->data['message'] ['status'] = $this->language->get('text_notice');
                             break;
                     }
-                    $this->data['message'] ['date_formatted'] = \H::dateISO2Display(
-                                                                    $this->data['message'] ['date_added'],
-                                                                    $this->language->get('date_format_short')
-                                                                        .' '.$this->language->get('time_format')
+                    $this->data['message'] ['date_formatted'] = H::dateISO2Display(
+                        $this->data['message'] ['date_added'],
+                        $this->language->get('date_format_short')
+                        .' '.$this->language->get('time_format')
                     );
                 } else {
                     $this->data['message'] ["message"] = $this->language->get('text_not_found');
@@ -189,13 +191,12 @@ class ControllerResponsesListingGridMessageGrid extends AController
 
     public function getNotifies()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $ret = [
-                'total' => '',
-                'total_title' => '',
-                'shortlist'   => []
+            'total'       => '',
+            'total_title' => '',
+            'shortlist'   => [],
         ];
 
         $this->loadLanguage('tool/message_manager');
@@ -205,8 +206,10 @@ class ControllerResponsesListingGridMessageGrid extends AController
             $ret['total_title'] = sprintf($this->language->get('text_notifier_title'), $ret['total']);
             foreach ($ret['shortlist'] as &$m) {
                 $m['message'] = mb_substr($m['message'], 0, 30).'...';
-                $m['href'] = $this->html->getSecureURL('listing_grid/message_grid/update',
-                    '&oper=show&readonly=1&id='.$m['msg_id']);
+                $m['href'] = $this->html->getSecureURL(
+                    'listing_grid/message_grid/update',
+                    '&oper=show&readonly=1&id='.$m['msg_id']
+                );
             }
         }
 

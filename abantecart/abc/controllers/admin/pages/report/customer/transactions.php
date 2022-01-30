@@ -58,8 +58,8 @@ class ControllerPagesReportCustomerTransactions extends AController
             // url to load data from
             'url'            => $this->html->getSecureURL('listing_grid/report_customer/transactions'),
             // default sort column
-            'sortname'       => 'name',
-            'sortorder'      => 'asc',
+            'sortname'       => 'date_added',
+            'sortorder'      => 'desc',
             'columns_search' => true,
             'multiselect'    => 'false',
             // actions

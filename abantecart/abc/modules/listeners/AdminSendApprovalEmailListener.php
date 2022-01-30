@@ -94,19 +94,14 @@ class AdminSendApprovalEmailListener
             $mail->setTo($customer_info['email']);
             $mail->setFrom($config->get('store_main_email'));
             $mail->setSender($store_info->store_name);
-            if($mail->setTemplate(
-                'admin_approval_email',
-                $this->data,
-                $this->registry->get('language')->getContentLanguageID())
-            ){
-                if (is_file(ABC::env('DIR_RESOURCES').$store_info->config_mail_logo)) {
-                    $mail->addAttachment(
-                        ABC::env('DIR_RESOURCES').$store_info->config_mail_logo,
-                        md5(pathinfo($store_info->config_mail_logo, PATHINFO_FILENAME))
-                        .'.'.pathinfo($store_info->config_mail_logo, PATHINFO_EXTENSION));
-                }
-                $mail->send();
+            $mail->setTemplate('admin_approval_email', $this->data, $this->registry->get('language')->getContentLanguageID());
+            if (is_file(ABC::env('DIR_RESOURCES').$store_info->config_mail_logo)) {
+                $mail->addAttachment(
+                    ABC::env('DIR_RESOURCES').$store_info->config_mail_logo,
+                    md5(pathinfo($store_info->config_mail_logo, PATHINFO_FILENAME))
+                    .'.'.pathinfo($store_info->config_mail_logo, PATHINFO_EXTENSION));
             }
+            $mail->send();
         }
 
 

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,13 +21,22 @@
 namespace abc\core\engine;
 
 use abc\core\ABC;
+use abc\core\cache\ACache;
+use abc\core\lib\AConfig;
+use abc\core\lib\ADB;
+use abc\core\lib\AException;
+use abc\core\lib\ALanguageManager;
+use abc\core\lib\ARequest;
+use abc\core\lib\ASession;
 use abc\core\view\AView;
 use abc\core\lib\ADataset;
 use abc\core\lib\AError;
 use abc\core\lib\AFile;
+use abc\models\admin\ModelLocalisationCountry;
+use Exception;
 use H;
 use ReCaptcha\ReCaptcha;
-
+use ReflectionException;
 
 /**
  * Load form data, render output
@@ -98,12 +107,14 @@ class AForm
     protected $form_edit_action;
 
     /**
-     * @param  string $form_edit_action
+     * @param string $form_edit_action
      */
     public function __construct($form_edit_action = '')
     {
         $this->registry = Registry::getInstance();
-        $this->page_id = $this->layout->page_id;
+        if ($this->layout) {
+            $this->page_id = $this->layout->page_id;
+        }
         $this->errors = [];
         $this->form_edit_action = $form_edit_action;
     }
@@ -119,7 +130,7 @@ class AForm
     }
 
     /**
-     * @param  array $errors - array of validation errors - field_name -=> error
+     * @param array $errors - array of validation errors - field_name -=> error
      *
      * @void
      */
@@ -135,6 +146,7 @@ class AForm
      *
      * @return bool
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
      */
     public function loadFromDb($name)
     {
@@ -159,11 +171,12 @@ class AForm
      *
      * @return bool
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
      */
     protected function loadForm($name)
     {
-        $language_id = (int)$this->config->get('storefront_language_id');
-        $store_id = (int)$this->config->get('config_store_id');
+        $language_id = (int) $this->config->get('storefront_language_id');
+        $store_id = (int) $this->config->get('config_store_id');
         $cache_key = 'forms.'.$name;
         $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id.'_lang_'.$language_id;
         $form = $this->cache->get($cache_key);
@@ -172,12 +185,13 @@ class AForm
             return false;
         }
 
-        $query = $this->db->query("SELECT f.*, fd.description
-                                    FROM ".$this->db->table_name("forms")." f
-                                    LEFT JOIN ".$this->db->table_name("form_descriptions")." fd
-                                        ON ( f.form_id = fd.form_id AND fd.language_id = '".$language_id."' )
-                                    WHERE f.form_name = '".$this->db->escape($name)."'
-                                            AND f.status = 1 "
+        $query = $this->db->query(
+            "SELECT f.*, fd.description
+            FROM ".$this->db->table_name("forms")." f
+            LEFT JOIN ".$this->db->table_name("form_descriptions")." fd
+                ON ( f.form_id = fd.form_id AND fd.language_id = '".$language_id."' )
+            WHERE f.form_name = '".$this->db->escape($name)."'
+                    AND f.status = 1 "
         );
 
         if (!$query->num_rows) {
@@ -194,14 +208,13 @@ class AForm
      * load form fields data into this->fields variable
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function loadFields()
     {
-
-        $language_id = (int)$this->config->get('storefront_language_id');
-        $store_id = (int)$this->config->get('config_store_id');
+        $language_id = (int) $this->config->get('storefront_language_id');
+        $store_id = (int) $this->config->get('config_store_id');
         $cache_key = 'forms.'.$this->form['form_name'].'.fields';
         $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id.'_lang_'.$language_id;
         $fields = $this->cache->get($cache_key);
@@ -211,25 +224,25 @@ class AForm
         }
 
         $query = $this->db->query(
-                "SELECT f.*, fd.name, fd.description, fd.error_text
+            "SELECT f.*, fd.name, fd.description, fd.error_text
                 FROM ".$this->db->table_name("fields")." f
                 LEFT JOIN ".$this->db->table_name("field_descriptions")." fd
                     ON ( f.field_id = fd.field_id AND fd.language_id = '".$language_id."' )
                 WHERE f.form_id = '".$this->form['form_id']."'
                     AND f.status = 1
-                ORDER BY f.sort_order");
+                ORDER BY f.sort_order"
+        );
         $this->fields = [];
         if ($query->num_rows) {
             foreach ($query->rows as $row) {
-                if (H::has_value($row['settings'])) {
-                    $row['settings'] = unserialize($row['settings']);
-                }
+                $row['settings'] = $row['settings'] ? unserialize($row['settings']) : [];
                 $this->fields[$row['field_id']] = $row;
                 $query = $this->db->query(
                     "SELECT *
                     FROM ".$this->db->table_name("field_values")." 
                     WHERE field_id = '".$row['field_id']."'
-                    AND language_id = '".$language_id."'");
+                    AND language_id = '".$language_id."'"
+                );
                 if ($query->num_rows) {
                     $values = unserialize($query->row['value']);
                     usort($values, ['self', 'sortBySortOrder']);
@@ -237,7 +250,6 @@ class AForm
                         $this->fields[$row['field_id']]['options'][$value['name']] = $value['name'];
                     }
                     $this->fields[$row['field_id']]['value'] = $values[0]['name'];
-
                 }
             }
         }
@@ -262,13 +274,13 @@ class AForm
      * load form fields groups data into this->groups variable
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function loadGroups()
     {
-        $language_id = (int)$this->config->get('storefront_language_id');
-        $store_id = (int)$this->config->get('config_store_id');
+        $language_id = (int) $this->config->get('storefront_language_id');
+        $store_id = (int) $this->config->get('config_store_id');
         $cache_key = 'forms.'.$this->form['form_name'].'.groups';
         $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id.'_lang_'.$language_id;
         $groups = $this->cache->get($cache_key);
@@ -345,6 +357,7 @@ class AForm
      * @param string $fname
      *
      * @return array with field data
+     * @throws ReflectionException
      */
     public function getField($fname)
     {
@@ -388,7 +401,7 @@ class AForm
     /**
      * assign array of field with values.
      *
-     * @param  array $values - array of field name -> value
+     * @param array $values - array of field name -> value
      *
      * @return void
      */
@@ -423,11 +436,11 @@ class AForm
      * @param array $data - array with field data
      *
      * @return object  - AHtml form element
-     * @throws \abc\core\lib\AException
+     * @throws AException|ReflectionException
      */
     public function getFieldHtml($data)
     {
-        $data['form'] = $this->form['form_name'];
+        $data['form'] = $this->form['form_name'] ?: '';
 
         if ($data['type'] == 'form') {
             $data['javascript'] = $this->addFormJs();
@@ -440,9 +453,8 @@ class AForm
      * Render the form elements only
      *
      * @return string html
-     * @throws \abc\core\lib\AException
-     * @throws \ReflectionException
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws AException|ReflectionException
      */
     public function loadExtendedFields()
     {
@@ -453,12 +465,12 @@ class AForm
      * add javascript to implement form behaviour based on form_edit_action parameter
      *
      * @return string
-     * @throws \abc\core\lib\AException
+     * @throws AException|ReflectionException
      */
     protected function addFormJs()
     {
         /**
-         * @var \abc\core\lib\ALanguageManager
+         * @var ALanguageManager
          */
         $language = $this->registry->get('language');
         $view = new AView($this->registry, 0);
@@ -467,7 +479,7 @@ class AForm
             case 'ST': //standards
                 $view->batchAssign(
                     [
-                        'id' => $this->form['form_name'],
+                        'id' => $this->form['form_name'] ?? '',
                     ]
                 );
                 $output = $view->fetch('form/form_js_st.tpl');
@@ -475,10 +487,10 @@ class AForm
             case 'HS': //highlight on change and show save button
                 $view->batchAssign(
                     [
-                        'id'              => $this->form['form_name'],
+                        'id'              => $this->form['form_name'] ?? '',
                         'button_save'     => $language->get('button_save'),
                         'button_reset'    => $language->get('button_reset'),
-                        'update'          => $this->form['update'],
+                        'update'          => $this->form['update'] ?? '',
                         'text_processing' => $language->get('text_processing'),
                         'text_saved'      => $language->get('text_saved'),
                     ]
@@ -508,11 +520,10 @@ class AForm
      * @return string html
      * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws AException|ReflectionException
      */
     public function getFormHtml($fieldsOnly = false)
     {
-
         // if no form was loaded return empty string
         if (empty($this->form)) {
             return '';
@@ -544,10 +555,8 @@ class AForm
 
             //custom data based on the HTML element type
             switch ($data['type']) {
+                case 'checkboxgroup':
                 case 'multiselectbox' :
-                    $data['name'] .= '[]';
-                    break;
-                case 'checkboxgroup' :
                     $data['name'] .= '[]';
                     break;
                 case 'captcha' :
@@ -572,7 +581,7 @@ class AForm
                             'type'        => $data['type'],
                             'title'       => $field['name'],
                             'description' => (!empty($field['description']) ? $field['description'] : ''),
-                            'error'       => ($this->errors[$field['field_name']] ?: ''),
+                            'error'       => ($this->errors[$field['field_name']] ? : ''),
                             'item_html'   => $item->getHtml(),
                         ]
                     );
@@ -610,10 +619,10 @@ class AForm
                 'name'   => $this->form['form_name'],
                 'attr'   => ' class="form" ',
                 'action' => $this->html->getSecureURL(
-                                                    $this->form['controller'],
-                                                    '&form_id='.$this->form['form_id'],
-                                                    true
-                            )
+                    $this->form['controller'],
+                    '&form_id='.$this->form['form_id'],
+                    true
+                ),
             ];
             $form_open = HtmlElementFactory::create($data);
             $form_close = $view->fetch('form/form_close.tpl');
@@ -642,7 +651,7 @@ class AForm
      * @param array $data - usually it's a $_POST
      *
      * @return array - array with error text for each of invalid field data
-     * @throws \Exception
+     * @throws Exception
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function validateFormData($data = [])
@@ -698,7 +707,6 @@ class AForm
 
             //for captcha or recaptcha
             if ($field['element_type'] == 'K' || $field['element_type'] == 'J') {
-
                 if ($this->config->get('config_recaptcha_secret_key')) {
                     require_once ABC::env('DIR_VENDOR').'google/recaptcha/src/autoload.php';
                     $recaptcha = new ReCaptcha($this->config->get('config_recaptcha_secret_key'));
@@ -721,8 +729,8 @@ class AForm
             ) {
                 $fm = new AFile();
                 $file_path_info = $fm->getUploadFilePath(
-                                                        $data['settings']['directory'],
-                                                        $this->request->files[$field['field_name']]['name']
+                    $data['settings']['directory'],
+                    $this->request->files[$field['field_name']]['name']
                 );
                 $file_data = [
                     'name'     => $file_path_info['name'],
@@ -750,8 +758,9 @@ class AForm
      * @param array $files - usually it's a $_FILES array
      *
      * @return array - list of absolute paths of moved files
-     * @throws \abc\core\lib\AException
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function processFileUploads($files = [])
     {

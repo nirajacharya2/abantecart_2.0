@@ -29,6 +29,7 @@ use abc\core\lib\AResponse;
 use abc\core\lib\AWarning;
 use abc\core\view\AView;
 use H;
+use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 
@@ -75,6 +76,7 @@ final class ADispatcher
      * @param string $rt
      * @param array $args
      *
+     * @throws ReflectionException
      */
     public function __construct($rt, $args = [])
     {
@@ -220,7 +222,7 @@ final class ADispatcher
      * @param string $route
      *
      * @return string
-     * @throws ReflectionException
+     * @throws ReflectionException|AException
      */
     protected function dispatchPrePost($route)
     {
@@ -248,7 +250,7 @@ final class ADispatcher
      * @param string $controller
      *
      * @return string
-     * @throws ReflectionException
+     * @throws ReflectionException|AException
      */
     public function dispatchGetOutput($controller = '')
     {
@@ -264,11 +266,11 @@ final class ADispatcher
      * @param AController|string $parent_controller
      *
      * @return null|string
-     * @throws ReflectionException
+     * @throws ReflectionException|AException
      */
     public function dispatch($parent_controller = '')
     {
-        ADebug::checkpoint(''.$this->class.'/'.$this->method.' dispatch START');
+        ADebug::checkpoint($this->class.'/'.$this->method.' dispatch START');
 
         //Process the controller, layout and children
 
@@ -286,7 +288,7 @@ final class ADispatcher
             $url = $this->request->server['REQUEST_URI'];
             $error = new AError(
                 'Error: URL: '.$url.' Could not load controller '
-                    .$this->controller.'! Call stack: '.$function_stack.'',
+                    .$this->controller.'! Call stack: '.$function_stack,
                 AC_ERR_CLASS_CLASS_NOT_EXIST);
             $error->toLog()->toDebug();
             return null;
@@ -330,6 +332,25 @@ final class ADispatcher
                     $args = [];
                 } else {
                     $args = $this->args;
+                }
+
+                $rfl = new ReflectionClass($controller);
+                $method = $rfl->getMethod($this->method);
+                if($method) {
+                    $allParameters = $method->getParameters();
+                    if($allParameters) {
+                        $methodParams = [];
+                        foreach ($allParameters as $p) {
+                            if (isset($args[$p->name])) {
+                                $methodParams[$p->name] = $args[$p->name];
+                            }
+                        }
+                        if($methodParams && H::isAssocArray($args)) {
+                            $args = $methodParams;
+                        }elseif(!$methodParams && H::isAssocArray($args)){
+                            $args = [];
+                        }
+                    }
                 }
 
                 $dispatch = call_user_func_array([$controller, $this->method], $args);
@@ -392,14 +413,14 @@ final class ADispatcher
                 //add pre and post controllers output
                 $this->response->setOutput($output_pre.$this->response->getOutput().$output_post);
 
-                //clean up and destroy the object
+            //clean up and destroy the object
                 unset($controller, $dispatch);
-            } else {
-                $err = new AError(
-                    'Error: controller method not exist '.$this->class.'::'.$this->method.'!',
-                    AC_ERR_CLASS_METHOD_NOT_EXIST
-                );
-                $err->toLog()->toDebug();
+        } else {
+            $err = new AError(
+                'Error: controller method not exist '.$this->class.'::'.$this->method.'!',
+                AC_ERR_CLASS_METHOD_NOT_EXIST
+            );
+            $err->toLog()->toDebug();
                 if (in_array($this->controller_type, ['responses', 'api', 'task'])) {
                     $dd = new ADispatcher('responses/error/ajaxerror/not_found');
                     $dd->dispatch();

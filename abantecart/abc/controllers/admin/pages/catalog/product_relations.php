@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -28,15 +28,13 @@ use abc\models\catalog\Product;
 
 class ControllerPagesCatalogProductRelations extends AController
 {
-    private $error = [];
-    public $data = [];
+    public $error = [];
 
     public function main()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
-        $product_id = (int)$this->request->get['product_id'];
+        $product_id = (int) $this->request->get['product_id'];
         $language_id = $this->language->getContentLanguageID();
 
         $this->loadLanguage('catalog/product');
@@ -52,7 +50,7 @@ class ControllerPagesCatalogProductRelations extends AController
         }
 
         if ($this->request->is_POST()) {
-            $this->request->post['product_category'] = $this->request->post['product_category'] ?: [];
+            $this->request->post['product_category'] = $this->request->post['product_category'] ? : [];
             Product::updateProductLinks($product_id, $this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
             abc_redirect($this->html->getSecureURL('catalog/product_relations', '&product_id='.$product_id));
@@ -161,27 +159,24 @@ class ControllerPagesCatalogProductRelations extends AController
         //load only prior saved products
         $this->data['products'] = [];
         if (count($this->data['product_related'])) {
-            $ids = [];
-            foreach ($this->data['product_related'] as $id) {
-                $ids[] = (int)$id;
-            }
+            $ids = array_map('intval', $this->data['product_related']);
 
             $this->loadModel('catalog/product');
             $filter = ['subsql_filter' => 'p.product_id in ('.implode(',', $ids).')'];
             $results = $this->model_catalog_product->getProducts($filter);
 
-            $product_ids = [];
-            foreach ($results as $result) {
-                $product_ids[] = (int)$result['product_id'];
-            }
+            $product_ids = array_column($results, 'product_id');
+
             //get thumbnails by one pass
             $resource = new AResource('image');
-            $thumbnails = $resource->getMainThumbList(
-                'products',
-                $product_ids,
-                $this->config->get('config_image_grid_width'),
-                $this->config->get('config_image_grid_height')
-            );
+            $thumbnails = $product_ids
+                ? $resource->getMainThumbList(
+                    'products',
+                    $product_ids,
+                    $this->config->get('config_image_grid_width'),
+                    $this->config->get('config_image_grid_height')
+                )
+                : [];
 
             foreach ($results as $r) {
                 $thumbnail = $thumbnails[$r['product_id']];
@@ -190,15 +185,22 @@ class ControllerPagesCatalogProductRelations extends AController
             }
         }
 
-        $this->data['form']['fields']['related'] = $form->getFieldHtml([
-            'type'        => 'multiselectbox',
-            'name'        => 'product_related[]',
-            'value'       => $this->data['product_related'],
-            'options'     => $this->data['products'],
-            'style'       => 'chosen',
-            'ajax_url'    => $this->html->getSecureURL('r/product/product/products', '&exclude[]='.$product_id),
-            'placeholder' => $this->language->get('text_select_from_lookup'),
-        ]);
+        $this->data['form']['fields']['related'] = $form->getFieldHtml(
+            [
+               'type'        => 'multiselectbox',
+               'name'        => 'product_related[]',
+               'value'       => $this->data['product_related'],
+               'options'     => $this->data['products'],
+               'style'       => 'chosen',
+               'ajax_url'    => $this->html->getSecureURL(
+                   'r/product/product/products',
+                   '&exclude[]='.$product_id
+               ),
+               'placeholder' => $this->language->get(
+                   'text_select_from_lookup'
+               ),
+           ]
+        );
 
         $this->data['form']['fields']['store'] = $form->getFieldHtml([
             'type'    => 'checkboxgroup',
@@ -208,8 +210,10 @@ class ControllerPagesCatalogProductRelations extends AController
             'style'   => 'chosen',
         ]);
         if ($this->config->get('config_embed_status')) {
-            $this->data['embed_url'] = $this->html->getSecureURL('common/do_embed/product',
-                '&product_id='.$product_id);
+            $this->data['embed_url'] = $this->html->getSecureURL(
+                'common/do_embed/product',
+                '&product_id='.$product_id
+            );
         }
         $this->addChild('pages/catalog/product_summary', 'summary_form', 'pages/catalog/product_summary.tpl');
         $this->view->assign('help_url', $this->gen_help_url('product_relations'));

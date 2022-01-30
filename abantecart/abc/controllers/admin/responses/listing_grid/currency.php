@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,17 +22,17 @@ namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
 use abc\core\lib\AError;
+use abc\core\lib\AException;
 use abc\core\lib\AJson;
 use abc\models\locale\Currency;
 use abc\models\order\Order;
+use abc\models\QueryBuilder;
 use H;
+use ReflectionException;
 use stdClass;
-
 
 class ControllerResponsesListingGridCurrency extends AController
 {
-    public $data = [];
-
     public function main()
     {
 
@@ -69,11 +69,9 @@ class ControllerResponsesListingGridCurrency extends AController
         $response->page = $page;
         $response->total = $total_pages;
         $response->records = $total;
-
+        /** @var Currency|QueryBuilder $currencyInstance */
         $currencyInstance = new Currency();
-
         $results = $currencyInstance->setGridRequest($data)->get()->toArray();
-
         $i = 0;
         foreach ($results as $result) {
 
@@ -177,7 +175,7 @@ class ControllerResponsesListingGridCurrency extends AController
                             }
 
                             if (isset($this->request->post[$f][$id])) {
-                                $err = $this->_validateField($f, $this->request->post[$f][$id]);
+                                $err = $this->_validateField($f, $this->request->post[$f][$id], $id);
                                 if (!empty($err)) {
                                     $error = new AError('');
                                     return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
@@ -205,8 +203,7 @@ class ControllerResponsesListingGridCurrency extends AController
      *
      * @return void
      * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws \ReflectionException|AException
      */
     public function update_field()
     {
@@ -217,25 +214,28 @@ class ControllerResponsesListingGridCurrency extends AController
         $this->loadLanguage('localisation/currency');
         if (!$this->user->canModify('listing_grid/currency')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            $error->toJSONResponse('NO_PERMISSIONS_402',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/currency'),
                     'reset_value' => true,
-                ]);
+                ]
+            );
+            return;
         }
 
         if (isset($this->request->get['id'])) {
             //request sent from edit form. ID in url
             foreach ($this->request->post as $key => $value) {
-                $err = $this->_validateField($key, $value);
+                $err = $this->_validateField($key, $value, $this->request->get['id']);
                 if (!empty($err)) {
                     $error = new AError('');
-                    return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                    $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                    return;
                 }
                 $data = [$key => $value];
                 Currency::find($this->request->get['id'])->update($data);
             }
-            return null;
+            return;
         }
 
         //request sent from jGrid. ID is key of array
@@ -243,19 +243,14 @@ class ControllerResponsesListingGridCurrency extends AController
         foreach ($allowedFields as $f) {
             if (isset($this->request->post[$f])) {
                 foreach ($this->request->post[$f] as $k => $v) {
-                    $err = $this->_validateField($f, $v);
+                    $err = $this->_validateField($f, $v, $k);
+
                     if (!empty($err)) {
                         $error = new AError('');
-                        return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                        $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                        return;
                     }
-                    $result = Currency::find($k)->update([$f => $v]);
-                    if (!$result) {
-                        if ($f == 'status') {
-                            $this->messages->saveNotice('Currency warning', 'Warning: You tried to disable the only enabled currency of cart!');
-                        }
-                        $this->response->setOutput('error!');
-                        return null;
-                    }
+                    Currency::find($k)->update([$f => $v]);
                 }
             }
         }
@@ -264,7 +259,7 @@ class ControllerResponsesListingGridCurrency extends AController
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
-    private function _validateField($field, $value)
+    protected function _validateField($field, $value, $id = 0)
     {
         $err = '';
         switch ($field) {
@@ -276,6 +271,20 @@ class ControllerResponsesListingGridCurrency extends AController
             case 'code':
                 if (mb_strlen($value) != 3) {
                     $err = $this->language->get('error_code');
+                }
+                break;
+            case 'status':
+                // prevent disabling the only enabled currency in cart
+                $enabled = [];
+                $all = Currency::all();
+                foreach ($all as $c) {
+                    if ($c->status && $c->currency_id != $id) {
+                        $enabled[] = $c;
+                    }
+                }
+
+                if (!$enabled && !$value) {
+                    $err = 'You tried to disable the only enabled currency of cart!';
                 }
                 break;
             default:

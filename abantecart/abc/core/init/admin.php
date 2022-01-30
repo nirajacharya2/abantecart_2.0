@@ -1,8 +1,9 @@
 <?php
 use abc\core\ABC;
+use abc\core\engine\Registry;
 use abc\core\lib\AConfig;
 use abc\core\lib\AExtensionManager;
-
+$registry = Registry::getInstance();
 $lib_list = [
     'layout_manager',
     'content_manager',
@@ -52,7 +53,7 @@ $registry->set('extension_manager', new AExtensionManager());
 
 //Now we have session, reload config for store if provided or set in session
 $session = $registry->get('session');
-if (H::has_value($request->get['store_id']) || H::has_value($session->data['current_store_id'])) {
+if (H::has_value($registry::request()?->get['store_id']) || H::has_value($session?->data['current_store_id'])) {
     $config = new AConfig($registry);
     $registry->set('config', $config);
 }

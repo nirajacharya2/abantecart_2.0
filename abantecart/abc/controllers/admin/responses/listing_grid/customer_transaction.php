@@ -73,9 +73,16 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
         }
         if (H::has_value($this->request->get['date_start'])) {
             $data['filter']['date_start'] = H::dateDisplay2ISO($this->request->get['date_start']);
+        }else{
+            $data['filter']['date_start'] = date(
+                'Y-m-d',
+                mktime(0, 0, 0, date("m")-1, date("d"), date("Y"))
+            );
         }
         if (H::has_value($this->request->get['date_end'])) {
             $data['filter']['date_end'] = H::dateDisplay2ISO($this->request->get['date_end']);
+        }else{
+            $data['filter']['date_end'] = date('Y-m-d');
         }
 
         $allowedFields = array_merge(

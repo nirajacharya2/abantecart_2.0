@@ -1,4 +1,4 @@
-<?php
+<?php   
 /*------------------------------------------------------------------------------
   $Id$
 
@@ -25,35 +25,31 @@ use abc\core\engine\AController;
 
 class ControllerCommonTemplateDebug extends AController
 {
-    public function main($instance_id = 0, $args = [])
-    {
-        //init controller data
-        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $block_details = $this->layout->getBlockDetails($args['block_id']);
-        $parent_block = $this->layout->getBlockDetails($block_details['parent_instance_id']);
+	public function main($instance_id = 0, $args = []) {
+		//init controller data
+        $this->extensions->hk_InitData($this,__FUNCTION__);
+		
+		$block_details = $this->layout->getBlockDetails($args['block_id']);
+		$parent_block = $this->layout->getBlockDetails($block_details['parent_instance_id']);
 
-        $this->data['id'] = $args['block_id'];
-        $this->data['name'] = $block_details['block_txt_id'];
-        $this->data['tpl_path'] = $args['block_tpl'];
-        $this->data['controller'] = $block_details['controller'];
-        $this->data['controller_path'] = str_replace(ABC::env('DIR_ROOT').'/', '', $args['block_controller']);
-        $this->data['parent_block'] = $parent_block['block_txt_id'];
+		$this->data['id'] = $args['block_id'];
+		$this->data['name'] = $block_details['block_txt_id'];
+		$this->data['tpl_path'] = $args['block_tpl'];
+		$this->data['controller'] = $block_details['controller'];
+		$this->data['controller_path'] = str_replace(ABC::env('DIR_ROOT') . '/', '', $args['block_controller']);
+		$this->data['parent_block'] = $parent_block['block_txt_id'];
         $this->data['parent'] = [];
-        $this->data['parent']['id'] = $parent_block['instance_id'];
-        $this->data['parent']['name'] = $parent_block['block_txt_id'];
-        $this->data['parent']['tpl_path'] = $args['parent_tpl'];
-        $this->data['parent']['controller'] = $parent_block['controller'];
-        $this->data['parent']['controller_path'] = str_replace(
-            ABC::env('DIR_ROOT').'/',
-            '',
-            $args['parent_controller']
-        );
-
-        $this->view->batchAssign($this->data);
-
-        $this->processTemplate('common/template_debug.tpl');
-        //init controller data
-        $this->extensions->hk_UpdateData($this, __FUNCTION__);
-    }
+		$this->data['parent']['id'] = $parent_block['instance_id'];
+		$this->data['parent']['name'] = $parent_block['block_txt_id'];
+		$this->data['parent']['tpl_path'] = $args['parent_tpl'];
+		$this->data['parent']['controller'] = $parent_block['controller'];
+		$this->data['parent']['controller_path'] = str_replace(ABC::env('DIR_ROOT') . '/', '', $args['parent_controller']);
+		
+		$this->view->batchAssign($this->data);
+		
+		$this->processTemplate('common/template_debug.tpl');
+		//init controller data
+        $this->extensions->hk_UpdateData($this,__FUNCTION__);
+	}
 }

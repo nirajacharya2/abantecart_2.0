@@ -23,12 +23,7 @@ namespace abc\controllers\storefront;
 use abc\core\engine\AController;
 use Psr\SimpleCache\InvalidArgumentException;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
-class ControllerBlocksHTMLBlock extends AController
-{
+class ControllerBlocksHTMLBlock extends AController {
 
     public function main($instance_id = 0)
     {

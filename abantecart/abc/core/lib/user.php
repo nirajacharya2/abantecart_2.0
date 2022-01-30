@@ -125,7 +125,7 @@ final class AUser
             $this->userGroupId = (int)$user->user_group_id;
             $this->username = $user->username;
 
-            $this->lastLogin = $this->session->data['user_last_login'] = $user->last_login;
+            $this->lastLogin = $this->session->data['user_last_login'] = (string)$user->last_login;
             if (!$this->lastLogin || $this->lastLogin == 'null' || $this->lastLogin == '0000-00-00 00:00:00') {
                 $this->session->data['user_last_login'] = $this->lastLogin = '';
             }

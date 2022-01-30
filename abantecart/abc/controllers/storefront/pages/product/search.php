@@ -40,7 +40,6 @@ class ControllerPagesProductSearch extends AController
 {
     protected $category;
     protected $path;
-    public $data = [];
 
     use ProductListingTrait;
 
@@ -108,13 +107,15 @@ class ControllerPagesProductSearch extends AController
             $url .= '&limit='.$request['limit'];
         }
 
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getNonSecureURL('product/search', $url),
-            'text'      => $this->language->get('heading_title'),
-            'separator' => $this->language->get('text_separator'),
-        ]);
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getNonSecureURL('product/search', $url),
+                'text'      => $this->language->get('heading_title'),
+                'separator' => $this->language->get('text_separator'),
+            ]
+        );
 
-        $page = isset($request['page']) ? $request['page'] : 1;
+        $page = $request['page'] ?? 1;
 
         $sorting_href = $request['sort'];
         if (!$sorting_href || !isset($this->data['sorts'][$request['sort']])) {
@@ -141,26 +142,30 @@ class ControllerPagesProductSearch extends AController
                 'name'    => 'category_id',
                 'options' => $options,
                 'value'   => $request['category_id'],
-            ]);
+            ]
+        );
 
-        $this->data['description'] = $this->html->buildElement([
-            'type'       => 'checkbox',
-            'id'         => 'description',
-            'name'       => 'description',
-            'checked'    => (int)$request['description'],
-            'value'      => 1,
-            'label_text' => $this->language->get('entry_description'),
-        ]);
+        $this->data['description'] = $this->html->buildElement(
+            [
+                'type'       => 'checkbox',
+                'id'         => 'description',
+                'name'       => 'description',
+                'checked'    => (int)$request['description'],
+                'value'      => 1,
+                'label_text' => $this->language->get('entry_description'),
+            ]
+        );
 
         $this->data['model'] = $this->html->buildElement(
             [
                 'type'       => 'checkbox',
                 'id'         => 'model',
                 'name'       => 'model',
-                'checked'    => (bool)$request['model'],
+                'checked'    => (bool) $request['model'],
                 'value'      => 1,
                 'label_text' => $this->language->get('entry_model'),
-            ]);
+            ]
+        );
 
         $this->data['submit'] = $this->html->buildElement([
             'type'  => 'button',
@@ -390,12 +395,14 @@ class ControllerPagesProductSearch extends AController
                     ];
                 }
 
-                $sorting = $this->html->buildElement([
-                    'type'    => 'selectbox',
-                    'name'    => 'sort',
-                    'options' => $sort_options,
-                    'value'   => $sort.'-'.$order,
-                ]);
+                $sorting = $this->html->buildElement(
+                    [
+                        'type'    => 'selectbox',
+                        'name'    => 'sort',
+                        'options' => $sort_options,
+                        'value'   => $sort.'-'.$order,
+                    ]
+                );
 
                 $this->data['sorting'] = $sorting;
                 $url = '';

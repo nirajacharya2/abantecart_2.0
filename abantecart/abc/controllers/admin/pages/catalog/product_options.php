@@ -1,11 +1,13 @@
 <?php
+/** @noinspection DuplicatedCode */
+
 /*------------------------------------------------------------------------------
   $Id$
 
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -33,11 +35,23 @@ use H;
 class ControllerPagesCatalogProductOptions extends AController
 {
     public $error = [];
-    /**
-     * @var AttributeManagerInterface
-     */
+    /** @var AttributeManagerInterface */
     protected $attribute_manager;
-    public $data = ['allowed_option_types' => ['I', 'T', 'S', 'M', 'R', 'C', 'G', 'H', 'U', 'B']];
+    public $data = [
+        'allowed_option_types' =>
+            [
+                'I',
+                'T',
+                'S',
+                'M',
+                'R',
+                'C',
+                'G',
+                'H',
+                'U',
+                'B',
+            ],
+    ];
 
     public function main()
     {
@@ -204,7 +218,9 @@ class ControllerPagesCatalogProductOptions extends AController
             'catalog/product_options',
             '&product_id='.$this->request->get['product_id']
         );
-        $this->data['form_title'] = $this->language->get('text_edit').'&nbsp;'.$this->language->get('text_product');
+        $this->data['form_title'] = $this->language->get('text_edit')
+            .'&nbsp;'
+            .$this->language->get('text_product');
         $this->data['update'] = '';
         $form = new AForm('HT');
 
@@ -221,68 +237,90 @@ class ControllerPagesCatalogProductOptions extends AController
             'options' => $options_list,
         ]);
 
-        $form->setForm([
-            'form_name' => 'product_form',
-            'update'    => $this->data['update'],
-        ]);
+        $form->setForm(
+            [
+                'form_name' => 'product_form',
+                'update'    => $this->data['update'],
+            ]
+        );
 
         $this->data['form']['id'] = 'product_form';
-        $this->data['form']['form_open'] = $form->getFieldHtml([
-            'type'   => 'form',
-            'name'   => 'product_form',
-            'action' => $this->data['action'],
-            'attr'   => 'data-confirm-exit="true"  class="form-horizontal"',
-        ]);
-        $this->data['form']['submit'] = $form->getFieldHtml([
-            'type'  => 'button',
-            'name'  => 'submit',
-            'text'  => $this->language->get('button_add'),
-            'style' => 'button1',
-        ]);
-        $this->data['form']['cancel'] = $form->getFieldHtml([
-            'type'  => 'button',
-            'name'  => 'cancel',
-            'text'  => $this->language->get('button_cancel'),
-            'style' => 'button2',
-        ]);
+        $this->data['form']['form_open'] = $form->getFieldHtml(
+            [
+                'type'   => 'form',
+                'name'   => 'product_form',
+                'action' => $this->data['action'],
+                'attr'   => 'data-confirm-exit="true"  class="form-horizontal"',
+            ]
+        );
+        $this->data['form']['submit'] = $form->getFieldHtml(
+            [
+                'type'  => 'button',
+                'name'  => 'submit',
+                'text'  => $this->language->get('button_add'),
+                'style' => 'button1',
+            ]
+        );
+        $this->data['form']['cancel'] = $form->getFieldHtml(
+            [
+                'type'  => 'button',
+                'name'  => 'cancel',
+                'text'  => $this->language->get('button_cancel'),
+                'style' => 'button2',
+            ]
+        );
 
-        $form->setForm([
-            'form_name' => 'new_option_form',
-            'update'    => '',
-        ]);
-        $this->data['attributes'] = $form->getFieldHtml([
-            'type'    => 'selectbox',
-            'name'    => 'attribute_id',
-            'options' => $this->data['attributes'],
-            'style'   => 'chosen',
-        ]);
-        $this->data['option_name'] = $form->getFieldHtml([
-            'type'     => 'input',
-            'name'     => 'option_name',
-            'required' => true,
-        ]);
-        $this->data['status'] = $form->getFieldHtml([
-            'type'  => 'checkbox',
-            'name'  => 'status',
-            'value' => 1,
-            'style' => 'btn_switch',
-        ]);
-        $this->data['sort_order'] = $form->getFieldHtml([
-            'type'  => 'input',
-            'name'  => 'sort_order',
-            'style' => 'small-field',
-        ]);
-        $this->data['required'] = $form->getFieldHtml([
-            'type'  => 'checkbox',
-            'name'  => 'required',
-            'style' => 'btn_switch',
-        ]);
-        $this->data['element_type'] = $form->getFieldHtml([
-            'type'     => 'selectbox',
-            'name'     => 'element_type',
-            'required' => true,
-            'options'  => $element_types,
-        ]);
+        $form->setForm(
+            [
+                'form_name' => 'new_option_form',
+                'update'    => '',
+            ]
+        );
+        $this->data['attributes'] = $form->getFieldHtml(
+            [
+                'type'    => 'selectbox',
+                'name'    => 'attribute_id',
+                'options' => $this->data['attributes'],
+                'style'   => 'chosen',
+            ]
+        );
+        $this->data['option_name'] = $form->getFieldHtml(
+            [
+                'type'     => 'input',
+                'name'     => 'option_name',
+                'required' => true,
+            ]
+        );
+        $this->data['status'] = $form->getFieldHtml(
+            [
+                'type'  => 'checkbox',
+                'name'  => 'status',
+                'value' => 1,
+                'style' => 'btn_switch',
+            ]
+        );
+        $this->data['sort_order'] = $form->getFieldHtml(
+            [
+                'type'  => 'input',
+                'name'  => 'sort_order',
+                'style' => 'small-field',
+            ]
+        );
+        $this->data['required'] = $form->getFieldHtml(
+            [
+                'type'  => 'checkbox',
+                'name'  => 'required',
+                'style' => 'btn_switch',
+            ]
+        );
+        $this->data['element_type'] = $form->getFieldHtml(
+            [
+                'type'     => 'selectbox',
+                'name'     => 'element_type',
+                'required' => true,
+                'options'  => $element_types,
+            ]
+        );
 
         $this->addChild('pages/catalog/product_summary', 'summary_form', 'pages/catalog/product_summary.tpl');
         $object_title = $this->language->get('text_product').' '.$this->language->get('text_option_value');
@@ -342,11 +380,7 @@ class ControllerPagesCatalogProductOptions extends AController
         ) {
             $this->error['warning'] = $this->language->get('error_option_in_group');
         }
-
-        if (!$this->error) {
-            return true;
-        } else {
-            return false;
-        }
+        $this->extensions->hk_ValidateData($this);
+        return (!$this->error);
     }
 }

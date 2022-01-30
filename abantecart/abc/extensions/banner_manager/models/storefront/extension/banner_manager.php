@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,7 +21,7 @@
 namespace abc\extensions\banner_manager\models\storefront\extension;
 
 use abc\core\engine\Model;
-
+use Exception;
 
 class ModelExtensionBannerManager extends Model
 {
@@ -30,20 +30,19 @@ class ModelExtensionBannerManager extends Model
      * @param int $language_id
      *
      * @return array
-     * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws Exception
      */
     public function getBanner($banner_id, $language_id)
     {
-        $banner_id = (int)$banner_id;
-        $language_id = (int)$language_id;
+        $banner_id = (int) $banner_id;
+        $language_id = (int) $language_id;
         if (!$language_id) {
-            $language_id = (int)$this->config->get('storefront_language_id');
+            $language_id = (int) $this->config->get('storefront_language_id');
         }
 
         $cache_key =
             'banner.banner_id_'.$banner_id
-            .'_store_'.(int)$this->config->get('config_store_id')
+            .'_store_'.(int) $this->config->get('config_store_id')
             .'_lang_'.$language_id;
         $ret_data = $this->cache->get($cache_key);
         if ($ret_data !== null) {
@@ -81,20 +80,20 @@ class ModelExtensionBannerManager extends Model
      * @param int $custom_block_id
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getBanners($custom_block_id)
     {
-        $custom_block_id = (int)$custom_block_id;
+        $custom_block_id = (int) $custom_block_id;
         if (!$custom_block_id) {
             return [];
         }
 
         if (!empty($data['content_language_id'])) {
-            $language_id = (int)$data['content_language_id'];
+            $language_id = (int) $data['content_language_id'];
         } else {
-            $language_id = (int)$this->config->get('storefront_language_id');
+            $language_id = (int) $this->config->get('storefront_language_id');
         }
 
         $cache_key = 'banner.group.block_id_'.$custom_block_id
@@ -117,10 +116,10 @@ class ModelExtensionBannerManager extends Model
         }
         $banner_group_name = $content['banner_group_name'];
 
-        $sql
-            = "SELECT *
+        $sql = "SELECT *
                 FROM ".$this->db->table_name("banners")." b
-                LEFT JOIN ".$this->db->table_name("banner_descriptions")." bd ON (b.banner_id = bd.banner_id)
+                LEFT JOIN ".$this->db->table_name("banner_descriptions")." bd 
+                    ON (b.banner_id = bd.banner_id)
                 WHERE bd.language_id = '".$language_id."'
                     AND b.status='1'
                     AND (NOW() BETWEEN CASE WHEN `start_date` IS NULL
@@ -145,24 +144,24 @@ class ModelExtensionBannerManager extends Model
      * @param int $type
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function writeBannerStat($banner_id, $type = 1)
     {
-        $banner_id = (int)$banner_id;
-        $type = (int)$type;
+        $banner_id = (int) $banner_id;
+        $type = (int) $type;
 
         $user_info = [
             'user_id'   => (is_object($this->user) ? $this->user->getId() : ''),
             'user_ip'   => $this->request->getRemoteIP(),
-            'user_host' => $this->request->server['REMOTE_HOST'],
+            'user_host' => $this->request->server['REMOTE_HOST'] ?? '',
             'rt'        => $this->request->get['rt'],
         ];
 
         $sql = "INSERT INTO ".$this->db->table_name("banner_stat")." (`banner_id`, `type`, `store_id`, `user_info`)
                 VALUES ('".$banner_id."',
                         '".$type."',
-                        '".(int)$this->config->get('config_store_id')."',
+                        '".(int) $this->config->get('config_store_id')."',
                         '".$this->db->escape(serialize($user_info))."')";
         $this->db->query($sql);
 

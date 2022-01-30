@@ -67,7 +67,7 @@ trait SaleOrderTrait
             'id'    => $order_info['shipping_method_key'],
             'title' => $order_info['shipping_method'],
         ];
-        $customer_data['payment_method'] = $order_info['payment_method_key'];
+        $customer_data['payment_method_key'] = $order_info['payment_method_key'];
 
         $c_data =& $customer_data;
 
