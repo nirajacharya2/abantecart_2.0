@@ -250,14 +250,17 @@ class CustomerTransaction extends BaseModel
         $customerTransaction = new static;
         $transTable = $customerTransaction->getConnection()->getTablePrefix().$customerTransaction->getTable();
         $now = date('Y-m-d H:i:s');
-        $query = static::selectRaw('sum(credit) - sum(debit) as balance')
-            ->selectRaw('sum(credit) as credit')
-            ->selectRaw('sum(debit) as debit')
-            ->where('customer_id', '=', $customer_id)
-            ->whereRaw( $transTable.".date_added > '".$customer->running_balance_datetime."' AND ".$transTable.".date_added < '".$now."'" )
-            ->first();
-        $balance = $query->balance + $customer->running_balance;
-        return $balance;
+        $db = Registry::db();
+        //use raw query to avoid additional filters inside sql which we can get from Scope-classes
+        $query = $db->query(
+            "SELECT sum(credit) - sum(debit) as balance
+            FROM ".$db->table_name('customer_transactions')."
+            WHERE customer_id = ".(int)$customer_id."
+                AND ".$transTable.".date_added > '".$customer->running_balance_datetime."' 
+                AND ".$transTable.".date_added < '".$now."'"
+        );
+
+        return $query->row['balance'] + $customer->running_balance;
     }
 
     /**
