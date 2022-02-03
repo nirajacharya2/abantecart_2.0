@@ -687,6 +687,7 @@ class AOrder extends ALibBase
                 //mark calculated balance as unknown
                 $customer->running_balance_datetime = null;
                 $customer->running_balance = 0;
+                $customer->save();
             }
         }
 
