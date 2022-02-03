@@ -26,6 +26,7 @@ use abc\core\engine\Registry;
 use abc\models\catalog\Product;
 use abc\models\catalog\ProductOptionValue;
 use abc\models\customer\Address;
+use abc\models\customer\Customer;
 use abc\models\locale\Country;
 use abc\models\locale\ZoneDescription;
 use abc\models\order\Order;
@@ -680,6 +681,14 @@ class AOrder extends ALibBase
         );
         $orderHistory->save();
         $orderData['comment'] = $orderData['comment'].' '.$comment;
+        if($orderData['customer_id']){
+            $customer = Customer::find($orderData['customer_id']);
+            if($customer) {
+                //mark calculated balance as unknown
+                $customer->running_balance_datetime = null;
+                $customer->running_balance = 0;
+            }
+        }
 
         // load language for IM
         $language = new ALanguage($this->registry, $orderData['code']);
@@ -738,7 +747,7 @@ class AOrder extends ALibBase
 
                 //check quantity and send notification when 0 or less
                 if ($stockProduct->get('quantity') <= 0) {
-                    //notify admin with out of stock
+                    //notify admin with "out of stock"
                     $message_arr = [
                         1 => [
                             'message' => sprintf($language->get('im_product_out_of_stock_admin_text'),
