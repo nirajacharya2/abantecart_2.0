@@ -681,15 +681,6 @@ class AOrder extends ALibBase
         );
         $orderHistory->save();
         $orderData['comment'] = $orderData['comment'].' '.$comment;
-        if($orderData['customer_id']){
-            $customer = Customer::find($orderData['customer_id']);
-            if($customer) {
-                //mark calculated balance as unknown
-                $customer->running_balance_datetime = null;
-                $customer->running_balance = 0;
-                $customer->save();
-            }
-        }
 
         // load language for IM
         $language = new ALanguage($this->registry, $orderData['code']);
