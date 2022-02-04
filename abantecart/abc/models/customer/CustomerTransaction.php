@@ -246,6 +246,9 @@ class CustomerTransaction extends BaseModel
     {
         $customer = Customer::find($customer_id);
         $customer->running_balance_datetime = $customer->running_balance_datetime ?: '1970-01-01';
+        if($customer->running_balance_datetime == '1970-01-01'){
+            $customer->running_balance = 0;
+        }
 
         $customerTransaction = new static;
         $transTable = $customerTransaction->getConnection()->getTablePrefix().$customerTransaction->getTable();
@@ -258,7 +261,7 @@ class CustomerTransaction extends BaseModel
             ->where('customer_id', '=', $customer_id)
             ->whereRaw( $transTable.".date_added > '".$customer->running_balance_datetime."' AND ".$transTable.".date_added < '".$now."'" )
             ->first();
-        $balance = $query->balance + $customer->running_balance;
+            $balance = $query->balance + $customer->running_balance;
         return $balance;
     }
 
