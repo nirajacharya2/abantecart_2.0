@@ -256,17 +256,22 @@ class CustomerTransaction extends BaseModel
             return null;
         }
         $customer->running_balance_datetime = $customer->running_balance_datetime ?: '1970-01-01';
+        if($customer->running_balance_datetime == '1970-01-01'){
+            $customer->running_balance = 0;
+        }
 
         $customerTransaction = new static;
         $transTable = $customerTransaction->getConnection()->getTablePrefix().$customerTransaction->getTable();
         $now = date('Y-m-d H:i:s');
-        $query = static::selectRaw('sum(credit) - sum(debit) as balance')
+        // do not allow additional filters here! globalScopes must be disabled here
+        $query = static::withoutGlobalScopes()
+            ->selectRaw('sum(credit) - sum(debit) as balance')
             ->selectRaw('sum(credit) as credit')
             ->selectRaw('sum(debit) as debit')
             ->where('customer_id', '=', $customer_id)
             ->whereRaw( $transTable.".date_added > '".$customer->running_balance_datetime."' AND ".$transTable.".date_added < '".$now."'" )
             ->first();
-        $balance = $query->balance + $customer->running_balance;
+            $balance = $query->balance + $customer->running_balance;
         return $balance;
     }
 
