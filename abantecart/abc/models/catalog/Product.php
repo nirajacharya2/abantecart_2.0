@@ -5,7 +5,6 @@ namespace abc\models\catalog;
 use abc\core\ABC;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
-use abc\core\lib\ADB;
 use abc\core\lib\AException;
 use abc\core\lib\AttributeManager;
 use abc\models\BaseModel;
@@ -21,14 +20,12 @@ use abc\models\system\Setting;
 use abc\models\system\Store;
 use abc\models\system\TaxClass;
 use Carbon\Carbon;
-use Chelout\RelationshipEvents\HasOne;
 use Dyrynda\Database\Support\GeneratesUuid;
 use Exception;
 use H;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
@@ -56,7 +53,7 @@ use ReflectionException;
  * @property float $shipping_price
  * @property float $price
  * @property int $tax_class_id
- * @property Carbon                        $date_available
+ * @property Carbon $date_available
  * @property float $weight
  * @property int $weight_class_id
  * @property float $length
@@ -73,7 +70,7 @@ use ReflectionException;
  * @property float $cost
  * @property int $call_to_order
  * @property string $settings
- * @property Carbon                $date_added
+ * @property Carbon $date_added
  * @property Carbon $date_modified
  * @property ProductDescription $description
  * @property ProductDescription $descriptions
@@ -162,7 +159,7 @@ class Product extends BaseModel
         'cost'              => 'float',
         'call_to_order'     => 'int',
         'product_type_id'   => 'int',
-        'settings'          => Serialized:class,
+        'settings'          => Serialized::class,
     ];
 
     /** @var array */
@@ -669,7 +666,7 @@ class Product extends BaseModel
             ],
             'hidable'    => false,
         ],
-        'product_store' => [
+        'product_store'     => [
             'cast'       => 'int',
             'rule'       => 'integer',
             'access'     => 'read',
@@ -983,6 +980,7 @@ class Product extends BaseModel
 
     /**
      * seo-keywords
+     *
      * @var array
      */
     protected $keywords = [];
@@ -1046,7 +1044,7 @@ class Product extends BaseModel
      */
     public static function scopeWithFinalPrice($builder, $customer_group_id, Carbon $toDate = null)
     {
-        if (!$toDate || !($toDate instanceof Carbon)) {
+        if (!($toDate instanceof Carbon)) {
             $inc = "NOW()";
         } else {
             $inc = "'".$toDate->toIso8601String()."'";
@@ -1055,7 +1053,7 @@ class Product extends BaseModel
         $sql = " ( SELECT p2sp.price
                     FROM ".Registry::db()->table_name("product_specials")." p2sp
                     WHERE p2sp.product_id = ".Registry::db()->table_name("products").".product_id
-                            AND p2sp.customer_group_id = '".(int)$customer_group_id."'
+                            AND p2sp.customer_group_id = '".(int) $customer_group_id."'
                             AND ((p2sp.date_start IS NULL OR p2sp.date_start < ".$inc.")
                             AND (p2sp.date_end IS NULL OR p2sp.date_end > ".$inc."))
                     ORDER BY p2sp.priority ASC, p2sp.price ASC 
@@ -1193,7 +1191,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return HasOne
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function stock_status()
     {
@@ -1218,7 +1216,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return HasOne
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function description()
     {
@@ -1244,6 +1242,7 @@ class Product extends BaseModel
 
     /**
      * TODO: ???is needed?
+     *
      * @return HasMany
      */
     public function option_descriptions()
@@ -1252,6 +1251,7 @@ class Product extends BaseModel
     }
 
     /**TODO: ???is needed?
+     *
      * @return HasMany
      */
     public function option_values()
@@ -1260,6 +1260,7 @@ class Product extends BaseModel
     }
 
     /**TODO: ???is needed?
+     *
      * @return HasMany
      */
     public function option_value_descriptions()
@@ -1293,20 +1294,11 @@ class Product extends BaseModel
     }
 
     /**
-     * @return HasOne
-     */
-    public function featured()
-    {
-        return $this->hasOne(ProductsFeatured::class, 'product_id');
-    }
-
-    /**
      * @return BelongsToMany
      */
     public function related()
     {
-        return $this->belongsToMany(ProductsRelated::class, 'products_related','product_id','related_id');
-        //???return $this->belongsToMany(Product::class, 'products_related', 'product_id', 'related_id');
+        return $this->belongsToMany(Product::class, 'products_related', 'product_id', 'related_id');
     }
 
     /**
@@ -1335,7 +1327,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return HasOne
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function manufacturer()
     {
@@ -1396,7 +1388,7 @@ class Product extends BaseModel
         $categories = Category::getCategories(0);
         $product_categories = [];
         foreach ($categories as $category) {
-            $product_categories[] = (object)[
+            $product_categories[] = (object) [
                 'id'   => $category['category_id'],
                 'name' => htmlspecialchars_decode($category['name']),
             ];
@@ -1407,9 +1399,9 @@ class Product extends BaseModel
     public function getProductStores()
     {
         $stores = Store::active()->select(['store_id as id', 'name'])->get();
-        $result[] = (object)['id' => 0, 'name' => 'Default'];
+        $result[] = (object) ['id' => 0, 'name' => 'Default'];
         foreach ($stores as $store) {
-            $result[] = (object)['id' => $store->id, 'name' => $store->name];
+            $result[] = (object) ['id' => $store->id, 'name' => $store->name];
         }
         return $result;
     }
@@ -1419,7 +1411,7 @@ class Product extends BaseModel
         $manufacturers = Manufacturer::select(['manufacturer_id as id', 'name'])->get();
         $result = [];
         foreach ($manufacturers as $manufacturer) {
-            $result[] = (object)['id' => $manufacturer->id, 'name' => $manufacturer->name];
+            $result[] = (object) ['id' => $manufacturer->id, 'name' => $manufacturer->name];
         }
         return $result;
     }
@@ -1428,9 +1420,9 @@ class Product extends BaseModel
     {
         $tax_classes = TaxClass::with('description')->get();
         $result = [];
-        $result[] = (object)['id' => 0, 'name' => $this->registry->get('language')->get('text_none')];
+        $result[] = (object) ['id' => 0, 'name' => $this->registry->get('language')->get('text_none')];
         foreach ($tax_classes as $tax_class) {
-            $result[] = (object)['id' => $tax_class->tax_class_id, 'name' => $tax_class->description->title];
+            $result[] = (object) ['id' => $tax_class->tax_class_id, 'name' => $tax_class->description->title];
         }
         return $result;
     }
@@ -1445,15 +1437,15 @@ class Product extends BaseModel
     {
         $language = $this->registry->get('language');
         return [
-            (object)[
+            (object) [
                 'id'   => '',
                 'name' => $language->get('text_default'),
             ],
-            (object)[
+            (object) [
                 'id'   => 0,
                 'name' => $language->get('text_no'),
             ],
-            (object)[
+            (object) [
                 'id'   => 1,
                 'name' => $language->get('text_yes'),
             ],
@@ -1467,13 +1459,13 @@ class Product extends BaseModel
      */
     public function getStockStatuses($language_id = 0)
     {
-        $language_id = $language_id ?: static::$current_language_id;
+        $language_id = $language_id ? : static::$current_language_id;
         $stock_statuses = StockStatus::where('language_id', '=', $language_id)
-                             ->select(['stock_status_id as id', 'name'])
-                             ->get();
+                                     ->select(['stock_status_id as id', 'name'])
+                                     ->get();
         $result = [];
         foreach ($stock_statuses as $stock_status) {
-            $result[] = (object)[
+            $result[] = (object) [
                 'id'   => $stock_status->id,
                 'name' => $stock_status->name,
             ];
@@ -1486,7 +1478,7 @@ class Product extends BaseModel
         $length_classes = LengthClass::with('description')->get();
         $result = [];
         foreach ($length_classes as $length_class) {
-            $result[] = (object)['id' => $length_class->length_class_id, 'name' => $length_class->description->title];
+            $result[] = (object) ['id' => $length_class->length_class_id, 'name' => $length_class->description->title];
         }
         return $result;
     }
@@ -1496,14 +1488,14 @@ class Product extends BaseModel
         $weight_classes = WeightClass::with('description')->get();
         $result = [];
         foreach ($weight_classes as $weight_class) {
-            $result[] = (object)['id' => $weight_class->weight_class_id, 'name' => $weight_class->description->title];
+            $result[] = (object) ['id' => $weight_class->weight_class_id, 'name' => $weight_class->description->title];
         }
         return $result;
     }
 
     /**
-     * @return array|false|mixed
-     * @throws ReflectionException
+     * @return array
+     * @throws ReflectionException|Exception
      */
     public function getAllData()
     {
@@ -1606,7 +1598,7 @@ class Product extends BaseModel
         //if no options - check whole product subtract
         if (!$track_status && !$this->product_options && !$this->product_options->values) {
             //check main product
-            $track_status = (int)$this->subtract;
+            $track_status = $this->subtract;
         }
         return $track_status;
     }
@@ -1652,12 +1644,11 @@ class Product extends BaseModel
 
     public function updateImages($data = [], $language_id = null)
     {
-
         if (!$data['images'] || !is_array($data['images'])) {
             return false;
         }
         if (!$language_id && $data['language_id']) {
-            $language_id = (int)$data['language_id'];
+            $language_id = (int) $data['language_id'];
         }
 
         $resource_mdl = new ResourceLibrary();
@@ -1671,7 +1662,7 @@ class Product extends BaseModel
 
         $result = $resource_mdl->updateImageResourcesByUrls($data, 'products', $this->product_id, $title, $language_id);
         if ($resource_mdl->errors()) {
-            $this->errors = array_merge((array)$this->errors, $resource_mdl->errors());
+            $this->errors = array_merge($this->errors, $resource_mdl->errors());
         }
         $this->cache->flush('product');
         return $result;
@@ -1703,7 +1694,7 @@ class Product extends BaseModel
             $productOptionId = $optionObj->getKey();
             unset($optionObj);
 
-            foreach ((array)$option['descriptions'] as $option_description) {
+            foreach ((array) $option['descriptions'] as $option_description) {
                 $option_description['product_id'] = $productId;
                 $option_description['product_option_id'] = $productOptionId;
                 $optionDescData = $this->removeSubArrays($option_description);
@@ -1713,7 +1704,7 @@ class Product extends BaseModel
                 unset($optionDescObj);
             }
 
-            foreach ((array)$option['values'] as $option_value) {
+            foreach ((array) $option['values'] as $option_value) {
                 $option_value['product_id'] = $productId;
                 $option_value['product_option_id'] = $productOptionId;
                 $option_value['attribute_value_id'] = 0;
@@ -1726,7 +1717,7 @@ class Product extends BaseModel
                 unset($optionValueObj);
 
                 $optionValueDescData = [];
-                foreach ((array)$option_value['descriptions'] as $option_value_description) {
+                foreach ((array) $option_value['descriptions'] as $option_value_description) {
                     $option_value_description['product_id'] = $productId;
                     $option_value_description['product_option_value_id'] = $productOptionValueId;
 
@@ -1736,12 +1727,11 @@ class Product extends BaseModel
                     unset($optionValueDescObj);
                 }
                 if ($option_value['images']) {
-
                     $title = $optionValueDescData['name'];
-                    $title = is_array($title) ? current($title) : (string)$title;
+                    $title = is_array($title) ? current($title) : (string) $title;
 
                     $language_id = $optionValueDescData['language_id'];
-                    $language_id = is_array($language_id) ? current($language_id) : (string)$language_id;
+                    $language_id = is_array($language_id) ? current($language_id) : (string) $language_id;
 
                     $result = $resource_mdl->updateImageResourcesByUrls(
                         $option_value,
@@ -1771,6 +1761,10 @@ class Product extends BaseModel
         return $array;
     }
 
+    /**
+     * @return array
+     * @throws Exception
+     */
     public function keywords()
     {
         if ($this->keywords) {
@@ -1798,14 +1792,15 @@ class Product extends BaseModel
      * @param $product_id
      *
      * @return array
+     * @throws Exception
      */
     public static function getProductInfo($product_id)
     {
-        $product_id = (int)$product_id;
+        $product_id = (int) $product_id;
         if (!$product_id) {
             return [];
         }
-
+        /** @var Product $product */
         $product = Product::with('description', 'categories', 'stores', 'tagsByLanguage')
                           ->find($product_id);
         if (!$product) {
@@ -1858,7 +1853,7 @@ class Product extends BaseModel
     public static function createProduct(array $product_data)
     {
         $product_data['new_product'] = true;
-        if (!isset($product_data['product_store']) || empty($product_data['product_store'])) {
+        if (empty($product_data['product_store'])) {
             $product_data['product_store'] = [0 => 0];
         }
         $product = new Product($product_data);
@@ -1871,7 +1866,7 @@ class Product extends BaseModel
             }
             if ($product_data['keyword'] || $product_data['product_description']['name']) {
                 UrlAlias::setProductKeyword(
-                    $product_data['keyword'] ?: $product_data['product_description']['name'],
+                    $product_data['keyword'] ? : $product_data['product_description']['name'],
                     $product
                 );
             }
@@ -2044,9 +2039,6 @@ class Product extends BaseModel
      */
     public static function updateProduct(int $product_id, array $product_data)
     {
-        /**
-         * @var Product $product
-         */
         $product = Product::find($product_id);
         if (!$product) {
             return false;
@@ -2082,7 +2074,7 @@ class Product extends BaseModel
             ARRAY_FILTER_USE_KEY
         );
 
-        if (is_array($attributes) && !empty($attributes) && $product_data['product_type_id']) {
+        if (!empty($attributes) && $product_data['product_type_id']) {
             self::updateProductAttributes($product_id, $product_data['product_type_id'], $attributes);
         }
         self::updateProductLinks($product, $product_data);
@@ -2098,7 +2090,7 @@ class Product extends BaseModel
     public static function updateProductAttributes(int $productId, int $productTypeId, array $attributes)
     {
         foreach ($attributes as $name => $value) {
-            $attributeId = (int)substr($name, strlen('attribute_'), strlen($name));
+            $attributeId = (int) substr($name, strlen('attribute_'), strlen($name));
             if (!$attributeId) {
                 continue;
             }
@@ -2150,11 +2142,10 @@ class Product extends BaseModel
 
         if (isset($product_data['product_category'])
             && $product_data['product_category'] != $product_data['product_category_prev']) {
-
-            $ids = (array)$product_data['product_category'];
+            $ids = (array) $product_data['product_category'];
             $product_data['product_category'] = [];
             foreach ($ids as $id) {
-                $id = (int)$id;
+                $id = (int) $id;
                 if ($id) {
                     $product_data['product_category'][] = $id;
                 }
@@ -2163,16 +2154,6 @@ class Product extends BaseModel
                 $model->categories()->sync($product_data['product_category']);
             } else {
                 $model->categories()->detach($product_data['product_category_prev']);
-            }
-
-            //touch all categories to call update listener that calculates products count in it
-            $affectedCategories = [];
-
-            foreach ((array)$product_data['product_category'] as $id) {
-                $affectedCategories[] = $id;
-            }
-            foreach ((array)$product_data['product_category_prev'] as $id) {
-                $affectedCategories[] = $id;
             }
         }
 
@@ -2193,11 +2174,12 @@ class Product extends BaseModel
                 $languageId = static::$current_language_id;
                 $productTags = [];
                 foreach ($tags as $tag) {
+                    /** @var ProductTag $productTag */
                     $productTag = ProductTag::create([
-                        'tag'         => trim($tag),
-                        'product_id'  => $model->product_id,
-                        'language_id' => $languageId,
-                    ]);
+                                                         'tag'         => trim($tag),
+                                                         'product_id'  => $model->product_id,
+                                                         'language_id' => $languageId,
+                                                     ]);
                     $productTags[] = $productTag->id;
                 }
 
@@ -2255,6 +2237,7 @@ class Product extends BaseModel
             return false;
         }
 
+        /** @var Product $product */
         $product = self::where('product_id', '=', $productId)->first();
         if (!$product) {
             return false;
@@ -2284,9 +2267,9 @@ class Product extends BaseModel
 
         //special prices
         if (is_object($this->registry->get('customer')) && $this->registry->get('customer')->isLogged()) {
-            $customer_group_id = (int)$this->registry->get('customer')->getCustomerGroupId();
+            $customer_group_id = (int) $this->registry->get('customer')->getCustomerGroupId();
         } else {
-            $customer_group_id = (int)$this->config->get('config_customer_group_id');
+            $customer_group_id = (int) $this->config->get('config_customer_group_id');
         }
 
         $sql
@@ -2301,7 +2284,7 @@ class Product extends BaseModel
                  ) ";
         $arSelect[] = $this->db->raw("COALESCE( ".$sql.", ".$this->db->table_name("products").".price) as final_price");
 
-        $languageId = (int)$this->config->get('storefront_language_id');
+        $languageId = (int) $this->config->get('storefront_language_id');
 
         $products_info = Product::select($arSelect)
                                 ->where('products.catalog_only', '=', 1)
@@ -2342,7 +2325,7 @@ class Product extends BaseModel
      */
     public static function getProductOptionsWithValues($product_id)
     {
-        if (!(int)$product_id) {
+        if (!(int) $product_id) {
             return [];
         }
         /**
@@ -2353,12 +2336,12 @@ class Product extends BaseModel
                               ->where(
                                   [
                                       'product_id' => $product_id,
-                                      'group_id'   => 0
+                                      'group_id'   => 0,
                                   ]
                               )->active()
                               ->orderBy('sort_order');
         //allow to extend this method from extensions
-        Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
+        Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query);
 
         $productOptions = $query->get()->toArray();
 
@@ -2382,11 +2365,11 @@ class Product extends BaseModel
         $db = Registry::db();
         $cache = Registry::getInstance()->get('cache');
         $config = Registry::getInstance()->get('config');
-        $limit = (int)$data['limit'];
+        $limit = (int) $data['limit'];
 
         $aliasOP = $db->table_name('order_products');
-        $language_id = (int)$config->get('storefront_language_id');
-        $store_id = (int)$config->get('config_store_id');
+        $language_id = (int) $config->get('storefront_language_id');
+        $store_id = (int) $config->get('config_store_id');
 
         $cache_key = 'product.bestseller.ids.'
             .'.store_'.$store_id
@@ -2397,14 +2380,18 @@ class Product extends BaseModel
             $productIds = [];
             /** @var QueryBuilder $query */
             $query = OrderProduct::select(['order_products.product_id']);
-            $query->leftJoin('orders',
+            $query->leftJoin(
+                'orders',
                 'order_products.order_id',
                 '=',
-                'orders.order_id')
-                  ->leftJoin('products',
+                'orders.order_id'
+            )
+                  ->leftJoin(
+                      'products',
                       'order_products.product_id',
                       '=',
-                      'products.product_id')
+                      'products.product_id'
+                  )
                   ->where('orders.order_status_id', '>', 0)
                   ->where('order_products.product_id', '>', 0)
                   ->groupBy('order_products.product_id')
@@ -2467,9 +2454,11 @@ class Product extends BaseModel
                          ->addSelect($select)
                          ->leftJoin('product_descriptions', function ($subQuery) use ($language_id) {
                              /** @var JoinClause $subQuery */
-                             $subQuery->on('products.product_id',
+                             $subQuery->on(
+                                 'products.product_id',
                                  '=',
-                                 'product_descriptions.product_id')
+                                 'product_descriptions.product_id'
+                             )
                                       ->where('product_descriptions.language_id', '=', $language_id);
                          })
                          ->leftJoin(
@@ -2480,9 +2469,11 @@ class Product extends BaseModel
                          )
                          ->leftJoin('stock_statuses', function ($subQuery) use ($language_id) {
                              /** @var JoinClause $subQuery */
-                             $subQuery->on('products.stock_status_id',
+                             $subQuery->on(
+                                 'products.stock_status_id',
                                  '=',
-                                 'stock_statuses.stock_status_id')
+                                 'stock_statuses.stock_status_id'
+                             )
                                       ->where('stock_statuses.language_id', '=', $language_id);
                          })
                          ->whereIn('products.product_id', $bestSellerIds)
@@ -2513,7 +2504,7 @@ class Product extends BaseModel
             if ($start < 0) {
                 $start = 0;
             }
-            if ((int)$limit) {
+            if ((int) $limit) {
                 $query = $query->offset($start)->limit($limit);
             }
 
@@ -2565,7 +2556,6 @@ class Product extends BaseModel
         $IDs = is_array($IDs) ? $IDs : func_get_args();
         $arr = [];
         foreach ($IDs as $id) {
-
             $arr[] = 'product_id='.$id;
         }
 
@@ -2597,7 +2587,7 @@ class Product extends BaseModel
     public function addProductOption($data = [], $attribute_id = null)
     {
         $product_id = $this->getKey();
-        $attribute_id = $attribute_id ?: $data['attribute_id'];
+        $attribute_id = $attribute_id ? : $data['attribute_id'];
         if (!$product_id) {
             Registry::log()->write(__CLASS__.": ".__FUNCTION__.': Unknown product ID');
             return false;
@@ -2608,7 +2598,6 @@ class Product extends BaseModel
         $db = Registry::db();
         $db->beginTransaction();
         try {
-
             /**
              * @var AttributeManager $am
              */
@@ -2689,8 +2678,8 @@ class Product extends BaseModel
 
         $product_option_data = [];
         $where = ['product_id' => $this->getKey()];
-        if ((int)$group_id) {
-            $where['group_id'] = (int)$group_id;
+        if ((int) $group_id) {
+            $where['group_id'] = (int) $group_id;
         }
 
         $options = ProductOption::where($where)->orderBy('sort_order')->get();
@@ -2767,7 +2756,7 @@ class Product extends BaseModel
         $filter['description'] = $filter['description'] ?? false;
         $filter['model'] = $filter['model'] ?? false;
 
-        $filter['only_enabled'] = isset($filter['only_enabled']) ? (bool) $filter['only_enabled'] : true;
+        $filter['only_enabled'] = !isset($filter['only_enabled']) || (bool) $filter['only_enabled'];
         $filter['customer_group_id'] = $filter['customer_group_id']
             ?? Registry::config()->get('config_customer_group_id');
         $filter['keyword'] = trim($filter['keyword']);
@@ -2784,8 +2773,8 @@ class Product extends BaseModel
 
         $cacheKey = 'product.list.'
             .md5(var_export($params, true))
-            .'_side_'.(int)ABC::env('IS_ADMIN');
-        //$cache = Registry::cache()->get($cacheKey);
+            .'_side_'.(int) ABC::env('IS_ADMIN');
+        $cache = Registry::cache()->get($cacheKey);
 
         if ($cache === null) {
             $db = Registry::db();
@@ -2912,11 +2901,15 @@ class Product extends BaseModel
                             );
                         }
                         foreach ($tags as $tag) {
-                            $query->orWhereRaw("LCASE(".$pt_table.".tag) = '".$db->escape(mb_strtolower(trim($tag)))
-                                ."'");
+                            $query->orWhereRaw(
+                                "LCASE(".$pt_table.".tag) = '".$db->escape(mb_strtolower(trim($tag)))
+                                ."'"
+                            );
                         }
-                        $query->orWhereRaw("LCASE(".$pd_table.".name) LIKE '%"
-                            .$db->escape(mb_strtolower($filter['keyword']), true)."%'");
+                        $query->orWhereRaw(
+                            "LCASE(".$pd_table.".name) LIKE '%"
+                            .$db->escape(mb_strtolower($filter['keyword']), true)."%'"
+                        );
                         if ($filter['description']) {
                             $query->orWhereRaw(
                                 "LCASE(".$pd_table.".description) LIKE '%"
@@ -2947,11 +2940,11 @@ class Product extends BaseModel
                 );
             }
 
-            if ((array)$filter['include']) {
-                $query->whereIn('products.product_id', (array)$filter['include']);
+            if ((array) $filter['include']) {
+                $query->whereIn('products.product_id', (array) $filter['include']);
             }
-            if ((array)$filter['exclude']) {
-                $query->whereNotIn('products.product_id', (array)$filter['exclude']);
+            if ((array) $filter['exclude']) {
+                $query->whereNotIn('products.product_id', (array) $filter['exclude']);
             }
 
             //show only enabled and available products for storefront!
@@ -2995,13 +2988,11 @@ class Product extends BaseModel
 
             //pagination
             if (isset($params['start']) || isset($params['limit'])) {
-                if ($params['start'] < 0) {
-                    $params['start'] = 0;
-                }
+                $params['start'] = max(0,$params['start']);
                 if ($params['limit'] < 1) {
                     $params['limit'] = 20;
                 }
-                $query->offset((int)$params['start'])->limit((int)$params['limit']);
+                $query->offset((int) $params['start'])->limit((int) $params['limit']);
             }
 
             //allow to extend this method from extensions

@@ -35,6 +35,7 @@ use Chelout\RelationshipEvents\Concerns\HasMorphOneEvents;
 use Chelout\RelationshipEvents\Concerns\HasMorphToEvents;
 use Chelout\RelationshipEvents\Concerns\HasMorphToManyEvents;
 use Chelout\RelationshipEvents\Concerns\HasOneEvents;
+use Closure;
 use H;
 use Illuminate\Database\ConnectionResolver;
 use Illuminate\Database\Eloquent\Collection;
@@ -67,12 +68,13 @@ use stdClass;
  * @method static QueryBuilder selectRaw(string $sql) QueryBuilder
  * @method static QueryBuilder distinct(array $columns) QueryBuilder
  * @method static QueryBuilder|Builder withTrashed()
- * * @method static QueryBuilder updateOrCreate(array $data) QueryBuilder
+ * @method static QueryBuilder updateOrCreate(array $attributes, array $values) QueryBuilder
+ * @method static QueryBuilder create(array $values) BaseModel
  * @method static QueryBuilder active() QueryBuilder
  * @method static QueryBuilder join( string $table, \Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
  * @method static QueryBuilder leftJoin( string $table, \Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
  * @method static QueryBuilder rightJoin( string $table, \Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
- * @method static QueryBuilder|Builder OrderBy(string $column, string $order) QueryBuilder
+ * @method static QueryBuilder|Builder OrderBy(string $column, string $order = 'asc') QueryBuilder
  * @const  string DELETED_AT
  */
 class BaseModel extends OrmModel
@@ -291,7 +293,7 @@ class BaseModel extends OrmModel
         $searchObj = ABC::getObjectByAlias('ModelSearch', [new $className]);
         //check and convert parameters for data set into correct format
         foreach ($searchParams as $name => $value) {
-            if (is_string($value) && substr($value, 0, 5) == 'with_') {
+            if (is_string($value) && str_starts_with($value, 'with_')) {
                 $searchParams[$value] = true;
                 unset($searchParams[$name]);
             }
@@ -721,7 +723,6 @@ class BaseModel extends OrmModel
      * @param string|array $typesOnly - filter output by relation type or few
      *
      * @return array
-     * @throws ReflectionException
      */
     public static function getRelationships($typesOnly = null)
     {
@@ -755,9 +756,7 @@ class BaseModel extends OrmModel
                         ];
                     }
                 }
-            } catch (Exception $e) {
-
-            }
+            } catch (Exception $e) {}
         }
         return $relationships;
     }
@@ -769,7 +768,7 @@ class BaseModel extends OrmModel
      *
      * @return Builder
      */
-    protected function setKeysForSaveQuery(Builder $query)
+    protected function setKeysForSaveQuery($query)
     {
         if (isset($this->primaryKeySet)) {
             foreach ($this->primaryKeySet as $key) {

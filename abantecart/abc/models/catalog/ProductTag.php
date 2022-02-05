@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * Class ProductTag
  *
+ * @property int $id
  * @property int $product_id
  * @property string $tag
  * @property int $language_id
@@ -34,6 +35,7 @@ class ProductTag extends BaseModel
     ];
 
     protected $casts = [
+        'id'          => 'int',
         'product_id'  => 'int',
         'language_id' => 'int',
         'tag' => 'string',
@@ -46,6 +48,7 @@ class ProductTag extends BaseModel
     ];
 
     protected $fillable = [
+            'id',
             'product_id',
             'language_id',
             'tag'
