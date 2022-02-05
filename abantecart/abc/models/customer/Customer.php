@@ -50,6 +50,10 @@ use ReflectionException;
  * @property string $advanced_status
  * @property int $approved
  * @property int $customer_group_id
+ * @property float running_balance
+ * @property float running_credit
+ * @property float running_debit
+ * @property Carbon running_balance_datetime
  * @property string $ip
  * @property array $data
  * @property Carbon $date_added

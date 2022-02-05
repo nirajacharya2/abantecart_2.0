@@ -45,7 +45,8 @@ class ControllerResponsesCheckoutProcess extends AController
                 AC_ERR_USER_ERROR,
                 [
                     'error' => true,
-                    'error_text' => 'System Error'
+                    'error_text' => 'System Error: '.$e->getMessages(),
+                    'error_title' => 'System Error: '.$e->getMessages()
                 ]
             );
         }
