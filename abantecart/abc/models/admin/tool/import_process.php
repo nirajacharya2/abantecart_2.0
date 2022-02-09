@@ -620,10 +620,11 @@ class ModelToolImportProcess extends Model
             $exist_ids = array_column($result->rows, 'product_option_value_id');
 
             //now load values. Pick longest data array
-            $option_vals = $data[$i]['product_option_values'];
+            $option_vals = (array)$data[$i]['product_option_values'];
 
             //find largest key by count
             $counts = @array_map('count', $option_vals);
+
             $ids = [];
             if (max($counts) == 1) {
                 //single option value case
