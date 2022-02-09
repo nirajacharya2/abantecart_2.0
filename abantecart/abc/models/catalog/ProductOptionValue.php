@@ -30,10 +30,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property ProductOption $product_option
  * @property ProductOptionValueDescription $description
  * @property Product $product
- * @property Collection $order_options
  *
- * @method static ProductOptionValue find(int $product_option_value_id) ProductOptionValue
- * @method static ProductOptionValue select(mixed $select) Builder
+ * @property Collection $order_options
  *
  * @package abc\models
  */
@@ -46,9 +44,6 @@ class ProductOptionValue extends BaseModel
     protected $primaryKey = 'product_option_value_id';
     public $timestamps = false;
 
-    /**
-     * @var array
-     */
     protected $images = [];
 
     protected $casts = [

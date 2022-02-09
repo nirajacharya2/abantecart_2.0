@@ -23,8 +23,13 @@ use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\AResourceManager;
 use abc\models\BaseModel;
+use abc\models\casts\Serialized;
 use abc\models\QueryBuilder;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -42,11 +47,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $settings
  * @property ProductOptionValue $option_values
  * @property Product $product
- * @property \Illuminate\Database\Eloquent\Collection $product_option_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $product_option_values
  *
- * @method static ProductOption find(int $product_option_id) ProductOption
- * @method static ProductOption select(mixed $select) Builder
+ * @property Collection $product_option_descriptions
+ * @property Collection $product_option_values
  *
  * @package abc\models
  */
@@ -74,6 +77,7 @@ class ProductOption extends BaseModel
         'sort_order'   => 'int',
         'status'       => 'int',
         'required'     => 'int',
+        'settings'     => Serialized::class
     ];
 
     /**
@@ -92,7 +96,7 @@ class ProductOption extends BaseModel
     ];
 
     /**
-     * @return mixed
+     * @return BelongsTo
      */
     public function product()
     {
@@ -100,14 +104,15 @@ class ProductOption extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return HasMany
      */
     public function descriptions()
     {
         return $this->hasMany(ProductOptionDescription::class, 'product_option_id');
     }
+
     /**
-     * @return mixed
+     * @return HasOne
      */
     public function description()
     {
@@ -116,7 +121,7 @@ class ProductOption extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return HasMany
      */
     public function values()
     {
@@ -124,7 +129,7 @@ class ProductOption extends BaseModel
     }
 
     /**
-     * @return false|mixed
+     * @return array|false|mixed
      */
     public function getAllData()
     {
@@ -143,9 +148,7 @@ class ProductOption extends BaseModel
 
     public function delete()
     {
-        /**
-         * @var AResourceManager $rm
-         */
+        /** @var AResourceManager $rm */
         $rm = ABC::getObjectByAlias('AResourceManager');
         $rm->setType('image');
         if($this->option_values) {
@@ -158,9 +161,9 @@ class ProductOption extends BaseModel
     }
 
     /**
-     * @param $po_ids
+     * @param array $po_ids
      *
-     * @return bool|\Illuminate\Support\Collection
+     * @return false|\Illuminate\Support\Collection
      */
     public static function getProductOptionsByIds($po_ids)
     {
@@ -168,9 +171,6 @@ class ProductOption extends BaseModel
         if (!$po_ids || !is_array($po_ids)) {
             return false;
         }
-        /**
-         * @var QueryBuilder $query
-         */
         $query = static::select(
             [
                 'product_options.*',
