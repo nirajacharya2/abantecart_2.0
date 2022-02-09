@@ -31,10 +31,9 @@ class ControllerTaskLocalisationLanguage extends AController
     {
     }
 
-    public function translate(...$args)
+    public function translate($task_id, $step_id, $settings = [])
     {
         $translate_result = false;
-        list($task_id, $step_id,) = $args;
         $this->load->library('json');
 
         if (!$task_id || !$step_id) {

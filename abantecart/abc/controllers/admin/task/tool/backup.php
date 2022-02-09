@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2021 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -30,10 +30,9 @@ use H;
 class ControllerTaskToolBackup extends AController
 {
 
-    public function dumpTables(...$args)
+    public function dumpTables($task_id, $step_id, $settings = [])
     {
         $table_list = [];
-        list(, , $settings) = $args;
         $backup_name = preg_replace('[^0-9A-z_\.]', '', $settings['backup_name']);
         $backup_name = !$backup_name ? 'manual_backup' : $backup_name;
 
@@ -193,7 +192,7 @@ class ControllerTaskToolBackup extends AController
         $result = $bkp->backupFile(ABC::env('DIR_CONFIG').'config.php', false);
 
         $output = [
-            'result'  => (bool) $result,
+            'result'  => $result,
             'message' => '( backup config file )',
         ];
 

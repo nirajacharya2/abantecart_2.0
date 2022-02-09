@@ -24,7 +24,9 @@ use abc\core\ABC;
 use abc\core\engine\ADispatcher;
 use abc\core\engine\Registry;
 use abc\modules\events\ABaseEvent;
+use Exception;
 use H;
+use ReflectionException;
 
 /**
  * Class ATaskManager
@@ -36,7 +38,7 @@ use H;
 class ATaskManager
 {
     protected $registry;
-    public $errors = array(); // errors during process
+    public $errors = []; // errors during process
     protected $starter;
     /**
      * @var ALog
@@ -49,7 +51,7 @@ class ATaskManager
      */
     private $mode = 'html';
 
-    protected $run_log = array();
+    protected $run_log = [];
     /**
      * @var string can be 'simple' or 'detailed'
      */
@@ -68,7 +70,7 @@ class ATaskManager
      */
     public function __construct($mode = 'html')
     {
-        $this->mode = in_array($mode, array('html', 'ajax', 'cli')) ? $mode : 'html';
+        $this->mode = in_array($mode, ['html', 'ajax', 'cli']) ? $mode : 'html';
         $this->registry = Registry::getInstance();
         // who is initiator of process, admin or storefront
         $this->starter = ABC::env('IS_ADMIN') === true ? 1 : 0;
@@ -92,7 +94,7 @@ class ATaskManager
 
     public function runTasks()
     {
-        $this->run_log = array();
+        $this->run_log = [];
         $task_list = $this->getReadyTasks();
         // run loop tasks
         foreach ($task_list as $task) {
@@ -116,7 +118,7 @@ class ATaskManager
      * @param int $task_id
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function runTask($task_id)
     {
@@ -155,7 +157,7 @@ class ATaskManager
      * @param int $task_id
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     private function getReadyTasks($task_id = 0)
     {
@@ -175,7 +177,7 @@ class ATaskManager
      * @param int $step_id
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function canStepRun($task_id, $step_id)
     {
@@ -207,7 +209,7 @@ class ATaskManager
      * @param $step_id
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function isLastStep($task_id, $step_id)
     {
@@ -237,7 +239,7 @@ class ATaskManager
      * @param array $step_details
      *
      * @return bool
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws AException
      */
     public function runStep($step_details)
@@ -252,11 +254,11 @@ class ATaskManager
         //change status to active
         $this->updateStepState(
             $step_id,
-            array(
+            [
                 'last_time_run' => date('Y-m-d H:i:s'),
                 //change status of step to "running" while it run
                 'status'        => self::STATUS_READY,
-            )
+            ]
         );
 
         //call event
@@ -264,7 +266,15 @@ class ATaskManager
 
         $response_message = '';
         try {
-            $dd = new ADispatcher($step_details['controller'], array($task_id, $step_id, $step_details['settings']));
+            $dd = new ADispatcher(
+                $step_details['controller'],
+                [
+                  'task_id' => $task_id,
+                  'step_id' => $step_id,
+                  'settings' => $step_details['settings']
+                ]
+            );
+
             // waiting for result array from step's controller
             $response = $dd->dispatchGetOutput();
 
@@ -273,11 +283,11 @@ class ATaskManager
             if (json_last_error() == JSON_ERROR_NONE) {
                 $response = $json;
             }
-            $result = isset($response['result']) && $response['result'] ? true : false;
+            $result = (isset($response['result']) && $response['result']);
             if ($result) {
-                $response_message = isset($response['message']) ? $response['message'] : '';
+                $response_message = $response['message'] ?? '';
             } else {
-                $response_message = isset($response['error_text']) ? $response['error_text'] : '';
+                $response_message = $response['error_text'] ?? '';
             }
         } catch (AException $e) {
             $this->log->write($e);
@@ -286,10 +296,10 @@ class ATaskManager
 
         $this->updateStepState(
             $step_id,
-            array(
+            [
                 'result' => (int)$result,
                 'status' => ($result ? self::STATUS_COMPLETED : self::STATUS_FAILED),
-            )
+            ]
         );
 
         //call event
@@ -311,7 +321,7 @@ class ATaskManager
     /**
      * @param int $task_id
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function detectAndSetTaskStatus($task_id)
     {
@@ -340,15 +350,15 @@ class ATaskManager
             }
         }
 
-        $this->updateTask($task_id, array('status' => $task_status));
+        $this->updateTask($task_id, ['status' => $task_status]);
     }
 
     /**
      * @param int $task_id
-     * @param array $task_settings - for future. it can be reference for callback
+     * @param array $task_settings - for future. it can be "reference" for callback
      *
      * @return bool
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws AException
      */
     private function runSteps($task_id, $task_settings)
@@ -360,10 +370,10 @@ class ATaskManager
 
         $this->updateTaskState(
             $task_id,
-            array(
+            [
                 'status'        => self::STATUS_RUNNING,
                 'last_time_run' => date('Y-m-d H:i:s'),
-            )
+            ]
         );
 
         //get steps
@@ -380,12 +390,8 @@ class ATaskManager
                 if ($step_details['interrupt_on_step_fault'] === true) {
                     break;
                 }
-            } else {
-                /*  if ($this->log_level == 'detailed') {
-                      $this->log_level['steps'][$step_details['step_id']] = $step_result;
-                  }*/
             }
-            $this->updateTaskState($task_id, array('progress' => ceil($k * 100 / $steps_count)));
+            $this->updateTaskState($task_id, ['progress' => ceil($k * 100 / $steps_count)]);
             $k++;
         }
 
@@ -397,22 +403,22 @@ class ATaskManager
      * @param array $state
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
-    protected function updateTaskState($task_id, $state = array())
+    protected function updateTaskState($task_id, $state = [])
     {
         $task_id = (int)$task_id;
         if (!$task_id) {
             return false;
         }
 
-        $upd_flds = array(
+        $upd_flds = [
             'last_result',
             'last_time_run',
             'status',
             'progress',
-        );
-        $data = array();
+        ];
+        $data = [];
         foreach ($upd_flds as $fld_name) {
             if (H::has_value($state[$fld_name])) {
                 $data[$fld_name] = $state[$fld_name];
@@ -426,17 +432,17 @@ class ATaskManager
      * @param array $state
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
-    protected function updateStepState($step_id, $state = array())
+    protected function updateStepState($step_id, $state = [])
     {
-        $upd_flds = array(
+        $upd_flds = [
             'task_id',
             'last_result',
             'last_time_run',
             'status',
-        );
-        $data = array();
+        ];
+        $data = [];
         foreach ($upd_flds as $fld_name) {
             if (H::has_value($state[$fld_name])) {
                 $data[$fld_name] = $state[$fld_name];
@@ -461,9 +467,8 @@ class ATaskManager
         } else {
             $this->run_log[] = $message;
         }
-        if ($this->task_log) {
-            $this->task_log->write($message);
-        }
+        $this->task_log?->write($message);
+
         return true;
     }
 
@@ -471,9 +476,9 @@ class ATaskManager
      * @param array $data
      *
      * @return int
-     * @throws \Exception
+     * @throws Exception
      */
-    public function addTask($data = array())
+    public function addTask($data = [])
     {
         if (!$data) {
             $this->errors[] = 'Error: Can not to create task. Empty data given.';
@@ -523,16 +528,16 @@ class ATaskManager
      * @param array $data
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
-    public function updateTask($task_id, $data = array())
+    public function updateTask($task_id, $data = [])
     {
         $task_id = (int)$task_id;
         if (!$task_id) {
             return false;
         }
 
-        $upd_flds = array(
+        $upd_flds = [
             'name'               => 'string',
             'starter'            => 'int',
             'status'             => 'int',
@@ -543,8 +548,8 @@ class ATaskManager
             'run_interval'       => 'int',
             'max_execution_time' => 'int',
             'date_modified'      => 'timestamp',
-        );
-        $update = array();
+        ];
+        $update = [];
         foreach ($upd_flds as $fld_name => $fld_type) {
             if (H::has_value($data[$fld_name])) {
                 switch ($fld_type) {
@@ -583,9 +588,9 @@ class ATaskManager
      * @param array $data
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
-    public function updateTaskDetails($task_id, $data = array())
+    public function updateTaskDetails($task_id, $data = [])
     {
         $task_id = (int)$task_id;
         if (!$task_id) {
@@ -610,7 +615,7 @@ class ATaskManager
                     SET settings = '".$this->db->escape($data['settings'])."'
                     WHERE task_id = ".$task_id;
         } else {
-            $data['created_by'] = isset($data['created_by']) ? $data['created_by'] : 1;
+            $data['created_by'] = $data['created_by'] ?? 1;
             $sql = "INSERT INTO ".$this->db->table_name('task_details')."
                     (task_id, created_by, settings, date_modified)
                      VALUES (   '".$task_id."',
@@ -626,9 +631,9 @@ class ATaskManager
      * @param array $data
      *
      * @return bool|int
-     * @throws \Exception
+     * @throws Exception
      */
-    public function addStep($data = array())
+    public function addStep($data = [])
     {
         if (!$data) {
             $this->errors[] = "Error: Can not to create task's step. Empty data given.";
@@ -664,16 +669,16 @@ class ATaskManager
      * @param array $data
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
-    public function updateStep($step_id, $data = array())
+    public function updateStep($step_id, $data = [])
     {
         $step_id = (int)$step_id;
         if (!$step_id) {
             return false;
         }
 
-        $upd_flds = array(
+        $upd_flds = [
             'task_id'            => 'int',
             'starter'            => 'int',
             'status'             => 'int',
@@ -684,8 +689,8 @@ class ATaskManager
             'controller'         => 'string',
             'settings'           => 'string',
             'date_modified'      => 'timestamp',
-        );
-        $update = array();
+        ];
+        $update = [];
         foreach ($upd_flds as $fld_name => $fld_type) {
             if (H::has_value($data[$fld_name])) {
                 switch ($fld_type) {
@@ -716,7 +721,7 @@ class ATaskManager
     /**
      * @param int $task_id
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function deleteTask($task_id)
     {
@@ -734,7 +739,7 @@ class ATaskManager
     /**
      * @param int $step_id
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function deleteStep($step_id)
     {
@@ -746,13 +751,13 @@ class ATaskManager
      * @param int $task_id
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getTaskById($task_id)
     {
         $task_id = (int)$task_id;
         if (!$task_id) {
-            return array();
+            return [];
         }
         $sql = "SELECT *
                 FROM ".$this->db->table_name('tasks')." t
@@ -776,13 +781,13 @@ class ATaskManager
      * @param string $task_name
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getTaskByName($task_name)
     {
         $task_name = $this->db->escape($task_name);
         if (!$task_name) {
-            return array();
+            return [];
         }
 
         $sql = "SELECT *
@@ -807,15 +812,15 @@ class ATaskManager
      * @param int $task_id
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getTaskSteps($task_id)
     {
         $task_id = (int)$task_id;
         if (!$task_id) {
-            return array();
+            return [];
         }
-        $output = array();
+        $output = [];
         try {
             $sql = "SELECT *
                 FROM ".$this->db->table_name('task_steps')."
@@ -848,14 +853,14 @@ class ATaskManager
      * @param int $step_id
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getTaskStep($task_id, $step_id)
     {
         $task_id = (int)$task_id;
         $step_id = (int)$step_id;
         if (!$task_id || !$step_id) {
-            return array();
+            return [];
         }
 
         $sql = "SELECT *
@@ -873,17 +878,17 @@ class ATaskManager
      * @param int $task_id
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getReadyTaskSteps($task_id)
     {
         $task_id = (int)$task_id;
         if (!$task_id) {
-            return array();
+            return [];
         }
 
         $all_steps = $this->getTaskSteps($task_id);
-        $steps = array();
+        $steps = [];
         foreach ($all_steps as $step) {
             //skip all steps that not scheduled
             if ($step['status'] != self::STATUS_READY) {
@@ -898,9 +903,9 @@ class ATaskManager
      * @param array $data
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
-    public function getTotalTasks($data = array())
+    public function getTotalTasks($data = [])
     {
         $sql = "SELECT COUNT(*) as total
                 FROM ".$this->db->table_name('tasks');
@@ -922,9 +927,9 @@ class ATaskManager
      * @param array $data
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
-    public function getTasks($data = array())
+    public function getTasks($data = [])
     {
 
         $sql = "SELECT td.*, t.*
@@ -941,12 +946,12 @@ class ATaskManager
             $sql .= " AND (LCASE(t.name) LIKE '%".$this->db->escape(mb_strtolower($data['filter']['name']))."%')";
         }
 
-        $sort_data = array(
+        $sort_data = [
             'name'          => 't.name',
             'status'        => 't.status',
             'start_time'    => 't.start_time',
             'date_modified' => 't.date_modified',
-        );
+        ];
 
         if (isset($data['sort']) && array_key_exists($data['sort'], $sort_data)) {
             $sql .= " ORDER BY ".$sort_data[$data['sort']];
@@ -954,7 +959,7 @@ class ATaskManager
             $sql .= " ORDER BY t.date_modified";
         }
 
-        if (isset($data['order']) && ($data['order'] == 'DESC')) {
+        if ($data['order'] == 'DESC') {
             $sql .= " DESC";
         } else {
             $sql .= " ASC";

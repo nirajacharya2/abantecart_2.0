@@ -39,9 +39,9 @@ class ControllerTaskSaleContact extends AController
     private $sent_count = 0;
     private $user_id = 0;
 
-    public function sendSms(...$args)
+    public function sendSms($task_id, $step_id, $settings = [])
     {
-        list($task_id, $step_id,) = $args;
+
         $this->load->library('json');
         //for aborting process
         ignore_user_abort(false);

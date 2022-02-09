@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -197,9 +197,7 @@ class ModelToolImportProcess extends Model
         try {
             $this->task_id = $task_id;
             $language_id = $settings['language_id'] ? : $this->language->getContentLanguageID();
-            $store_id = $settings['store_id']
-                ? (int) $settings['store_id']
-                : (int) $this->session->data['current_store_id'];
+            $store_id = (int)$settings['store_id'] ? : (int) $this->session->data['current_store_id'];
             $this->load->model('catalog/product');
             $log_classname = ABC::getFullClassName('ALog');
             if ($log_classname) {
@@ -536,7 +534,12 @@ class ModelToolImportProcess extends Model
 
         $manufacturer = $this->filterArray($data['manufacturers']);
 
-        $manufacturer_id = $this->processManufacturer($manufacturer['name'], $manufacturer['sort_order'], $store_id);
+        $manufacturer_id = $this->processManufacturer(
+            $manufacturer['name'],
+            $manufacturer['sort_order'],
+            $store_id
+        );
+
         if ($manufacturer_id) {
             $status = true;
             //process images
@@ -578,7 +581,6 @@ class ModelToolImportProcess extends Model
         $this->toLog("Creating product option for product ID ".$product_id.".");
         //get existing options and values.
         $this->load->model('catalog/product');
-        $this->log->write(var_export($data, true));
         //add new options for each option
         foreach ($data as $dataRow) {
             //skip empty arrays
@@ -767,7 +769,11 @@ class ModelToolImportProcess extends Model
         if ($pd_opt_val_id && !empty($data['image'])) {
             //process images
             $this->migrateImages(
-                $data, 'product_option_value', $pd_opt_val_id, $data['name'], $this->language->getContentLanguageID()
+                $data,
+                'product_option_value',
+                $pd_opt_val_id,
+                $data['name'],
+                $this->language->getContentLanguageID()
             );
         }
 
@@ -814,7 +820,13 @@ class ModelToolImportProcess extends Model
             } else {
                 if (is_array($source)) {
                     //we have an array from list of values. Run again
-                    $this->migrateImages(['image' => $source], $object_txt_id, $object_id, $title, $language_id);
+                    $this->migrateImages(
+                        ['image' => $source],
+                        $object_txt_id,
+                        $object_id,
+                        $title,
+                        $language_id
+                    );
                     continue;
                 }
             }
@@ -979,9 +991,11 @@ class ModelToolImportProcess extends Model
             $query = $this->db->query(
                 "SELECT p.product_id as product_id
                 FROM ".$this->db->table_name("products")." p
-                LEFT JOIN ".$this->db->table_name("products_to_stores")." p2s ON (p.product_id = p2s.product_id)
-                WHERE LCASE(p.sku) = '".$this->db->escape(mb_strtolower($sku))."' AND p2s.store_id = ".(int) $store_id
-                ." limit 1"
+                LEFT JOIN ".$this->db->table_name("products_to_stores")." p2s 
+                    ON (p.product_id = p2s.product_id)
+                WHERE LCASE(p.sku) = '".$this->db->escape(mb_strtolower($sku))."' 
+                    AND p2s.store_id = ".(int) $store_id." 
+                LIMIT 1"
             );
             return $query->row['product_id'];
         } else {
@@ -1001,8 +1015,8 @@ class ModelToolImportProcess extends Model
     {
         /** @var Manufacturer $result */
         $result = Manufacturer::select()
-                              ->whereRaw("LCASE(name) = '".$this->db->escape(mb_strtolower($manufacturer_name))."'")
-                              ->first();
+                  ->whereRaw("LCASE(name) = '".$this->db->escape(mb_strtolower($manufacturer_name))."'")
+                  ->first();
         $manufacturer_id = $result->manufacturer_id;
         if (!$manufacturer_id) {
             $manufacturer_id = Manufacturer::addManufacturer(
@@ -1132,24 +1146,20 @@ class ModelToolImportProcess extends Model
     {
         $query = CategoryDescription::select(
             ['category_descriptions.category_id', 'category_descriptions.name', 'categories.path']
-        )
-                                    ->whereRaw(
-                                        "LCASE(".Registry::db()->table_name('category_descriptions').".name) = '"
-                                        .$this->db->escape(mb_strtolower($category_name))."'"
-                                    );
-        $query->join(
+        )->whereRaw(
+               "LCASE(".Registry::db()->table_name('category_descriptions').".name) = '"
+                   .$this->db->escape(mb_strtolower($category_name))."'"
+        )->join(
             'categories_to_stores',
             'category_descriptions.category_id',
             '=',
             'categories_to_stores.category_id'
-        );
-        $query->join(
+        )->join(
             'categories',
             'categories.category_id',
             '=',
             'category_descriptions.category_id'
-        );
-        $query->where(
+        )->where(
             [
                 'category_descriptions.language_id' => $language_id,
                 'categories_to_stores.store_id'     => $store_id,
