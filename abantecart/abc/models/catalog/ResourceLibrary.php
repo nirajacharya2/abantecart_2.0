@@ -164,7 +164,6 @@ class ResourceLibrary extends BaseModel
             }
             $resource_id = $rm->addResource($resource);
             if ($resource_id) {
-                $this->errors[] = "Map image resource : ".$image_basename." ".$resource_id;
                 $rm->mapResource($object_txt_id, $object_id, $resource_id);
             } else {
                 $this->errors[] = "Error: Image resource can not be created. ".$this->registry->get('db')->error;
