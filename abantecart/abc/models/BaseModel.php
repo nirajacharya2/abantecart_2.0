@@ -134,7 +134,7 @@ class BaseModel extends OrmModel
     /**
      * @var array
      */
-    protected $errors;
+    protected $errors = [];
 
     /**
      * @var string
