@@ -219,7 +219,10 @@ class ModelToolImportProcess extends Model
             $result = false;
             if (empty($this->errors)) {
                 $result = $this->addUpdateProduct(
-                    $this->data['product_data'], $this->data['settings'], $language_id, $store_id
+                    $this->data['product_data'],
+                    $this->data['settings'],
+                    $language_id,
+                    $store_id
                 );
             } else {
                 foreach ($this->errors as $error) {
@@ -584,7 +587,7 @@ class ModelToolImportProcess extends Model
         //add new options for each option
         foreach ($data as $dataRow) {
             //skip empty arrays
-            if (!is_array($dataRow) || !$dataRow['name']) {
+            if (!is_array($dataRow) || !$dataRow['name'] || !is_string($dataRow['name'])) {
                 continue;
             }
 
