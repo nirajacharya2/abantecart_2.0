@@ -156,8 +156,10 @@ class ControllerPagesToolErrorLog extends AController
         }
 
         $handle = fopen($file, 'w+');
-        fclose($handle);
-        $this->session->data['success'] = $this->language->get('text_success');
+        if($handle !== false) {
+            fclose($handle);
+            $this->session->data['success'] = $this->language->get('text_success');
+        }
         abc_redirect($this->html->getSecureURL('tool/error_log', '&filename='.$filename));
 
         //update controller data
