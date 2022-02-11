@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -115,13 +115,16 @@ class ControllerPagesProductCategory extends AController
                         $path .= '_'.$path_id;
                     }
 
-                    $this->document->addBreadcrumb([
-                                                       'href'      => $this->html->getSEOURL(
-                                                           'product/category', '&path='.$path, '&encode'
-                                                       ),
-                                                       'text'      => $categoryNames[$path_id],
-                                                       'separator' => $this->language->get('text_separator'),
-                                                   ]);
+                    $this->document->addBreadcrumb(
+                        [
+                           'href'      => $this->html->getSEOURL(
+                               'product/category',
+                               '&path='.$path, '&encode'
+                           ),
+                           'text'      => $categoryNames[$path_id],
+                           'separator' => $this->language->get('text_separator'),
+                       ]
+                    );
                 }
             }
         } else {
@@ -179,10 +182,8 @@ class ControllerPagesProductCategory extends AController
             if ($category_total || $product_total) {
                 $categories = [];
                 $results = Category::getCategories($category_id);
-                $category_ids = [];
-                foreach ($results as $result) {
-                    $category_ids[] = (int) $result['category_id'];
-                }
+                $category_ids = array_map('intval', array_column($results, 'category_id'));
+
                 //get thumbnails by one pass
                 $resource = new AResource('image');
                 $thumbnails = $resource->getMainThumbList(
@@ -213,10 +214,8 @@ class ControllerPagesProductCategory extends AController
                     ($page - 1) * $limit,
                     $limit
                 );
-                $product_ids = $products = [];
-                foreach ($products_result as $result) {
-                    $product_ids[] = (int) $result['product_id'];
-                }
+                $product_ids = array_map('intval', array_column($products_result, 'product_id'));
+                $products = [];
                 $products_info = $this->model_catalog_product->getProductsAllInfo($product_ids);
                 $thumbnails = $resource->getMainThumbList(
                     'products',
@@ -361,11 +360,13 @@ class ControllerPagesProductCategory extends AController
                 foreach ($this->data['sorts'] as $item => $text) {
                     $sort_options[$item] = $text;
                 }
-                $sorting = $this->html->buildSelectbox([
-                                                           'name'    => 'sort',
-                                                           'options' => $sort_options,
-                                                           'value'   => $sort.'-'.$order,
-                                                       ]);
+                $sorting = $this->html->buildSelectbox(
+                    [
+                       'name'    => 'sort',
+                       'options' => $sort_options,
+                       'value'   => $sort.'-'.$order,
+                   ]
+                );
                 $this->view->assign('sorting', $sorting);
                 $this->view->assign('url', $this->html->getSEOURL('product/category', '&path='.$request['path']));
 
@@ -376,21 +377,19 @@ class ControllerPagesProductCategory extends AController
                 );
 
                 $this->view->assign(
-                    'pagination_bootstrap', $this->html->buildElement([
-                                                                          'type'       => 'Pagination',
-                                                                          'name'       => 'pagination',
-                                                                          'text'       => $this->language->get(
-                                                                              'text_pagination'
-                                                                          ),
-                                                                          'text_limit' => $this->language->get(
-                                                                              'text_per_page'
-                                                                          ),
-                                                                          'total'      => $product_total,
-                                                                          'page'       => $page,
-                                                                          'limit'      => $limit,
-                                                                          'url'        => $pagination_url,
-                                                                          'style'      => 'pagination',
-                                                                      ])
+                    'pagination_bootstrap', $this->html->buildElement(
+                        [
+                            'type'       => 'Pagination',
+                            'name'       => 'pagination',
+                            'text'       => $this->language->get('text_pagination'),
+                            'text_limit' => $this->language->get('text_per_page'),
+                            'total'      => $product_total,
+                            'page'       => $page,
+                            'limit'      => $limit,
+                            'url'        => $pagination_url,
+                            'style'      => 'pagination',
+                        ]
+                    )
                 );
 
                 $this->view->assign('sort', $sort);
@@ -426,15 +425,17 @@ class ControllerPagesProductCategory extends AController
             }
 
             if (isset($request['path'])) {
-                $this->document->addBreadcrumb([
-                                                   'href'      => $this->html->getSEOURL(
-                                                       'product/category',
-                                                       '&path='.$request['path'].$url,
-                                                       '&encode'
-                                                   ),
-                                                   'text'      => $this->language->get('text_error'),
-                                                   'separator' => $this->language->get('text_separator'),
-                                               ]);
+                $this->document->addBreadcrumb(
+                    [
+                       'href'      => $this->html->getSEOURL(
+                           'product/category',
+                           '&path='.$request['path'].$url,
+                           '&encode'
+                       ),
+                       'text'      => $this->language->get('text_error'),
+                       'separator' => $this->language->get('text_separator'),
+                   ]
+                );
             }
 
             $this->document->setTitle($this->language->get('text_error'));
