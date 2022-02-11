@@ -334,7 +334,7 @@ class ControllerPagesProductSearch extends AController
                             }
                         }
 
-                        $products[] = $result +
+                        $products[] = array_merge($result,
                             [
                                 'rating'         => $rating,
                                 'stars'          => sprintf($this->language->get('text_stars'), $rating),
@@ -358,7 +358,8 @@ class ControllerPagesProductSearch extends AController
                                 'in_stock'       => $in_stock,
                                 'no_stock_text'  => $no_stock_text,
                                 'total_quantity' => $total_quantity,
-                            ];
+                            ]
+                        );
                     }
                 }
 

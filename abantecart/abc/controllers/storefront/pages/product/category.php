@@ -309,7 +309,7 @@ class ControllerPagesProductCategory extends AController
                         }
                     }
 
-                    $products[$k] = $result +
+                    $products[$k] = array_merge($result,
                         [
                             'rating'                      => $rating,
                             'stars'                       => sprintf($this->language->get('text_stars'), $rating),
@@ -343,7 +343,7 @@ class ControllerPagesProductCategory extends AController
                                 '&product_id='.$result['product_id']
                             ),
                             'catalog_mode'                => $catalog_mode,
-                        ];
+                        ]);
                 }
                 $this->data['products'] = $products;
 
