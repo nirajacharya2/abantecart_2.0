@@ -580,10 +580,11 @@ class Customer extends BaseModel
     {
         /** @var AEncryption $enc */
         $enc = ABC::getObjectByAlias('AEncryption');
+        $salt_key = $this->attributes['salt'] ?? H::genToken(8);
+
         if (!empty(trim($password))
-            && $enc::getHash($password, $this->attributes['salt']) != $this->attributes['password']
+            && $enc::getHash($password, $salt_key) != $this->attributes['password']
         ) {
-            $salt_key = H::genToken(8);
             $this->fill(['salt' => $salt_key]);
             $this->attributes['password'] = $enc::getHash($password, $salt_key);
         } else {
