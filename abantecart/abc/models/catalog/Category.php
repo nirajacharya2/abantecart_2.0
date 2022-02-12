@@ -1,5 +1,21 @@
 <?php
-
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2022 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ *
+ */
 namespace abc\models\catalog;
 
 use abc\core\ABC;
@@ -47,7 +63,6 @@ use ReflectionException;
  * @property Collection $category_descriptions
  * @property Collection $products_to_categories
  *
- * @method static Category find(int $customer_id) Category
  * @package abc\models
  */
 class Category extends BaseModel
@@ -58,14 +73,10 @@ class Category extends BaseModel
         'descriptions',
         'products',
     ];
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $primaryKey = 'category_id';
 
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $casts = [
         'parent_id'             => 'int',
         'sort_order'            => 'int',
@@ -85,9 +96,7 @@ class Category extends BaseModel
         'date_modified',
     ];
 
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $fillable = [
         'category_id',
         'uuid',
@@ -213,7 +222,7 @@ class Category extends BaseModel
      */
     public function description()
     {
-        return $this->hasOne(CategoryDescription::class, 'category_id')
+        return $this->hasOne(CategoryDescription::class, 'category_id', 'category_id')
                     ->where('language_id', '=', static::$current_language_id);
     }
 
@@ -394,7 +403,7 @@ class Category extends BaseModel
     }
 
     /**
-     * @param        $category_id
+     * @param int $category_id
      *
      * @return array
      * @throws ReflectionException
@@ -678,17 +687,8 @@ class Category extends BaseModel
     public static function getCategoriesData($params)
     {
         $db = Registry::db();
-        if ($params['language_id']) {
-            $language_id = (int) $params['language_id'];
-        } else {
-            $language_id = static::$current_language_id;
-        }
-
-        if ($params['store_id']) {
-            $store_id = (int) $params['store_id'];
-        } else {
-            $store_id = (int) Registry::config()->get('config_store_id');
-        }
+        $language_id = (int) $params['language_id'] ?: static::$current_language_id;
+        $store_id = (int) $params['store_id'] ?: (int) Registry::config()->get('config_store_id');
 
         $arSelect = [];
         if (ABC::env('IS_ADMIN')) {

@@ -1,5 +1,21 @@
 <?php
-
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2022 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ *
+ */
 namespace abc\models\catalog;
 
 use abc\core\ABC;
@@ -26,11 +42,13 @@ use H;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 use Psr\SimpleCache\InvalidArgumentException;
+use Ramsey\Uuid\Uuid;
 use ReflectionException;
 
 /**
@@ -69,7 +87,7 @@ use ReflectionException;
  * @property int $maximum
  * @property float $cost
  * @property int $call_to_order
- * @property string $settings
+ * @property array $settings
  * @property Carbon $date_added
  * @property Carbon $date_modified
  * @property ProductDescription $description
@@ -228,7 +246,7 @@ class Product extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'default_text' => 'UUID must be between 1 and 255 characters!',
+                    'default_text' => 'Invalid UUID Format! Please follow pattern '.Uuid::VALID_PATTERN,
                 ],
             ],
         ],
@@ -1191,11 +1209,11 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return HasOne
      */
     public function stock_status()
     {
-        return $this->hasOne(StockStatus::class, 'stock_status_id')
+        return $this->hasOne(StockStatus::class, 'stock_status_id', 'stock_status_id')
                     ->where('language_id', '=', static::$current_language_id);
     }
 
@@ -1216,11 +1234,11 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return HasOne
      */
     public function description()
     {
-        return $this->hasOne(ProductDescription::class, 'product_id')
+        return $this->hasOne(ProductDescription::class, 'product_id','product_id')
                     ->where('language_id', '=', static::$current_language_id);
     }
 
@@ -1327,7 +1345,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return HasOne
      */
     public function manufacturer()
     {

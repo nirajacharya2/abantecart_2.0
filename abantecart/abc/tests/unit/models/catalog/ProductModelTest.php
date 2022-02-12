@@ -16,15 +16,17 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace abc\tests\unit\models\catalog;
+namespace Tests\unit\models\catalog;
 
 use abc\core\engine\Registry;
 use abc\models\catalog\Product;
 use abc\models\catalog\ProductDescription;
 use abc\models\catalog\UrlAlias;
 use abc\tests\unit\ATestCase;
+use Exception;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use PDOException;
 use PHPUnit\Framework\Warning;
 
 class ProductModelTest extends ATestCase
@@ -39,9 +41,9 @@ class ProductModelTest extends ATestCase
         $data = $product->getAllData();
         $rels = Product::getRelationships('HasMany', 'HasOne', 'belongsToMany');
         $rels = array_keys($rels);
+        unset($rels['options']);
         foreach ($rels as $rel) {
             $rel = Str::snake($rel);
-            //var_dump($rel.": ".count($data[$rel]));
             $this->assertGreaterThan(0, count($data[$rel]));
         }
     }
@@ -101,14 +103,14 @@ class ProductModelTest extends ATestCase
             //var_Dump(var_dump(array_diff(array_keys($data),array_keys($errors))));
         }
 
-        $this->assertEquals(30, count($errors));
+        $this->assertCount(30, $errors);
 
         //validate correct data
         $product = new Product();
         $errors = [];
         try {
             $data = [
-                'uuid'              => 'sssss',
+                'uuid' =>  '00000000-0000-0000-0000-000000000000',
                 'model'             => 'tesmodeltest',
                 'sku'               => 'testskutest',
                 'location'          => 'somewhere',
@@ -145,12 +147,13 @@ class ProductModelTest extends ATestCase
             $errors = $product->errors()['validation'];
             var_Dump($errors);
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
     }
 
     /**
      * @return int
+     * @throws Exception
      */
     public function testCreateProduct()
     {
@@ -208,11 +211,7 @@ class ProductModelTest extends ATestCase
         try {
             $product = Product::createProduct($arProduct);
             $productId = $product->getKey();
-        } catch (\PDOException $e) {
-            $this->fail($e->getMessage());
-        } catch (Warning $e) {
-            $this->fail($e->getMessage());
-        } catch (\Exception $e) {
+        } catch (PDOException|Warning|Exception $e) {
             $this->fail($e->getMessage());
         }
 
@@ -268,11 +267,7 @@ class ProductModelTest extends ATestCase
         try {
             Product::setCurrentLanguageID(1);
             Product::updateProduct($productId, $arProductData);
-        } catch (\PDOException $e) {
-            $this->fail($e->getMessage());
-        } catch (Warning $e) {
-            $this->fail($e->getMessage());
-        } catch (\Exception $e) {
+        } catch (PDOException|Warning|Exception $e) {
             $this->fail($e->getMessage());
         }
 
@@ -295,11 +290,7 @@ class ProductModelTest extends ATestCase
             /** @var ProductDescription $pd */
             $pd = ProductDescription::where('product_id', '=', $productId)->first();
             $pd->touch();
-        } catch (\PDOException $e) {
-            $this->fail($e->getMessage());
-        } catch (Warning $e) {
-            $this->fail($e->getMessage());
-        } catch (\Exception $e) {
+        } catch (PDOException|Warning|Exception $e) {
             $this->fail($e->getMessage());
         }
         $product->refresh();
@@ -310,21 +301,14 @@ class ProductModelTest extends ATestCase
     /**
      * @depends testCreateProduct
      *
-     * @param $productId
+     * @param int $productId
      */
     public function testDeleteProduct(int $productId)
     {
         try {
             $result = Product::destroy($productId);
-        } catch (\PDOException $e) {
+        } catch (PDOException|Warning|Exception $e) {
             $this->fail($e->getMessage());
-            $result = false;
-        } catch (Warning $e) {
-            $this->fail($e->getMessage());
-            $result = false;
-        } catch (\Exception $e) {
-            $this->fail($e->getMessage());
-            $result = false;
         }
         $this->assertEquals(true, $result);
     }
@@ -341,21 +325,26 @@ class ProductModelTest extends ATestCase
         $related_ids = [50, 50, 50, 51];
         Product::relateProducts($related_ids);
 
-        $result = $db->query("SELECT product_id, related_id FROM ".$db->table_name("products_related")
-            ." WHERE product_id=50");
+        $result = $db->query(
+            "SELECT product_id, related_id 
+            FROM ".$db->table_name("products_related")." 
+            WHERE product_id=50");
         $this->assertEquals(1, $result->num_rows);
-        $result = $db->query("SELECT product_id, related_id FROM ".$db->table_name("products_related")
-            ." WHERE product_id=51");
+        $result = $db->query(
+            "SELECT product_id, related_id 
+            FROM ".$db->table_name("products_related")." 
+            WHERE product_id=51"
+        );
         $this->assertEquals(1, $result->num_rows);
 
-        $product = $product = Product::find(64);
+        $product = Product::find(64);
         $options = $product->getProductOptions();
 
-        $this->assertEquals($options[0]['product_option_id'], 314);
-        $this->assertEquals($options[0]['descriptions'][0]['name'], 'Fragrance Size');
-        $this->assertEquals($options[0]['language'][1]['name'], 'Fragrance Size');
-        $this->assertEquals($options[0]['product_option_value'][0]['descriptions'][0]['name'], '1.0 oz');
-        $this->assertEquals($options[0]['product_option_value'][0]['language'][1]['name'], '1.0 oz');
+        $this->assertEquals(314, $options[0]['product_option_id']);
+        $this->assertEquals('Fragrance Size', $options[0]['descriptions'][0]['name']);
+        $this->assertEquals('Fragrance Size', $options[0]['language'][1]['name']);
+        $this->assertEquals('1.0 oz', $options[0]['product_option_value'][0]['descriptions'][0]['name']);
+        $this->assertEquals('1.0 oz', $options[0]['product_option_value'][0]['language'][1]['name']);
 
     }
 

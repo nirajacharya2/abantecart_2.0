@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2022 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -20,6 +20,7 @@ namespace abc\models\catalog;
 
 use abc\models\BaseModel;
 use abc\models\locale\Language;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -36,7 +37,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property Language $language
  * @property ProductOption $product_option
  *
- * @method static ProductOptionDescription create(array $attributes) ProductOptionDescription
  *
  *
  * @package abc\models
@@ -153,21 +153,35 @@ class ProductOptionDescription extends BaseModel
 
     ];
 
+    /**
+     * @param string $value
+     *
+     * @return string
+     */
     public function getNameAttribute($value)
     {
         return $value === '' ? 'n/a' : $value;
     }
 
+    /**
+     * @return BelongsTo
+     */
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id');
     }
 
+    /**
+     * @return BelongsTo
+     */
     public function language()
     {
         return $this->belongsTo(Language::class, 'language_id');
     }
 
+    /**
+     * @return BelongsTo
+     */
     public function product_option()
     {
         return $this->belongsTo(ProductOption::class, 'product_option_id');

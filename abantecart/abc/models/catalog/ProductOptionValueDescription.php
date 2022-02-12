@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2022 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -22,6 +22,7 @@ use abc\models\BaseModel;
 use abc\models\casts\Serialized;
 use abc\models\locale\Language;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -31,7 +32,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $language_id
  * @property int $product_id
  * @property string $name
- * @property string $grouped_attribute_names
+ * @property array $grouped_attribute_names
  *
  * @property Carbon $date_added
  * @property Carbon $date_modified
@@ -39,8 +40,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property Product $product
  * @property Language $language
  *
- * @method static ProductOptionValueDescription find(int $id) ProductOptionValueDescription
- * @method static ProductOptionValueDescription create(array $attributes) ProductOptionValueDescription
  *
  * @package abc\models
  */
@@ -130,23 +129,25 @@ class ProductOptionValueDescription extends BaseModel
         ],
     ];
 
-    public function setGroupedAttributeNamesAttribute($value)
-    {
-        if ($value !== null && !is_string($value)) {
-            $this->attributes['grouped_attribute_names'] = serialize($value);
-        }
-    }
-
+    /**
+     * @return BelongsTo
+     */
     public function product_option_value()
     {
         return $this->belongsTo(ProductOptionValue::class, 'product_option_value_id');
     }
 
+    /**
+     * @return BelongsTo
+     */
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id');
     }
 
+    /**
+     * @return BelongsTo
+     */
     public function language()
     {
         return $this->belongsTo(Language::class, 'language_id');

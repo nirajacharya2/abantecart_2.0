@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2022 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -25,6 +25,7 @@ use abc\core\engine\Registry;
 use abc\core\lib\AResourceManager;
 use abc\core\lib\AttributeManager;
 use abc\models\BaseModel;
+use abc\models\casts\Serialized;
 use abc\models\QueryBuilder;
 use Carbon\Carbon;
 use Exception;
@@ -50,7 +51,7 @@ use Psr\SimpleCache\InvalidArgumentException;
  * @property string $element_type
  * @property int $required
  * @property string $regexp_pattern
- * @property string $settings
+ * @property array $settings
  * @property Carbon $date_added
  * @property Carbon $date_modified
  *
@@ -86,7 +87,7 @@ class ProductOption extends BaseModel
         'sort_order'   => 'int',
         'status'       => 'int',
         'required'     => 'int',
-        'settings'     => Serialization::class,
+        'settings'     => Serialized::class,
     ];
 
     /** @var array */
@@ -206,11 +207,6 @@ class ProductOption extends BaseModel
         parent::__construct($attributes);
     }
 
-    public function setSettingsAttribute($value)
-    {
-        $this->attributes['settings'] = serialize($value);
-    }
-
     /**
      * @return BelongsTo
      */
@@ -291,9 +287,6 @@ class ProductOption extends BaseModel
         if (!$po_ids || !is_array($po_ids)) {
             return false;
         }
-        /**
-         * @var QueryBuilder $query
-         */
         $query = static::select(
             [
                 'product_options.*',
@@ -381,6 +374,7 @@ class ProductOption extends BaseModel
             $optionData['grouped_attribute_data'] = $groupData;
         }
 
+        /** @var ProductOptionValue $optionValue */
         $optionValue = ProductOptionValue::create($optionData);
         $optionValueId = $optionValue->getKey();
 
@@ -401,7 +395,6 @@ class ProductOption extends BaseModel
             }
 
             // Insert generic merged name
-            $grouped_names = null;
             foreach ($descr_names as $language_id => $name) {
                 ProductOptionValueDescription::create(
                     [
@@ -426,18 +419,11 @@ class ProductOption extends BaseModel
                             'name' => ($indata['description']['name'] ?? 'Unknown'),
                         ],
                     ];
-                } elseif ($indata['name']) {
-                    $valueDescriptions = [
-                        static::$current_language_id =>
-                            [
-                                'name' => ($indata['name'] ?? 'Unknown'),
-                            ],
-                    ];
                 } else {
                     $valueDescriptions = [
                         static::$current_language_id =>
                             [
-                                'name' => 'Unknown',
+                                'name' => $indata['name'] ?? 'Unknown',
                             ],
                     ];
                 }
@@ -489,7 +475,7 @@ class ProductOption extends BaseModel
         } else {
             $indata['placeholder'] = $indata['option_placeholder'];
         }
-
+        /** @var ProductOption $option */
         $option = ProductOption::create($indata);
         $product_option_id = $option->getKey();
 
@@ -523,7 +509,13 @@ class ProductOption extends BaseModel
         return $product_option_id;
     }
 
-    public static function updateProductOptionValues($indata)
+    /**
+     * @param array $indata
+     *
+     * @return bool
+     * @throws Exception
+     */
+    public static function updateProductOptionValues(array $indata)
     {
         if (!is_array($indata['product_option_value_id']) || !$indata['product_option_id'] || !$indata['product_id']) {
             return false;
@@ -538,17 +530,16 @@ class ProductOption extends BaseModel
 
             foreach ($indata as $key => $value) {
                 if (is_array($value) && isset($value[$valueId])) {
-                    $option_value_data[$key] = $indata[$key][$valueId];
+                    $option_value_data[$key] = $value[$valueId];
                 }
             }
 
             //Check if new, delete or update
-            if ($status == 'delete' && strpos($valueId, 'new') === false) {
+            if ($status == 'delete' && !str_contains($valueId, 'new')) {
                 //delete this option value for all languages
+                /** @var ProductOptionValue $value */
                 $value = ProductOptionValue::find($valueId);
-                if ($value) {
-                    $value->forceDelete();
-                }
+                $value?->forceDelete();
             } else {
                 if ($status == 'new') {
                     // Need to create new option value
@@ -565,6 +556,13 @@ class ProductOption extends BaseModel
         return true;
     }
 
+    /**
+     * @param int $pd_opt_val_id
+     * @param array $inData
+     *
+     * @return void
+     * @throws Exception
+     */
     public static function updateProductOptionValueAndDescription($pd_opt_val_id, $inData)
     {
         $data = $inData;
@@ -598,9 +596,7 @@ class ProductOption extends BaseModel
         }
 
         $optionValue = ProductOptionValue::find($pd_opt_val_id);
-        if ($optionValue) {
-            $optionValue->update($data);
-        }
+        $optionValue?->update($data);
 
         if (is_array($inData['attribute_value_id'])) {
             //update children option values description from global attributes
@@ -679,7 +675,7 @@ class ProductOption extends BaseModel
 
     /**
      * check attribute before add to product options
-     * cant add attribute that is already in group attribute that assigned to product
+     * can't add attribute that is already in group attribute that assigned to product
      *
      * @param $product_id
      * @param $attribute_id
@@ -700,7 +696,7 @@ class ProductOption extends BaseModel
 
     public function getProductOptionValueArray($option_value_id)
     {
-
+        /** @var ProductOptionValue $product_option_value */
         $product_option_value = ProductOptionValue::with('description')
                                                   ->whereNull('group_id')
                                                   ->find($option_value_id);

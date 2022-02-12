@@ -1,13 +1,36 @@
 <?php
-
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2022 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ *
+ */
 namespace abc\models\catalog;
 
 use abc\core\engine\AResource;
+use abc\core\lib\AException;
 use abc\models\BaseModel;
+use abc\models\casts\Serialized;
 use Carbon\Carbon;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 /**
  * Class ProductOptionValue
@@ -24,14 +47,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property float $weight
  * @property string $weight_type
  * @property int $attribute_value_id
- * @property string $grouped_attribute_data
+ * @property array $grouped_attribute_data
  * @property int $sort_order
  * @property int $default
  * @property Carbon $date_added
  * @property Carbon $date_modified
  *
  * @property ProductOption $product_option
- * @property ProductOptionValueDescription $description
+ * @property ProductOptionValueDescription $valueDescription
  * @property Product $product
  * @property Collection $order_options
  * @property ProductOptionDescription $descriptions
@@ -66,7 +89,7 @@ class ProductOptionValue extends BaseModel
         'price'                  => 'float',
         'weight'                 => 'float',
         'attribute_value_id'     => 'int',
-        'grouped_attribute_data' => 'serialized',
+        'grouped_attribute_data' => Serialized::class,
         'sort_order'             => 'int',
         'default'                => 'int',
     ];
@@ -245,34 +268,45 @@ class ProductOptionValue extends BaseModel
 
     ];
 
-    public function setGroupedAttributeDataAttribute($value)
-    {
-        if ($value !== null && !is_string($value)) {
-            $this->attributes['grouped_attribute_data'] = serialize($value);
-        }
-    }
-
+    /**
+     * @return BelongsTo
+     */
     public function option()
     {
         return $this->belongsTo(ProductOption::class, 'product_option_id');
     }
 
+    /**
+     * @return BelongsTo
+     */
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id');
     }
 
+    /**
+     * @return HasOne
+     */
     public function description()
     {
         return $this->hasOne(ProductOptionValueDescription::class, 'product_option_value_id')
                     ->where('language_id', '=', static::$current_language_id);
     }
 
+    /**
+     * @return HasMany
+     */
     public function descriptions()
     {
         return $this->hasMany(ProductOptionValueDescription::class, 'product_option_value_id');
     }
 
+    /**
+     * @return array
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
+     */
     public function images()
     {
         if ($this->images) {
@@ -298,6 +332,12 @@ class ProductOptionValue extends BaseModel
         return $this->images;
     }
 
+    /**
+     * @return array
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
+     */
     public function getAllData()
     {
         $this->load('descriptions');
