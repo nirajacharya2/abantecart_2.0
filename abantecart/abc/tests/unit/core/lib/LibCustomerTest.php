@@ -1,10 +1,12 @@
 <?php
-namespace abc\tests\unit;
+namespace Tests\unit\core\lib;
 
 use abc\core\engine\Registry;
 use abc\core\lib\ACustomer;
 use abc\models\customer\Customer;
+use Exception;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class LibCustomerTest
@@ -104,7 +106,7 @@ class LibCustomerTest extends ATestCase{
         }catch(ValidationException $e){
             var_dump($e->errors());
             exit;
-        }catch(\Exception $e){
+        }catch(Exception $e){
             var_dump($e->getMessage());
             exit;
         }
@@ -140,7 +142,7 @@ class LibCustomerTest extends ATestCase{
         }catch(ValidationException $e){
             var_dump($e->errors());
             exit;
-        }catch(\Exception $e){
+        }catch(Exception $e){
             var_dump($e->getMessage());
             exit;
         }

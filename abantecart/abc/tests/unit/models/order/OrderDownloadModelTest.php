@@ -1,9 +1,10 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\order;
 
 use abc\models\order\OrderDownload;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class OrderDownloadModelTest
@@ -44,7 +45,7 @@ class OrderDownloadModelTest extends ATestCase
             $errors = $orderDownload->errors()['validation'];
             // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
-        $this->assertEquals(13, count($errors));
+        $this->assertCount(13, $errors);
 
         //check validation of presence in database
         $data = [
@@ -67,7 +68,7 @@ class OrderDownloadModelTest extends ATestCase
             $errors = $orderDownload->errors()['validation'];
             //var_Dump($errors);
         }
-        $this->assertEquals(4, count($errors));
+        $this->assertCount(4, $errors);
 
         //check validation of nullables
         $data = [
@@ -93,7 +94,7 @@ class OrderDownloadModelTest extends ATestCase
             $errors = $orderDownload->errors()['validation'];
             //var_Dump($errors);
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
         //valid data
         $data = [
@@ -123,7 +124,7 @@ class OrderDownloadModelTest extends ATestCase
             // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
             var_dump($errors);
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
         $orderDownload->forceDelete();
     }
 

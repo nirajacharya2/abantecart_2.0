@@ -1,21 +1,16 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\locale;
 
 use abc\models\locale\Country;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class CountryModelTest
  */
 class CountryModelTest extends ATestCase
 {
-
-
-    protected function setUp()
-    {
-        //init
-    }
 
     public function testValidator()
     {
@@ -37,9 +32,7 @@ class CountryModelTest extends ATestCase
             $errors = $country->errors()['validation'];
         }
 
-
-        $this->assertEquals(6, count($errors));
-
+        $this->assertCount(6, $errors);
 
         $country = new Country(
             [
@@ -57,7 +50,7 @@ class CountryModelTest extends ATestCase
             $errors = $country->errors()['validation'];
         }
 
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
     }
 }

@@ -1,9 +1,10 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\order;
 
 use abc\models\order\OrderDataType;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class OrderDataTypeModelTest
@@ -33,7 +34,7 @@ class OrderDataTypeModelTest extends ATestCase
             // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
 
-        $this->assertEquals(3, count($errors));
+        $this->assertCount(3, $errors);
 
         //check validation of presence in database
         $data = [
@@ -50,7 +51,7 @@ class OrderDataTypeModelTest extends ATestCase
             //var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
 
-        $this->assertEquals(1, count($errors));
+        $this->assertCount(1, $errors);
 
         $data = [
             'type_id'     => 3,
@@ -60,7 +61,6 @@ class OrderDataTypeModelTest extends ATestCase
 
         $orderDataType = new OrderDataType($data);
         $errors = [];
-        $order_id = null;
         try {
             $orderDataType->validate();
             $orderDataType->save();
@@ -69,7 +69,7 @@ class OrderDataTypeModelTest extends ATestCase
             //var_Dump(array_intersect_key($data, $errors ));
         }
 
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
         if ($orderDataType->type_id) {
             $orderDataType->forceDelete();

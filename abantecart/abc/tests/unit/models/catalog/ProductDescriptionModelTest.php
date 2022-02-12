@@ -1,18 +1,14 @@
 <?php
-namespace abc\tests\unit;
+namespace Tests\unit\models\catalog;
 
 use abc\models\catalog\ProductDescription;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class ProductDescriptionModelTest
  */
 class ProductDescriptionModelTest extends ATestCase{
-
-
-    protected function setUp(){
-        //init
-    }
 
     public function testValidator()
     {
@@ -33,7 +29,7 @@ class ProductDescriptionModelTest extends ATestCase{
             $errors = $productDescription->errors()['validation'];
         }
 
-        $this->assertEquals(7, count($errors));
+        $this->assertCount(7, $errors);
 
 
         $errors = [];
@@ -51,7 +47,7 @@ class ProductDescriptionModelTest extends ATestCase{
         } catch (ValidationException $e) {
             $errors = $productDescription->errors()['validation'];
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
         $errors = [];
         try {
@@ -69,7 +65,7 @@ class ProductDescriptionModelTest extends ATestCase{
             $errors = $productDescription->errors()['validation'];
             //var_dump($errors);
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
         $errors = [];
         try {
             $data = [
@@ -81,7 +77,7 @@ class ProductDescriptionModelTest extends ATestCase{
         } catch (ValidationException $e) {
             $errors = $productDescription->errors()['validation'];
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
     }
 }

@@ -1,19 +1,15 @@
 <?php
-namespace abc\tests\unit;
+namespace Tests\unit\models\customer;
 
 use abc\models\customer\Customer;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class CustomerModelTest
  */
 class CustomerModelTest extends ATestCase{
     const PASSWORD = '1234567890';
-
-    protected function setUp():void
-    {
-        //init
-    }
 
     public function testValidator()
     {
@@ -330,10 +326,10 @@ class CustomerModelTest extends ATestCase{
     public function testGetCustomersByProduct()
     {
         $result = Customer::search(['filter' => ['product_id' => 51]]);
-        $this->assertEquals(2, count($result));
+        $this->assertCount(2, $result);
 
         $result = Customer::search(['filter' => ['product_id' => 66]]);
-        $this->assertEquals(1, count($result));
+        $this->assertCount(1, $result);
     }
 
     public function testIsUniqueLoginName()

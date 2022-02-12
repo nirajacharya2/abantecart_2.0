@@ -1,10 +1,10 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\core\lib;
 
-use abc\core\ABC;
 use abc\core\engine\Registry;
 use stdClass;
+use Tests\unit\ATestCase;
 
 /**
  * Class CacheTest

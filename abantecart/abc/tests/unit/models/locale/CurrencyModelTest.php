@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2022 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -16,11 +16,12 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace unit\models\locale;
+namespace Tests\unit\models\locale;
 
 use abc\models\locale\Currency;
-use abc\tests\unit\ATestCase;
+use Exception;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 class CurrencyModelTest extends ATestCase
 {
@@ -49,7 +50,7 @@ class CurrencyModelTest extends ATestCase
         }
 
         //var_dump($errors);die;
-        $this->assertEquals(7, count($errors));
+        $this->assertCount(7, $errors);
 
 
         $currency = new Currency(
@@ -71,13 +72,13 @@ class CurrencyModelTest extends ATestCase
             $errors = $currency->errors()['validation'];
         }
 
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
     }
 
     /**
      * @return int
-     * @throws \Exception
+     * @throws Exception
      */
     public function testCreateCurrency()
     {
@@ -99,10 +100,11 @@ class CurrencyModelTest extends ATestCase
     /**
      * @depends testCreateCurrency
      *
-     * @param $createdId
+     * @param int $createdId
      */
     public function testReadCurrency(int $createdId)
     {
+        /** @var Currency $result */
         $result = Currency::find($createdId);
         $this->assertEquals('Test currency', $result->title);
     }
@@ -110,14 +112,14 @@ class CurrencyModelTest extends ATestCase
     /**
      * @depends testCreateCurrency
      *
-     * @param $createdId
-     *
+     * @param int $createdId
      */
     public function testUpdateCurrency(int $createdId)
     {
         Currency::find($createdId)->update([
             'code' => 'TCU',
         ]);
+        /** @var Currency $result */
         $result = Currency::find($createdId);
         $this->assertEquals('TCU', $result->code);
     }
@@ -125,7 +127,7 @@ class CurrencyModelTest extends ATestCase
     /**
      * @depends testCreateCurrency
      *
-     * @param $createdId
+     * @param int $createdId
      */
     public function testDeleteCurrency(int $createdId)
     {

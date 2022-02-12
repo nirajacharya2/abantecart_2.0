@@ -1,7 +1,7 @@
 <?php
 namespace abc\banner_manager\tests\unit;
 
-use abc\tests\unit\ATestCase;
+use Tests\unit\models\ATestCase;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\Abac;

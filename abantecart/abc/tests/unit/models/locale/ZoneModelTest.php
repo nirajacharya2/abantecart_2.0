@@ -1,9 +1,10 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\locale;
 
 use abc\models\locale\Zone;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class ZoneModelTest
@@ -27,7 +28,7 @@ class ZoneModelTest extends ATestCase
         } catch (ValidationException $e) {
             $errors = $zone->errors()['validation'];
         }
-        $this->assertEquals(4, count($errors));
+        $this->assertCount(4, $errors);
 
         $zone = new Zone(
             [
@@ -43,7 +44,7 @@ class ZoneModelTest extends ATestCase
         } catch (ValidationException $e) {
             $errors = $zone->errors()['validation'];
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
     }
 

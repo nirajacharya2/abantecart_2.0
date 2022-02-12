@@ -1,21 +1,17 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\order;
 
 use abc\models\locale\Country;
 use abc\models\order\OrderStatus;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class OrderStatusModelTest
  */
 class OrderStatusModelTest extends ATestCase
 {
-
-    protected function setUp():void
-    {
-        //init
-    }
 
     public function testValidator()
     {
@@ -33,7 +29,7 @@ class OrderStatusModelTest extends ATestCase
             $errors = $orderStatus->errors()['validation'];
             // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
-        $this->assertEquals(1, count($errors));
+        $this->assertCount(1, $errors);
 
         //validate
         $data = [
@@ -51,7 +47,7 @@ class OrderStatusModelTest extends ATestCase
             var_dump($errors);
             // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
         $orderStatus->forceDelete();
     }

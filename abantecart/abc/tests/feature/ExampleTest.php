@@ -3,7 +3,7 @@
 namespace tests\Feature;
 
 
-use abc\tests\unit\ATestCase;
+use Tests\unit\models\ATestCase;
 
 class ExampleTest extends ATestCase
 {

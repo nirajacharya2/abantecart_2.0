@@ -1,10 +1,11 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\order;
 
 use abc\models\order\OrderDownload;
 use abc\models\order\OrderDownloadsHistory;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class OrderDownloadHistoryModelTest
@@ -38,7 +39,7 @@ class OrderDownloadHistoryModelTest extends ATestCase
             $errors = $orderDownloadHistory->errors()['validation'];
             // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
-        $this->assertEquals(7, count($errors));
+        $this->assertCount(7, $errors);
 
         //check validation of presence in database
         $data = [
@@ -61,7 +62,7 @@ class OrderDownloadHistoryModelTest extends ATestCase
             $errors = $orderDownloadHistory->errors()['validation'];
             //var_Dump($errors);
         }
-        $this->assertEquals(4, count($errors));
+        $this->assertCount(4, $errors);
 
         //valid data
         $data = [
@@ -105,7 +106,7 @@ class OrderDownloadHistoryModelTest extends ATestCase
             // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
             var_dump($errors);
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
         $orderDownloadHistory->forceDelete();
         $orderDownload->forceDelete();
     }

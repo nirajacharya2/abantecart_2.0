@@ -4,7 +4,7 @@ use abc\models\catalog\Product;
 use abc\models\customer\Address;
 use abc\models\customer\Customer;
 use abc\modules\listeners\ModelAuditListener;
-use abc\tests\unit\modules\listeners\ATestListener;
+use Tests\unit\models\modules\listeners\ATestListener;
 
 return [
     /** events for ORM Models

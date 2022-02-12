@@ -16,13 +16,13 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace unit\models;
-use abc\core\ABC;
-use abc\tests\unit\ATestCase;
+namespace Tests\unit\models;
 use abc\models\catalog\Product;
-use abc\tests\unit\modules\listeners\ATestListener;
+use Exception;
 use Illuminate\Validation\ValidationException;
+use PDOException;
 use PHPUnit\Framework\Warning;
+use Tests\unit\ATestCase;
 
 class BaseModelTest extends ATestCase
 {
@@ -82,11 +82,7 @@ class BaseModelTest extends ATestCase
         try {
             $product = Product::createProduct($arProduct);
             $productId = $product->getKey();
-        } catch (\PDOException $e) {
-            $this->fail($e->getMessage());
-        } catch (Warning $e) {
-            $this->fail($e->getMessage());
-        } catch (\Exception $e) {
+        } catch (PDOException|Warning|Exception $e) {
             $this->fail($e->getMessage());
         }
 
@@ -114,12 +110,12 @@ class BaseModelTest extends ATestCase
 
             $product->save();
             $result = true;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             $this->fail($e->getMessage());
         } catch (ValidationException $e){
             $error_text = $e->getMessage();
             $result = true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error_text = $e->getMessage();
             if (is_int(strpos($error_text, "'validation' =>"))) {
                 echo $e->getMessage();

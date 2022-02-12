@@ -1,20 +1,16 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\catalog;
 
 use abc\models\catalog\ProductOptionDescription;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class ProductOptionDescriptionModelTest
  */
 class ProductOptionDescriptionModelTest extends ATestCase
 {
-
-    protected function setUp()
-    {
-        //init
-    }
 
     public function testValidator()
     {
@@ -34,7 +30,7 @@ class ProductOptionDescriptionModelTest extends ATestCase
             $errors = $productOptionDescription->errors()['validation'];
         }
 
-        $this->assertEquals(6, count($errors));
+        $this->assertCount(6, $errors);
 
         $errors = [];
         try {
@@ -44,13 +40,13 @@ class ProductOptionDescriptionModelTest extends ATestCase
                 'product_option_id'  => 307,
                 'name'               => 'unit test option',
                 'option_placeholder' => 'some placeholder text',
-                'error_text'         => 'Oooops..you did something wrong.',
+                'error_text'         => 'Oops..you did something wrong.',
             ];
             $productOptionDescription->validate($data);
         } catch (ValidationException $e) {
             $errors = $productOptionDescription->errors()['validation'];
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
         $errors = [];
         try {
@@ -60,13 +56,13 @@ class ProductOptionDescriptionModelTest extends ATestCase
                 'product_option_id'  => 0,
                 'name'               => 'unit test option',
                 'option_placeholder' => 'some placeholder text',
-                'error_text'         => 'Oooops..you did something wrong.',
+                'error_text'         => 'Oops..you did something wrong.',
             ];
             $productOptionDescription->validate($data);
         } catch (ValidationException $e) {
             $errors = $productOptionDescription->errors()['validation'];
         }
-        $this->assertEquals(3, count($errors));
+        $this->assertCount(3, $errors);
 
     }
 }

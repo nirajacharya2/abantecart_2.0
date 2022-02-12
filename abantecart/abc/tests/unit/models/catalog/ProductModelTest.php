@@ -22,12 +22,12 @@ use abc\core\engine\Registry;
 use abc\models\catalog\Product;
 use abc\models\catalog\ProductDescription;
 use abc\models\catalog\UrlAlias;
-use abc\tests\unit\ATestCase;
 use Exception;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use PDOException;
 use PHPUnit\Framework\Warning;
+use Tests\unit\ATestCase;
 
 class ProductModelTest extends ATestCase
 {

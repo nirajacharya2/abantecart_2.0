@@ -1,20 +1,16 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\catalog;
 
 use abc\models\catalog\ProductTag;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class ProductTagModelTest
  */
 class ProductTagModelTest extends ATestCase
 {
-
-    protected function setUp()
-    {
-        //init
-    }
 
     public function testValidator()
     {
@@ -31,7 +27,7 @@ class ProductTagModelTest extends ATestCase
             $errors = $productsRelated->errors()['validation'];
         }
 
-        $this->assertEquals(3, count($errors));
+        $this->assertCount(3, $errors);
 
         $errors = [];
         try {
@@ -45,7 +41,7 @@ class ProductTagModelTest extends ATestCase
             $errors = $productsRelated->errors()['validation'];
         }
 
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
         $errors = [];
         try {
@@ -59,7 +55,7 @@ class ProductTagModelTest extends ATestCase
             $errors = $productsRelated->errors()['validation'];
         }
 
-        $this->assertEquals(1, count($errors));
+        $this->assertCount(1, $errors);
 
         $errors = [];
         try {
@@ -73,7 +69,7 @@ class ProductTagModelTest extends ATestCase
             $errors = $productsRelated->errors()['validation'];
         }
 
-        $this->assertEquals(1, count($errors));
+        $this->assertCount(1, $errors);
 
         $errors = [];
         try {
@@ -87,7 +83,7 @@ class ProductTagModelTest extends ATestCase
             $errors = $productsRelated->errors()['validation'];
         }
 
-        $this->assertEquals(1, count($errors));
+        $this->assertCount(1, $errors);
 
     }
 }

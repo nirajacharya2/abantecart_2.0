@@ -16,11 +16,11 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace abc\tests\unit\models;
+namespace Tests\unit\models\models;
 
 use abc\core\lib\ADB;
 use abc\models\locale\Currency;
-use abc\tests\unit\ATestCase;
+use Tests\unit\models\ATestCase;
 
 /**
  * Class testCurrencyModel

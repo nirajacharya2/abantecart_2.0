@@ -1,20 +1,16 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\catalog;
 
 use abc\models\catalog\ProductOptionValue;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class ProductOptionValueModelTest
  */
 class ProductOptionValueModelTest extends ATestCase
 {
-
-    protected function setUp()
-    {
-        //init
-    }
 
     public function testValidator()
     {
@@ -42,7 +38,7 @@ class ProductOptionValueModelTest extends ATestCase
             $errors = $productOptionValue->errors()['validation'];
             //var_Dump(array_keys($errors));
         }
-        $this->assertEquals(13, count($errors));
+        $this->assertCount(13, $errors);
 
         $errors = [];
         try {
@@ -67,19 +63,18 @@ class ProductOptionValueModelTest extends ATestCase
             $errors = $productOptionValue->errors()['validation'];
             var_Dump($errors);
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
     }
 
     public function testStaticMethods()
     {
         $options = ProductOptionValue::getProductOptionValues(314);
-        $this->assertEquals(count($options), 3);
-        $this->assertEquals($options[0]['product_id'], 64);
-        $this->assertEquals($options[0]['descriptions'][0]['name'], '1.0 oz');
+        $this->assertCount(3, $options);
+        $this->assertEquals(64, $options[0]['product_id']);
+        $this->assertEquals('1.0 oz', $options[0]['descriptions'][0]['name']);
 
         $option = ProductOptionValue::getProductOptionValue($options[0]['product_option_value_id']);
-        $this->assertEquals($option['product_id'], 64);
-        $this->assertEquals($option['descriptions'][0]['name'], '1.0 oz');
-
+        $this->assertEquals(64, $option['product_id']);
+        $this->assertEquals('1.0 oz', $option['descriptions'][0]['name']);
     }
 }

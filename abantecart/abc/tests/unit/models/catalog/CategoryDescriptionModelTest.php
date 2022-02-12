@@ -1,11 +1,10 @@
 <?php
 
-namespace abc\tests\unit\models\catalog;
+namespace Tests\unit\models\catalog;
 
-use abc\models\catalog\Category;
 use abc\models\catalog\CategoryDescription;
-use abc\tests\unit\ATestCase;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class CategoryDescriptionModelTest
@@ -14,11 +13,6 @@ use Illuminate\Validation\ValidationException;
  */
 class CategoryDescriptionModelTest extends ATestCase
 {
-
-    protected function setUp()
-    {
-
-    }
 
     public function testValidator()
     {
@@ -36,7 +30,7 @@ class CategoryDescriptionModelTest extends ATestCase
             //var_dump($errors);
         }
 
-        $this->assertEquals(1, count($errors));
+        $this->assertCount(1, $errors);
 
 
         $categoryDescription = new CategoryDescription(
@@ -52,7 +46,7 @@ class CategoryDescriptionModelTest extends ATestCase
             $errors = $categoryDescription->errors()['validation'];
             //var_dump($errors);
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
     }
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\locale;
 
 use Illuminate\Validation\ValidationException;
 use abc\models\locale\WeightClass;
-
+use Tests\unit\ATestCase;
 
 /**
  * Class WeightClassModelTest
@@ -27,7 +27,7 @@ class WeightClassModelTest extends ATestCase
         } catch (ValidationException $e) {
             $errors = $weight->errors()['validation'];
         }
-        $this->assertEquals(1, count($errors));
+        $this->assertCount(1, $errors);
 
         $weight = new WeightClass(
             [
@@ -40,7 +40,7 @@ class WeightClassModelTest extends ATestCase
         } catch (ValidationException $e) {
             $errors = $weight->errors()['validation'];
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
     }
 }

@@ -1,14 +1,15 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\locale;
 
 use abc\models\locale\LanguageDefinition;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
- * Class LenguageDefinitionModelTest
+ * Class LanguageDefinitionModelTest
  */
-class LenguageDefinitionModelTest extends ATestCase
+class LanguageDefinitionModelTest extends ATestCase
 {
 
 
@@ -28,7 +29,7 @@ class LenguageDefinitionModelTest extends ATestCase
             $errors = $language->errors()['validation'];
         }
 
-        $this->assertEquals(2, count($errors));
+        $this->assertCount(2, $errors);
 
         $language = new LanguageDefinition(
             [
@@ -43,7 +44,7 @@ class LenguageDefinitionModelTest extends ATestCase
         } catch (ValidationException $e) {
             $errors = $language->errors()['validation'];
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
     }
 }

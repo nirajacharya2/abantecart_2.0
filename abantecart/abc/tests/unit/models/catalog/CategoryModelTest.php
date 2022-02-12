@@ -16,11 +16,11 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace abc\tests\unit\models\catalog;
+namespace Tests\unit\models\catalog;
 
 use abc\models\catalog\Category;
-use abc\tests\unit\ATestCase;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 class CategoryModelTest extends ATestCase
 {
@@ -45,7 +45,7 @@ class CategoryModelTest extends ATestCase
         } catch (ValidationException $e) {
             $errors = $category->errors()['validation'];
         }
-        $this->assertEquals(9, count($errors));
+        $this->assertCount(9, $errors);
 
         $errors = [];
         try {
@@ -65,7 +65,7 @@ class CategoryModelTest extends ATestCase
             $errors = $category->errors()['validation'];
             var_Dump($errors);
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
     }
 
     public function testGetPath()
@@ -75,7 +75,7 @@ class CategoryModelTest extends ATestCase
 
         $path = $category->getPath($category->category_id, 'id');
         $this->assertIsInt(strpos($path, '_'));
-
+        /** @var Category $category */
         $category = Category::whereNull('parent_id')->first();
         $path = $category->getPath($category->category_id, 'id');
         $this->assertEquals($path, $category->category_id);

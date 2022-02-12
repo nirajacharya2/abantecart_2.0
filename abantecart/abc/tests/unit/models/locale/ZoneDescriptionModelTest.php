@@ -1,14 +1,15 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\locale;
 
 use abc\models\locale\ZoneDescription;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
- * Class ZoneDescriptonModelTest
+ * Class ZoneDescriptionModelTest
  */
-class ZoneDescriptonModelTest extends ATestCase
+class ZoneDescriptionModelTest extends ATestCase
 {
 
     public function testValidator()
@@ -27,7 +28,7 @@ class ZoneDescriptonModelTest extends ATestCase
         } catch (ValidationException $e) {
             $errors = $zone->errors()['validation'];
         }
-        $this->assertEquals(2, count($errors));
+        $this->assertCount(2, $errors);
 
         $zone = new ZoneDescription(
             [
@@ -41,7 +42,7 @@ class ZoneDescriptonModelTest extends ATestCase
         } catch (ValidationException $e) {
             $errors = $zone->errors()['validation'];
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
     }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\order;
 
 use abc\core\engine\Registry;
 use abc\models\catalog\ProductOption;
@@ -8,6 +8,7 @@ use abc\models\order\Order;
 use abc\models\order\OrderDatum;
 use abc\models\order\OrderProduct;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class OrderModelTest
@@ -86,10 +87,10 @@ class OrderModelTest extends ATestCase
                 $order->validate();
             } catch (ValidationException $e) {
                 $errors = $order->errors()['validation'];
-                // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
+                 var_Dump(array_diff(array_keys($data), array_keys($errors) ));
             }
 
-            $this->assertEquals(48, count($errors));
+            $this->assertCount(48, $errors);
 
             //check validation of presence in database
             $data = [
@@ -110,7 +111,7 @@ class OrderModelTest extends ATestCase
                 // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
             }
 
-            $this->assertEquals(7, count($errors));
+            $this->assertCount(7, $errors);
 
             //check validation of presence in database
             $data = [
@@ -131,7 +132,7 @@ class OrderModelTest extends ATestCase
                 // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
             }
 
-            $this->assertEquals(0, count($errors));
+            $this->assertCount(0, $errors);
 
             //check correct value
             $data = [
@@ -192,19 +193,16 @@ class OrderModelTest extends ATestCase
 
             $order = new Order($data);
             $errors = [];
-            $order_id = null;
             try {
                 $order->validate();
                 $order->save();
             } catch (ValidationException $e) {
                 $errors = $order->errors()['validation'];
-                var_Dump(array_intersect_key($data, $errors));
-                var_Dump($errors);
-            }catch(\Exception $e){
-
+//                var_Dump(array_intersect_key($data, $errors));
+//                var_Dump($errors);
             }
 
-            $this->assertEquals(0, count($errors));
+            $this->assertCount(0, $errors);
 
             if ($order->order_id) {
                 //Order::destroy($order->order_id);
@@ -249,6 +247,7 @@ class OrderModelTest extends ATestCase
         $customer_id = $order->customer_id;
         $order->update(['customer_id' => null]);
 
+        /** @var OrderProduct $product */
         $product = OrderProduct::where('order_id', '=', 6)->first();
 
         $results = Order::getGuestOrdersWithProduct($product->product_id)->toArray();

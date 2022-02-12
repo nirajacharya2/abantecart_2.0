@@ -1,20 +1,16 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\order;
 
 use abc\models\order\Coupon;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class CouponModelTest
  */
 class CouponModelTest extends ATestCase
 {
-
-    protected function setUp():void
-    {
-        //init
-    }
 
     public function testValidator()
     {
@@ -42,7 +38,7 @@ class CouponModelTest extends ATestCase
             //var_dump($errors);
             // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
-        $this->assertEquals(11, count($errors));
+        $this->assertCount(11, $errors);
 
         //validate
         $data = [
@@ -69,7 +65,7 @@ class CouponModelTest extends ATestCase
             var_dump($errors);
             // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
         $coupon->forceDelete();
     }

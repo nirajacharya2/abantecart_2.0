@@ -1,10 +1,11 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\order;
 
 use abc\models\order\OrderStatus;
 use abc\models\order\OrderStatusDescription;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class OrderStatusDescriptionModelTest
@@ -35,7 +36,7 @@ class OrderStatusDescriptionModelTest extends ATestCase
             //var_dump($errors);
             // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
-        $this->assertEquals(3, count($errors));
+        $this->assertCount(3, $errors);
 
         //validate
         $orderStatus = new OrderStatus(['status_text_id' => 'test_status']);
@@ -57,7 +58,7 @@ class OrderStatusDescriptionModelTest extends ATestCase
             var_dump($errors);
             // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
         $orderStatusDescription->forceDelete();
         $orderStatus->forceDelete();

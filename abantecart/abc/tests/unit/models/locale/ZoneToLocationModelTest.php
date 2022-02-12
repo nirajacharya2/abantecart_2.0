@@ -1,14 +1,14 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\locale;
 
 use abc\models\locale\ZonesToLocation;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Class ZoneTolocationModelTest
+ * Class ZoneToLocationModelTest
  */
-class ZoneTolocationModelTest extends ATestCase
+class ZoneToLocationModelTest extends ATestCase
 {
     public function testValidator()
     {

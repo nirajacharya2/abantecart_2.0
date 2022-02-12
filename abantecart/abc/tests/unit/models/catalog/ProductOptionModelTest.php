@@ -1,20 +1,16 @@
 <?php
-namespace abc\tests\unit;
+namespace Tests\unit\models\catalog;
 
 use abc\models\catalog\ProductOption;
-use abc\models\catalog\ProductOptionDescription;
 use abc\models\catalog\ProductOptionValue;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class ProductOptionModelTest
  */
 class ProductOptionModelTest extends ATestCase{
 
-
-    protected function setUp(){
-        //init
-    }
 
     public function testValidator()
     {
@@ -36,7 +32,7 @@ class ProductOptionModelTest extends ATestCase{
         } catch (ValidationException $e) {
             $errors = $productOption->errors()['validation'];
         }
-        $this->assertEquals(8, count($errors));
+        $this->assertCount(8, $errors);
 
         $errors = [];
         try {
@@ -56,11 +52,12 @@ class ProductOptionModelTest extends ATestCase{
             $errors = $productOption->errors()['validation'];
             var_Dump($errors);
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
     }
 
     public function testStaticMethods()
     {
+        /** @var ProductOption $option */
         $option = ProductOption::first();
 
         $sku = time();
@@ -87,6 +84,7 @@ class ProductOptionModelTest extends ATestCase{
         $valueId = ProductOption::addProductOptionValueAndDescription($data);
         $this->assertIsInt($valueId);
 
+        /** @var ProductOptionValue $optionValue */
         $optionValue = ProductOptionValue::with('description')->find($valueId);
 
         $optionCheckData = $data;
@@ -118,7 +116,7 @@ class ProductOptionModelTest extends ATestCase{
         ];
         $valueId = ProductOption::addProductOptionValueAndDescription($data);
         $this->assertIsInt($valueId);
-
+        /** @var ProductOptionValue $optionValue */
         $optionValue = ProductOptionValue::with('description')->find($valueId);
 
         $optionCheckData = $data;
@@ -147,7 +145,7 @@ class ProductOptionModelTest extends ATestCase{
         ];
         $valueId = ProductOption::addProductOptionValueAndDescription($data);
         $this->assertIsInt($valueId);
-
+        /** @var ProductOptionValue $optionValue */
         $optionValue = ProductOptionValue::with('description')->find($valueId);
 
         $optionCheckData = $data;
@@ -175,7 +173,7 @@ class ProductOptionModelTest extends ATestCase{
         ];
         $valueId = ProductOption::addProductOptionValueAndDescription($data);
         $this->assertIsInt($valueId);
-
+        /** @var ProductOptionValue $optionValue */
         $optionValue = ProductOptionValue::with('description')->find($valueId);
 
         $optionCheckData = $data;
@@ -202,7 +200,7 @@ class ProductOptionModelTest extends ATestCase{
         ];
         $valueId = ProductOption::addProductOptionValueAndDescription($data);
         $this->assertIsInt($valueId);
-
+        /** @var ProductOptionValue $optionValue */
         $optionValue = ProductOptionValue::with('description')->find($valueId);
 
         $optionCheckData = $data;

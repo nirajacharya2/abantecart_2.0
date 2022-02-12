@@ -77,7 +77,7 @@ use stdClass;
  * @method static QueryBuilder|Builder OrderBy(string $column, string $order = 'asc') QueryBuilder
  * @const  string DELETED_AT
  */
-class BaseModel extends OrmModel
+abstract class BaseModel extends OrmModel
 {
     use HasOneEvents,
         HasBelongsToEvents,

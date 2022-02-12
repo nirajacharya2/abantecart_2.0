@@ -1,9 +1,10 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\locale;
 
 use Illuminate\Validation\ValidationException;
 use abc\models\locale\LengthClass;
+use Tests\unit\ATestCase;
 
 /**
  * Class LengthClassModelTest
@@ -27,7 +28,7 @@ class LengthClassModelTest extends ATestCase
             $errors = $language->errors()['validation'];
         }
 
-        $this->assertEquals(1, count($errors));
+        $this->assertCount(1, $errors);
 
         $language = new LengthClass(
             [
@@ -41,7 +42,7 @@ class LengthClassModelTest extends ATestCase
         } catch (ValidationException $e) {
             $errors = $language->errors()['validation'];
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
     }
 }

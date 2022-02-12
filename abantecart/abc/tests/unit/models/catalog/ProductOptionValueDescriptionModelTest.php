@@ -1,21 +1,16 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\catalog;
 
-use abc\models\catalog\ProductOptionValue;
 use abc\models\catalog\ProductOptionValueDescription;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class ProductOptionValueDescriptionModelTest
  */
 class ProductOptionValueDescriptionModelTest extends ATestCase
 {
-
-    protected function setUp()
-    {
-        //init
-    }
 
     public function testValidator()
     {
@@ -34,7 +29,7 @@ class ProductOptionValueDescriptionModelTest extends ATestCase
             $errors = $valueDescription->errors()['validation'];
         }
 
-        $this->assertEquals(4, count($errors));
+        $this->assertCount(4, $errors);
 
         $errors = [];
         try {
@@ -49,7 +44,7 @@ class ProductOptionValueDescriptionModelTest extends ATestCase
         } catch (ValidationException $e) {
             $errors = $valueDescription->errors()['validation'];
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
     }
 }

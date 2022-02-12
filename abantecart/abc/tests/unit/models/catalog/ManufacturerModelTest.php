@@ -1,10 +1,12 @@
 <?php
 
-namespace abc\tests\unit\models\catalog;
+namespace Tests\unit\models\catalog;
 
 use abc\models\catalog\Manufacturer;
-use abc\tests\unit\ATestCase;
+use Exception;
+use PDOException;
 use PHPUnit\Framework\Warning;
+use Tests\unit\ATestCase;
 
 class ManufacturerModelTest extends ATestCase
 {
@@ -21,11 +23,7 @@ class ManufacturerModelTest extends ATestCase
         ];
         try {
         $manufacturerId = Manufacturer::addManufacturer($arManufacturer);
-        } catch (\PDOException $e) {
-            $this->fail($e->getMessage());
-        } catch (Warning $e) {
-            $this->fail($e->getMessage());
-        } catch (\Exception $e) {
+        } catch (PDOException|Warning|Exception $e) {
             $this->fail($e->getMessage());
         }
 
@@ -50,7 +48,6 @@ class ManufacturerModelTest extends ATestCase
      *
      * @param int $manufacturerId
      *
-     * @throws \abc\core\lib\AException
      */
     public function testUpdateManufacturer(int $manufacturerId)
     {
@@ -74,20 +71,11 @@ class ManufacturerModelTest extends ATestCase
     public function testDeleteManufacturer(int $manufacturerId)
     {
         try {
-            $result = (new Manufacturer)->deleteManufacturer($manufacturerId);
-        } catch (\PDOException $e) {
+            (new Manufacturer)->deleteManufacturer($manufacturerId);
+        } catch (PDOException|Warning|Exception $e) {
             $this->fail($e->getMessage());
-            $result = false;
-        } catch (Warning $e) {
-            $this->fail($e->getMessage());
-            $result = false;
-        } catch (\Exception $e) {
-            $this->fail($e->getMessage());
-            $result = false;
         }
 
         $this->assertNull(Manufacturer::find($manufacturerId));
     }
-
-
 }

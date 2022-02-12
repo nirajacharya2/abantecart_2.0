@@ -16,14 +16,16 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace abc\tests\unit\models\admin;
+namespace Tests\unit\models;
 
 use abc\core\engine\Registry;
 use abc\models\catalog\Product;
 use abc\models\system\AuditEvent;
 use abc\models\system\AuditModel;
-use abc\tests\unit\ATestCase;
+use Exception;
+use PDOException;
 use PHPUnit\Framework\Warning;
+use Tests\unit\ATestCase;
 
 class AuditLogTest extends ATestCase
 {
@@ -44,6 +46,7 @@ class AuditLogTest extends ATestCase
      * @param array $eventList
      *
      * @return int
+     * @throws Exception
      */
     public function CreateUpdateRestoreDeleteProduct($eventList = [])
     {
@@ -131,11 +134,7 @@ class AuditLogTest extends ATestCase
         try {
             $product = Product::createProduct($arProduct);
             $productId = $product->product_id;
-        } catch (\PDOException $e) {
-            $this->fail($e->getMessage());
-        } catch (Warning $e) {
-            $this->fail($e->getMessage());
-        } catch (\Exception $e) {
+        } catch (PDOException|Warning|Exception $e) {
             $this->fail($e->getMessage());
         }
 
@@ -159,15 +158,8 @@ class AuditLogTest extends ATestCase
         try {
             Product::destroy($productId);
             $result = true;
-        } catch (\PDOException $e) {
+        } catch (PDOException|Warning|Exception $e) {
             $this->fail($e->getMessage());
-            $result = false;
-        } catch (Warning $e) {
-            $this->fail($e->getMessage());
-            $result = false;
-        } catch (\Exception $e) {
-            $this->fail($e->getMessage());
-            $result = false;
         }
 
         $this->assertEquals(true, $result);
@@ -183,10 +175,7 @@ class AuditLogTest extends ATestCase
         $product = Product::withTrashed()
                           ->where('product_id', $productId)
                           ->first();
-        if ($product) {
-            $product->forceDelete();
-        }
-
+        $product?->forceDelete();
         return $productId;
     }
 
@@ -327,7 +316,7 @@ class AuditLogTest extends ATestCase
                 'deleting' => 80,
                 'deleted'  => 80,
             ],
-            $this->getLoggedEvents('Product', $productId)
+            $logged
         );
     }
 
@@ -391,17 +380,14 @@ class AuditLogTest extends ATestCase
      * @depends testCreateProduct
      *
      * @param int $productId
+     * @param $data
      */
     public function UpdateProduct(int $productId, $data)
     {
         try {
             Product::setCurrentLanguageID(1);
             Product::updateProduct($productId, $data);
-        } catch (\PDOException $e) {
-            $this->fail($e->getMessage());
-        } catch (Warning $e) {
-            $this->fail($e->getMessage());
-        } catch (\Exception $e) {
+        } catch (PDOException|Warning|Exception $e) {
             $this->fail($e->getMessage());
         }
     }

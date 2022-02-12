@@ -1,9 +1,10 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\locale;
 
 use Illuminate\Validation\ValidationException;
 use abc\models\locale\Location;
+use Tests\unit\ATestCase;
 
 /**
  * Class LocationModelTest
@@ -27,7 +28,7 @@ class LocationModelTest extends ATestCase
         } catch (ValidationException $e) {
             $errors = $location->errors()['validation'];
         }
-        $this->assertEquals(2, count($errors));
+        $this->assertCount(2, $errors);
 
         $location = new Location(
             [
@@ -42,7 +43,7 @@ class LocationModelTest extends ATestCase
         } catch (ValidationException $e) {
             $errors = $location->errors()['validation'];
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
     }
 

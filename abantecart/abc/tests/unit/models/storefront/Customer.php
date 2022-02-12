@@ -16,11 +16,11 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace unit\models\storefront;
+namespace Tests\unit\models\storefront;
 
-use abc\tests\unit\ATestCase;
+use Tests\unit\models\ATestCase;
 use abc\models\customer\Customer;
-use abc\tests\unit\modules\listeners\ATestListener;
+use Tests\unit\models\modules\listeners\ATestListener;
 use PHPUnit\Framework\Warning;
 
 class CustomerTest extends ATestCase
