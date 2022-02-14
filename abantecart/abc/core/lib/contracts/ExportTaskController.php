@@ -17,11 +17,11 @@ interface ExportTaskController
     public function getCount(array $params);
 
     /**
-     * @param int $taskId
-     * @param int $stepId
+     * @param int $task_id
+     * @param int $step_id
      * @param array $settings
      *
      * @return mixed
      */
-    public function export($taskId, $stepId, $settings = []);
+    public function export($task_id, $step_id, $settings = []);
 }
