@@ -289,7 +289,7 @@ class ATaskManager
             } else {
                 $response_message = $response['error_text'] ?? '';
             }
-        } catch (AException $e) {
+        } catch (\Exception|\Error $e) {
             $this->log->write($e);
             $result = false;
         }
