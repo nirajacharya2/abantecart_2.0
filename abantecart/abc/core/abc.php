@@ -24,6 +24,7 @@ use abc\core\lib\ADebug;
 use abc\models\BaseModel;
 use H;
 use ReflectionClass;
+use ReflectionException;
 use ReflectionMethod;
 
 if(php_sapi_name()!='cli') {
@@ -79,7 +80,7 @@ class ABC extends ABCBase
     {
 
         $rootName = explode('\\',$className)[0];
-        if (!in_array($rootName, ['abc'])) {
+        if ($rootName != 'abc') {
             return false;
         }
 
@@ -101,7 +102,7 @@ class ABC extends ABCBase
         }
 
         //try to find by Abantecart prefix
-        if(substr(basename($fileName),0,1) == 'A') {
+        if(str_starts_with(basename($fileName), 'A')) {
             $dirname = dirname($fileName).DS;
             $filename = substr(basename($fileName),1);
             $filename = implode("_",preg_split(
@@ -135,8 +136,8 @@ class ABC extends ABCBase
      */
     public function loadDefaultStage()
     {
-        //load and put config into environment
-        static::loadConfig('default');
+        //load default config into environment
+        static::loadConfig();
     }
 
     /**
@@ -236,7 +237,7 @@ class ABC extends ABCBase
             if (is_file($classmap_file)) {
                 $ext_classmap = @include($classmap_file);
                 if (is_array($ext_classmap)) {
-                    static::$class_map = array_merge((array)static::$class_map,$ext_classmap);
+                    static::$class_map = array_merge(static::$class_map,$ext_classmap);
                 }
             }
         }
@@ -285,7 +286,7 @@ class ABC extends ABCBase
      */
     public static function env($name, $value = null, $override = false)
     {
-        //if need to get
+        //getting
         if ($value === null && !is_array($name)) {
             //check environment values
             if (!sizeof(static::$env)) {
@@ -295,7 +296,7 @@ class ABC extends ABCBase
             if( isset(static::$env[$name])){
                 return static::$env[$name];
             }
-        } // if need to set batch of values
+        } // setting
         else {
             if (is_array($name)) {
 
@@ -347,7 +348,7 @@ class ABC extends ABCBase
     /**
      * Method returns full name of class if it exists
      *
-     * @param $class_alias
+     * @param string $class_alias
      *
      * @return bool|object|BaseModel
      */
@@ -378,7 +379,7 @@ class ABC extends ABCBase
      *
      * @param array $args
      *
-     * @return bool|string
+     * @return bool|object
      */
     static function getObjectByAlias(string $class_alias, $args = [])
     {
@@ -390,7 +391,7 @@ class ABC extends ABCBase
                     $class_name = static::$class_map[$class_alias];
                 }
 
-                $args = $args ? $args : static::getClassDefaultArgs($class_alias);
+                $args = $args ? : static::getClassDefaultArgs($class_alias);
 
                 $refMethod = new ReflectionMethod($class_name, '__construct');
                 $params = $refMethod->getParameters();
@@ -407,7 +408,7 @@ class ABC extends ABCBase
 
                 $reflector = new ReflectionClass($class_name);
                 return $reflector->newInstanceArgs($re_args);
-            }catch(\ReflectionException $e){}
+            }catch(ReflectionException $e){}
         }
 
         return false;
@@ -420,7 +421,7 @@ class ABC extends ABCBase
      *
      * @param array $args
      *
-     * @return bool|string
+     * @return bool|object
      */
     static function getModelObjectByAlias(string $class_alias, $args = [])
     {
@@ -432,11 +433,11 @@ class ABC extends ABCBase
                     $class_name = static::$model_map[$class_alias];
                 }
 
-                $args = $args ? $args : static::getClassDefaultArgs($class_alias);
+                $args = $args ? : static::getClassDefaultArgs($class_alias);
 
                 $reflector = new ReflectionClass($class_name);
                 return $reflector->newInstanceArgs($args);
-            }catch(\ReflectionException $e){}
+            }catch(ReflectionException $e){}
         }
 
         return false;
@@ -479,10 +480,10 @@ class ABC extends ABCBase
             exit;
         }
 
+        $registry = Registry::getInstance();
         $this->init();
         ob_clean();
 
-        $registry = Registry::getInstance();
         ADebug::checkpoint('init end');
 
         //Route to request process
@@ -502,12 +503,12 @@ class ABC extends ABCBase
         }
 
         //Show cache stats if debugging
-        if ($registry->get('config')->get('config_debug')) {
+//        if ($registry->get('config')->get('config_debug')) {
             /* ??????????????
             //TODO. how to collect statistic for laravel cache???
             ADebug::variable('Cache statistics: ',
                  $registry->get('cache')->stats()."\n");*/
-        }
+//        }
 
         ADebug::checkpoint('app end');
 
