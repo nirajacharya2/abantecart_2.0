@@ -27,6 +27,7 @@ use abc\core\lib\ADataset;
 use abc\core\lib\AException;
 use abc\core\lib\AFormManager;
 use abc\core\lib\ALayoutManager;
+use abc\core\lib\ATaskManager;
 use abc\modules\workers\ABackupWorker;
 use DebugBar\DebugBarException;
 use Exception;
@@ -42,6 +43,9 @@ class ModelToolBackup extends Model
 {
     public $errors = [];
     public $backup_filename;
+    private $eta = [];
+    /** @var int raw size of backup directory/ needed for calculation of eta of compression */
+    private $est_backup_size = 0;
 
     /**
      * @param $sql
@@ -145,7 +149,6 @@ class ModelToolBackup extends Model
      */
     public function backup($tables, $rl = true, $config = false, $sql_dump_mode = 'data_only')
     {
-
         $bkp = new ABackup('manual_backup'.'_'.date('Y-m-d-H-i-s'));
 
         if ($bkp->error) {
@@ -180,13 +183,12 @@ class ModelToolBackup extends Model
 
     /**
      * @param string $job_name
-     * @param array  $data
+     * @param array $data
      *
      * @return array|bool
      */
     public function createBackupJob($job_name, $data = [])
     {
-
         if (!$job_name) {
             $this->errors[] = 'Can not to create background job. Empty job name given';
         }
@@ -194,15 +196,14 @@ class ModelToolBackup extends Model
         $job_configuration = [
             'worker' =>
                 [
-                  'file'   => ABC::env('DIR_WORKERS').'backup.php',
-                  'class'  => ABackupWorker::class,
-                  'method' => 'backup'
-                ]
+                    'file'   => ABC::env('DIR_WORKERS').'backup.php',
+                    'class'  => ABackupWorker::class,
+                    'method' => 'backup',
+                ],
         ];
 
         //create step for table backup
         if ($data['table_list']) {
-
             //calculate estimate time for dumping of tables
             // get sizes of tables
             $table_list = [];
@@ -231,8 +232,6 @@ class ModelToolBackup extends Model
             $job_configuration['worker']['parameters']['backup_content'] = true;
         }
 
-
-
         $job_info = ['errors' => []];
         try {
             $job_info = H::createJob(
@@ -242,15 +241,15 @@ class ModelToolBackup extends Model
                     'status'        => 1,
                     'start_time'    => date(
                         'Y-m-d H:i:s',
-                        mktime(0, 0, 0, date('m'), (int)date('d') + 1, date('Y'))
+                        mktime(0, 0, 0, date('m'), (int) date('d') + 1, date('Y'))
                     ),
                     'last_time_run' => '0000-00-00 00:00:00',
                     'last_result'   => '0',
-                    'configuration' => $job_configuration
+                    'configuration' => $job_configuration,
 
                 ]
             );
-        } catch(AException $e){
+        } catch (AException $e) {
             $this->log->error($e->getMessage().' File:'.$e->getFile().':'.$e->getLine().$e->getTraceAsString());
         }
 
@@ -259,13 +258,13 @@ class ModelToolBackup extends Model
             return false;
         }
         return $job_info;
-
     }
 
     /**
      * @param array $table_list
      *
      * @return array
+     * @throws Exception
      */
     public function getTableSizes($table_list = [])
     {
@@ -277,22 +276,23 @@ class ModelToolBackup extends Model
             $tables[] = $this->db->escape($table);
         }
 
+        $k = 8;
         $sql = "SELECT TABLE_NAME AS 'table_name',
-                    table_rows AS 'num_rows', ((data_length/8) + (index_length/8) - (data_free/8)) AS 'size'
+                    table_rows AS 'num_rows', ((data_length/".$k.") + (index_length/".$k.") - (data_free/".$k.")) AS 'size'
                 FROM information_schema.TABLES
                 WHERE information_schema.TABLES.table_schema = '".$this->db->getDatabaseName()."'
                     AND TABLE_NAME IN ('".implode("','", $tables)."') ";
         $result = $this->db->query($sql);
         $output = [];
         foreach ($result->rows as $row) {
-            if ($row['size'] > (1048576*8)) {
-                $text = round(($row['size'] / (1048576*8)), 1).'Mb';
+            if ($row['size'] > (1048576 * $k)) {
+                $text = round(($row['size'] / (1048576 * $k)), 1).'Mb';
             } else {
-                $text = round($row['size'] / (1024*8), 1).'Kb';
+                $text = round($row['size'] / (1024 * $k), 1).'Kb';
             }
 
             $output[$row['table_name']] = [
-                'bytes' => $row['size'],
+                'bytes' => $row['size'] * $k,
                 'text'  => $text,
             ];
         }
@@ -315,7 +315,6 @@ class ModelToolBackup extends Model
         ];
         $dirs_size = 0;
         foreach ($all_dirs as $d) {
-
             //skip content directories
             if (in_array($d, $content_dirs)) {
                 continue;
@@ -338,7 +337,7 @@ class ModelToolBackup extends Model
         $content_dirs = [ // white list
                           ABC::env('DIR_RESOURCES'),
                           ABC::env('DIR_IMAGES'),
-                          ABC::env('DIR_DOWNLOADS')
+                          ABC::env('DIR_DOWNLOADS'),
         ];
         $dirs_size = 0;
         foreach ($content_dirs as $d) {
@@ -379,6 +378,197 @@ class ModelToolBackup extends Model
             }
         }
         return $count_size;
+    }
+
+    public function createBackupTask($task_name, $data = [])
+    {
+        if (!$task_name) {
+            $this->errors[] = 'Can not to create task. Empty task name given';
+        }
+
+        //NOTE: remove temp backup dir before process to prevent progressive increment of directory date if some backup-steps will be failed
+        $bkp = new ABackup("manual_backup_".date('Ymd_His'));
+        $bkp->removeBackupDirectory();
+        unset($bkp);
+
+        $tm = new ATaskManager();
+
+        //1. create new task
+        $task_id = $tm->addTask(
+            [
+                'name'               => $task_name,
+                //admin-side is starter
+                'starter'            => 1,
+                'created_by'         => $this->user->getId(),
+                // schedule it!
+                'status'             => 1,
+                'start_time'         => date(
+                    'Y-m-d H:i:s',
+                    mktime(0, 0, 0, date('m'), (int) date('d') + 1, date('Y'))
+                ),
+                'last_time_run'      => '0000-00-00 00:00:00',
+                'progress'           => '0',
+                'last_result'        => '0',
+                'run_interval'       => '0',
+                'max_execution_time' => '0',
+            ]
+        );
+        if (!$task_id) {
+            $this->errors = array_merge($this->errors, $tm->errors);
+            return false;
+        }
+
+        $backup_filename = "manual_backup_".date('Ymd_His');
+
+        //create step for table backup
+        if ($data['table_list']) {
+            //calculate estimate time for dumping of tables
+            // get sizes of tables
+            $db_size = $this->getTableSizes($data['table_list']); //size in bytes
+            $db_size = array_sum(array_column($db_size,'bytes'));
+
+            // get eta in seconds. 2794843 - "bytes per seconds" of dumping for Pentium(R) Dual-Core CPU E5200 @ 2.50GHz × 2
+            $eta = ceil($db_size / 2794843) * 4;
+            $max_eta = ini_get('max_execution_time');
+            $eta = max($eta, $max_eta);
+
+            $step_id = $tm->addStep(
+                [
+                    'task_id'            => $task_id,
+                    'sort_order'         => 1,
+                    'status'             => 1,
+                    'last_time_run'      => '0000-00-00 00:00:00',
+                    'last_result'        => '0',
+                    'max_execution_time' => $eta,
+                    'controller'         => 'task/tool/backup/dumptables',
+                    'settings'           => [
+                        'table_list'    => $data['table_list'],
+                        'sql_dump_mode' => $data['sql_dump_mode'],
+                        'backup_name'   => $backup_filename,
+                    ],
+                ]
+            );
+
+            if (!$step_id) {
+                $this->errors = array_merge($this->errors, $tm->errors);
+                return false;
+            } else {
+                $this->eta[$step_id] = $eta;
+                // size of sql-file of output
+                $this->est_backup_size += ceil($db_size * 1.61);
+            }
+        }
+
+        //create step for content-files backup
+        if ($data['backup_code']) {
+            //calculate estimate time for copying of code
+            $dirs_size = $this->getCodeSize();
+
+            //// get eta in seconds. 28468838 - "bytes per seconds" of coping of files for SATA III hdd
+            $eta = ceil($dirs_size / 28468838);
+            $max_eta = ini_get('max_execution_time');
+            $eta = max($eta,$max_eta);
+
+            $step_id = $tm->addStep(
+                [
+                    'task_id'            => $task_id,
+                    'sort_order'         => 2,
+                    'status'             => 1,
+                    'last_time_run'      => '0000-00-00 00:00:00',
+                    'last_result'        => '0',
+                    'max_execution_time' => $eta,
+                    'controller'         => 'task/tool/backup/backupCodeFiles',
+                    'settings'           => [
+                        'interrupt_on_step_fault' => false,
+                        'backup_name'             => $backup_filename,
+                    ],
+                ]
+            );
+
+            if (!$step_id) {
+                $this->errors = array_merge($this->errors, $tm->errors);
+                return false;
+            } else {
+                $this->eta[$step_id] = $eta;
+                $this->est_backup_size += $dirs_size;
+            }
+        }
+        //create step for content-files backup
+        if ($data['backup_content']) {
+            //calculate estimate time for copying of content files
+            $dirs_size = $this->getContentSize();
+            //// get eta in seconds. 28468838 - "bytes per seconds" of coping of files for SATA III hdd
+            $eta = ceil($dirs_size / 28468838);
+            $max_eta = ini_get('max_execution_time');
+            $eta = $eta < $max_eta ? $max_eta : $eta;
+
+            $step_id = $tm->addStep(
+                [
+                    'task_id'            => $task_id,
+                    'sort_order'         => 3,
+                    'status'             => 1,
+                    'last_time_run'      => '0000-00-00 00:00:00',
+                    'last_result'        => '0',
+                    'max_execution_time' => $eta,
+                    'controller'         => 'task/tool/backup/backupContentFiles',
+                    'settings'           => [
+                        'interrupt_on_step_fault' => false,
+                        'backup_name'             => $backup_filename,
+                    ],
+                ]
+            );
+
+            if (!$step_id) {
+                $this->errors = array_merge($this->errors, $tm->errors);
+                return false;
+            } else {
+                $this->eta[$step_id] = $eta;
+                $this->est_backup_size += $dirs_size;
+            }
+        }
+
+        //create last step for compressing backup
+        if ($data['compress_backup']) {
+            //// get eta in seconds. 18874368 - "bytes per seconds" of gz-compression, level 1 on
+            // AMD mobile Athlon XP2400+ 512 MB RAM Linux 2.6.12-rc4 gzip 1.3.3
+            $eta = ceil($this->est_backup_size / 18874368);
+            $max_eta = ini_get('max_execution_time');
+            $eta = $eta < $max_eta ? $max_eta : $eta;
+
+            $step_id = $tm->addStep(
+                [
+                    'task_id'            => $task_id,
+                    'sort_order'         => 4,
+                    'status'             => 1,
+                    'last_time_run'      => '0000-00-00 00:00:00',
+                    'last_result'        => '0',
+                    'max_execution_time' => $eta,
+                    'controller'         => 'task/tool/backup/compressbackup',
+                    'settings'           => [
+                        'interrupt_on_step_fault' => false,
+                        'backup_name'             => $backup_filename,
+                    ],
+                ]
+            );
+            if (!$step_id) {
+                $this->errors = array_merge($this->errors, $tm->errors);
+                return false;
+            } else {
+                $this->eta[$step_id] = $eta;
+            }
+        }
+
+        $task_details = $tm->getTaskById($task_id);
+        if ($task_details) {
+            foreach ($this->eta as $step_id => $eta) {
+                $task_details['steps'][$step_id]['eta'] = $eta;
+            }
+            return $task_details;
+        } else {
+            $this->errors[] = 'Can not to get task details for execution';
+            $this->errors = array_merge($this->errors, $tm->errors);
+            return false;
+        }
     }
 
 }
