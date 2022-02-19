@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -20,15 +20,18 @@
 
 // Required PHP Version
 use abc\core\ABC;
+use abc\core\engine\Registry;
 use abc\core\lib\ACurrency;
+use abc\core\lib\AException;
+use abc\core\lib\ATaskManager;
 
-ABC::env('MIN_PHP_VERSION', '7.0.0');
+ABC::env('MIN_PHP_VERSION', '8.1.0');
 if (version_compare(phpversion(), ABC::env('MIN_PHP_VERSION'), '<') == true) {
     die(ABC::env('MIN_PHP_VERSION')
         .'+ Required for AbanteCart to work properly! Please contact your system administrator or host service provider.');
 }
 
-if (substr(php_sapi_name(), 0, 3) != 'cli' && !empty($_SERVER['REMOTE_ADDR'])) {
+if (!str_starts_with(php_sapi_name(), 'cli') && !empty($_SERVER['REMOTE_ADDR'])) {
     //not command line!!
     echo "Not implemented! <br> \n";
     exit;
@@ -59,6 +62,7 @@ require_once(ABC::env('DIR_ROOT').'/core/init.php');
 // not needed anymore
 unset($_GET['s']);
 // Currency for processes that require currency
+$registry = Registry::getInstance();
 $registry->set('currency', new ACurrency($registry));
 
 //process command
@@ -96,7 +100,7 @@ switch ($command) {
 /**
  * @param array $options
  *
- * @return none
+ * @throws Exception
  */
 function queryTasks($options)
 {
@@ -125,7 +129,6 @@ function queryTasks($options)
 /**
  * @param array $options
  *
- * @return none
  */
 function processTasks($options)
 {
@@ -137,7 +140,7 @@ function processTasks($options)
     if ($options['show_log']) {
         $run_log = $tm->getRunLog();
         $run_log_text = implode("\n", $run_log);
-        echo "{$run_log_text}\n";
+        echo $run_log_text."\n";
     }
     echo "Finished all ready tasks! \n";
 }
@@ -145,7 +148,7 @@ function processTasks($options)
 /**
  * @param array $options
  *
- * @return none
+ * @throws Exception
  */
 function processTask($options)
 {
@@ -154,15 +157,15 @@ function processTask($options)
     if ($options['force']) {
         echo "Force starting task! \n";
         if (
-            !$tm->updateTask($options['task_id'], array('status' => $tm::STATUS_READY))
-            || !($steps = $tm->getTaskSteps($options['task_id']))
+            !$tm->updateTask($options['task_id'], ['status' => $tm::STATUS_READY])
+                || !($steps = $tm->getTaskSteps($options['task_id']))
         ) {
             echo "Error: Task ID {$options['task_id']} can not be re-started! \n";
             exit(1);
         }
 
         foreach ($steps as $step) {
-            $tm->updateStep($step['step_id'], array('status' => $tm::STATUS_READY));
+            $tm->updateStep($step['step_id'], ['status' => $tm::STATUS_READY]);
         }
     }
 
@@ -174,7 +177,7 @@ function processTask($options)
     if ($options['show_log']) {
         $run_log = $tm->getRunLog();
         $run_log_text = implode("\n", $run_log);
-        echo "{$run_log_text}\n";
+        echo $run_log_text."\n";
     }
     echo "Finished running: Task ID ".$options['task_id'].": \n";
 }
@@ -182,7 +185,8 @@ function processTask($options)
 /**
  * @param array $options
  *
- * @return none
+ * @throws ReflectionException
+ * @throws AException
  */
 function processTaskStep($options)
 {
@@ -190,13 +194,13 @@ function processTaskStep($options)
     $tm = new ATaskManager($tm_mode);
     echo "Force starting step! \n";
     if (
-        !$tm->updateTask($options['task_id'], array('status' => $tm::STATUS_READY))
+        !$tm->updateTask($options['task_id'], ['status' => $tm::STATUS_READY])
         || !$tm->getTaskSteps($options['task_id'])
     ) {
         echo "Error: Task ID ".$options['task_id']." can not be re-started! \n";
         exit(1);
     }
-    $tm->updateStep($options['step_id'], array('status' => $tm::STATUS_READY));
+    $tm->updateStep($options['step_id'], ['status' => $tm::STATUS_READY]);
 
     echo "Running: Task ID ".$options['task_id']." Step ID ".$options['step_id'].": \n";
     //start step
@@ -208,7 +212,7 @@ function processTaskStep($options)
     if ($options['show_log']) {
         $run_log = $tm->getRunLog();
         $run_log_text = implode("\n", $run_log);
-        echo "{$run_log_text}\n";
+        echo $run_log_text."\n";
     }
 
     if (!$step_result) {
@@ -223,11 +227,11 @@ function processTaskStep($options)
  */
 function getOptionList()
 {
-    return array(
+    return [
         '--task_id'  => 'Task ID for task to be ran',
         '--step_id'  => 'Step ID for task to be ran',
         '--show_log' => 'Details of the task process from the log',
-    );
+    ];
 }
 
 /**
@@ -273,7 +277,7 @@ function getOptionValues($opt_name = '')
 {
     global $args;
     $args = !$args ? $_SERVER['argv'] : $args;
-    $options = array();
+    $options = [];
     foreach ($args as $v) {
         $is_flag = preg_match('/^--(.*)$/', $v, $match);
         //skip commands
@@ -302,7 +306,7 @@ function getOptionValues($opt_name = '')
     }
 
     if ($opt_name) {
-        return isset($options[$opt_name]) ? $options[$opt_name] : null;
+        return $options[$opt_name] ?? null;
     }
 
     return $options;
