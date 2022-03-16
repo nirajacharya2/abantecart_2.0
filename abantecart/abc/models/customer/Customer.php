@@ -547,7 +547,7 @@ public function __construct(array $attributes = [])
         /** @var AEncryption $enc */
         $enc = ABC::getObjectByAlias('AEncryption');
         if (!empty(trim($password))
-            && $enc::getHash($password, $this->attributes['salt']) != $this->attributes['password']
+            && $enc::getHash((string)$password, (string)$this->attributes['salt']) != $this->attributes['password']
         ) {
             $salt_key = H::genToken(8);
             $this->fill(['salt' => $salt_key]);
