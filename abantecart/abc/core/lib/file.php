@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,8 +21,11 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
+use abc\core\cache\ACache;
 use abc\core\engine\Registry;
+use H;
+use ReflectionException;
+use stdClass;
 
 if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -34,9 +37,9 @@ if (!class_exists('abc\core\ABC')) {
  */
 
 /**
- * @property \abc\core\lib\ALanguageManager $language
+ * @property ALanguageManager $language
  * @property ADB                            $db
- * @property \abc\core\cache\ACache         $cache
+ * @property ACache         $cache
  * @property AConfig                        $config
  */
 class AFile
@@ -51,7 +54,7 @@ class AFile
     public function __construct()
     {
         $this->registry = Registry::getInstance();
-        $this->errors = array();
+        $this->errors = [];
     }
 
     /**
@@ -80,11 +83,12 @@ class AFile
      * @param array $data
      *
      * @return array
+     * @throws AException
+     * @throws ReflectionException
      */
     public function validateFileOption($settings, $data)
     {
-
-        $errors = array();
+        $errors = [];
 
         if (empty($data['name'])) {
             $errors[] = $this->language->get('error_empty_file_name');
@@ -112,11 +116,11 @@ class AFile
         //convert all to Kb and check the limits on abantecart and php side
         $abc_upload_limit = (int)$this->config->get('config_upload_max_size'); //comes in Kb
         $php_upload_limit = (int)ini_get('upload_max_filesize') * 1024; //comes in Mb
-        $max_size_kb = $abc_upload_limit < $php_upload_limit ? $abc_upload_limit : $php_upload_limit;
+        $max_size_kb = min($abc_upload_limit, $php_upload_limit);
 
         //check limit for attribute if set
         if ((int)$settings['max_size'] > 0) {
-            $max_size_kb = (int)$settings['max_size'] < $max_size_kb ? (int)$settings['max_size'] : $max_size_kb;
+            $max_size_kb = min((int) $settings['max_size'], $max_size_kb);
         }
 
         if ($max_size_kb < (int)$data['size'] / 1024) {
@@ -136,12 +140,12 @@ class AFile
     public function getUploadFilePath($upload_sub_dir, $file_name)
     {
         if (empty($file_name)) {
-            return array();
+            return [];
         }
         $uploads_dir = ABC::env('DIR_ROOT').'/admin/system/uploads';
-        AHelperUtils::is_writable_dir($uploads_dir);
+        H::make_writable_dir($uploads_dir);
         $file_path = $uploads_dir.'/'.$upload_sub_dir.'/';
-        AHelperUtils::is_writable_dir($file_path);
+        H::make_writable_dir($file_path);
 
         $ext = strrchr($file_name, '.');
         $file_name = substr($file_name, 0, strlen($file_name) - strlen($ext));
@@ -160,7 +164,7 @@ class AFile
             $i++;
         } while (file_exists($real_path));
 
-        return array('name' => $new_name, 'path' => $real_path);
+        return ['name' => $new_name, 'path' => $real_path];
     }
 
     /**
@@ -168,7 +172,7 @@ class AFile
      *
      * @param string $url
      *
-     * @return object/bool
+     * @return object|false
      */
     public function downloadFile($url)
     {
@@ -186,7 +190,7 @@ class AFile
      * @param object $download
      * @param string $target
      *
-     * @return int
+     * @return bool|null
      */
     public function writeDownloadToFile($download, $target)
     {
@@ -212,13 +216,18 @@ class AFile
         curl_setopt($ch, CURLOPT_URL, $uri);
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 
-        $response = new \stdClass();
+        $response = new stdClass();
 
         $response->body = curl_exec($ch);
         $response->http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $response->content_type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
         $response->content_length = curl_getinfo($ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
+        //trick for cdn-servers (case when content length unknown )
+        if ($response->content_length < 0) {
+            $response->content_length = strlen($response->body);
+        }
         curl_close($ch);
 
         return $response;

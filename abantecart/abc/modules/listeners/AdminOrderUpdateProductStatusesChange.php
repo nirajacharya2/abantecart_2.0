@@ -162,6 +162,7 @@ class AdminOrderUpdateProductStatusesChange
             }
 
             $this->data['logo'] = $config_mail_logo;
+            //TODO: see belong! why override ?
             $this->data['store_name'] = $order_info['store_name'];
             $this->data['address'] = nl2br($config->get('config_address'));
             $this->data['telephone'] = $config->get('config_telephone');

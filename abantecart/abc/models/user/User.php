@@ -5,7 +5,7 @@ namespace abc\models\user;
 use abc\models\BaseModel;
 use abc\models\system\Audit;
 use abc\core\lib\AException;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**

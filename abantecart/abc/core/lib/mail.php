@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -25,7 +25,9 @@ use abc\core\engine\Registry;
 use abc\core\lib\contracts\MailApiResponse;
 use abc\models\customer\CustomerCommunication;
 use abc\models\system\EmailTemplate;
+use Exception;
 use Mustache_Engine;
+use ReflectionException;
 
 class AMail
 {
@@ -51,31 +53,26 @@ class AMail
     protected $attachments = [];
     protected $headers = [];
 
-    protected $placeholders = [];
-    /**
-     * @var EmailTemplate
-     */
-    protected $emailTemplate;
-
-    /**
-     * @var AMessage
-     */
+    /** @var AMessage */
     protected $messages;
-    /**
-     * @var ALog
-     */
+    /** @var ALog */
     protected $log;
+    protected $storeId = 0;
+    protected $placeholders = [];
+    /** @var EmailTemplate */
+    protected $emailTemplate;
     public $protocol = 'mail';
     protected $hostname;
     protected $username;
     protected $password;
     protected $port = 25;
     protected $timeout = 5;
-    public $newline = "\n";
+    public $newline = PHP_EOL;
     public $crlf = "\r\n";
     public $verp = false;
     public $parameter = '';
     public $error = [];
+    protected $extensions;
     /**
      * @var AUser
      */
@@ -88,6 +85,8 @@ class AMail
 
     /**
      * @param null | AConfig $config
+     *
+     * @throws AException|ReflectionException
      */
     public function __construct($config = null)
     {
@@ -103,6 +102,8 @@ class AMail
         $this->timeout = $config->get('config_smtp_timeout');
         $this->log = $registry->get('log');
         $this->messages = $registry->get('messages');
+        $this->storeId = $config->get('current_store_id') ?? $config->get('config_store_id') ?? 0;
+        $this->extensions = $registry->get('extensions');
     }
 
     /**
@@ -127,7 +128,7 @@ class AMail
      */
     public function addHeader($header, $value)
     {
-        $this->headers[$header] = $value;
+        $this->headers[trim($header," ")] = trim($value," ");
     }
 
     /**
@@ -170,11 +171,18 @@ class AMail
         $this->html = $html;
     }
 
+    /**
+     * @param string $text_id
+     * @param array $placeholders
+     * @param $languageId
+     *
+     * @return bool|void
+     */
     public function setTemplate($text_id, array $placeholders = [], $languageId = 1)
     {
         $text_id = trim($text_id);
         if (empty($text_id)) {
-            $this->log->write('Email text id can\'t be empmty');
+            $this->log->write('Email text id can\'t be empty');
             return;
         }
 
@@ -222,7 +230,7 @@ class AMail
             $headers = explode(',', $emailTemplate->headers);
             foreach ($headers as $header) {
                 $parts = explode(':', $header);
-                if (count((array) $parts) !== 2) {
+                if (count($parts) !== 2) {
                     continue;
                 }
                 $this->addHeader($parts[0], $parts[1]);
@@ -346,6 +354,8 @@ class AMail
 
     /**
      * @return bool
+     * @throws AException
+     * @throws ReflectionException
      */
     public function send()
     {
@@ -408,41 +418,38 @@ class AMail
 
         $boundary = '----=_NextPart_'.md5(rand());
 
-        $header = '';
-
-        if ($this->protocol == 'smtp') {
-            $header .= 'To: '.$to.$this->newline;
-            $header .= 'Subject: '.'=?UTF-8?B?'.base64_encode($this->subject).'?='.$this->newline;
+        $header = [];
+        if ($this->protocol != 'mail') {
+            $header['To'] = $to;
+            $header['Subject'] = '=?UTF-8?B?'.base64_encode($this->subject).'?=';
         }
 
-        $header .= 'Date: '.date('D, d M Y H:i:s O').$this->newline;
-        $header .= 'From: '.'=?UTF-8?B?'.base64_encode($this->sender).'?='.'<'.$this->from.'>'.$this->newline;
-        $header .= 'Reply-To: '.'=?UTF-8?B?'.base64_encode($this->sender).'?='.'<'
-            .($this->reply_to ? $this->reply_to : $this->from).'>'.$this->newline;
+        $header['Date'] = date('D, d M Y H:i:s O');
+        $header['From'] = '=?UTF-8?B?'.base64_encode($this->sender).'?='.'<'.$this->from.'>';
+        $header['Reply-To'] = '=?UTF-8?B?'.base64_encode($this->sender).'?='.'<'.($this->reply_to ? : $this->from).'>';
 
-        $header .= 'Return-Path: '.$this->from.$this->newline;
-        $header .= 'X-Mailer: PHP/'.phpversion().$this->newline;
-        $header .= 'MIME-Version: 1.0'.$this->newline;
-        $header .= 'Content-Type: multipart/related; boundary="'.$boundary.'"'.$this->newline.$this->newline;
+        $header['Return-Path'] = $this->from;
+        $header['X-Mailer'] = 'PHP/'.phpversion();
+        $header['MIME-Version'] =  '1.0';
+        $header['Content-Type'] = 'multipart/related; boundary="'.$boundary.'"'.$this->newline.$this->newline;
 
         if (!$this->html) {
             $message = '--'.$boundary.$this->newline;
             $message .= 'Content-Type: text/plain; charset="utf-8"'.$this->newline;
-            $message .= 'Content-Transfer-Encoding: 8bit'.$this->newline.$this->newline;
-            $message .= $this->text.$this->newline;
+            $message .= 'Content-Transfer-Encoding: base64'.$this->newline.$this->newline;
+            $message .= chunk_split(base64_encode($this->text)).$this->newline;
         } else {
             $message = '--'.$boundary.$this->newline;
             $message .= 'Content-Type: multipart/alternative; boundary="'.$boundary.'_alt"'.$this->newline
                 .$this->newline;
             $message .= '--'.$boundary.'_alt'.$this->newline;
             $message .= 'Content-Type: text/plain; charset="utf-8"'.$this->newline;
-            $message .= 'Content-Transfer-Encoding: 8bit'.$this->newline.$this->newline;
+            $message .= 'Content-Transfer-Encoding: base64'.$this->newline.$this->newline;
 
             if ($this->text) {
-                $message .= $this->text.$this->newline;
+                $message .= chunk_split(base64_encode($this->text)).$this->newline;
             } else {
-                $message .= 'This is a HTML email and your email client software does not support HTML email!'
-                    .$this->newline;
+                $message .= base64_encode('This is a HTML email and your email client software does not support HTML email!').$this->newline;
             }
 
             $message .= '--'.$boundary.'_alt'.$this->newline;
@@ -488,7 +495,7 @@ class AMail
                 $this->log->write($error);
                 $this->error[] = $error;
             } else {
-                if (substr(PHP_OS, 0, 3) != 'WIN') {
+                if (!str_starts_with(PHP_OS, 'WIN')) {
                     socket_set_timeout($handle, $this->timeout, 0);
                 }
 
@@ -498,7 +505,7 @@ class AMail
                     }
                 }
 
-                if (substr($this->hostname, 0, 3) == 'tls') {
+                if (str_starts_with($this->hostname, 'tls')) {
                     fputs($handle, 'STARTTLS'.$this->crlf);
                     $reply = '';
                     while ($line = fgets($handle, 515)) {
@@ -687,8 +694,11 @@ class AMail
                     $this->log->write($error);
                     $this->error[] = $error;
                 }
-
-                fputs($handle, $header.$message.$this->crlf);
+                $addHeaders = '';
+                foreach($header as $name=>$value){
+                    $addHeaders .= $name.': '.$value.$this->newline;
+                }
+                fputs($handle, $addHeaders.$message.$this->crlf);
                 fputs($handle, '.'.$this->crlf);
 
                 $reply = '';
@@ -739,7 +749,7 @@ class AMail
                         $this->error[] = "Error send via Mail Api";
                     }
                 }
-            }catch(\Exception $e){
+            }catch(Exception $e){
                 $this->error[] = __CLASS__ .'->MailApiManager: '.$e->getMessage()."\n".$e->getTraceAsString();
             }
         }

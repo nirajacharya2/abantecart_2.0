@@ -25,7 +25,7 @@ use abc\core\engine\AController;
 class ControllerCommonHome extends AController
 {
 
-    public function login()
+    public function login($instance_id)
     {
         if (isset($this->request->get['rt']) && !isset($this->request->get['token'])) {
             $route = '';
@@ -37,13 +37,13 @@ class ControllerCommonHome extends AController
                 $route .= '/'.$part[1];
             }
 
-            $ignore = array(
+            $ignore = [
                 'index/login',
                 'index/logout',
                 'index/forgot_password',
                 'error/not_found',
                 'error/permission',
-            );
+            ];
 
             if (!in_array($route, $ignore)) {
                 return $this->dispatch('pages/index/login');
@@ -63,14 +63,13 @@ class ControllerCommonHome extends AController
 
     public function permission()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         if (isset($this->request->get['rt'])) {
             $route = '';
             $rt = $this->request->get['rt'];
-            if (substr($rt, 0, 2) == 'p/') {
+            if (str_starts_with($rt, 'p/')) {
                 $rt = substr($rt, 2);
             }
             $part = explode('/', $rt);
@@ -83,7 +82,7 @@ class ControllerCommonHome extends AController
                 $route .= '/'.$part[1];
             }
 
-            $ignore = array(
+            $ignore = [
                 'index/home',
                 'index/login',
                 'index/logout',
@@ -92,7 +91,7 @@ class ControllerCommonHome extends AController
                 'error/not_found',
                 'error/permission',
                 'error/token',
-            );
+            ];
 
             if (!in_array($route, $ignore)) {
                 if (!$this->user->canAccess($route)) {
@@ -103,6 +102,5 @@ class ControllerCommonHome extends AController
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
-        return null;
     }
 }

@@ -183,7 +183,7 @@ class BaseModelTest extends ATestCase
                 $this->fail($e->getTraceAsString());
             }
         }
-        $this->assertEquals($result, true);
+        $this->assertEquals(true, $result);
 
         if($result) {
             //test force deleting
@@ -191,7 +191,7 @@ class BaseModelTest extends ATestCase
             $product = $model->find($productId);
             $product->forceDelete();
             $exists = Product::onlyTrashed()->where('product_id', $productId)->exists();
-            $this->assertEquals($exists, false);
+            $this->assertEquals(false, $exists);
         }
 
     }

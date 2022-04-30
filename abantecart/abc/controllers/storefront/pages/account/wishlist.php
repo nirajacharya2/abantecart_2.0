@@ -1,11 +1,11 @@
-<?php 
+<?php
 /*------------------------------------------------------------------------------
   $Id$
 
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -17,141 +17,159 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\storefront;
+
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\AResource;
 use abc\core\engine\HtmlElementFactory;
+use H;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-class ControllerPagesAccountWishlist extends AController {
-	public $data = array();
-	public function main() {
+class ControllerPagesAccountWishlist extends AController
+{
+    public function main()
+    {
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+        if (!$this->customer->isLogged()) {
+            $this->session->data['redirect'] = $this->html->getSecureURL('account/wishlist');
+            abc_redirect($this->html->getSecureURL('account/login'));
+        }
 
-		if (!$this->customer->isLogged()) {
-			$this->session->data['redirect'] = $this->html->getSecureURL('account/wishlist');
-			abc_redirect($this->html->getSecureURL('account/login'));
-		}
+        $this->document->setTitle($this->language->get('heading_title'));
 
-		$this->document->setTitle($this->language->get('heading_title'));
+        $this->getWishList();
 
-		$this->getWishList();
+        //init controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+        unset($this->session->data['success']);
+    }
 
-		//init controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-		unset($this->session->data['success']);
-	}
+    private function getWishList()
+    {
+        $cart_rt = 'checkout/cart';
+        //is this an embed mode
+        if ($this->config->get('embed_mode') == true) {
+            $cart_rt = 'r/checkout/cart/embed';
+        }
 
-	private function getWishList() {
-		$cart_rt = 'checkout/cart';
-		//is this an embed mode	
-		if($this->config->get('embed_mode') == true){
-			$cart_rt = 'r/checkout/cart/embed';
-		}
+        $this->document->setTitle($this->language->get('heading_title'));
 
-    	$this->document->setTitle( $this->language->get('heading_title') );
+        $this->document->resetBreadcrumbs();
 
-      	$this->document->resetBreadcrumbs();
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getHomeURL(),
+                'text'      => $this->language->get('text_home'),
+                'separator' => false,
+            ]
+        );
 
-      	$this->document->addBreadcrumb( array ( 
-        	'href'      => $this->html->getHomeURL(),
-        	'text'      => $this->language->get('text_home'),
-        	'separator' => FALSE
-      	 )); 
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('account/account'),
+                'text'      => $this->language->get('text_account'),
+                'separator' => $this->language->get('text_separator'),
+            ]
+        );
 
-		$this->document->addBreadcrumb(array(
-			'href' => $this->html->getSecureURL('account/account'),
-			'text' => $this->language->get('text_account'),
-			'separator' => $this->language->get('text_separator')
-		));
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('account/wishlist'),
+                'text'      => $this->language->get('heading_title'),
+                'separator' => $this->language->get('text_separator'),
+            ]
+        );
 
-      	$this->document->addBreadcrumb( array ( 
-        	'href'      => $this->html->getSecureURL('account/wishlist'),
-        	'text'      => $this->language->get('heading_title'),
-        	'separator' => $this->language->get('text_separator')
-      	 ));
-			
-		$whishlist = $this->customer->getWishList();		
-    	if ( $whishlist ) {
-			$this->loadModel('tool/seo_url');
-	 		$this->loadModel('catalog/product');
+        $whishlist = $this->customer->getWishList();
+
+        if ($whishlist) {
+            $this->loadModel('tool/seo_url');
+            $this->loadModel('catalog/product');
 
             //get thumbnails by one pass
             $resource = new AResource('image');
             $thumbnails = $resource->getMainThumbList(
-                    'products',
-                    array_keys($whishlist),
-                    $this->config->get('config_image_cart_width'),
-                    $this->config->get('config_image_cart_width')
+                'products',
+                array_keys($whishlist),
+                $this->config->get('config_image_cart_width'),
+                $this->config->get('config_image_cart_width')
             );
-		    $products = array();
-      		foreach ($whishlist as $product_id => $timestamp) {
-				$product_info = $this->model_catalog_product->getProduct($product_id);
- 				$thumbnail = $thumbnails[$product_id];
- 		    	$options = $this->model_catalog_product->getProductOptions($product_id);
-		    	if ($options) {
-		    		$add = $this->html->getSEOURL('product/product','&product_id=' . $product_id, '&encode');
-		    	} else {
-                    $add = $this->html->getSecureURL($cart_rt, '&product_id=' . $product_id, '&encode');
-		    	}
+            $products = [];
+            foreach ($whishlist as $product_id => $timestamp) {
+                $product_info = $this->model_catalog_product->getProduct($product_id);
+                $thumbnail = $thumbnails[$product_id];
+                $options = $this->model_catalog_product->getProductOptions($product_id);
 
-       			$products[] = array(
-          			'product_id'      => $product_id,
-          			'name'     => $product_info['name'],
-          			'model'    => $product_info['model'],
-          			'thumb'    => $thumbnail,
-          			'added'	   => AHelperUtils::dateInt2Display($timestamp),
-					'price'    => $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax'))),
-					'href'     => $this->html->getSEOURL('product/product', '&product_id=' . $product_id,true),
-					'call_to_order' => $product_info['call_to_order'],
-					'add' => $add
-        		);
-      		}
-            $this->data['products'] =  $products;
-			if (isset($this->session->data['redirect'])) {
-				$this->data['continue'] = str_replace('&amp;','&',$this->session->data['redirect']);
-				unset($this->session->data['redirect']);
-			} else {
+                $add = $this->html->getSEOURL(
+                    $options ? 'product/product' : $cart_rt,
+                    '&product_id='.$product_id,
+                    '&encode'
+                );
+
+                $products[] = [
+                    'product_id'    => $product_id,
+                    'name'          => $product_info['name'],
+                    'model'         => $product_info['model'],
+                    'thumb'         => $thumbnail,
+                    'added'         => H::dateInt2Display($timestamp),
+                    'price'         => $this->currency->format(
+                        $this->tax->calculate(
+                            $product_info['price'],
+                            $product_info['tax_class_id'],
+                            $this->config->get('config_tax')
+                        )
+                    ),
+                    'href'          => $this->html->getSEOURL('product/product', '&product_id='.$product_id, true),
+                    'call_to_order' => $product_info['call_to_order'],
+                    'add'           => $add,
+                ];
+            }
+            $this->data['products'] = $products;
+            if (isset($this->session->data['redirect'])) {
+                $this->data['continue'] = str_replace('&amp;', '&', $this->session->data['redirect']);
+                unset($this->session->data['redirect']);
+            } else {
                 $this->data['continue'] = $this->html->getHomeURL();
-			}
+            }
 
-			$this->view->assign('error', '' );
-		    if($this->session->data['error']){
-		    	$this->view->assign('error', $this->session->data['error'] );
-			    unset($this->session->data['error']);
-		    }
+            $this->view->assign('error', '');
+            if ($this->session->data['error']) {
+                $this->view->assign('error', $this->session->data['error']);
+                unset($this->session->data['error']);
+            }
 
-			if ($this->config->get('config_customer_price')) {
-			    $display_price = TRUE;
-			} elseif ($this->customer->isLogged()) {
-			    $display_price = TRUE;
-			} else {
-			    $display_price = FALSE;
-			}
-	        $this->data['display_price'] = $display_price;
+            if ($this->config->get('config_customer_price')) {
+                $display_price = true;
+            } elseif ($this->customer->isLogged()) {
+                $display_price = true;
+            } else {
+                $display_price = false;
+            }
+            $this->data['display_price'] = $display_price;
 
-			$this->view->setTemplate('pages/account/wishlist.tpl');
-    	} else {
+            $this->view->setTemplate('pages/account/wishlist.tpl');
+        } else {
             $this->data['heading_title'] = $this->language->get('heading_title');
             $this->data['text_error'] = $this->language->get('text_empty_wishlist');
 
-		    $this->data['button_continue'] = HtmlElementFactory::create( array('name' => 'continue',
-																			   'type' => 'button',
-																			   'text' =>  $this->language->get('button_continue'),
-																			   'href' =>  $this->html->getHomeURL(),
-																			   'style' => 'button' ));
+            $this->data['button_continue'] = HtmlElementFactory::create(
+                [
+                    'name'  => 'continue',
+                    'type'  => 'button',
+                    'text'  => $this->language->get('button_continue'),
+                    'href'  => $this->html->getHomeURL(),
+                    'style' => 'button',
+                ]
+            );
 
-            $this->view->setTemplate( 'pages/error/not_found.tpl' );
-    	}
+            $this->view->setTemplate('pages/error/not_found.tpl');
+        }
 
-		$this->data['cart'] = $this->html->getSecureURL($cart_rt);
+        $this->data['cart'] = $this->html->getSecureURL($cart_rt);
 
-		$this->view->batchAssign( $this->data);
+        $this->view->batchAssign($this->data);
         $this->processTemplate();
-  	}
+    }
 }

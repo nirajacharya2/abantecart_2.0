@@ -21,9 +21,9 @@ namespace abc\commands;
 
 use abc\core\ABC;
 use Exception;
-
-if (version_compare(phpversion(), '7.0.0', '<') == true) {
-    exit("\n\t\t\tphp v7.0.0+  Required for AbanteCart to work properly!\n");
+define('PHP_MIN_VERSION', '8.1.0');
+if (version_compare(phpversion(), PHP_MIN_VERSION, '<') == true) {
+    exit("\n\t\t\tphp v".PHP_MIN_VERSION."+  Required for AbanteCart to work properly!\n");
 }
 set_include_path(__DIR__);
 define('DS', DIRECTORY_SEPARATOR);
@@ -87,8 +87,7 @@ if (!$options && !$action) {
 }
 
 //validate command and options
-$errors = (array)$executor->validate($action, $options);
-
+$errors = $executor->validate($action, $options);
 if ($errors) {
     showError("Validation errors occurred");
     foreach ($errors as $error) {

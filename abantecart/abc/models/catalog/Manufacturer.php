@@ -12,7 +12,7 @@ use abc\models\BaseModel;
 use abc\models\QueryBuilder;
 use abc\models\system\Setting;
 use Dyrynda\Database\Support\GeneratesUuid;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**

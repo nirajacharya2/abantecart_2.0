@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -18,28 +18,30 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\lib\AData;
 use abc\core\lib\AError;
-use abc\core\lib\AException;
 use abc\core\lib\AJson;
+use abc\core\lib\ALog;
 use abc\core\lib\ATaskManager;
+use abc\models\admin\ModelToolImportProcess;
+use Exception;
 
 /**
  * Class ControllerTaskToolImportProcess
  *
- * @property \abc\models\admin\ModelToolImportProcess $model_tool_import_process
+ * @property ModelToolImportProcess $model_tool_import_process
  */
 class ControllerTaskToolImportProcess extends AController
 {
-    public $data = [];
     protected $success_count = 0;
     protected $failed_count = 0;
     public $errors = [];
 
-    public function processRows()
+    public function processRows($task_id, $step_id, $settings = [])
     {
-        list($task_id, $step_id,) = func_get_args();
+
         $this->load->library('json');
         //for aborting process
         ignore_user_abort(false);
@@ -129,8 +131,6 @@ class ControllerTaskToolImportProcess extends AController
                 //skip header and process each record
                 array_shift($records);
                 $this->loadModel('tool/import_process');
-                $step_failed_count = 0;
-
                 foreach ($records as $index => $rowData) {
                     $vals = [];
                     //check if we match row data count to header
@@ -150,12 +150,7 @@ class ControllerTaskToolImportProcess extends AController
                     $method = "process_".$type."_record";
                     try {
                         $result = $this->model_tool_import_process->$method($task_id, $vals, $import_details);
-                    } catch (\PDOException $e) {
-                        $error_text = $e->getMessage();
-                        $this->errors[] = $error_text;
-                        $this->log->write($error_text);
-                        $result = false;
-                    } catch (AException $e) {
+                    } catch (Exception $e) {
                         $error_text = $e->getMessage();
                         $this->errors[] = $error_text;
                         $this->log->write($error_text);
@@ -167,6 +162,17 @@ class ControllerTaskToolImportProcess extends AController
                     } else {
                         $this->errors = array_merge($this->errors, $this->model_tool_import_process->errors);
                         $step_failed_count++;
+                    }
+                }
+                if (!empty($return)) {
+                    $imp_log = new ALog(
+                        [
+                            'app' => ABC::env('DIR_LOGS').$type."_import_".$task_id.".txt"
+                        ]
+                    );
+
+                    foreach ($return as $message) {
+                        $imp_log->write($message);
                     }
                 }
             } else {
@@ -189,7 +195,7 @@ class ControllerTaskToolImportProcess extends AController
 
         $tm->updateTaskDetails($task_id, ['settings' => $task_settings]);
         //sends always true as result
-        $tm->updateStep($step_id, ['last_result' => $this->failed_count ? false : true]);
+        $tm->updateStep($step_id, ['last_result' => !$this->failed_count]);
         //all done, clear cache
         $this->cache->remove('*');
         //return always true fo import process only. we think one failed row cannot block task

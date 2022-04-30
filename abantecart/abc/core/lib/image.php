@@ -23,6 +23,9 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\engine\AResource;
 use abc\core\engine\Registry;
+use Exception;
+use GdImage;
+use ReflectionException;
 
 /**
  * Class AImage
@@ -50,7 +53,7 @@ class AImage
     /**
      * @param string $filename
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function __construct($filename)
     {
@@ -72,7 +75,7 @@ class AImage
                 'channels' => $info['channels'],
             ];
             $this->registry = Registry::getInstance();
-            $this->image = $this->get_gd_resource($filename);
+            $this->image = $this->getGDImage($filename);
         } catch (AException $e) {
             $error = new AWarning('Error: Cannot load image '.$filename.'. '.$e->getMessage());
             $error->toLog();
@@ -95,7 +98,7 @@ class AImage
      * @return resource|string
      * @throws AException
      */
-    private function get_gd_resource($filename)
+    private function getGDImage($filename)
     {
         $mime = $this->info['mime'];
 
@@ -146,7 +149,7 @@ class AImage
      * @param array $options
      *
      * @return bool
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function resizeAndSave($filename, $width, $height, $options = [])
     {
@@ -180,7 +183,7 @@ class AImage
      * @param int $quality - some number in range from 1 till 100
      *
      * @return bool
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function save($filename, $quality = 90)
     {
@@ -197,7 +200,7 @@ class AImage
      * @param int $quality - some number in range from 1 till 100
      *
      * @return bool
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function _save($filename, $quality = 90)
     {
@@ -209,7 +212,7 @@ class AImage
             $userInfo = posix_getpwuid(posix_getuid());
             $user = $userInfo['name'];
             $groupInfo = posix_getgrgid(posix_getgid());
-            $group = $groupInfo = $groupInfo['name'];
+            $group = $groupInfo['name'];
             $error_text = "AImage: directory ".dirname($filename)." is not writable for user ".$user.':'.$group;
             $warning = new AWarning($error_text);
             $warning->toLog();
@@ -217,8 +220,8 @@ class AImage
         }
 
         $quality = (int)$quality;
-        $quality = $quality > 100 ? 100 : $quality;
-        $quality = $quality < 1 ? 1 : $quality;
+        $quality = min($quality, 100);
+        $quality = max($quality, 1);
 
         $extension = pathinfo($filename, PATHINFO_EXTENSION);
         if ($this->isMemoryEnough($this->info['width'], $this->info['height'])) {
@@ -254,7 +257,7 @@ class AImage
      * @param bool|false $nofill - sign for background fill
      *
      * @return bool|null
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function resize($width = 0, $height = 0, $nofill = false)
     {
@@ -292,7 +295,7 @@ class AImage
                 }
             }
 
-            if (is_resource($this->image)) {
+            if ($this->image instanceof GdImage) {
                 imagecopyresampled(
                     $this->image,
                     $image_old,
@@ -305,7 +308,7 @@ class AImage
                     $this->info['width'],
                     $this->info['height']);
             }
-            if (is_resource($image_old)) {
+            if ( $image_old instanceof GdImage) {
                 imagedestroy($image_old);
             }
         } else {
@@ -335,14 +338,14 @@ class AImage
      *
      * @return bool
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function watermark($filename, $position = 'bottomright')
     {
-        if (!is_resource($this->image)) {
+        if (! $this->image instanceof GdImage) {
             return false;
         }
-        $watermark = $this->get_gd_resource($filename);
+        $watermark = $this->getGDImage($filename);
         try {
             $watermark_width = imagesx($watermark);
             $watermark_height = imagesy($watermark);
@@ -368,7 +371,7 @@ class AImage
             }
             imagecopy($this->image, $watermark, $watermark_pos_x, $watermark_pos_y, 0, 0, 120, 40);
             imagedestroy($watermark);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $warning = new AWarning('Cannot to apply watermark to the image file '.$this->file.'. '.$e->getMessage());
             $warning->toLog()->toDebug();
             return false;
@@ -383,11 +386,11 @@ class AImage
      * @param int $bottom_y
      *
      * @return bool
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function crop($top_x, $top_y, $bottom_x, $bottom_y)
     {
-        if (!is_resource($this->image)) {
+        if (!$this->image instanceof GdImage) {
             return false;
         }
         if ($this->isMemoryEnough($bottom_x - $top_x, $bottom_y - $top_y)) {
@@ -412,11 +415,11 @@ class AImage
      * @param string $color
      *
      * @return bool
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function rotate($degree, $color = 'FFFFFF')
     {
-        if (!is_resource($this->image)) {
+        if (!$this->image instanceof GdImage) {
             return false;
         }
         try {
@@ -426,7 +429,7 @@ class AImage
                 imagecolorallocate($this->image, $rgb[0], $rgb[1], $rgb[2]));
             $this->info['width'] = imagesx($this->image);
             $this->info['height'] = imagesy($this->image);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $warning = new AWarning('Cannot to rotate image file '.$this->file.'. '.$e->getMessage());
             $warning->toLog()->toDebug();
             return false;
@@ -438,16 +441,16 @@ class AImage
      * @param int $filter
      *
      * @return bool
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function filter($filter)
     {
-        if (!is_resource($this->image)) {
+        if (!$this->image instanceof GdImage) {
             return false;
         }
         try {
             imagefilter($this->image, $filter);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $warning = new AWarning('Cannot to apply filter to the image file '.$this->file.'. '.$e->getMessage());
             $warning->toLog()->toDebug();
             return false;
@@ -463,18 +466,18 @@ class AImage
      * @param string $color
      *
      * @return bool
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function text($text, $x = 0, $y = 0, $size = 5, $color = '000000')
     {
-        if (!is_resource($this->image)) {
+        if (!$this->image instanceof GdImage) {
             return false;
         }
         $rgb = $this->html2rgb($color);
         try {
             imagestring($this->image, $size, $x, $y, $text,
                 imagecolorallocate($this->image, $rgb[0], $rgb[1], $rgb[2]));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $warning = new AWarning('Cannot to add text into image file '.$this->file.'. '.$e->getMessage());
             $warning->toLog()->toDebug();
             return false;
@@ -490,14 +493,14 @@ class AImage
      *
      * @return bool
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function merge($filename, $x = 0, $y = 0, $opacity = 100)
     {
 
-        $merge = $this->get_gd_resource($filename);
+        $merge = $this->getGDImage($filename);
 
-        if (!is_resource($this->image) || $merge) {
+        if (!($this->image instanceof GdImage) || $merge) {
             return false;
         }
 
@@ -505,7 +508,7 @@ class AImage
             $merge_width = imagesx($merge);
             $merge_height = imagesy($merge);
             imagecopymerge($this->image, $merge, $x, $y, 0, 0, $merge_width, $merge_height, $opacity);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $warning = new AWarning('Cannot to merge image files '.$this->file.' and '.$filename.'. '.$e->getMessage());
             $warning->toLog()->toDebug();
             return false;
@@ -559,7 +562,7 @@ class AImage
 
     public function __destruct()
     {
-        if (is_resource($this->image)) {
+        if ($this->image instanceof GdImage) {
             imagedestroy($this->image);
         } else {
             $this->image = null;

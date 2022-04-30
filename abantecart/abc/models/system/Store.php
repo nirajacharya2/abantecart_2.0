@@ -10,7 +10,7 @@ use abc\models\content\ContentsToStore;
 use abc\models\customer\Customer;
 use abc\models\order\Order;
 use abc\models\user\UserNotification;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**

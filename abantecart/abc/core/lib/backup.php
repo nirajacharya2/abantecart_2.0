@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,13 +21,14 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\engine\ALoader;
 use abc\core\engine\ExtensionsApi;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
 use abc\models\admin\ModelToolBackup;
+use DebugBar\DebugBarException;
 use DirectoryIterator;
 use FilesystemIterator;
+use H;
+use ReflectionException;
 
 /**
  * Class ABackup
@@ -53,14 +54,6 @@ class ABackup
      */
     private $db;
     /**
-     * @var ALoader
-     */
-    private $load;
-    /**
-     * @var ModelToolBackup
-     */
-    private $model_tool_backup;
-    /**
      * @var ExtensionsApi
      */
     private $extensions;
@@ -71,7 +64,7 @@ class ABackup
     /**
      * @var array
      */
-    public $error = array();
+    public $error = [];
 
     /**
      * @param string $name
@@ -79,13 +72,11 @@ class ABackup
      */
     public function __construct($name = '', $create_subdirs = true)
     {
-        /**
-         * @var Registry
-         */
+        /** @var Registry */
         $this->registry = Registry::getInstance();
-        $this->log = $this->registry->get('log');
-        $this->db = $this->registry->get('db');
-        $this->extensions = $this->registry->get('extensions');
+        $this->log = Registry::log();
+        $this->db = Registry::db();
+        $this->extensions = Registry::extensions();
         $this->slash = DS;
         if ($name) {
             $result = $this->setBackupName($name);
@@ -107,24 +98,23 @@ class ABackup
     /**
      * @param string $name
      *
-     * @return mixed
+     * @return bool
      */
     public function setBackupName($name)
     {
         $this->backup_name = $name;
         $this->createTempBackupDir();
-        return $this->errors ? false : true;
+        return !$this->errors;
     }
 
     protected function createTempBackupDir($create_subdirs = true)
     {
-        //first of all check backup directory create or set writable permissions
+        //check backup directory create or set writable permissions
         // Before backup process need to call validate() method! (see below)
         $app_backup_dir = ABC::env('DIR_BACKUP');
-        if (!AHelperUtils::is_writable_dir($app_backup_dir)) {
-            $this->error[] = 'Backup-directory "'
-                .$app_backup_dir
-                .'" is not writable or cannot be created! Backup operation is not possible';
+        if (!H::is_writable_dir($app_backup_dir)) {
+            $this->error[] = 'Backup-directory "'.$app_backup_dir.'" is not writable '
+                .'or cannot be created! Backup operation is not possible';
         }
         //Add [date] snapshot to the name and validate if archive is already used.
         //Return error if archive can not be created
@@ -163,10 +153,10 @@ class ABackup
      *
      * @return bool|string - path of dump file or false
      * @throws AException
-     * @throws \DebugBar\DebugBarException
-     * @throws \ReflectionException
+     * @throws DebugBarException
+     * @throws ReflectionException
      */
-    public function dumpTables($tables = array(), $dump_file = '')
+    public function dumpTables($tables = [], $dump_file = '')
     {
         if (!$tables || !is_array($tables) || !$this->backup_dir) {
             $error_text = 'Error: Cannot to dump of tables during sql-dumping. '
@@ -177,7 +167,7 @@ class ABackup
             return false;
         }
 
-        $table_list = array();
+        $table_list = [];
         foreach ($tables as $table) {
             if (!is_string($table)) {
                 continue;
@@ -193,7 +183,7 @@ class ABackup
 
         $sql = "SELECT TABLE_NAME AS 'table_name',
                     table_rows AS 'num_rows', 
-                    (data_length + index_length - data_free) AS 'size'
+                    ((data_length/8) + (index_length/8) - (data_free/8)) AS 'size'
                 FROM information_schema.TABLES
                 WHERE information_schema.TABLES.table_schema = '".$this->db->getDatabaseName()."'
                     AND TABLE_NAME IN ('".implode("','", $table_list)."')";
@@ -202,7 +192,7 @@ class ABackup
         }
 
         $result = $this->db->query($sql);
-        $memory_limit = (AHelperUtils::getMemoryLimitInBytes() - memory_get_usage()) / 4;
+        $memory_limit = (H::getMemoryLimitInBytes() - memory_get_usage()) / 4;
 
         // sql-file for small tables
 
@@ -261,7 +251,7 @@ class ABackup
             }
             unset($r);
             // for tables greater than $memory_limit (for ex. if php memory limit 64mb $memory_limit equal 10mb)
-            if ($table_info['size'] > $memory_limit && !$small_table) {// for tables greater than 20 MB
+            if ($table_info['size']*8 > $memory_limit && !$small_table) {// for tables greater than 20 MB
                 //max allowed rows count for safe fetching
                 $limit = 10000;
                 //break apart export to prevent memory overflow
@@ -294,11 +284,11 @@ class ABackup
                     $values = '';
                     foreach ($row as $value) {
                         $value = str_replace(
-                            array("\x00", "\x0a", "\x0d", "\x1a"),
-                            array('\0', '\n', '\r', '\Z'),
+                            ["\x00", "\x0a", "\x0d", "\x1a"],
+                            ['\0', '\n', '\r', '\Z'],
                             $value
                         );
-                        $value = str_replace(array("\n", "\r", "\t"), array('\n', '\r', '\t'), $value);
+                        $value = str_replace(["\n", "\r", "\t"], ['\n', '\r', '\t'], $value);
                         $value = str_replace('\\', '\\\\', $value);
                         $value = str_replace('\'', '\\\'', $value);
                         $value = str_replace('\\\n', '\n', $value);
@@ -332,8 +322,8 @@ class ABackup
     /**
      * @return bool
      * @throws AException
-     * @throws \DebugBar\DebugBarException
-     * @throws \ReflectionException
+     * @throws DebugBarException
+     * @throws ReflectionException
      */
     public function dumpDatabase()
     {
@@ -341,13 +331,13 @@ class ABackup
             return false;
         }
 
-        $this->load->model('tool/backup');
-        $table_list = $this->model_tool_backup->getTables();
+        /** @var ModelToolBackup $mdl */
+        $mdl = Registry::load()->model('tool/backup');
+        $table_list = $mdl->getTables();
         if (!$table_list) {
             $error_text = "Error: Can't create sql dump of database during backup. Cannot obtain table list. ";
             $this->log->error($error_text);
             $this->error[] = $error_text;
-
             return false;
         }
 
@@ -355,7 +345,6 @@ class ABackup
             $error_text = "Error: Can't create sql dump of tables during backup.";
             $this->log->error($error_text);
             $this->error[] = $error_text;
-
             return false;
         }
 
@@ -367,8 +356,8 @@ class ABackup
      *
      * @return bool
      * @throws AException
-     * @throws \DebugBar\DebugBarException
-     * @throws \ReflectionException
+     * @throws DebugBarException
+     * @throws ReflectionException
      */
     public function dumpTable($table_name)
     {
@@ -384,7 +373,7 @@ class ABackup
             .'_'.$table_name
             .'_dump_'.date("Y-m-d-H-i-s").'.sql';
 
-        $result = $this->dumpTables($tables = array($table_name), $backupFile);
+        $result = $this->dumpTables([$table_name], $backupFile);
 
         if (!$result) {
             $error_text = "Error: Can't create sql dump of database table during backup";
@@ -420,17 +409,18 @@ class ABackup
         $path = pathinfo($dir_path, PATHINFO_BASENAME);
 
         if (!is_dir($this->backup_dir.'files'.$this->slash.$path)) {
-            // it need for nested dirs, for example files/extensions
+            // it nested dirs, for example files/extensions
             mkdir($this->backup_dir.'files'.$this->slash.$path, 0775, true);
         }
 
         if (file_exists($this->backup_dir.'files'.$this->slash.$path)) {
             if ($path) {
-                $this->removeDir($this->backup_dir.'files'.$this->slash.$path);  // delete stuck dir
+                // delete stuck dir
+                $this->removeDir($this->backup_dir.'files'.$this->slash.$path);
             }
         }
 
-        //check for backup-loop. Do NOT backup of backup-directory!!!
+        //check for backup-loop. Do NOT back up of backup-directory!!!
         if (is_int(strpos($dir_path, $this->backup_dir))) {
             return true;
         }
@@ -453,7 +443,7 @@ class ABackup
                 ." to backup folder \"".$this->backup_dir
                 ."files".$this->slash.$path."\" during backup\n";
             if (!is_writable($dir_path)) {
-                $error_text .= "Check write permission for directory \"".$dir_path."";
+                $error_text .= "Check write permission for directory \"".$dir_path;
             }
             $this->log->error($error_text);
             $this->error[] = $error_text;
@@ -539,14 +529,13 @@ class ABackup
         //generate errors: No space on device (log to message as error too), No permissions, Others
         //return Success or failed.
 
-        AHelperUtils::compressTarGZ($archive_filename, $src_dir.$filename, 1);
+        H::compressTarGZ($archive_filename, $src_dir.$filename, 1);
 
         if (!file_exists($archive_filename)) {
             $error_text = 'Error: cannot to pack '.$archive_filename."\n Please see error log for details.";
             $this->error[] = $error_text;
             $log_text = 'Error: cannot to pack '.$archive_filename."\n";
             $this->log->error($log_text);
-
             return false;
         } else {
             @chmod($archive_filename, 0644);
@@ -673,7 +662,7 @@ class ABackup
     public function validate()
     {
         //reset errors array before validation
-        $this->error = array();
+        $this->error = [];
         //1. check is backup directory is writable
         if (!is_writable(ABC::env('DIR_BACKUP'))) {
             $this->error[] = 'Directory '.ABC::env('DIR_BACKUP')
@@ -682,7 +671,7 @@ class ABackup
 
         //2. check mysql driver
         $sql = "SELECT TABLE_NAME AS 'table_name',
-                    table_rows AS 'num_rows', (data_length + index_length - data_free) AS 'size'
+                    table_rows AS 'num_rows'
                 FROM information_schema.TABLES
                 WHERE information_schema.TABLES.table_schema = '".$this->db->getDatabaseName()."'";
         $result = $this->db->query($sql, true);
@@ -705,6 +694,6 @@ class ABackup
 
         $this->extensions->hk_ValidateData($this);
 
-        return ($this->error ? false : true);
+        return !$this->error;
     }
 }

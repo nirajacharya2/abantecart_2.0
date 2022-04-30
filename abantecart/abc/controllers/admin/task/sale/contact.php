@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -26,21 +26,20 @@ use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AJson;
 use abc\core\lib\AMail;
+use abc\core\lib\AMailIM;
 use abc\core\lib\ATaskManager;
 use abc\core\view\AView;
 use abc\models\customer\Customer;
-use abc\models\user\User;
+use Exception;
 
 class ControllerTaskSaleContact extends AController
 {
-    public $data = [];
-    private $protocol;
-    private $sent_count = 0;
-    private $user_id = 0;
+    protected $protocol;
+    protected $sent_count = 0;
+    protected $user_id = 0;
 
-    public function sendSms()
+    public function sendSms($task_id, $step_id, $settings = [])
     {
-        list($task_id, $step_id,) = func_get_args();
         $this->load->library('json');
         //for aborting process
         ignore_user_abort(false);
@@ -68,10 +67,8 @@ class ControllerTaskSaleContact extends AController
         $this->response->setOutput(AJson::encode($output));
     }
 
-    public function sendEmail()
+    public function sendEmail($task_id, $step_id, $settings = [])
     {
-        list($task_id, $step_id,) = func_get_args();
-
         $this->load->library('json');
         //for aborting process
         ignore_user_abort(false);
@@ -101,7 +98,6 @@ class ControllerTaskSaleContact extends AController
 
     protected function _send($task_id, $step_id)
     {
-
         $this->loadLanguage('sale/contact');
 
         if (!$task_id || !$step_id) {
@@ -111,7 +107,7 @@ class ControllerTaskSaleContact extends AController
 
         $tm = new ATaskManager();
         $task_info = $tm->getTaskById($task_id);
-        $sent = (int)$task_info['settings']['sent'];
+        $sent = (int) $task_info['settings']['sent'];
         $task_steps = $tm->getTaskSteps($task_id);
         $step_info = [];
         foreach ($task_steps as $task_step) {
@@ -138,8 +134,9 @@ class ControllerTaskSaleContact extends AController
             $this->_return_error($error_text);
         }
 
+        $this->loadModel('sale/customer');
         $this->loadModel('setting/store');
-        $store_info = $this->model_setting_store->getStore((int)$this->session->data['current_store_id']);
+        $store_info = $this->model_setting_store->getStore((int) $this->session->data['current_store_id']);
         $from = '';
         if ($store_info) {
             $from = $store_info['store_main_email'];
@@ -168,7 +165,7 @@ class ControllerTaskSaleContact extends AController
             return true;
         }
         foreach ($send_to as $to) {
-            $send_data['subscriber'] = in_array($to, $step_info['settings']['subscribers']) ? true : false;
+            $send_data['subscriber'] = in_array($to, $step_info['settings']['subscribers']);
 
             if ($this->protocol == 'email') {
                 $result = $this->_send_email($to, $send_data);
@@ -186,7 +183,8 @@ class ControllerTaskSaleContact extends AController
                 $tm->updateStep($step_id, ['settings' => serialize($step_settings)]);
                 //update task details to show them at the end
                 $sent++;
-                $tm->updateTaskDetails($task_id,
+                $tm->updateTaskDetails(
+                    $task_id,
                     [
                         //set 1 as "admin"
                         'created_by' => 1,
@@ -194,8 +192,8 @@ class ControllerTaskSaleContact extends AController
                             'recipients_count' => $task_info['settings']['recipients_count'],
                             'sent'             => $sent,
                         ],
-                    ]);
-
+                    ]
+                );
             } else {
                 $step_result = false;
             }
@@ -214,11 +212,13 @@ class ControllerTaskSaleContact extends AController
     {
         $error = new AError($error_text);
         $error->toLog()->toDebug();
-        return $error->toJSONResponse('APP_ERROR_402',
+        return $error->toJSONResponse(
+            'APP_ERROR_402',
             [
-                'error_text'  => $error_text,
+                'error_text' => $error_text,
                 'reset_value' => true,
-            ]);
+            ]
+        );
     }
 
     protected function _send_email($email, $data)
@@ -237,13 +237,17 @@ class ControllerTaskSaleContact extends AController
         $text_unsubscribe = $this->language->get('text_unsubscribe');
         $message_body = $data['message'];
         if ($data['subscriber']) {
-            $customer_info = Customer::getCustomers(['filter' => ['email'=> $email ]]);
+            $customer_info = Customer::getCustomers(['filter' => ['email' => $email]]);
             $customer_id = $customer_info[0]['customer_id'];
             if ($customer_id) {
-                $message_body .= "\n\n<br><br>".sprintf($text_unsubscribe,
+                $message_body .= "\n\n<br><br>".sprintf(
+                        $text_unsubscribe,
                         $email,
-                        $this->html->getCatalogURL('account/notification',
-                            '&email='.$email.'&customer_id='.$customer_id));
+                        $this->html->getCatalogURL(
+                            'account/notification',
+                            '&email='.$email.'&customer_id='.$customer_id
+                        )
+                    );
             }
         }
 
@@ -251,7 +255,7 @@ class ControllerTaskSaleContact extends AController
             html_entity_decode($message_body, ENT_QUOTES, ABC::env('APP_CHARSET'));
         $this->data['mail_template'] = 'mail/contact.tpl';
 
-        //allow to change email data from extensions
+        //allow change email data from extensions
         $this->extensions->hk_ProcessData($this, 'cp_sale_contact_mail');
 
         $view = new AView($this->registry, 0);
@@ -306,10 +310,11 @@ class ControllerTaskSaleContact extends AController
                 return false;
             }
             /**
-             * @var \abc\core\lib\AMailIM $driver
+             * @var AMailIM $driver
              */
             $driver = new $classname();
-        } catch (AException $e) {}
+        } catch (AException $e) {
+        }
 
         if ($driver === null) {
             return false;
@@ -322,7 +327,7 @@ class ControllerTaskSaleContact extends AController
             //use safe call
             try {
                 $result = $driver->send($to, $text);
-            } catch (AException $e) {
+            } catch (Exception $e) {
                 return false;
             }
         }

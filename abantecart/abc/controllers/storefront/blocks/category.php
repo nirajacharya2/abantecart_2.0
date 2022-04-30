@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,6 +22,7 @@ namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
+use abc\core\lib\AException;
 use abc\models\catalog\Category;
 
 class ControllerBlocksCategory extends AController
@@ -30,6 +31,13 @@ class ControllerBlocksCategory extends AController
     protected $path = [];
     protected $selected_root_id = [];
     protected $thumbnails = [];
+
+    public function __construct($registry, $instance_id, $controller, $parent_controller = '')
+    {
+        parent::__construct($registry, $instance_id, $controller, $parent_controller);
+        $this->data['empty_render_text'] =
+            'To view content of block you should be logged in and prices must be without taxes';
+    }
 
     public function main()
     {
@@ -62,15 +70,16 @@ class ControllerBlocksCategory extends AController
         //load main level categories
         $all_categories = Category::getAllCategories();
         //build thumbnails list
-        $category_ids = array_column($all_categories,'category_id');
+        $category_ids = array_column($all_categories, 'category_id');
         $resource = new AResource('image');
-
-        $this->thumbnails = $resource->getMainThumbList(
-            'categories',
-            $category_ids,
-            $this->config->get('config_image_category_width'),
-            $this->config->get('config_image_category_height')
-        );
+        $this->thumbnails = $category_ids
+            ? $resource->getMainThumbList(
+                'categories',
+                $category_ids,
+                $this->config->get('config_image_category_width'),
+                $this->config->get('config_image_category_height')
+            )
+            : [];
 
         //Build category tree
         $this->buildCategoryTree($all_categories);
@@ -94,7 +103,7 @@ class ControllerBlocksCategory extends AController
      * @param int $parent_id
      *
      * @return array
-     * @throws \abc\core\lib\AException
+     * @throws AException
      */
     protected function buildCategoryTree($all_categories = [], $parent_id = 0)
     {
@@ -111,10 +120,11 @@ class ControllerBlocksCategory extends AController
                 $this->selected_root_id = $category['parents'][0];
             }
             $output[] = $category;
-            $output = array_merge($output, $this->buildCategoryTree(
-                                                                    $all_categories,
-                                                                    $category['category_id']
-                                                                    )
+            $output = array_merge(
+                $output, $this->buildCategoryTree(
+                $all_categories,
+                $category['category_id']
+            )
             );
         }
         if ($parent_id == 0) {
@@ -136,16 +146,15 @@ class ControllerBlocksCategory extends AController
     }
 
     /**
-     * Function builds one multi-dimensional (nested) category tree for menu
+     * Function builds one multidimensional (nested) category tree for menu
      *
      * @param int $parent_id
      *
      * @return array
-     * @throws \abc\core\lib\AException
+     * @throws AException
      */
     protected function buildNestedCategoryList($parent_id = 0)
     {
-
         $output = [];
         foreach ($this->data['all_categories'] as $category) {
             if ($category['parent_id'] != $parent_id) {
