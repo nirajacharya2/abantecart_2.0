@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -32,18 +32,16 @@ use stdClass;
  */
 class ControllerResponsesListingGridExtension extends AController
 {
-    public $data;
 
     public function main()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('extension/extensions');
 
         $page = $this->request->post['page']; // get the requested page
-        if ((int)$page < 0) {
+        if ((int) $page < 0) {
             $page = 0;
         }
         $limit = $this->request->post['rows']; // get how many rows we want to have into the grid
@@ -56,14 +54,16 @@ class ControllerResponsesListingGridExtension extends AController
             $search_str = $searchData['rules'][0]['data'];
         }
 
-        $store_id = (int)$this->config->get('config_store_id');
+        $store_id = (int) $this->config->get('config_store_id');
         if ($this->request->get_or_post('store_id')) {
             $store_id = $this->request->get_or_post('store_id');
         }
 
         //sort
-        $allowedSort = array_merge([1 => 'key', 'name', 'category', 'date_modified', 'status', 'store_name'],
-            (array)$this->data['allowed_sort']);
+        $allowedSort = array_merge(
+            [1 => 'key', 'name', 'category', 'date_modified', 'status', 'store_name'],
+            (array) $this->data['allowed_sort']
+        );
         if (!in_array($sidx, $allowedSort)) {
             $sidx = 'date_modified';
         }
@@ -73,7 +73,7 @@ class ControllerResponsesListingGridExtension extends AController
             $sord = 'asc';
         }
 
-        //extensions that has record in DB but missing files
+        //extensions that have record in DB but missing files
         $missing_extensions = $this->extensions->getMissingExtensions();
 
         $data = [
@@ -83,7 +83,7 @@ class ControllerResponsesListingGridExtension extends AController
             'sort_order' => [$sidx, $sord],
         ];
         if ($this->config->get('config_store_id')) {
-            $data['store_id'] = (int)$this->config->get('config_store_id');
+            $data['store_id'] = (int) $this->config->get('config_store_id');
         }
         //extensions list. NOTE: set "force" mode to get data from db
 
@@ -113,7 +113,6 @@ class ControllerResponsesListingGridExtension extends AController
         if (!H::has_value($this->session->data['extension_filter'])
             || $this->session->data['extension_filter'] == 'extensions'
         ) {
-
             if ($ready_to_install && is_array($ready_to_install)) {
                 foreach ($ready_to_install as $pack) {
                     $to_install[$pack['extension_name']] =
@@ -142,13 +141,13 @@ class ControllerResponsesListingGridExtension extends AController
 
         foreach ($rows as $row) {
             $extension = $row['key'];
-            $response->rows[$i]['id'] = str_replace(' ', '-', $row['key']).'_'.(int)$row['store_id'];
+            $response->rows[$i]['id'] = str_replace(' ', '-', $row['key']).'_'.(int) $row['store_id'];
             $id = $response->rows[$i]['id'];
 
             $response->userdata->extension_id[$id] = $extension;
             $response->userdata->store_id[$id] = $row['store_id'];
 
-            $name = !isset($row['name']) ? trim($this->extensions->getExtensionName($extension)) : $row['name'];
+            $name = $row['name'] ? : trim($this->extensions->getExtensionName($extension));
 
             //for new extensions
             if ($row['remote_install']) {
@@ -158,7 +157,6 @@ class ControllerResponsesListingGridExtension extends AController
                 $status = $this->language->get('text_ready_to_install');
                 $response->userdata->classes[$id] =
                     'success disable-edit disable-delete disable-uninstall disable-install';
-
             } elseif (in_array($extension, $missing_extensions)) {
                 $response->userdata->classes[$id] =
                     'warning disable-edit disable-install disable-uninstall disable-remote-install';
@@ -179,15 +177,17 @@ class ControllerResponsesListingGridExtension extends AController
                 $row['date_modified'] = date('Y-m-d H:i:s', time());
             } else {
                 if (!$this->config->has($extension.'_status')) {
-                    $response->userdata->classes[$id] = 'disable-edit disable-install disable-uninstall disable-remote-install';
+                    $response->userdata->classes[$id] =
+                        'disable-edit disable-install disable-uninstall disable-remote-install';
                     $status = $this->language->get('text_not_installed');
                 } else {
-                    $response->userdata->classes[$id] = 'disable-delete disable-uninstall disable-install disable-remote-install';
+                    $response->userdata->classes[$id] =
+                        'disable-delete disable-uninstall disable-install disable-remote-install';
                     $status = $this->html->buildCheckbox([
-                        'name'  => $extension.'['.$extension.'_status]',
-                        'value' => $row['status'],
-                        'style' => 'btn_switch',
-                    ]);
+                                                             'name'  => $extension.'['.$extension.'_status]',
+                                                             'value' => $row['status'],
+                                                             'style' => 'btn_switch',
+                                                         ]);
                 }
 
                 $icon_relative_url = ABC::env('DIRNAME_EXTENSIONS')
@@ -205,23 +205,28 @@ class ControllerResponsesListingGridExtension extends AController
                 if (!$this->config->has($extension.'_status')) {
                     $icon = '<img src="'.$icon.'" alt="'.$extension.'" border="0" />';
                 } else {
-                    $icon = '<a href="'.$this->html->getSecureURL('extension/extensions/edit',
-                            $this->data['url'].'&extension='.$extension).'"><img src="'.$icon.'" alt="'.$extension
-                        .'" border="0" /></a>';
+                    $icon = '<a href="'.$this->html->getSecureURL(
+                            'extension/extensions/edit',
+                            $this->data['url'].'&extension='.$extension
+                        ).'"><img src="'.$icon.'" alt="'.$extension.'" style="border: 0" /></a>';
                 }
 
                 $category = $row['category'];
                 // if update available
                 if (is_array($updates) && in_array($extension, array_keys($updates))) {
                     if ($updates[$extension]['installation_key']) {
-                        $update_now_url = $this->html->getSecureURL('tool/package_installer',
-                            '&extension_key='.$updates[$extension]['installation_key']);
+                        $update_now_url = $this->html->getSecureURL(
+                            'tool/package_installer',
+                            '&extension_key='.$updates[$extension]['installation_key']
+                        );
                     } else {
                         $update_now_url = $updates[$extension]['url'];
                     }
-                    $name = '<p class="alert-info">'.$name.'<br>'.sprintf($this->language->get('text_update_available'),
+                    $name = '<p class="alert-info">'.$name.'<br>'.sprintf(
+                            $this->language->get('text_update_available'),
                             $updates[$extension]['version'],
-                            $update_now_url).'</p>';
+                            $update_now_url
+                        ).'</p>';
                     $push[] = $i;
                 }
             }
@@ -234,8 +239,7 @@ class ControllerResponsesListingGridExtension extends AController
                 H::dateISO2Display($row['date_modified'], $this->language->get('date_format_short')),
             ];
             if (!$this->config->get('config_store_id')) {
-                $response->rows[$i]['cell'][] =
-                    $row['store_name'] ? $row['store_name'] : $this->language->get('text_default');
+                $response->rows[$i]['cell'][] = $row['store_name'] ? : $this->language->get('text_default');
             }
             $response->rows[$i]['cell'][] = $status;
             if ($push) {
@@ -254,7 +258,7 @@ class ControllerResponsesListingGridExtension extends AController
             }
         }
 
-        $response->rows = array_slice($response->rows, (int)($page - 1) * $limit, $limit);
+        $response->rows = array_slice($response->rows, (int) ($page - 1) * $limit, $limit);
         $this->data['response'] = $response;
 
         //update controller data
@@ -270,11 +274,14 @@ class ControllerResponsesListingGridExtension extends AController
 
         if (!$this->user->canModify('listing_grid/extension')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            $error->toJSONResponse(
+                'NO_PERMISSIONS_402',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/extension'),
                     'reset_value' => true,
-                ]);
+                ]
+            );
+            return;
         }
 
         $this->loadLanguage('extension/extensions');
@@ -300,11 +307,13 @@ class ControllerResponsesListingGridExtension extends AController
         $this->load->library('json');
         if ($this->extension_manager->errors) {
             $error = new AError('');
-            return $error->toJSONResponse('VALIDATION_ERROR_406',
+            $error->toJSONResponse(
+                'VALIDATION_ERROR_406',
                 [
                     'error_text'  => '<br>'.implode('<br>', $this->extension_manager->errors),
                     'reset_value' => true,
-                ]);
+                ]
+            );
         }
     }
 
@@ -314,17 +323,21 @@ class ControllerResponsesListingGridExtension extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $this->loadLanguage('extension/extensions');
 
-        // first of all we need check dependencies
+        // check dependencies
         $config = H::getExtensionConfigXml($this->request->get['extension']);
         $result = $this->extension_manager->validateDependencies($this->request->get['extension'], $config);
         $this->data = ['license_text' => '', 'error_text' => ''];
         if ($result) {
             // if all fine show license agreement
             if (file_exists(ABC::env('DIR_EXT').$this->request->get['extension']."/license.txt")) {
-                $this->data['license_text'] =
-                    file_get_contents(ABC::env('DIR_EXT').$this->request->get['extension']."/license.txt");
-                $this->data['license_text'] =
-                    htmlentities($this->data['license_text'], ENT_QUOTES, ABC::env('APP_CHARSET'));
+                $this->data['license_text'] = file_get_contents(
+                    ABC::env('DIR_EXT').$this->request->get['extension']."/license.txt"
+                );
+                $this->data['license_text'] = htmlentities(
+                    $this->data['license_text'],
+                    ENT_QUOTES,
+                    ABC::env('APP_CHARSET')
+                );
                 $this->data['license_text'] = nl2br($this->data['license_text']);
             }
         } else {

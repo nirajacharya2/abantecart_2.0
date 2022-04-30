@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -25,12 +25,15 @@ use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\lib\AError;
+use abc\core\lib\AException;
 use abc\core\lib\AJson;
 use abc\core\lib\AResourceManager;
 use abc\core\lib\ResourceUploadHandler;
 use abc\models\catalog\Category;
 use abc\models\catalog\Manufacturer;
+use Exception;
 use H;
+use ReflectionException;
 
 if (!ini_get('safe_mode')) {
     set_time_limit(0);
@@ -38,7 +41,6 @@ if (!ini_get('safe_mode')) {
 
 class ControllerResponsesCommonResourceLibrary extends AController
 {
-    public $data = [];
     // TODO: need to find solution for this hardcoded preview sizes
     public $thumb_sizes = ['width' => 100, 'height' => 100];
 
@@ -55,8 +57,8 @@ class ControllerResponsesCommonResourceLibrary extends AController
             $language_id = $this->language->getContentLanguageID();
         }
         $this->data['language_id'] = $language_id;
-        $this->data['mode'] = $this->request->get['mode'];
-        $this->data['type'] = $this->request->get['type'];
+        $this->data['mode'] = $this->request->get['mode'] ?? '';
+        $this->data['type'] = $this->request->get['type'] ?? '';
 
         $rm = new AResourceManager();
         $this->_common($rm);
@@ -97,8 +99,8 @@ class ControllerResponsesCommonResourceLibrary extends AController
 
         $this->data['current_url'] = $this->html->getSecureURL('common/resource_library', '', '&encode');
 
-        $this->data['add'] = isset($this->request->get['add']) ? $this->request->get['add'] : false;
-        $this->data['update'] = isset($this->request->get['update']) ? $this->request->get['update'] : false;
+        $this->data['add'] = $this->request->get['add'] ?? false;
+        $this->data['update'] = $this->request->get['update'] ?? false;
         $this->data['rl_add'] = $this->html->getSecureURL('common/resource_library/add');
         $this->data['rl_resources'] = $this->html->getSecureURL('common/resource_library/resources');
         $this->data['rl_delete'] = $this->html->getSecureURL('common/resource_library/delete');
@@ -120,8 +122,10 @@ class ControllerResponsesCommonResourceLibrary extends AController
                 .'&type='.$this->request->get['type']
                 .'&object_name='.$this->request->get['object_name']
                 .'&object_id='.$this->request->get['object_id']);
-        $this->data['rl_replace'] =
-            $this->html->getSecureURL('common/resource_library/replace', '&resource_id='.$this->data['resource_id']);
+        $this->data['rl_replace'] = $this->html->getSecureURL(
+            'common/resource_library/replace',
+            '&resource_id='.$this->data['resource_id']
+        );
         $this->data['type'] = $this->request->get['type'];
 
         //load resource
@@ -173,7 +177,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
             $this->thumb_sizes['width'],
             $this->thumb_sizes['height']
         );
-        $resource['url'] = $rm->buildResourceURL($resource['resource_path'], 'full');
+        $resource['url'] = $rm->buildResourceURL($resource['resource_path']);
         $resource['relative_url'] = $rm->buildResourceURL($resource['resource_path'], 'relative');
 
         $resource['resource_objects'] = $rm->getResourceObjects($resource['resource_id'], $language_id);
@@ -187,7 +191,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
                 $this->data['object_id']);
 
             // also check is mapped at all
-            //NOTE: we allow to delete resource that mapped ONLY to current object
+            //NOTE: allow delete resource that mapped ONLY to current object
             $is_mapped = $rm->isMapped($resource['resource_id']);
             if (($is_mapped == 1 && $resource['mapped_to_current']) || !$is_mapped) {
                 $resource['can_delete'] = true;
@@ -196,7 +200,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
             }
         } else {
             //check is mapped at all
-            $resource['can_delete'] = $rm->isMapped($resource['resource_id']) > 0 ? false : true;
+            $resource['can_delete'] = !($rm->isMapped($resource['resource_id']) > 0);
         }
 
         $this->_buildForm($resource);
@@ -230,8 +234,8 @@ class ControllerResponsesCommonResourceLibrary extends AController
 
     /**
      * @return null | void
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function add()
     {
@@ -263,8 +267,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
         if ($this->request->get['mode'] == 'single') {
             $this->data['types'] = [$rm->getResourceTypeByName($this->request->get['type'])];
         } else {
-            $this->data['types'] =
-                $this->session->data['rl_types'] ? $this->session->data['rl_types'] : $rm->getResourceTypes();
+            $this->data['types'] = $this->session->data['rl_types'] ? : $rm->getResourceTypes();
         }
 
         if (!$this->data['types']) {
@@ -277,8 +280,8 @@ class ControllerResponsesCommonResourceLibrary extends AController
         }
 
         $this->data['type'] = $this->request->get['type'];
-        $this->data['wrapper_id'] = $this->request->get['wrapper_id'] ? $this->request->get['wrapper_id'] : false;
-        $this->data['field_id'] = $this->request->get['field_id'] ? $this->request->get['field_id'] : false;
+        $this->data['wrapper_id'] = $this->request->get['wrapper_id'] ? : false;
+        $this->data['field_id'] = $this->request->get['field_id'] ? : false;
 
         $this->data['language_id'] = $this->config->get('storefront_language_id');
 
@@ -310,8 +313,8 @@ class ControllerResponsesCommonResourceLibrary extends AController
     /**
      * @param array $resource
      *
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws ReflectionException
+     * @throws AException
      */
     protected function _buildForm($resource = [])
     {
@@ -491,8 +494,8 @@ class ControllerResponsesCommonResourceLibrary extends AController
     /**
      * @param AResourceManager $rm
      *
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws ReflectionException
+     * @throws AException
      */
     protected function _common($rm)
     {
@@ -500,8 +503,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
         if ($this->request->get['mode'] == 'single') {
             $this->data['types'] = [$rm->getResourceTypeByName($this->request->get['type'])];
         } else {
-            $this->data['types'] =
-                isset($this->session->data['rl_types']) ? $this->session->data['rl_types'] : $rm->getResourceTypes();
+            $this->data['types'] = $this->session->data['rl_types'] ?? $rm->getResourceTypes();
         }
 
         $this->data['type'] = $this->request->get['type'];
@@ -551,6 +553,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
         $rm->setType($this->data['type']);
         $options = [];
         foreach ($this->data['types'] as $type) {
+            $type['type_name'] = $type['type_name'] ?? '';
             $options[$type['type_name']] = $type['type_name'];
         }
         $this->data['rl_types'] = $form->getFieldHtml([
@@ -565,6 +568,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
 
         $this->data['languages'] = [];
         $result = $this->language->getAvailableLanguages();
+        $languages = [];
         foreach ($result as $lang) {
             $this->data['languages'][$lang['language_id']] = $lang;
             $languages[$lang['language_id']] = $lang['name'];
@@ -581,8 +585,8 @@ class ControllerResponsesCommonResourceLibrary extends AController
 
     /**
      * @return mixed
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function upload()
     {
@@ -686,8 +690,8 @@ class ControllerResponsesCommonResourceLibrary extends AController
 
     /**
      * @return mixed
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function replace()
     {
@@ -908,7 +912,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
                 $page = 1;
             }
             $filter_data['page'] = $page;
-            $filter_data['limit'] = $filter_data['limit'] ? $filter_data['limit'] : $list_limit;
+            $filter_data['limit'] = $filter_data['limit'] ? : $list_limit;
         }
 
         if (!empty($this->request->get['sort'])) {
@@ -940,7 +944,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
 
             $result['items'][$key]['url'] = $rm->buildResourceURL($item['resource_path'], 'full');
             $result['items'][$key]['relative_url'] = $rm->buildResourceURL($item['resource_path'], 'relative');
-            $result['items'][$key]['can_delete'] = $result['items'][$key]['mapped'] == 1 ? true : false;
+            $result['items'][$key]['can_delete'] = $result['items'][$key]['mapped'] == 1;
 
         }
 
@@ -1125,7 +1129,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
         if (!empty($result)) {
             $rm->setType($result['type_name']);
             if (!empty($result['resource_code'])) {
-                if (strpos($result['resource_code'], "http") === 0) {
+                if (str_starts_with($result['resource_code'], "http")) {
                     abc_redirect($result['resource_code']);
                 } else {
                     $this->response->setOutput($result['resource_code']);
@@ -1325,16 +1329,17 @@ class ControllerResponsesCommonResourceLibrary extends AController
         $this->response->setOutput(AJson::encode($info));
     }
 
-    public function get_resources_scripts()
+    public function get_resources_scripts(
+        $object_name,
+            $object_id,
+            $types,
+            $onload = true,
+            $mode = '',
+            $page = 1,
+            $limit = 18,
+            $sort = null,
+            $order = 'ASC')
     {
-        /**
-         * @var string $object_name - name of RL-object for assistance of resources, for ex. products, categories, etc
-         * @var int $object_id - id of object
-         * @var array $types - array with RL-types (image, audio,video,archive etc)
-         * @var bool $onload - sign of call function after js-script load
-         * @var string $mode - mode of RL
-         */
-        list($object_name, $object_id, $types, $onload, $mode, $page, $limit, $sort, $order) = func_get_args();
 
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
@@ -1414,7 +1419,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
      * @param int $object_id
      *
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     protected function _getProductsTitle($object_id)
     {
@@ -1427,6 +1432,8 @@ class ControllerResponsesCommonResourceLibrary extends AController
      * @param int $object_id
      *
      * @return string
+     * @throws AException
+     * @throws ReflectionException
      */
     protected function _getCategoriesTitle($object_id)
     {
@@ -1438,8 +1445,8 @@ class ControllerResponsesCommonResourceLibrary extends AController
      * @param int $object_id
      *
      * @return string
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws ReflectionException
+     * @throws AException
      */
     protected function _getStoreTitle($object_id)
     {
@@ -1467,13 +1474,13 @@ class ControllerResponsesCommonResourceLibrary extends AController
      * @param int $object_id
      *
      * @return string
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws ReflectionException
+     * @throws AException
      */
     protected function _getDownloadsTitle($object_id)
     {
         $this->loadModel('catalog/download');
         $description = $this->model_catalog_download->getDownload($object_id);
-        return $description['name'] ? $description['name'] : $this->language->get('text_new_download');
+        return $description['name'] ? : $this->language->get('text_new_download');
     }
 }

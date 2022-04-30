@@ -3,6 +3,7 @@
 namespace abc\models\order;
 
 use abc\models\BaseModel;
+use abc\models\casts\Serialized;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -35,7 +36,7 @@ class OrderDatum extends BaseModel
     protected $casts = [
         'order_id' => 'int',
         'type_id'  => 'int',
-        'data'     => 'serialized',
+        'data'     => Serialized::class,
     ];
 
     protected $dates = [

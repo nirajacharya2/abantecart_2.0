@@ -24,6 +24,7 @@ use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\models\customer\CustomerTransaction;
 use Cake\Database\Exception;
+use Carbon\Carbon;
 use H;
 
 class ControllerPagesAccountTransactions extends AController
@@ -159,6 +160,11 @@ class ControllerPagesAccountTransactions extends AController
         $trans_total = $results[0]['total_num_rows'];
         if (count($results)) {
             foreach ($results as $result) {
+                $result['date_added'] = Carbon::parse($result['date_added'])
+                                              ->format(
+                                                  $this->language->get('date_format_short')
+                                                        .' '
+                                                        .$this->language->get('time_format') );
                 $result['credit'] = $this->currency->format($result['credit']);
                 $result['debit'] = $this->currency->format($result['debit']);
                 $trans[] = $result;

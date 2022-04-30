@@ -4,6 +4,7 @@ namespace abc\controllers\admin;
 
 use abc\core\ABC;
 use abc\core\engine\AController;
+use abc\core\lib\AException;
 use abc\core\lib\AJson;
 use abc\core\lib\ATaskManager;
 use abc\core\lib\contracts\AuditLogStorageInterface;
@@ -15,8 +16,8 @@ class ControllerTaskToolExportAuditLog extends AController implements ExportTask
     /**
      * @param array $params
      *
-     * @return int|void
-     * @throws \abc\core\lib\AException
+     * @return false|void
+     * @throws AException
      */
     public function getCount(array $params)
     {
@@ -49,25 +50,24 @@ class ControllerTaskToolExportAuditLog extends AController implements ExportTask
 
         $this->data['response'] = [
             'result' => true,
-            'count'  => (int)$response['total'],
+            'count'  => (int) $response['total'],
         ];
         $this->load->library('json');
         $this->response->addJSONHeader();
-        $this->response->setOutput(AJson::encode($this->data['response'])
+        $this->response->setOutput(
+            AJson::encode($this->data['response'])
         );
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
     /**
-     * @return mixed|void
-     * @throws \abc\core\lib\AException
+     * @return false|void
+     * @throws AException
      */
-    public function export()
+    public function export($task_id, $step_id, $settings = [])
     {
-        /**
-         * @var AuditLogStorageInterface $auditLogStorage
-         */
+        /** @var AuditLogStorageInterface $auditLogStorage */
         $auditLogStorage = ABC::getObjectByAlias('AuditLogStorage');
 
         if (!($auditLogStorage instanceof AuditLogStorageInterface)) {
@@ -75,10 +75,8 @@ class ControllerTaskToolExportAuditLog extends AController implements ExportTask
             return false;
         }
 
-        list($taskId, $stepId, $settings) = func_get_args();
-
-        $start = $settings['start'] ?: 0;
-        $limit = $settings['limit'] ?: 100;
+        $start = $settings['start'] ? : 0;
+        $limit = $settings['limit'] ? : 100;
 
         $request = $settings['request'];
         $request['rowsPerPage'] = $limit;
@@ -135,7 +133,7 @@ class ControllerTaskToolExportAuditLog extends AController implements ExportTask
                     'auditable_id'     => $row['entity']['id'],
                     'event'            => $row['entity']['group'],
                     'description'      => $row['description'],
-                    'ip'       => $row['request']['ip'],
+                    'ip'               => $row['request']['ip'],
                     'date_added'       => $row['request']['timestamp'],
                 ];
                 foreach ($row['changes'] as $change) {
@@ -151,20 +149,22 @@ class ControllerTaskToolExportAuditLog extends AController implements ExportTask
         fclose($output);
 
         $tm = new ATaskManager();
-        $tm->updateTask($taskId, [
+        $tm->updateTask($task_id, [
             'last_result' => '0',
         ]);
 
         $this->load->library('json');
         $this->response->addJSONHeader();
         if ($result['items']) {
-            $tm->updateTask($taskId, [
+            $tm->updateTask($task_id, [
                 'last_result' => '1',
             ]);
-            $tm->updateStep($stepId,
+            $tm->updateStep(
+                $step_id,
                 [
                     'last_result' => '1',
-                ]);
+                ]
+            );
             $output = [
                 'result' => true,
                 //'message' => $result->count().' product orders exported.',

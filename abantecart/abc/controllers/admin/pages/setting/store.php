@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -27,7 +27,6 @@ use abc\models\order\Order;
 class ControllerPagesSettingStore extends AController
 {
     public $error = [];
-    public $data = [];
 
     public function insert()
     {
@@ -115,6 +114,7 @@ class ControllerPagesSettingStore extends AController
         $this->data['token'] = $this->session->data['token'];
         $this->data['content_language_id'] = $this->session->data['content_language_id'];
         $this->data['form_language_switch'] = $this->html->getContentLanguageSwitcher();
+        $contentLanguageId = $this->language->getContentLanguageID();
 
         $this->document->initBreadcrumb([
             'href'      => $this->html->getSecureURL('index/home'),
@@ -271,15 +271,16 @@ class ControllerPagesSettingStore extends AController
             'type'  => 'input',
             'name'  => 'alias',
             'value' => $store_info['alias'],
-        ]);
-        if (empty($store_info['store_description'][$this->session->data['content_language_id']]['description'])) {
+            ]
+        );
+        if (empty($store_info['store_description'][$contentLanguageId]['description'])) {
             $store_info['store_description'] =
                 $this->model_setting_store->getStoreDescriptions($this->request->get['store_id']);
         }
         $this->data['form']['fields']['general']['description'] = $form->getFieldHtml([
             'type'  => 'texteditor',
-            'name'  => 'store_description['.$this->session->data['content_language_id'].'][description]',
-            'value' => $store_info['store_description'][$this->session->data['content_language_id']]['description'],
+                'name'  => 'store_description['.$contentLanguageId.'][description]',
+                'value' => $store_info['store_description'][$contentLanguageId]['description'],
             'style' => 'xl-field',
         ]);
         $this->data['form']['fields']['general']['url'] = $form->getFieldHtml([
@@ -365,10 +366,6 @@ class ControllerPagesSettingStore extends AController
 
         $this->extensions->hk_ValidateData($this);
 
-        if (!$this->error) {
-            return true;
-        } else {
-            return false;
-        }
+        return (!$this->error);
     }
 }

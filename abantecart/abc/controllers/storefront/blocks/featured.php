@@ -26,11 +26,8 @@ use abc\models\catalog\Product;
 
 class ControllerBlocksFeatured extends AController
 {
-    public $data;
-
     public function main()
     {
-
         //disable cache when login display price setting is off or enabled showing of prices with taxes
         if (($this->config->get('config_customer_price') && !$this->config->get('config_tax'))
             && $this->html_cache()) {
@@ -52,10 +49,7 @@ class ControllerBlocksFeatured extends AController
                 'limit' => $this->config->get('config_featured_limit'),
             ]
         );
-        $product_ids = [];
-        foreach ($results as $result) {
-            $product_ids[] = (int)$result['product_id'];
-        }
+        $product_ids = array_column($results, 'product_id');
 
         $products_info = $this->model_catalog_product->getProductsAllInfo($product_ids);
         //get thumbnails by one pass
@@ -75,26 +69,35 @@ class ControllerBlocksFeatured extends AController
             $whishlist = $this->customer->getWishList();
         }
 
-        foreach ($results as $result) {
+        foreach ($results as $k => $result) {
             $thumbnail = $thumbnails[$result['product_id']];
             $rating = $products_info[$result['product_id']]['rating'];
             $special = false;
             $discount = $products_info[$result['product_id']]['discount'];
             if ($discount) {
-                $price = $this->currency->format($this->tax->calculate($discount, $result['tax_class_id'],
-                    $this->config->get('config_tax')));
+                $price = $this->currency->format(
+                    $this->tax->calculate(
+                        $discount,
+                        $result['tax_class_id'],
+                        $this->config->get('config_tax')
+                    )
+                );
             } else {
                 $price = $this->currency->format(
-                        $this->tax->calculate(
-                            $result['price'],
-                            $result['tax_class_id'],
-                            $this->config->get('config_tax')
-                        )
+                    $this->tax->calculate(
+                        $result['price'],
+                        $result['tax_class_id'],
+                        $this->config->get('config_tax')
+                    )
                 );
                 $special = $products_info[$result['product_id']]['special'];
                 if ($special) {
-                    $special = $this->currency->format($this->tax->calculate($special, $result['tax_class_id'],
-                        $this->config->get('config_tax')));
+                    $special = $this->currency->format(
+                        $this->tax->calculate(
+                            $special, $result['tax_class_id'],
+                            $this->config->get('config_tax')
+                        )
+                    );
                 }
             }
 
@@ -115,8 +118,8 @@ class ControllerBlocksFeatured extends AController
             $no_stock_text = $this->language->get('text_out_of_stock');
             $total_quantity = 0;
             $stock_checkout = $result['stock_checkout'] === ''
-                            ? $this->config->get('config_stock_checkout')
-                            : $result['stock_checkout'];
+                ? $this->config->get('config_stock_checkout')
+                : $result['stock_checkout'];
 
             if ($stock_info[$result['product_id']]['subtract']) {
                 $track_stock = true;
@@ -134,48 +137,45 @@ class ControllerBlocksFeatured extends AController
 
             $catalog_mode = false;
             if ($result['product_type_id']) {
-                $prodTypeSettings = Product::getProductTypeSettings((int)$result['product_id']);
+                $prodTypeSettings = Product::getProductTypeSettings((int) $result['product_id']);
 
                 if ($prodTypeSettings && is_array($prodTypeSettings) && isset($prodTypeSettings['catalog_mode'])) {
-                    $catalog_mode = (bool)$prodTypeSettings['catalog_mode'];
+                    $catalog_mode = (bool) $prodTypeSettings['catalog_mode'];
                 }
             }
 
-            $this->data['products'][] = [
-                'product_id'                  => $result['product_id'],
-                'name'                        => $result['name'],
-                'blurb'                       => $result['blurb'],
-                'model'                       => $result['model'],
-                'rating'                      => $rating,
-                'stars'                       => sprintf($this->language->get('text_stars'), $rating),
-                'price'                       => $price,
-                'call_to_order'               => $result['call_to_order'],
-                'options'                     => $options,
-                'special'                     => $special,
-                'thumb'                       => $thumbnail,
-                'href'                        => $this->html->getSEOURL(
-                                                                        'product/product',
-                                                                        '&product_id='.$result['product_id'],
-                                                                        '&encode'
-                                                                    ),
-                'add'                         => $add,
-                'track_stock'                 => $track_stock,
-                'in_stock'                    => $in_stock,
-                'no_stock_text'               => $no_stock_text,
-                'total_quantity'              => $total_quantity,
-                'date_added'                  => $result['date_added'],
-                'tax_class_id'                => $result['tax_class_id'],
-                'in_wishlist'                 => $in_wishlist,
-                'product_wishlist_add_url'    => $this->html->getURL(
-                                                                        'product/wishlist/add',
-                                                                        '&product_id='.$result['product_id']
-                                                                    ),
-                'product_wishlist_remove_url' => $this->html->getURL(
-                                                                        'product/wishlist/remove',
-                                                                        '&product_id='.$result['product_id']
-                                                                    ),
-                'catalog_mode'               => $catalog_mode,
-            ];
+            $this->data['products'][$k] = array_merge(
+                $result,
+                [
+
+                    'rating'                      => $rating,
+                    'stars'                       => sprintf($this->language->get('text_stars'), $rating),
+                    'price'                       => $price,
+                    'options'                     => $options,
+                    'special'                     => $special,
+                    'thumb'                       => $thumbnail,
+                    'href'                        => $this->html->getSEOURL(
+                        'product/product',
+                        '&product_id='.$result['product_id'],
+                        '&encode'
+                    ),
+                    'add'                         => $add,
+                    'track_stock'                 => $track_stock,
+                    'in_stock'                    => $in_stock,
+                    'no_stock_text'               => $no_stock_text,
+                    'total_quantity'              => $total_quantity,
+                    'in_wishlist'                 => $in_wishlist,
+                    'product_wishlist_add_url'    => $this->html->getURL(
+                        'product/wishlist/add',
+                        '&product_id='.$result['product_id']
+                    ),
+                    'product_wishlist_remove_url' => $this->html->getURL(
+                        'product/wishlist/remove',
+                        '&product_id='.$result['product_id']
+                    ),
+                    'catalog_mode'                => $catalog_mode,
+                ]
+            );
         }
 
         if ($this->config->get('config_customer_price')) {

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -26,14 +26,14 @@ use abc\models\order\OrderDownload;
 
 class ControllerPagesSaleOrderTabs extends AController
 {
-    public $data = [];
-
-    public function main()
+    public function main($data = [])
     {
-
-        $this->data = func_get_arg(0);
+        $this->data = $data;
         if (!is_array($this->data)) {
-            throw new AException (AC_ERR_LOAD, 'Error: Could not create order tabs. Tabs definition is not array.');
+            throw new AException (
+                'Error: Could not create order tabs. Tabs definition is not array.',
+                AC_ERR_LOAD
+            );
         }
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);

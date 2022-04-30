@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,26 +21,21 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
+use abc\models\admin\ModelReportCustomer;
 use H;
 use stdClass;
-
-if ( ! class_exists('abc\core\ABC') || ! \abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class ControllerResponsesListingGridReportCustomer
  *
- * @property \abc\models\admin\ModelReportCustomer $model_report_customer
+ * @property ModelReportCustomer $model_report_customer
  */
 class ControllerResponsesListingGridReportCustomer extends AController
 {
     public function online()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -48,19 +43,29 @@ class ControllerResponsesListingGridReportCustomer extends AController
         $this->load->library('json');
 
         //Prepare filter config
-        $grid_filter_params = array_merge([
-            'customer' => 'c.lastname',
-            'ip'       => 'co.ip',
-            'url'      => 'co.url',
-            'time'     => 'co.date_added',
-                                          ], (array) $this->data['grid_filter_params']);
+        $grid_filter_params = array_merge(
+            [
+                'customer' => 'c.lastname',
+                'ip'       => 'co.ip',
+                'url'      => 'co.url',
+                'time'     => 'co.date_added',
+            ],
+            (array) $this->data['grid_filter_params']
+        );
 
-        $filter_grid = new AFilter(['method' => 'post', 'grid_filter_params' => $grid_filter_params]);
+        $filter_grid = new AFilter(
+            [
+                'method' => 'post',
+                'grid_filter_params' => $grid_filter_params,
+            ]
+        );
 
         $filter_params = $filter_grid->getFilterData();
         $filters = AJson::decode(html_entity_decode($this->request->post['filters']), true);
         if ($filters['rules'][0]['field'] == 'customer') {
-            $filter_params['subsql_filter'] .= " OR LOWER(c.`firstname`) LIKE '%".$this->db->escape($filters['rules'][0]['data'], true)."%'";
+            $filter_params['subsql_filter'] .= " OR LOWER(c.`firstname`) LIKE '%".$this->db->escape(
+                    $filters['rules'][0]['data'], true
+                )."%'";
         }
 
         $total = $this->model_report_customer->getTotalOnlineCustomers($filter_params);
@@ -81,8 +86,10 @@ class ControllerResponsesListingGridReportCustomer extends AController
             $response->rows[$i]['cell'] = [
                 $result['customer'],
                 $result['ip'],
-                AHelperUtils::dateISO2Display($result['date_added'],
-                    $this->language->get('date_format_short').' '.$this->language->get('time_format')),
+                H::dateISO2Display(
+                    $result['date_added'],
+                    $this->language->get('date_format_short').' '.$this->language->get('time_format')
+                ),
                 $result['url'],
             ];
             $i++;
@@ -106,7 +113,8 @@ class ControllerResponsesListingGridReportCustomer extends AController
         //Prepare filter config
         $filter_params = array_merge(
             ['date_start', 'date_end', 'order_status'],
-            (array)$this->data['filter_params']);
+            (array) $this->data['filter_params']
+        );
         $filter_form = new AFilter(['method' => 'get', 'filter_params' => $filter_params]);
         $filter_grid = new AFilter(['method' => 'post']);
         $data = array_merge($filter_form->getFilterData(), $filter_grid->getFilterData());
@@ -116,7 +124,7 @@ class ControllerResponsesListingGridReportCustomer extends AController
         if (isset($this->request->post['_search']) && $this->request->post['_search'] == 'true') {
             $searchData = AJson::decode(htmlspecialchars_decode($this->request->post['filters']), true);
             foreach ($searchData['rules'] as $rule) {
-                if ( ! in_array($rule['field'], $allowedFields)) {
+                if (!in_array($rule['field'], $allowedFields)) {
                     continue;
                 }
                 $data['filter'][$rule['field']] = $rule['data'];
@@ -125,6 +133,7 @@ class ControllerResponsesListingGridReportCustomer extends AController
 
         $total = $this->model_report_customer->getTotalCustomerOrders($data);
         $response = new stdClass();
+        $response->userdata = new stdClass();
         $response->page = $filter_grid->getParam('page');
         $response->total = $filter_grid->calcTotalPages($total);
         $response->records = $total;
@@ -179,22 +188,25 @@ class ControllerResponsesListingGridReportCustomer extends AController
         if (isset($this->request->post['_search']) && $this->request->post['_search'] == 'true') {
             $searchData = AJson::decode(htmlspecialchars_decode($this->request->post['filters']), true);
             foreach ($searchData['rules'] as $rule) {
-                if ( ! in_array($rule['field'], $allowedFields)) {
+                if (!in_array($rule['field'], $allowedFields)) {
                     continue;
                 }
                 $data['filter'][$rule['field']] = $rule['data'];
             }
         }
-        $data['filter']['date_start'] = $data['filter']['date_start'] ? H::dateDisplay2ISO($data['filter']['date_start']) : date('Y-m-d',strtotime('-7 day'));
-        $data['filter']['date_end'] = $data['filter']['date_end'] ? H::dateDisplay2ISO($data['filter']['date_end']) : date('Y-m-d');
-
+        $data['filter']['date_start'] = $data['filter']['date_start']
+            ? H::dateDisplay2ISO($data['filter']['date_start'])
+            : date(
+                'Y-m-d', strtotime('-7 day')
+            );
+        $data['filter']['date_end'] =
+            $data['filter']['date_end'] ? H::dateDisplay2ISO($data['filter']['date_end']) : date('Y-m-d');
 
         $results = $this->model_report_customer->getCustomerTransactions($data);
         $response = new stdClass();
         $response->page = $filter_grid->getParam('page');
         $response->total = $filter_grid->calcTotalPages($results[0]['total_num_rows']);
         $response->records = $results[0]['total_num_rows'];
-
 
         $i = 0;
         foreach ($results as $result) {

@@ -11,7 +11,7 @@ use Illuminate\Validation\ValidationException;
 class OrderProductModelTest extends ATestCase
 {
 
-    protected function setUp()
+    protected function setUp():void
     {
         //init
     }

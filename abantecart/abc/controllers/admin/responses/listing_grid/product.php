@@ -423,12 +423,11 @@ class ControllerResponsesListingGridProduct extends AController
                     'product_id' => $this->request->get['id']
                 ]
             );
-            return null;
+            return;
         }
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
-        return null;
     }
 
     protected function validateField($field, $value)

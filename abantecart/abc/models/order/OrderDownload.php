@@ -3,9 +3,10 @@
 namespace abc\models\order;
 
 use abc\models\BaseModel;
+use abc\models\casts\Serialized;
 use abc\models\catalog\Download;
 use abc\models\QueryBuilder;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -55,7 +56,7 @@ class OrderDownload extends BaseModel
         'percentage'               => 'int',
         'sort_order'               => 'int',
         'activate_order_status_id' => 'int',
-        'attributes_data'          => 'serialized',
+        'attributes_data'          => Serialized::class,
     ];
 
     protected $dates = [

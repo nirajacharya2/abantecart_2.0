@@ -23,7 +23,7 @@ class ABACTest extends ATestCase{
      */
     protected $abac;
 
-    protected function SetUp(){
+    protected function SetUp():void{
         //init
         /**
          * @var Registry

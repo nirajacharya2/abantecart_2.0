@@ -112,7 +112,7 @@ if (is_file(ABC::env('DIR_VENDOR').'autoload.php')) {
 }
 
 // Error Reporting
-error_reporting(E_ALL);
+error_reporting(E_ERROR & ~E_NOTICE);
 $dir_lib = $dir_app.'core'.$dir_sep.'lib'.$dir_sep;
 require_once($dir_lib.'debug.php');
 require_once($dir_lib.'exceptions.php');

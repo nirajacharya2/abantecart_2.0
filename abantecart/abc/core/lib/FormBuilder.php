@@ -51,7 +51,7 @@ class FormBuilder
     /**
      * FormBuilder constructor.
      *
-     * @param BaseModel $model
+     * @param string $model - class full name
      * @param int       $object_type
      * @param array     $formData
      */
@@ -117,17 +117,17 @@ class FormBuilder
                 return;
             }
 
-            $availibleFieldTypes = HtmlElementFactory::getAvailableElements();
+            $availableFieldTypes = HtmlElementFactory::getAvailableElements();
             $elementsWithOptions = HtmlElementFactory::getElementsWithOptions();
 
             foreach ($attributes['global_attribute_groups'] as $attribute_group) {
                 foreach ($attribute_group['global_attributes'] as $global_attribute) {
 
-                    if (!$availibleFieldTypes[$global_attribute['element_type']]) {
+                    if (!$availableFieldTypes[$global_attribute['element_type']]) {
                         continue;
                     }
 
-                    $type = $availibleFieldTypes[$global_attribute['element_type']]['type'];
+                    $type = $availableFieldTypes[$global_attribute['element_type']]['type'];
 
                     $description = $global_attribute['description'];
 
@@ -236,12 +236,12 @@ class FormBuilder
             $field = array_merge($field, $this->fields_preset['fields'][$field_name]);
         }
 
-        $field['rule'] = $this->converValidateRules($field);
+        $field['rule'] = $this->convertValidateRules($field);
 
         return $field;
     }
 
-    private function converValidateRules($field)
+    protected function convertValidateRules($field)
     {
         $rules = explode('|', $field['rule']);
         $modified_rules = [];

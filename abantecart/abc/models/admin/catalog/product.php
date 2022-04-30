@@ -1267,6 +1267,7 @@ class ModelCatalogProduct extends Model
         }
 
         $data = $query->row;
+        unset($data['product_id']);
         $data = array_merge($data, ['product_description' => $this->getProductDescriptions($product_id)]);
         foreach ($data['product_description'] as $lang => $desc) {
             $data['product_description'][$lang]['name'] .= ' ( Copy )';

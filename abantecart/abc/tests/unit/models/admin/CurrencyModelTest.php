@@ -24,7 +24,7 @@ use abc\tests\unit\ATestCase;
 class CurrencyModelTest extends ATestCase
 {
 
-    protected function setUp()
+    protected function setUp():void
     {
         //init
     }

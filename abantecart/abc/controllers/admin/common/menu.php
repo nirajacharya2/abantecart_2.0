@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -25,14 +25,8 @@ use abc\core\helper\AHelperHtml;
 use abc\core\lib\ADataset;
 use abc\core\lib\AResourceManager;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
 class ControllerCommonMenu extends AController
 {
-
-    public $data = [];
     protected $permissions = [];
     protected $groupID;
     const ROOT = 0;
@@ -45,7 +39,7 @@ class ControllerCommonMenu extends AController
         $menu_items = $menu->getRows();
 
         $this->loadModel('user/user_group');
-        $this->groupID = (int)$this->user->getUserGroupId();
+        $this->groupID = (int) $this->user->getUserGroupId();
         if ($this->groupID !== self::TOP_ADMIN_GROUP) {
             $user_group = $this->model_user_user_group->getUserGroup($this->groupID);
             $this->permissions = $user_group['permission'];
@@ -61,8 +55,8 @@ class ControllerCommonMenu extends AController
         // need to resort by sort_order property and exclude disabled extension items
         $enabled_extension = $this->extensions->getEnabledExtensions();
 
-        $tmp = array();
-        foreach ($this->data['menu_items'] as $i => $item) {
+        $tmp = [];
+        foreach ($this->data['menu_items'] as $item) {
             $offset = 0;
             while ($offset < 20 || isset ($tmp [$item ['parent_id']] [$item ['sort_order'] + $offset])) {
                 $offset++;
@@ -70,12 +64,11 @@ class ControllerCommonMenu extends AController
 
             //checks for disabled extension
             if ($item ['item_type'] == 'extension') {
-
                 // looks for this name in enabled extensions list. if is not there - skip it
                 if (!$this->findItemIdInExtensions($item ['item_id'], $enabled_extension)) {
                     continue;
                 } else { // if all fine - loads language of extension for menu item text show
-                    if (strpos($item ['item_url'], 'http') === false) {
+                    if (!str_contains($item ['item_url'], 'http')) {
                         $this->loadLanguage($item ['item_id'].'/'.$item ['item_id'], 'silent');
                         $item['language'] = $item ['item_id'].'/'.$item ['item_id'];
                     }
@@ -85,7 +78,7 @@ class ControllerCommonMenu extends AController
             $tmp [$item ['parent_id']] [$item ['sort_order'] + $offset] = $item;
         }
 
-        $this->data['menu_items'] = array();
+        $this->data['menu_items'] = [];
         foreach ($tmp as $item) {
             ksort($item);
             $this->data['menu_items'] = array_merge($this->data['menu_items'], $item);
@@ -119,17 +112,17 @@ class ControllerCommonMenu extends AController
         return false;
     }
 
-    private function buildMenuArray($menu_items = array())
+    private function buildMenuArray($menu_items = [])
     {
-        $dashboard = array(
-            'dashboard' => array(
+        $dashboard = [
+            'dashboard' => [
                 'icon' => '<i class="fa fa-home"></i>',
                 'id'   => 'dashboard',
                 'rt'   => 'index/home',
                 'href' => $this->html->getSecureURL('index/home'),
                 'text' => $this->language->get('text_dashboard'),
-            ),
-        );
+            ],
+        ];
 
         return array_merge($dashboard, $this->getChildItems('', $menu_items));
     }
@@ -138,7 +131,7 @@ class ControllerCommonMenu extends AController
     {
         $rm = new AResourceManager();
         $rm->setType('image');
-        $result = array();
+        $result = [];
         foreach ($menu_items as $item) {
             if ($item['parent_id'] == $item_id && isset($item['item_id'])) {
                 if (isset($item ['language'])) {
@@ -160,14 +153,14 @@ class ControllerCommonMenu extends AController
                 $link_keyname = strpos($item ['item_url'], "http") ? "onclick" : "href";
 
                 $icon = $rm->getResource($item ['item_icon_rl_id']);
-                $icon = $icon['resource_code'] ? $icon['resource_code'] : '';
+                $icon = $icon['resource_code'] ? : '';
 
-                $temp = array(
+                $temp = [
                     'id'          => $item ['item_id'],
                     $link_keyname => $menu_link,
                     'text'        => $this->language->get($item ['item_text']),
                     'icon'        => $icon,
-                );
+                ];
 
                 if ($rt) {
                     $temp['rt'] = $rt;
@@ -175,8 +168,7 @@ class ControllerCommonMenu extends AController
 
                 if ($children) {
                     $temp['children'] = $children;
-                }
-                elseif ($this->groupID !== self::TOP_ADMIN_GROUP && !$this->permissions['access'][$rt]) {
+                } elseif ($this->groupID !== self::TOP_ADMIN_GROUP && !$this->permissions['access'][$rt]) {
                     //skip top menus with no access permission
                     continue;
                 }
@@ -185,5 +177,20 @@ class ControllerCommonMenu extends AController
             }
         }
         return $result;
+    }
+
+    /**
+     * @param string $rt
+     *
+     * @return false|string
+     */
+    protected function getControllerRt($rt)
+    {
+        if (!$rt || preg_match("/(http|https):/", $rt)) {
+            return false;
+        }
+        $split = explode('/', $rt);
+
+        return $split[0].'/'.$split[1];
     }
 }

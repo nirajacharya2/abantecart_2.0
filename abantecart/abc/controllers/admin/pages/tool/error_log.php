@@ -156,7 +156,7 @@ class ControllerPagesToolErrorLog extends AController
         }
 
         $handle = fopen($file, 'w+');
-        if($handle!==false) {
+        if($handle !== false) {
             fclose($handle);
             $this->session->data['success'] = $this->language->get('text_success');
         }
