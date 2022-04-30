@@ -86,9 +86,9 @@ class ControllerTaskToolBackup extends AController
         }
     }
 
-    public function backupContentFiles(...$args)
+    public function backupContentFiles($task_id, $step_id, $settings = [])
     {
-        list(, , $settings) = func_get_args();
+
         $backup_name = preg_replace('[^0-9A-z_\.]', '', $settings['backup_name']);
         $backup_name = !$backup_name ? 'manual_backup' : $backup_name;
 
@@ -130,9 +130,8 @@ class ControllerTaskToolBackup extends AController
         }
     }
 
-    public function backupCodeFiles(...$args)
+    public function backupCodeFiles($task_id, $step_id, $settings = [])
     {
-        list(, , $settings) = $args;
         $backup_name = preg_replace('[^0-9A-z_\.]', '', $settings['backup_name']);
         $backup_name = !$backup_name ? 'manual_backup' : $backup_name;
         $bkp = new ABackup($backup_name);
@@ -183,9 +182,8 @@ class ControllerTaskToolBackup extends AController
         }
     }
 
-    public function backupConfig(...$args)
+    public function backupConfig($task_id, $step_id, $settings = [])
     {
-        list(, , $settings) = $args;
         $backup_name = preg_replace('[^0-9A-z_\.]', '', $settings['backup_name']);
         $backup_name = !$backup_name ? 'manual_backup' : $backup_name;
         $bkp = new ABackup($backup_name);
@@ -201,9 +199,8 @@ class ControllerTaskToolBackup extends AController
         $this->response->setOutput(AJson::encode($output));
     }
 
-    public function CompressBackup(...$args)
+    public function CompressBackup($task_id, $step_id, $settings = [])
     {
-        list(, , $settings) = $args;
         $backup_name = preg_replace('[^0-9A-z_\.]', '', $settings['backup_name']);
         $backup_name = $backup_name ? : 'manual_backup';
 
