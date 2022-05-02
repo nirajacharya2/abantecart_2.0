@@ -91,7 +91,7 @@ if ($from_admin) {
     $count = 0;
     $log_contents_end = "Log file tail: \n\n";
     $log_handle = fopen(ABC::env('DIR_LOGS')."application.log", "r");
-    if($log_handle !== false) {
+    if(is_resource($log_handle)) {
         //read 100 lines backwards from the eof or less
         $max_lines = 100;
         $max_bytes = filesize(ABC::env('DIR_LOGS')."application.log");
