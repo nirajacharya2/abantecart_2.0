@@ -592,9 +592,7 @@ class AHelperUtils extends AHelper
     public static function dateISO2Int($string_date)
     {
         $string_date = trim($string_date);
-        $is_datetime = strlen($string_date) > 10;
-
-        return static::dateFromFormat($string_date, ($is_datetime ? 'Y-m-d H:i:s' : 'Y-m-d'));
+        return  strtotime($string_date);
     }
 
     /**
