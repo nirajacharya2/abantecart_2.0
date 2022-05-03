@@ -70,7 +70,7 @@ class ModelToolOnlineNow extends Model
         $cache = $this->cache->pull($cache_key);
         if(!$cache || (time()-$cache) > 3600 ){
             //delete old records
-            $this->db->query("DELETE FROM `".$this->db->table("online_customers")."`
+            $this->db->query("DELETE FROM `".$this->db->table_name("online_customers")."`
                               WHERE `date_added`< (NOW() - INTERVAL 1 HOUR)");
             $this->cache->push($cache_key, time());
         }
