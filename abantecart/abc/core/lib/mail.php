@@ -753,7 +753,7 @@ class AMail
                 $this->error[] = __CLASS__ .'->MailApiManager: '.$e->getMessage()."\n".$e->getTraceAsString();
             }
         }
-        if ($this->error) {
+        if ($this->error && $this->messages) {
             $this->messages->saveError('Mailer error!',
                 'Can\'t send emails. Please see log for details and check your mail settings.');
             return false;
