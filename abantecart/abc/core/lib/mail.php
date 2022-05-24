@@ -369,7 +369,7 @@ class AMail
             $error = 'Error: E-Mail to required!';
             $this->log->write($error);
             $this->error[] = $error;
-            $this->messages->saveError('Mailer error!',
+            $this->messages?->saveError('Mailer error!',
                 'Can\'t send emails. Please see log for details and check your mail settings.');
             return false;
         }
@@ -378,7 +378,7 @@ class AMail
             $error = 'Error: E-Mail from required!';
             $this->log->write($error);
             $this->error[] = $error;
-            $this->messages->saveError('Mailer error!',
+            $this->messages?->saveError('Mailer error!',
                 'Can\'t send emails. Please see log for details and check your mail settings.');
             return false;
         }
@@ -387,7 +387,7 @@ class AMail
             $error = 'Error: E-Mail sender required!';
             $this->log->write($error);
             $this->error[] = $error;
-            $this->messages->saveError('Mailer error!',
+            $this->messages?->saveError('Mailer error!',
                 'Can\'t send emails. Please see log for details and check your mail settings.');
             return false;
         }
@@ -396,7 +396,7 @@ class AMail
             $error = 'Error: E-Mail subject required!';
             $this->log->write($error);
             $this->error[] = $error;
-            $this->messages->saveError('Mailer error!',
+            $this->messages?->saveError('Mailer error!',
                 'Can\'t send emails. Please see log for details and check your mail settings.');
             return false;
         }
@@ -405,7 +405,7 @@ class AMail
             $error = 'Error: E-Mail message required!';
             $this->log->write($error);
             $this->error[] = $error;
-            $this->messages->saveError('Mailer error!',
+            $this->messages?->saveError('Mailer error!',
                 'Can\'t send emails. Please see log for details and check your mail settings.');
             return false;
         }
@@ -754,7 +754,7 @@ class AMail
             }
         }
         if ($this->error) {
-            $this->messages->saveError('Mailer error!',
+            $this->messages?->saveError('Mailer error!',
                 'Can\'t send emails. Please see log for details and check your mail settings.');
             return false;
         }

@@ -33,7 +33,7 @@ use RuntimeException;
 class ControllerResponsesCommonExportTask extends AController
 {
     protected $zipFile = '';
-    protected $errors;
+    protected $errors = [];
     /**
      * @var string
      */
@@ -56,7 +56,7 @@ class ControllerResponsesCommonExportTask extends AController
             $this->exportTaskController = $this->request->get['controller'];
             $task_details = $this->addTask();
 
-            if (!$task_details) {
+            if (is_bool($task_details)) {
                 $error = new AError("Create export error: \n ".implode(' ', $this->errors));
                 $error->toJSONResponse(
                     'APP_ERROR_402',
@@ -103,6 +103,7 @@ class ControllerResponsesCommonExportTask extends AController
                 [$this->request->get]
             );
             $response = $dd->dispatchGetOutput();
+
             $json = json_decode($response, true);
             if (json_last_error() === JSON_ERROR_NONE) {
                 $response = $json;
