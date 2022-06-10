@@ -51,7 +51,7 @@ foreach($jss as $js){
 	);
 ?>
 
-<script type="text/javascript" src="vendor/components/jqGrid/plugins/jquery.tablednd.js"></script>
+<script type="text/javascript" src="vendor/components/jqgrid/plugins/jquery.tablednd.js"></script>
 <script type="text/javascript">
 
 var initGrid_<?php echo $data['table_id'] ?> = function ($) {
