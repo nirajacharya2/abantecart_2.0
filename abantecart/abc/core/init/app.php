@@ -79,6 +79,8 @@ if (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] 
         || $_SERVER['HTTP_X_FORWARDED_SERVER'] == 'ssl')
 ) {
     ABC::env('HTTPS', true);
+} elseif (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+    ABC::env('HTTPS', true);
 } elseif (isset($_SERVER['SCRIPT_URI']) && (str_starts_with($_SERVER['SCRIPT_URI'], 'https'))) {
     ABC::env('HTTPS', true);
 } elseif (isset($_SERVER['HTTP_HOST']) && (str_contains($_SERVER['HTTP_HOST'], ':443'))) {
