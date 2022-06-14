@@ -21,9 +21,26 @@
 namespace abc\controllers\storefront;
 
 use abc\core\engine\AControllerAPI;
+use OpenApi\Annotations as OA;
 
 class ControllerApiAccountAccount extends AControllerAPI
 {
+    /**
+     * @OA\POST(
+     *     path="/index.php/?r=a/account/account",
+     *     summary="Get account data",
+     *     tags={"Account"},
+     *     @OA\Response(
+     *         response="200",
+     *         description="Account data"
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denight"
+     *     )
+     * )
+     *
+     */
     public function post()
     {
         //init controller data

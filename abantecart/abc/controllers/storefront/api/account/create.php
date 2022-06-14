@@ -37,6 +37,22 @@ class ControllerApiAccountCreate extends AControllerAPI
     protected $v_error = array();
     public $data;
 
+    /**
+     * @OA\POST(
+     *     path="/index.php/?r=a/account/create",
+     *     summary="Create account",
+     *     tags={"Account"},
+     *     @OA\Response(
+     *         response="200",
+     *         description="Account data"
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denight"
+     *     )
+     * )
+     *
+     */
     public function post()
     {
         //init controller data

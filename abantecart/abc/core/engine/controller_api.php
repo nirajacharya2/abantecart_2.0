@@ -22,7 +22,34 @@ namespace abc\core\engine;
 
 use abc\core\lib\ARest;
 
-
+/**
+ * @OA\Info(
+ *     title="Abantecart 2.0 REST API",
+ *     version="0.1",
+ *     description="REST API for Abantecart version 2.0"
+ * )
+ *
+ * @OA\Tag(
+ *     name="Account",
+ *     description="Manage account: create, update, delete"
+ * )
+ * @OA\Tag(
+ *     name="Checkout",
+ *     description="Manage checkout: create, update, delete"
+ * )
+ * @OA\Tag(
+ *     name="Common",
+ *     description="Manage checkout: create, update, delete"
+ * )
+ * @OA\Tag(
+ *     name="Product",
+ *     description="Product API: create, update, delete"
+ * )
+ * * @OA\Tag(
+ *     name="Category",
+ *     description="Category API: create, update, delete"
+ * )
+ */
 class AControllerAPI extends AController
 {
     public $rest;

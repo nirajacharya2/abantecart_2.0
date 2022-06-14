@@ -1,0 +1,44 @@
+openapi: 3.0.0
+info:
+  title: 'Abantecart 2.0 REST API'
+  description: 'REST API for Abantecart version 2.0'
+  version: '0.1'
+paths:
+  '/index.php/?r=a/account/account':
+    post:
+      tags:
+        - Account
+      summary: 'Get account data'
+      operationId: bbdd9d82cafbc10800c4bf5a22b65582
+      responses:
+        '200':
+          description: 'Account data'
+        '403':
+          description: 'Access denight'
+  '/index.php/?r=a/account/create':
+    post:
+      tags:
+        - Account
+      summary: 'Create account'
+      operationId: 01ed909ab5ac19ec09bf15f25fa2d07d
+      responses:
+        '200':
+          description: 'Account data'
+        '403':
+          description: 'Access denight'
+tags:
+  -
+    name: Account
+    description: 'Manage account: create, update, delete'
+  -
+    name: Checkout
+    description: 'Manage checkout: create, update, delete'
+  -
+    name: Common
+    description: 'Manage checkout: create, update, delete'
+  -
+    name: Product
+    description: 'Product API: create, update, delete'
+  -
+    name: Category
+    description: 'Category API: create, update, delete'

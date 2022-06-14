@@ -272,8 +272,9 @@
     "koolphp/koolreport" : "3.25.4",
     "dyrynda/laravel-model-uuid" : "6.5.0",
     "php-amqplib/php-amqplib": "3.1.1",
-    "vdvpie22/audit-log-client": "^1.0",
-    "mustache/mustache": "2.14.0"
+    "vdvpie22/audit-log-client": "1.7",
+    "mustache/mustache": "2.14.0",
+    "zircote/swagger-php": "^4.4"
   },
   "extra": {
     "installer-paths": {
@@ -333,7 +334,11 @@
       ],
       "./vendor/assets/tinymce/tinymce/languages": [
         "tinymce/languages"
+      ],
+      "./vendor/assets/maximebf/debugbar": [
+        "maximebf/debugbar"
       ]
+
     },
     "merge-plugin": {
         "include": [
@@ -348,6 +353,12 @@
   "autoload-dev": {
     "psr-4": {
       "Tests\\": "tests/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "mnsami/composer-custom-directory-installer": true,
+      "wikimedia/composer-merge-plugin": true
     }
   }
 }
