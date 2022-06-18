@@ -32,13 +32,50 @@ class ControllerApiAccountEdit extends AControllerAPI
     protected $v_error = [];
     public $data;
 
+    /**
+     * @OA\POST(
+     *     path="/index.php/?rt=a/account/edit",
+     *     summary="Edit step 2",
+     *     description="There are 2 steps to edit customer details. First step is to get all allowed fields and provided earlier data (in case of error). Second step is to provide data to be validated and saved.",
+     *     tags={"Account"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/accountEditRequestModel"),
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Success response",
+     *         @OA\JsonContent(ref="#/components/schemas/EditStep2SuccessModel"),
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad Request",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denight",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *      @OA\Response(
+     *         response="500",
+     *         description="Server Error",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     )
+     * )
+     *
+     */
     public function post()
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request_data = $this->rest->getRequestParams();
 
         if (!$this->customer->isLoggedWithToken($request_data['token'])) {
-            $this->rest->setResponseData(['error' => 'Not logged in or Login attempt failed!']);
+            $this->rest->setResponseData([
+                    'error_code' => 0,
+                    'error_title' => 'Unauthorized',
+                    'error_text' => 'Not logged in or Login attempt failed!'
+                ]);
             $this->rest->sendResponse(401);
             return null;
         }
@@ -50,23 +87,47 @@ class ControllerApiAccountEdit extends AControllerAPI
             $request_data['newsletter'] = 1;
             $this->customer->model()->update($request_data);
             $this->data['status'] = 1;
-            $this->data['text_message'] = $this->language->get('text_success');
+            $this->data['success'] = $this->language->get('text_success');
+
+            //Update controller data
+            $this->extensions->hk_UpdateData($this, __FUNCTION__);
+            $this->rest->setResponseData($this->data);
+            $this->rest->sendResponse(200);
         } else {
-            $this->data['status'] = 0;
-            $this->data['error_warning'] = $this->v_error['warning'];
-            $this->data['error_firstname'] = $this->v_error['firstname'];
-            $this->data['error_lastname'] = $this->v_error['lastname'];
-            $this->data['error_email'] = $this->v_error['email'];
-            $this->data['error_telephone'] = $this->v_error['telephone'];
-            return $this->buildResponse();
+            $this->data['error_code'] = 0;
+            $this->data['errors'] = $this->v_error;
+
+            //Update controller data
+            $this->extensions->hk_UpdateData($this, __FUNCTION__);
+            $this->rest->setResponseData($this->data);
+            $this->rest->sendResponse(400);
         }
-
-        $this->extensions->hk_UpdateData($this, __FUNCTION__);
-
-        $this->rest->setResponseData($this->data);
-        $this->rest->sendResponse(200);
     }
 
+    /**
+     * @OA\Get (
+     *     path="/index.php/?rt=a/account/edit",
+     *     summary="Edit step 1",
+     *     description="There are 2 steps to edit customer details. First step is to get all allowed fields and provided earlier data (in case of error). Second step is to provide data to be validated and saved.",
+     *     tags={"Account"},
+     *     @OA\Response(
+     *         response="200",
+     *         description="Account data",
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="fields",
+     *                     type="object",
+     *                     ref="#/components/schemas/EditFieldsModel"
+     *                 )
+     *             )
+     *         ),
+     *     )
+     * )
+     *
+     */
     public function get()
     {
         $request_data = $this->rest->getRequestParams();

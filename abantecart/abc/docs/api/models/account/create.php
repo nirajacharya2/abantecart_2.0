@@ -3,19 +3,6 @@
 use abc\core\lib\ApiSuccessResponse;
 use abc\docs\api\models\SecureRequestModel;
 
-/**
- * Class AccountCreateStep1RequestModel.
- *
- * @OA\Schema (
- *     description="Account Create Request step 1",
- *     title="Account Create Step 1 Request model",
- *     schema="accountCreateStep1RequestModel"
- * )
- */
-class AccountCreateStep1RequestModel extends SecureRequestModel
-{
-}
-
 
 /**
  * Class AccountCreateRequestModel.
@@ -26,8 +13,17 @@ class AccountCreateStep1RequestModel extends SecureRequestModel
  *     schema="accountCreateRequestModel"
  * )
  */
-class AccountCreateRequestModel extends SecureRequestModel
+class AccountCreateRequestModel
 {
+    /**
+     * @OA\Property(
+     *     description="Unique API key that is set in the control panel",
+     * )
+     *
+     * @var string
+     */
+    private $api_key;
+
     /**
      * @OA\Property(
      *     description="Customer’s first name (32 characters limit)",

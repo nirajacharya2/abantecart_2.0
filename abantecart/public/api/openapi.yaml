@@ -90,6 +90,91 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
+  '/index.php/?rt=a/account/edit':
+    get:
+      tags:
+        - Account
+      summary: 'Edit step 1'
+      description: 'There are 2 steps to edit customer details. First step is to get all allowed fields and provided earlier data (in case of error). Second step is to provide data to be validated and saved.'
+      operationId: 4b88e78cc36b6bde00db17d9aa5039a7
+      responses:
+        '200':
+          description: 'Account data'
+          content:
+            application/json:
+              schema:
+                properties:
+                  fields: { $ref: '#/components/schemas/EditFieldsModel' }
+                type: object
+    post:
+      tags:
+        - Account
+      summary: 'Edit step 2'
+      description: 'There are 2 steps to edit customer details. First step is to get all allowed fields and provided earlier data (in case of error). Second step is to provide data to be validated and saved.'
+      operationId: 5dc7b691b8e21bcd1cf32229067ec61e
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/accountEditRequestModel'
+      responses:
+        '200':
+          description: 'Success response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditStep2SuccessModel'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: 'Access denight'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+  '/index.php/?rt=a/account/history':
+    post:
+      tags:
+        - Account
+      summary: 'Get orders history'
+      description: 'Get orders history paginated data'
+      operationId: 398f7f739f5eec2dfe62b495b156a5a2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountHistoryRequestModel'
+      responses:
+        '200':
+          description: 'Success response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistorySuccessModel'
+        '403':
+          description: 'Access denight'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
   '/index.php/?rt=a/account/login':
     post:
       tags:
@@ -257,73 +342,65 @@ components:
       allOf:
         -
           $ref: '#/components/schemas/ApiErrorResponse'
-    accountCreateStep1RequestModel:
-      title: 'Account Create Step 1 Request model'
-      description: 'Account Create Request step 1'
-      type: object
-      allOf:
-        -
-          $ref: '#/components/schemas/SecureRequestModel'
     accountCreateRequestModel:
       title: 'Account Create Request model'
       description: 'Account Create Request'
+      properties:
+        api_key:
+          description: 'Unique API key that is set in the control panel'
+          type: string
+        firstname:
+          description: 'Customer’s first name (32 characters limit)'
+          type: string
+        lastname:
+          description: 'Customer’s lastname (32 characters limit)'
+          type: string
+        loginname:
+          description: 'Customer’s loginname (Unique login name between 5 and 64 characters. Required If ''Require Login Name'' is enabled (default))'
+          type: string
+        email:
+          description: 'Customer’s email address (96 characters limit)'
+          type: string
+        telephone:
+          description: 'Customer’s telephone number (32 characters limit)'
+          type: string
+        fax:
+          description: 'Customer’s fax number (32 characters limit)'
+          type: string
+        company:
+          description: 'Company name (optional) (32 characters limit)'
+          type: string
+        address_1:
+          description: 'Street Address (128 characters limit)'
+          type: string
+        address_2:
+          description: 'Apartment #, Suite #, etc part of address (128 characters limit)'
+          type: string
+        postcode:
+          description: 'Zip code or Postal code (10 characters limit)'
+          type: string
+        city:
+          description: 'City or town name (128 characters limit)'
+          type: string
+        country_id:
+          description: 'ID of the country based on provided list of countries'
+          type: integer
+        zone_id:
+          description: 'ID for the local zone within a country. This is usually a state or region (This ID can be received with separate request based on selected country ID)'
+          type: integer
+        password:
+          description: 'Password to access login to the account'
+          type: string
+        confirm:
+          description: 'Confirmation with the same password as in password field'
+          type: string
+        agree:
+          description: 'This is a confirmation that user agrees to the site user agreement (This is configured in the admin and can be possibly enabled or disabled. Values: 1 agree or 0 decline)'
+          type: integer
+        newsletter:
+          description: 'Selection to receive a newsletter (values: 1 to receive and 0 to skip)'
+          type: integer
       type: object
-      allOf:
-        -
-          $ref: '#/components/schemas/SecureRequestModel'
-        -
-          properties:
-            firstname:
-              description: 'Customer’s first name (32 characters limit)'
-              type: string
-            lastname:
-              description: 'Customer’s lastname (32 characters limit)'
-              type: string
-            loginname:
-              description: 'Customer’s loginname (Unique login name between 5 and 64 characters. Required If ''Require Login Name'' is enabled (default))'
-              type: string
-            email:
-              description: 'Customer’s email address (96 characters limit)'
-              type: string
-            telephone:
-              description: 'Customer’s telephone number (32 characters limit)'
-              type: string
-            fax:
-              description: 'Customer’s fax number (32 characters limit)'
-              type: string
-            company:
-              description: 'Company name (optional) (32 characters limit)'
-              type: string
-            address_1:
-              description: 'Street Address (128 characters limit)'
-              type: string
-            address_2:
-              description: 'Apartment #, Suite #, etc part of address (128 characters limit)'
-              type: string
-            postcode:
-              description: 'Zip code or Postal code (10 characters limit)'
-              type: string
-            city:
-              description: 'City or town name (128 characters limit)'
-              type: string
-            country_id:
-              description: 'ID of the country based on provided list of countries'
-              type: integer
-            zone_id:
-              description: 'ID for the local zone within a country. This is usually a state or region (This ID can be received with separate request based on selected country ID)'
-              type: integer
-            password:
-              description: 'Password to access login to the account'
-              type: string
-            confirm:
-              description: 'Confirmation with the same password as in password field'
-              type: string
-            agree:
-              description: 'This is a confirmation that user agrees to the site user agreement (This is configured in the admin and can be possibly enabled or disabled. Values: 1 agree or 0 decline)'
-              type: integer
-            newsletter:
-              description: 'Selection to receive a newsletter (values: 1 to receive and 0 to skip)'
-              type: integer
     CreateStep1SuccessModel:
       title: 'Create Step 1 Success Response model'
       description: 'Create Step 1 Success Response'
@@ -403,6 +480,145 @@ components:
         checked:
           description: 'Field checked for checkbox'
           type: boolean
+      type: object
+    accountEditRequestModel:
+      title: 'Account Edit Request model'
+      description: 'Account Edit Request'
+      type: object
+      allOf:
+        -
+          $ref: '#/components/schemas/SecureRequestModel'
+        -
+          properties:
+            firstname:
+              description: 'Customer’s first name (32 characters limit)'
+              type: string
+            lastname:
+              description: 'Customer’s lastname (32 characters limit)'
+              type: string
+            email:
+              description: 'Customer’s email address (96 characters limit)'
+              type: string
+            telephone:
+              description: 'Customer’s telephone number (32 characters limit)'
+              type: string
+            fax:
+              description: 'Customer’s fax number (32 characters limit)'
+              type: string
+            newsletter:
+              description: 'Selection to receive a newsletter (values: 1 to receive and 0 to skip)'
+              type: integer
+    EditStep1SuccessModel:
+      title: 'Edit Step 1 Success Response model'
+      description: 'Edit Step 1 Success Response'
+    EditStep2SuccessModel:
+      title: 'Edit Step 2 Success Response model'
+      description: 'Edit Step 2 Success Response'
+      type: object
+      allOf:
+        -
+          $ref: '#/components/schemas/ApiSuccessResponse'
+        -
+          properties:
+            text_message:
+              description: 'Text message for customer after registration'
+              type: string
+    EditFieldsModel:
+      title: 'Edit Fields Model'
+      description: 'Edit Fields Model'
+      properties:
+        firstname:
+          $ref: '#/components/schemas/EditAccountField'
+        lastname:
+          $ref: '#/components/schemas/EditAccountField'
+        email:
+          $ref: '#/components/schemas/EditAccountField'
+        telephone:
+          $ref: '#/components/schemas/EditAccountField'
+        fax:
+          $ref: '#/components/schemas/EditAccountField'
+        newsletter:
+          $ref: '#/components/schemas/EditAccountField'
+      type: object
+    EditAccountField:
+      title: 'Crea teAccount Field model'
+      description: 'Edit Account Field'
+      properties:
+        type:
+          description: 'Field type'
+          type: string
+        name:
+          description: 'Field name'
+          type: string
+        value:
+          description: 'Field value'
+          type: string
+        required:
+          description: 'Field reuiqured'
+          type: boolean
+        error:
+          description: 'Field error'
+          type: string
+        options:
+          description: 'Field options'
+          type: object
+        checked:
+          description: 'Field checked for checkbox'
+          type: boolean
+      type: object
+    AccountHistoryRequestModel:
+      title: 'Account History Request Model'
+      description: 'Account History Request'
+      type: object
+      allOf:
+        -
+          $ref: '#/components/schemas/SecureRequestModel'
+        -
+          properties:
+            page:
+              description: 'Page Number, default 1'
+              type: integer
+            limit:
+              description: 'Limit of order for display, default value of setting config_catalog_limit'
+              type: integer
+    HistorySuccessModel:
+      title: 'History Success Model'
+      description: 'History Success Model'
+      properties:
+        orders:
+          description: 'Orders list'
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoryOrder'
+        total_orders:
+          description: 'Total orders'
+          type: integer
+        page:
+          description: 'Page Number'
+          type: integer
+      type: object
+    HistoryOrder:
+      description: 'Class HistoryOrder.'
+      properties:
+        order_id:
+          description: 'Order Id'
+          type: integer
+        name:
+          description: 'Order Name'
+          type: string
+        status:
+          description: 'Order Status'
+          type: string
+        date_added:
+          description: 'Date create'
+          type: string
+        products:
+          description: 'Products count in order'
+          type: integer
+        total:
+          description: 'Order total'
+          type: number
+          format: double
       type: object
     loginRequestModel:
       title: 'Login Request model'

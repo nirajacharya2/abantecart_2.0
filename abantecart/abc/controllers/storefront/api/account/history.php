@@ -29,13 +29,45 @@ class ControllerApiAccountHistory extends AControllerAPI
 {
     public $data;
 
+    /**
+     * @OA\POST(
+     *     path="/index.php/?rt=a/account/history",
+     *     summary="Get orders history",
+     *     description="Get orders history paginated data",
+     *     tags={"Account"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/AccountHistoryRequestModel"),
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Success response",
+     *         @OA\JsonContent(ref="#/components/schemas/HistorySuccessModel"),
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denight",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *      @OA\Response(
+     *         response="500",
+     *         description="Server Error",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     )
+     * )
+     *
+     */
     public function post()
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request_data = $this->rest->getRequestParams();
 
         if (!$this->customer->isLoggedWithToken($request_data['token'])) {
-            $this->rest->setResponseData(['error' => 'Not logged in or Login attempt failed!']);
+            $this->rest->setResponseData([
+                'error_code' => 0,
+                'error_title' => 'Unauthorized',
+                'error_text' => 'Not logged in or Login attempt failed!'
+            ]);
             $this->rest->sendResponse(401);
             return null;
         }
