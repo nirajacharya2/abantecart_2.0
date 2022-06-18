@@ -4,28 +4,443 @@ info:
   description: 'REST API for Abantecart version 2.0'
   version: '0.1'
 paths:
-  '/index.php/?r=a/account/account':
+  '/index.php/?rt=a/account/account':
     post:
       tags:
         - Account
-      summary: 'Get account data'
-      operationId: bbdd9d82cafbc10800c4bf5a22b65582
+      summary: 'Get customer details'
+      description: 'Get basic customer Details.'
+      operationId: 6e8152b7a7e7f7c14bfb6c729032a6c3
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/accountRequestModel'
+      responses:
+        '200':
+          description: 'Success response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseModel'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/accountErrorModel'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/accountErrorModel'
+  '/index.php/?rt=a/account/create':
+    get:
+      tags:
+        - Account
+      summary: 'Create step 1'
+      description: 'There are 2 steps to register new customer and save customer details. First step is to get all required fields and provided earlier data (in case of error). Second step is to provide data to be validated and saved.'
+      operationId: 44bb4af5e58ddc3e99329d8d6317980f
       responses:
         '200':
           description: 'Account data'
-        '403':
-          description: 'Access denight'
-  '/index.php/?r=a/account/create':
+          content:
+            application/json:
+              schema:
+                properties:
+                  fields: { $ref: '#/components/schemas/CreateFieldsModel' }
+                  text_agree: { type: string }
+                type: object
     post:
       tags:
         - Account
-      summary: 'Create account'
-      operationId: 01ed909ab5ac19ec09bf15f25fa2d07d
+      summary: 'Create step 2'
+      description: 'There are 2 steps to register new customer and save customer details. First step is to get all required fields and provided earlier data (in case of error). Second step is to provide data to be validated and saved.'
+      operationId: 9d9860ed8d606e413c32a0f91a44d56d
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/accountCreateRequestModel'
       responses:
         '200':
-          description: 'Account data'
+          description: 'Success response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateStep2SuccessModel'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
         '403':
           description: 'Access denight'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+  '/index.php/?rt=a/account/login':
+    post:
+      tags:
+        - Account
+      summary: Login
+      description: 'This API request needs to be done every time customer request to login to get access to customer account or just to confirm that current authentication is still valid and not expired.'
+      operationId: e8756d98bf3f8f73dc3384cae4b8259b
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/loginRequestModel'
+      responses:
+        '200':
+          description: 'Success response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/loginSuccessModel'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/loginErrorModel'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/loginErrorModel'
+  '/index.php/?rt=a/account/logout':
+    get:
+      tags:
+        - Account
+      summary: Logout
+      description: 'Logout from session'
+      operationId: c0b99d88171a0b40d643579e4b2774cd
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecureRequestModel'
+      responses:
+        '200':
+          description: 'Success response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+    post:
+      tags:
+        - Account
+      summary: Logout
+      description: 'Logout from session'
+      operationId: 773626dd201221161a570d406fd62108
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecureRequestModel'
+      responses:
+        '200':
+          description: 'Success response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+components:
+  schemas:
+    ApiSuccessResponse:
+      title: 'Success Response model'
+      description: 'Success Response'
+      properties:
+        status:
+          description: 'Request result'
+          type: integer
+        success:
+          description: 'Text description of request result'
+          type: string
+      type: object
+    ApiErrorResponse:
+      title: 'Error Response model'
+      description: 'Error Response'
+      properties:
+        error_code:
+          description: 'Request result'
+          type: integer
+        error_title:
+          description: 'Title of request result'
+          type: string
+        error_text:
+          description: 'Text description of request result'
+          type: string
+        errors:
+          description: 'Text description of request result'
+          type: object
+      type: object
+    SecureRequestModel:
+      title: 'Secure Request Model'
+      description: 'Secure Request'
+      properties:
+        token:
+          description: 'Access token ID. This token is provided by the system after successful initial authentication'
+          type: string
+        api_key:
+          description: 'Unique API key that is set in the control panel'
+          type: string
+      type: object
+    accountRequestModel:
+      title: 'Account Request model'
+      description: 'Account Request'
+      type: object
+      allOf:
+        -
+          $ref: '#/components/schemas/SecureRequestModel'
+    responseModel:
+      title: 'Response model'
+      description: 'Account data'
+      properties:
+        customer_id:
+          description: 'Unique user identificator'
+          type: integer
+        title:
+          description: 'Title of user info page'
+          type: string
+        firstname:
+          description: 'Firstname of user'
+          type: string
+        lastname:
+          description: 'Lastname of user'
+          type: string
+        email:
+          description: 'Email of user'
+          type: string
+        information:
+          description: 'Url to get information about user'
+          type: string
+        history:
+          description: 'Url to get history of user'
+          type: string
+        newsletter:
+          description: 'Get newsletter information url'
+          type: string
+      type: object
+    accountErrorModel:
+      title: 'Account Error Response model'
+      description: 'Account Error Response'
+      type: object
+      allOf:
+        -
+          $ref: '#/components/schemas/ApiErrorResponse'
+    accountCreateStep1RequestModel:
+      title: 'Account Create Step 1 Request model'
+      description: 'Account Create Request step 1'
+      type: object
+      allOf:
+        -
+          $ref: '#/components/schemas/SecureRequestModel'
+    accountCreateRequestModel:
+      title: 'Account Create Request model'
+      description: 'Account Create Request'
+      type: object
+      allOf:
+        -
+          $ref: '#/components/schemas/SecureRequestModel'
+        -
+          properties:
+            firstname:
+              description: 'Customer’s first name (32 characters limit)'
+              type: string
+            lastname:
+              description: 'Customer’s lastname (32 characters limit)'
+              type: string
+            loginname:
+              description: 'Customer’s loginname (Unique login name between 5 and 64 characters. Required If ''Require Login Name'' is enabled (default))'
+              type: string
+            email:
+              description: 'Customer’s email address (96 characters limit)'
+              type: string
+            telephone:
+              description: 'Customer’s telephone number (32 characters limit)'
+              type: string
+            fax:
+              description: 'Customer’s fax number (32 characters limit)'
+              type: string
+            company:
+              description: 'Company name (optional) (32 characters limit)'
+              type: string
+            address_1:
+              description: 'Street Address (128 characters limit)'
+              type: string
+            address_2:
+              description: 'Apartment #, Suite #, etc part of address (128 characters limit)'
+              type: string
+            postcode:
+              description: 'Zip code or Postal code (10 characters limit)'
+              type: string
+            city:
+              description: 'City or town name (128 characters limit)'
+              type: string
+            country_id:
+              description: 'ID of the country based on provided list of countries'
+              type: integer
+            zone_id:
+              description: 'ID for the local zone within a country. This is usually a state or region (This ID can be received with separate request based on selected country ID)'
+              type: integer
+            password:
+              description: 'Password to access login to the account'
+              type: string
+            confirm:
+              description: 'Confirmation with the same password as in password field'
+              type: string
+            agree:
+              description: 'This is a confirmation that user agrees to the site user agreement (This is configured in the admin and can be possibly enabled or disabled. Values: 1 agree or 0 decline)'
+              type: integer
+            newsletter:
+              description: 'Selection to receive a newsletter (values: 1 to receive and 0 to skip)'
+              type: integer
+    CreateStep1SuccessModel:
+      title: 'Create Step 1 Success Response model'
+      description: 'Create Step 1 Success Response'
+    CreateStep2SuccessModel:
+      title: 'Create Step 2 Success Response model'
+      description: 'Create Step 2 Success Response'
+      type: object
+      allOf:
+        -
+          $ref: '#/components/schemas/ApiSuccessResponse'
+        -
+          properties:
+            text_message:
+              description: 'Text message for customer after registration'
+              type: string
+    CreateFieldsModel:
+      title: 'Create Fields Model'
+      description: 'Create Fields Model'
+      properties:
+        loginname:
+          $ref: '#/components/schemas/CreateAccountField'
+        firstname:
+          $ref: '#/components/schemas/CreateAccountField'
+        lastname:
+          $ref: '#/components/schemas/CreateAccountField'
+        email:
+          $ref: '#/components/schemas/CreateAccountField'
+        telephone:
+          $ref: '#/components/schemas/CreateAccountField'
+        fax:
+          $ref: '#/components/schemas/CreateAccountField'
+        company:
+          $ref: '#/components/schemas/CreateAccountField'
+        address_1:
+          $ref: '#/components/schemas/CreateAccountField'
+        address_2:
+          $ref: '#/components/schemas/CreateAccountField'
+        city:
+          $ref: '#/components/schemas/CreateAccountField'
+        postcode:
+          $ref: '#/components/schemas/CreateAccountField'
+        country_id:
+          $ref: '#/components/schemas/CreateAccountField'
+        zone_id:
+          $ref: '#/components/schemas/CreateAccountField'
+        password:
+          $ref: '#/components/schemas/CreateAccountField'
+        confirm:
+          $ref: '#/components/schemas/CreateAccountField'
+        newsletter:
+          $ref: '#/components/schemas/CreateAccountField'
+        agree:
+          $ref: '#/components/schemas/CreateAccountField'
+      type: object
+    CreateAccountField:
+      title: 'Crea teAccount Field model'
+      description: 'Create Account Field'
+      properties:
+        type:
+          description: 'Field type'
+          type: string
+        name:
+          description: 'Field name'
+          type: string
+        value:
+          description: 'Field value'
+          type: string
+        required:
+          description: 'Field reuiqured'
+          type: boolean
+        error:
+          description: 'Field error'
+          type: string
+        options:
+          description: 'Field options'
+          type: object
+        checked:
+          description: 'Field checked for checkbox'
+          type: boolean
+      type: object
+    loginRequestModel:
+      title: 'Login Request model'
+      description: 'Login Request'
+      type: object
+      allOf:
+        -
+          $ref: '#/components/schemas/SecureRequestModel'
+        -
+          properties:
+            loginname:
+              description: 'Email address or loginname registered in customer account'
+              type: string
+            email:
+              description: 'Email address or loginname registered in customer account'
+              type: string
+            password:
+              description: "Customer’s password\t"
+              type: string
+    loginSuccessModel:
+      title: 'Login Success Response model'
+      description: 'Login Success Response'
+      type: object
+      allOf:
+        -
+          $ref: '#/components/schemas/ApiSuccessResponse'
+        -
+          properties:
+            token:
+              description: 'Access token'
+              type: string
+    loginErrorModel:
+      title: 'Login Error Response model'
+      description: 'Login Error Response'
+      type: object
+      allOf:
+        -
+          $ref: '#/components/schemas/ApiErrorResponse'
 tags:
   -
     name: Account

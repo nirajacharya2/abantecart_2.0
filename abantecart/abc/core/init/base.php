@@ -34,7 +34,6 @@ $class_list = [
         'controller_api',
         'loader',
         'model',
-        'registry',
         'resources',
         'html',
         'layout',

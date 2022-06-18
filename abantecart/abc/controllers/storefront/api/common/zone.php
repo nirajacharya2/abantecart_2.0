@@ -24,7 +24,7 @@ use abc\core\engine\AControllerAPI;
 
 class ControllerApiCommonZone extends AControllerAPI
 {
-    protected $data = array();
+    public $data = array();
 
     public function get()
     {

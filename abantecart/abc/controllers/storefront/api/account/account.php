@@ -21,25 +21,39 @@
 namespace abc\controllers\storefront;
 
 use abc\core\engine\AControllerAPI;
+use abc\core\engine\BaseErrorResponse;
+use abc\core\engine\SecureRequestModel;
 use OpenApi\Annotations as OA;
+
 
 class ControllerApiAccountAccount extends AControllerAPI
 {
     /**
      * @OA\POST(
-     *     path="/index.php/?r=a/account/account",
-     *     summary="Get account data",
+     *     path="/index.php/?rt=a/account/account",
+     *     summary="Get customer details",
+     *     description="Get basic customer Details.",
      *     tags={"Account"},
-     *     @OA\Response(
-     *         response="200",
-     *         description="Account data"
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/accountRequestModel"),
      *     ),
      *     @OA\Response(
-     *         response="403",
-     *         description="Access denight"
+     *         response="200",
+     *         description="Success response",
+     *         @OA\JsonContent(ref="#/components/schemas/responseModel"),
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Unauthorized",
+     *         @OA\JsonContent(ref="#/components/schemas/accountErrorModel"),
+     *     ),
+     *     @OA\Response(
+     *         response="500",
+     *         description="Server Error",
+     *         @OA\JsonContent(ref="#/components/schemas/accountErrorModel"),
      *     )
      * )
-     *
      */
     public function post()
     {
@@ -48,7 +62,11 @@ class ControllerApiAccountAccount extends AControllerAPI
         $request = $this->rest->getRequestParams();
 
         if (!$this->customer->isLoggedWithToken($request['token'])) {
-            $this->rest->setResponseData(array('error' => 'Not logged in or Login attempt failed!'));
+            $this->rest->setResponseData([
+                'error_code' => 401,
+                'error_title' => 'Unauthorized',
+                'error_text' => 'Not logged in or Login attempt failed!'
+            ]);
             $this->rest->sendResponse(401);
             return null;
         }

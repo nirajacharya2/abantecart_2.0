@@ -22,10 +22,40 @@ namespace abc\controllers\storefront;
 
 use abc\core\engine\AControllerAPI;
 use abc\models\customer\Address;
+use abc\core\engine\BaseErrorResponse;
+use abc\core\engine\SecureRequestModel;
+
 
 class ControllerApiAccountLogin extends AControllerAPI
 {
 
+    /**
+     * @OA\POST(
+     *     path="/index.php/?rt=a/account/login",
+     *     description="This API request needs to be done every time customer request to login to get access to customer account or just to confirm that current authentication is still valid and not expired.",
+     *     summary="Login",
+     *     tags={"Account"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/loginRequestModel"),
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Success response",
+     *         @OA\JsonContent(ref="#/components/schemas/loginSuccessModel"),
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Unauthorized",
+     *         @OA\JsonContent(ref="#/components/schemas/loginErrorModel"),
+     *     ),
+     *      @OA\Response(
+     *         response="500",
+     *         description="Server Error",
+     *         @OA\JsonContent(ref="#/components/schemas/loginErrorModel"),
+     *     )
+     * )
+     */
     public function post()
     {
         //This is login attempt
@@ -33,11 +63,19 @@ class ControllerApiAccountLogin extends AControllerAPI
         if (isset($request['token'])) {
             //this is the request to authorized
             if ($this->customer->isLoggedWithToken($request['token'])) {
-                $this->rest->setResponseData(['status' => 1, 'request' => 'authorized']);
+                $this->rest->setResponseData([
+                    'status' => 1,
+                    'success' => 'authorized',
+                    'token' => $request['token']
+                ]);
                 $this->rest->sendResponse(200);
                 return null;
             } else {
-                $this->rest->setResponseData(['status' => 0, 'request' => 'unauthorized']);
+                $this->rest->setResponseData([
+                        'error_code' => 0,
+                        'error_title' => 'Unauthorized',
+                        'error_text' => 'Unauthorized'
+                    ]);
                 $this->rest->sendResponse(401);
                 return null;
             }
@@ -50,8 +88,12 @@ class ControllerApiAccountLogin extends AControllerAPI
                 && $this->validate($loginname, $request['password'])
             ) {
                 if (!session_id()) {
-                    $this->rest->setResponseData(['status' => 0, 'error' => 'Unable to get session ID.']);
-                    $this->rest->sendResponse(501);
+                    $this->rest->setResponseData([
+                            'error_code' => 0,
+                            'error_title' => 'Unauthorized',
+                            'error_text' => 'Unable to get session ID.'
+                        ]);
+                    $this->rest->sendResponse(401);
                     return null;
                 }
                 $this->session->data['token'] = session_id();
@@ -63,7 +105,11 @@ class ControllerApiAccountLogin extends AControllerAPI
                 $this->rest->sendResponse(200);
                 return null;
             } else {
-                $this->rest->setResponseData(['status' => 0, 'error' => 'Login attempt failed!']);
+                $this->rest->setResponseData([
+                        'error_code' => 0,
+                        'error_title' => 'Unauthorized',
+                        'error_text' => 'Login attempt failed!'
+                    ]);
                 $this->rest->sendResponse(401);
                 return null;
             }
@@ -78,10 +124,11 @@ class ControllerApiAccountLogin extends AControllerAPI
             unset($this->session->data['guest']);
 
             $address = Address::where('customer_id', '=', $this->customer->getAddressId())
-                              ->orderBy('default', 'desc')->first();
+                              ->orderBy('address_id', 'desc')->first();
             $this->session->data['country_id'] = $address->country_id;
             $this->session->data['zone_id'] = $address->zone_id;
             return true;
         }
     }
 }
+

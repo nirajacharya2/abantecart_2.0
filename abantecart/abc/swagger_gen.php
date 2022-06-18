@@ -13,6 +13,9 @@ $excluse = [
 $pattern = 'api/*.php';
 
 $dirs = [
+    __DIR__.'/core/lib/ApiSuccessResponse.php',
+    __DIR__.'/core/lib/ApiErrorResponse.php',
+    __DIR__.'/docs/api',
     __DIR__.'/controllers/admin/api',
     __DIR__.'/controllers/storefront/api',
     __DIR__.'/core/engine/controller_api.php',
