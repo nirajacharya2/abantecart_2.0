@@ -260,7 +260,8 @@ ABC::env(
 );
 
 //load base libraries
-require_once __DIR__.DS.'base.php';
+require_once dirname(getcwd())
+.DS.'abc'.DS.'core'.DS.'init'.DS.'base.php';
 
 // Loader
 registerClass($registry, 'load', 'ALoader', [$registry], ALoader::class, [$registry]);
