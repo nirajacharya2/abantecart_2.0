@@ -1,7 +1,6 @@
 <?php
 
 use abc\core\lib\ApiErrorResponse;
-use abc\docs\api\models\SecureRequestModel;
 use OpenApi\Annotations as OA;
 
 /**
@@ -13,7 +12,7 @@ use OpenApi\Annotations as OA;
  *     schema="accountRequestModel"
  * )
  */
-class AccountRequestsModel extends SecureRequestModel
+class AccountRequestsModel
 {
 }
 

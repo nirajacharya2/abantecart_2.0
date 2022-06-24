@@ -20,12 +20,12 @@
 
 namespace abc\controllers\storefront;
 
-use abc\core\engine\AControllerAPI;
+use abc\core\engine\ASecureControllerAPI;
 use abc\models\order\Order;
 use abc\models\order\OrderProduct;
 use H;
 
-class ControllerApiAccountHistory extends AControllerAPI
+class ControllerApiAccountHistory extends ASecureControllerAPI
 {
     public $data;
 
@@ -35,6 +35,7 @@ class ControllerApiAccountHistory extends AControllerAPI
      *     summary="Get orders history",
      *     description="Get orders history paginated data",
      *     tags={"Account"},
+     *     security={{"tokenAuth":{}, "apiKey":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/AccountHistoryRequestModel"),
@@ -61,16 +62,6 @@ class ControllerApiAccountHistory extends AControllerAPI
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request_data = $this->rest->getRequestParams();
-
-        if (!$this->customer->isLoggedWithToken($request_data['token'])) {
-            $this->rest->setResponseData([
-                'error_code' => 0,
-                'error_title' => 'Unauthorized',
-                'error_text' => 'Not logged in or Login attempt failed!'
-            ]);
-            $this->rest->sendResponse(401);
-            return null;
-        }
 
         $this->loadLanguage('account/history');
 

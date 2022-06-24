@@ -28,7 +28,20 @@ use abc\core\lib\ARest;
  *     version="0.1",
  *     description="REST API for Abantecart version 2.0"
  * )
- *
+ * @OA\SecurityScheme(
+ *      securityScheme="tokenAuth",
+ *      in="header",
+ *      name="Token Auth",
+ *      type="http",
+ *      scheme="bearer",
+ *      bearerFormat="token",
+ * ),
+ * @OA\SecurityScheme(
+ *      securityScheme="apiKey",
+ *      in="header",
+ *      name="X-App-Api-key",
+ *      type="apiKey",
+ * ),
  * @OA\Tag(
  *     name="Account",
  *     description="Manage account: create, update, delete"

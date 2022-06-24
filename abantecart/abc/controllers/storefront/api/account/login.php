@@ -35,6 +35,7 @@ class ControllerApiAccountLogin extends AControllerAPI
      *     description="This API request needs to be done every time customer request to login to get access to customer account or just to confirm that current authentication is still valid and not expired.",
      *     summary="Login",
      *     tags={"Account"},
+     *     security={{"apiKey":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/loginRequestModel"),

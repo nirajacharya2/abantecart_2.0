@@ -20,9 +20,9 @@
 
 namespace abc\controllers\storefront;
 
-use abc\core\engine\AControllerAPI;
+use abc\core\engine\ASecureControllerAPI;
 
-class ControllerApiAccountLogout extends AControllerAPI
+class ControllerApiAccountLogout extends ASecureControllerAPI
 {
     /**
      * @OA\POST(
@@ -30,10 +30,7 @@ class ControllerApiAccountLogout extends AControllerAPI
      *     description="Logout from session",
      *     summary="Logout",
      *     tags={"Account"},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/SecureRequestModel"),
-     *     ),
+     *     security={{"tokenAuth":{}, "apiKey":{}}},
      *     @OA\Response(
      *         response="200",
      *         description="Success response",
@@ -51,20 +48,10 @@ class ControllerApiAccountLogout extends AControllerAPI
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request_data = $this->rest->getRequestParams();
 
-        if (!$this->customer->isLoggedWithToken($request_data['token'])) {
-            $this->rest->setResponseData([
-                'error_code' => 0,
-                'error_title' => 'Unauthorized',
-                'error_text' => 'Not logged in logout attempt failed!'
-            ]);
-            $this->rest->sendResponse(401);
-            return null;
-        } else {
-            $this->logout();
-            $this->rest->setResponseData(array('status' => 1, 'success' => 'Logged out',));
-            $this->rest->sendResponse(200);
-            return null;
-        }
+        $this->logout();
+        $this->rest->setResponseData(array('status' => 1, 'success' => 'Logged out',));
+        $this->rest->sendResponse(200);
+        return null;
     }
 
     /**
@@ -73,10 +60,7 @@ class ControllerApiAccountLogout extends AControllerAPI
      *     description="Logout from session",
      *     summary="Logout",
      *     tags={"Account"},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/SecureRequestModel"),
-     *     ),
+     *     security={{"tokenAuth":{}, "apiKey":{}}},
      *     @OA\Response(
      *         response="200",
      *         description="Success response",
@@ -94,20 +78,10 @@ class ControllerApiAccountLogout extends AControllerAPI
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request_data = $this->rest->getRequestParams();
 
-        if (!$this->customer->isLoggedWithToken($request_data['token'])) {
-            $this->rest->setResponseData([
-                'error_code' => 0,
-                'error_title' => 'Unauthorized',
-                'error_text' => 'Not logged in logout attempt failed!'
-            ]);
-            $this->rest->sendResponse(401);
-            return null;
-        } else {
-            $this->logout();
-            $this->rest->setResponseData(array('status' => 1, 'success' => 'Logged out',));
-            $this->rest->sendResponse(200);
-            return null;
-        }
+        $this->logout();
+        $this->rest->setResponseData(array('status' => 1, 'success' => 'Logged out',));
+        $this->rest->sendResponse(200);
+        return null;
     }
 
     protected function logout()

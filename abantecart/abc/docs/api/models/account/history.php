@@ -1,7 +1,5 @@
 <?php
 
-use abc\docs\api\models\SecureRequestModel;
-
 /**
  * Class AccountHistoryRequestModel.
  *
@@ -11,7 +9,7 @@ use abc\docs\api\models\SecureRequestModel;
  *     schema="AccountHistoryRequestModel"
  * )
  */
-class AccountHistoryRequestModel extends SecureRequestModel
+class AccountHistoryRequestModel
 {
     /**
      * @OA\Property(

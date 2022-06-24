@@ -1,0 +1,36 @@
+### Auth
+POST http://abantecart2/index.php/?rt=a/account/login
+Content-Type: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf
+
+{
+  "loginname": "allenwaters@abantecart.com",
+  "password": "12345"
+}
+
+> {%
+client.global.set('token', response.body.token);
+ %}
+
+### End Auth
+
+###### Get Account Data
+POST http://abantecart2/index.php/?rt=a/account/account
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf
+Authorization: Bearer {{token}}
+
+
+###### Get Category
+GET http://abantecart2/index.php/?rt=a/product/category&path=0_36
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf
+
+
+###### Get Category2
+GET http://abantecart2/index.php/?rt=a/product/category&category_id=0
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf

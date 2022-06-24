@@ -44,6 +44,7 @@ class ControllerApiAccountCreate extends AControllerAPI
      *     summary="Create step 2",
      *     description="There are 2 steps to register new customer and save customer details. First step is to get all required fields and provided earlier data (in case of error). Second step is to provide data to be validated and saved.",
      *     tags={"Account"},
+     *     security={{"apiKey":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/accountCreateRequestModel"),
@@ -158,6 +159,7 @@ class ControllerApiAccountCreate extends AControllerAPI
      *     summary="Create step 1",
      *     description="There are 2 steps to register new customer and save customer details. First step is to get all required fields and provided earlier data (in case of error). Second step is to provide data to be validated and saved.",
      *     tags={"Account"},
+     *     security={{"apiKey":{}}},
      *     @OA\Response(
      *         response="200",
      *         description="Account data",

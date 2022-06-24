@@ -2,7 +2,6 @@
 
 use abc\core\lib\ApiErrorResponse;
 use abc\core\lib\ApiSuccessResponse;
-use abc\docs\api\models\SecureRequestModel;
 
 /**
  * Class LoginRequestModel.
@@ -13,7 +12,7 @@ use abc\docs\api\models\SecureRequestModel;
  *     schema="loginRequestModel"
  * )
  */
-class LoginRequestsModel extends SecureRequestModel
+class LoginRequestsModel
 {
     /**
      * @OA\Property(

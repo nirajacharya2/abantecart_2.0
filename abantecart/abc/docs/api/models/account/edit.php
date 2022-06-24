@@ -1,7 +1,6 @@
 <?php
 
 use abc\core\lib\ApiSuccessResponse;
-use abc\docs\api\models\SecureRequestModel;
 
 
 /**
@@ -13,7 +12,7 @@ use abc\docs\api\models\SecureRequestModel;
  *     schema="accountEditRequestModel"
  * )
  */
-class AccountEditRequestModel extends SecureRequestModel
+class AccountEditRequestModel
 {
     /**
      * @OA\Property(

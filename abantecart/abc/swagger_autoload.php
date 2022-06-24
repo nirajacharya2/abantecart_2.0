@@ -38,6 +38,7 @@ require_once(__DIR__.'/core/engine/registry.php');
 //require_once(__DIR__.'/core/init/base.php');
 require_once(__DIR__.'/core/engine/controller.php');
 require_once(__DIR__.'/core/engine/controller_api.php');
+require_once(__DIR__.'/core/engine/secure_controller_api.php');
 
 require_once(__DIR__.'/core/lib/ApiErrorResponse.php');
 require_once(__DIR__.'/core/lib/ApiSuccessResponse.php');

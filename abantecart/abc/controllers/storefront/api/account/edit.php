@@ -20,14 +20,14 @@
 
 namespace abc\controllers\storefront;
 
-use abc\core\engine\AControllerAPI;
+use abc\core\engine\ASecureControllerAPI;
 use abc\models\customer\Customer;
 
 if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
-class ControllerApiAccountEdit extends AControllerAPI
+class ControllerApiAccountEdit extends ASecureControllerAPI
 {
     protected $v_error = [];
     public $data;
@@ -38,6 +38,7 @@ class ControllerApiAccountEdit extends AControllerAPI
      *     summary="Edit step 2",
      *     description="There are 2 steps to edit customer details. First step is to get all allowed fields and provided earlier data (in case of error). Second step is to provide data to be validated and saved.",
      *     tags={"Account"},
+     *     security={{"tokenAuth":{}, "apiKey":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/accountEditRequestModel"),
@@ -70,16 +71,6 @@ class ControllerApiAccountEdit extends AControllerAPI
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request_data = $this->rest->getRequestParams();
 
-        if (!$this->customer->isLoggedWithToken($request_data['token'])) {
-            $this->rest->setResponseData([
-                    'error_code' => 0,
-                    'error_title' => 'Unauthorized',
-                    'error_text' => 'Not logged in or Login attempt failed!'
-                ]);
-            $this->rest->sendResponse(401);
-            return null;
-        }
-
         $this->loadLanguage('account/edit');
         $this->loadLanguage('account/success');
         $this->v_error = $this->customer::validateRegistrationData($request_data);
@@ -110,6 +101,7 @@ class ControllerApiAccountEdit extends AControllerAPI
      *     summary="Edit step 1",
      *     description="There are 2 steps to edit customer details. First step is to get all allowed fields and provided earlier data (in case of error). Second step is to provide data to be validated and saved.",
      *     tags={"Account"},
+     *     security={{"tokenAuth":{}, "apiKey":{}}},
      *     @OA\Response(
      *         response="200",
      *         description="Account data",
@@ -130,14 +122,6 @@ class ControllerApiAccountEdit extends AControllerAPI
      */
     public function get()
     {
-        $request_data = $this->rest->getRequestParams();
-
-        if (!$this->customer->isLoggedWithToken($request_data['token'])) {
-            $this->rest->setResponseData(['error' => 'Not logged in or Login attempt failed!']);
-            $this->rest->sendResponse(401);
-            return null;
-        }
-
         return $this->buildResponse();
     }
 
