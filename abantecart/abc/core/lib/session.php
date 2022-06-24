@@ -74,10 +74,10 @@ final class ASession
         if (ABC::env('IS_API')) {
             //set up session specific for API based on the token or create new
             $token = '';
-            if ($_GET['token']) {
+            if ($_GET && $_GET['token']) {
                 $token = $_GET['token'];
             } else {
-                if ($_POST['token']) {
+                if ($_POST && $_POST['token']) {
                     $token = $_POST['token'];
                 }
             }
