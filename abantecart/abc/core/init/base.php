@@ -32,6 +32,7 @@ $class_list = [
         'dispatcher',
         'controller',
         'controller_api',
+        'secure_controller_api',
         'loader',
         'model',
         'resources',
