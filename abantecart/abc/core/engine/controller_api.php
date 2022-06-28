@@ -58,10 +58,6 @@ use abc\core\lib\ARest;
  *     name="Product",
  *     description="Product API: create, update, delete"
  * )
- * * @OA\Tag(
- *     name="Category",
- *     description="Category API: create, update, delete"
- * )
  */
 class AControllerAPI extends AController
 {

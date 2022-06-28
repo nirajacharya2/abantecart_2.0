@@ -32,42 +32,108 @@ use abc\models\catalog\Category;
  */
 class ControllerApiProductCategory extends AControllerAPI
 {
+    /**
+     * @OA\Get (
+     *     path="/index.php/?rt=a/product/category",
+     *     summary="Get category",
+     *     description="Get category with subcategories info",
+     *     tags={"Product"},
+     *     security={{"apiKey":{}}},
+     *     @OA\Parameter(
+     *         name="category_id",
+     *         in="query",
+     *         description="Category Id",
+     *      ),
+     *    @OA\Parameter(
+     *         name="language_id",
+     *         in="query",
+     *         required=true,
+     *         description="Language Id",
+     *      ),
+     *      @OA\Parameter(
+     *         name="store_id",
+     *         in="query",
+     *         required=true,
+     *         description="Store Id",
+     *      ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Category data",
+     *         @OA\JsonContent(ref="#/components/schemas/GetCategoryModel"),
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad Request",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denight",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Not Found",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *      @OA\Response(
+     *         response="500",
+     *         description="Server Error",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     )
+     * )
+     *
+     */
     public function get()
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        if (!isset($this->request->get['path']) && isset($this->request->get['category_id'])) {
-            $this->request->get['path'] = $this->request->get['category_id'];
+        $categoryId = 0;
+        if (isset($this->request->get['category_id'])) {
+            $categoryId = $this->request->get['category_id'];
         }
 
-        if (!isset($this->request->get['path']) && !isset($this->request->get['category_id'])) {
-            $this->rest->setResponseData(['Error' => 'Missing one of required category parameters']);
-            $this->rest->sendResponse(200);
+        if (!isset($this->request->get['store_id']) || !isset($this->request->get['language_id'])) {
+            $this->rest->setResponseData([
+                'error_code' => 400,
+                'error_text' => 'Bad request',
+            ]);
+            $this->rest->sendResponse(400);
+            return null;
+        }
+        $storeId = $this->request->get['store_id'];
+        $languageId = $this->request->get['language_id'];
+
+        if ($categoryId !== 0) {
+            $category_info = $this->getCategoryDetails($categoryId, $languageId, $storeId);
+        } else {
+            $category_info['category_id'] = $categoryId;
+            $category_info['subcategories'] = $this->getCategories($categoryId, $languageId, $storeId);
+        }
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+
+        if (!$category_info) {
+            $this->rest->setResponseData([
+                'error_code' => 404,
+                'error_text' => 'Category not found',
+            ]);
+            $this->rest->sendResponse(404);
             return null;
         }
 
-        if (isset($this->request->get['path']) && $this->request->get['path'] != 0) {
-            $parts = explode('_', $this->request->get['path']);
-            $category_id = array_pop($parts);
-            $category_info = $this->getCategoryDetails($category_id);
-        } else {
-            $category_info['category_id'] = 0;
-            $category_info['subcategories'] = $this->getCategories();
-        }
-        $this->extensions->hk_UpdateData($this, __FUNCTION__);
         $this->rest->setResponseData($category_info);
         $this->rest->sendResponse(200);
     }
 
-    public function getCategoryDetails($category_id)
+    public function getCategoryDetails($category_id, $languageId, $storeId)
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $this->loadModel('catalog/product');
         $this->loadModel('tool/image');
 
-        $category_info = Category::getCategory($category_id);
+        $category_info = Category::getCategory($category_id, $storeId, 0, $languageId);
         if (!$category_info) {
-            return ['message' => 'category not found'];
+            return false;
         }
         $resource = new AResource('image');
         $thumbnail = $resource->getMainThumb('categories',
@@ -85,17 +151,18 @@ class ControllerApiProductCategory extends AControllerAPI
         $category_info['total_products'] = $this->model_catalog_product->getTotalProductsByCategoryId($category_id);
         $category_info['total_subcategories'] = Category::getTotalCategoriesByCategoryId($category_id);
         if ($category_info['total_products']) {
-            $category_info['subcategories'] = $this->getCategories($category_id);
+            $category_info['subcategories'] = $this->getCategories($category_id, $languageId, $storeId);
         }
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
         return $category_info;
     }
 
-    public function getCategories($parent_category_id = 0)
+    public function getCategories($parent_category_id = 0, $languageId, $storeId)
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
-        $results = Category::getCategories($parent_category_id);
+        $results = Category::getCategories($parent_category_id, $storeId, 0, $languageId);
 
+        $this->log->write(print_r($results, true));
         $category_ids = $categories = [];
         foreach ($results as $result) {
             $category_ids[] = (int)$result['category_id'];
@@ -115,7 +182,7 @@ class ControllerApiProductCategory extends AControllerAPI
                 'name'                => $result['name'],
                 'category_id'         => $result['category_id'],
                 'sort_order'          => $result['sort_order'],
-                'thumb'               => $thumbnail['thumb_url'],
+                'thumb'               =>  (ABC::env('HTTPS') ? 'https:' : 'http:') .$thumbnail['thumb_url'],
                 'total_subcategories' => Category::getTotalCategoriesByCategoryId($result['category_id']),
             ];
         }
