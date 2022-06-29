@@ -34,3 +34,9 @@ GET http://abantecart2/index.php/?rt=a/product/filter&language_id=1&store_id=0&c
 Content-Type: application/json
 Accept: application/json
 X-App-Api-key: testKeykjsdkfjkdsjf
+
+### Get Products
+GET http://abantecart2/index.php?rt=a/product/filter&category_id=36
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf
