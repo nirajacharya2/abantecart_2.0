@@ -23,4 +23,4 @@ $dirs = [
 
 $openapi = \OpenApi\Generator::scan($dirs, ['exclude' => $excluse, 'pattern' => $pattern]);
 
-file_put_contents('../public/api/openapi.yaml', $openapi->toYaml());
+file_put_contents(__DIR__.'/../public/api/openapi.yaml', $openapi->toYaml());
