@@ -655,6 +655,69 @@ paths:
       security:
         -
           apiKey: []
+  '/index.php/?rt=a/product/product':
+    get:
+      tags:
+        - Product
+      summary: 'Get product'
+      description: 'Get product details'
+      operationId: 8a9f4c623cd8559f5009ebf0929e22a9
+      parameters:
+        -
+          name: product_id
+          in: query
+          description: 'Product unique Id'
+          required: true
+          schema:
+            type: integer
+        -
+          name: language_id
+          in: query
+          description: 'Language Id'
+          required: true
+          schema:
+            type: integer
+        -
+          name: store_id
+          in: query
+          description: 'Store Id'
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'Product data'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductModel'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: 'Access denight'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+        -
+          apiKey: []
 components:
   schemas:
     ApiSuccessResponse:
@@ -1249,6 +1312,202 @@ components:
         store_id:
           description: 'Store Id'
           type: integer
+      type: object
+    ProductModel:
+      description: 'Class ProductModel.'
+      properties:
+        product_id:
+          description: 'Product unique id'
+          type: integer
+        uuid:
+          description: UUID
+          type: string
+        model:
+          description: model
+          type: string
+        sku:
+          description: sku
+          type: string
+        location:
+          description: location
+          type: string
+        stock_checkout:
+          description: stock_checkout
+          type: string
+        stock_status_id:
+          description: stock_status_id
+          type: integer
+        manufacturer_id:
+          description: 'Manufacturer Id'
+          type: integer
+        shipping:
+          description: shipping
+          type: integer
+        ship_individually:
+          description: ship_individually
+          type: integer
+        free_shipping:
+          description: free_shipping
+          type: integer
+        shipping_price:
+          description: shipping_price
+          type: number
+          format: double
+        price:
+          description: price
+          type: string
+        tax_class_id:
+          description: tax_class_id
+          type: integer
+        date_available:
+          description: date_available
+          type: string
+        weight:
+          description: weight
+          type: number
+          format: double
+        weight_class_id:
+          description: weight_class_id
+          type: integer
+        length:
+          description: length
+          type: number
+          format: double
+        width:
+          description: width
+          type: number
+          format: double
+        height:
+          description: height
+          type: number
+          format: double
+        length_class_id:
+          description: length_class_id
+          type: integer
+        status:
+          description: status
+          type: integer
+        viewed:
+          description: viewed
+          type: integer
+        sort_order:
+          description: 'sort order'
+          type: integer
+        subtract:
+          description: Subtract
+          type: integer
+        minimum:
+          description: Minimum
+          type: integer
+        maximum:
+          description: Maximum
+          type: integer
+        cost:
+          description: Cost
+          type: number
+          format: double
+        call_to_order:
+          description: 'Call to Order'
+          type: integer
+        product_type_id:
+          description: product_type_id
+          type: integer
+        settings:
+          description: settings
+          type: string
+        date_added:
+          description: date_added
+          type: string
+        date_modified:
+          description: date_modified
+          type: string
+        date_deleted:
+          description: date_deleted
+          type: string
+        stage_id:
+          description: 'Stage Id'
+          type: string
+        id:
+          description: ID
+          type: integer
+        language_id:
+          description: 'Language ID'
+          type: integer
+        name:
+          description: name
+          type: string
+        meta_keywords:
+          description: 'Meta Keywords'
+          type: string
+        meta_description:
+          description: 'Meta Description'
+          type: string
+        description:
+          description: description
+          type: string
+        blurb:
+          description: blurb
+          type: string
+        store_id:
+          description: 'Store Id'
+          type: integer
+        title:
+          description: title
+          type: string
+        unit:
+          description: Unit
+          type: string
+        manufacturer:
+          description: 'Manufacturer Name'
+          type: string
+        stock_status:
+          description: 'Stock status'
+          type: string
+        length_class_name:
+          description: 'Length class Name'
+          type: string
+        rating:
+          description: Rating
+          type: number
+          format: double
+        final_price:
+          description: 'Final price'
+          type: number
+          format: double
+        thumbnail:
+          description: 'Thumb url'
+          type: string
+        special:
+          description: 'Is Special product'
+          type: boolean
+        discounts:
+          description: Discounts
+          type: array
+          items: {  }
+        product_price:
+          description: 'Product Price'
+          type: number
+          format: double
+        stock:
+          description: Stock
+          type: integer
+        options:
+          description: Options
+          type: array
+          items: {  }
+        text_stars:
+          description: text_starts
+          type: string
+        stars:
+          description: Starts
+          type: string
+        average:
+          description: Average
+          type: integer
+        tags:
+          description: 'List of tags'
+          type: array
+          items: {  }
       type: object
   securitySchemes:
     tokenAuth:

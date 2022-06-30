@@ -66,3 +66,17 @@ GET http://abantecart2/index.php/?rt=a/product/manufacturer&manufacturer_id=12
 Content-Type: application/json
 Accept: application/json
 X-App-Api-key: testKeykjsdkfjkdsjf
+
+
+### Get Product
+GET http://abantecart2/index.php/?rt=a/product/product&product_id=119
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf
+
+
+### Get Product Quantity
+GET http://abantecart2/index.php/?rt=a/product/quantity&product_id=119
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf
