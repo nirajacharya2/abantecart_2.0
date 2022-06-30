@@ -157,7 +157,7 @@ class ControllerApiProductFilter extends AControllerAPI
      *      ),
      *     @OA\Response(
      *         response="200",
-     *         description="Category data",
+     *         description="Products",
      *         @OA\JsonContent(ref="#/components/schemas/GetProductsModel"),
      *     ),
      *     @OA\Response(

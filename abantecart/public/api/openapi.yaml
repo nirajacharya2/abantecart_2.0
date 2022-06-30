@@ -444,11 +444,190 @@ paths:
             type: integer
       responses:
         '200':
-          description: 'Category data'
+          description: Products
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetProductsModel'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: 'Access denight'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+        -
+          apiKey: []
+  '/index.php/?rt=a/product/latest':
+    get:
+      tags:
+        - Product
+      summary: 'Get latest products'
+      description: 'Get kist of latest products'
+      operationId: 243df68a5dcced6278314154fccf7320
+      parameters:
+        -
+          name: language_id
+          in: query
+          description: 'Language Id'
+          required: true
+          schema:
+            type: integer
+        -
+          name: store_id
+          in: query
+          description: 'Store Id'
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetProductsModel'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: 'Access denight'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+        -
+          apiKey: []
+  '/index.php/?rt=a/product/manufacturer':
+    get:
+      tags:
+        - Product
+      summary: 'Get manufacturer'
+      description: 'Get manufacturer details'
+      operationId: 06e78d85060cc3fef05b37dd84629a23
+      parameters:
+        -
+          name: manufacturer_id
+          in: query
+          description: 'Manufacturer unique Id'
+          required: true
+          schema:
+            type: integer
+        -
+          name: language_id
+          in: query
+          description: 'Language Id'
+          required: true
+          schema:
+            type: integer
+        -
+          name: store_id
+          in: query
+          description: 'Store Id'
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'Manufacturer data'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManufacturerModel'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: 'Access denight'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+        -
+          apiKey: []
+  '/index.php/?rt=a/product/manufacturers':
+    get:
+      tags:
+        - Product
+      summary: 'Get manufacturers'
+      description: 'Get list of manufacturers'
+      operationId: 8d5469a4eb5a8df56bb10b1bdae8ea5d
+      parameters:
+        -
+          name: language_id
+          in: query
+          description: 'Language Id'
+          required: true
+          schema:
+            type: integer
+        -
+          name: store_id
+          in: query
+          description: 'Store Id'
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'Manufacturer data'
+          content:
+            application/json:
+              schema:
+                properties:
+                  '': { description: 'Manufacturer list' }
+                type: array
+                items:
+                  $ref: '#/components/schemas/ManufacturerModel'
         '400':
           description: 'Bad Request'
           content:
@@ -1036,6 +1215,40 @@ components:
         rating:
           description: Rating
           type: string
+      type: object
+    ManufacturerModel:
+      description: 'Class ManufacturerModel.'
+      properties:
+        manufacturer_id:
+          description: 'Manufacturer unique id'
+          type: integer
+        uuid:
+          description: UUID
+          type: string
+        name:
+          description: name
+          type: string
+        sort_order:
+          description: 'Sort Order'
+          type: integer
+        date_added:
+          description: 'Date Added'
+          type: string
+        date_modified:
+          description: 'Date Modified'
+          type: string
+        date_deleted:
+          description: 'Date deleted'
+          type: string
+        stage_id:
+          description: 'Stage Id'
+          type: integer
+        id:
+          description: Id
+          type: integer
+        store_id:
+          description: 'Store Id'
+          type: integer
       type: object
   securitySchemes:
     tokenAuth:

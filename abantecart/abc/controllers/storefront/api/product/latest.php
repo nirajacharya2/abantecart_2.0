@@ -28,8 +28,66 @@ use stdClass;
 class ControllerApiProductLatest extends AControllerAPI
 {
 
+    /**
+     * @OA\Get (
+     *     path="/index.php/?rt=a/product/latest",
+     *     summary="Get latest products",
+     *     description="Get kist of latest products",
+     *     tags={"Product"},
+     *     security={{"apiKey":{}}},
+     *    @OA\Parameter(
+     *         name="language_id",
+     *         in="query",
+     *         required=true,
+     *         description="Language Id",
+     *        @OA\Schema(
+     *              type="integer"
+     *          ),
+     *      ),
+     *      @OA\Parameter(
+     *         name="store_id",
+     *         in="query",
+     *         required=true,
+     *         description="Store Id",
+     *     @OA\Schema(
+     *              type="integer"
+     *          ),
+     *      ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Products",
+     *         @OA\JsonContent(ref="#/components/schemas/GetProductsModel"),
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad Request",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denight",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Not Found",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *      @OA\Response(
+     *         response="500",
+     *         description="Server Error",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     )
+     * )
+     *
+     */
     public function get()
     {
+
+        //TODO: Add support store_id and language_id, maybe currency
+        //TODO: Remove old models usage.
+        //TODO: Change Error response to standart
+
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadModel('catalog/product');

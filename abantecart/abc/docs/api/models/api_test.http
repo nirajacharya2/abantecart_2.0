@@ -40,3 +40,29 @@ GET http://abantecart2/index.php?rt=a/product/filter&category_id=36
 Content-Type: application/json
 Accept: application/json
 X-App-Api-key: testKeykjsdkfjkdsjf
+
+### Get Latest Products
+GET http://abantecart2/index.php?rt=a/product/latest
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf
+
+### Get Products
+GET http://abantecart2/index.php?rt=a/product/filter&category_id=36
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf
+
+
+### Get Manufacturers
+GET http://abantecart2/index.php/?rt=a/product/manufacturers
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf
+
+
+### Get Manufacturers
+GET http://abantecart2/index.php/?rt=a/product/manufacturer&manufacturer_id=12
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf

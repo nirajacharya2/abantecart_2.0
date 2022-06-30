@@ -21,33 +21,16 @@
 namespace abc\controllers\storefront;
 
 use abc\core\engine\AControllerAPI;
-use abc\models\catalog\Manufacturer;
-use abc\models\storefront\ModelCatalogManufacturer;
 
-/**
- * Class ControllerApiProductManufacturer
- *
- * @package abc\controllers\storefront
- * @property ModelCatalogManufacturer $model_catalog_manufacturer
- */
-class ControllerApiProductManufacturer extends AControllerAPI
+class ControllerApiProductManufacturers extends AControllerAPI
 {
     /**
      * @OA\Get (
-     *     path="/index.php/?rt=a/product/manufacturer",
-     *     summary="Get manufacturer",
-     *     description="Get manufacturer details",
+     *     path="/index.php/?rt=a/product/manufacturers",
+     *     summary="Get manufacturers",
+     *     description="Get list of manufacturers",
      *     tags={"Product"},
      *     security={{"apiKey":{}}},
-     *     @OA\Parameter(
-     *         name="manufacturer_id",
-     *         in="query",
-     *         required=true,
-     *         description="Manufacturer unique Id",
-     *        @OA\Schema(
-     *              type="integer"
-     *          ),
-     *      ),
      *    @OA\Parameter(
      *         name="language_id",
      *         in="query",
@@ -69,7 +52,18 @@ class ControllerApiProductManufacturer extends AControllerAPI
      *     @OA\Response(
      *         response="200",
      *         description="Manufacturer data",
-     *         @OA\JsonContent(ref="#/components/schemas/ManufacturerModel"),
+     *      @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 type="array",
+     *                  @OA\Items(
+     *                      ref="#/components/schemas/ManufacturerModel"
+     *                   ),
+     *                  @OA\Property(
+     *                      description="Manufacturer list",
+     *                  )
+     *             )
+     *         ),
      *     ),
      *     @OA\Response(
      *         response="400",
@@ -96,25 +90,14 @@ class ControllerApiProductManufacturer extends AControllerAPI
      */
     public function get()
     {
-
         //TODO: Add support store_id and language_id
         //TODO: Remove old models usage.
         //TODO: Change Error response to standart
 
         $this->extensions->hk_InitData($this, __FUNCTION__);
-        $manufacturer_id = $this->request->get['manufacturer_id'];
         $this->loadModel('catalog/manufacturer');
 
-        if (!$manufacturer_id) {
-            $this->rest->setResponseData([
-                'error_code' => 400,
-                'error_text' => 'Bad request',
-            ]);
-            $this->rest->sendResponse(400);
-            return null;
-        }
-
-        $data = (new Manufacturer())->getManufacturer($manufacturer_id);
+        $data = $this->model_catalog_manufacturer->getManufacturers();
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
