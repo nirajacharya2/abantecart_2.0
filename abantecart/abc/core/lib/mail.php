@@ -193,11 +193,13 @@ class AMail
 
         $emailTemplate = EmailTemplate::where('text_id', '=', $text_id)
             ->where('language_id', '=', $languageId)
-            ->where('status', '=', 1)
             ->get()
             ->first();
         if (!$emailTemplate) {
             $this->log->write('Email Template with text id "'.$text_id.'" and language_id = '.$languageId.' not found');
+            return;
+        }elseif(!$emailTemplate->status){
+            //if email template is disabled - do nothing
             return;
         }
         $this->emailTemplate = $emailTemplate;
