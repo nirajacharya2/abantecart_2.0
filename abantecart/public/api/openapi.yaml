@@ -718,6 +718,128 @@ paths:
       security:
         -
           apiKey: []
+  '/index.php/?rt=a/product/quantity':
+    get:
+      tags:
+        - Product
+      summary: 'Get product quantity'
+      description: 'Get quantity of products'
+      operationId: 0bda6edd270d84135fe117be3a00f806
+      parameters:
+        -
+          name: product_id
+          in: query
+          description: 'Product unique Id'
+          required: true
+          schema:
+            type: integer
+        -
+          name: language_id
+          in: query
+          description: 'Language Id'
+          required: true
+          schema:
+            type: integer
+        -
+          name: store_id
+          in: query
+          description: 'Store Id'
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'Quantity data'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuantityResponseModel'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: 'Access denight'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+        -
+          apiKey: []
+  '/index.php/?rt=a/product/resources':
+    get:
+      tags:
+        - Product
+      summary: 'Get product resources'
+      description: 'Get product resources'
+      operationId: c40c6c1d3e811777c36201a44364fee7
+      parameters:
+        -
+          name: product_id
+          in: query
+          description: 'Product unique Id'
+          required: true
+          schema:
+            type: integer
+        -
+          name: resource_type
+          in: query
+          description: 'Product resource type'
+          required: true
+          schema:
+            type: string
+            enum:
+              - image
+              - pdf
+      responses:
+        '200':
+          description: 'Resources data'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourcesResponseModel'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: 'Access denight'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+        -
+          apiKey: []
 components:
   schemas:
     ApiSuccessResponse:
@@ -1313,6 +1435,112 @@ components:
           description: 'Store Id'
           type: integer
       type: object
+    OptionModel:
+      description: 'Class OptionModel.'
+      properties:
+        product_option_id:
+          description: 'Product option id'
+          type: integer
+        attribute_id:
+          description: 'Product attribute id'
+          type: integer
+        group_id:
+          description: 'Option group id'
+          type: integer
+        name:
+          description: 'Option Name'
+          type: string
+        option_placeholder:
+          description: 'Option Placeholder'
+          type: string
+        option_value:
+          description: 'Option value'
+          type: array
+          items:
+            $ref: '#/components/schemas/OptionValueModel'
+        sort_order:
+          description: 'Sort Order'
+          type: integer
+        element_type:
+          description: 'Element Type'
+          type: string
+        html_type:
+          description: 'Html Type'
+          type: string
+        required:
+          description: 'Is required'
+          type: boolean
+        regexp_pattern:
+          description: 'Regexp patern'
+          type: string
+        error_text:
+          description: 'Error text'
+          type: string
+        settings:
+          description: Settings
+          type: string
+      type: object
+    OptionValueModel:
+      description: 'Class OptionValueModel.'
+      properties:
+        product_option_value_id:
+          description: 'Product option value id'
+          type: integer
+        attribute_value_id:
+          description: 'Product attribute value id'
+          type: integer
+        grouped_attribute_data:
+          description: 'Product attribute data'
+          type: string
+        group_id:
+          description: 'Option group id'
+          type: integer
+        name:
+          description: 'Option name'
+          type: string
+        option_placeholder:
+          description: 'Option placeholder'
+          type: string
+        regexp_pattern:
+          description: 'Option pattern'
+          type: string
+        error_text:
+          description: 'Error text'
+          type: string
+        settings:
+          description: 'Option settings'
+          type: string
+        children_options_names:
+          description: 'Child Option names'
+          type: array
+          items: {  }
+        sku:
+          description: SKU
+          type: string
+        price:
+          description: Price
+          type: number
+          format: double
+        prefix:
+          description: Prefix
+          type: string
+        weight:
+          description: Weight
+          type: number
+          format: double
+        weight_type:
+          description: 'Weight type'
+          type: string
+        quantity:
+          description: Quantity
+          type: integer
+        subtract:
+          description: Subtract
+          type: integer
+        default:
+          description: Default
+          type: integer
+      type: object
     ProductModel:
       description: 'Class ProductModel.'
       properties:
@@ -1494,7 +1722,8 @@ components:
         options:
           description: Options
           type: array
-          items: {  }
+          items:
+            $ref: '#/components/schemas/OptionModel'
         text_stars:
           description: text_starts
           type: string
@@ -1508,6 +1737,53 @@ components:
           description: 'List of tags'
           type: array
           items: {  }
+      type: object
+    QuantityResponseModel:
+      description: 'Class QuantityResponseModel.'
+      properties:
+        quantity:
+          description: Quantity
+          type: integer
+        stock_status:
+          description: 'Stock Status'
+          type: string
+        option_value_quantities:
+          description: 'Option value quantities'
+          type: array
+          items:
+            $ref: '#/components/schemas/OptionValusQuantityModel'
+      type: object
+    OptionValusQuantityModel:
+      description: 'Class OptionValusQuantityModel.'
+      properties:
+        product_option_value_id:
+          description: 'Product option value id'
+          type: integer
+        quantity:
+          description: Quantity
+          type: integer
+      type: object
+    ResourcesResponseModel:
+      description: 'Class ResourcesResponseModel.'
+      properties:
+        total:
+          description: Total
+          type: integer
+        resources:
+          description: 'List of resources'
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceModel'
+      type: object
+    ResourceModel:
+      description: 'Class ResourceModel.'
+      properties:
+        original:
+          description: original
+          type: string
+        thumb:
+          description: thumb
+          type: string
       type: object
   securitySchemes:
     tokenAuth:

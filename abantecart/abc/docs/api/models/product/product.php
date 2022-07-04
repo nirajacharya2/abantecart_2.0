@@ -454,7 +454,9 @@ class ProductModel
     /**
      * @OA\Property(
      *     description="Options",
-     *     @OA\Items()
+     *     @OA\Items(
+     *     ref="#/components/schemas/OptionModel"
+     * )
      * )
      * @var array
      */

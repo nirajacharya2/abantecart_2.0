@@ -80,3 +80,17 @@ GET http://abantecart2/index.php/?rt=a/product/quantity&product_id=119
 Content-Type: application/json
 Accept: application/json
 X-App-Api-key: testKeykjsdkfjkdsjf
+
+
+### Get Related Products
+GET http://abantecart2/index.php/?rt=a/product/related&product_id=118
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf
+
+
+### Get Resources of Products
+GET http://abantecart2/index.php/?rt=a/product/resources&product_id=118&resource_type=image
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf

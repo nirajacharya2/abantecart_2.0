@@ -103,6 +103,9 @@ class ControllerApiProductProduct extends AControllerAPI
         //TODO: Remove old models usage.
         //TODO: Change Error response to standart
         //TODO: How to get price for customer? Discounts?
+        //TODO: Change options and options values to array of objects (NO id's as key)
+        //TODO: Make price standart double values, add currency in requests and in responses
+
 
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request = $this->rest->getRequestParams();

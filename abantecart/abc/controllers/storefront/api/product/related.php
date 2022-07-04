@@ -39,8 +39,11 @@ class ControllerApiProductRelated extends AControllerAPI
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $product_id = $this->request->get['product_id'];
         if (!$product_id) {
-            $this->rest->setResponseData(array('Error' => 'Missing product ID as a required parameter'));
-            $this->rest->sendResponse(200);
+            $this->rest->setResponseData([
+                'error_code' => 400,
+                'error_text' => 'Bad request',
+            ]);
+            $this->rest->sendResponse(400);
             return null;
         }
 
