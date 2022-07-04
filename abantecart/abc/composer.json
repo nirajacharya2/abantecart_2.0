@@ -349,5 +349,11 @@
     "psr-4": {
       "Tests\\": "tests/"
     }
+  },
+  "config": {
+    "allow-plugins": {
+      "mnsami/composer-custom-directory-installer": true,
+      "wikimedia/composer-merge-plugin": true
+    }
   }
 }
