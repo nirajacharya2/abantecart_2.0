@@ -9,6 +9,7 @@ use Exception;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Debug\Exception\FatalErrorException;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
+use Throwable;
 
 class AHandleExceptions
 {
@@ -87,7 +88,7 @@ class AHandleExceptions
         } else {
             $debug_bar = ADebug::$debug_bar;
             if ($debug_bar) {
-                $debug_bar['exceptions']->addException($e);
+                $debug_bar['exceptions']->addThrowable($e);
             }
             $this->renderHttpResponse($e);
         }
