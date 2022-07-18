@@ -1500,7 +1500,7 @@ class ExtensionUtils
                     strlen($true_item_id) - 2
                 ) : $true_item_id;
 
-                $value = $settings[$item['id']];
+                $value = $settings[(string)$item['id']];
                 if (H::is_serialized($value)) {
                     $value = unserialize($value);
                 }

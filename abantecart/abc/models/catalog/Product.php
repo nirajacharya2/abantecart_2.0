@@ -29,6 +29,7 @@ use abc\models\casts\Serialized;
 use abc\models\locale\LengthClass;
 use abc\models\locale\WeightClass;
 use abc\models\order\Coupon;
+use abc\models\order\CouponsProduct;
 use abc\models\order\OrderProduct;
 use abc\models\QueryBuilder;
 use abc\models\system\Audit;
@@ -2049,7 +2050,7 @@ class Product extends BaseModel
        }*/
 
     /**
-     * @param int $product_id
+     * @param int   $product_id
      * @param array $product_data
      *
      * @return bool

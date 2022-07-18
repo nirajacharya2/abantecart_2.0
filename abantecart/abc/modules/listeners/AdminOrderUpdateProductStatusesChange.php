@@ -321,6 +321,7 @@ class AdminOrderUpdateProductStatusesChange
             $mail->setTo($order_info['email']);
             $mail->setFrom($config->get('store_main_email'));
             $mail->setSender($order_info['store_name']);
+            $mail->setSubject(Registry::language()->get('text_order_status').Registry::order_status()->getStatusById($order_info['order_status_id']));
             $mail->setTemplate('admin_order_update_product_statuses', $this->data, $order_info['language_id']);
             $mail->send();
 
@@ -342,6 +343,7 @@ class AdminOrderUpdateProductStatusesChange
 
                 $mail->setTo($config->get('store_main_email'));
                 $mail->setTemplate('admin_order_update_product_statuses_alert', $this->data);
+                $mail->setSubject(Registry::language()->get('text_order_status').Registry::order_status()->getStatusById($order_info['order_status_id']));
                 $mail->send();
 
                 // Send to additional alert emails

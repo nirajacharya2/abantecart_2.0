@@ -56,6 +56,7 @@ use ReflectionException;
  * @property ProductOption $product_option
  * @property ProductOptionValueDescription $valueDescription
  * @property Product $product
+ *
  * @property Collection $order_options
  * @property ProductOptionDescription $descriptions
  * @property ProductOptionDescription $description
@@ -75,9 +76,6 @@ class ProductOptionValue extends BaseModel
 
     protected $touches = ['option'];
 
-    /**
-     * @var array
-     */
     protected $images = [];
 
     protected $casts = [

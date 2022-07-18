@@ -37,6 +37,7 @@ use DOMDocument;
 use DOMElement;
 use DOMNode;
 use DOMXPath;
+use Error;
 use Exception;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Support\Collection;
@@ -591,9 +592,7 @@ class AHelperUtils extends AHelper
     public static function dateISO2Int($string_date)
     {
         $string_date = trim($string_date);
-        $is_datetime = strlen($string_date) > 10;
-
-        return static::dateFromFormat($string_date, ($is_datetime ? 'Y-m-d H:i:s' : 'Y-m-d'));
+        return  strtotime($string_date);
     }
 
     /**
@@ -1615,6 +1614,11 @@ class AHelperUtils extends AHelper
             $classes[$default_class_name] = $default_args;
         }
 
+        $log = Registry::getInstance()->get('log');
+        if(!$log){
+            $log = ABC::getObjectByAlias('ALog');
+        }
+
         foreach ($classes as $class => $arguments) {
             //check if class loaded & try to load file
             if (!class_exists($class)) {
@@ -1629,11 +1633,34 @@ class AHelperUtils extends AHelper
             if (class_exists($class)) {
                 try {
                     $reflection = new ReflectionClass($class);
-                    $instance = $reflection->newInstanceArgs($arguments);
+                    if($reflection->hasMethod('__construct')) {
+                        $r = $reflection->getMethod('__construct');
+                        $params = $r->getParameters();
+                    }else{
+                        $params = [];
+                    }
+                    if (!$params) {
+                        $args = [];
+                    } else {
+                        $args = $arguments;
+                    }
+                    $instance = $reflection->newInstanceArgs($args);
                 } catch (ReflectionException $e) {
-                    Registry::getInstance()->get('log')->write(
+
+                    $log->write(
                         'AHelperUtils Error: '.$e->getMessage().' '.$e->getLine().' (Class: '.$class.', args: '.var_export($arguments, true).' )'
                     );
+                } catch(Exception $e){
+                    Registry::getInstance()->get('log')->write(
+                        'AHelperUtils Error: '.$e->getMessage().' '.$e->getLine().' (Class: '.$class.', args: '.var_export($arguments, true).' )'
+                            ."\n".$e->getTraceAsString()
+                    );
+                } catch(Error $e){
+                    echo(
+                        'AHelperUtils Error: '.$e->getMessage().' '.$e->getLine().' (Class: '.$class.', args: '.var_export($arguments, true).' )'
+                            ."\n".$e->getTraceAsString()
+                    );
+                    exit;
                 }
             }
 

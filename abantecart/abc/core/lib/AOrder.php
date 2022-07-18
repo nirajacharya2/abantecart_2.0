@@ -526,7 +526,7 @@ class AOrder extends ALibBase
         }
 
         if (!$set_order_id && (int)$settings->get('config_start_order_id')) {
-            $maxOrderId = Order::max();
+            $maxOrderId = Order::max('order_id');
             if ($maxOrderId && $maxOrderId >= $settings->get('config_start_order_id')) {
                 $set_order_id = $maxOrderId + 1;
             } elseif ($settings->get('config_start_order_id')) {

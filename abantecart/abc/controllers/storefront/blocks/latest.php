@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,7 +22,6 @@ namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
-use abc\core\helper\AHelperUtils;
 use abc\models\catalog\Product;
 use Illuminate\Support\Collection;
 

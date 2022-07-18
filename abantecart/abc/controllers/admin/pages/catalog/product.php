@@ -828,7 +828,7 @@ class ControllerPagesCatalogProduct extends AController
         );
         if (isset($this->request->post['weight_class_id'])) {
             $this->data['weight_class_id'] = $this->request->post['weight_class_id'];
-        } elseif (isset($product_info)) {
+        } elseif ($product_info) {
             $this->data['weight_class_id'] = $product_info['weight_class_id'];
         } elseif (isset($weight_info)) {
             $this->data['weight_class_id'] = $weight_info['weight_class_id'];

@@ -433,6 +433,7 @@ echo $this->html->buildElement(
         $.ajax({
             url: url,
             type: 'GET',
+            dataType: "html",
             success: function (html) {
                 //remove option and reload the section
                 $('#option option:selected').remove();

@@ -277,7 +277,7 @@ class ProductOption extends BaseModel
     }
 
     /**
-     * @param $po_ids
+     * @param array $po_ids
      *
      * @return bool|Collection
      */

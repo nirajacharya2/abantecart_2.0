@@ -150,8 +150,8 @@ class ControllerBlocksRecentlyViewed extends AController
                 }
             }
 
-            $this->data['products'][$k] = $result
-                +
+            $this->data['products'][$k] = array_merge(
+                $result,
                 [
                     'rating'                      => $rating,
                     'stars'                       => sprintf($this->language->get('text_stars'), $rating),
@@ -179,7 +179,8 @@ class ControllerBlocksRecentlyViewed extends AController
                         '&product_id='.$result['product_id']
                     ),
                     'catalog_mode'                => $catalog_mode,
-                ];
+                ]
+            );
         }
 
         if ($this->config->get('config_customer_price')) {

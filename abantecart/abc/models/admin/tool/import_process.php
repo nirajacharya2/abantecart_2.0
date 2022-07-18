@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -42,9 +42,9 @@ use ReflectionException;
 /**
  * Class ModelToolImportProcess
  *
- * @property ModelToolImportProcess       $model_tool_import_process
- * @property ModelCatalogProduct          $model_catalog_product
- * @property ModelCatalogManufacturer     $model_catalog_manufacturer
+ * @property ModelToolImportProcess $model_tool_import_process
+ * @property ModelCatalogProduct $model_catalog_product
+ * @property ModelCatalogManufacturer $model_catalog_manufacturer
  * @property ModelLocalisationWeightClass $model_localisation_weight_class
  */
 class ModelToolImportProcess extends Model
@@ -105,7 +105,10 @@ class ModelToolImportProcess extends Model
                 'starter'            => 1, //admin-side is starter
                 'created_by'         => $this->user->getId(), //get starter id
                 'status'             => $tm::STATUS_READY,
-                'start_time'         => date('Y-m-d H:i:s', mktime(0, 0, 0, date('m'), date('d') + 1, date('Y'))),
+                'start_time'         => date(
+                    'Y-m-d H:i:s',
+                    mktime(0, 0, 0, date('m'), (int) date('d') + 1, date('Y'))
+                ),
                 'last_time_run'      => '0000-00-00 00:00:00',
                 'progress'           => '0',
                 'last_result'        => '1',
@@ -119,15 +122,15 @@ class ModelToolImportProcess extends Model
         }
 
         $tm->updateTaskDetails($task_id,
-            [
-                'created_by' => $this->user->getId(),
-                'settings'   => [
-                    'import_data'      => $data,
-                    'total_rows_count' => $total_rows_count,
-                    'success_count'    => 0,
-                    'failed_count'     => 0,
-                ],
-            ]
+                               [
+                                   'created_by' => $this->user->getId(),
+                                   'settings'   => [
+                                       'import_data'      => $data,
+                                       'total_rows_count' => $total_rows_count,
+                                       'success_count'    => 0,
+                                       'failed_count'     => 0,
+                                   ],
+                               ]
         );
 
         $sort_order = 1;
@@ -135,7 +138,7 @@ class ModelToolImportProcess extends Model
         while ($k < $total_rows_count) {
             //create task step
             $stop = $k + $divider;
-            $stop = $stop > $total_rows_count ? $total_rows_count : $stop;
+            $stop = min($stop, $total_rows_count);
             $step_id = $tm->addStep(
                 [
                     'task_id'            => $task_id,
@@ -196,16 +199,16 @@ class ModelToolImportProcess extends Model
         $this->db->beginTransaction();
         try {
             $this->task_id = $task_id;
-            $language_id = $settings['language_id']
-                ? $settings['language_id']
-                : $this->language->getContentLanguageID();
-            $store_id = $settings['store_id']
-                ? (int)$settings['store_id']
-                : (int)$this->session->data['current_store_id'];
+            $language_id = $settings['language_id'] ? : $this->language->getContentLanguageID();
+            $store_id = (int)$settings['store_id'] ? : (int) $this->session->data['current_store_id'];
             $this->load->model('catalog/product');
             $log_classname = ABC::getFullClassName('ALog');
             if ($log_classname) {
-                $this->imp_log = new $log_classname(['app' => "products_import_{$task_id}.txt"]);
+                $this->imp_log = new $log_classname(
+                    [
+                        'app' => "products_import_".$task_id.".txt",
+                    ]
+                );
             }
 
             $this->data['product_data'] = $data;
@@ -213,12 +216,17 @@ class ModelToolImportProcess extends Model
 
             $this->errors = [];
 
-            //allow to change list from hooks
+            //allow change list from hooks
             $this->extensions->hk_InitData($this, __FUNCTION__);
 
             $result = false;
             if (empty($this->errors)) {
-                $result = $this->addUpdateProduct($this->data['product_data'], $this->data['settings'], $language_id, $store_id);
+                $result = $this->addUpdateProduct(
+                    $this->data['product_data'],
+                    $this->data['settings'],
+                    $language_id,
+                    $store_id
+                );
             } else {
                 foreach ($this->errors as $error) {
                     $this->toLog($error);
@@ -226,7 +234,7 @@ class ModelToolImportProcess extends Model
             }
 
             $this->db->commit();
-            //allow to run additional actions from hooks
+            //allow run additional actions from hooks
             $this->extensions->hk_ProcessData($this, __FUNCTION__);
             return $result;
         } catch (Exception $e) {
@@ -249,11 +257,11 @@ class ModelToolImportProcess extends Model
     public function process_categories_record($task_id, $data, $settings)
     {
         $this->task_id = $task_id;
-        $language_id = $settings['language_id'] ? $settings['language_id'] : $this->language->getContentLanguageID();
-        $store_id = $settings['store_id'] ? $settings['store_id'] : $this->session->data['current_store_id'];
+        $language_id = $settings['language_id'] ? : $this->language->getContentLanguageID();
+        $store_id = $settings['store_id'] ? : $this->session->data['current_store_id'];
         $log_classname = ABC::getFullClassName('ALog');
         if ($log_classname) {
-            $this->imp_log = new $log_classname(['app' => "categories_import_{$task_id}.txt"]);
+            $this->imp_log = new $log_classname(['app' => "categories_import_".$task_id.".txt"]);
         }
         return $this->addUpdateCategory($data, $settings, $language_id, $store_id);
     }
@@ -271,12 +279,16 @@ class ModelToolImportProcess extends Model
     public function process_manufacturers_record($task_id, $data, $settings)
     {
         $this->task_id = $task_id;
-        $language_id = $settings['language_id'] ? $settings['language_id'] : $this->language->getContentLanguageID();
-        $store_id = $settings['store_id'] ? $settings['store_id'] : $this->session->data['current_store_id'];
+        $language_id = $settings['language_id'] ? : $this->language->getContentLanguageID();
+        $store_id = $settings['store_id'] ? : $this->session->data['current_store_id'];
         $this->load->model('catalog/manufacturer');
         $log_classname = ABC::getFullClassName('ALog');
         if ($log_classname) {
-            $this->imp_log = new $log_classname(['app' => "manufacturers_import_{$task_id}.txt"]);
+            $this->imp_log = new $log_classname(
+                [
+                    'app' => "manufacturers_import_".$task_id.".txt",
+                ]
+            );
         }
         return $this->addUpdateManufacturer($data, $settings, $language_id, $store_id);
     }
@@ -294,79 +306,79 @@ class ModelToolImportProcess extends Model
      */
     protected function addUpdateProduct($record, $settings, $language_id, $store_id)
     {
-            $status = false;
-            $record = array_map('trim', $record);
+        $status = false;
+        $record = array_map('trim', $record);
 
-            //data mapping
-            $data = $this->buildDataMap(
-                $record,
-                $settings['import_col'],
-                $settings['products_fields'],
-                $settings['split_col']
-            );
+        //data mapping
+        $data = $this->buildDataMap(
+            $record,
+            $settings['import_col'],
+            $settings['products_fields'],
+            $settings['split_col']
+        );
 
-            if (empty($data)) {
-                $this->toLog("Error: Unable to build products import data map.");
-                return false;
-            }
-            $product = $this->filterArray($data['products']);
-            $product_desc = $this->filterArray($data['product_descriptions']);
-            $manufacturers = $this->filterArray($data['manufacturers']);
+        if (empty($data)) {
+            $this->toLog("Error: Unable to build products import data map.");
+            return false;
+        }
+        $product = $this->filterArray($data['products']);
+        $product_desc = $this->filterArray($data['product_descriptions']);
+        $manufacturers = $this->filterArray($data['manufacturers']);
 
-            $product_data = $product;
+        $product_data = $product;
 
-            // import brand if needed
-            $product_data['manufacturer_id'] = 0;
-            if ($manufacturers['manufacturer']) {
-                $product_data['manufacturer_id'] = $this->processManufacturer($manufacturers['manufacturer'], 0, $store_id);
-            }
+        // import brand if needed
+        $product_data['manufacturer_id'] = 0;
+        if ($manufacturers['manufacturer']) {
+            $product_data['manufacturer_id'] = $this->processManufacturer($manufacturers['manufacturer'], 0, $store_id);
+        }
 
-            //check if row is complete and uniform
-            if (!$product_desc['name'] && !$product['sku'] && !$product['model']) {
-                $this->toLog('Error: Record is not complete or missing required data. Skipping!');
-                return false;
-            }
+        //check if row is complete and uniform
+        if (!$product_desc['name'] && !$product['sku'] && !$product['model']) {
+            $this->toLog('Error: Record is not complete or missing required data. Skipping!');
+            return false;
+        }
 
-            $this->toLog("Processing record for product {$product_desc['name']} {$product['sku']} {$product['model']}.");
+        $this->toLog("Processing record for product ".$product_desc['name']." ".$product['sku']." ".$product['model']);
 
-            //detect if we update or create new product based on update settings
-            $new_product = true;
-            $product_id = 0;
-            if ($settings['update_col']) {
-                $unique_field_index = key($settings['update_col']);
-                if (is_numeric($unique_field_index)) {
-                    $unique_field = $settings['products_fields'][$unique_field_index];
-                    $lookup_value = $this->getValueFromDataMap(
-                        $unique_field,
-                        $record,
-                        $settings['products_fields'],
-                        $settings['import_col']
-                    );
-                    $product_id = $this->getProductByField($unique_field, $lookup_value, $language_id, $store_id);
-                    if ($product_id) {
-                        //we have product, update
-                        $new_product = false;
-                    }
+        //detect if we update or create new product based on update settings
+        $new_product = true;
+        $product_id = 0;
+        if ($settings['update_col']) {
+            $unique_field_index = key($settings['update_col']);
+            if (is_numeric($unique_field_index)) {
+                $unique_field = $settings['products_fields'][$unique_field_index];
+                $lookup_value = $this->getValueFromDataMap(
+                    $unique_field,
+                    $record,
+                    $settings['products_fields'],
+                    $settings['import_col']
+                );
+                $product_id = $this->getProductByField($unique_field, $lookup_value, $language_id, $store_id);
+                if ($product_id) {
+                    //we have product, update
+                    $new_product = false;
                 }
             }
+        }
 
-            $this->load->model('catalog/product');
-            if ($new_product) {
-                $product_data['product_description'] = array_merge($product_desc, ['language_id' => $language_id]);
-                //apply default settings for new products only
-                $default_arr = [
-                    'status'          => 1,
-                    'subtract'        => 1,
-                    'free_shipping'   => 0,
-                    'shipping'        => 1,
-                    'call_to_order'   => 0,
-                    'sort_order'      => 0,
-                    'weight_class_id' => 5,
-                    'length_class_id' => 3,
-                ];
-                foreach ($default_arr as $key => $val) {
-                    $product_data[$key] = isset($product_data[$key]) ? $product_data[$key] : $val;
-                }
+        $this->load->model('catalog/product');
+        if ($new_product) {
+            $product_data['product_description'] = array_merge($product_desc, ['language_id' => $language_id]);
+            //apply default settings for new products only
+            $default_arr = [
+                'status'          => 1,
+                'subtract'        => 1,
+                'free_shipping'   => 0,
+                'shipping'        => 1,
+                'call_to_order'   => 0,
+                'sort_order'      => 0,
+                'weight_class_id' => 5,
+                'length_class_id' => 3,
+            ];
+            foreach ($default_arr as $key => $val) {
+                $product_data[$key] = $product_data[$key] ?? $val;
+            }
 
                 $productModel = Product::createProduct($product_data);
                 $product_id = $productModel->product_id;
@@ -386,11 +398,11 @@ class ModelToolImportProcess extends Model
             $status = true;
         }
 
-            // import category if needed
-            $categories = [];
-            if ($data['categories'] && $data['categories']['category']) {
-                $categories = $this->processCategories($data['categories'], $language_id, $store_id);
-            }
+        // import category if needed
+        $categories = [];
+        if ($data['categories'] && $data['categories']['category']) {
+            $categories = $this->processCategories($data['categories'], $language_id, $store_id);
+        }
 
             $product_links = [
                 'product_store' => [$store_id],
@@ -461,11 +473,11 @@ class ModelToolImportProcess extends Model
         $parent_category_id = $categories[0]['parent_id'];
 
         $category_data = array_merge(
-                            $category,
-                            ['parent_id' => $parent_category_id],
-                            ['category_description' => [$language_id => $category_desc]],
-                            ['category_store' => [$store_id]]
-                        );
+            $category,
+            ['parent_id' => $parent_category_id],
+            ['category_description' => [$language_id => $category_desc]],
+            ['category_store' => [$store_id]]
+        );
 
         if ($category_id) {
             //update category
@@ -473,7 +485,7 @@ class ModelToolImportProcess extends Model
                 $category_id,
                 $category_data
             );
-            $this->toLog("Updated category '{$category_desc['name']}' with ID {$category_id}.");
+            $this->toLog("Updated category ".$category_desc['name']." with ID ".$category_id);
             $status = true;
         } else {
             $default_arr = [
@@ -481,15 +493,15 @@ class ModelToolImportProcess extends Model
                 'sort_order' => 0,
             ];
             foreach ($default_arr as $key => $val) {
-                $category[$key] = isset($category[$key]) ? $category[$key] : $val;
+                $category[$key] = $category[$key] ?? $val;
             }
 
             $category_id = Category::addCategory($category_data);
             if ($category_id) {
-                $this->toLog("Created category '{$category_desc['name']}' with ID {$category_id}.");
+                $this->toLog("Created category ".$category_desc['name']." with ID ".$category_id);
                 $status = true;
             } else {
-                $this->toLog("Error: Failed to create category '{$category_desc['name']}'.");
+                $this->toLog("Error: Failed to create category ".$category_desc['name'].".");
                 return false;
             }
         }
@@ -528,7 +540,8 @@ class ModelToolImportProcess extends Model
             $record,
             $settings['import_col'],
             $settings['manufacturers_fields'],
-            $settings['split_col']);
+            $settings['split_col']
+        );
 
         if (empty($data)) {
             $this->toLog("Error: Unable to build manufacturers import data map.");
@@ -537,20 +550,30 @@ class ModelToolImportProcess extends Model
 
         $manufacturer = $this->filterArray($data['manufacturers']);
 
-        $manufacturer_id = $this->processManufacturer($manufacturer['name'], $manufacturer['sort_order'], $store_id);
+        $manufacturer_id = $this->processManufacturer(
+            $manufacturer['name'],
+            $manufacturer['sort_order'],
+            $store_id
+        );
+
         if ($manufacturer_id) {
             $status = true;
             //process images
-            $this->migrateImages($data['images'], 'manufacturers', $manufacturer_id, $manufacturer['name'],
-                $language_id);
+            $this->migrateImages(
+                $data['images'],
+                'manufacturers',
+                $manufacturer_id,
+                $manufacturer['name'],
+                $language_id
+            );
         }
 
-        if($status){
-             //call event
-             H::event(
-                 __CLASS__.'@'.__FUNCTION__,
-                 [new ABaseEvent($this->task_id, $manufacturer_id, $manufacturer, $record)]
-             );
+        if ($status) {
+            //call event
+            H::event(
+                __CLASS__.'@'.__FUNCTION__,
+                [new ABaseEvent($this->task_id, $manufacturer_id, $manufacturer, $record)]
+            );
         }
         return $status;
     }
@@ -584,9 +607,9 @@ class ModelToolImportProcess extends Model
         $product->options->forceDelete();
 
         //add new options for each option
-        for ($i = 0; $i < count($data); $i++) {
+        foreach ($data as $dataRow) {
             //skip empty arrays
-            if (!is_array($data[$i]) || !array_filter($data[$i]) || !$data[$i]['name']) {
+            if (!is_array($dataRow) || !$dataRow['name'] || !is_string($dataRow['name'])) {
                 continue;
             }
 
@@ -594,37 +617,41 @@ class ModelToolImportProcess extends Model
             $sql = "SELECT po.product_option_id  
                     FROM ".$this->db->table_name('product_option_descriptions')." pod
                     LEFT JOIN ".$this->db->table_name('product_options')." po
-                        ON po.product_id = '".(int)$product_id."'
-                    WHERE pod.name = '".$this->db->escape($data[$i]['name'])."'";
+                        ON po.product_id = '".(int) $product_id."'
+                    WHERE pod.name = '".$this->db->escape($dataRow['name'])."'";
 
             $result = $this->db->query($sql);
             $p_option_id = $result->row['product_option_id'];
 
             $opt_data = [
-                'option_name'        => $data[$i]['name'],
+                'option_name'        => $dataRow['name'],
                 'element_type'       => 'S',
-                'status'             => isset($data[$i]['status']) ? $data[$i]['status'] : 1,
+                'status'             => $dataRow['status'] ?? 1,
                 'regexp_pattern'     => "",
                 'error_text'         => '',
                 'option_placeholder' => '',
-                'required'           => isset($data[$i]['required']) ? $data[$i]['required'] : 0,
-                'sort_order'         => isset($data[$i]['sort_order']) ? $data[$i]['sort_order'] : 0
+                'required'           => $dataRow['required'] ?? 0,
+                'sort_order'         => $dataRow['sort_order'] ?? 0,
             ];
             if( !$p_option_id ) {
                 $p_option_id = $product->addProductOption($opt_data);
                 if ($p_option_id) {
-                    $this->toLog("Created product option '{$data[$i]['name']}' with ID {$p_option_id}.");
-                }else{
-                    $this->toLog("Error: Failed to create product option '{$data[$i]['name']}'.");
+                    $this->toLog("Created product option ".$dataRow['name']." with ID ".$p_option_id);
+                } else {
+                    $this->toLog("Error: Failed to create product option ".$dataRow['name'].".");
                     return false;
                 }
-            }else{
+            } else {
                 try {
+                    /** @var ProductOption $option */
                     $option = ProductOption::find($p_option_id);
                     $option->update($opt_data);
-                    $this->toLog( "Created product option '{$data[$i]['name']}' with ID {$p_option_id}." );
-                }catch(Exception $e){
-                    $this->toLog( "Error: Failed to update product option '{$data[$i]['name']}' with ID {$p_option_id}.\n".$e->getMessage() );
+                    $this->toLog("Created product option ".$dataRow['name']." with ID ".$p_option_id.".");
+                } catch (Exception $e) {
+                    $this->toLog(
+                        "Error: Failed to update product option ".$dataRow['name']." with ID ".$p_option_id.".\n"
+                        .$e->getMessage()
+                    );
                     return false;
                 }
             }
@@ -632,13 +659,13 @@ class ModelToolImportProcess extends Model
             //get all values of option
             $sql = "SELECT product_option_value_id 
                     FROM ".$this->db->table_name('product_option_values')." 
-                    WHERE product_option_id = '".(int)$p_option_id."' 
-                    AND product_id = '".(int)$product_id."'";
+                    WHERE product_option_id = '".(int) $p_option_id."' 
+                    AND product_id = '".(int) $product_id."'";
             $result = $this->db->query($sql);
             $exist_ids = array_column($result->rows, 'product_option_value_id');
 
             //now load values. Pick longest data array
-            $option_vals = $data[$i]['product_option_values'];
+            $option_vals = (array) $dataRow['product_option_values'];
 
             //find largest key by count
             $counts = @array_map('count', $option_vals);
@@ -659,13 +686,11 @@ class ModelToolImportProcess extends Model
 
             //remove values that absent in save record
             $diff_ids = array_diff($exist_ids, $ids);
-            foreach($diff_ids as $delete_id){
+            foreach ($diff_ids as $delete_id) {
+                /** @var ProductOptionValue $pov */
                 $pov = ProductOptionValue::find($delete_id);
-                if($pov) {
-                    $pov->forceDelete();
-                }
+                $pov?->forceDelete();
             }
-
         }
         return true;
     }
@@ -706,7 +731,7 @@ class ModelToolImportProcess extends Model
                         AND ".$colName." = '".$this->db->escape($colValue)."'
                         AND ov.product_option_id = '".(int)$optionId."'";
             $result = $this->db->query($sql);
-            if($result->num_rows){
+            if ($result->num_rows) {
                 break;
             }
         }
@@ -718,7 +743,7 @@ class ModelToolImportProcess extends Model
         if($result && $result->row){
             $opt_keys = $result->row;
             $update = true;
-        }else{
+        } else {
             $opt_keys = [
                 'name'        => 'n/a',
                 'sku'         => '',
@@ -750,8 +775,9 @@ class ModelToolImportProcess extends Model
             $optionValueData['weight_type'] = $prd_weight_info['unit'];
         }
 
-        if($update) {
+        if ($update) {
             $pd_opt_val_id = $opt_keys['product_option_value_id'];
+            /** @var ProductOptionValue $optionValue */
             $optionValue = ProductOptionValue::with('description')->find($pd_opt_val_id);
             $optionValue->update($optionValueData);
             $optionValue->description->update($optionValueData);
@@ -760,7 +786,13 @@ class ModelToolImportProcess extends Model
 
         if ($pd_opt_val_id && !empty($data['image'])) {
             //process images
-            $this->migrateImages($data, 'product_option_value', $pd_opt_val_id, $data['name'], $this->language->getContentLanguageID());
+            $this->migrateImages(
+                $data,
+                'product_option_value',
+                $pd_opt_val_id,
+                $data['name'],
+                $this->language->getContentLanguageID()
+            );
         }
 
         return $pd_opt_val_id;
@@ -790,7 +822,7 @@ class ModelToolImportProcess extends Model
         ];
 
         if (!in_array($object_txt_id, array_keys($objects)) || !$data || !is_array($data)) {
-            $this->toLog("Warning: Missing images for {$object_txt_id}.");
+            $this->toLog("Warning: Missing images for ".$object_txt_id);
             return true;
         }
 
@@ -808,17 +840,23 @@ class ModelToolImportProcess extends Model
             } else {
                 if (is_array($source)) {
                     //we have an array from list of values. Run again
-                    $this->migrateImages(['image' => $source], $object_txt_id, $object_id, $title, $language_id);
+                    $this->migrateImages(
+                        ['image' => $source],
+                        $object_txt_id,
+                        $object_id,
+                        $title,
+                        $language_id
+                    );
                     continue;
                 }
             }
             //check if image is absolute path or remote URL
             $host = parse_url($source, PHP_URL_HOST);
             $image_basename = basename($source);
-            //if url does not contains file extension - try to get mime type from url directly
+            //if url does not contain file extension - try to get mime type from url directly
             if ($host !== null && !pathinfo($image_basename, PATHINFO_EXTENSION)) {
                 $mime = $this->getRemoteImageMime($source);
-                if (strpos($mime, 'image') !== false) {
+                if (str_contains($mime, 'image')) {
                     $ext = strtolower(substr($mime, 6));
                     $image_basename = microtime(true).'.'.$ext;
                 } else {
@@ -835,14 +873,14 @@ class ModelToolImportProcess extends Model
             if ($host === null) {
                 //this is a path to file
                 if (!copy($source, $target)) {
-                    $this->toLog("Error: Unable to copy file {$source} to {$target}");
+                    $this->toLog("Error: Unable to copy file ".$source." to ".$target);
                     continue;
                 }
             } else {
                 //this is URL to image. Download first
                 $fl = new AFile();
                 if (($file = $fl->downloadFile($source)) === false) {
-                    $this->toLog("Error: Unable to download file from {$source} ");
+                    $this->toLog("Error: Unable to download file from ".$source);
                     continue;
                 }
                 if (!$fl->writeDownloadToFile($file, $target)) {
@@ -870,7 +908,6 @@ class ModelToolImportProcess extends Model
                 $rm->mapResource($object_txt_id, $object_id, $resource_id);
             } else {
                 $this->toLog("Error: Image resource can not be created. ".$this->db->error);
-                continue;
             }
         }
 
@@ -993,10 +1030,10 @@ class ModelToolImportProcess extends Model
      */
     protected function processManufacturer($manufacturer_name, $sort_order, $store_id)
     {
-        $manufacturer_id = null;
-        $query = Manufacturer::select();
-        $query->whereRaw("LCASE(name) = '".$this->db->escape(mb_strtolower($manufacturer_name))."'");
-        $result = $query->first();
+        /** @var Manufacturer $result */
+        $result = Manufacturer::select()
+                  ->whereRaw("LCASE(name) = '".$this->db->escape(mb_strtolower($manufacturer_name))."'")
+                  ->first();
         $manufacturer_id = $result->manufacturer_id;
         if (!$manufacturer_id) {
             $manufacturer_id = Manufacturer::addManufacturer(
@@ -1007,16 +1044,14 @@ class ModelToolImportProcess extends Model
                 ]
             );
             if ($manufacturer_id) {
-                $this->toLog("Created manufacturer '{$manufacturer_name}' with ID {$manufacturer_id}.");
+                $this->toLog("Created manufacturer ".$manufacturer_name." with ID ".$manufacturer_id);
             } else {
-                $this->toLog("Error: Failed to create manufacturer '{$manufacturer_name}'.");
+                $this->toLog("Error: Failed to create manufacturer ".$manufacturer_name.".");
             }
-        }else{
+        } else {
             //do this to run event listener on save
             $manufacturer = Manufacturer::find($manufacturer_id);
-            if($manufacturer){
-                $manufacturer->touch();
-            }
+            $manufacturer?->touch();
         }
         return $manufacturer_id;
     }
@@ -1050,10 +1085,12 @@ class ModelToolImportProcess extends Model
             $last_parent_id = 0;
             $catIds = [];
             $index = 0;
-            foreach ($categories as $c_name=> $cid) {
-                if($c_name===''){ continue; }
+            foreach ($categories as $c_name => $cid) {
+                if ($c_name === '') {
+                    continue;
+                }
                 //is parent?
-                $is_parent = ($index + 1 == count($categories)) ? false : true;
+                $is_parent = !($index + 1 == count($categories));
                 //check if category exists with this name
                 $catIds[] = (int)$cid;
                 if ($is_parent) {
@@ -1089,31 +1126,33 @@ class ModelToolImportProcess extends Model
      * @return array
      * @throws Exception
      */
-    protected function checkCategoryTree($nameTree = [], $language_id, $store_id)
+    protected function checkCategoryTree($nameTree = [], $language_id = 1, $store_id = 0)
     {
         $nameTree = array_values($nameTree);
         Category::setCurrentLanguageID($language_id);
         $output = array_flip($nameTree);
-        foreach($output as &$o){
+        foreach ($output as &$o) {
             $o = null;
         }
         $fullPath = [];
-        $k=0;
+        $k = 0;
 
         //check if parent exists
         $parent_exists = $this->findCategoryByNameAndParent($nameTree[0], $language_id, $store_id, 0);
-        if(!$parent_exists){
+        if (!$parent_exists) {
             return $output;
         }
 
-        foreach($nameTree as $c_name) {
-            if($c_name === ''){ continue; }
-            $parentId = $fullPath ? $fullPath[$k-1] : 0;
+        foreach ($nameTree as $c_name) {
+            if ($c_name === '') {
+                continue;
+            }
+            $parentId = $fullPath ? $fullPath[$k - 1] : 0;
             $exist = $this->findCategoryByNameAndParent($c_name, $language_id, $store_id, $parentId);
-            if($exist) {
+            if ($exist) {
                 $fullPath[$k] = $exist['category_id'];
                 $output[$c_name] = $exist['category_id'];
-            }else{
+            } else {
                 $output[$c_name] = null;
             }
             $k++;
@@ -1124,44 +1163,42 @@ class ModelToolImportProcess extends Model
 
     protected function findCategoryByNameAndParent($category_name, $language_id, $store_id, $parent_id)
     {
-        $query = CategoryDescription::select(['category_descriptions.category_id', 'category_descriptions.name', 'categories.path'])
-                ->whereRaw(
-                    "LCASE(".Registry::db()->table_name('category_descriptions').".name) = '".$this->db->escape(mb_strtolower($category_name))."'"
-                );
-        $query->join(
+        $query = CategoryDescription::select(
+            ['category_descriptions.category_id', 'category_descriptions.name', 'categories.path']
+        )->whereRaw(
+               "LCASE(".Registry::db()->table_name('category_descriptions').".name) = '"
+                   .$this->db->escape(mb_strtolower($category_name))."'"
+        )->join(
             'categories_to_stores',
             'category_descriptions.category_id',
             '=',
             'categories_to_stores.category_id'
-        );
-        $query->join(
+        )->join(
             'categories',
             'categories.category_id',
             '=',
             'category_descriptions.category_id'
-        );
-        $query->where(
+        )->where(
             [
                 'category_descriptions.language_id' => $language_id,
                 'categories_to_stores.store_id'     => $store_id,
             ]
         );
 
-        if($parent_id<0){
-        }elseif($parent_id>0){
+        if ($parent_id > 0) {
             $query->where('categories.parent_id', '=', $parent_id);
-        }else{
+        } elseif ($parent_id == 0) {
             $query->whereNull('categories.parent_id');
         }
         /** @var CategoryDescription|Category $result */
         $result = $query->first();
-        if($result){
+        if ($result) {
             $output = [
                 'category_id' => $result->category_id,
                 'path'        => $result->path,
-                'name'        => html_entity_decode($result->name, ENT_QUOTES,ABC::env('APP_CHARSET'))
+                'name'        => html_entity_decode($result->name, ENT_QUOTES, ABC::env('APP_CHARSET')),
             ];
-        }else{
+        } else {
             $output = [];
         }
         return $output;
@@ -1182,8 +1219,8 @@ class ModelToolImportProcess extends Model
                 FROM ".$this->db->table_name("category_descriptions")." cd
                 INNER JOIN ".$this->db->table_name("categories_to_stores")." c2s 
                     ON (cd.category_id = c2s.category_id)
-                WHERE language_id = ".(int)$language_id." 
-                    AND  c2s.store_id = ".(int)$store_id."
+                WHERE language_id = ".(int) $language_id." 
+                    AND  c2s.store_id = ".(int) $store_id."
                     AND cd.date_deleted is NULL
                     AND LCASE(name) = '".$this->db->escape(mb_strtolower($category_name))."'";
         $res = $this->db->query($sql);
@@ -1196,11 +1233,11 @@ class ModelToolImportProcess extends Model
                 $sql2 = "SELECT category_id 
                         FROM ".$this->db->table_name("categories")."
                         WHERE category_id IN (".implode(', ', $cIds).") 
-                            AND parent_id = ".(int)$parent_id."
+                            AND parent_id = ".(int) $parent_id."
                             AND date_deleted is NULL 
                         ORDER BY parent_id DESC";
                 $res2 = $this->db->query($sql2);
-                return (int)$res2->row['category_id'];
+                return (int) $res2->row['category_id'];
             }
         }
         return false;
@@ -1223,15 +1260,15 @@ class ModelToolImportProcess extends Model
                 'sort_order'           => 0,
                 'status'               => 1,
                 'category_description' => [
-                                            $language_id => [
-                                                                'name' => $category_name
-                                                            ]
-                                          ],
+                    $language_id => [
+                        'name' => $category_name,
+                    ],
+                ],
                 'category_store'       => [$store_id],
             ]
         );
         if ($category_id) {
-            $this->toLog("Created category '".$category_name."' with ID {$category_id}.");
+            $this->toLog("Created category '".$category_name."' with ID ".$category_id.".");
         } else {
             $this->toLog("Error: Failed to create category '".$category_name."'.");
         }
@@ -1266,7 +1303,7 @@ class ModelToolImportProcess extends Model
             $keys = array_reverse(explode('.', $field));
             if (end($keys) == 'product_options' && !empty($field_val)) {
                 //map options special way
-                //check if this is still same option or it is new name
+                //check if this is still same option. Or this is new name
                 if (count($keys) == 2) {
                     if ($keys[0] == 'name') {
                         $op_array[++$op_index]['name'] = $field_val;
@@ -1274,30 +1311,32 @@ class ModelToolImportProcess extends Model
                         $tmp_index = ($op_index >= 0) ? $op_index : 0;
                         $op_array[$tmp_index][$keys[0]] = $field_val;
                     }
-                } else if ($keys[0] == 'image') {
-                            //leaf element
-                            //check if we need to split the record data from list of values
-                            if (isset($split_col) && !empty($split_col[$index])) {
-                                $field_val = explode($split_col[$index], $field_val);
-                                $field_val = array_map('trim', $field_val);
-                            }
-                            if (!is_array($field_val)) {
-                                $field_val = [$field_val];
-                            }
-                            $arr['product_option_values']['image'][] = $field_val;
-
-                    $tmp_index = ($op_index >= 0) ? $op_index : 0;
-                    $op_array[$tmp_index] = array_merge_recursive($op_array[$tmp_index], $arr);
                 } else {
-                    for ($i = 0; $i < count($keys) - 1; $i++) {
-                        if ($i == 0) {
-                            $arr = [$keys[$i] => $field_val];
-                        } else {
-                            $arr = [$keys[$i] => $arr];
+                    if ($keys[0] == 'image') {
+                        //leaf element
+                        //check if we need to split the record data from list of values
+                        if (isset($split_col) && !empty($split_col[$index])) {
+                            $field_val = explode($split_col[$index], $field_val);
+                            $field_val = array_map('trim', $field_val);
                         }
+                        if (!is_array($field_val)) {
+                            $field_val = [$field_val];
+                        }
+                        $arr['product_option_values']['image'][] = $field_val;
+
+                        $tmp_index = ($op_index >= 0) ? $op_index : 0;
+                        $op_array[$tmp_index] = array_merge_recursive($op_array[$tmp_index], $arr);
+                    } else {
+                        for ($i = 0; $i < count($keys) - 1; $i++) {
+                            if ($i == 0) {
+                                $arr = [$keys[$i] => $field_val];
+                            } else {
+                                $arr = [$keys[$i] => $arr];
+                            }
+                        }
+                        $tmp_index = ($op_index >= 0) ? $op_index : 0;
+                        $op_array[$tmp_index] = array_merge_recursive((array) $op_array[$tmp_index], $arr);
                     }
-                    $tmp_index = ($op_index >= 0) ? $op_index : 0;
-                    $op_array[$tmp_index] = array_merge_recursive((array)$op_array[$tmp_index], (array)$arr);
                 }
             } else {
                 foreach ($keys as $key) {
@@ -1347,9 +1386,9 @@ class ModelToolImportProcess extends Model
      * Get a value from the record based on the setting key
      *
      * @param string $key
-     * @param array  $record
-     * @param array  $fields
-     * @param array  $columns
+     * @param array $record
+     * @param array $fields
+     * @param array $columns
      *
      * @return mixed|null
      */
@@ -1651,7 +1690,7 @@ class ModelToolImportProcess extends Model
                 ],
             ],
         ];
-        //allow to change list from hooks
+        //allow change list from hooks
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
         return $this->data['output'];

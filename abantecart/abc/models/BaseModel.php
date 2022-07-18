@@ -64,7 +64,7 @@ use stdClass;
  * @method static QueryBuilder|Builder whereNull(string $column) QueryBuilder
  * @method static QueryBuilder|Builder whereIn(string $column, array $keys) QueryBuilder
  * @method static QueryBuilder select(string|array $select = '*') QueryBuilder
- * @method static integer max() int
+ * @method static integer max(string $id) int
  * @method static QueryBuilder selectRaw(string $sql) QueryBuilder
  * @method static QueryBuilder distinct(array $columns) QueryBuilder
  * @method static QueryBuilder|Builder withTrashed()
@@ -136,7 +136,7 @@ abstract class BaseModel extends OrmModel
     /**
      * @var array
      */
-    protected $errors;
+    protected $errors = [];
 
     /**
      * @var string

@@ -363,7 +363,9 @@ class AHelperSystemCheck extends AHelper
         }
 
         //if SEO is enabled
-        if ($registry->get('config')->get('enable_seo_url')) {
+        if ($registry->get('config')->get('enable_seo_url')
+            && str_contains($_SERVER['SERVER_SOFTWARE'], 'Apache')
+        ) {
             $htaccess = ABC::env('DIR_PUBLIC').'/.htaccess';
             if (!file_exists($htaccess)) {
                 $ret_array[] = [

@@ -33,14 +33,12 @@ use Exception;
 
 class ControllerTaskSaleContact extends AController
 {
-    public $data = [];
-    private $protocol;
-    private $sent_count = 0;
-    private $user_id = 0;
+    protected $protocol;
+    protected $sent_count = 0;
+    protected $user_id = 0;
 
-    public function sendSms(...$args)
+    public function sendSms($task_id, $step_id, $settings = [])
     {
-        list($task_id, $step_id,) = $args;
         $this->load->library('json');
         //for aborting process
         ignore_user_abort(false);
@@ -68,10 +66,8 @@ class ControllerTaskSaleContact extends AController
         $this->response->setOutput(AJson::encode($output));
     }
 
-    public function sendEmail(...$args)
+    public function sendEmail($task_id, $step_id, $settings = [])
     {
-        list($task_id, $step_id,) = $args;
-
         $this->load->library('json');
         //for aborting process
         ignore_user_abort(false);
@@ -218,7 +214,7 @@ class ControllerTaskSaleContact extends AController
         return $error->toJSONResponse(
             'APP_ERROR_402',
             [
-                'error_text'  => $error_text,
+                'error_text' => $error_text,
                 'reset_value' => true,
             ]
         );

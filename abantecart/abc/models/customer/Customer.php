@@ -70,6 +70,7 @@ use ReflectionException;
  * @property \Illuminate\Database\Eloquent\Collection $orders
  *
  * @method static Customer find(int $customer_id) Customer
+ * @method static Customer select(mixed $select = '*') Builder
  * @package abc\models
  */
 class Customer extends BaseModel
@@ -583,8 +584,9 @@ class Customer extends BaseModel
         $salt_key = $this->attributes['salt'] ?? H::genToken(8);
 
         if (!empty(trim($password))
-            && $enc::getHash($password, $salt_key) != $this->attributes['password']
+            && $enc::getHash((string)$password, (string)$this->attributes['salt']) != $this->attributes['password']
         ) {
+            $salt_key = H::genToken(8);
             $this->fill(['salt' => $salt_key]);
             $this->attributes['password'] = $enc::getHash($password, $salt_key);
         } else {
@@ -736,6 +738,7 @@ class Customer extends BaseModel
 
     /**
      * @param array $inputData
+     * @param string $mode
      *
      * @return Collection|int
      * @throws AException

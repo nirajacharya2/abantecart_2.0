@@ -104,13 +104,26 @@ class ADB
             }
             if ($this->db_config['driver'] == 'mysql') {
                 //$this->orm->getConnection($this->conName)->select($this->raw("SET SQL_MODE='NO_ZERO_DATE,NO_ZERO_IN_DATE';"));
-                $this->orm->getConnection($this->conName)->select($this->raw("SET GLOBAL SQL_MODE='';"));
+                $this->orm->getConnection($this->conName)->select($this->raw("SET SQL_MODE='';"));
+                try {
+                    $this->orm->getConnection($this->conName)->select(
+                        $this->raw("SET time_zone='".date_default_timezone_get()."';")
+                    );
+                }catch(\PDOException $e){
+                    error_log($e->getMessage());
+                }
             }
 
         } catch (\PDOException $e) {
-            throw new AException($e->getMessage()."\n".$e->getTraceAsString(), $e->getCode(), $e->getFile(),
-                $e->getLine());
+            error_log($e->getMessage());
+            throw new AException(
+                $e->getMessage()."\n".$e->getTraceAsString(),
+                $e->getCode(),
+                $e->getFile(),
+                $e->getLine()
+            );
         } catch (\Error $e) {
+            error_log($e->getMessage());
             exit($e->getMessage()."\n".$e->getTraceAsString());
         }
         $this->registry = Registry::getInstance();

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -17,7 +17,6 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-
 namespace abc\models\admin;
 
 use abc\core\ABC;
@@ -52,23 +51,21 @@ class ModelSaleContact extends Model
             $this->errors[] = 'Can not to create task. Empty task name has been given.';
         }
 
-        //first of all needs to define recipient count
-
+        //define recipient count
         $this->load->model('setting/store');
-        $store_info = $this->model_setting_store->getStore((int)$this->session->data['current_store_id']);
-        if ($store_info) {
-            $store_name = $store_info['store_name'];
-        } else {
-            $store_name = $this->config->get('store_name');
-        }
+        $store_info = $this->model_setting_store->getStore(
+            (int)$this->session->data['current_store_id']
+        );
+
+        $store_name = $store_info ? $store_info['store_name'] : $this->config->get('store_name');
 
         //get URIs of recipients
         $uris = $subscribers = $task_controller = '';
-        if ($data['protocol'] == 'email') {
+        if ($data['protocol'] == 'email'){
             list($uris, $subscribers) = $this->_get_email_list($data);
             $task_controller = 'task/sale/contact/sendEmail';
 
-            //if message does not contains html-tags replace line breaks to <br>
+            //if message does not contain html-tags replace line breaks to <br>
             $decoded = html_entity_decode($data['message'], ENT_QUOTES, ABC::env('APP_CHARSET'));
             if ($decoded == strip_tags($decoded)) {
                 $data['message'] = nl2br($data['message']);
@@ -94,18 +91,21 @@ class ModelSaleContact extends Model
 
         //create new task
         $task_id = $tm->addTask(
-            [
-                'name'               => $task_name,
-                'starter'            => 1, //admin-side is starter
-                'created_by'         => $this->user->getId(), //get starter id
-                'status'             => $tm::STATUS_READY,
-                'start_time'         => date('Y-m-d H:i:s', mktime(0, 0, 0, date('m'), date('d') + 1, date('Y'))),
-                'last_time_run'      => '0000-00-00 00:00:00',
-                'progress'           => '0',
-                'last_result'        => '1', // think all fine until some failed step will set 0 here
-                'run_interval'       => '0',
-                //think that task will execute with some connection errors
-                'max_execution_time' => (sizeof($uris) * $time_per_send * 2),
+                [
+                    'name'               => $task_name,
+                    'starter'            => 1, //admin-side is starter
+                    'created_by'         => $this->user->getId(), //get starter id
+                    'status'             => $tm::STATUS_READY,
+                    'start_time'         => date(
+                        'Y-m-d H:i:s',
+                        mktime(0, 0, 0, date('m'), (int)date('d') + 1, date('Y'))
+                    ),
+                    'last_time_run'      => '0000-00-00 00:00:00',
+                    'progress'           => '0',
+                    'last_result'        => '1', // think all fine until some failed step will set 0 here
+                    'run_interval'       => '0',
+                    //think that task will execute with some connection errors
+                    'max_execution_time' => (sizeof($uris) * $time_per_send * 2)
 
             ]
         );
@@ -129,23 +129,25 @@ class ModelSaleContact extends Model
         $sort_order = 1;
         while ($steps_count > 0) {
             $uri_list = array_slice($uris, $k, $divider);
-            $step_id = $tm->addStep([
-                'task_id'            => $task_id,
-                'sort_order'         => $sort_order,
-                'status'             => 1,
-                'last_time_run'      => '0000-00-00 00:00:00',
-                'last_result'        => '0',
+            $step_id = $tm->addStep(
+                [
+                    'task_id'            => $task_id,
+                    'sort_order'         => $sort_order,
+                    'status'             => 1,
+                    'last_time_run'      => '0000-00-00 00:00:00',
+                    'last_result'        => '0',
                 //think that task will execute with some connection errors
-                'max_execution_time' => ($time_per_send * $divider * 2),
-                'controller'         => $task_controller,
-                'settings'           => [
-                    'to'          => $uri_list,
-                    'subject'     => $data['subject'],
-                    'message'     => $data['message'],
-                    'store_name'  => $store_name,
-                    'subscribers' => $subscribers,
-                ],
-            ]);
+                    'max_execution_time' => ($time_per_send * $divider * 2),
+                    'controller'         => $task_controller,
+                    'settings'           => [
+                            'to'          => $uri_list,
+                            'subject'     => $data['subject'],
+                            'message'     => $data['message'],
+                            'store_name'  => $store_name,
+                            'subscribers' => $subscribers
+                    ]
+            ]
+            );
 
             if (!$step_id) {
                 $this->errors = array_merge($this->errors, $tm->errors);
@@ -270,8 +272,13 @@ class ModelSaleContact extends Model
         if (isset($data['recipient'])) {
             $results = [];
             if ($data['recipient'] == 'all_subscribers') {
-                $all_subscribers =
-                    Customer::search(['filter' => ['newsletter_protocol' => 'sms', 'all_subscribers' => 1]]);
+                $all_subscribers = Customer::search(
+                    ['filter' => [
+                        'newsletter_protocol' => 'sms',
+                        'all_subscribers' => 1
+                        ]
+                    ]
+                );
                 $results = $this->_unify_customer_list('sms', $all_subscribers);
                 $subscribers = $results;
             } else {
@@ -311,7 +318,13 @@ class ModelSaleContact extends Model
 
         // All customers by name/email
         if (isset($data['to']) && is_array($data['to'])) {
-            $customers = Customer::search(['filter' => ['include' => $data['to']]]);
+            $customers = Customer::search(
+                [
+                    'filter' => [
+                        'include' => $data['to']
+                    ]
+                ]
+            );
             foreach ($customers as $customer_info) {
                 $phones[] = trim($customer_info['sms']);
             }
@@ -320,7 +333,13 @@ class ModelSaleContact extends Model
         if (isset($data['products']) && is_array($data['products']) && $data['products']) {
             foreach ($data['products'] as $product_id) {
                 //for registered customers
-                $results = Customer::search(['filter' => ['product_id' => $product_id]]);
+                $results = Customer::search(
+                    [
+                        'filter' => [
+                            'product_id' => $product_id
+                        ]
+                    ]
+                );
                 foreach ($results as $result) {
                     $phones[] = trim($result['sms']);
                 }

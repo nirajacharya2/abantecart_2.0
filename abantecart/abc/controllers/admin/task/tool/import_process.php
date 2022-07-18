@@ -39,9 +39,9 @@ class ControllerTaskToolImportProcess extends AController
     protected $failed_count = 0;
     public $errors = [];
 
-    public function processRows(...$args)
+    public function processRows($task_id, $step_id, $settings = [])
     {
-        list($task_id, $step_id,) = $args;
+
         $this->load->library('json');
         //for aborting process
         ignore_user_abort(false);
