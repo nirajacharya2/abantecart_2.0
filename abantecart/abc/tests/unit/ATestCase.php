@@ -20,7 +20,6 @@ namespace Tests\unit;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
-use Tests\unit\models\TestBootstrap;
 use PHPUnit\Framework\TestCase;
 use abc\core\lib\ACustomer;
 use abc\core\lib\ADB;

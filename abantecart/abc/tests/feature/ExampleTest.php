@@ -1,9 +1,7 @@
 <?php
+namespace Tests\feature;
 
-namespace tests\Feature;
-
-
-use Tests\unit\models\ATestCase;
+use Tests\unit\ATestCase;
 
 class ExampleTest extends ATestCase
 {

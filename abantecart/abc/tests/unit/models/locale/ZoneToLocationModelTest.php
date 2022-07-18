@@ -4,6 +4,7 @@ namespace Tests\unit\models\locale;
 
 use abc\models\locale\ZonesToLocation;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class ZoneToLocationModelTest

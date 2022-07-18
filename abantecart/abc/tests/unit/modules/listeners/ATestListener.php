@@ -16,7 +16,7 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace Tests\unit\models\modules\listeners;
+namespace Tests\unit\modules\listeners;
 
 use abc\core\engine\Registry;
 

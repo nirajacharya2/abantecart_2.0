@@ -18,9 +18,9 @@
 
 namespace Tests\unit\models\storefront;
 
-use Tests\unit\models\ATestCase;
+use Tests\unit\ATestCase;
 use abc\models\customer\Customer;
-use Tests\unit\models\modules\listeners\ATestListener;
+use Tests\unit\modules\listeners\ATestListener;
 use PHPUnit\Framework\Warning;
 
 class CustomerTest extends ATestCase

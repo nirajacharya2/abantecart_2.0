@@ -4,7 +4,7 @@ namespace Tests\unit\models\models\storefront;
 
 use abc\core\lib\ADB;
 use abc\models\customer\CustomerCommunication;
-use Tests\unit\models\ATestCase;
+use Tests\unit\ATestCase;
 
 /**
  * Class CustomerCommunicationTest

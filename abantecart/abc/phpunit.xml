@@ -6,16 +6,31 @@
     </include>
   </coverage>
   <testsuites>
-    <testsuite name="Feature Tests">
+    <testsuite name="feature-tests">
       <directory suffix="Test.php">./tests/feature</directory>
     </testsuite>
-    <testsuite name="Unit Tests">
+    <testsuite name="all-unit-tests">
       <directory suffix="Test.php">./tests/unit</directory>
     </testsuite>
-    <testsuite name="abc extensions feature tests">
+    <testsuite name="models-unit-tests-catalog">
+      <directory suffix="Test.php">./tests/unit/models/catalog</directory>
+    </testsuite>
+    <testsuite name="models-unit-tests-customer">
+      <directory suffix="Test.php">./tests/unit/models/customer</directory>
+    </testsuite>
+    <testsuite name="models-unit-tests-locale">
+      <directory suffix="Test.php">./tests/unit/models/locale</directory>
+    </testsuite>
+    <testsuite name="models-unit-tests-order">
+      <directory suffix="Test.php">./tests/unit/models/order</directory>
+    </testsuite>
+    <testsuite name="models-unit-tests-storefront">
+      <directory suffix="Test.php">./tests/unit/models/storefront</directory>
+    </testsuite>
+    <testsuite name="abc-extensions-feature-tests">
       <directory suffix="Test.php">../../extensions/*/tests/feature</directory>
     </testsuite>
-    <testsuite name="abc extensions unit tests">
+    <testsuite name="abc-extensions-unit-tests">
       <directory suffix="Test.php">../../extensions/*/tests/unit</directory>
     </testsuite>
   </testsuites>

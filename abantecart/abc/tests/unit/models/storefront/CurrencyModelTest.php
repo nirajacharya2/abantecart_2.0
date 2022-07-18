@@ -20,7 +20,7 @@ namespace Tests\unit\models\models;
 
 use abc\core\lib\ADB;
 use abc\models\locale\Currency;
-use Tests\unit\models\ATestCase;
+use Tests\unit\ATestCase;
 
 /**
  * Class testCurrencyModel
