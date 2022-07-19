@@ -40,7 +40,7 @@ if (!is_writable(__DIR__.'/../abc/system/logs')) {
         .'</br></br>writable for PHP to proceed');
 }
 
-require __DIR__.'/../abc/core/abc.php';
+require __DIR__.'/../abc/core/ABC.php';
 // Windows IIS Compatibility
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
     ABC::env('IS_WINDOWS', true);

@@ -53,7 +53,7 @@ if (!preg_match('/^--(.*)$/', $command)) {
 }
 
 try {
-    require __DIR__.DS.'core'.DS.'abc.php';
+    require __DIR__.DS.'core'.DS.'ABC.php';
     //run constructor of ABC class to load environment
 
     $ABC = new ABC();

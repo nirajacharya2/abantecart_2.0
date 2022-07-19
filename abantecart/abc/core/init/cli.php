@@ -18,7 +18,7 @@
 namespace abc\commands;
 
 use abc\core\ABC;
-use abc\core\cache\ACache;
+use abc\core\lib\AbcCache;
 use abc\core\lib\AConfig;
 use abc\core\lib\ADataEncryption;
 use abc\core\lib\ADocument;
@@ -179,7 +179,14 @@ registerClass($registry, 'session', 'ASession', [$session_id], ASession::class, 
 // Config
 if (ABC::env('DB_CURRENT_DRIVER')) {
     // Cache
-    registerClass($registry, 'cache', 'ACache', [], ACache::class, []);
+    registerClass(
+        $registry,
+        'cache',
+        'AbcCache',
+        [],
+        AbcCache::class,
+        []
+    );
     registerClass($registry, 'config', 'AConfig', [$registry], AConfig::class, [$registry]);
     registerClass(
         $registry,

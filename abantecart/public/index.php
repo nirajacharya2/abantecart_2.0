@@ -22,7 +22,7 @@ use abc\core\ABC;
 ob_start();
 
 define('DS', DIRECTORY_SEPARATOR);
-require dirname(__DIR__).DS.'abc'.DS.'core'.DS.'abc.php';
+require dirname(__DIR__).DS.'abc'.DS.'core'.DS.'ABC.php';
 // Windows IIS Compatibility
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
     ABC::env('IS_WINDOWS', true);

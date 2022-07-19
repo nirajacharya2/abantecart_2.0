@@ -55,7 +55,7 @@ class TestBootstrap
      */
     public function init()
     {
-        require_once dirname(__DIR__, 2).DS.'core'.DS.'abc.php';
+        require_once dirname(__DIR__, 2).DS.'core'.DS.'ABC.php';
 
         //run constructor of ABC class to load environment
         $ABC = new ABC();

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -18,8 +18,6 @@
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
 
-namespace abc;
-
 // set default encoding for multibyte php mod
 use abc\core\ABC;
 use abc\core\engine\AHook;
@@ -27,6 +25,7 @@ use abc\core\engine\AHtml;
 use abc\core\engine\ALanguage;
 use abc\core\engine\ALoader;
 use abc\core\lib\Abac;
+use abc\core\lib\AbcCache;
 use abc\core\lib\ADebug;
 use abc\core\lib\ACart;
 use abc\core\lib\AConfig;
@@ -35,6 +34,7 @@ use abc\core\lib\ACustomer;
 use abc\core\lib\ADataEncryption;
 use abc\core\lib\ADocument;
 use abc\core\lib\ADownload;
+use abc\core\lib\AException;
 use abc\core\lib\AIM;
 use abc\core\lib\AIMManager;
 use abc\core\lib\ALanguageManager;
@@ -52,12 +52,7 @@ use abc\core\lib\AUser;
 use abc\core\lib\AWeight;
 use abc\core\lib\CheckOut;
 use abc\core\lib\CSRFToken;
-use Exception;
-use H;
-use Illuminate\Cache\CacheManager;
-use Illuminate\Container\Container;
 use Illuminate\Events\Dispatcher;
-use Illuminate\Filesystem\Filesystem;
 
 mb_internal_encoding(ABC::env('APP_CHARSET'));
 ini_set('default_charset', 'utf-8');
@@ -297,28 +292,14 @@ if (php_sapi_name() == 'cli') {
 }
 
 // Cache
-registerClass($registry, 'cache', 'ACache', [], ACache::class, []);
-$cache_driver = ABC::env('CACHE')['CACHE_DRIVER'];
-$cache_driver = !$cache_driver ? 'file' : $cache_driver;
-$registry->get('cache')->setCacheStorageDriver($cache_driver);
-
-//Laravel cache
-$container = new Container();
-$container['config'] = [
-    'cache.default' => 'file',
-    'cache.stores.file' => [
-        'driver' => 'file',
-        'path' => ABC:: env('CACHE')['DIR_CACHE']
-    ]
-];
-// To use the file cache driver we need an instance of Illuminate's Filesystem, also stored in the container
-$container['files'] = new Filesystem;
-// Create the CacheManager
-$cacheManager = new CacheManager($container);
-$cache = $cacheManager->store();
-// Or, if you have multiple drivers:
-// $cache = $cacheManager->store('file');
-$registry->set('Cache', $cache);
+registerClass(
+    $registry,
+    'cache',
+    'AbcCache',
+    [ABC::env('CACHE')['driver']],
+    AbcCache::class,
+    ['file']
+);
 
 // Config
 registerClass($registry, 'config', 'AConfig', [$registry], AConfig::class, [$registry]);
@@ -550,7 +531,7 @@ if (is_object($abac)) {
  * @param string $default_class
  * @param array $default_arguments
  *
- * @throws core\lib\AException
+ * @throws AException
  */
 function registerClass($registry, $item_name, $alias, $arguments, $default_class, $default_arguments)
 {

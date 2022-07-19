@@ -29,8 +29,8 @@ if (!class_exists('abc\core\ABC')) {
 
 class ARest
 {
-    private $request = array();
-    private $response = array();
+    private $request = [];
+    private $response = [];
     private $responseStatus;
     private $registry;
 
@@ -40,15 +40,15 @@ class ARest
      * Supported data types and static data
      *
      */
-    private static $formats = array('xml', 'json', 'qs');
+    private static $formats = ['xml', 'json', 'qs'];
 
-    private static $contentTypes = array(
+    private static $contentTypes = [
         'xml'  => 'application/xml',
         'json' => 'application/json',
         'qs'   => 'text/plain',
-    );
+    ];
 
-    private static $status_codes = array(
+    private static $status_codes = [
         100 => 'Continue',
         101 => 'Switching Protocols',
         200 => 'OK',
@@ -90,7 +90,7 @@ class ARest
         503 => 'Service Unavailable',
         504 => 'Gateway Timeout',
         505 => 'HTTP Version Not Supported',
-    );
+    ];
 
     public function __construct()
     {
@@ -134,7 +134,7 @@ class ARest
         $this->response = $response_arr;
     }
 
-    public function sendResponse($status, $response_arr = array())
+    public function sendResponse($status, $response_arr = [])
     {
         $this->responseStatus = $status;
 
@@ -144,10 +144,10 @@ class ARest
 
         if (!empty($this->response)) {
             $method = $this->request['content-type'].'Response';
-            $this->response = array('status' => $this->responseStatus, 'body' => $this->$method());
+            $this->response = ['status' => $this->responseStatus, 'body' => $this->$method()];
         } else {
             $this->request['content-type'] = 'qs';
-            $this->response = array('status' => $this->responseStatus, 'body' => $this->response);
+            $this->response = ['status' => $this->responseStatus, 'body' => $this->response];
         }
 
         $status = (isset($this->response['status'])) ? $this->response['status'] : 200;
@@ -233,9 +233,9 @@ class ARest
     private function _getHeaders()
     {
         if (function_exists('apache_request_headers')) {
-            return apache_request_headers();
+            return \apache_request_headers();
         }
-        $headers = array();
+        $headers = [];
         $keys = preg_grep('{^HTTP_}i', array_keys($_SERVER));
         foreach ($keys as $val) {
             $key = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($val, 5)))));

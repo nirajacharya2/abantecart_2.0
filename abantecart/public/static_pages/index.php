@@ -28,7 +28,7 @@ use abc\core\lib\ASession;
 
 define('DS', DIRECTORY_SEPARATOR);
 $dir_app = __DIR__.'/../../abc/';
-require $dir_app.'core/abc.php';
+require $dir_app.'core/ABC.php';
 // Windows IIS Compatibility
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
     ABC::env('IS_WINDOWS', true);

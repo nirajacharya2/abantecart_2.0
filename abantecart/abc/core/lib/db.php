@@ -103,11 +103,11 @@ class ADB
                 $debug_bar->addCollector(new PHPDebugBarEloquentCollector($this->orm));
             }
             if ($this->db_config['driver'] == 'mysql') {
-                //$this->orm->getConnection($this->conName)->select($this->raw("SET SQL_MODE='NO_ZERO_DATE,NO_ZERO_IN_DATE';"));
                 $this->orm->getConnection($this->conName)->select($this->raw("SET SQL_MODE='';"));
                 try {
+                    $timezone = date_default_timezone_get();
                     $this->orm->getConnection($this->conName)->select(
-                        $this->raw("SET time_zone='".date_default_timezone_get()."';")
+                        $this->raw("SET time_zone='".$timezone."';")
                     );
                 }catch(\PDOException $e){
                     error_log($e->getMessage());

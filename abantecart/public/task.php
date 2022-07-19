@@ -28,7 +28,7 @@ use abc\core\lib\AJson;
 use abc\core\lib\ATaskManager;
 
 const DS = DIRECTORY_SEPARATOR;
-require dirname(__DIR__).DS.'abc'.DS.'core'.DS.'abc.php';
+require dirname(__DIR__).DS.'abc'.DS.'core'.DS.'ABC.php';
 
 ABC::env('MIN_PHP_VERSION', '8.1.0');
 if (version_compare(phpversion(), ABC::env('MIN_PHP_VERSION'), '<') == true) {
