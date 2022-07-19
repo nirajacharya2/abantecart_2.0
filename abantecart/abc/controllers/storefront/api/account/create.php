@@ -22,6 +22,7 @@ namespace abc\controllers\storefront;
 
 use abc\core\ABC;
 use abc\core\engine\AControllerAPI;
+use abc\core\engine\SecureRequestModel;
 use abc\core\lib\ACustomer;
 use abc\core\lib\AMail;
 
@@ -37,6 +38,40 @@ class ControllerApiAccountCreate extends AControllerAPI
     protected $v_error = array();
     public $data;
 
+    /**
+     * @OA\POST(
+     *     path="/index.php/?rt=a/account/create",
+     *     summary="Create step 2",
+     *     description="There are 2 steps to register new customer and save customer details. First step is to get all required fields and provided earlier data (in case of error). Second step is to provide data to be validated and saved.",
+     *     tags={"Account"},
+     *     security={{"apiKey":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/accountCreateRequestModel"),
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Success response",
+     *         @OA\JsonContent(ref="#/components/schemas/CreateStep2SuccessModel"),
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad Request",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denight",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *      @OA\Response(
+     *         response="500",
+     *         description="Server Error",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     )
+     * )
+     *
+     */
     public function post()
     {
         //init controller data
@@ -45,8 +80,12 @@ class ControllerApiAccountCreate extends AControllerAPI
         $request_data = $this->rest->getRequestParams();
 
         if ($this->customer->isLoggedWithToken($request_data['token'])) {
-            $this->rest->setResponseData(array('error' => 'Already Logged in. Can not create new account.'));
-            $this->rest->sendResponse(401);
+            $this->rest->setResponseData([
+                    'error_code' => 0,
+                    'error_title' => 'Access denied',
+                    'error_text' => 'Already Logged in. Can not create new account.'
+                ]);
+            $this->rest->sendResponse(403);
             return null;
         }
 
@@ -89,6 +128,7 @@ class ControllerApiAccountCreate extends AControllerAPI
             $mail->setSubject($subject);
             $mail->setText(html_entity_decode($message, ENT_QUOTES, ABC::env('APP_CHARSET')));
             $mail->send();
+
             $this->data['status'] = 1;
             if (!$this->config->get('config_customer_approval')) {
                 $this->data['text_message'] = sprintf($this->language->get('text_message'), '');
@@ -96,30 +136,52 @@ class ControllerApiAccountCreate extends AControllerAPI
                 $this->data['text_message'] =
                     sprintf($this->language->get('text_approval'), $this->config->get('store_name'), '');
             }
+
+            //Update controller data
+            $this->extensions->hk_UpdateData($this, __FUNCTION__);
+            $this->rest->setResponseData($this->data);
+            $this->rest->sendResponse(200);
         } else {
-            $this->data['status'] = 0;
+            $this->data['error_code'] = 0;
             $this->data['errors'] = $this->v_error;
-            $this->data['error_warning'] = $this->v_error['warning'];
-            $this->data['error_loginname'] = $this->v_error['loginname'];
-            $this->data['error_firstname'] = $this->v_error['firstname'];
-            $this->data['error_lastname'] = $this->v_error['lastname'];
-            $this->data['error_email'] = $this->v_error['email'];
-            $this->data['error_telephone'] = $this->v_error['telephone'];
-            $this->data['error_password'] = $this->v_error['password'];
-            $this->data['error_confirm'] = $this->v_error['confirm'];
-            $this->data['error_address_1'] = $this->v_error['address_1'];
-            $this->data['error_city'] = $this->v_error['city'];
-            $this->data['error_country'] = $this->v_error['country'];
-            $this->data['error_zone'] = $this->v_error['zone'];
-            return $this->get();
+
+            //Update controller data
+            $this->extensions->hk_UpdateData($this, __FUNCTION__);
+            $this->rest->setResponseData($this->data);
+            $this->rest->sendResponse(400);
         }
 
-        //init controller data
-        $this->extensions->hk_UpdateData($this, __FUNCTION__);
-        $this->rest->setResponseData($this->data);
-        $this->rest->sendResponse(200);
     }
 
+    /**
+     * @OA\Get (
+     *     path="/index.php/?rt=a/account/create",
+     *     summary="Create step 1",
+     *     description="There are 2 steps to register new customer and save customer details. First step is to get all required fields and provided earlier data (in case of error). Second step is to provide data to be validated and saved.",
+     *     tags={"Account"},
+     *     security={{"apiKey":{}}},
+     *     @OA\Response(
+     *         response="200",
+     *         description="Account data",
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="fields",
+     *                     type="object",
+     *                     ref="#/components/schemas/CreateFieldsModel"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="text_agree",
+     *                     type="string"
+     *                 ),
+     *             )
+     *         ),
+     *     )
+     * )
+     *
+     */
     public function get()
     {
         //Get all required data fields for registration.

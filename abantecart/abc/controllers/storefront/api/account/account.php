@@ -20,21 +20,44 @@
 
 namespace abc\controllers\storefront;
 
-use abc\core\engine\AControllerAPI;
+use abc\core\engine\ASecureControllerAPI;
+use abc\core\engine\BaseErrorResponse;
+use abc\core\engine\SecureRequestModel;
+use OpenApi\Annotations as OA;
 
-class ControllerApiAccountAccount extends AControllerAPI
+
+class ControllerApiAccountAccount extends ASecureControllerAPI
 {
+    /**
+     * @OA\POST(
+     *     path="/index.php/?rt=a/account/account",
+     *     summary="Get customer details",
+     *     description="Get basic customer Details.",
+     *     tags={"Account"},
+     *     security={{"tokenAuth":{}, "apiKey":{}}},
+     *     @OA\Response(
+     *         response="200",
+     *         description="Success response",
+     *         @OA\JsonContent(ref="#/components/schemas/responseModel"),
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Unauthorized",
+     *         @OA\JsonContent(ref="#/components/schemas/accountErrorModel"),
+     *     ),
+     *     @OA\Response(
+     *         response="500",
+     *         description="Server Error",
+     *         @OA\JsonContent(ref="#/components/schemas/accountErrorModel"),
+     *     )
+     * )
+     */
     public function post()
     {
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request = $this->rest->getRequestParams();
 
-        if (!$this->customer->isLoggedWithToken($request['token'])) {
-            $this->rest->setResponseData(array('error' => 'Not logged in or Login attempt failed!'));
-            $this->rest->sendResponse(401);
-            return null;
-        }
 
         //load language from main section
         $this->loadLanguage('account/account');

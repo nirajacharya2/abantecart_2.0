@@ -36,11 +36,11 @@ class ControllerApiCommonAccess extends AControllerAPI
         if (!$this->validateIP()) {
             return $this->dispatch('api/error/no_access');
         }
+        $headers = $this->request->getHeaders();
         //validate if API enabled and KEY matches.
         if ($this->config->get('config_admin_api_status')) {
             if ($this->config->get('config_admin_api_key')
-                && $this->config->get('config_admin_api_key') == $this->request->post_or_get('api_key')
-            ) {
+                && $this->config->get('config_admin_api_key') === $headers['X-App-Api-Key']) {
                 return null;
             } else {
                 if (!$this->config->get('config_admin_api_key')) {
@@ -70,9 +70,9 @@ class ControllerApiCommonAccess extends AControllerAPI
         //allow access to listed controllers with no login
         if (isset($request['rt']) && !isset($request['token'])) {
             $route = '';
-            $request['rt'] = ltrim($request['rt'],'a/');
-            $request['rt'] = ltrim($request['rt'],'r/');
-            $request['rt'] = ltrim($request['rt'],'p/');
+            $request['rt'] = ltrim($request['rt'], 'a/');
+            $request['rt'] = ltrim($request['rt'], 'r/');
+            $request['rt'] = ltrim($request['rt'], 'p/');
             $part = explode('/', $request['rt']);
 
             if (isset($part[0])) {
@@ -110,9 +110,9 @@ class ControllerApiCommonAccess extends AControllerAPI
 
         if (isset($request['rt'])) {
             $route = '';
-            $request['rt'] = ltrim($request['rt'],'a/');
-            $request['rt'] = ltrim($request['rt'],'r/');
-            $request['rt'] = ltrim($request['rt'],'p/');
+            $request['rt'] = ltrim($request['rt'], 'a/');
+            $request['rt'] = ltrim($request['rt'], 'r/');
+            $request['rt'] = ltrim($request['rt'], 'p/');
             $part = explode('/', $request['rt']);
 
             if (isset($part[0])) {

@@ -218,7 +218,7 @@ class ARest
     {
         $this->registry->get('load')->library('json');
         //autodetect JSON/JSONP
-        if ($this->request['params']['callback']) {
+        if ($this->request['params'] && $this->request['params']['callback']) {
             return $this->request['params']['callback']."(".AJson::encode($this->response).")";
         } else {
             return AJson::encode($this->response);

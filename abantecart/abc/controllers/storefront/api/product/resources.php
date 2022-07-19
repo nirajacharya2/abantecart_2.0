@@ -27,6 +27,60 @@ use abc\core\engine\AResource;
 class ControllerApiProductResources extends AControllerAPI
 {
 
+    /**
+     * @OA\Get (
+     *     path="/index.php/?rt=a/product/resources",
+     *     summary="Get product resources",
+     *     description="Get product resources",
+     *     tags={"Product"},
+     *     security={{"apiKey":{}}},
+     *     @OA\Parameter(
+     *         name="product_id",
+     *         in="query",
+     *         required=true,
+     *         description="Product unique Id",
+     *        @OA\Schema(
+     *              type="integer"
+     *          ),
+     *      ),
+     *     @OA\Parameter(
+     *         name="resource_type",
+     *         in="query",
+     *         required=true,
+     *         description="Product resource type",
+     *        @OA\Schema(
+     *              type="string",
+     *              enum={"image", "pdf"}
+     *          ),
+     *      ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Resources data",
+     *         @OA\JsonContent(ref="#/components/schemas/ResourcesResponseModel"),
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad Request",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denight",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Not Found",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *      @OA\Response(
+     *         response="500",
+     *         description="Server Error",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     )
+     * )
+     *
+     */
     public function get()
     {
         //init controller data
@@ -36,8 +90,11 @@ class ControllerApiProductResources extends AControllerAPI
         $resource_type = $this->request->get['resource_type'];
 
         if (!$product_id) {
-            $this->rest->setResponseData(array('Error' => 'Missing product ID as a required parameter'));
-            $this->rest->sendResponse(200);
+            $this->rest->setResponseData([
+                'error_code' => 400,
+                'error_text' => 'Bad request',
+            ]);
+            $this->rest->sendResponse(400);
             return null;
         }
 
@@ -61,15 +118,16 @@ class ControllerApiProductResources extends AControllerAPI
             }
             $resources = $images;
         } else {
-            if ($resource_type == 'pdf') {
+            //TODO: Add another resources type with response like in Images, add http/https to url's
+//            if ($resource_type == 'pdf') {
                 // TODO Add support to other types to return files or codes
-            } else {
-                $resource = new AResource('image');
-                //Getting all available types. NOTE there is no easy way, yet,
-                // to tell what resources are available in what type for given product.
-                //This is possible only in admin for now
-                $resources = $resource->getAllResourceTypes();
-            }
+//            } else {
+//                $resource = new AResource('image');
+//                //Getting all available types. NOTE there is no easy way, yet,
+//                // to tell what resources are available in what type for given product.
+//                //This is possible only in admin for now
+//                $resources = $resource->getAllResourceTypes();
+//            }
         }
 
         //init controller data

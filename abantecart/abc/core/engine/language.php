@@ -130,6 +130,26 @@ class ALanguage
 
     // NOTE: Template language variables do not use ->get and loaded automatically in controller class.
     //		 There is no way to get access to used definitions and not possible to validate missing values
+    /**
+     * Get single text language definition or default text value
+     *
+     * @param string $key - Language definition key
+     * @param string $text - Default text value
+     *
+     * @return string - Definition value
+     * @throws ReflectionException
+     * @throws AException
+     */
+    public function t($key, $text)
+    {
+        $existing = $this->get($key, '', true);
+        if ($existing && $existing != $key) {
+            return $existing;
+        } else {
+            //Key does not exists, show passed text
+            return $text;
+        }
+    }
 
     /**
      * Get single language definition
@@ -394,7 +414,12 @@ class ALanguage
         //language code is provided as input. Higher priority
         $request_lang = $request->get['language'] ?? '';
         $request_lang = $request->post['language'] ?? $request_lang;
-        unset($_GET['language'], $_POST['language']);
+        if ($_GET && $_GET['language']) {
+            unset($_GET['language']);
+        }
+        if ($_POST && $_POST['language']) {
+            unset($_POST['language']);
+        }
 
         if ($request_lang && array_key_exists($request_lang, $languages)) {
             $lang_code = $request_lang;
