@@ -20,25 +20,48 @@
 
 namespace abc\controllers\storefront;
 
-use abc\core\engine\AControllerAPI;
+use abc\core\engine\ASecureControllerAPI;
 use abc\models\order\Order;
 use abc\models\order\OrderProduct;
 use H;
 
-class ControllerApiAccountHistory extends AControllerAPI
+class ControllerApiAccountHistory extends ASecureControllerAPI
 {
     public $data;
 
+    /**
+     * @OA\POST(
+     *     path="/index.php/?rt=a/account/history",
+     *     summary="Get orders history",
+     *     description="Get orders history paginated data",
+     *     tags={"Account"},
+     *     security={{"tokenAuth":{}, "apiKey":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/AccountHistoryRequestModel"),
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Success response",
+     *         @OA\JsonContent(ref="#/components/schemas/HistorySuccessModel"),
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denight",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *      @OA\Response(
+     *         response="500",
+     *         description="Server Error",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     )
+     * )
+     *
+     */
     public function post()
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request_data = $this->rest->getRequestParams();
-
-        if (!$this->customer->isLoggedWithToken($request_data['token'])) {
-            $this->rest->setResponseData(['error' => 'Not logged in or Login attempt failed!']);
-            $this->rest->sendResponse(401);
-            return null;
-        }
 
         $this->loadLanguage('account/history');
 

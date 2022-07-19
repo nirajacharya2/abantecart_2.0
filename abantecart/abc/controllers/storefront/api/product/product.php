@@ -37,16 +37,89 @@ use Illuminate\Support\Collection;
 class ControllerApiProductProduct extends AControllerAPI
 {
 
+    /**
+     * @OA\Get (
+     *     path="/index.php/?rt=a/product/product",
+     *     summary="Get product",
+     *     description="Get product details",
+     *     tags={"Product"},
+     *     security={{"apiKey":{}}},
+     *     @OA\Parameter(
+     *         name="product_id",
+     *         in="query",
+     *         required=true,
+     *         description="Product unique Id",
+     *        @OA\Schema(
+     *              type="integer"
+     *          ),
+     *      ),
+     *    @OA\Parameter(
+     *         name="language_id",
+     *         in="query",
+     *         required=true,
+     *         description="Language Id",
+     *        @OA\Schema(
+     *              type="integer"
+     *          ),
+     *      ),
+     *      @OA\Parameter(
+     *         name="store_id",
+     *         in="query",
+     *         required=true,
+     *         description="Store Id",
+     *     @OA\Schema(
+     *              type="integer"
+     *          ),
+     *      ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Product data",
+     *         @OA\JsonContent(ref="#/components/schemas/ProductModel"),
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad Request",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denight",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Not Found",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *      @OA\Response(
+     *         response="500",
+     *         description="Server Error",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     )
+     * )
+     *
+     */
     public function get()
     {
+        //TODO: Add support store_id and language_id
+        //TODO: Remove old models usage.
+        //TODO: Change Error response to standart
+        //TODO: How to get price for customer? Discounts?
+        //TODO: Change options and options values to array of objects (NO id's as key)
+        //TODO: Make price standart double values, add currency in requests and in responses
+
+
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request = $this->rest->getRequestParams();
 
         $product_id = $request['product_id'];
 
         if (empty($product_id) || !is_numeric($product_id)) {
-            $this->rest->setResponseData(['Error' => 'Missing or incorrect format product ID']);
-            $this->rest->sendResponse(200);
+            $this->rest->setResponseData([
+                'error_code' => 400,
+                'error_text' => 'Bad request',
+            ]);
+            $this->rest->sendResponse(400);
             return null;
         }
 
@@ -55,8 +128,11 @@ class ControllerApiProductProduct extends AControllerAPI
         $product = Product::with('description', 'options.description')->with('tags')->find($product_id);
 
         if (!$product) {
-            $this->rest->setResponseData( [ 'Error' => 'No product found' ] );
-            $this->rest->sendResponse(200);
+            $this->rest->setResponseData([
+                'error_code' => 404,
+                'error_text' => 'Product not found',
+            ]);
+            $this->rest->sendResponse(404);
             return null;
         }
         //load resource library
@@ -183,7 +259,7 @@ class ControllerApiProductProduct extends AControllerAPI
 //        $product_info['tags'] = $tags;
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
-
+//???? must be an array?
         $this->rest->setResponseData($product );
         $this->rest->sendResponse(200);
     }

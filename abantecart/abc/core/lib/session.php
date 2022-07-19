@@ -23,7 +23,6 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 
-
 /**
  * Class ASession
  */
@@ -73,14 +72,14 @@ final class ASession
         $path = '';
         if (ABC::env('IS_API')) {
             //set up session specific for API based on the token or create new
-            $token = '';
-            if ($_GET['token']) {
-                $token = $_GET['token'];
-            } else {
-                if ($_POST['token']) {
-                    $token = $_POST['token'];
-                }
-            }
+            $token = $this->getTokenFromHeaders();
+//            if ($_GET && $_GET['token']) {
+//                $token = $_GET['token'];
+//            } else {
+//                if ($_POST && $_POST['token']) {
+//                    $token = $_POST['token'];
+//                }
+//            }
             $final_session_id = $this->prepareSessionId($token);
             session_id($final_session_id);
         } else {
@@ -131,6 +130,28 @@ final class ASession
             }
         }
         $_SESSION['session_mode'] = $session_mode;
+    }
+
+    private function getHeaders()
+    {
+        if (function_exists('apache_request_headers')) {
+            return apache_request_headers();
+        }
+        return [];
+    }
+
+    private function getTokenFromHeaders()
+    {
+        $headers = $this->getHeaders();
+        if (!$headers || !$headers['Authorization']) {
+            return '';
+        }
+
+        $token = str_replace('Bearer ', '', $headers['Authorization']);
+        if (!$token) {
+            return '';
+        }
+        return $token;
     }
 
     public function clear()

@@ -26,12 +26,11 @@ class ControllerApiCommonAccess extends AControllerAPI
 {
     public function main()
     {
+        $headers = $this->request->getHeaders();
         //validate if API enabled and KEY matches.
         if ($this->config->get('config_storefront_api_status')) {
             if ($this->config->get('config_storefront_api_key')
-                && ($this->config->get('config_storefront_api_key') == $this->request->post['api_key']
-                    || $this->config->get('config_storefront_api_key') == $this->request->get['api_key'])
-            ) {
+                && $this->config->get('config_storefront_api_key') === $headers['X-App-Api-Key']) {
                 return null;
             } else {
                 if (!$this->config->get('config_storefront_api_key')) {

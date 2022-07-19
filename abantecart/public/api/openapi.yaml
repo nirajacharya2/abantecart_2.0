@@ -1,0 +1,1811 @@
+openapi: 3.0.0
+info:
+  title: 'Abantecart 2.0 REST API'
+  description: 'REST API for Abantecart version 2.0'
+  version: '0.1'
+paths:
+  '/index.php/?rt=a/account/account':
+    post:
+      tags:
+        - Account
+      summary: 'Get customer details'
+      description: 'Get basic customer Details.'
+      operationId: 6e8152b7a7e7f7c14bfb6c729032a6c3
+      responses:
+        '200':
+          description: 'Success response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseModel'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/accountErrorModel'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/accountErrorModel'
+      security:
+        -
+          tokenAuth: []
+          apiKey: []
+  '/index.php/?rt=a/account/create':
+    get:
+      tags:
+        - Account
+      summary: 'Create step 1'
+      description: 'There are 2 steps to register new customer and save customer details. First step is to get all required fields and provided earlier data (in case of error). Second step is to provide data to be validated and saved.'
+      operationId: 44bb4af5e58ddc3e99329d8d6317980f
+      responses:
+        '200':
+          description: 'Account data'
+          content:
+            application/json:
+              schema:
+                properties:
+                  fields: { $ref: '#/components/schemas/CreateFieldsModel' }
+                  text_agree: { type: string }
+                type: object
+      security:
+        -
+          apiKey: []
+    post:
+      tags:
+        - Account
+      summary: 'Create step 2'
+      description: 'There are 2 steps to register new customer and save customer details. First step is to get all required fields and provided earlier data (in case of error). Second step is to provide data to be validated and saved.'
+      operationId: 9d9860ed8d606e413c32a0f91a44d56d
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/accountCreateRequestModel'
+      responses:
+        '200':
+          description: 'Success response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateStep2SuccessModel'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: 'Access denight'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+        -
+          apiKey: []
+  '/index.php/?rt=a/account/edit':
+    get:
+      tags:
+        - Account
+      summary: 'Edit step 1'
+      description: 'There are 2 steps to edit customer details. First step is to get all allowed fields and provided earlier data (in case of error). Second step is to provide data to be validated and saved.'
+      operationId: 4b88e78cc36b6bde00db17d9aa5039a7
+      responses:
+        '200':
+          description: 'Account data'
+          content:
+            application/json:
+              schema:
+                properties:
+                  fields: { $ref: '#/components/schemas/EditFieldsModel' }
+                type: object
+      security:
+        -
+          tokenAuth: []
+          apiKey: []
+    post:
+      tags:
+        - Account
+      summary: 'Edit step 2'
+      description: 'There are 2 steps to edit customer details. First step is to get all allowed fields and provided earlier data (in case of error). Second step is to provide data to be validated and saved.'
+      operationId: 5dc7b691b8e21bcd1cf32229067ec61e
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/accountEditRequestModel'
+      responses:
+        '200':
+          description: 'Success response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditStep2SuccessModel'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: 'Access denight'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+        -
+          tokenAuth: []
+          apiKey: []
+  '/index.php/?rt=a/account/history':
+    post:
+      tags:
+        - Account
+      summary: 'Get orders history'
+      description: 'Get orders history paginated data'
+      operationId: 398f7f739f5eec2dfe62b495b156a5a2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountHistoryRequestModel'
+      responses:
+        '200':
+          description: 'Success response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistorySuccessModel'
+        '403':
+          description: 'Access denight'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+        -
+          tokenAuth: []
+          apiKey: []
+  '/index.php/?rt=a/account/login':
+    post:
+      tags:
+        - Account
+      summary: Login
+      description: 'This API request needs to be done every time customer request to login to get access to customer account or just to confirm that current authentication is still valid and not expired.'
+      operationId: e8756d98bf3f8f73dc3384cae4b8259b
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/loginRequestModel'
+      responses:
+        '200':
+          description: 'Success response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/loginSuccessModel'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/loginErrorModel'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/loginErrorModel'
+      security:
+        -
+          apiKey: []
+  '/index.php/?rt=a/account/logout':
+    get:
+      tags:
+        - Account
+      summary: Logout
+      description: 'Logout from session'
+      operationId: c0b99d88171a0b40d643579e4b2774cd
+      responses:
+        '200':
+          description: 'Success response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+        -
+          tokenAuth: []
+          apiKey: []
+    post:
+      tags:
+        - Account
+      summary: Logout
+      description: 'Logout from session'
+      operationId: 773626dd201221161a570d406fd62108
+      responses:
+        '200':
+          description: 'Success response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+        -
+          tokenAuth: []
+          apiKey: []
+  '/index.php/?rt=a/product/category':
+    get:
+      tags:
+        - Product
+      summary: 'Get category'
+      description: 'Get category with subcategories info'
+      operationId: 8ea0a5bc63ac7a9f3efe1e6f26e4605c
+      parameters:
+        -
+          name: category_id
+          in: query
+          description: 'Category Id'
+        -
+          name: language_id
+          in: query
+          description: 'Language Id'
+          required: true
+        -
+          name: store_id
+          in: query
+          description: 'Store Id'
+          required: true
+      responses:
+        '200':
+          description: 'Category data'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetCategoryModel'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: 'Access denight'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+        -
+          apiKey: []
+  '/index.php/?rt=a/product/filter':
+    get:
+      tags:
+        - Product
+      summary: 'Get products'
+      description: 'You can get all products assigned to matching category ID, Manufacturer ID, keyword, etc. One of following search parameters is required category_id, manufacturer_id or keyword'
+      operationId: 173d44d2440c72674fc9a1bc36ad426d
+      parameters:
+        -
+          name: category_id
+          in: query
+          description: 'Category Id'
+          schema:
+            type: integer
+        -
+          name: manufacturer_id
+          in: query
+          description: 'Manufacturer Id'
+          schema:
+            type: integer
+        -
+          name: keyword
+          in: query
+          description: 'Keyword text to be searched in product name, mode or SKU (space separated words to be searched)'
+          schema:
+            type: string
+          spaceDelimited: true
+        -
+          name: match
+          in: query
+          description: 'Identify type of match for keyword based search. Allowed values: any, all or exact any - result will contain any of the matched keywords separated by space all - all keywords must be present in the result exact - will do matching of whole keyword.'
+          schema:
+            type: string
+            enum:
+              - all
+              - any
+        -
+          name: pfrom
+          in: query
+          description: 'Search for price range from pfrom to pto price (Only starting pfrom or finishing price range pto can be specified.)'
+          schema:
+            type: double
+        -
+          name: pto
+          in: query
+          description: 'Search for price range from pfrom to pto price (Only starting pfrom or finishing price range pto can be specified.)'
+          schema:
+            type: double
+        -
+          name: page
+          in: query
+          description: 'Show specific page for the result'
+          schema:
+            type: integer
+        -
+          name: rows
+          in: query
+          description: 'Number or results in one page set'
+          schema:
+            type: integer
+        -
+          name: sidx
+          in: query
+          description: 'Data result to use for sorting (Sort Index). Sorting is possible by name, model, price and sort_order'
+          schema:
+            type: string
+            enum:
+              - name
+              - model
+              - price
+              - sort_order
+        -
+          name: sord
+          in: query
+          description: 'Sorting order direction. Possible values DESC descending and ASC ascending. (Default ASC sorting order)'
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+        -
+          name: _search
+          in: query
+          description: 'Parameter to identify that advanced search is performed with JSON based filter string.'
+          schema:
+            type: boolean
+            enum:
+              - true
+              - false
+        -
+          name: filters
+          in: query
+          description: 'JSON based string with set of parameters to perform advanced search and filtering. This filter string is based on advanced jGgrid searching.'
+          schema:
+            type: boolean
+            enum:
+              - true
+              - false
+          example: '{''groupOp'':''AND'',''rules'':[{''field'':''name'',''op'':''cn'',''data'':''ab''}]}'
+        -
+          name: language_id
+          in: query
+          description: 'Language Id'
+          required: true
+          schema:
+            type: integer
+        -
+          name: store_id
+          in: query
+          description: 'Store Id'
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetProductsModel'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: 'Access denight'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+        -
+          apiKey: []
+  '/index.php/?rt=a/product/latest':
+    get:
+      tags:
+        - Product
+      summary: 'Get latest products'
+      description: 'Get kist of latest products'
+      operationId: 243df68a5dcced6278314154fccf7320
+      parameters:
+        -
+          name: language_id
+          in: query
+          description: 'Language Id'
+          required: true
+          schema:
+            type: integer
+        -
+          name: store_id
+          in: query
+          description: 'Store Id'
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetProductsModel'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: 'Access denight'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+        -
+          apiKey: []
+  '/index.php/?rt=a/product/manufacturer':
+    get:
+      tags:
+        - Product
+      summary: 'Get manufacturer'
+      description: 'Get manufacturer details'
+      operationId: 06e78d85060cc3fef05b37dd84629a23
+      parameters:
+        -
+          name: manufacturer_id
+          in: query
+          description: 'Manufacturer unique Id'
+          required: true
+          schema:
+            type: integer
+        -
+          name: language_id
+          in: query
+          description: 'Language Id'
+          required: true
+          schema:
+            type: integer
+        -
+          name: store_id
+          in: query
+          description: 'Store Id'
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'Manufacturer data'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManufacturerModel'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: 'Access denight'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+        -
+          apiKey: []
+  '/index.php/?rt=a/product/manufacturers':
+    get:
+      tags:
+        - Product
+      summary: 'Get manufacturers'
+      description: 'Get list of manufacturers'
+      operationId: 8d5469a4eb5a8df56bb10b1bdae8ea5d
+      parameters:
+        -
+          name: language_id
+          in: query
+          description: 'Language Id'
+          required: true
+          schema:
+            type: integer
+        -
+          name: store_id
+          in: query
+          description: 'Store Id'
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'Manufacturer data'
+          content:
+            application/json:
+              schema:
+                properties:
+                  '': { description: 'Manufacturer list' }
+                type: array
+                items:
+                  $ref: '#/components/schemas/ManufacturerModel'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: 'Access denight'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+        -
+          apiKey: []
+  '/index.php/?rt=a/product/product':
+    get:
+      tags:
+        - Product
+      summary: 'Get product'
+      description: 'Get product details'
+      operationId: 8a9f4c623cd8559f5009ebf0929e22a9
+      parameters:
+        -
+          name: product_id
+          in: query
+          description: 'Product unique Id'
+          required: true
+          schema:
+            type: integer
+        -
+          name: language_id
+          in: query
+          description: 'Language Id'
+          required: true
+          schema:
+            type: integer
+        -
+          name: store_id
+          in: query
+          description: 'Store Id'
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'Product data'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductModel'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: 'Access denight'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+        -
+          apiKey: []
+  '/index.php/?rt=a/product/quantity':
+    get:
+      tags:
+        - Product
+      summary: 'Get product quantity'
+      description: 'Get quantity of products'
+      operationId: 0bda6edd270d84135fe117be3a00f806
+      parameters:
+        -
+          name: product_id
+          in: query
+          description: 'Product unique Id'
+          required: true
+          schema:
+            type: integer
+        -
+          name: language_id
+          in: query
+          description: 'Language Id'
+          required: true
+          schema:
+            type: integer
+        -
+          name: store_id
+          in: query
+          description: 'Store Id'
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'Quantity data'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuantityResponseModel'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: 'Access denight'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+        -
+          apiKey: []
+  '/index.php/?rt=a/product/resources':
+    get:
+      tags:
+        - Product
+      summary: 'Get product resources'
+      description: 'Get product resources'
+      operationId: c40c6c1d3e811777c36201a44364fee7
+      parameters:
+        -
+          name: product_id
+          in: query
+          description: 'Product unique Id'
+          required: true
+          schema:
+            type: integer
+        -
+          name: resource_type
+          in: query
+          description: 'Product resource type'
+          required: true
+          schema:
+            type: string
+            enum:
+              - image
+              - pdf
+      responses:
+        '200':
+          description: 'Resources data'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourcesResponseModel'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: 'Access denight'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: 'Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+        -
+          apiKey: []
+components:
+  schemas:
+    ApiSuccessResponse:
+      title: 'Success Response model'
+      description: 'Success Response'
+      properties:
+        status:
+          description: 'Request result'
+          type: integer
+        success:
+          description: 'Text description of request result'
+          type: string
+      type: object
+    ApiErrorResponse:
+      title: 'Error Response model'
+      description: 'Error Response'
+      properties:
+        error_code:
+          description: 'Request result'
+          type: integer
+        error_title:
+          description: 'Title of request result'
+          type: string
+        error_text:
+          description: 'Text description of request result'
+          type: string
+        errors:
+          description: 'Text description of request result'
+          type: object
+      type: object
+    accountRequestModel:
+      title: 'Account Request model'
+      description: 'Account Request'
+    responseModel:
+      title: 'Response model'
+      description: 'Account data'
+      properties:
+        customer_id:
+          description: 'Unique user identificator'
+          type: integer
+        title:
+          description: 'Title of user info page'
+          type: string
+        firstname:
+          description: 'Firstname of user'
+          type: string
+        lastname:
+          description: 'Lastname of user'
+          type: string
+        email:
+          description: 'Email of user'
+          type: string
+        information:
+          description: 'Url to get information about user'
+          type: string
+        history:
+          description: 'Url to get history of user'
+          type: string
+        newsletter:
+          description: 'Get newsletter information url'
+          type: string
+      type: object
+    accountErrorModel:
+      title: 'Account Error Response model'
+      description: 'Account Error Response'
+      type: object
+      allOf:
+        -
+          $ref: '#/components/schemas/ApiErrorResponse'
+    accountCreateRequestModel:
+      title: 'Account Create Request model'
+      description: 'Account Create Request'
+      properties:
+        api_key:
+          description: 'Unique API key that is set in the control panel'
+          type: string
+        firstname:
+          description: 'Customer’s first name (32 characters limit)'
+          type: string
+        lastname:
+          description: 'Customer’s lastname (32 characters limit)'
+          type: string
+        loginname:
+          description: 'Customer’s loginname (Unique login name between 5 and 64 characters. Required If ''Require Login Name'' is enabled (default))'
+          type: string
+        email:
+          description: 'Customer’s email address (96 characters limit)'
+          type: string
+        telephone:
+          description: 'Customer’s telephone number (32 characters limit)'
+          type: string
+        fax:
+          description: 'Customer’s fax number (32 characters limit)'
+          type: string
+        company:
+          description: 'Company name (optional) (32 characters limit)'
+          type: string
+        address_1:
+          description: 'Street Address (128 characters limit)'
+          type: string
+        address_2:
+          description: 'Apartment #, Suite #, etc part of address (128 characters limit)'
+          type: string
+        postcode:
+          description: 'Zip code or Postal code (10 characters limit)'
+          type: string
+        city:
+          description: 'City or town name (128 characters limit)'
+          type: string
+        country_id:
+          description: 'ID of the country based on provided list of countries'
+          type: integer
+        zone_id:
+          description: 'ID for the local zone within a country. This is usually a state or region (This ID can be received with separate request based on selected country ID)'
+          type: integer
+        password:
+          description: 'Password to access login to the account'
+          type: string
+        confirm:
+          description: 'Confirmation with the same password as in password field'
+          type: string
+        agree:
+          description: 'This is a confirmation that user agrees to the site user agreement (This is configured in the admin and can be possibly enabled or disabled. Values: 1 agree or 0 decline)'
+          type: integer
+        newsletter:
+          description: 'Selection to receive a newsletter (values: 1 to receive and 0 to skip)'
+          type: integer
+      type: object
+    CreateStep1SuccessModel:
+      title: 'Create Step 1 Success Response model'
+      description: 'Create Step 1 Success Response'
+    CreateStep2SuccessModel:
+      title: 'Create Step 2 Success Response model'
+      description: 'Create Step 2 Success Response'
+      type: object
+      allOf:
+        -
+          $ref: '#/components/schemas/ApiSuccessResponse'
+        -
+          properties:
+            text_message:
+              description: 'Text message for customer after registration'
+              type: string
+    CreateFieldsModel:
+      title: 'Create Fields Model'
+      description: 'Create Fields Model'
+      properties:
+        loginname:
+          $ref: '#/components/schemas/CreateAccountField'
+        firstname:
+          $ref: '#/components/schemas/CreateAccountField'
+        lastname:
+          $ref: '#/components/schemas/CreateAccountField'
+        email:
+          $ref: '#/components/schemas/CreateAccountField'
+        telephone:
+          $ref: '#/components/schemas/CreateAccountField'
+        fax:
+          $ref: '#/components/schemas/CreateAccountField'
+        company:
+          $ref: '#/components/schemas/CreateAccountField'
+        address_1:
+          $ref: '#/components/schemas/CreateAccountField'
+        address_2:
+          $ref: '#/components/schemas/CreateAccountField'
+        city:
+          $ref: '#/components/schemas/CreateAccountField'
+        postcode:
+          $ref: '#/components/schemas/CreateAccountField'
+        country_id:
+          $ref: '#/components/schemas/CreateAccountField'
+        zone_id:
+          $ref: '#/components/schemas/CreateAccountField'
+        password:
+          $ref: '#/components/schemas/CreateAccountField'
+        confirm:
+          $ref: '#/components/schemas/CreateAccountField'
+        newsletter:
+          $ref: '#/components/schemas/CreateAccountField'
+        agree:
+          $ref: '#/components/schemas/CreateAccountField'
+      type: object
+    CreateAccountField:
+      title: 'Crea teAccount Field model'
+      description: 'Create Account Field'
+      properties:
+        type:
+          description: 'Field type'
+          type: string
+        name:
+          description: 'Field name'
+          type: string
+        value:
+          description: 'Field value'
+          type: string
+        required:
+          description: 'Field reuiqured'
+          type: boolean
+        error:
+          description: 'Field error'
+          type: string
+        options:
+          description: 'Field options'
+          type: object
+        checked:
+          description: 'Field checked for checkbox'
+          type: boolean
+      type: object
+    accountEditRequestModel:
+      title: 'Account Edit Request model'
+      description: 'Account Edit Request'
+      properties:
+        firstname:
+          description: 'Customer’s first name (32 characters limit)'
+          type: string
+        lastname:
+          description: 'Customer’s lastname (32 characters limit)'
+          type: string
+        email:
+          description: 'Customer’s email address (96 characters limit)'
+          type: string
+        telephone:
+          description: 'Customer’s telephone number (32 characters limit)'
+          type: string
+        fax:
+          description: 'Customer’s fax number (32 characters limit)'
+          type: string
+        newsletter:
+          description: 'Selection to receive a newsletter (values: 1 to receive and 0 to skip)'
+          type: integer
+      type: object
+    EditStep1SuccessModel:
+      title: 'Edit Step 1 Success Response model'
+      description: 'Edit Step 1 Success Response'
+    EditStep2SuccessModel:
+      title: 'Edit Step 2 Success Response model'
+      description: 'Edit Step 2 Success Response'
+      type: object
+      allOf:
+        -
+          $ref: '#/components/schemas/ApiSuccessResponse'
+        -
+          properties:
+            text_message:
+              description: 'Text message for customer after registration'
+              type: string
+    EditFieldsModel:
+      title: 'Edit Fields Model'
+      description: 'Edit Fields Model'
+      properties:
+        firstname:
+          $ref: '#/components/schemas/EditAccountField'
+        lastname:
+          $ref: '#/components/schemas/EditAccountField'
+        email:
+          $ref: '#/components/schemas/EditAccountField'
+        telephone:
+          $ref: '#/components/schemas/EditAccountField'
+        fax:
+          $ref: '#/components/schemas/EditAccountField'
+        newsletter:
+          $ref: '#/components/schemas/EditAccountField'
+      type: object
+    EditAccountField:
+      title: 'Crea teAccount Field model'
+      description: 'Edit Account Field'
+      properties:
+        type:
+          description: 'Field type'
+          type: string
+        name:
+          description: 'Field name'
+          type: string
+        value:
+          description: 'Field value'
+          type: string
+        required:
+          description: 'Field reuiqured'
+          type: boolean
+        error:
+          description: 'Field error'
+          type: string
+        options:
+          description: 'Field options'
+          type: object
+        checked:
+          description: 'Field checked for checkbox'
+          type: boolean
+      type: object
+    AccountHistoryRequestModel:
+      title: 'Account History Request Model'
+      description: 'Account History Request'
+      properties:
+        page:
+          description: 'Page Number, default 1'
+          type: integer
+        limit:
+          description: 'Limit of order for display, default value of setting config_catalog_limit'
+          type: integer
+      type: object
+    HistorySuccessModel:
+      title: 'History Success Model'
+      description: 'History Success Model'
+      properties:
+        orders:
+          description: 'Orders list'
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoryOrder'
+        total_orders:
+          description: 'Total orders'
+          type: integer
+        page:
+          description: 'Page Number'
+          type: integer
+      type: object
+    HistoryOrder:
+      description: 'Class HistoryOrder.'
+      properties:
+        order_id:
+          description: 'Order Id'
+          type: integer
+        name:
+          description: 'Order Name'
+          type: string
+        status:
+          description: 'Order Status'
+          type: string
+        date_added:
+          description: 'Date create'
+          type: string
+        products:
+          description: 'Products count in order'
+          type: integer
+        total:
+          description: 'Order total'
+          type: number
+          format: double
+      type: object
+    loginRequestModel:
+      title: 'Login Request model'
+      description: 'Login Request'
+      properties:
+        loginname:
+          description: 'Email address or loginname registered in customer account'
+          type: string
+        email:
+          description: 'Email address or loginname registered in customer account'
+          type: string
+        password:
+          description: "Customer’s password\t"
+          type: string
+      type: object
+    loginSuccessModel:
+      title: 'Login Success Response model'
+      description: 'Login Success Response'
+      type: object
+      allOf:
+        -
+          $ref: '#/components/schemas/ApiSuccessResponse'
+        -
+          properties:
+            token:
+              description: 'Access token'
+              type: string
+    loginErrorModel:
+      title: 'Login Error Response model'
+      description: 'Login Error Response'
+      type: object
+      allOf:
+        -
+          $ref: '#/components/schemas/ApiErrorResponse'
+    GetCategoryModel:
+      description: 'Class GetCategoryModel.'
+      properties:
+        category_id:
+          description: 'Category Id'
+          type: integer
+        uuid:
+          description: 'Category UUID'
+          type: string
+        parent_id:
+          description: 'Parent Category Id'
+          type: integer
+        path:
+          description: 'Category Path'
+          type: string
+        total_products_count:
+          description: 'Total products count'
+          type: integer
+        active_products_count:
+          description: 'Active products count'
+          type: integer
+        children_count:
+          description: 'Child categories count'
+          type: integer
+        sort_order:
+          description: 'Sort Order'
+          type: integer
+        status:
+          description: Status
+          type: integer
+        date_added:
+          description: 'Date added'
+          type: string
+        date_modified:
+          description: 'Date modiefied'
+          type: string
+        date_deleted:
+          description: 'Date deleted'
+          type: string
+        stage_id:
+          description: 'Stage Id'
+          type: string
+        id:
+          description: Id
+          type: integer
+        language_id:
+          description: 'Language Id'
+          type: integer
+        name:
+          description: 'Category Name'
+          type: string
+        meta_keywords:
+          description: 'Meta Keywords'
+          type: string
+        meta_description:
+          description: 'Meta Description'
+          type: string
+        description:
+          description: Description
+          type: string
+        store_id:
+          description: 'Store Id'
+          type: integer
+        products_count:
+          description: 'Count of products in top level of category'
+          type: integer
+        thumbnail:
+          description: 'Category thumbnail url'
+          type: string
+        total_products:
+          description: 'Total products'
+          type: integer
+        total_subcategories:
+          description: 'Total subcategories count'
+          type: integer
+        subcategories:
+          description: 'Subcategories list'
+          type: array
+          items:
+            $ref: '#/components/schemas/SubcategoryModel'
+      type: object
+    SubcategoryModel:
+      description: 'Class SubcategoryModel.'
+      properties:
+        category_id:
+          description: 'Category Id'
+          type: integer
+        name:
+          description: 'Category Name'
+          type: string
+        sort_order:
+          description: 'Sort Order'
+          type: integer
+        thumb:
+          description: 'Category Thumb url'
+          type: string
+        total_subcategories:
+          description: 'Count of subcategories'
+          type: integer
+      type: object
+    GetProductsModel:
+      description: 'Class GetProductsModel.'
+      properties:
+        page:
+          description: 'Page Number'
+          type: integer
+        total:
+          description: 'Total Pages'
+          type: integer
+        records:
+          description: 'Recors count'
+          type: integer
+        limit:
+          description: Limit
+          type: integer
+        sidx:
+          description: 'Sort By'
+          type: string
+        sord:
+          description: 'Sort Order'
+          type: string
+        params:
+          $ref: '#/components/schemas/ParamsModel'
+        rows:
+          description: 'Rows list'
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterRowModel'
+      type: object
+    ParamsModel:
+      description: 'Class ParamsModel.'
+      properties:
+        sort:
+          description: 'Sort Order'
+          type: string
+        order:
+          description: Order
+          type: string
+        limit:
+          description: Limit
+          type: integer
+        start:
+          description: Start
+          type: integer
+        content_language_id:
+          description: 'Language Id'
+          type: integer
+        filter:
+          description: Filter
+          type: object
+        subsql_filter:
+          description: 'Sub sql filter'
+          type: string
+      type: object
+    FilterRowModel:
+      description: 'Class FilterRowModel.'
+      properties:
+        id:
+          description: Id
+          type: integer
+        cell:
+          $ref: '#/components/schemas/FilterCellModel'
+      type: object
+    FilterCellModel:
+      description: 'Class FilterCellModel.'
+      properties:
+        thumb:
+          description: Thumb
+          type: string
+        name:
+          description: Name
+          type: string
+        description:
+          description: Description
+          type: string
+        model:
+          description: model
+          type: string
+        price:
+          description: Price
+          type: number
+          format: double
+        currency_code:
+          description: 'Currency code'
+          type: string
+        rating:
+          description: Rating
+          type: string
+      type: object
+    ManufacturerModel:
+      description: 'Class ManufacturerModel.'
+      properties:
+        manufacturer_id:
+          description: 'Manufacturer unique id'
+          type: integer
+        uuid:
+          description: UUID
+          type: string
+        name:
+          description: name
+          type: string
+        sort_order:
+          description: 'Sort Order'
+          type: integer
+        date_added:
+          description: 'Date Added'
+          type: string
+        date_modified:
+          description: 'Date Modified'
+          type: string
+        date_deleted:
+          description: 'Date deleted'
+          type: string
+        stage_id:
+          description: 'Stage Id'
+          type: integer
+        id:
+          description: Id
+          type: integer
+        store_id:
+          description: 'Store Id'
+          type: integer
+      type: object
+    OptionModel:
+      description: 'Class OptionModel.'
+      properties:
+        product_option_id:
+          description: 'Product option id'
+          type: integer
+        attribute_id:
+          description: 'Product attribute id'
+          type: integer
+        group_id:
+          description: 'Option group id'
+          type: integer
+        name:
+          description: 'Option Name'
+          type: string
+        option_placeholder:
+          description: 'Option Placeholder'
+          type: string
+        option_value:
+          description: 'Option value'
+          type: array
+          items:
+            $ref: '#/components/schemas/OptionValueModel'
+        sort_order:
+          description: 'Sort Order'
+          type: integer
+        element_type:
+          description: 'Element Type'
+          type: string
+        html_type:
+          description: 'Html Type'
+          type: string
+        required:
+          description: 'Is required'
+          type: boolean
+        regexp_pattern:
+          description: 'Regexp patern'
+          type: string
+        error_text:
+          description: 'Error text'
+          type: string
+        settings:
+          description: Settings
+          type: string
+      type: object
+    OptionValueModel:
+      description: 'Class OptionValueModel.'
+      properties:
+        product_option_value_id:
+          description: 'Product option value id'
+          type: integer
+        attribute_value_id:
+          description: 'Product attribute value id'
+          type: integer
+        grouped_attribute_data:
+          description: 'Product attribute data'
+          type: string
+        group_id:
+          description: 'Option group id'
+          type: integer
+        name:
+          description: 'Option name'
+          type: string
+        option_placeholder:
+          description: 'Option placeholder'
+          type: string
+        regexp_pattern:
+          description: 'Option pattern'
+          type: string
+        error_text:
+          description: 'Error text'
+          type: string
+        settings:
+          description: 'Option settings'
+          type: string
+        children_options_names:
+          description: 'Child Option names'
+          type: array
+          items: {  }
+        sku:
+          description: SKU
+          type: string
+        price:
+          description: Price
+          type: number
+          format: double
+        prefix:
+          description: Prefix
+          type: string
+        weight:
+          description: Weight
+          type: number
+          format: double
+        weight_type:
+          description: 'Weight type'
+          type: string
+        quantity:
+          description: Quantity
+          type: integer
+        subtract:
+          description: Subtract
+          type: integer
+        default:
+          description: Default
+          type: integer
+      type: object
+    ProductModel:
+      description: 'Class ProductModel.'
+      properties:
+        product_id:
+          description: 'Product unique id'
+          type: integer
+        uuid:
+          description: UUID
+          type: string
+        model:
+          description: model
+          type: string
+        sku:
+          description: sku
+          type: string
+        location:
+          description: location
+          type: string
+        stock_checkout:
+          description: stock_checkout
+          type: string
+        stock_status_id:
+          description: stock_status_id
+          type: integer
+        manufacturer_id:
+          description: 'Manufacturer Id'
+          type: integer
+        shipping:
+          description: shipping
+          type: integer
+        ship_individually:
+          description: ship_individually
+          type: integer
+        free_shipping:
+          description: free_shipping
+          type: integer
+        shipping_price:
+          description: shipping_price
+          type: number
+          format: double
+        price:
+          description: price
+          type: string
+        tax_class_id:
+          description: tax_class_id
+          type: integer
+        date_available:
+          description: date_available
+          type: string
+        weight:
+          description: weight
+          type: number
+          format: double
+        weight_class_id:
+          description: weight_class_id
+          type: integer
+        length:
+          description: length
+          type: number
+          format: double
+        width:
+          description: width
+          type: number
+          format: double
+        height:
+          description: height
+          type: number
+          format: double
+        length_class_id:
+          description: length_class_id
+          type: integer
+        status:
+          description: status
+          type: integer
+        viewed:
+          description: viewed
+          type: integer
+        sort_order:
+          description: 'sort order'
+          type: integer
+        subtract:
+          description: Subtract
+          type: integer
+        minimum:
+          description: Minimum
+          type: integer
+        maximum:
+          description: Maximum
+          type: integer
+        cost:
+          description: Cost
+          type: number
+          format: double
+        call_to_order:
+          description: 'Call to Order'
+          type: integer
+        product_type_id:
+          description: product_type_id
+          type: integer
+        settings:
+          description: settings
+          type: string
+        date_added:
+          description: date_added
+          type: string
+        date_modified:
+          description: date_modified
+          type: string
+        date_deleted:
+          description: date_deleted
+          type: string
+        stage_id:
+          description: 'Stage Id'
+          type: string
+        id:
+          description: ID
+          type: integer
+        language_id:
+          description: 'Language ID'
+          type: integer
+        name:
+          description: name
+          type: string
+        meta_keywords:
+          description: 'Meta Keywords'
+          type: string
+        meta_description:
+          description: 'Meta Description'
+          type: string
+        description:
+          description: description
+          type: string
+        blurb:
+          description: blurb
+          type: string
+        store_id:
+          description: 'Store Id'
+          type: integer
+        title:
+          description: title
+          type: string
+        unit:
+          description: Unit
+          type: string
+        manufacturer:
+          description: 'Manufacturer Name'
+          type: string
+        stock_status:
+          description: 'Stock status'
+          type: string
+        length_class_name:
+          description: 'Length class Name'
+          type: string
+        rating:
+          description: Rating
+          type: number
+          format: double
+        final_price:
+          description: 'Final price'
+          type: number
+          format: double
+        thumbnail:
+          description: 'Thumb url'
+          type: string
+        special:
+          description: 'Is Special product'
+          type: boolean
+        discounts:
+          description: Discounts
+          type: array
+          items: {  }
+        product_price:
+          description: 'Product Price'
+          type: number
+          format: double
+        stock:
+          description: Stock
+          type: integer
+        options:
+          description: Options
+          type: array
+          items:
+            $ref: '#/components/schemas/OptionModel'
+        text_stars:
+          description: text_starts
+          type: string
+        stars:
+          description: Starts
+          type: string
+        average:
+          description: Average
+          type: integer
+        tags:
+          description: 'List of tags'
+          type: array
+          items: {  }
+      type: object
+    QuantityResponseModel:
+      description: 'Class QuantityResponseModel.'
+      properties:
+        quantity:
+          description: Quantity
+          type: integer
+        stock_status:
+          description: 'Stock Status'
+          type: string
+        option_value_quantities:
+          description: 'Option value quantities'
+          type: array
+          items:
+            $ref: '#/components/schemas/OptionValusQuantityModel'
+      type: object
+    OptionValusQuantityModel:
+      description: 'Class OptionValusQuantityModel.'
+      properties:
+        product_option_value_id:
+          description: 'Product option value id'
+          type: integer
+        quantity:
+          description: Quantity
+          type: integer
+      type: object
+    ResourcesResponseModel:
+      description: 'Class ResourcesResponseModel.'
+      properties:
+        total:
+          description: Total
+          type: integer
+        resources:
+          description: 'List of resources'
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceModel'
+      type: object
+    ResourceModel:
+      description: 'Class ResourceModel.'
+      properties:
+        original:
+          description: original
+          type: string
+        thumb:
+          description: thumb
+          type: string
+      type: object
+  securitySchemes:
+    tokenAuth:
+      type: http
+      name: 'Token Auth'
+      in: header
+      bearerFormat: token
+      scheme: bearer
+    apiKey:
+      type: apiKey
+      name: X-App-Api-key
+      in: header
+tags:
+  -
+    name: Account
+    description: 'Manage account: create, update, delete'
+  -
+    name: Checkout
+    description: 'Manage checkout: create, update, delete'
+  -
+    name: Common
+    description: 'Manage checkout: create, update, delete'
+  -
+    name: Product
+    description: 'Product API: create, update, delete'

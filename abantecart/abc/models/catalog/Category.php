@@ -464,9 +464,10 @@ class Category extends BaseModel
      * @throws AException
      * @throws InvalidArgumentException
      */
-    public static function getCategories($parentId = 0, $storeId = null, $limit = 0)
+    public static function getCategories($parentId = 0, $storeId = null, $limit = 0, $languageId = null)
     {
-        $languageId = static::$current_language_id;
+        $languageId = $languageId !== null ? $languageId : static::$current_language_id;
+        Registry::log()->write($languageId);
 
         $cacheKey = 'category.list.'.$parentId
             .'.store_'.$storeId
@@ -515,6 +516,7 @@ class Category extends BaseModel
 
             //allow to extends this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
+            Registry::log()->write($query->toSql());
             $categories = $query->get();
 
             foreach ($categories as $category) {
@@ -522,7 +524,7 @@ class Category extends BaseModel
                     $category->name = static::getPath($category->category_id);
                 }
                 $category_data[] = $category->toArray();
-                $category_data = array_merge($category_data, static::getCategories($category->category_id, $storeId));
+                $category_data = array_merge($category_data, static::getCategories($category->category_id, $storeId, $limit, $languageId));
             }
             $cache = $category_data;
             Registry::cache()->put($cacheKey, $cache);
@@ -536,11 +538,11 @@ class Category extends BaseModel
      * @return false|mixed
      * @throws InvalidArgumentException
      */
-    public static function getCategory($categoryId)
+    public static function getCategory($categoryId, $storeId = null, $limit=0, $languageId=null)
     {
         $db = Registry::db();
-        $storeId = (int) Registry::config()->get('config_store_id');
-        $languageId = static::$current_language_id;
+        $storeId = $storeId !== null ? $storeId : (int) Registry::config()->get('config_store_id');
+        $languageId = $languageId !== null ? $languageId : static::$current_language_id;
 
         $cacheKey = 'product.listing.category.'.(int)$categoryId.'.store_'.$storeId.'_lang_'.$languageId;
         $cache = Registry::cache()->get($cacheKey);

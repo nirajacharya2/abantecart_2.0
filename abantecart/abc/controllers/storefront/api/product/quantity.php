@@ -25,6 +25,68 @@ use abc\core\engine\AControllerAPI;
 class ControllerApiProductQuantity extends AControllerAPI
 {
 
+    /**
+     * @OA\Get (
+     *     path="/index.php/?rt=a/product/quantity",
+     *     summary="Get product quantity",
+     *     description="Get quantity of products",
+     *     tags={"Product"},
+     *     security={{"apiKey":{}}},
+     *     @OA\Parameter(
+     *         name="product_id",
+     *         in="query",
+     *         required=true,
+     *         description="Product unique Id",
+     *        @OA\Schema(
+     *              type="integer"
+     *          ),
+     *      ),
+     *    @OA\Parameter(
+     *         name="language_id",
+     *         in="query",
+     *         required=true,
+     *         description="Language Id",
+     *        @OA\Schema(
+     *              type="integer"
+     *          ),
+     *      ),
+     *      @OA\Parameter(
+     *         name="store_id",
+     *         in="query",
+     *         required=true,
+     *         description="Store Id",
+     *     @OA\Schema(
+     *              type="integer"
+     *          ),
+     *      ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Quantity data",
+     *         @OA\JsonContent(ref="#/components/schemas/QuantityResponseModel"),
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad Request",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denight",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Not Found",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *      @OA\Response(
+     *         response="500",
+     *         description="Server Error",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     )
+     * )
+     *
+     */
     public function get()
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
@@ -35,14 +97,20 @@ class ControllerApiProductQuantity extends AControllerAPI
         $opt_val_id = $request['option_value_id'];
 
         if (empty($product_id) || !is_numeric($product_id)) {
-            $this->rest->setResponseData(array('Error' => 'Missing or incorrect format product ID'));
-            $this->rest->sendResponse(200);
+            $this->rest->setResponseData([
+                'error_code' => 400,
+                'error_text' => 'Bad request',
+            ]);
+            $this->rest->sendResponse(400);
             return null;
         }
 
         if (!$this->config->get('config_storefront_api_stock_check')) {
-            $this->rest->setResponseData(array('Error' => 'Restricted access to stock check '));
-            $this->rest->sendResponse(200);
+            $this->rest->setResponseData([
+                'error_code' => 403,
+                'error_text' => 'Restricted access to stock check',
+            ]);
+            $this->rest->sendResponse(403);
             return null;
         }
 
@@ -50,8 +118,11 @@ class ControllerApiProductQuantity extends AControllerAPI
         $this->loadModel('catalog/product');
         $product_info = $this->model_catalog_product->getProduct($product_id);
         if (count($product_info) <= 0) {
-            $this->rest->setResponseData(array('Error' => 'No product found'));
-            $this->rest->sendResponse(200);
+            $this->rest->setResponseData([
+                'error_code' => 404,
+                'error_text' => 'No product found',
+            ]);
+            $this->rest->sendResponse(404);
             return null;
         }
         //filter data and return only QTY for product and option values

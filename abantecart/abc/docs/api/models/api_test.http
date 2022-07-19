@@ -1,0 +1,96 @@
+### Auth
+POST http://abantecart2/index.php/?rt=a/account/login
+Content-Type: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf
+
+{
+  "loginname": "allenwaters@abantecart.com",
+  "password": "12345"
+}
+
+> {%
+client.global.set('token', response.body.token);
+ %}
+
+### End Auth
+
+###### Get Account Data
+POST http://abantecart2/index.php/?rt=a/account/account
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf
+Authorization: Bearer {{token}}
+
+
+###### Get Category2
+GET http://abantecart2/index.php/?rt=a/product/category&language_id=1&store_id=0
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf
+
+
+###### Get Category Products
+GET http://abantecart2/index.php/?rt=a/product/filter&language_id=1&store_id=0&category_id=36
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf
+
+### Get Products
+GET http://abantecart2/index.php?rt=a/product/filter&category_id=36
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf
+
+### Get Latest Products
+GET http://abantecart2/index.php?rt=a/product/latest
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf
+
+### Get Products
+GET http://abantecart2/index.php?rt=a/product/filter&category_id=36
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf
+
+
+### Get Manufacturers
+GET http://abantecart2/index.php/?rt=a/product/manufacturers
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf
+
+
+### Get Manufacturers
+GET http://abantecart2/index.php/?rt=a/product/manufacturer&manufacturer_id=12
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf
+
+
+### Get Product
+GET http://abantecart2/index.php/?rt=a/product/product&product_id=119
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf
+
+
+### Get Product Quantity
+GET http://abantecart2/index.php/?rt=a/product/quantity&product_id=119
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf
+
+
+### Get Related Products
+GET http://abantecart2/index.php/?rt=a/product/related&product_id=118
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf
+
+
+### Get Resources of Products
+GET http://abantecart2/index.php/?rt=a/product/resources&product_id=118&resource_type=image
+Content-Type: application/json
+Accept: application/json
+X-App-Api-key: testKeykjsdkfjkdsjf

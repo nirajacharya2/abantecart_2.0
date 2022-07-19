@@ -78,6 +78,8 @@ if (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] 
         || $_SERVER['HTTP_X_FORWARDED_SERVER'] == 'ssl')
 ) {
     ABC::env('HTTPS', true);
+} elseif (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+    ABC::env('HTTPS', true);
 } elseif (isset($_SERVER['SCRIPT_URI']) && (str_starts_with($_SERVER['SCRIPT_URI'], 'https'))) {
     ABC::env('HTTPS', true);
 } elseif (isset($_SERVER['HTTP_HOST']) && (str_contains($_SERVER['HTTP_HOST'], ':443'))) {
@@ -257,7 +259,8 @@ ABC::env(
 );
 
 //load base libraries
-require_once __DIR__.DS.'base.php';
+require_once dirname(getcwd())
+.DS.'abc'.DS.'core'.DS.'init'.DS.'base.php';
 
 // Registry
 $registry = Registry::getInstance();

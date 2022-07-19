@@ -27,9 +27,168 @@ use stdClass;
 
 class ControllerApiProductFilter extends AControllerAPI
 {
-
+    /**
+     * @OA\Get (
+     *     path="/index.php/?rt=a/product/filter",
+     *     summary="Get products",
+     *     description="You can get all products assigned to matching category ID, Manufacturer ID, keyword, etc. One of following search parameters is required category_id, manufacturer_id or keyword",
+     *     tags={"Product"},
+     *     security={{"apiKey":{}}},
+     *     @OA\Parameter(
+     *         name="category_id",
+     *         in="query",
+     *         description="Category Id",
+     *         @OA\Schema(
+     *              type="integer"
+     *          ),
+     *      ),
+     *     @OA\Parameter(
+     *         name="manufacturer_id",
+     *         in="query",
+     *         description="Manufacturer Id",
+     *         @OA\Schema(
+     *              type="integer"
+     *          ),
+     *      ),
+     *      @OA\Parameter(
+     *         name="keyword",
+     *         in="query",
+     *         spaceDelimited=true,
+     *         description="Keyword text to be searched in product name, mode or SKU (space separated words to be searched)",
+     *        @OA\Schema(
+     *              type="string"
+     *          ),
+     *      ),
+     *     @OA\Parameter(
+     *         name="match",
+     *         in="query",
+     *         description="Identify type of match for keyword based search. Allowed values: any, all or exact any - result will contain any of the matched keywords separated by space all - all keywords must be present in the result exact - will do matching of whole keyword.",
+     *         @OA\Schema(
+     *              type="string",
+     *              enum={ "all", "any" }
+     *          ),
+     *      ),
+     *     @OA\Parameter(
+     *         name="pfrom",
+     *         in="query",
+     *         description="Search for price range from pfrom to pto price (Only starting pfrom or finishing price range pto can be specified.)",
+     *         @OA\Schema(
+     *              type="double",
+     *          ),
+     *      ),
+     *     @OA\Parameter(
+     *         name="pto",
+     *         in="query",
+     *         description="Search for price range from pfrom to pto price (Only starting pfrom or finishing price range pto can be specified.)",
+     *         @OA\Schema(
+     *              type="double",
+     *          ),
+     *      ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Show specific page for the result",
+     *         @OA\Schema(
+     *              type="integer"
+     *          ),
+     *      ),
+     *     @OA\Parameter(
+     *         name="rows",
+     *         in="query",
+     *         description="Number or results in one page set",
+     *         @OA\Schema(
+     *              type="integer"
+     *          ),
+     *      ),
+     *     @OA\Parameter(
+     *         name="sidx",
+     *         in="query",
+     *         description="Data result to use for sorting (Sort Index). Sorting is possible by name, model, price and sort_order",
+     *         @OA\Schema(
+     *              type="string",
+     *              enum={ "name", "model", "price", "sort_order" },
+     *          ),
+     *      ),
+     *      @OA\Parameter(
+     *         name="sord",
+     *         in="query",
+     *         description="Sorting order direction. Possible values DESC descending and ASC ascending. (Default ASC sorting order)",
+     *         @OA\Schema(
+     *              type="string",
+     *              enum={ "ASC", "DESC" },
+     *          ),
+     *      ),
+     *       @OA\Parameter(
+     *         name="_search",
+     *         in="query",
+     *         description="Parameter to identify that advanced search is performed with JSON based filter string.",
+     *         @OA\Schema(
+     *              type="boolean",
+     *              enum={ true, false },
+     *          ),
+     *      ),
+     *      @OA\Parameter(
+     *         name="filters",
+     *         in="query",
+     *         description="JSON based string with set of parameters to perform advanced search and filtering. This filter string is based on advanced jGgrid searching.",
+     *         @OA\Schema(
+     *              type="boolean",
+     *              enum={ true, false },
+     *          ),
+     *     example="{'groupOp':'AND','rules':[{'field':'name','op':'cn','data':'ab'}]}"
+     *      ),
+     *    @OA\Parameter(
+     *         name="language_id",
+     *         in="query",
+     *         required=true,
+     *         description="Language Id",
+     *        @OA\Schema(
+     *              type="integer"
+     *          ),
+     *      ),
+     *      @OA\Parameter(
+     *         name="store_id",
+     *         in="query",
+     *         required=true,
+     *         description="Store Id",
+     *     @OA\Schema(
+     *              type="integer"
+     *          ),
+     *      ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Products",
+     *         @OA\JsonContent(ref="#/components/schemas/GetProductsModel"),
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad Request",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denight",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Not Found",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *      @OA\Response(
+     *         response="500",
+     *         description="Server Error",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     )
+     * )
+     *
+     */
     public function get()
     {
+        //TODO: Add support store_id and language_id, maybe currency
+        //TODO: Remove old models usage.
+        //TODO: Change Error response to standart
+
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $this->loadModel('catalog/product');

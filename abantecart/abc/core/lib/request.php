@@ -29,6 +29,7 @@ final class ARequest
     public $cookie = [];
     public $files = [];
     public $server = [];
+    public $headers = [];
 
     private $http;
     private $uniqueId;
@@ -50,11 +51,14 @@ final class ARequest
         $_FILES = $this->clean($_FILES);
         $_SERVER = $this->clean($_SERVER);
 
+
         $this->get = $_GET;
         $this->post = $_POST;
         $this->cookie = $_COOKIE;
         $this->files = $_FILES;
         $this->server = $_SERVER;
+
+        $this->headers = apache_request_headers();
 
         //generate unique request
         $this->setRequestId();
@@ -312,5 +316,10 @@ final class ARequest
         setcookie($name, null, -1, $path);
         unset($this->cookie[$name], $_COOKIE[$name]);
         return true;
+    }
+
+    public function getHeaders()
+    {
+        return $this->headers;
     }
 }
