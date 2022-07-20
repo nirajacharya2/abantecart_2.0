@@ -130,7 +130,6 @@ class ControllerResponsesSettingSettingQuickForm extends AController {
 			'style' => 'button2',
 		));
 
-		$this->load->library('config_manager');
 		$conf_mngr = new AConfigManager();
 		$data = $this->model_setting_setting->getSetting($this->data['group'],$this->data['store_id']);
 
@@ -181,7 +180,6 @@ class ControllerResponsesSettingSettingQuickForm extends AController {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
-		$this->load->library('config_manager');
 		$config_mngr = new AConfigManager();
 		$result = $config_mngr->validate($group, $this->request->post);
 		$this->error = $result['error'];
@@ -431,7 +429,6 @@ class ControllerResponsesSettingSettingQuickForm extends AController {
 		));
 
 		$this->data['form']['fields'] = array();
-		$this->load->library('config_manager');
 		$conf_mngr = new AConfigManager();
 		$set_fields =  $conf_mngr->getFormFields($section, $form, $settings_data);
 		foreach ($this->data['qs_fields'][$section] as $field_name) {

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,23 +22,37 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\AForm;
+use abc\core\engine\ALoader;
 use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
+use abc\models\admin\ModelLocalisationCountry;
+use abc\models\admin\ModelLocalisationLengthClass;
+use abc\models\admin\ModelLocalisationStockStatus;
+use abc\models\admin\ModelLocalisationWeightClass;
+use abc\models\admin\ModelSaleCustomerGroup;
+use abc\models\admin\ModelSettingSetting;
 use abc\models\locale\Currency;
+use abc\models\locale\LengthClassDescription;
+use abc\models\locale\WeightClassDescription;
 use abc\models\order\OrderStatus;
+use abc\models\system\TaxClass;
+use abc\models\system\TaxClassDescription;
+use Exception;
 use H;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 /**
  * @property AExtensionManager $extension_manager
- * @property \abc\models\admin\ModelSettingSetting $model_setting_setting
- * @property \abc\models\admin\ModelLocalisationCountry $model_localisation_country
- * @property \abc\models\admin\ModelLocalisationLengthClass $model_localisation_length_class
- * @property \abc\models\admin\ModelLocalisationWeightClass $model_localisation_weight_class
- * @property \abc\models\admin\ModelLocalisationStockStatus $model_localisation_stock_status
- * @property \abc\models\admin\ModelSaleCustomerGroup $model_sale_customer_group
+ * @property ModelSettingSetting $model_setting_setting
+ * @property ModelLocalisationCountry $model_localisation_country
+ * @property ModelLocalisationLengthClass $model_localisation_length_class
+ * @property ModelLocalisationWeightClass $model_localisation_weight_class
+ * @property ModelLocalisationStockStatus $model_localisation_stock_status
+ * @property ModelSaleCustomerGroup $model_sale_customer_group
  * @property ASession $session
- * @property \abc\core\lib\ALanguageManager $language
- * @property \abc\core\engine\ALoader $load
+ * @property ALanguageManager $language
+ * @property ALoader $load
  * @property AIMManager $im
  * @property AConfig $config
  * @property ARequest $request
@@ -80,13 +94,13 @@ class AConfigManager
      *    Build field for provided key setting
      *
      * @param string $setting_key
-     * @param \abc\core\engine\AForm $form - form object where filed will be shown
+     * @param AForm $form - form object where filed will be shown
      * @param array $data - current setting data
      * @param int $store_id - Selected store ID for the setting
      * @param string $group
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getFormField($setting_key, $form, $data, $store_id, $group = '')
     {
@@ -109,7 +123,7 @@ class AConfigManager
      *    Build fields array for provided setting group (section)
      *
      * @param string $group
-     * @param \abc\core\engine\AForm $form - form object where filed will be shown
+     * @param AForm $form - form object where filed will be shown
      * @param array $data - current setting data
      *
      * @return array
@@ -132,8 +146,8 @@ class AConfigManager
      *
      * @return array|bool
      * @throws AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function validate($group, $fields = [], $store_id = 0)
     {
@@ -304,7 +318,7 @@ class AConfigManager
      *
      * @return array
      * @throws AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException|ReflectionException
      */
     protected function buildFormDetails($form, $data)
     {
@@ -404,31 +418,15 @@ class AConfigManager
             $language_codes[$lng_code] = $v['name'];
         }
 
-        $results = Currency::all()->toArray();
-        $currencies = [];
-        foreach ($results as $v) {
-            $currencies[$v['code']] = $v['title'];
-        }
+        $currencies = Currency::all()->pluck('title', 'code')->toArray();
+        $lengthClasses = LengthClassDescription::get()->pluck('title', 'unit')->toArray();
+        $weightClasses = WeightClassDescription::get()->pluck('title', 'unit')->toArray();
 
-        $this->load->model('localisation/length_class');
-        $results = $this->model_localisation_length_class->getLengthClasses();
-        $length_classes = [];
-        foreach ($results as $v) {
-            $length_classes[$v['unit']] = $v['title'];
-        }
 
-        $this->load->model('localisation/weight_class');
-        $results = $this->model_localisation_weight_class->getWeightClasses();
-        $weight_classes = [];
-        foreach ($results as $v) {
-            $weight_classes[$v['unit']] = $v['title'];
-        }
-
-        $this->load->model('localisation/tax_class');
-        $results = $this->model_localisation_tax_class->getTaxClasses();
-        $tax_classes = ['' => $this->language->get('text_select')];
-        foreach ($results as $v) {
-            $tax_classes[$v['tax_class_id']] = $v['title'];
+        $results = TaxClassDescription::get()->pluck('title', 'tax_class_id')->toArray();
+        $taxClasses = ['' => $this->language->get('text_select')];
+        if($results) {
+            $taxClasses += $results;
         }
 
         $fields['country'] = $form->getFieldHtml($props[] = [
@@ -512,21 +510,21 @@ class AConfigManager
             'type'    => 'selectbox',
             'name'    => 'config_length_class',
             'value'   => $data['config_length_class'],
-            'options' => $length_classes,
+            'options' => $lengthClasses,
         ]);
 
         $fields['weight_class'] = $form->getFieldHtml($props[] = [
             'type'    => 'selectbox',
             'name'    => 'config_weight_class',
             'value'   => $data['config_weight_class'],
-            'options' => $weight_classes,
+            'options' => $weightClasses,
         ]);
 
         $fields['tax_class'] = $form->getFieldHtml($props[] = [
             'type'    => 'selectbox',
             'name'    => 'config_tax_class_id',
             'value'   => $data['config_tax_class_id'],
-            'options' => $tax_classes,
+            'options' => $taxClasses,
         ]);
 
         if (isset($data['one_field'])) {
@@ -568,13 +566,14 @@ class AConfigManager
      *
      * @return array
      * @throws AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     protected function buildFormGeneral($form, $data)
     {
         $fields = [];
         //general section
+
         $this->load->model('localisation/stock_status');
         $stock_statuses = ['0' => $this->language->get('text_none')];
         $results = $this->model_localisation_stock_status->getStockStatuses();
@@ -750,8 +749,8 @@ class AConfigManager
      * @return array
      *
      * @throws AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     protected function buildFormCheckout($form, $data)
     {
@@ -971,12 +970,12 @@ class AConfigManager
     }
 
     /**
-     * @var AForm $form
-     *
+     * @param AForm $form
      * @param array $data
      *
      * @return array
-     * @throws AException
+     * @throws AException|ReflectionException
+     *
      */
     protected function buildFormAppearance($form, $data)
     {
@@ -1313,8 +1312,8 @@ class AConfigManager
      *
      * @return array
      * @throws AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     protected function buildFormMail($form, $data)
     {
@@ -1407,8 +1406,8 @@ class AConfigManager
      *
      * @return array
      * @throws AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     protected function buildFormIm($form, $data)
     {
@@ -1444,7 +1443,7 @@ class AConfigManager
                     'type'       => 'checkbox',
                     'name'       => 'config_storefront_'.$protocol.'_status',
                     'value'      => 1,
-                    'checked'    => $data['config_storefront_'.$protocol.'_status'] ? true : false,
+                    'checked'    => (bool)$data['config_storefront_' . $protocol . '_status'],
                     'label_text' => $this->language->get('text_storefront'),
                 ]);
 
@@ -1452,7 +1451,7 @@ class AConfigManager
                     'type'       => 'checkbox',
                     'name'       => 'config_admin_'.$protocol.'_status',
                     'value'      => 1,
-                    'checked'    => $data['config_admin_'.$protocol.'_status'] ? true : false,
+                    'checked'    => (bool)$data['config_admin_' . $protocol . '_status'],
                     'label_text' => $this->language->get('text_admin'),
                 ]);
             }
@@ -1463,12 +1462,12 @@ class AConfigManager
     }
 
     /**
-     * @var AForm $form
-     *
+     * @param AForm $form
      * @param array $data
      *
      * @return array
-     * @throws AException
+     * @throws AException|ReflectionException
+     *
      */
     protected function buildFormApi($form, $data)
     {
@@ -1532,8 +1531,8 @@ class AConfigManager
      *
      * @return array
      * @throws AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     protected function buildFormSystem($form, $data)
     {
@@ -1600,15 +1599,15 @@ class AConfigManager
             'value' => $data['config_compression'],
         ]);
 
-        $all_cache_drivers = Registry::cache()->getAvailableStores();
-        $cache_drivers = [];
-        foreach ($all_cache_drivers as $drv) {
-            $name = strtoupper($drv['driver_name']);
-            $cache_drivers[$name] = $name;
+        $allCacheDrivers = Registry::cache()->getAvailableStores();
+        $cacheDrivers = [];
+        foreach ($allCacheDrivers as $driver_name => $drv) {
+            $name = strtoupper($driver_name);
+            $cacheDrivers[$name] = $name;
         }
-        sort($cache_drivers, SORT_STRING);
-        $current_cache_driver = strtoupper(Registry::cache()->getCurrentStore());
-        unset($cache_drivers[$current_cache_driver]);
+        sort($cacheDrivers, SORT_STRING);
+        $currentCacheDriver = strtoupper(Registry::cache()->getCurrentStore());
+        unset($cacheDrivers[$currentCacheDriver]);
 
         $fields['cache_enable'] = $form->getFieldHtml($props[] = [
                 'type'  => 'checkbox',
@@ -1619,16 +1618,10 @@ class AConfigManager
             .'<br/>'
             .sprintf(
                 $this->language->get('text_setting_cache_drivers'),
-                $current_cache_driver,
-                implode(', ', $cache_drivers)
+                $currentCacheDriver,
+                implode(', ', $cacheDrivers)
             );
 
-        $fields['html_cache'] = $form->getFieldHtml($props[] = [
-            'type'  => 'checkbox',
-            'name'  => 'config_html_cache',
-            'value' => $data['config_html_cache'],
-            'style' => 'btn_switch',
-        ]);
         $fields['upload_max_size'] = $form->getFieldHtml($props[] = [
                 'type'  => 'input',
                 'name'  => 'config_upload_max_size',

@@ -244,12 +244,12 @@ if (ABC::env('DATABASES')) {
     }
 }
 
-// Cache
-$registry->set('cache', new AbcCache('file'));
-
 // Config
 $config = new AConfig($registry);
 $registry->set('config', $config);
+
+// Cache
+$registry->set('cache', new AbcCache('file'));
 
 // Session
 $registry->set('session', new ASession(ABC::env('SESSION_ID')));

@@ -91,7 +91,6 @@ class ControllerPagesDesignTemplate extends AController
         // get templates
         $this->data['templates'] = [];
 
-        $this->load->library('config_manager');
         $conf_mngr = new AConfigManager();
 
         //get all enabled templates
@@ -289,7 +288,6 @@ class ControllerPagesDesignTemplate extends AController
         $this->data['cancel'] = $this->html->getSecureURL('design/template/edit', '&tmpl_id='.$tmpl_id);
         $this->data['back'] = $this->html->getSecureURL('design/template');
 
-        $this->load->library('config_manager');
         $this->conf_mngr = new AConfigManager();
 
         //set control buttons
@@ -467,7 +465,6 @@ class ControllerPagesDesignTemplate extends AController
             $this->error['warning'] = $this->language->get('error_permission');
         }
 
-        $this->load->library('config_manager');
         $config_mngr = new AConfigManager();
         $result = $config_mngr->validate($group, $this->request->post);
         $this->error = $result['error'];

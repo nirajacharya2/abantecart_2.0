@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2021 Belavier Commerce LLC
+ * Copyright 2011-2022 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -30,6 +30,7 @@ use Exception;
 use H;
 use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\Pure;
+use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 
 /**
@@ -63,9 +64,9 @@ class Install extends BaseCommand
      *
      * @return array|bool|null
      * @throws AException
-     * @throws \DebugBar\DebugBarException
-     * @throws \ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws DebugBarException
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public function run(string $action, array $options)
     {
@@ -74,7 +75,8 @@ class Install extends BaseCommand
         if ($action == 'app') {
             return $this->installApp($options);
         } elseif ($action == 'package') {
-            return $this->installPackage($options);
+            $this->installPackage($options);
+            return null;
         } elseif ($action == 'extension') {
             if (isset($options['install'])) {
                 return $this->installExtension($options);
@@ -145,7 +147,7 @@ class Install extends BaseCommand
      *
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function installPackage($options)
     {
@@ -315,7 +317,7 @@ class Install extends BaseCommand
      * @return bool|null
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function uninstallExtension($options)
     {
@@ -352,7 +354,7 @@ class Install extends BaseCommand
      * @return bool
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function installExtension($options)
     {
@@ -390,7 +392,7 @@ class Install extends BaseCommand
      * @return bool|null
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function removeExtension($options)
     {
@@ -538,9 +540,10 @@ class Install extends BaseCommand
     protected function validateAppRequirements()
     {
         $errors = [];
-        if (version_compare(phpversion(), ABC::env('MIN_PHP_VERSION'), '<') == true) {
-            $errors['warning'] =
-                'Warning: You need to use PHP '.ABC::env('MIN_PHP_VERSION').' or above for AbanteCart to work!';
+        if (version_compare(phpversion(), ABC::env('MIN_PHP_VERSION'), '<')) {
+            $errors['warning'] = 'Warning: You need to use PHP '
+                .ABC::env('MIN_PHP_VERSION')
+                .' or above for AbanteCart to work!';
         }
 
         if (!ini_get('file_uploads')) {
@@ -577,23 +580,26 @@ class Install extends BaseCommand
         }
 
         if (!is_writable(ABC::env('DIR_SYSTEM'))) {
-            $errors['warning'] = 'Warning: System directory '.ABC::env('DIR_SYSTEM')
+            $errors['warning'] = 'Warning: System directory '
+                .ABC::env('DIR_SYSTEM')
                 .' and all its children files/directories need to be writable for AbanteCart to work!';
         }
 
         if (!is_writable(ABC::env('CACHE')['stores']['file']['path'])) {
-            $errors['warning'] =
-                'Warning: Cache directory '.ABC::env('CACHE')['stores']['file']['path']
+            $errors['warning'] = 'Warning: Cache directory '
+                .ABC::env('CACHE')['stores']['file']['path']
                 .' needs to be writable for AbanteCart to work!';
         }
 
         if (!is_writable(ABC::env('DIR_LOGS'))) {
-            $errors['warning'] =
-                'Warning: Logs directory '.ABC::env('DIR_LOGS').' needs to be writable for AbanteCart to work!';
+            $errors['warning'] = 'Warning: Logs directory '
+                .ABC::env('DIR_LOGS')
+                .' needs to be writable for AbanteCart to work!';
         }
 
         if (!is_writable(ABC::env('DIR_PUBLIC').'images')) {
-            $errors['warning'] = 'Warning: Image directory '.ABC::env('DIR_PUBLIC')
+            $errors['warning'] = 'Warning: Image directory '
+                .ABC::env('DIR_PUBLIC')
                 .'images and all its children files/directories need to be writable for AbanteCart to work!';
         }
 
@@ -712,7 +718,7 @@ return [
                         'driver' => '{$options['cache_driver']}',
                         'stores' => [
                             '{$options['cache_driver']}' => [
-                                //folder where we storing cache files
+                                //folder where we store cache files
                                 'path'   => '{$dirs['cache']}',
                                 //time-to-live in seconds
                                 //also can be Datetime Object
@@ -1274,7 +1280,7 @@ EOD;
      * @param $options
      *
      * @return array
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      * @throws AException|Exception
      */
     public function validateExtensionOptions($options)

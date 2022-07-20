@@ -463,7 +463,6 @@ class ControllerPagesCatalogProduct extends AController
         if ($this->request->is_POST() && $this->validateForm()) {
             $product_data = $this->prepareData($this->request->post);
             $product_id = $this->data['product_id'] = (int) $this->request->get['product_id'];
-
             Product::updateProduct($product_id, $product_data);
 
             $this->extensions->hk_ProcessData($this, 'product_update');
@@ -1462,6 +1461,9 @@ class ControllerPagesCatalogProduct extends AController
         }
         if (!isset($data['language_id'])) {
             $data['language_id'] = $this->language->getContentLanguageID();
+        }
+        if (isset($data['manufacturer_id']) && !$data['manufacturer_id']) {
+            $data['manufacturer_id'] = null;
         }
         $data['product_category'] = $data['product_category'] ? : [];
         return $data;

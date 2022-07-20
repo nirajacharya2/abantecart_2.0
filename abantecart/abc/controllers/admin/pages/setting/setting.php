@@ -180,7 +180,6 @@ class ControllerPagesSettingSetting extends AController
         $this->data['cancel'] = $this->html->getSecureURL('setting/setting');
         $this->data['action'] = $this->html->getSecureURL('setting/setting');
 
-        $this->load->library('config_manager');
         $this->conf_mngr = new AConfigManager();
 
         //activate quick start guide button
@@ -692,7 +691,6 @@ class ControllerPagesSettingSetting extends AController
             $this->error['warning'] = $this->language->get('error_permission');
         }
 
-        $this->load->library('config_manager');
         $config_mngr = new AConfigManager();
         $result = $config_mngr->validate($group, $this->request->post, $store_id);
         $this->error = $result['error'];

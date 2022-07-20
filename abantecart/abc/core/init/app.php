@@ -291,6 +291,18 @@ if (php_sapi_name() == 'cli') {
     H::setDBUserVars();
 }
 
+
+// Config
+registerClass(
+    $registry,
+    'config',
+    'AConfig',
+    [$registry],
+    AConfig::class,
+    [$registry]
+);
+$config = $registry->get('config');
+
 // Cache
 registerClass(
     $registry,
@@ -300,10 +312,6 @@ registerClass(
     AbcCache::class,
     ['file']
 );
-
-// Config
-registerClass($registry, 'config', 'AConfig', [$registry], AConfig::class, [$registry]);
-$config = $registry->get('config');
 
 // Session
 $session_id = ABC::env('SESSION_ID');

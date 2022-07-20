@@ -174,7 +174,6 @@ class ControllerResponsesListingGridSetting extends AController
     private function _validateField($group, $field, $value)
     {
         $this->data['error'] = '';
-        $this->load->library('config_manager');
         $config_mngr = new AConfigManager();
         $result = $config_mngr->validate($group, [$field => $value]);
         $this->data['error'] = is_array($result['error']) ? current($result['error']) : $result['error'];

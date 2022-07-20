@@ -1,29 +1,50 @@
 <?php
-/**
- * ABC wrapper of Laravel Cache
- *
- */
+/*------------------------------------------------------------------------------
+  $Id$
+
+  AbanteCart, Ideal OpenSource Ecommerce Solution
+  http://www.AbanteCart.com
+
+  Copyright © 2011-2022 Belavier Commerce LLC
+
+  This source file is subject to Open Software License (OSL 3.0)
+  License details is bundled with this package in the file LICENSE.txt.
+  It is also available at this URL:
+  <http://www.opensource.org/licenses/OSL-3.0>
+
+ UPGRADE NOTE:
+   Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+   versions in the future. If you wish to customize AbanteCart for your
+   needs please refer to http://www.AbanteCart.com for more information.
+------------------------------------------------------------------------------*/
 
 namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use Closure;
+use DateInterval;
+use DateTimeInterface;
+use Exception;
 use Illuminate\Cache\CacheManager;
+use Illuminate\Cache\MemcachedConnector;
 use Illuminate\Container\Container;
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Filesystem\Filesystem;
+use Psr\SimpleCache\InvalidArgumentException;
 
 /**
  * Class AbcCache
  *
- * @method static \Illuminate\Contracts\Cache\Repository  store(string|null $name = null)
+ * @method static Repository  store(string|null $name = null)
  * @method static bool has(string $key)
  * @method static bool missing(string $key)
  * @method static int|bool increment(string $key, $value = 1)
  * @method static int|bool decrement(string $key, $value = 1)
  * @method static bool forever(string $key, $value)
- * @method static mixed sear(string $key, \Closure $callback)
- * @method static mixed rememberForever(string $key, \Closure $callback)
+ * @method static mixed sear(string $key, Closure $callback)
+ * @method static mixed rememberForever(string $key, Closure $callback)
  * @method static bool forget(string $key)
  *
  * @package abc\core\lib
@@ -42,7 +63,7 @@ class AbcCache
     {
         static::$storeConfig = $config ?: ABC::env('CACHE')['stores'][$defaultDriver];
         if(!static::$storeConfig){
-            throw new \Exception(__CLASS__.': Configuration of cache-driver '
+            throw new Exception(__CLASS__.': Configuration of cache-driver '
                 .$defaultDriver.' not found!. '
                 .'Please check your environment and file config/'.ABC::getStageName().'/config.php');
         }
@@ -135,7 +156,7 @@ class AbcCache
     protected function initMemcachedApp(&$app)
     {
 
-        $app['memcached.connector'] = new \Illuminate\Cache\MemcachedConnector();
+        $app['memcached.connector'] = new MemcachedConnector();
     }
 
     public function getConfig()
@@ -180,7 +201,7 @@ class AbcCache
     }
 
     /**
-     * @return \Illuminate\Contracts\Cache\Repository
+     * @return Repository
      */
     public function getCurrentStorage()
     {
@@ -190,7 +211,7 @@ class AbcCache
     /**
      * @param string $store
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function setCurrentStore(string $store)
     {
@@ -198,7 +219,7 @@ class AbcCache
             static::$currentStore = $store;
             $this->manager->setDefaultDriver($store);
         } else {
-            throw new \Exception('Storage '.$store
+            throw new Exception('Storage '.$store
                 .' not found in the configuration. See abc/config/*/config.php file for details');
         }
     }
@@ -216,7 +237,7 @@ class AbcCache
      *
      * @param  string $key
      * @param  mixed $value
-     * @param  \DateTimeInterface|\DateInterval|int|null $ttl
+     * @param  DateTimeInterface|DateInterval|int|null $ttl
      * @param string $store - storage name, if empty - will use default
      *
      *
@@ -249,7 +270,7 @@ class AbcCache
      * @param string $store - storage name, if empty - will use default
      *
      * @return mixed | false
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function get(string $key, string $store = '')
     {
@@ -280,7 +301,7 @@ class AbcCache
      *
      * @param  string $key
      * @param  mixed $value
-     * @param  \DateTimeInterface|\DateInterval|int|null $ttl
+     * @param  DateTimeInterface|DateInterval|int|null $ttl
      * @param string $store - storage name, if empty - will use default
      *
      * @return bool
@@ -294,30 +315,26 @@ class AbcCache
 
         $storage = $this->getStorage($store);
         $ttl = $ttl === null ? static::$storeConfig['ttl'] : $ttl;
-        if(!$storage){
-            return null;
-        }
-
-        return $storage->add($key, $value, $ttl);
+        return $storage?->add($key, $value, $ttl);
     }
 
     /**
      * Get an item from the cache, or execute the given Closure and store the result.
      *
      * @param  string  $key
-     * @param  \DateTimeInterface|\DateInterval|int|null  $ttl
-     * @param  \Closure  $callback
+     * @param  DateTimeInterface|DateInterval|int|null  $ttl
+     * @param  Closure  $callback
      * @param string $store - storage name, if empty - will use default
      * @return mixed
      */
-    public function remember(string $key, $ttl, \Closure $callback, string $store = '')
+    public function remember(string $key, $ttl, Closure $callback, string $store = '')
     {
         if( !$this->enabled || !$this->manager ){
             return null;
         }
 
         $storage = $this->getStorage($store);
-        $ttl = $ttl === null ? static::$storeConfig['ttl'] : $ttl;
+        $ttl = $ttl ?? static::$storeConfig['ttl'];
         return $storage->remember($key, $ttl, $callback);
     }
 
@@ -363,14 +380,13 @@ class AbcCache
     /**
      * @param string $store
      *
-     * @return \Illuminate\Contracts\Cache\Repository
+     * @return Repository
      */
     protected function getStorage(string $store = '')
     {
-        $store = !$store ? static::$currentStore : $store;
-        $store = !$store ? ABC::env('CACHE')['driver'] : $store;
-        $output = $this->manager->store($store);
-        return $output;
+        $store = $store ?: static::$currentStore;
+        $store = $store ?: ABC::env('CACHE')['driver'];
+        return $this->manager->store($store);
     }
 
     public function tags($tags, $store = '')
