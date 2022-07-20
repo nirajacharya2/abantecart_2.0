@@ -47,6 +47,7 @@ class ACurrency
      * @param $registry Registry
      *
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function __construct($registry)
     {
@@ -60,11 +61,11 @@ class ACurrency
          * @var AMessage
          */
         $this->message = $registry->get('messages');
-
-        $cache = $registry->get('cache');
+        /** @var AbcCache $cache */
+        $cache = Registry::cache();
         $cache_key = 'localization.currencies';
-        $cache_data = $cache->pull($cache_key);
-        if ($cache_data !== false) {
+        $cache_data = $cache->get($cache_key);
+        if( $cache_data !== null ) {
             $this->currencies = $cache_data;
         } else {
             $query = $this->db->query("SELECT * FROM ".$this->db->table_name("currencies"));
@@ -80,11 +81,12 @@ class ACurrency
                     'status'        => $result['status'],
                 ];
             }
-            $cache->push($cache_key, $this->currencies);
+            $cache->put($cache_key, $this->currencies);
         }
 
-        $currencyCode =
-            $this->isValidCodeFormat($this->request->get['currency']) ? $this->request->get['currency'] : '';
+        $currencyCode = $this->isValidCodeFormat($this->request->get['currency'])
+                ? $this->request->get['currency']
+                : '';
         if ($currencyCode && array_key_exists($currencyCode, $this->currencies)) {
             $this->set($currencyCode);
             // Currency is switched, set sign for external use via isSwitched method

@@ -35,16 +35,16 @@ class ControllerBlocksMenu extends AController
 
         $this->data['heading_title'] = $this->language->get('heading_title', 'blocks/menu');
 
-        $cache_key = 'storefront_menu'.
-            '.store_'.(int) $this->config->get('config_store_id')
+        $cache_key = 'storefront_menu.store_'
+            .(int)$this->config->get('config_store_id')
             .'_lang_'.$this->config->get('storefront_language_id');
-        $this->menu_items = $this->cache->pull($cache_key);
-        if ($this->menu_items === false) {
+        $this->menu_items = $this->cache->get($cache_key);
+        if ($this->menu_items === null) {
             $menu = new AMenu_Storefront();
             $this->menu_items = $menu->getMenuItems();
 
             //writes into cache result of calling _buildMenu func!
-            $this->cache->push($cache_key, $this->menu_items);
+            $this->cache->put($cache_key, $this->menu_items);
         }
 
         //build menu structure after caching. related to http/https urls
@@ -65,7 +65,7 @@ class ControllerBlocksMenu extends AController
         if (empty($this->menu_items[$parent])) {
             return $menu;
         }
-        $lang_id = (int) $this->config->get('storefront_language_id');
+        $lang_id = (int)$this->config->get('storefront_language_id');
 
         foreach ($this->menu_items[$parent] as $item) {
             if (preg_match("/^http/i", $item ['item_url'])) {

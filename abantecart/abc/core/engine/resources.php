@@ -21,7 +21,7 @@
 namespace abc\core\engine;
 
 use abc\core\ABC;
-use abc\core\cache\ACache;
+use abc\core\lib\AbcCache;
 use abc\core\lib\AConfig;
 use abc\core\lib\ADB;
 use abc\core\lib\AException;
@@ -34,7 +34,7 @@ use H;
  * @property  ALoader $load
  * @property  AHtml $html
  * @property  AConfig $config
- * @property  ACache $cache
+ * @property  AbcCache $cache
  * @property  ADB $db
  * @property  \abc\core\lib\ALanguageManager $language
  */
@@ -101,16 +101,17 @@ class AResource
     protected function loadType()
     {
         $cache_key = 'resources.'.$this->type;
-        $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '',
-                $cache_key).'.store_'.(int)$this->config->get('config_store_id');
-        $type_data = $this->cache->pull($cache_key);
-        if ($type_data === false || empty($type_data['type_id'])) {
+        $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '',$cache_key)
+                    .'.store_'.(int)$this->config->get('config_store_id');
+
+        $type_data = $this->cache->get($cache_key);
+        if ($type_data === null || empty($type_data['type_id'])) {
             $sql = "SELECT * "
                 ."FROM ".$this->db->table_name("resource_types")." "
                 ."WHERE type_name = '".$this->db->escape($this->type)."'";
             $query = $this->db->query($sql);
             $type_data = $query->row;
-            $this->cache->push($cache_key, $type_data);
+            $this->cache->put($cache_key, $type_data);
         }
         $this->type_id = (int)$type_data['type_id'];
         $this->type_dir = $type_data['default_directory'];
@@ -219,6 +220,7 @@ class AResource
      * @return string
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getResourceThumb($resource_id, $width, $height, $language_id = '')
     {
@@ -251,6 +253,7 @@ class AResource
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getResource($resource_id, $language_id = 0)
     {
@@ -266,8 +269,8 @@ class AResource
         //attempt to load cache
         $cache_key = 'resources.'.$resource_id;
         $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key);
-        $resource = $this->cache->pull($cache_key);
-        if ($resource === false) {
+        $resource = $this->cache->get($cache_key);
+        if ($resource === null) {
             $where = "WHERE rl.resource_id = ".$this->db->escape($resource_id);
             $sql = "SELECT
                         rd.*,
@@ -291,7 +294,7 @@ class AResource
             foreach ($result as $r) {
                 $resource[$r['language_id']] = $r;
             }
-            $this->cache->push($cache_key, $resource);
+            $this->cache->put($cache_key, $resource);
         }
 
         $result = [];
@@ -436,20 +439,21 @@ class AResource
     /**
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getAllResourceTypes()
     {
         //attempt to load cache
         $cache_key = 'resources.types.store_'.(int)$this->config->get('config_store_id');
-        $types = $this->cache->pull($cache_key);
-        if ($types !== false) {
+        $types = $this->cache->get($cache_key);
+        if ($types !== null) {
             return $types;
         }
 
         $sql = "SELECT * FROM ".$this->db->table_name("resource_types")." ";
         $query = $this->db->query($sql);
         $types = $query->rows;
-        $this->cache->push($cache_key, $types);
+        $this->cache->put($cache_key, $types);
 
         return $types;
     }
@@ -472,6 +476,7 @@ class AResource
      * @return array
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getMainThumb($object_name, $object_id, $width, $height, $noimage = true)
     {
@@ -506,6 +511,7 @@ class AResource
      * @return array
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getResourceAllObjects(
         $object_name,
@@ -696,6 +702,7 @@ class AResource
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getResources($object_name, $object_id, $language_id = 0)
     {
@@ -713,8 +720,8 @@ class AResource
         //attempt to load cache
         $cache_key = 'resources.'.$this->type.'.'.$object_name.'.'.$object_id;
         $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id.'_lang_'.$language_id;
-        $resources = $this->cache->pull($cache_key);
-        if ($resources !== false) {
+        $resources = $this->cache->get($cache_key);
+        if ($resources !== null) {
             return $resources;
         }
 
@@ -744,7 +751,7 @@ class AResource
 
         $query = $this->db->query($sql);
         $resources = $query->rows;
-        $this->cache->push($cache_key, $resources);
+        $this->cache->put($cache_key, $resources);
         return $resources;
     }
 
@@ -770,6 +777,7 @@ class AResource
      * @return array
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getMainThumbList($object_name, $object_ids = [], $width = 0, $height = 0, $noimage = true)
     {
@@ -801,8 +809,8 @@ class AResource
         $cache_key = 'resources.list.'.$this->type.'.'.$object_name.'.'.$width.'x'.$height.'.'.md5(implode('.',
                 $object_ids));
         $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id.'_lang_'.$language_id;
-        $output = $this->cache->pull($cache_key);
-        if ($output !== false) {
+        $output = $this->cache->get($cache_key);
+        if ($output !== null) {
             return $output;
         }
 
@@ -897,7 +905,7 @@ class AResource
             }
         }
 
-        $this->cache->push($cache_key, $output);
+        $this->cache->put($cache_key, $output);
         return $output;
     }
 
@@ -911,6 +919,7 @@ class AResource
      * @return array
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getMainImage($object_name, $object_id, $width, $height, $noimage = true)
     {

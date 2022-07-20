@@ -27,6 +27,8 @@ use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
 use abc\models\catalog\Category;
 use abc\models\catalog\Product;
+use abc\models\catalog\ProductDiscount;
+use abc\models\catalog\ProductSpecial;
 use H;
 use stdClass;
 
@@ -174,26 +176,29 @@ class ControllerResponsesListingGridProduct extends AController
                 $ids = explode(',', $this->request->post['id']);
                 if (!empty($ids)) {
                     $ids = array_unique($ids);
-                    foreach ($ids as $id) {
-                        $err = $this->validateDelete($id);
-                        if (!empty($err)) {
-                            $error = new AError('');
-                            return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
-                        }
-                        $this->extensions->hk_ProcessData($this, 'deleting', ['product_id' => $id]);
+                    $this->db->beginTransaction();
+                    try {
+                        foreach ($ids as $id) {
+                            $err = $this->validateDelete($id);
+                            if (!empty($err)) {
+                                $error = new AError('');
+                                return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                            }
+                            $product = Product::with('categories')->find($id);
+                            $categories = $product->categories;
 
-                        $categories = $this->db->table('products_to_categories')
-                                     ->where(['product_id' => $id])
-                                     ->get();
-                        //TODO: think here!!!
-                        $this->model_catalog_product->deleteProduct($id);
-                        //run products count recalculation
-                        foreach($categories as $item){
-                            $category = Category::find($item->category_id);
-                            if($category){
-                                $category->touch();
+                            $product->forceDelete();
+                            //run products count recalculation
+                            foreach ($categories as $item) {
+                                $item->touch();
                             }
                         }
+                        $this->db->commit();
+                    } catch (\Exception $e) {
+                        $this->db->rollback();
+                        $error = new AError($e->getMessage());
+                        $error->toLog();
+                        return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $e->getMessage()]);
                     }
                 }
                 break;
@@ -222,7 +227,7 @@ class ControllerResponsesListingGridProduct extends AController
                             }
                         }
                         if (!empty($upd)) {
-                            Product::updateProduct($id, $upd, $this->language->getContentLanguageID());
+                            Product::updateProduct($id, $upd);
                             $this->extensions->hk_ProcessData($this, 'update', ['product_id' => $id]);
                         }
                     }
@@ -231,7 +236,7 @@ class ControllerResponsesListingGridProduct extends AController
             case 'relate':
                 $ids = explode(',', $this->request->post['id']);
                 if (!empty($ids)) {
-                    $this->model_catalog_product->relateProducts($ids);
+                    Product::relateProducts($ids);
                 }
                 break;
             default:
@@ -246,8 +251,9 @@ class ControllerResponsesListingGridProduct extends AController
      * update only one field
      *
      * @return void
-     * @throws \abc\core\lib\AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function update_field()
     {
@@ -282,7 +288,7 @@ class ControllerResponsesListingGridProduct extends AController
                     $value = H::dateDisplay2ISO($value);
                 }
                 $data = [$key => $value];
-                Product::updateProduct($product_id, $data, $this->language->getContentLanguageID());
+                Product::updateProduct($product_id, $data);
             }
             $this->extensions->hk_ProcessData($this, 'update_field', ['product_id' => $product_id]);
             return null;
@@ -302,8 +308,8 @@ class ControllerResponsesListingGridProduct extends AController
                         $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                         return null;
                     }
-                    Product::updateProduct($k, [$f => $v], $this->language->getContentLanguageID());
-                    $this->extensions->hk_ProcessData($this, __FUNCTION__, ['product_id' => $k]);
+                    Product::updateProduct($k, [$f => $v]);
+                    $this->extensions->hk_ProcessData($this, 'update_field', ['product_id' => $k]);
                 }
             }
         }
@@ -320,11 +326,13 @@ class ControllerResponsesListingGridProduct extends AController
 
         if (!$this->user->canModify('listing_grid/product')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            $error->toJSONResponse('NO_PERMISSIONS_402',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/product'),
                     'reset_value' => true,
-                ]);
+                ]
+            );
+            return;
         }
 
         $this->loadLanguage('catalog/product');
@@ -333,7 +341,8 @@ class ControllerResponsesListingGridProduct extends AController
             //request sent from edit form. ID in url
             foreach ($this->request->post as $key => $value) {
                 $data = [$key => $value];
-                $this->model_catalog_product->updateProductDiscount($this->request->get['id'], $data);
+                $discount = ProductDiscount::find($this->request->get['id']);
+                $discount?->update($data);
             }
 
             $this->extensions->hk_ProcessData(
@@ -343,12 +352,11 @@ class ControllerResponsesListingGridProduct extends AController
                     'product_id' => $this->request->get['id']
                 ]
             );
-            return null;
+            return;
         }
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
-        return null;
     }
 
     public function update_special_field()
@@ -373,7 +381,8 @@ class ControllerResponsesListingGridProduct extends AController
             //request sent from edit form. ID in url
             foreach ($this->request->post as $key => $value) {
                 $data = [$key => $value];
-                $this->model_catalog_product->updateProductSpecial($this->request->get['id'], $data);
+                $special = ProductSpecial::find($this->request->get['id']);
+                $special?->update($data);
             }
 
             $this->extensions->hk_ProcessData(
@@ -383,12 +392,11 @@ class ControllerResponsesListingGridProduct extends AController
                     'product_id' => $this->request->get['id']
                 ]
             );
-            return null;
+            return;
         }
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
-        return null;
     }
 
     public function update_relations_field()

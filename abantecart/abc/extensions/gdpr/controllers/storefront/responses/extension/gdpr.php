@@ -145,7 +145,7 @@ class ControllerResponsesExtensionGdpr extends AController
                 fclose($file_handler);
 
             } else {
-                throw new AException(AC_ERR_LOAD, 'Error: Could not find file '.$file.'!');
+                throw new AException('Error: Could not find file '.$file.'!', AC_ERR_LOAD);
             }
         } else {
             exit('Error: Headers already sent out!');

@@ -29,8 +29,8 @@ class ZonesToLocation extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'country_id'  => 'int',
-        'zone_id'     => 'int',
+        'country_id' => 'int',
+        'zone_id' => 'int',
         'location_id' => 'int',
     ];
 
@@ -45,6 +45,100 @@ class ZonesToLocation extends BaseModel
         'location_id',
         'date_added',
         'date_modified',
+        'zone_to_location_id'
+    ];
+    protected $rules = [
+        'zone_to_location_id'=>[
+            'checks' => [
+                'integer',
+                'required',
+                'sometimes',
+                'min:1'
+            ],
+            'messages' => [
+                'integer' => [
+                    'language_key' => 'error_zone_to_location_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'zone to location id must be integer!',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_zone_to_location_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'zone to location id required!',
+                    'section' => 'admin'
+                ],
+                'min' => [
+                    'language_key' => 'error_zone_to_location_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'zone to location id must be more 1!',
+                    'section' => 'admin'
+                ],
+            ]
+        ],
+        'country_id' => [
+            'checks' => [
+                'required',
+                'sometimes',
+                'integer'
+            ],
+            'messages' => [
+                'integer' => [
+                    'language_key' => 'error_country_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'country id must be integer!',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_country_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'country id required!',
+                    'section' => 'admin'
+                ],
+            ]
+        ],
+        'zone_id' => [
+            'checks' => [
+                'required',
+                'integer',
+                'sometimes'
+            ],
+            'messages' => [
+                'integer' => [
+                    'language_key' => 'error_zone_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'zone id must be integer!',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_zone_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'zone id required!',
+                    'section' => 'admin'
+                ],
+            ]
+        ],
+        'location_id' => [
+            'checks' => [
+                'required',
+                'sometimes',
+                'integer'
+            ],
+            'messages' => [
+                'integer' => [
+                    'language_key' => 'error_location_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'location id must be integer!',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_location_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'location id required!',
+                    'section' => 'admin'
+                ],
+            ]
+        ]
     ];
 
     public function zone()

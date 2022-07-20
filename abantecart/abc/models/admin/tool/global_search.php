@@ -413,6 +413,7 @@ class ModelToolGlobalSearch extends Model
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getResult($search_category, $keyword, $mode = 'listing')
     {
@@ -801,6 +802,7 @@ class ModelToolGlobalSearch extends Model
      * @param array $table
      *
      * @return array
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */

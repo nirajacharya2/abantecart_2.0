@@ -24,10 +24,6 @@ use abc\core\ABC;
 use abc\core\engine\Registry;
 use DOMDocument;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
 /**
  * Class AConnect
  *
@@ -362,7 +358,7 @@ final class AConnect
                 if ($this->silent_mode) {
                     return false;
                 } else {
-                    throw new AException(AC_ERR_CONNECT_METHOD, 'No connect method available ( curl | socket )');
+                    throw new AException('No connect method available ( curl | socket )', AC_ERR_CONNECT_METHOD);
                 }
         }
 

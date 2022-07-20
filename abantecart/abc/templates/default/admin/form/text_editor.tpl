@@ -1,6 +1,6 @@
 <?php
 //unique id
-$wrapper_id = \abc\core\helper\AHelperUtils::randomWord(6);
+$wrapper_id = \H::randomWord(6);
 ?>
 <div id="<?php echo $wrapper_id ?>" class="text-editor panel panel-default">
 	<ul class="nav nav-tabs" role="tablist">
@@ -95,24 +95,27 @@ $wrapper_id = \abc\core\helper\AHelperUtils::randomWord(6);
 			    id="text_editor_<?php echo $id ?>"
 			    ><?php echo $value ?>
 	        </textarea>
-		</div>
+        </div>
 
-	</div>
+    </div>
 
 </div>
 
 
 <script type="application/javascript">
     $(window).load(function () {
-		tinymce.remove();
-		//initiate editor
-		mcei.selector = 'textarea#text_editor_<?php echo $id ?>';
+        try {
+            tinymce.remove('textarea#text_editor_<?php echo $id ?>');
+        } catch (e) {
+        }
+        //initiate editor
+        mcei.selector = 'textarea#text_editor_<?php echo $id ?>';
 
-		tinymce.baseURL = "<?php echo $this->templateResource('vendor/tinymce/tinymce'); ?>";
+        tinymce.baseURL = "<?php echo $this->templateResource('vendor/assets/tinymce/tinymce'); ?>";
 
-		tinymce.init(mcei);
+        tinymce.init(mcei);
 
-		//for modal mode
+        //for modal mode
 		if($('#<?php echo $wrapper_id; ?>').parents('.modal-content').length>0){
 			$('#<?php echo $wrapper_id; ?> a.qt_cnt_expand').hide();
 		}
@@ -178,27 +181,27 @@ $wrapper_id = \abc\core\helper\AHelperUtils::randomWord(6);
 			editor = $('#<?php echo $id ?>');
 			textareaInsert(editor, '<!-- comment -->');
 			return false;
-		});
+        });
 
-		$('#<?php echo $wrapper_id; ?> a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-			var newtab_id = $(e.target).attr('aria-controls'), // newly activated tab
-		        prevtab_id = $(e.relatedTarget).attr('aria-controls'); // previous active tab
+        $('#<?php echo $wrapper_id; ?> a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            var newtab_id = $(e.target).attr('aria-controls'), // newly activated tab
+                prevtab_id = $(e.relatedTarget).attr('aria-controls'); // previous active tab
 
-			var textarea, value;
-			textarea = $('#'+prevtab_id+ ' textarea');
-			
-			if(prevtab_id == 'visual_<?php echo $wrapper_id?>'){
-				value = tinyMCE.activeEditor.getContent();
-				value = visual2html(value);
-				$('#'+newtab_id+ ' textarea')
-						.val( value )
-						.removeAttr('disabled');
-			} else {
-				$('#'+newtab_id+ ' textarea')
-						.val(textarea.val())
-						.removeAttr('disabled');
-				if(tinyMCE.activeEditor != null) {
-					value = textarea.val();
+            var textarea, value;
+            textarea = $('#' + prevtab_id + ' textarea');
+
+            if (prevtab_id == 'visual_<?php echo $wrapper_id?>') {
+                value = tinyMCE.get('text_editor_<?php echo $id ?>').getContent();
+                value = visual2html(value);
+                $('#' + newtab_id + ' textarea')
+                    .val(value)
+                    .removeAttr('disabled');
+            } else {
+                $('#' + newtab_id + ' textarea')
+                    .val(textarea.val())
+                    .removeAttr('disabled');
+                if (tinyMCE.activeEditor != null) {
+                    value = textarea.val();
 					value = html2visual(value);
 					tinyMCE.activeEditor.setContent( value );
 				}

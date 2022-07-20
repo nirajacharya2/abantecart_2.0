@@ -22,16 +22,13 @@ namespace abc\core\lib;
 
 use abc\core\engine\Registry;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class ALength
  */
 class ALength
 {
-    protected $lengths = array();
+    protected $lengths = [];
     /**
      * @var ADB
      */
@@ -41,36 +38,38 @@ class ALength
      */
     protected $config;
 
-    public $predefined_lengths = array(
-        'cm' => array(
+    public $predefined_lengths = [
+        'cm' => [
             'length_class_id' => 1,
             'value'           => 1.00000000,
             'iso_code'        => 'CMET',
             'language_id'     => 1,
             'title'           => 'Centimeter',
             'unit'            => 'cm',
-        ),
-        'mm' => array(
+        ],
+        'mm' => [
             'length_class_id' => 2,
             'value'           => 10.00000000,
             'iso_code'        => 'MMET',
             'language_id'     => 1,
             'title'           => 'Millimeter',
             'unit'            => 'mm',
-        ),
-        'in' => array(
+        ],
+        'in' => [
             'length_class_id' => 3,
             'value'           => 0.39370000,
             'iso_code'        => 'INCH',
             'language_id'     => 1,
             'title'           => 'Inch',
             'unit'            => 'in',
-        ),
-    );
-    public $predefined_length_ids = array();
+        ],
+    ];
+    public $predefined_length_ids = [];
 
     /**
      * @param $registry Registry
+     *
+     * @throws \ReflectionException
      */
     public function __construct($registry)
     {
@@ -80,8 +79,8 @@ class ALength
         $cache = $registry->get('cache');
         $language_id = (int)$registry->get('language')->getLanguageID();
         $cache_key = 'localization.length_classes.lang_'.$language_id;
-        $cache_data = $cache->pull($cache_key);
-        if ($cache_data !== false) {
+        $cache_data = $cache->get($cache_key);
+        if ($cache_data !== null) {
             $this->lengths = $cache_data;
         } else {
             $sql = "SELECT *, mc.length_class_id
@@ -99,7 +98,7 @@ class ALength
                 }
                 $this->lengths[strtolower($row['unit'])] = $row;
             }
-            $cache->push($cache_key, $this->lengths);
+            $cache->put($cache_key, $this->lengths);
         }
         foreach ($this->predefined_lengths as $unit => $length) {
             $this->predefined_length_ids[] = $length['length_class_id'];

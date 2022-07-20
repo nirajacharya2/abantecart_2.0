@@ -19,7 +19,6 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\cache\ACache;
 use abc\core\engine\ALanguage;
 use abc\core\engine\ALoader;
 use abc\core\engine\ExtensionsApi;
@@ -34,7 +33,9 @@ use abc\models\storefront\ModelToolOnlineNow;
 use abc\modules\events\ABaseEvent;
 use Exception;
 use H;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\ValidationException;
+use Psr\SimpleCache\InvalidArgumentException;
 use ReCaptcha\ReCaptcha;
 use ReflectionException;
 
@@ -101,7 +102,7 @@ class ACustomer extends ALibBase
      */
     protected $config;
     /**
-     * @var ACache
+     * @var AbcCache
      */
     protected $cache;
     /**
@@ -139,7 +140,9 @@ class ACustomer extends ALibBase
      *
      * @param int $customer_id
      *
-     * @throws AException|ReflectionException
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function __construct($registry, $customer_id = 0)
     {
@@ -241,17 +244,18 @@ class ACustomer extends ALibBase
         }
         $config = Registry::config();
         $filter = [
-                'search_operator' => 'equal',
-                'loginname' => $loginname,
-                'password' => $password,
-                'status' => 1,
+            'search_operator' => 'equal',
+            'loginname'       => $loginname,
+            'password'        => $password,
+            'status'          => 1,
 
         ];
         if ($config->get('config_customer_approval')) {
             $filter['approved'] = 1;
         }
 
-        $customer_data = Customer::getCustomers(['filter' => $filter])->first();
+        /** @var Collection $customer_data */
+        $customer_data = Customer::search(['filter' => $filter])->first();
         if ($customer_data) {
             $this->customerInit($customer_data->toArray());
 
@@ -620,6 +624,7 @@ class ACustomer extends ALibBase
      *
      * @return bool
      * @throws Exception|ValidationException
+     * @throws InvalidArgumentException
      */
     public function debitTransaction($data)
     {
@@ -635,6 +640,7 @@ class ACustomer extends ALibBase
      *
      * @return bool
      * @throws Exception
+     * @throws InvalidArgumentException
      */
     public function creditTransaction($data)
     {
@@ -815,7 +821,7 @@ class ACustomer extends ALibBase
             return false;
         }
         $keys = array_keys($cart_data);
-        if (!empty($keys)) {
+        if (is_array($keys) && !empty($keys)) {
             foreach ($keys as $k) {
                 if (is_int(strpos($k, 'store_'))) {
                     return true;
@@ -901,7 +907,7 @@ class ACustomer extends ALibBase
             $customer_id = $this->unauth_customer['customer_id'];
         }
         if (!$customer_id) {
-            return $output;
+            return [];
         }
 
         $customer = $this->model();
@@ -921,7 +927,8 @@ class ACustomer extends ALibBase
      * @param array $data - amount, order_id, transaction_type, description, comments, creator
      *
      * @return bool
-     * @throws Exception
+     * @throws Exception|ValidationException
+     * @throws InvalidArgumentException
      */
     protected function recordTransaction($data)
     {
@@ -958,6 +965,7 @@ class ACustomer extends ALibBase
      * @throws AException
      * @throws ValidationException
      * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public static function createCustomer($data, $subscribe_only = false)
     {
@@ -1035,10 +1043,10 @@ class ACustomer extends ALibBase
             }
 
             $db->commit();
-        }catch(ValidationException $e){
+        } catch (ValidationException $e) {
             $db->rollback();
             throw $e;
-        }catch(Exception $e){
+        } catch (Exception $e) {
             $db->rollback();
             throw new AException(__CLASS__.': '.$e->getMessage(), 0, __FILE__);
         }
@@ -1073,6 +1081,7 @@ class ACustomer extends ALibBase
      * @return bool
      * @throws AException
      * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public function editCustomer( $data )
     {
@@ -1128,6 +1137,7 @@ class ACustomer extends ALibBase
      * @return bool
      * @throws AException
      * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public function editPassword( $loginname, $password )
     {
@@ -1188,6 +1198,7 @@ class ACustomer extends ALibBase
      * @return array
      * @throws AException
      * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public static function validateRegistrationData( $data )
     {
@@ -1285,6 +1296,7 @@ class ACustomer extends ALibBase
      * @return array
      * @throws AException
      * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public static function validateSubscribeData( $data )
     {

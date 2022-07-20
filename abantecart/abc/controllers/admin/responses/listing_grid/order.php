@@ -29,6 +29,7 @@ use abc\models\order\Order;
 use abc\models\order\OrderStatus;
 use Exception;
 use H;
+use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 use stdClass;
 
@@ -74,19 +75,19 @@ class ControllerResponsesListingGridOrder extends AController
             'limit' => $limit,
         ];
         if (isset($this->request->get['status']) && $this->request->get['status'] !== 'default') {
-            $data['filter_order_status_id'] = $this->request->get['status'];
+            $data['filter']['order_status_id'] = $this->request->get['status'];
         }
         if (isset($this->request->get['date_end']) && $this->request->get['date_end'] !== '') {
-            $data['filter_date_end'] = H::dateDisplay2ISO($this->request->get['date_end']);
+            $data['filter']['date_end'] = H::dateDisplay2ISO($this->request->get['date_end']);
         }
         if (isset($this->request->get['date_start']) && $this->request->get['date_start'] !== '') {
-            $data['filter_date_start'] = H::dateDisplay2ISO($this->request->get['date_start']);
+            $data['filter']['date_start'] = H::dateDisplay2ISO($this->request->get['date_start']);
         }
         if (H::has_value($this->request->get['customer_id'])) {
-            $data['filter_customer_id'] = $this->request->get['customer_id'];
+            $data['filter']['customer_id'] = $this->request->get['customer_id'];
         }
         if (H::has_value($this->request->get['product_id'])) {
-            $data['filter_product_id'] = $this->request->get['product_id'];
+            $data['filter']['product_id'] = $this->request->get['product_id'];
         }
 
         if (isset($this->request->post['_search']) && $this->request->post['_search'] == 'true') {
@@ -96,9 +97,9 @@ class ControllerResponsesListingGridOrder extends AController
                 if (!in_array($rule['field'], $allowedFields)) {
                     continue;
                 }
-                $data['filter_'.$rule['field']] = $rule['data'];
+                $data['filter'][$rule['field']] = $rule['data'];
                 if ($rule['field'] == 'date_added') {
-                    $data['filter_'.$rule['field']] = H::dateDisplay2ISO($rule['data']);
+                    $data['filter'][$rule['field']] = H::dateDisplay2ISO($rule['data']);
                 }
             }
         }
@@ -111,7 +112,7 @@ class ControllerResponsesListingGridOrder extends AController
             $statuses[(string) $item['order_status_id']] = $item['description']['name'];
         }
 
-        $results = Order::getOrders($data);
+        $results = Order::search($data);
         $total = $results[0]['total_num_rows'];
         if ($total > 0) {
             $total_pages = ceil($total / $limit);
@@ -121,6 +122,7 @@ class ControllerResponsesListingGridOrder extends AController
 
         if ($page > $total_pages) {
             $page = $total_pages;
+            $data['start'] = ($page - 1) * $limit;
         }
 
         $response = new stdClass();
@@ -134,10 +136,8 @@ class ControllerResponsesListingGridOrder extends AController
             $response->rows[$i]['id'] = $result['order_id'];
             $response->userdata->order_status_id[$result['order_id']] = $result['order_status_id'];
             //if status not-reversal or not displayed
-            if (in_array(
-                    $this->order_status->getStatusById($result['order_status_id']),
-                    (array) ABC::env('ORDER')['not_reversal_statuses']
-                )
+            if (in_array($this->order_status->getStatusById($result['order_status_id']),
+                    (array)ABC::env('ORDER')['not_reversal_statuses'])
                 || !in_array($result['order_status_id'], array_keys($statuses))) {
                 $orderStatus = $result['status'];
             } else {
@@ -155,11 +155,16 @@ class ControllerResponsesListingGridOrder extends AController
                 $result['name'],
                 $orderStatus,
                 H::dateISO2Display(
-                    $result['date_added'], $this->language->get('date_format_short')." ".$this->language->get(
-                                             'time_format_short'
-                                         )
+                    $result['date_added'],
+                    $this->language->get('date_format_short')
+                        ." "
+                        .$this->language->get('time_format_short')
                 ),
-                $this->currency->format($result['total'], $result['currency'], $result['value']),
+                $this->currency->format(
+                    $result['total'],
+                    $result['currency'],
+                    $result['value']
+                ),
             ];
             $i++;
         }
@@ -199,7 +204,7 @@ class ControllerResponsesListingGridOrder extends AController
                     if (!empty($ids)) {
                         Order::whereIn('order_id', $ids)->forceDelete();
                     }
-                    $this->db->commt();
+                    $this->db->commit();
                 } catch (Exception $e) {
                     $this->db->rollback();
                     $error = new AError('');
@@ -222,7 +227,7 @@ class ControllerResponsesListingGridOrder extends AController
                         foreach ($ids as $id) {
                             Order::editOrder(
                                 $id,
-                                ['order_status_id' => (int) $this->request->post['order_status_id'][$id]]
+                                ['order_status_id' => (int)$this->request->post['order_status_id'][$id]]
                             );
                         }
                     } catch (Exception $e) {
@@ -250,8 +255,9 @@ class ControllerResponsesListingGridOrder extends AController
      * update only one field
      *
      * @return void
-     * @throws ReflectionException
      * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function update_field()
     {
@@ -262,17 +268,13 @@ class ControllerResponsesListingGridOrder extends AController
 
         if (!$this->user->canModify('listing_grid/order')) {
             $error = new AError('');
-
-            return $error->toJSONResponse(
-                'NO_PERMISSIONS_402',
+            $error->toJSONResponse( 'NO_PERMISSIONS_402',
                 [
-                    'error_text'  => sprintf(
-                        $this->language->get('error_permission_modify'),
-                        'listing_grid/order'
-                    ),
+                    'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/order'),
                     'reset_value' => true,
                 ]
             );
+            return;
         }
 
         if (H::has_value($this->request->post['downloads'])) {
@@ -281,7 +283,9 @@ class ControllerResponsesListingGridOrder extends AController
             foreach ($data as $order_download_id => $item) {
                 if (isset($item['expire_date'])) {
                     $item['expire_date'] = $item['expire_date']
-                        ? H::dateDisplay2ISO($item['expire_date'], $this->language->get('date_format_short'))
+                        ? H::dateDisplay2ISO(
+                            $item['expire_date'],
+                            $this->language->get('date_format_short'))
                         : '';
                 }
                 $this->model_catalog_download->editOrderDownload($order_download_id, $item);

@@ -1,4 +1,4 @@
-<?php  
+<?php
 /*------------------------------------------------------------------------------
   $Id$
 
@@ -17,7 +17,9 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\storefront;
+
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 
@@ -27,45 +29,45 @@ class ControllerBlocksCouponCodes extends AController
     public function main($action = '')
     {
         //init controller data
-        $this->extensions->hk_InitData($this,__FUNCTION__);
-		$this->loadLanguage('checkout/payment');
-		if (!$this->config->get('coupon_status')) {
-			return null;
-		}
+        $this->extensions->hk_InitData($this, __FUNCTION__);
+        $this->loadLanguage('checkout/payment');
+        if (!$this->config->get('coupon_status')) {
+            return null;
+        }
 
-		$this->data['coupon_status'] = $this->config->get('coupon_status');
+        $this->data['coupon_status'] = $this->config->get('coupon_status');
         $entered_cpn_code = $this->request->post['coupon'] ?? $this->session->data['coupon'];
 
-		$form = new AForm();
+        $form = new AForm();
         $form->setForm(['form_name' => 'coupon']);
 
-        $this->data[ 'coupon_code' ] = $entered_cpn_code;
-		$this->data[ 'form_open' ] = $form->getFieldHtml(
+        $this->data['coupon_code'] = $entered_cpn_code;
+        $this->data['form_open'] = $form->getFieldHtml(
             [
-                        'type' => 'form',
-                        'name' => 'coupon',
-                        'action' => $action,
+                'type'   => 'form',
+                'name'   => 'coupon',
+                'action' => $action,
                 'csrf'   => true,
             ]
         );
         $this->data['coupon'] = $form->getFieldHtml(
             [
-                                       'type' => 'input',
-		                               'name' => 'coupon',
-		                               'value' => $entered_cpn_code,
+                'type'  => 'input',
+                'name'  => 'coupon',
+                'value' => $entered_cpn_code,
             ]
         );
         $this->data['submit'] = $form->getFieldHtml(
             [
-                             'type' => 'submit',
+                'type' => 'submit',
                 'name' => $this->language->get('button_coupon'),
             ]
         );
 
-		$this->view->batchAssign($this->data);
-		$this->processTemplate('blocks/coupon_form.tpl');
+        $this->view->batchAssign($this->data);
+        $this->processTemplate('blocks/coupon_form.tpl');
 
         //update controller data
-        $this->extensions->hk_UpdateData($this,__FUNCTION__);
-	}
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
 }

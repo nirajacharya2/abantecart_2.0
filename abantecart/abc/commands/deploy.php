@@ -121,13 +121,13 @@ class Deploy extends BaseCommand
     protected function switchConfig($stage_name)
     {
         if (!trim($stage_name)) {
-            throw new AException(AC_ERR_USER_ERROR, "Error: Wrong stage name!");
+            throw new AException("Error: Wrong stage name!", AC_ERR_USER_ERROR);
         }
         $stage_config = ABC::env('DIR_CONFIG').$stage_name.DS.'config.php';
         if ( !is_file($stage_config) ){
             throw new AException(
-                AC_ERR_USER_ERROR,
-                "Error: Cannot find config file of stage (looking for ".$stage_config." )!");
+                "Error: Cannot find config file of stage (looking for ".$stage_config." )!",
+                AC_ERR_USER_ERROR);
         }
 
         $tmp_file = ABC::env('DIR_CONFIG').'tmp.php';
@@ -149,15 +149,17 @@ return '".$stage_name."';
         if (file_exists($enabled_config)) {
             $result = rename($enabled_config, $enabled_config.'.bkp');
             if (!$result) {
-                throw new AException(AC_ERR_USER_ERROR,
-                    "Cannot rename prior config-file ".$enabled_config.". Please check permissions.");
+                throw new AException(
+                    "Cannot rename prior config-file ".$enabled_config.". Please check permissions.",
+                    AC_ERR_USER_ERROR);
             }
         }
         //let's switch
         $result = rename($tmp_file, $enabled_config);
         if (!$result) {
-            throw new AException(AC_ERR_USER_ERROR,
-                "Cannot rename temporary file ".$tmp_file." to ".$enabled_config.".");
+            throw new AException(
+                "Cannot rename temporary file ".$tmp_file." to ".$enabled_config.".",
+                AC_ERR_USER_ERROR);
         }
         return true;
     }

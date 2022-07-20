@@ -113,7 +113,7 @@ class ControllerResponsesListingGridMessageGrid extends AController
     }
 
     /**
-     * @return void
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws AException|ReflectionException
      */
     public function update()

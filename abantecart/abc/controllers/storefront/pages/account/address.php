@@ -53,6 +53,7 @@ class ControllerPagesAccountAddress extends AController
     }
 
     /**
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */

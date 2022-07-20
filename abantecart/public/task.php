@@ -20,6 +20,7 @@
 
 // Required PHP Version
 use abc\core\ABC;
+use abc\core\engine\Registry;
 use abc\core\lib\ACurrency;
 use abc\core\lib\ADebug;
 use abc\core\lib\AError;
@@ -27,7 +28,7 @@ use abc\core\lib\AJson;
 use abc\core\lib\ATaskManager;
 
 const DS = DIRECTORY_SEPARATOR;
-require dirname(__DIR__).DS.'abc'.DS.'core'.DS.'abc.php';
+require dirname(__DIR__).DS.'abc'.DS.'core'.DS.'ABC.php';
 
 ABC::env('MIN_PHP_VERSION', '8.1.0');
 if (version_compare(phpversion(), ABC::env('MIN_PHP_VERSION'), '<') == true) {
@@ -42,7 +43,7 @@ ABC::env('IS_ADMIN', true);
 $app = new ABC();
 $app->init();
 ob_start();
-$registry = \abc\core\engine\Registry::getInstance();
+$registry = Registry::getInstance();
 
 $step_result = null;
 // add to settings API et task_api_key
@@ -109,7 +110,12 @@ if ($mode && !$task_id) {
             if ($run_mode != 'continue') {
                 $task_details = $tm->getTaskById($task_id);
                 foreach ($task_details['steps'] as $step) {
-                    $tm->updateStep($step['step_id'], ['status' => $tm::STATUS_READY]);
+                    $tm->updateStep(
+                        $step['step_id'],
+                        [
+                            'status' => $tm::STATUS_READY,
+                        ]
+                    );
                 }
             }
 
@@ -173,7 +179,7 @@ if ($mode != 'ajax' && !$step_id) {
                 -webkit-animation: ellipsis steps(4, end) 900ms infinite;
                 animation: ellipsis steps(4, end) 900ms infinite;
                 content: "\2026"; /* ascii code for the ellipsis character */
-                width: 0px;
+                width: 0;
             }
 
             @keyframes ellipsis {
@@ -196,16 +202,16 @@ if ($mode != 'ajax' && !$step_id) {
              task run via ajax
              */
             jQuery(document).ready(function () {
-                var data = <?php echo AJson::encode($data); ?>;
+                let data = <?php echo AJson::encode($data); ?>;
                 runTaskUI(data);
             });
 
-            var base_url = '<?php echo ABC::env('HTTPS_SERVER'); ?>task.php';
-            var abort_task_url = '<?php echo $abort_task_url; ?>';
-            var task_fail = false;
-            var task_complete_text = task_fail_text = '';
+            let base_url = '<?php echo ABC::env('HTTPS_SERVER'); ?>task.php';
+            let abort_task_url = '<?php echo $abort_task_url; ?>';
+            let task_fail = false;
+            let task_complete_text = task_fail_text = '';
 
-            var defaultTaskMessages = {
+            let defaultTaskMessages = {
                 task_failed: 'Task Failed',
                 task_success: 'Task was completed',
                 task_abort: 'Task was aborted',
@@ -217,8 +223,8 @@ if ($mode != 'ajax' && !$step_id) {
             };
 
 
-            var runTaskUI = function (data) {
-                if (data.hasOwnProperty("error") && data.error == true) {
+            let runTaskUI = function (data) {
+                if (data.hasOwnProperty("error") && data.error === true) {
                     runTaskShowError('Creation of new task failed! Please check error log for details. \n' + data.error_text);
                 } else {
                     $('body').append('<div class="loading">Running</div>');
@@ -228,15 +234,15 @@ if ($mode != 'ajax' && !$step_id) {
 
 
             function runTaskStepsUI(task_details) {
-                if (task_details.status != '1') {
+                if (task_details.status !== '1') {
                     runTaskShowError('Cannot to run steps of task "' + task_details.name + '" because status of task is not "ready". Current status - ' + task_details.status);
                 } else {
                     //then run sequential ajax calls
                     //note: all that calls must be asynchronous to be interruptible!
-                    var ajaxes = {};
-                    for (var k in task_details.steps) {
-                        var step = task_details.steps[k];
-                        var senddata = {
+                    let ajaxes = {};
+                    for (let k in task_details.steps) {
+                        let step = task_details.steps[k];
+                        let senddata = {
                             mode: 'html',
                             task_api_key: '<?php echo $task_api_key; ?>',
                             task_id: task_details.task_id,
@@ -256,7 +262,7 @@ if ($mode != 'ajax' && !$step_id) {
 
                         if (step.hasOwnProperty("settings") && step.settings != null
                             && step.settings.hasOwnProperty("interrupt_on_step_fault")
-                            && step.settings.interrupt_on_step_fault == true) {
+                            && step.settings.interrupt_on_step_fault === true) {
                             ajaxes[k]['interrupt_on_step_fault'] = true;
                         } else {
                             ajaxes[k]['interrupt_on_step_fault'] = false;
@@ -265,7 +271,7 @@ if ($mode != 'ajax' && !$step_id) {
 
                     do_seqAjax(ajaxes, 3);
                 }
-            };
+            }
 
             function do_seqAjax(ajaxes, attempts_count) {
 
@@ -277,18 +283,18 @@ if ($mode != 'ajax' && !$step_id) {
                     });
                 };
 
-                var current = 0,
+                let current = 0,
                     current_key,
                     keys = [];
-                for (var k in ajaxes) {
+                for (let k in ajaxes) {
                     keys.push(k);
                 }
-                var steps_cnt = keys.length;
-                var attempts = attempts_count || 3;// set attempts count for fail ajax call (for repeating request)
-                var kill = false;
+                let steps_cnt = keys.length;
+                let attempts = attempts_count || 3;// set attempts count for fail ajax call (for repeating request)
+                let kill = false;
 
                 //declare your function to run AJAX requests
-                var do_ajax = function () {
+                let do_ajax = function () {
 
                     //interrupt recursion when:
                     //kill task
@@ -323,13 +329,13 @@ if ($mode != 'ajax' && !$step_id) {
                             current++;
                         },
                         error: function (xhr, status, error) {
-                            var error_txt = '';
+                            let error_txt = '';
                             try { //when server response is json formatted string
-                                var err = $.parseJSON(xhr.responseText);
+                                let err = $.parseJSON(xhr.responseText);
                                 if (err.hasOwnProperty("error_text")) {
                                     error_txt = err.error_text;
                                 } else {
-                                    if (xhr.status == 200) {
+                                    if (xhr.status === 200) {
                                         error_txt = '(' + xhr.responseText + ')';
                                     } else {
                                         error_txt = 'HTTP-status:' + xhr.status;
@@ -337,7 +343,7 @@ if ($mode != 'ajax' && !$step_id) {
                                     error_txt = 'Connection error occurred. ' + error_txt;
                                 }
                             } catch (e) {
-                                if (xhr.status == 200) {
+                                if (xhr.status === 200) {
                                     error_txt = '(' + xhr.responseText + ')';
                                 } else {
                                     error_txt = 'HTTP-status:' + xhr.status;
@@ -345,8 +351,8 @@ if ($mode != 'ajax' && !$step_id) {
                                 error_txt = 'Connection error occurred. ' + error_txt;
                             }
 
-                            //so.. if all attempts of this step are failed
-                            if (attempts == 0) {
+                            //if all attempts of this step are failed
+                            if (attempts === 0) {
                                 task_complete_text += '<div class="alert-danger">'
                                     + defaultTaskMessages.step + ' '
                                     + (current + 1) + ' - '
@@ -369,12 +375,12 @@ if ($mode != 'ajax' && !$step_id) {
                         complete: function (jqXHR, text_status) {
 
                             //  get index for current connection completed
-                            var i = $.xhrPool.indexOf(jqXHR);
+                            let i = $.xhrPool.indexOf(jqXHR);
                             //  removes from list by index
                             if (i > -1) {
                                 $.xhrPool.splice(i, 1);
                             }
-                            if (text_status != 'abort') {
+                            if (text_status !== 'abort') {
                                 do_ajax();
                             }
                         }

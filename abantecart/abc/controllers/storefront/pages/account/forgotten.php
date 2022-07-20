@@ -24,10 +24,13 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\lib\AEncryption;
+use abc\core\lib\AException;
 use abc\models\customer\Customer;
 use abc\modules\events\ABaseEvent;
 use H;
 use Illuminate\Validation\ValidationException;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 class ControllerPagesAccountForgotten extends AController
 {
@@ -153,7 +156,6 @@ class ControllerPagesAccountForgotten extends AController
 
         //init controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
-
     }
 
     public function reset()
@@ -289,7 +291,6 @@ class ControllerPagesAccountForgotten extends AController
 
         //init controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
-
     }
 
     public function loginname()
@@ -388,8 +389,9 @@ class ControllerPagesAccountForgotten extends AController
      * @param $data
      *
      * @return bool|mixed
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
      */
     protected function findCustomer($mode, $data)
     {
@@ -407,7 +409,7 @@ class ControllerPagesAccountForgotten extends AController
         if ($this->config->get('prevent_email_as_login') || $this->dcrypt->active) {
             if ($mode == 'password') {
                 if (!empty($loginname)) {
-                    $output = Customer::getCustomers([
+                    $output = Customer::search([
                         'filter' =>
                             [
                                 'search_operator' => 'equal',
@@ -422,7 +424,7 @@ class ControllerPagesAccountForgotten extends AController
             } else {
                 if ($mode == 'loginname') {
                     if (!empty($lastname)) {
-                        $output = Customer::getCustomers([
+                        $output = Customer::search([
                             'filter' =>
                                 [
                                     'search_operator' => 'equal',
@@ -438,7 +440,7 @@ class ControllerPagesAccountForgotten extends AController
             }
         } else {
             //get customer by email
-            $output = Customer::getCustomers([
+            $output = Customer::search([
                 'filter' =>
                     [
                         'search_operator' => 'equal',

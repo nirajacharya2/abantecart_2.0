@@ -4,7 +4,7 @@ use abc\models\catalog\Product;
 use abc\models\customer\Address;
 use abc\models\customer\Customer;
 use abc\modules\listeners\ModelAuditListener;
-use abc\tests\unit\modules\listeners\ATestListener;
+use Tests\unit\modules\listeners\ATestListener;
 
 return [
     /** events for ORM Models
@@ -31,12 +31,4 @@ return [
             ModelAuditListener::class
         ],
     ],
-
-    //allow to enable/disable soft-deleting for models. Default value "false"
-    //see eloquent documentation for details
-    'FORCE_DELETING' => [
-        /*Product::class => true*/
-        Customer::class => true,
-        Address::class => true,
-    ]
 ];

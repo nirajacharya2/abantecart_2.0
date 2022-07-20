@@ -39,6 +39,38 @@ class LengthClass extends BaseModel
         'value',
         'date_added',
         'date_modified',
+        'length_class_id'
+    ];
+    protected $rules = [
+        'length_class_id' => [
+            'checks' => [
+                'integer',
+                'required',
+                'sometimes',
+                'min:1'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'language_definition_id is not integer'],
+                'integer' => [
+                    'language_key' => 'error_length_class_id',
+                    'language_block' => 'localisation/length_class',
+                    'default_text' => 'Length class id must be integer!',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_length_class_id',
+                    'language_block' => 'localisation/length_class',
+                    'default_text' => 'Length class id required!',
+                    'section' => 'admin'
+                ],
+                'min' => [
+                    'language_key' => 'error_length_class_id',
+                    'language_block' => 'localisation/length_class',
+                    'default_text' => 'Length class id must be more 1!',
+                    'section' => 'admin'
+                ],
+            ]
+        ]
     ];
 
     public function descriptions()
@@ -49,6 +81,6 @@ class LengthClass extends BaseModel
     public function description()
     {
         return $this->hasOne(LengthClassDescription::class, 'length_class_id')
-                    ->where('language_id', $this->registry->get('language')->getContentLanguageID());
+            ->where('language_id', $this->registry->get('language')->getContentLanguageID());
     }
 }

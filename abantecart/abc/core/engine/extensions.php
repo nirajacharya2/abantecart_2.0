@@ -21,7 +21,7 @@
 namespace abc\core\engine;
 
 use abc\core\ABC;
-use abc\core\cache\ACache;
+use abc\core\lib\AbcCache;
 use abc\core\lib\ADb;
 use abc\core\lib\ADebug;
 use abc\core\lib\AError;
@@ -29,6 +29,8 @@ use abc\core\lib\AException;
 use abc\core\lib\AWarning;
 use abc\models\BaseModel;
 use abc\models\QueryBuilder;
+use DOMDocument;
+use DOMElement;
 use Exception;
 use H;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -112,7 +114,6 @@ abstract class Extension
             array_unshift($args, $this);
             return call_user_func_array([$this->ExtensionsApi, $method], $args);
         }
-
         return null;
     }
 }
@@ -238,6 +239,7 @@ class ExtensionCollection
  * long description.
  *
  * @property ADb $db
+ * @property AbcCache $cache
  * @method hk_InitData(object $baseObject, string $baseObjectMethod)
  * @method hk_UpdateData(object $baseObject, string $baseObjectMethod)
  * @method hk_ProcessData(object $baseObject, string $point_name = '', mixed $array = null)
@@ -314,14 +316,12 @@ class ExtensionsApi
      * @var array
      */
     protected $extension_types = [
-        'extensions',
-        'payment',
-        'shipping',
-        'template',
-        'language',
-    ];
-    /** @var ACache */
-    protected $cache;
+            'extensions',
+            'payment',
+            'shipping',
+            'template',
+            'language',
+        ];
 
     public function __construct()
     {
@@ -369,6 +369,7 @@ class ExtensionsApi
             //check if we have extensions in dir that has no record in db
             $diff = array_diff($this->extensions_dir, $this->db_extensions);
             if (!empty($diff)) {
+                $sessionData = $this->registry->get('session')->data;
                 foreach ($diff as $ext) {
                     $data['key'] = $ext;
                     $data['status'] = 0;
@@ -377,7 +378,7 @@ class ExtensionsApi
                     $data['version'] = $misext->getConfig('version');
                     $data['priority'] = $misext->getConfig('priority');
                     $data['category'] = $misext->getConfig('category');
-                    $data['license_key'] = $this->registry->get('session')->data['package_info']['extension_key'];
+                    $data['license_key'] = $sessionData['package_info']['extension_key'] ?? null;
 
                     if ($this->registry->has('extension_manager')) {
                         $this->registry->get('extension_manager')->add($data);
@@ -392,6 +393,7 @@ class ExtensionsApi
      *
      * @return array
      * @throws Exception
+     * @throws InvalidArgumentException
      */
     public function getInstalled($type = '')
     {
@@ -401,8 +403,9 @@ class ExtensionsApi
             if ($type) {
                 $cache_key .= ".type=".$type;
             }
-            $load_data = $this->cache->pull($cache_key);
-            if ($load_data !== false) {
+            $load_data = $this->cache->get($cache_key);
+            if ($load_data !== null) {
+                //if we have cache, return
                 return $load_data;
             }
         }
@@ -435,8 +438,7 @@ class ExtensionsApi
             }
         }
 
-        $this->cache?->push($cache_key, $extension_data);
-
+        $this->cache?->put($cache_key, $extension_data);
         return $extension_data;
     }
 
@@ -445,6 +447,7 @@ class ExtensionsApi
      *
      * @return array
      * @throws Exception
+     * @throws InvalidArgumentException
      */
     public function getExtensionInfo($key = '')
     {
@@ -454,8 +457,9 @@ class ExtensionsApi
             if ($key) {
                 $cache_key .= ".key=".$key;
             }
-            $load_data = $this->cache->pull($cache_key);
-            if ($load_data !== false) {
+            $load_data = $this->cache->get($cache_key);
+            if ($load_data !== null) {
+                //if we have cache, return
                 return $load_data;
             }
         }
@@ -475,7 +479,7 @@ class ExtensionsApi
             }
         }
 
-        $this->cache?->push($cache_key, $extension_data);
+        $this->cache?->put($cache_key, $extension_data);
 
         return $extension_data;
     }
@@ -504,8 +508,9 @@ class ExtensionsApi
                 $cache_key .= $this->cache->paramsToString($data);
             }
 
-            $load_data = $this->cache->pull($cache_key);
-            if ($load_data !== false) {
+            $load_data = $this->cache->get($cache_key);
+            if ($load_data !== null) {
+                //if we have cache, return
                 return $load_data;
             }
         }
@@ -601,8 +606,7 @@ class ExtensionsApi
         }
 
         $result->total = $total ? $total->num_rows : $result->num_rows;
-        $this->cache?->push($cache_key, $result);
-
+        $this->cache?->put($cache_key, $result);
         return $result;
     }
 
@@ -970,6 +974,7 @@ class ExtensionsApi
      *
      * @return array|bool - false if not found, array with extension name and file name if found
      * @throws Exception
+     * @throws InvalidArgumentException
      */
     public function isExtensionResource($resource_type, $route, $ext_status = '', $mode = '')
     {
@@ -1090,6 +1095,7 @@ class ExtensionsApi
      *
      * @return array|bool
      * @throws AException
+     * @throws InvalidArgumentException
      * @throws ReflectionException
      */
     public function getAllPrePostTemplates($route)
@@ -1236,8 +1242,8 @@ class ExtensionsApi
             return $this->extensions->$property;
         }
         throw new AException(
-            AC_ERR_LOAD,
-            'Extensions of name "'.$property.'" not found in ExtensionsApi '
+            'Extensions of name "'.$property.'" not found in ExtensionsApi ',
+            AC_ERR_LOAD
         );
     }
 
@@ -1519,16 +1525,16 @@ class ExtensionUtils
                     }
                 }
 
-                if ($item['id'] == $this->name.'_status') {
+                if ((string)$item['id'] == $this->name.'_status') {
                     $result[$i]['style'] = 'btn_switch';
                     $result[$i]['attr'] = 'reload_on_save="true"';
                 }
                 $type_attr = $item->type->attributes();
-                if ((string) $type_attr['required'] == 'true') {
+                if ((string)$type_attr['required'] == 'true') {
                     $result[$i]['required'] = true;
                     $this->registry->get('session')->data['extension_required_fields'][] = $result[$i]['name'];
                 }
-                if ((string) $type_attr['readonly'] == 'true') {
+                if ((string)$type_attr['readonly'] == 'true') {
                     $result[$i]['attr'] .= ' readonly';
                 }
 
@@ -1662,6 +1668,7 @@ class ExtensionUtils
 
     /**
      * @return array
+     * @throws InvalidArgumentException
      * @throws ReflectionException|AException
      */
     public function getDefaultSettings()

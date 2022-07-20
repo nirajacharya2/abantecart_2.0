@@ -70,7 +70,7 @@ class AData
     public function __construct()
     {
         if (!ABC::env('IS_ADMIN')) {
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access this section');
+            throw new AException ('Error: permission denied to access this section', AC_ERR_LOAD);
         }
         $this->registry = Registry::getInstance();
         $this->load->model('tool/table_relationships');
@@ -119,6 +119,7 @@ class AData
      * @param string $table_name
      *
      * @return array
+     * @throws \Exception
      */
     public function getTableColumns($table_name)
     {
@@ -164,6 +165,7 @@ class AData
      * @return array
      * @throws ReflectionException
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function importData($data_array, $mode = 'commit')
     {
@@ -893,8 +895,9 @@ class AData
      * @param bool $action_delete
      *
      * @return array
-     * @throws ReflectionException
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
      */
     protected function processImportTable(
         $table_name,
@@ -1178,6 +1181,8 @@ class AData
      *
      * @return array
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws AException
      */
     protected function doAllResources($table_cfg, $data, $parent_vals)
     {
@@ -1269,6 +1274,8 @@ class AData
      * @param string $code
      *
      * @return null
+     * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws ReflectionException
      */
     protected function createResource($rm, $object_txt_id, $object_id, $image_basename = '', $code = '')
@@ -1306,7 +1313,7 @@ class AData
      */
     protected function updateFromArray($table_name, $table_cfg, $data_row, $parent_vals)
     {
-        $cols = [];
+        $cols = $where = [];
         //set ids to where from parent they might not be in there
         $where = $this->buildIdColumns($table_cfg, $parent_vals);
 

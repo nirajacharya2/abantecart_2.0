@@ -47,16 +47,16 @@ final class AUser
     private $lastname;
     private $lastLogin;
     /**
-     * @var \abc\core\lib\ARequest
+     * @var ARequest
      */
     private $request;
     /**
-     * @var \abc\core\lib\ASession
+     * @var ASession
      */
     private $session;
 
     /**
-     * @var \abc\core\lib\ADB
+     * @var ADB
      */
     private $db;
 
@@ -66,7 +66,7 @@ final class AUser
     private $permission = [];
 
     /**
-     * @param $registry \abc\core\engine\Registry
+     * @param $registry Registry
      *
      * @throws \Exception
      */
@@ -76,8 +76,9 @@ final class AUser
         $this->request = $registry->get('request');
         $this->session = $registry->get('session');
 
-        if (isset($this->session->data['user_id'])) {
+        if ((int)$this->session->data['user_id']) {
             $user = User::find((int)$this->session->data['user_id']);
+
             if ($user) {
                 $this->userId = (int)$user->user_id;
                 $this->userGroupId = (int)$user->user_group_id;
@@ -118,8 +119,7 @@ final class AUser
                 'users.status'   => 1,
             ]
         )->whereRaw(Registry::db()->table_name('users').'.password = '.$sqlString)
-         ->first();
-
+                    ->first();
         if ($user) {
             $this->userId = $this->session->data['user_id'] = (int)$user->user_id;
             $this->userGroupId = (int)$user->user_group_id;
@@ -202,6 +202,7 @@ final class AUser
      */
     public function hasPermission($key, $value)
     {
+
         //If top_admin allow all permission. Make sure Top Admin Group is set to ID 1
         if ($this->userGroupId == 1) {
             return true;

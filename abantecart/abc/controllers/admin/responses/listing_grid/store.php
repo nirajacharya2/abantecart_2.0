@@ -17,72 +17,79 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\admin;
+
 use abc\core\engine\AController;
 use abc\core\lib\AError;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-class ControllerResponsesListingGridStore extends AController {
-	public $data = array();
-	/**
-	 * update only one field
-	 *
-	 * @return mixed
-	 */
-	public function update_field() {
+class ControllerResponsesListingGridStore extends AController
+{
+    public $data = [];
 
-		//init controller data
-		$this->extensions->hk_InitData($this, __FUNCTION__);
+    /**
+     * update only one field
+     *
+     * @return mixed
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
+     */
+    public function update_field()
+    {
 
-		if (!$this->user->canModify('listing_grid/store')) {
-			$error = new AError('');
-			return $error->toJSONResponse('NO_PERMISSIONS_402',
-				array( 'error_text' => sprintf($this->language->get('error_permission_modify'), 'listing_grid/store'),
-					'reset_value' => true
-				));
-		}
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-		$this->loadLanguage('setting/store');
+        if (!$this->user->canModify('listing_grid/store')) {
+            $error = new AError('');
+            return $error->toJSONResponse('NO_PERMISSIONS_402',
+                [
+                    'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/store'),
+                    'reset_value' => true,
+                ]);
+        }
 
-		$this->loadModel('setting/store');
-		if (isset($this->request->get[ 'id' ])) {
-			//request sent from edit form. ID in url
-			foreach ($this->request->post as $key => $value) {
-				$err = $this->_validateField($key, $value);
-				if (!empty($err)) {
-					$error = new AError('');
-					return $error->toJSONResponse('VALIDATION_ERROR_406', array( 'error_text' => $err ));
-				}
-				$data = array( $key => $value );
-				$this->model_setting_store->editStore($this->request->get[ 'id' ], $data);
-			}
-			return null;
-		}
+        $this->loadLanguage('setting/store');
 
-		//update controller data
-		$this->extensions->hk_UpdateData($this, __FUNCTION__);
-	}
+        $this->loadModel('setting/store');
+        if (isset($this->request->get['id'])) {
+            //request sent from edit form. ID in url
+            foreach ($this->request->post as $key => $value) {
+                $err = $this->_validateField($key, $value);
+                if (!empty($err)) {
+                    $error = new AError('');
+                    return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                }
+                $data = [$key => $value];
+                $this->model_setting_store->editStore($this->request->get['id'], $data);
+            }
+            return null;
+        }
 
-	private function _validateField($field, $value) {
-		$this->data['error'] = '';
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
 
-		switch ($field) {
-			case 'config_name' :
-				if (!$value) {
-					$this->data['error'] = $this->language->get('error_name');
-				}
-				break;
-			case 'config_url' :
-				if (!$value) {
-					$this->data['error'] = $this->language->get('error_url');
-				}
-				break;
-		}
+    private function _validateField($field, $value)
+    {
+        $this->data['error'] = '';
 
-		$this->extensions->hk_ValidateData($this, array($field, $value));
-		return $this->data['error'];
-	}
+        switch ($field) {
+            case 'config_name' :
+                if (!$value) {
+                    $this->data['error'] = $this->language->get('error_name');
+                }
+                break;
+            case 'config_url' :
+                if (!$value) {
+                    $this->data['error'] = $this->language->get('error_url');
+                }
+                break;
+        }
+
+        $this->extensions->hk_ValidateData($this, [$field, $value]);
+        return $this->data['error'];
+    }
 
 }

@@ -28,6 +28,7 @@ use H;
 use ReflectionException;
 use stdClass;
 
+
 class ControllerResponsesListingGridUserPermission extends AController
 {
 
@@ -78,10 +79,12 @@ class ControllerResponsesListingGridUserPermission extends AController
                 $response->userdata->classes[$id] = 'disable-edit disable-delete';
                 $name = $result['name'];
             } else {
-                $name = $this->html->buildInput([
-                                                    'name'  => 'name['.$id.']',
-                                                    'value' => $result['name'],
-                                                ]);
+                $name = $this->html->buildInput(
+                    [
+                        'name'  => 'name['.$id.']',
+                        'value' => $result['name'],
+                    ]
+                );
             }
             $response->rows[$i]['id'] = $id;
             $response->rows[$i]['cell'] = [$name];
@@ -99,6 +102,7 @@ class ControllerResponsesListingGridUserPermission extends AController
      * update only one field
      *
      * @return void
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws ReflectionException
      * @throws AException
      */
@@ -110,8 +114,7 @@ class ControllerResponsesListingGridUserPermission extends AController
         $this->loadLanguage('user/user_group');
         if (!$this->user->canModify('listing_grid/user_permission')) {
             $error = new AError('');
-
-            return $error->toJSONResponse(
+            $error->toJSONResponse(
                 'NO_PERMISSIONS_402',
                 [
                     'error_text'  => sprintf(
@@ -120,6 +123,7 @@ class ControllerResponsesListingGridUserPermission extends AController
                     'reset_value' => true,
                 ]
             );
+            return;
         }
 
         $this->loadModel('user/user_group');
@@ -133,8 +137,8 @@ class ControllerResponsesListingGridUserPermission extends AController
                     $err = $this->_validateField($f, $v);
                     if (!empty($err)) {
                         $error = new AError('');
-
-                        return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                        $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                        return;
                     }
                     $this->model_user_user_group->editUserGroup($k, [$f => $v]);
                 }

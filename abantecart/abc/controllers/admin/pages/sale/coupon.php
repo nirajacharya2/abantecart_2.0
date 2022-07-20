@@ -26,6 +26,7 @@ use abc\core\engine\AResource;
 use abc\models\order\Order;
 use H;
 
+
 class ControllerPagesSaleCoupon extends AController
 {
     public $error = [];
@@ -53,16 +54,16 @@ class ControllerPagesSaleCoupon extends AController
         $this->document->setTitle($this->language->get('heading_title'));
 
         $this->document->initBreadcrumb([
-                                            'href'      => $this->html->getSecureURL('index/home'),
-                                            'text'      => $this->language->get('text_home'),
-                                            'separator' => false,
-                                        ]);
+            'href'      => $this->html->getSecureURL('index/home'),
+            'text'      => $this->language->get('text_home'),
+            'separator' => false,
+        ]);
         $this->document->addBreadcrumb([
-                                           'href'      => $this->html->getSecureURL('sale/coupon'),
-                                           'text'      => $this->language->get('heading_title'),
-                                           'separator' => ' :: ',
-                                           'current'   => true,
-                                       ]);
+            'href'      => $this->html->getSecureURL('sale/coupon'),
+            'text'      => $this->language->get('heading_title'),
+            'separator' => ' :: ',
+            'current'   => true,
+        ]);
 
         if (isset($this->session->data['error'])) {
             $this->data['error_warning'] = $this->session->data['error'];
@@ -170,33 +171,33 @@ class ControllerPagesSaleCoupon extends AController
 
         $form = new AForm();
         $form->setForm([
-                           'form_name' => 'coupon_grid_search',
-                       ]);
+            'form_name' => 'coupon_grid_search',
+        ]);
 
         $grid_search_form = [];
         $grid_search_form['id'] = 'coupon_grid_search';
         $grid_search_form['form_open'] = $form->getFieldHtml([
-                                                                 'type'   => 'form',
-                                                                 'name'   => 'coupon_grid_search',
-                                                                 'action' => '',
-                                                             ]);
+            'type'   => 'form',
+            'name'   => 'coupon_grid_search',
+            'action' => '',
+        ]);
         $grid_search_form['submit'] = $form->getFieldHtml([
-                                                              'type'  => 'button',
-                                                              'name'  => 'submit',
-                                                              'text'  => $this->language->get('button_go'),
-                                                              'style' => 'button1',
-                                                          ]);
+            'type'  => 'button',
+            'name'  => 'submit',
+            'text'  => $this->language->get('button_go'),
+            'style' => 'button1',
+        ]);
         $grid_search_form['reset'] = $form->getFieldHtml([
-                                                             'type'  => 'button',
-                                                             'name'  => 'reset',
-                                                             'text'  => $this->language->get('button_reset'),
-                                                             'style' => 'button2',
-                                                         ]);
+            'type'  => 'button',
+            'name'  => 'reset',
+            'text'  => $this->language->get('button_reset'),
+            'style' => 'button2',
+        ]);
         $grid_search_form['fields']['status'] = $form->getFieldHtml([
-                                                                        'type'    => 'selectbox',
-                                                                        'name'    => 'status',
-                                                                        'options' => $statuses,
-                                                                    ]);
+            'type'    => 'selectbox',
+            'name'    => 'status',
+            'options' => $statuses,
+        ]);
 
         $grid_settings['search_form'] = true;
 
@@ -311,15 +312,15 @@ class ControllerPagesSaleCoupon extends AController
         );
 
         $this->document->initBreadcrumb([
-                                            'href'      => $this->html->getSecureURL('index/home'),
-                                            'text'      => $this->language->get('text_home'),
-                                            'separator' => false,
-                                        ]);
+            'href'      => $this->html->getSecureURL('index/home'),
+            'text'      => $this->language->get('text_home'),
+            'separator' => false,
+        ]);
         $this->document->addBreadcrumb([
-                                           'href'      => $this->html->getSecureURL('sale/coupon'),
-                                           'text'      => $this->language->get('heading_title'),
-                                           'separator' => ' :: ',
-                                       ]);
+            'href'      => $this->html->getSecureURL('sale/coupon'),
+            'text'      => $this->language->get('heading_title'),
+            'separator' => ' :: ',
+        ]);
 
         if (H::has_value($this->request->get['coupon_id']) && $this->request->is_GET()) {
             $coupon_info = $this->model_sale_coupon->getCouponByID($this->request->get['coupon_id']);
@@ -421,110 +422,104 @@ class ControllerPagesSaleCoupon extends AController
         }
 
         $this->document->addBreadcrumb([
-                                           'href'      => $this->data['action'],
-                                           'text'      => $this->data['heading_title'],
-                                           'separator' => ' :: ',
-                                           'current'   => true,
+            'href'      => $this->data['action'],
+            'text'      => $this->data['heading_title'],
+            'separator' => ' :: ',
+            'current'   => true,
 
-                                       ]);
+        ]);
 
         $form->setForm([
-                           'form_name' => 'couponFrm',
-                           'update'    => $this->data['update'],
-                       ]);
+            'form_name' => 'couponFrm',
+            'update'    => $this->data['update'],
+        ]);
 
         $this->data['form']['id'] = 'couponFrm';
         $this->data['form']['form_open'] = $form->getFieldHtml([
-                                                                   'type'   => 'form',
-                                                                   'name'   => 'couponFrm',
-                                                                   'attr'   => 'data-confirm-exit="true"  class="aform form-horizontal"',
-                                                                   'action' => $this->data['action'],
-                                                               ]);
+            'type'   => 'form',
+            'name'   => 'couponFrm',
+            'attr'   => 'data-confirm-exit="true"  class="aform form-horizontal"',
+            'action' => $this->data['action'],
+        ]);
         $this->data['form']['submit'] = $form->getFieldHtml([
-                                                                'type'  => 'button',
-                                                                'name'  => 'submit',
-                                                                'text'  => $this->language->get('button_save'),
-                                                                'style' => 'button1',
-                                                            ]);
+            'type'  => 'button',
+            'name'  => 'submit',
+            'text'  => $this->language->get('button_save'),
+            'style' => 'button1',
+        ]);
         $this->data['form']['cancel'] = $form->getFieldHtml([
-                                                                'type'  => 'button',
-                                                                'name'  => 'cancel',
-                                                                'text'  => $this->language->get('button_cancel'),
-                                                                'style' => 'button2',
-                                                            ]);
+            'type'  => 'button',
+            'name'  => 'cancel',
+            'text'  => $this->language->get('button_cancel'),
+            'style' => 'button2',
+        ]);
 
         $this->data['form']['fields']['status'] = $form->getFieldHtml([
-                                                                          'type'  => 'checkbox',
-                                                                          'name'  => 'status',
-                                                                          'value' => $this->data['status'],
-                                                                          'style' => 'btn_switch',
-                                                                      ]);
+            'type'  => 'checkbox',
+            'name'  => 'status',
+            'value' => $this->data['status'],
+            'style' => 'btn_switch',
+        ]);
 
         $this->data['form']['fields']['name'] = $form->getFieldHtml([
-                                                                        'type'         => 'input',
-                                                                        'name'         => 'coupon_description['
-                                                                            .$cont_lang_id.'][name]',
-                                                                        'value'        => $this->data['coupon_description'][$cont_lang_id]['name'],
-                                                                        'required'     => true,
-                                                                        'style'        => 'large-field',
-                                                                        'multilingual' => true,
-                                                                    ]);
+            'type'         => 'input',
+            'name'         => 'coupon_description['.$cont_lang_id.'][name]',
+            'value'        => $this->data['coupon_description'][$cont_lang_id]['name'],
+            'required'     => true,
+            'style'        => 'large-field',
+            'multilingual' => true,
+        ]);
         $this->data['form']['fields']['description'] = $form->getFieldHtml([
-                                                                               'type'         => 'textarea',
-                                                                               'name'         => 'coupon_description['
-                                                                                   .$cont_lang_id.'][description]',
-                                                                               'value'        => $this->data['coupon_description'][$cont_lang_id]['description'],
-                                                                               'required'     => true,
-                                                                               'style'        => 'large-field',
-                                                                               'multilingual' => true,
-                                                                           ]);
+            'type'         => 'textarea',
+            'name'         => 'coupon_description['.$cont_lang_id.'][description]',
+            'value'        => $this->data['coupon_description'][$cont_lang_id]['description'],
+            'required'     => true,
+            'style'        => 'large-field',
+            'multilingual' => true,
+        ]);
         $this->data['form']['fields']['code'] = $form->getFieldHtml([
-                                                                        'type'     => 'input',
-                                                                        'name'     => 'code',
-                                                                        'value'    => $this->data['code'],
-                                                                        'required' => true,
-                                                                    ]);
+            'type'     => 'input',
+            'name'     => 'code',
+            'value'    => $this->data['code'],
+            'required' => true,
+        ]);
         $this->data['form']['fields']['type'] = $form->getFieldHtml([
-                                                                        'type'    => 'selectbox',
-                                                                        'name'    => 'type',
-                                                                        'value'   => $this->data['type'],
-                                                                        'options' => [
-                                                                            'P' => $this->language->get('text_percent'),
-                                                                            'F' => $this->language->get('text_amount'),
-                                                                        ],
-                                                                    ]);
+            'type'    => 'selectbox',
+            'name'    => 'type',
+            'value'   => $this->data['type'],
+            'options' => [
+                'P' => $this->language->get('text_percent'),
+                'F' => $this->language->get('text_amount'),
+            ],
+        ]);
         $this->data['form']['fields']['discount'] = $form->getFieldHtml([
-                                                                            'type'  => 'input',
-                                                                            'name'  => 'discount',
-                                                                            'value' => H::moneyDisplayFormat(
-                                                                                $this->data['discount']
-                                                                            ),
-                                                                        ]);
+            'type'  => 'input',
+            'name'  => 'discount',
+            'value' => H::moneyDisplayFormat($this->data['discount']),
+        ]);
         $this->data['form']['fields']['total'] = $form->getFieldHtml([
-                                                                         'type'  => 'input',
-                                                                         'name'  => 'total',
-                                                                         'value' => H::moneyDisplayFormat(
-                                                                             $this->data['total']
-                                                                         ),
-                                                                     ]);
+            'type'  => 'input',
+            'name'  => 'total',
+            'value' => H::moneyDisplayFormat($this->data['total']),
+        ]);
         $this->data['form']['fields']['logged'] = $form->getFieldHtml([
-                                                                          'type'    => 'selectbox',
-                                                                          'name'    => 'logged',
-                                                                          'value'   => $this->data['logged'],
-                                                                          'options' => [
-                                                                              1 => $this->language->get('text_yes'),
-                                                                              0 => $this->language->get('text_no'),
-                                                                          ],
-                                                                      ]);
+            'type'    => 'selectbox',
+            'name'    => 'logged',
+            'value'   => $this->data['logged'],
+            'options' => [
+                1 => $this->language->get('text_yes'),
+                0 => $this->language->get('text_no'),
+            ],
+        ]);
         $this->data['form']['fields']['shipping'] = $form->getFieldHtml([
-                                                                            'type'    => 'selectbox',
-                                                                            'name'    => 'shipping',
-                                                                            'value'   => $this->data['shipping'],
-                                                                            'options' => [
-                                                                                1 => $this->language->get('text_yes'),
-                                                                                0 => $this->language->get('text_no'),
-                                                                            ],
-                                                                        ]);
+            'type'    => 'selectbox',
+            'name'    => 'shipping',
+            'value'   => $this->data['shipping'],
+            'options' => [
+                1 => $this->language->get('text_yes'),
+                0 => $this->language->get('text_no'),
+            ],
+        ]);
 
         $this->data['form']['fields']['date_start'] = $form->getFieldHtml(
             [
@@ -539,29 +534,25 @@ class ControllerPagesSaleCoupon extends AController
         );
 
         $this->data['form']['fields']['date_end'] = $form->getFieldHtml([
-                                                                            'type'       => 'date',
-                                                                            'name'       => 'date_end',
-                                                                            'value'      => $this->data['date_end'],
-                                                                            'default'    => '',
-                                                                            'dateformat' => H::format4Datepicker(
-                                                                                $this->language->get(
-                                                                                    'date_format_short'
-                                                                                )
-                                                                            ),
-                                                                            'highlight'  => 'past',
-                                                                            'required'   => true,
-                                                                        ]);
+            'type'       => 'date',
+            'name'       => 'date_end',
+            'value'      => $this->data['date_end'],
+            'default'    => '',
+            'dateformat' => H::format4Datepicker($this->language->get('date_format_short')),
+            'highlight'  => 'past',
+            'required'   => true,
+        ]);
 
         $this->data['form']['fields']['uses_total'] = $form->getFieldHtml([
-                                                                              'type'  => 'input',
-                                                                              'name'  => 'uses_total',
-                                                                              'value' => $this->data['uses_total'],
-                                                                          ]);
+            'type'  => 'input',
+            'name'  => 'uses_total',
+            'value' => $this->data['uses_total'],
+        ]);
         $this->data['form']['fields']['uses_customer'] = $form->getFieldHtml([
-                                                                                 'type'  => 'input',
-                                                                                 'name'  => 'uses_customer',
-                                                                                 'value' => $this->data['uses_customer'],
-                                                                             ]);
+            'type'  => 'input',
+            'name'  => 'uses_customer',
+            'value' => $this->data['uses_customer'],
+        ]);
 
         $this->loadModel('setting/store');
         //Get store name
@@ -569,14 +560,20 @@ class ControllerPagesSaleCoupon extends AController
         $store_name = 'For store '.$store_info['store_name'].': ';
 
         if ($this->request->get['coupon_id']) {
-            $total = Order::getOrders(['filter_coupon_id' => $this->request->get['coupon_id']], 'total_only');
+            $total = Order::search(
+                [
+                    'filter' => [
+                        'coupon_id' => $this->request->get['coupon_id'],
+                    ],
+                    'mode'   => 'total_only',
+                ]
+            );
             $this->data['form']['fields']['total_coupon_usage'] = $form->getFieldHtml([
-                                                                                          'type'  => 'input',
-                                                                                          'name'  => 'total_coupon_usage',
-                                                                                          'value' => $store_name
-                                                                                              .(int) $total,
-                                                                                          'attr'  => 'disabled',
-                                                                                      ]);
+                'type'  => 'input',
+                'name'  => 'total_coupon_usage',
+                'value' => $store_name.(int)$total,
+                'attr'  => 'disabled',
+            ]);
         }
 
         //load only prior saved products

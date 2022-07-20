@@ -49,11 +49,13 @@ class ControllerApiCustomerOrders extends AControllerAPI
         }
 
         $filter = [
-            'filter_customer_id' => $request['customer_id'],
-            'sort'               => 'date_added',
-            'order'              => 'DESC',
-            'start'              => 0,
-            'limit'              => 20,
+            'filter' => [
+                'customer_id' => $request['customer_id'],
+            ],
+            'sort'   => 'date_added',
+            'order'  => 'DESC',
+            'start'  => 0,
+            'limit'  => 20,
         ];
 
         if ($request['start']) {
@@ -63,7 +65,7 @@ class ControllerApiCustomerOrders extends AControllerAPI
             $filter['limit'] = (int)$request['limit'];
         }
 
-        $orders = Order::getOrders($filter);
+        $orders = Order::search($filter);
         if (!count($orders)) {
             $this->rest->setResponseData(['Message' => 'No order records found for the customer']);
             $this->rest->sendResponse(200);

@@ -33,7 +33,7 @@ class AMenu_Storefront extends AMenu
     public function __construct()
     {
         $this->registry = Registry::getInstance();
-        $this->db = $this->registry->get('db');
+        $this->db = Registry::db();
 
         $this->dataset = new ADataset ('menu', 'storefront');
         $this->dataset_description = new ADataset ('menu', 'storefront_description');
@@ -142,7 +142,7 @@ class AMenu_Storefront extends AMenu
             throw new AException (AC_ERR_LOAD, 'Error: permission denied to change menu');
         }
 
-        //clean text id 
+        //clean text id
         $item ["item_id"] = H::preformatTextID($item ["item_id"]);
 
         $check_array = [
@@ -179,11 +179,11 @@ class AMenu_Storefront extends AMenu
             $item ["sort_order"] = $new_sort_order;
 
         }
-        // concatenate parent_name with item name 
+        // concatenate parent_name with item name
         if (!$item ['item_type']) {
             $item ['item_type'] = 'extension';
         }
-        // checks for unique item_id				
+        // checks for unique item_id
         if (in_array($item ["item_id"], $this->item_ids)) {
             return 'Error: Cannot to add menu item because item with item_id "'.$item ["item_id"]
                 .'" is already exists.';
@@ -206,26 +206,26 @@ class AMenu_Storefront extends AMenu
 
         // rebuild menu var after changing
         $this->_buildMenu();
-        $this->registry->get('cache')->remove('storefront_menu');
+        Registry::cache()->flush('storefront_menu');
         return $result;
     }
 
     /*
      * method delete menu item by id (name)
-     * 
+     *
      * @param string $item_name
      * @return boolean
      */
     public function deleteMenuItem($item_id)
     {
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to change menu');
+            throw new AException('Error: permission denied to change menu', AC_ERR_LOAD);
         }
         //
         $this->dataset->deleteRows(["column_name" => "item_id", "operator" => "=", "value" => $item_id]);
         $this->dataset_description->deleteRows(["column_name" => "item_id", "operator" => "=", "value" => $item_id]);
         $this->_buildMenu();
-        $this->registry->get('cache')->remove('storefront_menu');
+        Registry::cache()->flush('storefront_menu');
         return true;
     }
 
@@ -239,7 +239,7 @@ class AMenu_Storefront extends AMenu
     {
 
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to change menu');
+            throw new AException('Error: permission denied to change menu', AC_ERR_LOAD);
         }
 
         if (empty ($new_values) || !$item_id) {
@@ -281,7 +281,7 @@ class AMenu_Storefront extends AMenu
         }
 
         $this->_buildMenu();
-        $this->registry->get('cache')->remove('storefront_menu');
+        Registry::cache()->flush('storefront_menu');
         return true;
     }
 
@@ -300,7 +300,7 @@ class AMenu_Storefront extends AMenu
         $data = !is_array($data) ? [] : $data;
 
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to change menu');
+            throw new AException('Error: permission denied to change menu', AC_ERR_LOAD);
         }
 
         $config = $this->registry->get('config');
@@ -327,7 +327,7 @@ class AMenu_Storefront extends AMenu
         }
 
         $this->dataset_description->addRows($item_text);
-        $this->registry->get('cache')->remove('storefront_menu');
+        Registry::cache()->flush('storefront_menu');
     }
 
     /**
@@ -341,14 +341,14 @@ class AMenu_Storefront extends AMenu
     public function deleteLanguage($language_id)
     {
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to change menu');
+            throw new AException('Error: permission denied to change menu', AC_ERR_LOAD);
         }
         $this->dataset_description->deleteRows([
             "column_name" => "language_id",
             "operator"    => "=",
             "value"       => $language_id,
         ]);
-        $this->registry->get('cache')->remove('storefront_menu');
+        Registry::cache()->flush('storefront_menu');
     }
 
 }

@@ -21,7 +21,6 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\cache\ACache;
 use abc\core\engine\Registry;
 use Exception;
 use H;
@@ -30,11 +29,11 @@ use ReflectionException;
 /**
  * Class AContentManager
  *
- * @property ADB $db
- * @property ALanguageManager $language
- * @property AConfig $config
- * @property ASession $session
- * @property ACache $cache
+ * @property ADB                    $db
+ * @property ALanguageManager       $language
+ * @property AConfig                $config
+ * @property ASession               $session
+ * @property AbcCache               $cache
  *
  */
 class AContentManager
@@ -48,7 +47,7 @@ class AContentManager
     public function __construct()
     {
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to change custom content');
+            throw new AException ('Error: permission denied to change custom content', AC_ERR_LOAD);
         }
         $this->registry = Registry::getInstance();
     }
@@ -91,11 +90,9 @@ class AContentManager
             $seo_key = H::SEOEncode($data['keyword'], 'content_id', $content_id);
         }
         if ($seo_key) {
-            $this->language->replaceDescriptions(
-                'url_aliases',
-                ['query' => "content_id=".$content_id],
-                [(int) $this->language->getContentLanguageID() => ['keyword' => $seo_key]]
-            );
+            $this->language->replaceDescriptions('url_aliases',
+                ['query' => "content_id=".( int )$content_id],
+                [(int)$this->language->getContentLanguageID() => ['keyword' => $seo_key]]);
         } else {
             $this->db->query(
                 "DELETE
@@ -141,7 +138,7 @@ class AContentManager
             }
         }
 
-        $this->cache->remove('content');
+        $this->cache->flush('content');
 
         return $content_id;
     }
@@ -219,7 +216,8 @@ class AContentManager
                 $this->db->query($sql);
             }
         }
-        $this->cache->remove('content');
+        $this->cache->flush('content');
+
         return true;
     }
 
@@ -331,7 +329,7 @@ class AContentManager
                           WHERE content_id='".$content_id."'";
                 $this->db->query($query);
 
-                $value = !$value ? [0] : $value;
+                $value = $value ? : [0];
                 foreach ($value as $parent_content_id) {
                     $parent_content_id = (int) $parent_content_id;
                     if ($parent_content_id == $content_id) {
@@ -360,7 +358,7 @@ class AContentManager
                 break;
         }
 
-        $this->cache->remove('content');
+        $this->cache->flush('content');
 
         return true;
     }
@@ -368,7 +366,8 @@ class AContentManager
     /**
      * @param int $content_id
      *
-     * @throws Exception
+     * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function deleteContent($content_id)
     {
@@ -392,7 +391,7 @@ class AContentManager
             WHERE `query` = 'content_id=".( int ) $content_id."'"
         );
 
-        $this->cache->remove('content');
+        $this->cache->flush('content');
     }
 
     /**
@@ -630,7 +629,8 @@ class AContentManager
      *
      * @return array
      * @throws AException
-     * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
      */
     public function getContentsForSelect($parent_only = false, $without_top = false, $store_id = 0)
     {

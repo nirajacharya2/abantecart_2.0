@@ -400,23 +400,29 @@ class ControllerResponsesSaleContact extends AController
             case 'all_subscribers':
                 $filter = $newsletter_db_filter;
                 $filter['filter']['all_subscribers'] = 1;
-                $count = Customer::getCustomers($filter, 'total_only');
+                $count = Customer::getTotalCustomers($filter);
                 break;
             case 'only_subscribers':
                 $filter = $newsletter_db_filter;
                 $filter['filter']['only_subscribers'] = 1;
-                $count = Customer::getCustomers($filter, 'total_only');
+                $count = Customer::getTotalCustomers($filter);
                 break;
             case 'only_customers':
                 $filter = $newsletter_db_filter;
                 $filter['filter']['only_customers'] = 1;
-                $count = Customer::getCustomers($filter, 'total_only');
+                $count = Customer::getTotalCustomers($filter);
                 break;
             case 'ordered':
                 $products = $this->request->post['products'];
                 if (is_array($products)) {
                     foreach ($products as $product_id) {
-                        $results = Customer::getCustomersByProduct($product_id);
+                        $results = Customer::search(
+                            [
+                                'filter' => [
+                                    'product_id' => $product_id,
+                                ],
+                            ]
+                        );
                         foreach ($results as $result) {
                             $emails[] = trim($result[$protocol]);
                         }

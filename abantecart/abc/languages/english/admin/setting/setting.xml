@@ -1003,7 +1003,8 @@
 	</definition>
 	<definition>
 		<key>entry_task_api_key</key>
-		<value><![CDATA[Tasks API Key:<br/><span class="help">This is a secret key to allow AbanteCart to run scheduled processes from the browser with /task.php file. If not set, tasks will not run via browser.<br/>NOTE: This API Key is not required for running tasks command line.</span>]]></value>
+		<value>
+			<![CDATA[Tasks API Key:<br/><span class="help">This is a secret key to allow AbanteCart to run scheduled processes from the browser with /task.php file. If not set, tasks will not run via browser.<br/>NOTE: This API Key is not required for running tasks command line.</span>]]></value>
 	</definition>
 	<definition>
 		<key>entry_duplicate_contact_us</key>
@@ -1012,5 +1013,9 @@
 	<definition>
 		<key>entry_allow_order_recalc</key>
 		<value><![CDATA[Allow Order Recalculation on Admin Side]]></value>
+	</definition>
+	<definition>
+		<key>entry_tax_class</key>
+		<value><![CDATA[Default Tax Class:<br/><span class="help">Default value will be taken as default value for tax class of new creating product.</span>]]></value>
 	</definition>
 </definitions>

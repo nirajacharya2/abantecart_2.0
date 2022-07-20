@@ -31,6 +31,7 @@ class ControllerPagesExtensionExtensionTabs extends AController
 
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
+
         $this->loadLanguage('extension/extensions');
 
         $groups = (array) $this->data['groups'];

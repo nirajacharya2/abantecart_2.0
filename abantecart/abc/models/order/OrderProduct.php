@@ -35,6 +35,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $ship_individually
  * @property int $free_shipping
  * @property float|null $shipping_price
+ * @property \Carbon\Carbon $date_added
+ * @property \Carbon\Carbon $date_modified
  *
  * @property Order $order
  * @property Product $product

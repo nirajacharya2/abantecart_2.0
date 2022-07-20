@@ -23,13 +23,9 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
 final class ATemplate
 {
-    public $data = array();
+    public $data = [];
     private $config;
 
     public function fetch($filename)
@@ -61,7 +57,7 @@ final class ATemplate
 
             return $content;
         } else {
-            throw new AException(AC_ERR_LOAD, 'Error: Could not load template '.$file.'!');
+            throw new AException('Error: Could not load template '.$file.'!', AC_ERR_LOAD);
         }
     }
 }

@@ -149,7 +149,7 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
 
         if ($data['transaction_type'][1]) {
             $output['transaction_type'] = trim($data['transaction_type'][1]);
-            $this->cache->remove('transaction_types');
+            $this->cache->flush('transaction_types');
         } else {
             $output['transaction_type'] = trim($data['transaction_type'][0]);
         }

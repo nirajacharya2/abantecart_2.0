@@ -17,79 +17,89 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\admin;
+
 use abc\core\engine\AController;
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-class ControllerResponsesCommonAccess extends AController {
 
-	public function login() {
+class ControllerResponsesCommonAccess extends AController
+{
 
-		if (isset($this->request->get[ 'rt' ]) && !isset($this->request->get[ 'token' ])) {
-			$route = '';
+    public function login()
+    {
 
-			$part = explode('/', $this->request->get[ 'rt' ]);
+        if (isset($this->request->get['rt']) && !isset($this->request->get['token'])) {
+            $route = '';
+            $part = explode('/', $this->request->get['rt']);
 
-			if (isset($part[ 0 ])) {
-				$route .= $part[ 0 ];
-			}
+            if (isset($part[0])) {
+                $route .= $part[0];
+            }
 
-			if (isset($part[ 1 ])) {
-				$route .= '/' . $part[ 1 ];
-			}
+            if (isset($part[1])) {
+                $route .= '/'.$part[1];
+            }
 
-			$ignore = array(
-				'common/access',
-				'common/captcha',
-				'error/ajaxerror/login',
-				'error/ajaxerror/not_found',
-				'error/ajaxerror/permission',
-			);
+            $ignore = [
+                'common/access',
+                'common/captcha',
+                'error/ajaxerror/login',
+                'error/ajaxerror/not_found',
+                'error/ajaxerror/permission',
+            ];
 
-			if (!in_array($route, $ignore)) {
-				if (!isset($this->request->get[ 'token' ]) || !isset($this->session->data[ 'token' ]) || ($this->request->get[ 'token' ] != $this->session->data[ 'token' ])) {
-					return $this->dispatch('responses/error/ajaxerror/login');
-				}
-			}
-		} else {
-			if (!isset($this->request->get[ 'token' ]) || !isset($this->session->data[ 'token' ]) || ($this->request->get[ 'token' ] != $this->session->data[ 'token' ])) {
-				return $this->dispatch('responses/error/ajaxerror/login');
-			}
-		}
-	}
+            if (!in_array($route, $ignore)) {
+                if (!isset($this->request->get['token'])
+                    || !isset($this->session->data['token'])
+                    || ($this->request->get['token'] != $this->session->data['token'])
+                ) {
+                    return $this->dispatch('responses/error/ajaxerror/login');
+                }
+            }
+        } else {
+            if (!isset($this->request->get['token'])
+                || !isset($this->session->data['token'])
+                || ($this->request->get['token'] != $this->session->data['token'])
+            ) {
+                return $this->dispatch('responses/error/ajaxerror/login');
+            }
+        }
+    }
 
-	public function permission() {
-		if ($this->extensions->isExtensionController($this->request->get[ 'rt' ])){ return null; }
-		if (isset($this->request->get[ 'rt' ])) {
-			$route = '';
-			$rt = $this->request->get[ 'rt' ];
-			if(in_array(substr($rt,0,2),array('p/','r/'))){
-				$rt = substr($rt,2);
-			}
-			$part = explode('/', $rt);
+    public function permission()
+    {
+        if ($this->extensions->isExtensionController($this->request->get['rt'])) {
+            return null;
+        }
+        if (isset($this->request->get['rt'])) {
+            $route = '';
+            $rt = $this->request->get['rt'];
+            if (in_array(substr($rt, 0, 2), ['p/', 'r/'])) {
+                $rt = substr($rt, 2);
+            }
+            $part = explode('/', $rt);
 
-			if (isset($part[ 0 ])) {
-				$route .= $part[ 0 ];
-			}
+            if (isset($part[0])) {
+                $route .= $part[0];
+            }
 
-			if (isset($part[ 1 ])) {
-				$route .= '/' . $part[ 1 ];
-			}
+            if (isset($part[1])) {
+                $route .= '/'.$part[1];
+            }
 
-			$ignore = array(
-				'common/access',
-				'common/captcha',
-				'error/ajaxerror/login',
-				'error/ajaxerror/not_found',
-				'error/ajaxerror/permission',
-			);
+            $ignore = [
+                'common/access',
+                'common/captcha',
+                'error/ajaxerror/login',
+                'error/ajaxerror/not_found',
+                'error/ajaxerror/permission',
+            ];
 
-			if (!in_array($route, $ignore)) {
-				if (!$this->user->canAccess($route)) {
-					return $this->dispatch('responses/error/ajaxerror/permission');
-				}
-			}
-		}
-	}
+            if (!in_array($route, $ignore)) {
+                if (!$this->user->canAccess($route)) {
+                    return $this->dispatch('responses/error/ajaxerror/permission');
+                }
+            }
+        }
+    }
 }

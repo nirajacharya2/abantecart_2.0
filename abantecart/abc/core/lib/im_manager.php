@@ -77,7 +77,10 @@ class AIMManager extends AIM
         parent::__construct();
         // forbid for non admin calls
         if (ABC::env('IS_ADMIN') !== true) {
-            throw new AException (AC_ERR_LOAD, 'Error: permission denied to access class AIMManager');
+            throw new AException (
+                'Error: permission denied to access class AIMManager',
+                AC_ERR_LOAD
+            );
         }
     }
 
@@ -125,6 +128,7 @@ class AIMManager extends AIM
      * @return array|bool
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function sendToCustomer($customer_id, $sendpoint, $msg_details = [])
     {
@@ -425,6 +429,7 @@ class AIMManager extends AIM
      * notes: If message is not provided, message text will be takes from languages based on checkpoint text key.
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function sendToUser($user_id, $sendpoint, $msg_details = [])
     {
@@ -652,6 +657,7 @@ class AIMManager extends AIM
     /**
      * @return array
      * @throws Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getIMDriversList()
     {

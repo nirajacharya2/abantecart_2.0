@@ -16,14 +16,16 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace abc\tests\unit\models\admin;
+namespace Tests\unit\models;
 
 use abc\core\engine\Registry;
 use abc\models\catalog\Product;
 use abc\models\system\AuditEvent;
 use abc\models\system\AuditModel;
-use abc\tests\unit\ATestCase;
+use Exception;
+use PDOException;
 use PHPUnit\Framework\Warning;
+use Tests\unit\ATestCase;
 
 class AuditLogTest extends ATestCase
 {
@@ -44,9 +46,14 @@ class AuditLogTest extends ATestCase
      * @param array $eventList
      *
      * @return int
+     * @throws Exception
      */
-    public function testCreateUpdateRestoreDeleteProduct($eventList = [])
+    public function CreateUpdateRestoreDeleteProduct($eventList = [])
     {
+        //use direct sql-query to prevent audit log of this operation
+        Registry::db()->query("DELETE FROM ".Registry::db()->table_name('audit_events'));
+        $this->reGenerateRequestId();
+
         $productId = null;
 
         if (!$eventList) {
@@ -105,141 +112,135 @@ class AuditLogTest extends ATestCase
             'tax_class_id'        => '1',
             'subtract'            => '0',
             'quantity'            => '99',
-            'minimum'             => '1',
-            'maximum'             => '0',
-            'stock_checkout'      => '',
-            'stock_status_id'     => '1',
-            'sku'                 => '124596788',
-            'location'            => '',
-            'keyword'             => '',
-            'date_available'      => '2013-08-29 14:35:30',
-            'sort_order'          => '1',
-            'shipping'            => '1',
-            'free_shipping'       => '0',
-            'ship_individually'   => '0',
-            'shipping_price'      => '0',
-            'length'              => '0.00',
-            'width'               => '0.00',
-            'height'              => '0.00',
-            'length_class_id'     => '0',
-            'weight'              => '75.00',
-            'weight_class_id'     => '2',
+            'minimum'           => '1',
+            'maximum'           => '0',
+            'stock_checkout'    => '',
+            'stock_status_id'   => '1',
+            'sku'               => '124596788',
+            'location'          => '',
+            'date_available'    => '2013-08-29 14:35:30',
+            'sort_order'        => '1',
+            'shipping'          => '1',
+            'free_shipping'     => '0',
+            'ship_individually' => '0',
+            'shipping_price'    => '0.1',
+            'length'            => '1.00',
+            'width'             => '1.00',
+            'height'            => '1.00',
+            'length_class_id'   => 1,
+            'weight'            => '75.00',
+            'weight_class_id'   => '2',
         ];
         try {
-            $productId = Product::createProduct($arProduct);
-        } catch (\PDOException $e) {
-            $this->fail($e->getMessage());
-        } catch (Warning $e) {
-            $this->fail($e->getMessage());
-        } catch (\Exception $e) {
+            $product = Product::createProduct($arProduct);
+            $productId = $product->product_id;
+        } catch (PDOException|Warning|Exception $e) {
             $this->fail($e->getMessage());
         }
 
         $this->assertIsInt($productId);
 
         $data = [
-            'price' => '29.55',
+            'price'               => '29.55',
             'product_description' =>
-                    [
-                        'name'             => 'Test update product',
-                        'blurb'            => 'Test update blurb',
-                        'description'      => 'Test update description',
-                        'meta_keywords'    => '',
-                        'meta_description' => '',
-                        'language_id'      => 1,
-                    ]
+                [
+                    'name'             => 'Test update product',
+                    'blurb'            => 'Test update blurb',
+                    'description'      => 'Test update description',
+                    'meta_keywords'    => 'test meta keywords',
+                    'meta_description' => 'test meta description',
+                    'language_id'      => 1,
+                ]
         ];
         $this->UpdateProduct($productId, $data);
-
 
         // now delete, restore and force delete
         try {
             Product::destroy($productId);
             $result = true;
-        } catch (\PDOException $e) {
+        } catch (PDOException|Warning|Exception $e) {
             $this->fail($e->getMessage());
-            $result = false;
-        } catch (Warning $e) {
-            $this->fail($e->getMessage());
-            $result = false;
-        } catch (\Exception $e) {
-            $this->fail($e->getMessage());
-            $result = false;
         }
 
         $this->assertEquals(true, $result);
         //call restore events
-        Product::onlyTrashed()
-               ->where('product_id', $productId)
-               ->first()
-               ->restore();
-
+        $product = Product::onlyTrashed()
+                          ->where('product_id', $productId)
+                          ->first();
+        $product->restore();
         //force delete
         /**
          * @var Product $mdl
          */
-        $mdl = Product::find($productId);
-        $mdl->forceDelete();
-
+        $product = Product::withTrashed()
+                          ->where('product_id', $productId)
+                          ->first();
+        $product?->forceDelete();
         return $productId;
     }
 
-    /**
-     * @depends testCreateUpdateRestoreDeleteProduct
-     *
-     * @param $productId
-     */
-    public function testLoggedAllEvents(int $productId)
+    public function testLoggedAllEvents()
     {
-
         //check all events list
-        $this->assertEquals(
-            [
-                "created"      => 28,
-                "deleted"      => 80,
-                "deleting"     => 80,
-                "forceDeleted" => 35,
-                "restored"     => 35,
-                "restoring"    => 35,
-                "updated"      => 5,
-                "updating"     => 13,
-            ],
-            $this->getLoggedEvents('Product', $productId)
-        );
+        $productId = $this->CreateUpdateRestoreDeleteProduct();
+        //check all events list
+        $logged = $this->getLoggedEvents('Product', $productId);
+        $assert = [
+            //28 fields of product, 6 descriptions + 8 tags
+            "created"      => 28,
+            "deleting"     => 80,
+            "deleted"      => 80,
+            "restoring"    => 35,
+            "restored"     => 35,
+            "forceDeleted" => 35,
+
+            //updated: 1 product price + 6 product descriptions + 1 date_deleted of product(restoring)
+            "updated"      => 7,
+            "updating"     => 7,
+        ];
+        $this->assertEquals($logged, $assert);
     }
 
     public function testLoggedPreEvents()
     {
         //check all events list
-        $productId = $this->testCreateUpdateRestoreDeleteProduct(
-            ['saving', 'creating', 'updating', 'deleting']
-        );
-        $this->assertEquals(
+        $productId = $this->CreateUpdateRestoreDeleteProduct(
             [
-                "creating" => 7,
-                "deleting" => 80,
-                "updating" => 5,
-            ],
-            $this->getLoggedEvents('Product', $productId)
+                'saving',
+                'creating',
+                'updating',
+                'deleting',
+            ]
         );
+        $logged = $this->getLoggedEvents('Product', $productId);
+        $assert = [
+            //Note: 11 - because product_id on creating is unknown!
+            "creating" => 11,
+            //deleting includes deletes of product, description and tags
+            "deleting" => 76,
+            // updated price of product. twice
+            "updating" => 7,
+        ];
+        $this->assertEquals($logged, $assert);
+
     }
 
     public function testLoggedSaving()
     {
-        $productId = $this->testCreateUpdateRestoreDeleteProduct(['saving']);
+        $productId = $this->CreateUpdateRestoreDeleteProduct(['saving']);
         //check all events list
-        $this->assertEquals(
-            [
-                //1 because saving before creating will skip
-                "saving" => 5,
-            ],
-            $this->getLoggedEvents('Product', $productId)
-        );
+        $logged = $this->getLoggedEvents('Product', $productId);
+        $assert = [
+            //1 because saving before creating will skip
+            "saving" => 7,
+        ];
+
+        $this->assertEquals($logged, $assert);
     }
 
     public function testLoggedSaved()
     {
-        $productId = $this->testCreateUpdateRestoreDeleteProduct(['saved']);
+        $productId = $this->CreateUpdateRestoreDeleteProduct(['saved']);
         //check all events list
         $this->assertEquals(
             [],
@@ -249,7 +250,7 @@ class AuditLogTest extends ATestCase
 
     public function testLoggedSavingUpdating()
     {
-        $productId = $this->testCreateUpdateRestoreDeleteProduct(['saving', 'updating']);
+        $productId = $this->CreateUpdateRestoreDeleteProduct(['saving', 'updating']);
         //check all events list
         $this->assertEquals(
             [
@@ -261,7 +262,7 @@ class AuditLogTest extends ATestCase
 
     public function testLoggedCreatingUpdating()
     {
-        $productId = $this->testCreateUpdateRestoreDeleteProduct(['saving', 'creating']);
+        $productId = $this->CreateUpdateRestoreDeleteProduct(['saving', 'creating']);
         //check all events list
         $this->assertEquals(
             [
@@ -274,8 +275,7 @@ class AuditLogTest extends ATestCase
 
     public function testLoggedCreatingUpdatingSaving()
     {
-        $productId = $this->testCreateUpdateRestoreDeleteProduct(['saving', 'creating', 'updating']);
-
+        $productId = $this->CreateUpdateRestoreDeleteProduct(['saving', 'creating', 'updating']);
         $this->assertEquals(
             [
                 'creating' => 7,
@@ -287,8 +287,7 @@ class AuditLogTest extends ATestCase
 
     public function testLoggedDeleting()
     {
-        $productId = $this->testCreateUpdateRestoreDeleteProduct(['deleting']);
-
+        $productId = $this->CreateUpdateRestoreDeleteProduct(['deleting']);
         $this->assertEquals(
             [
                 'deleting' => 80,
@@ -299,8 +298,7 @@ class AuditLogTest extends ATestCase
 
     public function testLoggedDeleted()
     {
-        $productId = $this->testCreateUpdateRestoreDeleteProduct(['deleted']);
-
+        $productId = $this->CreateUpdateRestoreDeleteProduct(['deleted']);
         $this->assertEquals(
             [
                 'deleted' => 80,
@@ -311,14 +309,14 @@ class AuditLogTest extends ATestCase
 
     public function testLoggedDeletingDeleted()
     {
-        $productId = $this->testCreateUpdateRestoreDeleteProduct(['deleting', 'deleted']);
-
+        $productId = $this->CreateUpdateRestoreDeleteProduct(['deleting', 'deleted']);
+        $logged = $this->getLoggedEvents('Product', $productId);
         $this->assertEquals(
             [
                 'deleting' => 80,
                 'deleted'  => 80,
             ],
-            $this->getLoggedEvents('Product', $productId)
+            $logged
         );
     }
 
@@ -326,43 +324,52 @@ class AuditLogTest extends ATestCase
      * @param string $auditableModel
      * @param int $auditableId
      *
+     *
      * @return array
      */
     public function getLoggedEvents(string $auditableModel, int $auditableId): array
     {
-        $db = $this->registry->get('db');
+        $db = Registry::db();
 
         $auditableModelId = 0;
         /** @var AuditModel $auditModel */
         $auditModel = $db->table('audit_models')
-            ->where('name', '=', $auditableModel)
-            ->first();
+                         ->where('name', '=', $auditableModel)
+                         ->first();
         if ($auditModel) {
             $auditableModelId = $auditModel->id;
         } else {
             $this->fail('No model in Audit Models Table');
         }
 
-        $requestId = $this->registry->get('request')->getUniqueId();
+        $requestId = Registry::request()->getUniqueId();
 
         $writtenEvents = [];
         //check records of all events set
         //$db->enableQueryLog();
 
-        $audit = new AuditEvent();
+        $audit = $db->table('audit_events');
         $result = $audit
-            ->select('event_type_id', $db->getORM()::raw('count(*) as count'))
-            ->leftJoin('audit_event_descriptions', 'audit_event_descriptions.audit_event_id', '=', 'audit_events.id')
-            ->where('main_auditable_model_id', '=', $auditableModelId)
-            ->where('main_auditable_id', '=', $auditableId)
-            ->where('request_id', '=', $requestId)
-            ->groupBy('event_type_id')
+            ->select(
+                'event_type_id',
+                $db->getORM()::raw('count(*) as count')
+            )->leftJoin(
+                'audit_event_descriptions',
+                'audit_event_descriptions.audit_event_id',
+                '=',
+                'audit_events.id'
+            )->where(
+                [
+                    'main_auditable_model_id' => $auditableModelId,
+                    'main_auditable_id'       => $auditableId,
+                    'request_id'              => $requestId,
+                ]
+            )->groupBy('event_type_id')
             ->get();
 
-
-        if ($result->count()) {
-            foreach ($result->toArray() as $row) {
-                $writtenEvents[AuditEvent::getEventById($row['event_type_id'])] = $row['count'];
+        if ($result) {
+            foreach ($result as $row) {
+                $writtenEvents[AuditEvent::getEventById($row->event_type_id)] = $row->count;
             }
         }
 
@@ -373,19 +380,21 @@ class AuditLogTest extends ATestCase
      * @depends testCreateProduct
      *
      * @param int $productId
+     * @param $data
      */
     public function UpdateProduct(int $productId, $data)
     {
         try {
-            Product::updateProduct($productId, $data, 1);
-        } catch (\PDOException $e) {
-            $this->fail($e->getMessage());
-        } catch (Warning $e) {
-            $this->fail($e->getMessage());
-        } catch (\Exception $e) {
+            Product::setCurrentLanguageID(1);
+            Product::updateProduct($productId, $data);
+        } catch (PDOException|Warning|Exception $e) {
             $this->fail($e->getMessage());
         }
+    }
 
+    protected function reGenerateRequestId()
+    {
+        Registry::request()->setRequestId('unittest-'.time());
     }
 
 }

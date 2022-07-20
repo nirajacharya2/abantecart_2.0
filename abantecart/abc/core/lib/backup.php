@@ -21,6 +21,7 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
+use abc\core\engine\ALoader;
 use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
 use abc\models\admin\ModelToolBackup;
@@ -53,6 +54,14 @@ class ABackup
      * @var ADB
      */
     private $db;
+    /**
+     * @var ALoader
+     */
+    private $load;
+    /**
+     * @var ModelToolBackup
+     */
+    private $model_tool_backup;
     /**
      * @var ExtensionsApi
      */
@@ -425,7 +434,7 @@ class ABackup
             return true;
         }
         // also skip cache & logs dir
-        if (is_int(strpos($dir_path, ABC::env('CACHE')['DIR_CACHE']))
+        if (is_int(strpos($dir_path, ABC::env('CACHE')['stores']['file']['path']))
             || is_int(strpos($dir_path, ABC::env('DIR_LOGS')))
         ) {
             return true;

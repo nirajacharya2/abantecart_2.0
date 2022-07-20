@@ -17,17 +17,19 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\storefront;
+
 use abc\core\ABC;
 use abc\core\engine\AController;
 
 class ControllerCommonTemplateDebug extends AController
 {
-    public function main($instance_id = 0, $args = [])
-    {
+
+	public function main($instance_id = 0, $args = []) {
 		//init controller data
         $this->extensions->hk_InitData($this,__FUNCTION__);
-
+		
 		$block_details = $this->layout->getBlockDetails($args['block_id']);
 		$parent_block = $this->layout->getBlockDetails($block_details['parent_instance_id']);
 

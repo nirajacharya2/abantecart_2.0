@@ -21,9 +21,9 @@
 namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
+use Psr\SimpleCache\InvalidArgumentException;
 
-class ControllerBlocksHTMLBlock extends AController
-{
+class ControllerBlocksHTMLBlock extends AController {
 
     public function main($instance_id = 0)
     {
@@ -56,6 +56,7 @@ class ControllerBlocksHTMLBlock extends AController
      * @param $instance_id
      *
      * @return array
+     * @throws InvalidArgumentException
      */
     protected function getBlockContent($instance_id)
     {

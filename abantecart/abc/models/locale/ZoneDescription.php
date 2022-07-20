@@ -27,15 +27,80 @@ class ZoneDescription extends BaseModel
         'language_id',
     ];
 
-    public $timestamps = false;
-
+    protected $touches = ['zone'];
     protected $casts = [
-        'zone_id'     => 'int',
+        'zone_id' => 'int',
         'language_id' => 'int',
     ];
 
     protected $fillable = [
         'name',
+        'id'
+    ];
+    protected $rules = [
+        'id' => [
+            'checks' => [
+                'integer',
+                'required',
+                'sometimes',
+                'min:1'
+            ],
+            'messages' => [
+                'integer' => [
+                    'language_key' => 'error_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'id must be integer!',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'id required!',
+                    'section' => 'admin'
+                ],
+                'min' => [
+                    'language_key' => 'error_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'id must be more 1!',
+                    'section' => 'admin'
+                ],
+            ]
+        ],
+        'name' => [
+            'checks' => [
+                'string',
+                'required',
+                'sometimes',
+                'min:2',
+                'max:128'
+            ],
+            'messages' => [
+                'min' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'Name must be more 2 characters',
+                    'section' => 'admin'
+                ],
+                'max' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'Name must be no more than 255 characters',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'Name required!',
+                    'section' => 'admin'
+                ],
+                'string' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'Name must be string!',
+                    'section' => 'admin'
+                ],
+            ]
+        ]
     ];
 
     public function zone()

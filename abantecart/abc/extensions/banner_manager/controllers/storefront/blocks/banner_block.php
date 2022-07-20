@@ -22,11 +22,10 @@ namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
+use abc\core\lib\AException;
 use abc\extensions\banner_manager\models\storefront\extension\ModelExtensionBannerManager;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 /**
  * Class ControllerBlocksBannerBlock
@@ -38,6 +37,7 @@ class ControllerBlocksBannerBlock extends AController
 
     public function main($instance_id = 0, $custom_block_id = 0)
     {
+
         //load JS to register clicks before html-cache
         $this->document->addScriptBottom($this->view->templateResource('assets/js/banner_manager.js'));
 

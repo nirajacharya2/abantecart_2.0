@@ -3,12 +3,19 @@
 namespace abc\modules\audit_log;
 
 use abc\core\engine\Registry;
+use abc\core\lib\ADB;
 use abc\core\lib\contracts\AuditLogStorageInterface;
+use abc\models\QueryBuilder;
 use abc\models\system\AuditEvent;
 use abc\models\system\AuditEventDescription;
 use abc\models\system\AuditModel;
 use abc\models\system\AuditUser;
 
+/**
+ * Class AuditLogDbStorage
+ *
+ * @package abc\modules\audit_log
+ */
 class AuditLogDbStorage implements AuditLogStorageInterface
 {
     private $db;
@@ -19,7 +26,8 @@ class AuditLogDbStorage implements AuditLogStorageInterface
      */
     public function __construct()
     {
-        $this->db = Registry::getInstance()->get('db');
+        /** @var ADB db */
+        $this->db = Registry::db();
     }
 
     /**
@@ -27,93 +35,55 @@ class AuditLogDbStorage implements AuditLogStorageInterface
      *
      * @param array $data
      *
-     * @return mixed
      */
     public function write(array $data)
     {
-        $auditModel = $this->db->table('audit_models')
-            ->where('name', '=', $data['entity']['name'])
-            ->first();
-        if ($auditModel) {
-            $auditableModelId = $auditModel->id;
-        } else {
-            $auditableModelId = $this->db->table('audit_models')->insertGetId(['name' => $data['entity']['name']]);
-        }
+        $this->db->beginTransaction();
+
+        $auditableModelId = AuditEvent::getModelIdByName($data['entity']['name']);
         $data['entity']['model_id'] = $auditableModelId;
 
-        $db = $this->db;
-        $this->db->transaction(static function () use ($db, $data) {
+        $auditUserId = AuditEvent::getUserId(
+            AuditUser::getUserTypeId($data['actor']['group']),
+            (int)$data['actor']['id'],
+            $data['actor']['name']
+        );
 
-            /*$auditSession = $db->table('audit_sessions')
-                ->where('session_id', '=', $data['event']['session_id'])
-                ->first();
-            if ($auditSession) {
-                $auditSessionId = $auditSession->id;
-            } else {
-                $auditSessionId = $db->table('audit_sessions')->insertGetId(['session_id' => $data['event']['session_id']]);
-            }
-            $event['audit_session_id'] = $auditSessionId;*/
+        $eventId = AuditEvent::getEventIdByParams(
+            [
+                'audit_user_id'           => $auditUserId,
+                'request_id'              => $data['id'],
+                'event_type_id'           => AuditEvent::EVENT_NAMES[$data['entity']['group']] ?: 1,
+                'main_auditable_model_id' => $data['entity']['model_id'],
+                'main_auditable_id'       => $data['entity']['id'],
+            ]
+        );
 
-            $auditUser = $db->table('audit_users')
-                ->where('user_type_id', '=', AuditUser::getUserTypeId($data['actor']['group']))
-                ->where('user_id', '=', $data['actor']['id'])
-                ->where('name', '=', $data['actor']['name'])
-                ->first();
-            if ($auditUser) {
-                $auditUserId = $auditUser->id;
-            } else {
-                $userData = [
-                    'user_type_id' => AuditUser::getUserTypeId($data['actor']['group']),
-                    'user_id'      => $data['actor']['id'],
-                    'name'         => $data['actor']['name'],
-                ];
-                $auditUserId = $db->table('audit_users')->insertGetId($userData);
-            }
-            $event['audit_user_id'] = $auditUserId;
-            $event['request_id'] = $data['id'];
-            $event['event_type_id'] = AuditEvent::EVENT_NAMES[$data['entity']['group']] ?: 1;
-            $event['main_auditable_model_id'] = $data['entity']['model_id'];
-            $event['main_auditable_id'] = $data['entity']['id'];
-
-            $auditEvent = $db->table('audit_events')
-                ->where('request_id', '=', $event['request_id'])
-                ->where('audit_user_id', '=', $auditUserId)
-                ->where('event_type_id', '=', $event['event_type_id'])
-                ->where('main_auditable_model_id', '=', $event['main_auditable_model_id'])
-                ->where('main_auditable_id', '=', $event['main_auditable_id'])
-                ->first();
-            if ($auditEvent) {
-                $eventId = $auditEvent->id;
-            } else {
-                $eventId = $db->table('audit_events')->insertGetId($event);
-            }
-
-            if ($eventId) {
-                foreach ($data['changes'] as $change) {
-                    if (!$change['groupName']) {
-                        $change['groupName'] = $change['name'];
-                    }
-                    $model = $db->table('audit_models')
-                        ->where('name', '=', $change['groupName'])
-                        ->first();
-                    if ($model) {
-                        $modelId = $model->id;
-                    } else {
-                        $modelId = $db->table('audit_models')->insertGetId(['name' => $change['groupName']]);
-                    }
-                    $change['model_id'] = $modelId;
-                    $eventDescription = [
-                        'auditable_model_id' => $change['model_id'],
-                        'auditable_id'       => $change['groupId'] ?: 0,
-                        'field_name'         => $change['name'],
-                        'old_value'          => $change['oldValue'],
-                        'new_value'          => $change['newValue'],
-                        'audit_event_id'     => $eventId,
-                    ];
-                    $db->table('audit_event_descriptions')->insert($eventDescription);
+        if ($eventId) {
+            $eventDescriptions = [];
+            foreach ($data['changes'] as $change) {
+                if (!$change['groupName']) {
+                    $change['groupName'] = $change['name'];
                 }
+
+                $modelId = AuditEvent::getModelIdByName($change['groupName']);
+                $change['model_id'] = $modelId;
+                $eventDescriptions[] = [
+                    'auditable_model_id' => $change['model_id'],
+                    'auditable_id'       => $change['groupId'] ?: 0,
+                    'field_name'         => $change['name'],
+                    'old_value'          => $change['oldValue'],
+                    'new_value'          => $change['newValue'],
+                    'audit_event_id'     => $eventId,
+                ];
+
             }
-        });
+            if ($eventDescriptions) {
+                $this->db->table('audit_event_descriptions')->insert($eventDescriptions);
+            }
+        }
+        $this->db->commit();
+
     }
 
     /**
@@ -126,7 +96,7 @@ class AuditLogDbStorage implements AuditLogStorageInterface
     public function getEvents(array $request)
     {
         /**
-         * @var string $filter
+         * @var array $filter
          * @var string $date_from
          * @var string $date_to
          * @var string $user_name
@@ -137,9 +107,8 @@ class AuditLogDbStorage implements AuditLogStorageInterface
          * @var array  $events
          */
         extract($request, EXTR_OVERWRITE);
-
+        $arFilters = [];
         if ($filter) {
-            $arFilters = [];
             foreach ($filter as $item) {
                 $arFilters[] = json_decode(htmlspecialchars_decode($item), true);
             }
@@ -151,9 +120,23 @@ class AuditLogDbStorage implements AuditLogStorageInterface
         if ($arFilters || $date_from || $date_to || $user_name || $events) {
 
 
-            $audit = AuditEvent::leftJoin('audit_users', 'audit_users.id', '=', 'audit_events.audit_user_id')
-                ->leftJoin('audit_users as audit_aliases', 'audit_aliases.id', '=', 'audit_events.audit_alias_id')
-                ->leftJoin('audit_models', 'audit_models.id', '=', 'audit_events.main_auditable_model_id');
+            $audit = AuditEvent::leftJoin(
+                'audit_users',
+                'audit_users.id',
+                '=',
+                'audit_events.audit_user_id'
+            )->leftJoin(
+                'audit_users as audit_aliases',
+                'audit_aliases.id',
+                '=',
+                'audit_events.audit_alias_id'
+            )->leftJoin(
+                'audit_models',
+                'audit_models.id',
+                '=',
+                'audit_events.main_auditable_model_id'
+            );
+
             if (is_array($arFilters) && !empty($arFilters)) {
                 $auditableTypes = [];
                 $auditableIds = [];
@@ -184,9 +167,16 @@ class AuditLogDbStorage implements AuditLogStorageInterface
                 }
 
                 if (!empty($attributeNames)) {
-                    $audit = $audit->join('audit_event_descriptions', 'audit_event_descriptions.audit_event_id', '=', 'audit_events.id')
-                        ->groupBy('audit_events.id')
-                        ->whereIn('audit_event_descriptions.field_name', $attributeNames);
+                    $audit = $audit->join(
+                        'audit_event_descriptions',
+                        'audit_event_descriptions.audit_event_id',
+                        '=',
+                        'audit_events.id'
+                    )->groupBy('audit_events.id')
+                     ->whereIn(
+                         'audit_event_descriptions.field_name',
+                         $attributeNames
+                     );
                 }
 
             }
@@ -198,6 +188,7 @@ class AuditLogDbStorage implements AuditLogStorageInterface
             }
             if ($user_name) {
                 $audit = $audit->where(function ($query) use ($user_name) {
+                    /** @var QueryBuilder $query */
                     $query->where('audit_users.name', 'like', '%'.$user_name.'%')
                         ->orWhere('audit_aliases.name', 'like', '%'.$user_name.'%');
                 });
@@ -234,12 +225,16 @@ class AuditLogDbStorage implements AuditLogStorageInterface
                 $audit = $audit->orderBy($sortBy, $ordering);
             }
 
+            //$this->db->enableQueryLog();
+
             $this->data['response']['items'] = $audit
                 ->get()
                 ->toArray();
             foreach ($this->data['response']['items'] as &$item) {
                 $item['event'] = AuditEvent::getEventById($item['event_type_id']);
             }
+
+            //\H::df($this->db->getQueryLog());
 
             $this->data['response']['total'] = $this->db->sql_get_row_count();
 
@@ -260,7 +255,7 @@ class AuditLogDbStorage implements AuditLogStorageInterface
          * @var string $filter
          */
         extract($request, EXTR_OVERWRITE);
-
+        $arFilters = [];
         if ($filter) {
             $arFilters = json_decode(htmlspecialchars_decode($filter), true);
         }

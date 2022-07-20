@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2022 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -21,6 +21,8 @@ namespace abc\models\catalog;
 use abc\models\BaseModel;
 use abc\models\casts\Serialized;
 use abc\models\locale\Language;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -30,10 +32,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $language_id
  * @property int $product_id
  * @property string $name
- * @property string $grouped_attribute_names
+ * @property array $grouped_attribute_names
+ *
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
  *
  * @property Product $product
  * @property Language $language
+ *
  *
  * @package abc\models
  */
@@ -47,13 +53,22 @@ class ProductOptionValueDescription extends BaseModel
         'language_id',
         'product_id',
     ];
-    public $timestamps = false;
+    protected $mainClassName = Product::class;
+    protected $mainClassKey = 'product_id';
+
+    protected $touches = ['product_option_value'];
 
     protected $casts = [
         'product_option_value_id' => 'int',
         'language_id'             => 'int',
         'product_id'              => 'int',
         'grouped_attribute_names' => Serialized::class
+    ];
+
+    /** @var array */
+    protected $dates = [
+        'date_added',
+        'date_modified',
     ];
 
     protected $fillable = [
@@ -64,11 +79,75 @@ class ProductOptionValueDescription extends BaseModel
         'grouped_attribute_names',
     ];
 
+    protected $rules = [
+        /** @see validate() */
+        'product_option_value_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:product_option_values',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Product Option Value ID is not Integer or absent in product_option_values table!'],
+            ],
+        ],
+
+        'product_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:products',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Product ID is not Integer or absent in products table!'],
+            ],
+        ],
+
+        'language_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:languages',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Language ID is not Integer or absent in languages table!'],
+            ],
+        ],
+
+        'name' => [
+            'checks'   => [
+                'string',
+                'sometimes',
+                'required',
+                'max:1500',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Product Option Name must be greater than 3 and less than 1500 characters!',
+                ],
+            ],
+        ],
+    ];
+
+    /**
+     * @return BelongsTo
+     */
+    public function product_option_value()
+    {
+        return $this->belongsTo(ProductOptionValue::class, 'product_option_value_id');
+    }
+
+    /**
+     * @return BelongsTo
+     */
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id');
     }
 
+    /**
+     * @return BelongsTo
+     */
     public function language()
     {
         return $this->belongsTo(Language::class, 'language_id');

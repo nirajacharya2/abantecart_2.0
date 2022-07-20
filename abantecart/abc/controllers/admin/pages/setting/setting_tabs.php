@@ -30,7 +30,10 @@ class ControllerPagesSettingSettingTabs extends AController
         //Load input arguments for gid settings
         $this->data = $data;
         if (!is_array($this->data)) {
-            throw new AException ('Error: Could not create grid. Grid definition is not array.', AC_ERR_LOAD);
+            throw new AException(
+                'Error: Could not create grid. Grid definition is not array.',
+                AC_ERR_LOAD
+            );
         }
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);

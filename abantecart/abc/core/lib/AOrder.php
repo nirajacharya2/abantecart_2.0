@@ -145,6 +145,7 @@ class AOrder extends ALibBase
      * NOTE: method to create an order based on provided data array.
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function buildOrderData($indata)
     {
@@ -477,6 +478,7 @@ class AOrder extends ALibBase
      *
      * @return int
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      */
     public function _create($data, $set_order_id = '')
@@ -503,7 +505,7 @@ class AOrder extends ALibBase
                 }
             } //remove
             else {
-                //this will remove order with dependencies by Fkeys
+                //this will remove order with dependencies by foreign keys
                 $order->forceDelete();
             }
         }
@@ -656,6 +658,7 @@ class AOrder extends ALibBase
      * @return bool
      * @throws \abc\core\lib\AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function _confirm($order_id, $order_status_id, $comment = '')
     {
@@ -757,7 +760,7 @@ class AOrder extends ALibBase
         }
 
         //clean product cache as stock might have changed.
-        Registry::cache()->remove('product');
+        Registry::cache()->flush('product');
 
         H::event('storefront\sendOrderConfirmEmail', [new ABaseEvent($orderData)]);
         return true;
@@ -787,6 +790,7 @@ class AOrder extends ALibBase
      * @return bool
      * @throws AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function _update($order_id, $order_status_id, $comment = '', $notify = false)
     {

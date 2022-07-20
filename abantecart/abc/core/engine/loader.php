@@ -23,9 +23,6 @@ use abc\core\lib\AConfig;
 use abc\core\lib\AException;
 use abc\core\lib\AWarning;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class ALoader
@@ -88,7 +85,10 @@ final class ALoader
         if ($file) {
             include_once($file);
         } else {
-            throw new AException(AC_ERR_LOAD, 'Error: Could not load library '.$library.'!');
+            throw new AException(
+                'Error: Could not load library '.$library.'!',
+                AC_ERR_LOAD
+            );
         }
     }
 
@@ -186,7 +186,10 @@ final class ALoader
         if (file_exists($file)) {
             include_once($file);
         } else {
-            throw new AException(AC_ERR_LOAD, 'Error: Could not load helper '.$helper.'!');
+            throw new AException(
+                'Error: Could not load helper '.$helper.'!',
+                AC_ERR_LOAD
+            );
         }
     }
 
@@ -205,6 +208,9 @@ final class ALoader
      * @param string $mode
      *
      * @return array|null
+     * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
      */
     public function language($language, $mode = '')
     {

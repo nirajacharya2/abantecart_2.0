@@ -1,9 +1,10 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\order;
 
 use abc\models\order\OrderHistory;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class OrderHistoryModelTest
@@ -20,6 +21,7 @@ class OrderHistoryModelTest extends ATestCase
     {
 
         $errors = [];
+        $order = new OrderHistory();
         try {
             //validate
             $data = [
@@ -28,7 +30,6 @@ class OrderHistoryModelTest extends ATestCase
                 'comment'         => [],
                 'order_status_id' => 'fail',
             ];
-            $order = new OrderHistory();
             $order->fill($data);
             $order->validate();
         } catch (ValidationException $e) {
@@ -81,14 +82,13 @@ class OrderHistoryModelTest extends ATestCase
 
         $order = new OrderHistory($data);
         $errors = [];
-        $order_id = null;
         try {
             $order->validate();
             $order->save();
         } catch (ValidationException $e) {
             $errors = $order->errors()['validation'];
-            var_Dump(array_intersect_key($data, $errors));
-            var_Dump($errors);
+//            var_Dump(array_intersect_key($data, $errors));
+//            var_Dump($errors);
         }
 
         $this->assertCount(0, $errors);

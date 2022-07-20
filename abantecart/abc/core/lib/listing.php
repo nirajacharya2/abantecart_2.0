@@ -21,12 +21,16 @@
 namespace abc\core\lib;
 
 use abc\core\engine\Registry;
+use abc\models\catalog\Category;
+use abc\models\catalog\Manufacturer;
+use abc\models\catalog\Product;
+use Psr\SimpleCache\InvalidArgumentException;
 
 /**
  * Class AListing
  *
- * @property \abc\core\cache\ACache $cache
- * @property ADB                    $db
+ * @property \abc\core\lib\AbcCache $cache
+ * @property ADB $db
  */
 class AListing
 {
@@ -53,14 +57,14 @@ class AListing
     public function __construct($custom_block_id)
     {
         $this->registry = Registry::getInstance();
-        $this->custom_block_id = (int)$custom_block_id;
+        $this->custom_block_id = (int) $custom_block_id;
         // datasources
         $this->data_sources = [
             'catalog_product_getPopularProducts' => [
                 'text'                 => 'text_products_popular',
                 'rl_object_name'       => 'products',
                 'data_type'            => 'product_id',
-                'storefront_model'     => 'catalog/product',
+                'storefront_model'     => Product::class,
                 'storefront_method'    => 'getPopularProducts',
                 'storefront_view_path' => 'product/product',
             ],
@@ -68,47 +72,47 @@ class AListing
                 'text'                 => 'text_products_special',
                 'rl_object_name'       => 'products',
                 'data_type'            => 'product_id',
-                'storefront_model'     => 'catalog/product',
+                'storefront_model'     => Product::class,
                 'storefront_method'    => 'getProductSpecials',
                 'storefront_view_path' => 'product/product',
             ],
-            'catalog_category_getcategories'     => [
+            'catalog_category_getCategories'     => [
                 'text'                 => 'text_categories',
                 'rl_object_name'       => 'categories',
                 'data_type'            => 'category_id',
-                'storefront_model'     => 'catalog/category',
-                'storefront_method'    => 'getCategories',
+                'storefront_model'     => Category::class,
+                'storefront_method'    => 'getCategoriesData',
                 'storefront_view_path' => 'product/category',
             ],
-            'catalog_category_getmanufacturers'  => [
+            'catalog_category_getManufacturers'  => [
                 'text'                 => 'text_manufacturers',
                 'rl_object_name'       => 'manufacturers',
                 'data_type'            => 'manufacturer_id',
-                'storefront_model'     => 'catalog/manufacturer',
+                'storefront_model'     => Manufacturer::class,
                 'storefront_method'    => 'getManufacturers',
                 'storefront_view_path' => 'product/manufacturer',
             ],
-            'catalog_product_getfeatured'        => [
+            'catalog_product_getFeatured'        => [
                 'text'                 => 'text_featured',
                 'rl_object_name'       => 'products',
                 'data_type'            => 'product_id',
-                'storefront_model'     => 'catalog/product',
+                'storefront_model'     => Product::class,
                 'storefront_method'    => 'getFeaturedProducts',
                 'storefront_view_path' => 'product/product',
             ],
-            'catalog_product_getlatest'          => [
+            'catalog_product_getLatest'          => [
                 'text'                 => 'text_latest',
                 'rl_object_name'       => 'products',
                 'data_type'            => 'product_id',
-                'storefront_model'     => 'catalog/product',
+                'storefront_model'     => Product::class,
                 'storefront_method'    => 'getLatestProducts',
                 'storefront_view_path' => 'product/product',
             ],
-            'catalog_product_getbestsellers'     => [
+            'catalog_product_getBestsellers'     => [
                 'text'                 => 'text_bestsellers',
                 'rl_object_name'       => 'products',
                 'data_type'            => 'product_id',
-                'storefront_model'     => 'catalog/product',
+                'storefront_model'     => Product::class,
                 'storefront_method'    => 'getBestsellerProducts',
                 'storefront_view_path' => 'product/product',
             ],
@@ -123,8 +127,8 @@ class AListing
                 'view_path'            => 'catalog/product/update',
                 'rl_object_name'       => 'products',
                 'text'                 => 'text_custom_products',
-                'storefront_model'     => 'catalog/product',
-                'storefront_method'    => 'getProduct',
+                'storefront_model'     => Product::class,
+                'storefront_method'    => 'getProducts',
                 'storefront_view_path' => 'product/product',
                 'items_list_url'       => 'product/product/related',
             ],
@@ -137,8 +141,8 @@ class AListing
                 'view_path'            => 'catalog/category/update',
                 'rl_object_name'       => 'categories',
                 'text'                 => 'text_custom_categories',
-                'storefront_model'     => 'catalog/category',
-                'storefront_method'    => 'getCategory',
+                'storefront_model'     => Category::class,
+                'storefront_method'    => 'getCategoriesData',
                 'storefront_view_path' => 'product/category',
                 'items_list_url'       => 'product/product/product_categories',
             ],
@@ -151,8 +155,8 @@ class AListing
                 'view_path'            => 'catalog/category/update',
                 'rl_object_name'       => 'manufacturers',
                 'text'                 => 'text_custom_manufacturers',
-                'storefront_model'     => 'catalog/manufacturer',
-                'storefront_method'    => 'getManufacturer',
+                'storefront_model'     => Manufacturer::class,
+                'storefront_method'    => 'getManufacturers',
                 'storefront_view_path' => 'product/manufacturer',
                 'items_list_url'       => 'catalog/manufacturer_listing/getManufacturers',
             ],
@@ -174,17 +178,18 @@ class AListing
      *
      * @return array
      * @throws \Exception
+     * @throws InvalidArgumentException
      */
-    public function getCustomList($store_id=0)
+    public function getCustomList($store_id = 0)
     {
-        $store_id = (int)$store_id;
-        if (!(int)$this->custom_block_id) {
+        $store_id = (int) $store_id;
+        if (!(int) $this->custom_block_id) {
             return [];
         }
 
-        $custom_block_id = (int)$this->custom_block_id;
+        $custom_block_id = (int) $this->custom_block_id;
         $cache_key = 'blocks.custom.'.$custom_block_id.$store_id;
-        $output = $this->cache->pull($cache_key);
+        $output = false;//$this->cache->get($cache_key);
 
         if ($output !== false) {
             return $output;
@@ -198,7 +203,7 @@ class AListing
             ORDER BY sort_order"
         );
         $output = $result->rows;
-        $this->cache->push($cache_key, $output);
+        $this->cache->put($cache_key, $output);
         return $output;
     }
 
@@ -212,7 +217,7 @@ class AListing
 
     /**
      * @param string $key
-     * @param array  $data
+     * @param array $data
      */
     public function addListingDataSource($key, $data)
     {
@@ -227,37 +232,117 @@ class AListing
         unset($this->data_sources[$key]);
     }
 
-    //method returns argument for call_user_func function usage when call storefront model to get list
-
     /**
+     * method returns argument for call_user_func function usage when call storefront model to get list
+     *
      * @param string $model
      * @param string $method
-     * @param array  $args
+     * @param array $args
      *
      * @return array|false
+     * @throws InvalidArgumentException
      */
-    public function getListingArguments($model, $method, $args = [])
+    public function getListingMethodArguments($model, $method, $args = [])
     {
         if (!$method || !$model || !$args) {
             return false;
         }
         $output = [];
-        if ($model == 'catalog/category' && $method == 'getCategories') {
-            $args['parent_id'] = is_null($args['parent_id']) ? 0 : $args['parent_id'];
-            $output = [$args['parent_id'], $args['limit']];
-        } elseif ($model == 'catalog/manufacturer' && $method == 'getManufacturers') {
-            $output = [['limit' => $args['limit']]];
-        } elseif ($model == 'catalog/product' && $method == 'getPopularProducts') {
-            $output = ['limit' => $args['limit']];
-        } elseif ($model == 'catalog/product' && $method == 'getProductSpecials') {
-            $output = ['p.sort_order', 'ASC', 0, 'limit' => $args['limit']];
-        } elseif ($model == 'catalog/product' && $method == 'getBestsellerProducts') {
-            $output = [$args['limit']];
-        } elseif ($model == 'catalog/product' && $method == 'getFeaturedProducts') {
-            $output = [$args['limit']];
-        } elseif ($model == 'catalog/product' && $method == 'getLatestProducts') {
-            $output = [$args['limit']];
+        if ($model == Category::class && $method == 'getCategoriesData') {
+            $output = [
+                'params' => [
+                    'limit'       => $args['limit'],
+                    'language_id' => $args['language_id'],
+                    'store_id'    => $args['store_id'],
+                    'parent_id'   => (int) $args['parent_id'],
+                ],
+            ];
+
+            //in case when custom list of categories
+            $include = $this->getCustomListIds($args['store_id'], 'category_id');
+            if ($include) {
+                $output['params']['include'] = $include;
+                unset(
+                    $output['params']['limit'],
+                    $output['params']['parent_id']
+                );
+            }
+        } elseif ($model == Manufacturer::class && $method == 'getManufacturers') {
+            $output = [
+                'params' => [
+                    'limit'       => $args['limit'],
+                    'language_id' => $args['language_id'],
+                    'store_id'    => $args['store_id'],
+                ],
+            ];
+
+            //in case when custom list of categories
+            $include = $this->getCustomListIds($args['store_id'], 'manufacturer_id');
+            if ($include) {
+                $output['params']['include'] = $include;
+                unset(
+                    $output['params']['limit']
+                );
+            }
+        } elseif ($model == Product::class) {
+            if (in_array(
+                $method,
+                [
+                    'getPopularProducts',
+                    'getProductSpecials',
+                    'getBestsellerProducts',
+                    'getFeaturedProducts',
+                    'getLatestProducts',
+                ]
+            )
+            ) {
+                $output = [
+                    'limit'  => $args['limit'],
+                    'filter' => [
+                        'customer_group_id' => $args['customer_group_id'],
+                        'store_id'          => $args['store_id'],
+                    ],
+                ];
+
+                if (in_array(
+                    $method,
+                    ['getProductSpecials', 'getBestsellerProducts', 'getFeaturedProducts']
+                )) {
+                    $output['start'] = 0;
+                    $output['sort'] = 'sort_order';
+                    $output = ['params' => $output];
+                }
+            }
+            //for custom products list
+            if ($method == 'getProducts') {
+                $include = $this->getCustomListIds($args['store_id'], 'product_id');
+                if (!$include) {
+                    return false;
+                }
+
+                $output = [
+                    'params' => [
+                        'with_all' => true,
+                        'filter'   => ['include' => $include],
+                    ],
+                ];
+            }
         }
         return $output;
+    }
+
+    protected function getCustomListIds($storeId, $keyName)
+    {
+        $list = $this->getCustomList($storeId);
+        if (!$list) {
+            return false;
+        }
+        $include = [];
+        foreach ($list as $item) {
+            if ($item['data_type'] == $keyName) {
+                $include[] = (int) $item['id'];
+            }
+        }
+        return $include;
     }
 }

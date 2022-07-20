@@ -16,7 +16,7 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace abc\tests\unit;
+namespace Tests\unit;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
@@ -27,7 +27,6 @@ use abc\core\lib\ALog;
 use abc\core\lib\ARequest;
 use abc\core\lib\AResponse;
 use abc\core\lib\ASession;
-use abc\core\lib\AUser;
 use Exception;
 use ReflectionClass;
 
@@ -59,9 +58,13 @@ class ATestCase extends TestCase
         $tb = TestBootstrap::getInstance();
         $this->registry = $tb->registry;
         //add admin to the scope
-        $this->registry->set('request', new ARequest());
-        $this->registry->get('session')->data['user_id'] = 1;
-        $this->registry->set('user', ABC::getObjectByAlias('AUser',[$this->registry]));
+        if (!$this->registry->get('request')) {
+            $this->registry->set('request', new ARequest());
+        }
+        if (!$this->registry->get('user')) {
+            $this->registry->get('session')->data['user_id'] = 1;
+            $this->registry->set('user', ABC::getObjectByAlias('AUser', [$this->registry]));
+        }
     }
 
     public function __get($key)

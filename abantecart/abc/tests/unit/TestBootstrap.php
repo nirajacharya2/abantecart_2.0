@@ -16,7 +16,7 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace abc\tests\unit;
+namespace Tests\unit;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
@@ -44,15 +44,18 @@ class TestBootstrap
      */
     public static function getInstance()
     {
-        if(!self::$instance)
-        {
+        if (!self::$instance) {
             self::$instance = new TestBootstrap();
         }
         return self::$instance;
     }
 
-    public function init () {
-        require_once dirname(__DIR__, 2).DS.'core'.DS.'abc.php';
+    /**
+     * Note: this method calls once!
+     */
+    public function init()
+    {
+        require_once dirname(__DIR__, 2).DS.'core'.DS.'ABC.php';
 
         //run constructor of ABC class to load environment
         $ABC = new ABC();
@@ -65,7 +68,7 @@ class TestBootstrap
         //load core config for stage
         $ABC::loadConfig($stage_name);
 
-        ABC::env('DIR_TESTS', dirname(__DIR__, 1).DS);
+        ABC::env('DIR_TESTS', dirname(__DIR__).DS);
         ABC::env('DIR_VENDOR', dirname(__DIR__, 2).DS.'vendor'.DS);
 
         //load tests config for stage

@@ -202,8 +202,8 @@ class ControllerResponsesListingGridCurrency extends AController
      * update only one field
      *
      * @return void
-     * @throws ReflectionException
-     * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException|AException
      */
     public function update_field()
     {

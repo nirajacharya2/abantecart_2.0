@@ -57,11 +57,10 @@ final class ARequest
         $this->cookie = $_COOKIE;
         $this->files = $_FILES;
         $this->server = $_SERVER;
-
-        $this->headers = apache_request_headers();
+        $this->headers = $this->getRequestHeaders();
 
         //generate unique request
-        $this->uniqueId = \H::genRequestId();
+        $this->setRequestId();
 
         //check if there is any encrypted data
         if (isset($this->get['__e']) && $this->get['__e']) {
@@ -71,6 +70,41 @@ final class ARequest
             $this->post = array_replace_recursive($this->post, $this->decodeURI($this->post['__e']));
         }
         $this->detectBrowser();
+    }
+
+    public function getRequestHeaders()
+    {
+        if (function_exists('apache_request_headers')) {
+            return \apache_request_headers();
+        }else{
+            {
+                $arh = [];
+                $rx_http = '/\AHTTP_/';
+                foreach ($_SERVER as $key => $val) {
+                    if (preg_match($rx_http, $key)) {
+                        $arh_key = preg_replace($rx_http, '', $key);
+                        $rx_matches = [];
+                        // do some nasty string manipulations to restore the original letter case
+                        // this should work in most cases
+                        $rx_matches = explode('_', $arh_key);
+                        if (count($rx_matches) > 0 and strlen($arh_key) > 2) {
+                            foreach ($rx_matches as $ak_key => $ak_val) $rx_matches[$ak_key] = ucfirst($ak_val);
+                            $arh_key = implode('-', $rx_matches);
+                        }
+                        $arh[$arh_key] = $val;
+                    }
+                }
+                return ($arh);
+            }
+        }
+    }
+
+    /**
+     * @param string|null $requestId
+     */
+    public function setRequestId(string $requestId = null)
+    {
+        $this->uniqueId = $requestId ?? \H::genRequestId();
     }
 
     //todo: Include PHP module filter to process input params. http://us3.php.net/manual/en/book.filter.php

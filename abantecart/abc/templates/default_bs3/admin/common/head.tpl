@@ -12,25 +12,32 @@ use abc\core\ABC; ?>
 <link href="<?php echo $link['href']; ?>" rel="<?php echo $link['rel']; ?>"/>
 <?php } ?>
 
-<?php if ( is_file( ABC::env('DIR_RESOURCES') . $icon ) ) {  ?>
-<link href="resources/<?php echo $icon; ?>" type="image/png" rel="icon" />
+<?php if (is_file(ABC::env('DIR_RESOURCES').$icon)) { ?>
+    <link href="resources/<?php echo $icon; ?>" type="image/png" rel="icon"/>
 <?php } ?>
 
-<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" />
-<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/vuetify/v2/vuetify.css'); ?>" />
+<link rel="stylesheet" type="text/css"
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons"/>
+<link rel="stylesheet" type="text/css"
+      href="<?php echo $this->templateResource('assets/css/vuetify/v2/vuetify.css'); ?>"/>
 <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 
+<script type="text/javascript"
+        src="<?php echo $this->templateResource('assets/js/tinymce/tinymce.min.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo $this->templateResource('assets/js/vue/vue.js'); ?>"></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/tinymce-vue/tinymce-vue.js'); ?>"></script>
+<script type="text/javascript"
+        src="<?php echo $this->templateResource('assets/js/tinymce-vue/tinymce-vue.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo $this->templateResource('assets/js/vuetify/v2/vuetify.js'); ?>"></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/vee-validate/vee-validate.js'); ?>"></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/polyfill/polyfill.min.js'); ?>"></script>
+<script type="text/javascript"
+        src="<?php echo $this->templateResource('assets/js/vee-validate/vee-validate.js'); ?>"></script>
+<script type="text/javascript"
+        src="<?php echo $this->templateResource('assets/js/polyfill/polyfill.min.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo $this->templateResource('assets/js/axios/axios.min.js'); ?>"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
 
-<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/stylesheet.css'); ?>" />
+<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/stylesheet.css'); ?>"/>
 
 
 <?php if ($this->document->renderJsVars()) { ?>
@@ -146,9 +153,6 @@ var mcei = {
 	add_unload_trigger: false,
 	height: 330,
 };
-
-
-
 
 $(document).ready(function () {
 

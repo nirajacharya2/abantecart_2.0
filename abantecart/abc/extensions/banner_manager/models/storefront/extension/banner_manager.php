@@ -44,8 +44,8 @@ class ModelExtensionBannerManager extends Model
             'banner.banner_id_'.$banner_id
             .'_store_'.(int) $this->config->get('config_store_id')
             .'_lang_'.$language_id;
-        $ret_data = $this->cache->pull($cache_key);
-        if ($ret_data !== false) {
+        $ret_data = $this->cache->get($cache_key);
+        if ($ret_data !== null) {
             //return result 
             return $ret_data;
         }
@@ -71,7 +71,7 @@ class ModelExtensionBannerManager extends Model
                      ON bd.banner_id = b.banner_id AND bd.language_id = '".$language_id."'
                 WHERE b.banner_id='".$banner_id."'";
         $result = $this->db->query($sql);
-        $this->cache->push($cache_key, $result->row);
+        $this->cache->put($cache_key, $result->row);
 
         return $result->row;
     }
@@ -81,6 +81,7 @@ class ModelExtensionBannerManager extends Model
      *
      * @return array
      * @throws Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getBanners($custom_block_id)
     {
@@ -95,17 +96,17 @@ class ModelExtensionBannerManager extends Model
             $language_id = (int) $this->config->get('storefront_language_id');
         }
 
-        $cache_key =
-            'banner.group.block_id_'.$custom_block_id.'_store_'.(int) $this->config->get('config_store_id').'_lang_'
-            .$language_id;
-        $ret_data = $this->cache->pull($cache_key);
-        if ($ret_data !== false) {
+        $cache_key = 'banner.group.block_id_'.$custom_block_id
+                    .'_store_'.(int)$this->config->get('config_store_id')
+                    .'_lang_'.$language_id;
+        $ret_data = $this->cache->get($cache_key);
+        if ($ret_data !== null) {
             //return result 
             return $ret_data['banners'];
         }
 
         // get block info
-        $block_info = $this->layout->getBlockDescriptions($custom_block_id);
+        $block_info = (array)$this->layout->getBlockDescriptions($custom_block_id);
         $content = $block_info[$language_id]['content'];
         if ($content) {
             $content = unserialize($content);
@@ -121,12 +122,11 @@ class ModelExtensionBannerManager extends Model
                     ON (b.banner_id = bd.banner_id)
                 WHERE bd.language_id = '".$language_id."'
                     AND b.status='1'
-                    AND (NOW() BETWEEN CASE WHEN `start_date`= '0000-00-00 00:00:00'
+                    AND (NOW() BETWEEN CASE WHEN `start_date` IS NULL
                                             OR COALESCE(`start_date`, '1970-01-01 00:00:00') = '1970-01-01 00:00:00'
                                             THEN NOW() ELSE `start_date` END
                         AND
-                        CASE WHEN `end_date`='0000-00-00 00:00:00'
-                                    OR COALESCE(`end_date`, '1970-01-01 00:00:00') = '1970-01-01 00:00:00'
+                        CASE WHEN `end_date` IS NULL OR COALESCE(`end_date`, '1970-01-01 00:00:00') = '1970-01-01 00:00:00'
                             THEN  NOW() + INTERVAL 1 MONTH ELSE `end_date` END)
                     AND (`banner_group_name` = '".$this->db->escape($banner_group_name)."'
                         OR b.banner_id IN (SELECT DISTINCT id
@@ -134,7 +134,7 @@ class ModelExtensionBannerManager extends Model
                                     WHERE custom_block_id = '".$custom_block_id."' AND data_type='banner_id'))
                 ORDER BY `banner_group_name` ASC, b.sort_order ASC";
         $result = $this->db->query($sql);
-        $this->cache->push($cache_key, ['banners' => $result->rows]);
+        $this->cache->put($cache_key, ['banners' => $result->rows]);
 
         return $result->rows;
     }

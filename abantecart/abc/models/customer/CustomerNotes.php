@@ -3,6 +3,7 @@
 namespace abc\models\customer;
 
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CustomerNotes extends BaseModel
@@ -42,13 +43,14 @@ class CustomerNotes extends BaseModel
     /**
      * @param int $customerId
      *
-     * @return array
+     * @return Collection|false
      */
     public static function getNotes(int $customerId)
     {
         if (!$customerId) {
-            return [];
+            return false;
         }
+        /** @var Collection $notes */
         $notes = self::select([
             'customer_notes.note',
             'customer_notes.date_added as note_added',
@@ -61,9 +63,6 @@ class CustomerNotes extends BaseModel
             ->orderBy('note_added')
             ->get();
 
-        if (!$notes) {
-            return [];
-        }
         return $notes;
     }
 }

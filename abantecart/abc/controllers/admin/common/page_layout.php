@@ -126,7 +126,7 @@ class ControllerCommonPageLayout extends AController
         }
 
         foreach ($section_blocks as $block) {
-            $customName = '';
+            $customName = $edit_url = '';
             $this->loadLanguage('design/blocks');
 
             if ($block['custom_block_id']) {

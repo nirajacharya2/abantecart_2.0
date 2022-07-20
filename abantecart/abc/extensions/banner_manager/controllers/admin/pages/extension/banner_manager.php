@@ -821,7 +821,7 @@ class ControllerPagesExtensionBannerManager extends AController
             }
 
             $this->session->data ['success'] = $this->language->get( 'text_banner_success' );
-            $this->cache->remove( 'banner' );
+            $this->cache->flush( 'banner' );
             abc_redirect( $this->html->getSecureURL( 'extension/banner_manager/edit_block', '&custom_block_id='.$custom_block_id ) );
         }
 

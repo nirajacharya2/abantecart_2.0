@@ -36,9 +36,9 @@ class ModelLocalisationLanguageDefinitions extends Model
     /**
      * @param array $data
      *
-     * @return bool
-     * @throws ReflectionException
-     * @throws AException
+     * @return bool|int
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function addLanguageDefinition($data)
     {
@@ -84,16 +84,15 @@ class ModelLocalisationLanguageDefinitions extends Model
         }
 
         //save definition.
-        $this->language->replaceDescriptions(
-            'language_definitions',
+        $this->language->replaceDescriptions('language_definitions',
             [
-                'section'      => (int) $update_data['section'],
+                'section'      => (int)$update_data['section'],
                 'block'        => $update_data['block'],
                 'language_key' => $update_data['language_key'],
             ],
             [
                 $update_data['language_id'] => [
-                    'section'        => (int) $update_data['section'],
+                    'section'        => (int)$update_data['section'],
                     'block'          => $update_data['block'],
                     'language_key'   => $update_data['language_key'],
                     'language_value' => $update_data['language_value'],
@@ -102,8 +101,8 @@ class ModelLocalisationLanguageDefinitions extends Model
             $autotranslate
         );
 
-        $this->cache->remove('localization');
-        $this->cache->remove('admin_menu');
+        $this->cache->flush('localization');
+        $this->cache->flush('admin_menu');
 
         return true;
     }
@@ -141,16 +140,15 @@ class ModelLocalisationLanguageDefinitions extends Model
         }
 
         if (isset($update_data['language_key'])) {
-            $this->language->replaceDescriptions(
-                'language_definitions',
+            $this->language->replaceDescriptions('language_definitions',
                 [
-                    'section'      => (int) $update_data['section'],
+                    'section'      => (int)$update_data['section'],
                     'block'        => $update_data['block'],
                     'language_key' => $update_data['language_key'],
                 ],
                 [
-                    (int) $update_data['language_id'] => [
-                        'section'        => (int) $update_data['section'],
+                    (int)$update_data['language_id'] => [
+                        'section'        => (int)$update_data['section'],
                         'block'          => $update_data['block'],
                         'language_key'   => $update_data['language_key'],
                         'language_value' => html_entity_decode($lang_value, ENT_QUOTES, ABC::env('APP_CHARSET')),
@@ -159,15 +157,14 @@ class ModelLocalisationLanguageDefinitions extends Model
                 $autotranslate
             );
         } else {
-            $this->language->replaceDescriptions(
-                'language_definitions',
+            $this->language->replaceDescriptions('language_definitions',
                 [
-                    'section'      => (int) $update_data['section'],
+                    'section'      => (int)$update_data['section'],
                     'block'        => $update_data['block'],
                     'language_key' => $update_data['language_key'],
                 ],
                 [
-                    (int) $update_data['language_id'] => [
+                    (int)$update_data['language_id'] => [
                         'language_value' => html_entity_decode($lang_value, ENT_QUOTES, ABC::env('APP_CHARSET')),
                     ],
                 ],
@@ -175,8 +172,8 @@ class ModelLocalisationLanguageDefinitions extends Model
             );
         }
 
-        $this->cache->remove('localization');
-        $this->cache->remove('admin_menu');
+        $this->cache->flush('localization');
+        $this->cache->flush('admin_menu');
 
         return true;
     }
@@ -184,7 +181,7 @@ class ModelLocalisationLanguageDefinitions extends Model
     /**
      * @param int $id
      *
-     * @throws Exception
+     * @throws \Exception
      */
     public function deleteLanguageDefinition($id)
     {
@@ -201,15 +198,15 @@ class ModelLocalisationLanguageDefinitions extends Model
                     AND `language_key` = '".$row['language_key']."'"
             );
         }
-        $this->cache->remove('localization');
-        $this->cache->remove('admin_menu');
+        $this->cache->flush('localization');
+        $this->cache->flush('admin_menu');
     }
 
     /**
      * @param int $id
      *
      * @return array
-     * @throws Exception
+     * @throws \Exception
      */
     public function getLanguageDefinition($id)
     {
@@ -229,7 +226,7 @@ class ModelLocalisationLanguageDefinitions extends Model
      * @param int $section
      *
      * @return int
-     * @throws Exception
+     * @throws \Exception
      */
     public function getLanguageDefinitionIdByKey($key, $language_id, $block, $section)
     {
@@ -271,6 +268,7 @@ class ModelLocalisationLanguageDefinitions extends Model
      * @param string $mode
      *
      * @return array
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws Exception
      */
     public function getLanguageDefinitions($data = [], $mode = 'default')
@@ -376,12 +374,12 @@ class ModelLocalisationLanguageDefinitions extends Model
             return $result;
         } else {
             $cache_key = 'localization.language.definitions';
-            $language_data = $this->cache->pull($cache_key);
-            if ($language_data === false) {
+            $language_data = $this->cache->get($cache_key);
+            if ($language_data === null) {
                 $query = $this->db->query(
                     "SELECT *
                    FROM ".$this->db->table_name("language_definitions")." 
-                   WHERE language_id=".(int) $this->config->get('admin_language_id')."
+                   WHERE language_id=".(int)$this->config->get('admin_language_id')."
                    ORDER BY date_modified DESC, language_key, block"
                 );
 
@@ -396,7 +394,7 @@ class ModelLocalisationLanguageDefinitions extends Model
                         'date_modified'          => $result['date_modified'],
                     ];
                 }
-                $this->cache->push($cache_key, $language_data);
+                $this->cache->put($cache_key, $language_data);
             }
 
             return $language_data;
@@ -407,7 +405,7 @@ class ModelLocalisationLanguageDefinitions extends Model
      * @param array $data
      *
      * @return array
-     * @throws Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getTotalDefinitions($data = [])
     {
@@ -421,9 +419,10 @@ class ModelLocalisationLanguageDefinitions extends Model
      * @param array $data - from requester
      * @param AForm $form - form object
      *
-     * @return array ($data imputed processed and returns back)
-     * @throws AException
+     * @return array ($data imputed processed and returned back)
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws ReflectionException
+     * @throws AException
      */
     public function buildFormData(&$request, &$data, &$form)
     {
@@ -484,7 +483,10 @@ class ModelLocalisationLanguageDefinitions extends Model
                     $new_lang_obj->_load($block_path);
                     //now load definition for all languages to be available in the template
                     $all_defs[] = $this->LoadDefinitionSetEmpty(
-                        $def_det['section'], $block, $def_det['language_key'], $lang['language_id']
+                        $def_det['section'],
+                        $block,
+                        $def_det['language_key'],
+                        $lang['language_id']
                     );
                 }
             }
@@ -497,7 +499,10 @@ class ModelLocalisationLanguageDefinitions extends Model
                     $block = $def_det['block'];
                 }
                 $new_def = $this->LoadDefinitionSetEmpty(
-                    $def_det['section'], $block, $def_det['language_key'], $content_lang_id
+                    $def_det['section'],
+                    $block,
+                    $def_det['language_key'],
+                    $content_lang_id
                 );
                 //if exists redirect with correct language_definition_id for content language
                 if (H::has_value($new_def['language_definition_id'])) {
@@ -522,18 +527,22 @@ class ModelLocalisationLanguageDefinitions extends Model
             }
         }
 
-        $data['form']['submit'] = $form->getFieldHtml([
-                                                          'type'  => 'button',
-                                                          'name'  => 'submit',
-                                                          'text'  => $this->language->get('button_save'),
-                                                          'style' => 'button1',
-                                                      ]);
-        $data['form']['cancel'] = $form->getFieldHtml([
-                                                          'type'  => 'button',
-                                                          'name'  => 'cancel',
-                                                          'text'  => $this->language->get('button_cancel'),
-                                                          'style' => 'button2',
-                                                      ]);
+        $data['form']['submit'] = $form->getFieldHtml(
+            [
+                'type'  => 'button',
+                'name'  => 'submit',
+                'text'  => $this->language->get('button_save'),
+                'style' => 'button1',
+            ]
+        );
+        $data['form']['cancel'] = $form->getFieldHtml(
+            [
+                'type'  => 'button',
+                'name'  => 'cancel',
+                'text'  => $this->language->get('button_cancel'),
+                'style' => 'button2',
+            ]
+        );
 
         if ($disable_attr) {
             $section_txt = $this->language->get('text_storefront');
@@ -542,56 +551,54 @@ class ModelLocalisationLanguageDefinitions extends Model
             }
             $data['form']['fields']['section'] = $section_txt.
                 $form->getFieldHtml([
-                                        'type'  => 'hidden',
-                                        'name'  => 'section',
-                                        'value' => $data['section'],
-                                    ]);
+                    'type'  => 'hidden',
+                    'name'  => 'section',
+                    'value' => $data['section'],
+                ]);
             $data['form']['fields']['block'] = $data['block'].
                 $form->getFieldHtml([
-                                        'type'  => 'hidden',
-                                        'name'  => 'block',
-                                        'value' => $data['block'],
-                                    ]);
+                    'type'  => 'hidden',
+                    'name'  => 'block',
+                    'value' => $data['block'],
+                ]);
             $data['form']['fields']['language_key'] = $data['language_key'].
                 $form->getFieldHtml([
-                                        'type'  => 'hidden',
-                                        'name'  => 'language_key',
-                                        'value' => $data['language_key'],
-                                    ]);
+                    'type'  => 'hidden',
+                    'name'  => 'language_key',
+                    'value' => $data['language_key'],
+                ]);
         } else {
             $data['form']['fields']['section'] = $form->getFieldHtml([
-                                                                         'type'     => 'selectbox',
-                                                                         'name'     => 'section',
-                                                                         'options'  => [
-                                                                             1 => $this->language->get('text_admin'),
-                                                                             0 => $this->language->get(
-                                                                                 'text_storefront'
-                                                                             ),
-                                                                         ],
-                                                                         'value'    => $data['section'],
-                                                                         'required' => true,
-                                                                     ]);
+                'type'     => 'selectbox',
+                'name'     => 'section',
+                'options'  => [
+                    1 => $this->language->get('text_admin'),
+                    0 => $this->language->get('text_storefront'),
+                ],
+                'value'    => $data['section'],
+                'required' => true,
+            ]);
 
             $data['form']['fields']['block'] = $form->getFieldHtml([
-                                                                       'type'     => 'input',
-                                                                       'name'     => 'block',
-                                                                       'value'    => $data['block'],
-                                                                       'required' => true,
-                                                                   ]);
+                'type'     => 'input',
+                'name'     => 'block',
+                'value'    => $data['block'],
+                'required' => true,
+            ]);
             $data['form']['fields']['language_key'] = $form->getFieldHtml([
-                                                                              'type'     => 'input',
-                                                                              'name'     => 'language_key',
-                                                                              'value'    => $data['language_key'],
-                                                                              'required' => true,
-                                                                          ]);
+                'type'     => 'input',
+                'name'     => 'language_key',
+                'value'    => $data['language_key'],
+                'required' => true,
+            ]);
         }
 
         if ($main_block) {
             $data['form']['fields']['main_block'] = $form->getFieldHtml([
-                                                                            'type'  => 'hidden',
-                                                                            'name'  => 'main_block',
-                                                                            'value' => 1,
-                                                                        ]);
+                'type'  => 'hidden',
+                'name'  => 'main_block',
+                'value' => 1,
+            ]);
         }
 
         //load all language fields for this definition to be available in the template
@@ -618,21 +625,16 @@ class ModelLocalisationLanguageDefinitions extends Model
                 }
             }
             $data['form']['fields']['language_value'][$i['language_id']] = $form->getFieldHtml([
-                                                                                                   'type'     => 'textarea',
-                                                                                                   'name'     => 'language_value['
-                                                                                                       .$i['language_id']
-                                                                                                       .']',
-                                                                                                   'value'    => $value,
-                                                                                                   'required' => true,
-                                                                                                   'style'    => 'large-field',
-                                                                                               ]).$form->getFieldHtml([
-                                                                                                                          'type'  => 'hidden',
-                                                                                                                          'name'  => 'language_definition_id['
-                                                                                                                              .$i['language_id']
-                                                                                                                              .']',
-                                                                                                                          'value' => $id,
-                                                                                                                      ]
-                );
+                    'type'     => 'textarea',
+                    'name'     => 'language_value['.$i['language_id'].']',
+                    'value'    => $value,
+                    'required' => true,
+                    'style'    => 'large-field',
+                ]).$form->getFieldHtml([
+                    'type'  => 'hidden',
+                    'name'  => 'language_definition_id['.$i['language_id'].']',
+                    'value' => $id,
+                ]);
         }
 
         return ([]);
@@ -647,6 +649,7 @@ class ModelLocalisationLanguageDefinitions extends Model
      * @param int $lang_id
      *
      * @return array
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws Exception
      */
     public function LoadDefinitionSetEmpty($section, $block, $lang_key, $lang_id)

@@ -1,6 +1,6 @@
 <?php
 define('DS', DIRECTORY_SEPARATOR);
-require_once(__DIR__.'/core/abc.php');
+require_once(__DIR__.'/core/ABC.php');
 use abc\core\ABC;
 
 ABC::env('MIN_PHP_VERSION', '7.0.0');

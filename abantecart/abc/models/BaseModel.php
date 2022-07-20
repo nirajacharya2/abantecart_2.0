@@ -19,12 +19,13 @@
 namespace abc\models;
 
 use abc\core\ABC;
-use abc\core\cache\ACache;
 use abc\core\engine\Registry;
 use abc\core\lib\Abac;
+use abc\core\lib\AbcCache;
 use abc\core\lib\AConfig;
 use abc\core\lib\ADB;
 use abc\core\lib\AException;
+use abc\modules\injections\models\ModelSearch;
 use Carbon\Carbon;
 use Chelout\RelationshipEvents\Concerns\HasBelongsToEvents;
 use Chelout\RelationshipEvents\Concerns\HasBelongsToManyEvents;
@@ -46,6 +47,7 @@ use Illuminate\Validation\DatabasePresenceVerifier;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Validator;
+use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -69,13 +71,13 @@ use stdClass;
  * @method static QueryBuilder updateOrCreate(array $attributes, array $values) QueryBuilder
  * @method static QueryBuilder create(array $values) BaseModel
  * @method static QueryBuilder active() QueryBuilder
- * @method static QueryBuilder join(string $table, Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
- * @method static QueryBuilder leftJoin(string $table, Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
- * @method static QueryBuilder rightJoin(string $table, Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
- * @method static QueryBuilder|Builder OrderBy(string $column, string $order) QueryBuilder
+ * @method static QueryBuilder join( string $table, \Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
+ * @method static QueryBuilder leftJoin( string $table, \Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
+ * @method static QueryBuilder rightJoin( string $table, \Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
+ * @method static QueryBuilder|Builder OrderBy(string $column, string $order = 'asc') QueryBuilder
  * @const  string DELETED_AT
  */
-class BaseModel extends OrmModel
+abstract class BaseModel extends OrmModel
 {
     use HasOneEvents,
         HasBelongsToEvents,
@@ -122,7 +124,7 @@ class BaseModel extends OrmModel
     protected $config;
 
     /**
-     * @var ACache
+     * @var AbcCache
      */
     protected $cache;
 
@@ -233,6 +235,17 @@ class BaseModel extends OrmModel
     public static $auditExcludes = ['date_added', 'date_modified'];
 
     /**
+     * @var string - name of method of child model used for searching
+     */
+
+    public static $searchMethod;
+    /**
+     * @var array - list of available parameters for searching.
+     *              Use for keys of search parameters of method $searchMethod
+     */
+    public static $searchParams = [];
+
+    /**
      * @param array $attributes
      */
     public function __construct(array $attributes = [])
@@ -241,9 +254,7 @@ class BaseModel extends OrmModel
         $this->registry = Registry::getInstance();
         //set current language for getting single description from relation
         if (!static::$current_language_id) {
-            static::$current_language_id = ABC::env('IS_ADMIN')
-                ? $this->registry->get('language')->getContentLanguageID()
-                : $this->registry->get('language')->getLanguageID();
+            static::$current_language_id = static::getCurrentLanguageID();
         }
         $this->config = $this->registry->get('config');
         $this->cache = Registry::cache();
@@ -257,7 +268,7 @@ class BaseModel extends OrmModel
 
         //process validation rules
         if ($this->actor['user_type_name']) {
-            $userTypeRulesModel = (array) $this->{'rules'.ucfirst($this->actor['user_type_name'])};
+            $userTypeRulesModel = (array)$this->{'rules'.ucfirst($this->actor['user_type_name'])};
             $ruleAlias = 'rules'.ucfirst($this->actor['user_type_name']);
             $userTypeRulesEnv = (array) ABC::env('MODEL')['INITIALIZE'][$this->getClass()]['properties'][$ruleAlias];
             $userTypeRules = array_merge($userTypeRulesModel, $userTypeRulesEnv);
@@ -266,6 +277,41 @@ class BaseModel extends OrmModel
                 $this->rules = array_merge($this->rules, $userTypeRules);
             }
         }
+    }
+
+    /**
+     * Static wrapper for search method of model
+     *
+     * @param array $searchParams
+     *
+     * @return mixed
+     */
+    public static function search($searchParams = [])
+    {
+        $className = get_called_class();
+        /** @var ModelSearch $searchObj */
+        $searchObj = ABC::getObjectByAlias('ModelSearch', [new $className]);
+        //check and convert parameters for data set into correct format
+        foreach ($searchParams as $name => $value) {
+            if (is_string($value) && str_starts_with($value, 'with_')) {
+                $searchParams[$value] = true;
+                unset($searchParams[$name]);
+            }
+        }
+        return $searchObj->search($searchParams);
+    }
+
+    /**
+     * @return int
+     */
+    public static function getCurrentLanguageID()
+    {
+        if (!static::$current_language_id) {
+            static::$current_language_id = ABC::env('IS_ADMIN')
+                ? Registry::language()->getContentLanguageID()
+                : Registry::language()->getLanguageID();
+        }
+        return static::$current_language_id;
     }
 
     /**
@@ -308,11 +354,19 @@ class BaseModel extends OrmModel
     }
 
     /**
-     * @return int
+     * @return string
      */
-    public static function getCurrentLanguageID()
+    public static function getSearchMethod()
     {
-        return static::$current_language_id;
+        return static::$searchMethod;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getSearchParams()
+    {
+        return static::$searchParams;
     }
 
     /**
@@ -358,7 +412,7 @@ class BaseModel extends OrmModel
         if (!$abac) {
             return true;
         }
-        $resourceObject = new \stdClass();
+        $resourceObject = new stdClass();
         $resourceObject->name = $this->policyObject;
         $resourceObject->getColumns = $columns;
 
@@ -414,6 +468,7 @@ class BaseModel extends OrmModel
      * @throws ValidationException
      * @throws ReflectionException
      * @throws AException
+     * @throws InvalidArgumentException
      */
     public function validate(array $data = [], array $messages = [], array $customAttributes = [])
     {
@@ -422,7 +477,7 @@ class BaseModel extends OrmModel
          * to prevent exception during validation
          */
         $carbonStrictMode = Carbon::isStrictModeEnabled();
-        Carbon::useStrictMode(false); ///????
+        Carbon::useStrictMode(false);
         $data = !$data ? $this->getDirty() : $data;
 
         if ($rules = $this->rules()) {
@@ -481,15 +536,15 @@ class BaseModel extends OrmModel
                 $v->validate();
             } catch (ValidationException $e) {
                 $this->errors['validation'] = $v->errors()->toArray();
-                Carbon::useStrictMode($carbonStrictMode); //????
+                Carbon::useStrictMode($carbonStrictMode);
                 throw $e;
             } catch (Exception $e) {
                 $this->errors['validator'] = $e->getMessage();
-                Carbon::useStrictMode($carbonStrictMode); //??????
+                Carbon::useStrictMode($carbonStrictMode);
                 throw $e;
             }
         }
-        Carbon::useStrictMode($carbonStrictMode); //??????
+        Carbon::useStrictMode($carbonStrictMode);
         return true;
     }
 
@@ -562,6 +617,7 @@ class BaseModel extends OrmModel
     /**
      * @param array $data
      *
+     * @throws ReflectionException
      */
     public function updateRelationships(array $data)
     {
@@ -700,8 +756,7 @@ class BaseModel extends OrmModel
                         ];
                     }
                 }
-            } catch (Exception $e) {
-            }
+            } catch (Exception $e) {}
         }
         return $relationships;
     }

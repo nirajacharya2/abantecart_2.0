@@ -1,18 +1,14 @@
 <?php
-namespace abc\tests\unit;
+namespace Tests\unit\models\customer;
 
 use abc\models\customer\Address;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class AddressModelTest
  */
 class AddressModelTest extends ATestCase{
-
-
-    protected function setUp():void{
-        //init
-    }
 
     public function testUpdate()
     {

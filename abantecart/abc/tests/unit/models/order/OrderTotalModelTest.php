@@ -1,9 +1,10 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\order;
 
 use abc\models\order\OrderTotal;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class OrderTotalModelTest
@@ -38,7 +39,7 @@ class OrderTotalModelTest extends ATestCase
             $errors = $orderStatus->errors()['validation'];
             // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
-        $this->assertEquals(7, count($errors));
+        $this->assertCount(7, $errors);
 
         //validate
         $data = [
@@ -63,7 +64,7 @@ class OrderTotalModelTest extends ATestCase
             var_dump($errors);
             // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
         $orderStatus->forceDelete();
     }

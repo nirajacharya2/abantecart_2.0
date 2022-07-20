@@ -58,6 +58,7 @@ class AHandleExceptions
             //throw
         }
     }
+//   TODO: не работает КЕШ! см модель продукта, сохранение в кеш в методе getProducts
 
     /**
      * Handle an uncaught exception from the application.
@@ -87,7 +88,7 @@ class AHandleExceptions
         } else {
             $debug_bar = ADebug::$debug_bar;
             if ($debug_bar) {
-                $debug_bar['exceptions']->addException($e);
+                $debug_bar['exceptions']->addThrowable($e);
             }
             $this->renderHttpResponse($e);
         }

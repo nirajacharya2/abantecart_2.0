@@ -228,7 +228,9 @@ class Test extends BaseCommand
                     ],
                     'example'     => "php abcexec test:phpunit --help\n".
                         "\t  To run all tests:\n\n\t\t   "
-                        ."php abcexec test:phpunit --run --all --stage=default\n\n"
+                        ."php ./vendor/bin/phpunit \n\n"
+                        ."\t  To run some testsuite:\n\n\t\t   "
+                        ."php ./vendor/bin/phpunit --testsuite models-unit-tests-catalog\n\n"
                         ."\t  To create new phpunit test:\n\n\t\t   "
                         ."php abcexec test:phpunit --create YourClassNameTest --stage=default\n\n",
                 ],

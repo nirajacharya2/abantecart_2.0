@@ -385,7 +385,9 @@ class ControllerResponsesFormsManagerFields extends AController
 
     /**
      * @return string
-     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     private function _file_upload_settings_form()
     {

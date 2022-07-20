@@ -407,11 +407,11 @@ final class ADispatcher
                 //Request controller to generate output
                 $controller->finalize();
 
-            //check for controller.pre
-            $output_post = $this->dispatchPrePost($this->controller.ABC::env('POSTFIX_POST'));
+                //check for controller.pre
+                $output_post = $this->dispatchPrePost($this->controller.ABC::env('POSTFIX_POST'));
 
-            //add pre and post controllers output
-            $this->response->setOutput($output_pre.$this->response->getOutput().$output_post);
+                //add pre and post controllers output
+                $this->response->setOutput($output_pre.$this->response->getOutput().$output_post);
 
             //clean up and destroy the object
                 unset($controller, $dispatch);

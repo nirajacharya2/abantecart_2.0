@@ -40,6 +40,107 @@ class Location extends BaseModel
         'description',
         'date_added',
         'date_modified',
+        'location_id'
+    ];
+    protected $rules = [
+        'location_id' => [
+            'checks' => [
+                'integer',
+                'required',
+                'sometimes',
+                'min:1'
+            ],
+            'messages' => [
+                'integer' => [
+                    'language_key' => 'error_location_id',
+                    'language_block' => 'localisation/location',
+                    'default_text' => 'location id must be integer!',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_location_id',
+                    'language_block' => 'localisation/location',
+                    'default_text' => 'location id required!',
+                    'section' => 'admin'
+                ],
+                'min' => [
+                    'language_key' => 'error_location_id',
+                    'language_block' => 'localisation/location',
+                    'default_text' => 'location id must be more 1!',
+                    'section' => 'admin'
+                ],
+            ]
+        ],
+        'name' => [
+            'checks' => [
+                'string',
+                'min:2',
+                'max:32',
+                'required',
+                'sometimes'
+            ],
+            'messages' => [
+                'min' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/location',
+                    'default_text' => 'Name must be more 2 characters',
+                    'section' => 'admin'
+                ],
+                'max' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/location',
+                    'default_text' => 'Name must be no more than 32 characters',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/location',
+                    'default_text' => 'name required!',
+                    'section' => 'admin'
+                ],
+                'string' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/language',
+                    'default_text' => 'name must be string!',
+                    'section' => 'admin'
+                ],
+            ]
+        ],
+        'description' => [
+            'checks' => [
+                'string',
+                'min:2',
+                'max:255',
+                'required',
+                'sometimes'
+            ],
+            'messages' => [
+                'min' => [
+                    'language_key' => 'error_description',
+                    'language_block' => 'localisation/location',
+                    'default_text' => 'Description must be more 2 characters',
+                    'section' => 'admin'
+                ],
+                'max' => [
+                    'language_key' => 'error_description',
+                    'language_block' => 'localisation/location',
+                    'default_text' => 'Description must be no more than 255 characters',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_description',
+                    'language_block' => 'localisation/location',
+                    'default_text' => 'Description required!',
+                    'section' => 'admin'
+                ],
+                'string' => [
+                    'language_key' => 'error_description',
+                    'language_block' => 'localisation/language',
+                    'default_text' => 'Description must be string!',
+                    'section' => 'admin'
+                ],
+            ]
+        ]
     ];
 
     public function tax_rates()

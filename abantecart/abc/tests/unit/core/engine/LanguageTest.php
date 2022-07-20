@@ -1,8 +1,9 @@
 <?php
-namespace abc\tests\unit;
+namespace Tests\unit\core\engine;
 
 use abc\core\engine\ALanguage;
 use abc\core\engine\Registry;
+use Tests\unit\ATestCase;
 
 /**
  * Class LanguageTest

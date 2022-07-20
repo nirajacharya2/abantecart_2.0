@@ -20,17 +20,13 @@
 
 namespace abc\extensions\forms_manager\models\admin\tool;
 
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Model;
-
-if ( ! class_exists( 'abc\core\ABC' ) ) {
-    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
-}
+use H;
 
 class ModelToolFormsManager extends Model
 {
 
-    public $error = array();
+    public $error = [];
 
     public function getFormById( $form_id )
     {
@@ -49,10 +45,10 @@ class ModelToolFormsManager extends Model
             return $results->row;
         }
 
-        return array();
+        return [];
     }
 
-    public function getForms( $data = array(), $mode = 'default' )
+    public function getForms( $data = [], $mode = 'default' )
     {
 
         if ( ! empty( $data['content_language_id'] ) ) {
@@ -63,7 +59,7 @@ class ModelToolFormsManager extends Model
 
         if ( $data || $mode == 'total_only' ) {
 
-            $filter = ( isset( $data['filter'] ) ? $data['filter'] : array() );
+            $filter = ( isset( $data['filter'] ) ? $data['filter'] : []);
 
             if ( $mode == 'total_only' ) {
                 $sql = "SELECT COUNT(*) AS total FROM ".$this->db->table_name( "forms" )." f LEFT JOIN ".$this->db->table_name( "form_descriptions" )." fd ON (f.form_id = fd.form_id)";
@@ -121,11 +117,11 @@ class ModelToolFormsManager extends Model
                 return $query->row['total'];
             }
 
-            $sort_data = array(
+            $sort_data = [
                 'name'        => 'f.form_name',
                 'description' => 'fd.description',
                 'status'      => 'f.status',
-            );
+            ];
 
             if ( isset( $data['sort'] ) && in_array( $data['sort'], array_keys( $sort_data ) ) ) {
                 $sql .= " ORDER BY ".$sort_data[$data['sort']];
@@ -156,40 +152,40 @@ class ModelToolFormsManager extends Model
             return $query->rows;
         } else {
             $cache_key = 'extensions.forms_manager.lang_'.$language_id;
-            $form_data = $this->cache->pull( $cache_key );
+            $form_data = $this->cache->get( $cache_key );
 
-            if ( $form_data === false ) {
+            if ( $form_data === null ) {
                 $query = $this->db->query( "SELECT *
                                             FROM ".$this->db->table_name( "forms" )." f
                                             LEFT JOIN ".$this->db->table_name( "form_descriptions" )." fd ON (f.form_id = fd.form_id)
                                             WHERE fd.language_id = '".$language_id."'
                                             ORDER BY f.form_name ASC" );
                 $form_data = $query->rows;
-                $this->cache->push( $cache_key, $form_data );
+                $this->cache->put( $cache_key, $form_data );
             }
 
             return $form_data;
         }
     }
 
-    public function getTotalForms( $data = array() )
+    public function getTotalForms( $data = [])
     {
         return $this->getForms( $data, 'total_only' );
     }
 
     public function getFormDescriptions( $form_id )
     {
-        $form_description_data = array();
+        $form_description_data = [];
 
         $query = $this->db->query( "SELECT * FROM ".$this->db->table_name( "form_descriptions" )." WHERE form_id = '".(int)$form_id."'" );
 
         foreach ( $query->rows as $result ) {
-            $form_description_data[$result['language_id']] = array(
+            $form_description_data[$result['language_id']] = [
                 'form_name'        => $result['name'],
                 'meta_keywords'    => $result['meta_keywords'],
                 'meta_description' => $result['meta_description'],
                 'description'      => $result['description'],
-            );
+            ];
         }
 
         return $form_description_data;
@@ -232,8 +228,8 @@ class ModelToolFormsManager extends Model
         }
 
         $this->language->replaceDescriptions( 'form_descriptions',
-            array( 'form_id' => (int)$form_id ),
-            array( (int)$language_id => array( 'description' => $description ) )
+            ['form_id' => (int)$form_id],
+            [(int)$language_id => ['description' => $description]]
         );
 
         $this->_deleteCache();
@@ -263,7 +259,7 @@ class ModelToolFormsManager extends Model
 
         if ( $this->getFormNameById( $data['form_id'] ) !== false ) {
 
-            $cols = array();
+            $cols = [];
 
             if ( isset( $data['form_name'] ) ) {
                 $data['form_name'] = str_replace( ' ', '_', $this->db->escape( $data['form_name'] ) );
@@ -275,7 +271,7 @@ class ModelToolFormsManager extends Model
                 $cols[] = 'success_page = "'.$this->db->escape( $data['controller_path'] ).'"';
             }
 
-            if ( AHelperUtils::has_value( $data['success_page'] ) ) {
+            if ( H::has_value( $data['success_page'] ) ) {
                 $cols[] = 'success_page = "'.$this->db->escape( $data['success_page'] ).'"';
             } else {
                 if ( isset( $data['controller_path'] ) ) {
@@ -313,8 +309,8 @@ class ModelToolFormsManager extends Model
     {
         if ( $description ) {
             $this->language->updateDescriptions( 'form_descriptions',
-                array( 'form_id' => (int)$form_id ),
-                array( (int)(int)$this->session->data['content_language_id'] => array( 'description' => $description ) )
+                ['form_id' => (int)$form_id],
+                [(int)(int)$this->session->data['content_language_id'] => ['description' => $description]]
             );
 
         }
@@ -327,7 +323,7 @@ class ModelToolFormsManager extends Model
             return false;
         }
 
-        $columns = array(
+        $columns = [
             'field_name',
             'element_type',
             'sort_order',
@@ -335,37 +331,37 @@ class ModelToolFormsManager extends Model
             'status',
             'settings',
             'regexp_pattern',
-        );
+        ];
 
-        if ( AHelperUtils::has_value( $data['field_name'] ) ) {
+        if ( H::has_value( $data['field_name'] ) ) {
             $data['field_name'] = str_replace( ' ', '_', $this->db->escape( $data['field_name'] ) );
             if ( ! $data['field_name'] ) {
                 return false;
             }
         }
 
-        if ( AHelperUtils::has_value( $data['sort_order'] ) ) {
+        if ( H::has_value( $data['sort_order'] ) ) {
             $data['sort_order'] = (int)$data['sort_order'];
         }
 
-        if ( AHelperUtils::has_value( $data['required'] ) ) {
+        if ( H::has_value( $data['required'] ) ) {
             $data['required'] = ( (int)$data['required'] ) ? 'Y' : 'N';
         }
 
-        if ( AHelperUtils::has_value( $data['status'] ) ) {
+        if ( H::has_value( $data['status'] ) ) {
             $data['status'] = ( (int)$data['status'] ) ? 1 : 0;
         }
 
-        if ( AHelperUtils::has_value( $data['regexp_pattern'] ) ) {
+        if ( H::has_value( $data['regexp_pattern'] ) ) {
             $data['regexp_pattern'] = $this->db->escape( $data['regexp_pattern'] );
         }
 
-        if ( AHelperUtils::has_value( $data['settings'] ) ) {
+        if ( H::has_value( $data['settings'] ) ) {
             $data['settings'] = $this->db->escape( serialize( $data['settings'] ) );
         }
-        $update = array();
+        $update = [];
         foreach ( $columns as $colname ) {
-            if ( AHelperUtils::has_value( $data[$colname] ) ) {
+            if ( H::has_value( $data[$colname] ) ) {
                 $update[] = $colname." = '".$data[$colname]."'";
             }
         }
@@ -390,13 +386,13 @@ class ModelToolFormsManager extends Model
             return false;
         }
 
-        $columns = array(
+        $columns = [
             'name'        => 'field_description',
             'description' => 'field_note',
             'error_text'  => 'error_text',
-        );
+        ];
 
-        $update = array();
+        $update = [];
         foreach ( $columns as $alias => $colname ) {
             if ( $data[$colname] ) {
                 $update[$alias] = $data[$colname];
@@ -407,8 +403,8 @@ class ModelToolFormsManager extends Model
         if ( $update ) {
             $this->language->replaceDescriptions(
                 'field_descriptions',
-                array( 'field_id' => (int)$field_id ),
-                array( (int)$this->language->getContentLanguageID() => $update )
+                ['field_id' => (int)$field_id],
+                [(int)$this->language->getContentLanguageID() => $update]
             );
         }
 
@@ -423,13 +419,13 @@ class ModelToolFormsManager extends Model
         if ( ! $language_id ) {
             return null;
         }
-        $values = array();
+        $values = [];
         if ( ! empty( $data['field_value_id'] ) ) {
             foreach ( $data['field_value_id'] as $key => $status ) {
-                $value_data = array(
+                $value_data = [
                     'name'       => $data['name'][$key],
                     'sort_order' => $data['sort_order'][$key],
-                );
+                ];
 
                 //Check if new, delete or update
                 if ( $status == 'delete' && strpos( $key, 'new' ) === false ) {
@@ -456,9 +452,9 @@ class ModelToolFormsManager extends Model
             return null;
         }
         $this->language->replaceDescriptionsSerialized( 'field_values',
-            array( 'field_id' => (int)$field_id ),
-            array( (int)$language_id => array( 'value' => serialize( $data ) ) ),
-            array( 'value' => array( 'name' ) )
+            ['field_id' => (int)$field_id],
+            [(int)$language_id => ['value' => serialize( $data )]],
+            ['value' => ['name']]
         );
 
         $this->_deleteCache();
@@ -565,13 +561,13 @@ class ModelToolFormsManager extends Model
 
         $this->language->replaceDescriptions(
             'field_descriptions',
-            array( 'field_id' => (int)$field_id ),
-            array(
-                (int)$language_id => array(
+            ['field_id' => (int)$field_id],
+            [
+                (int)$language_id => [
                     'name'        => $data['field_description'],
                     'description' => $data['field_note'],
-                ),
-            )
+                ],
+            ]
         );
 
     }
@@ -597,7 +593,7 @@ class ModelToolFormsManager extends Model
     public function getFields( $form_id )
     {
 
-        $fields = array();
+        $fields = [];
 
         $query = $this->db->query( "
             SELECT f.*, fd.name, fd.description
@@ -628,7 +624,7 @@ class ModelToolFormsManager extends Model
 
     public function getField( $field_id )
     {
-        $field = array();
+        $field = [];
 
         $query = $this->db->query( "
             SELECT f.*, fd.name, fd.description, fd.error_text
@@ -713,6 +709,6 @@ class ModelToolFormsManager extends Model
 
     private function _deleteCache()
     {
-        $this->cache->remove( 'forms' );
+        $this->cache->flush( 'forms' );
     }
 }

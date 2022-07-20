@@ -113,7 +113,6 @@ class ControllerCommonListingGrid extends AController
         }
 
         $this->view->assign('text_go', $this->language->get('button_go'));
-
         $this->view->assign('multiaction_options', $multiaction_options);
         $this->view->assign('history_mode', $this->data['history_mode'] ?? true);
         $this->view->assign('init_onload', $this->data['init_onload'] ?? true);
@@ -122,7 +121,6 @@ class ControllerCommonListingGrid extends AController
         $this->view->assign('text_no_results', $this->language->get('text_no_results'));
         $this->view->assign('text_all', $this->language->get('text_all'));
         $this->view->assign('text_select_from_list', $this->language->get('text_select_from_list'));
-
         $this->processTemplate('common/listing_grid.tpl');
 
         //update controller data

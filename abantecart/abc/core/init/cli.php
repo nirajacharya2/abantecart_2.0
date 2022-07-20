@@ -18,7 +18,7 @@
 namespace abc\commands;
 
 use abc\core\ABC;
-use abc\core\cache\ACache;
+use abc\core\lib\AbcCache;
 use abc\core\lib\AConfig;
 use abc\core\lib\ADataEncryption;
 use abc\core\lib\ADocument;
@@ -90,22 +90,29 @@ $dir_public = !ABC::env('DIR_PUBLIC') ? $dir_root.'public'.DS : ABC::env('DIR_PU
 $dir_vendor = !ABC::env('DIR_VENDOR') ? $dir_app.'vendor'.DS : ABC::env('DIR_VENDOR');
 
 $defaults = [
-    'DIR_ROOT'            => $dir_root,
-    'DIR_TESTS'           => $dir_app.'tests'.DS,
-    'DIR_APP'             => $dir_app,
-    'DIR_TEMPLATES'       => $dir_app.'templates'.DS,
-    'DIR_APP_EXTENSIONS'  => $dir_app.'extensions'.DS,
-    'DIR_SYSTEM'          => $dir_app.'system'.DS,
-    'CACHE'               => ['DIR_CACHE' => $dir_app.'system'.DS.'cache'.DS],
-    'DIR_BACKUP'          => $dir_app.'system'.DS.'backup'.DS,
-    'DIR_CORE'            => $dir_app.'core'.DS,
-    'DIR_LIB'             => $dir_app.'core'.DS.'lib'.DS,
-    'DIR_MODULES'         => $dir_app.'modules'.DS,
-    'DIR_WORKERS'         => $dir_app.'modules'.DS.'workers'.DS,
-    'DIR_IMAGES'          => $dir_public.'images'.DS,
-    'DIR_DOWNLOADS'       => $dir_app.'downloads'.DS,
-    'DIR_MIGRATIONS'      => $dir_app.'migrations'.DS,
-    'DIR_CONFIG'          => $dir_app.'config'.DS,
+    'DIR_ROOT'           => $dir_root,
+    'DIR_TESTS'          => $dir_app.'tests'.DS,
+    'DIR_APP'            => $dir_app,
+    'DIR_TEMPLATES'      => $dir_app.'templates'.DS,
+    'DIR_APP_EXTENSIONS' => $dir_app.'extensions'.DS,
+    'DIR_SYSTEM'         => $dir_app.'system'.DS,
+    'CACHE'              => [
+        'stores' =>
+            [
+                'file' => [
+                    'path' => $dir_app.'system'.DS.'cache'.DS,
+                ],
+            ],
+    ],
+    'DIR_BACKUP'         => $dir_app.'system'.DS.'backup'.DS,
+    'DIR_CORE'           => $dir_app.'core'.DS,
+    'DIR_LIB'            => $dir_app.'core'.DS.'lib'.DS,
+    'DIR_MODULES'        => $dir_app.'modules'.DS,
+    'DIR_WORKERS'        => $dir_app.'modules'.DS.'workers'.DS,
+    'DIR_IMAGES'         => $dir_public.'images'.DS,
+    'DIR_DOWNLOADS'      => $dir_app.'downloads'.DS,
+    'DIR_MIGRATIONS'     => $dir_app.'migrations'.DS,
+    'DIR_CONFIG'         => $dir_app.'config'.DS,
     'DIR_LOGS'            => $dir_app.'system'.DS.'logs'.DS,
     'DIR_PUBLIC'          => $dir_public,
     'DIR_RESOURCES'       => $dir_public.DS.'resources'.DS,
@@ -172,7 +179,14 @@ registerClass($registry, 'session', 'ASession', [$session_id], ASession::class, 
 // Config
 if (ABC::env('DB_CURRENT_DRIVER')) {
     // Cache
-    registerClass($registry, 'cache', 'ACache', [], ACache::class, []);
+    registerClass(
+        $registry,
+        'cache',
+        'AbcCache',
+        [],
+        AbcCache::class,
+        []
+    );
     registerClass($registry, 'config', 'AConfig', [$registry], AConfig::class, [$registry]);
     registerClass(
         $registry,

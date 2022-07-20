@@ -145,7 +145,7 @@ class ModelCatalogDownload extends Model
         if (isset($data['product_id'])) {
             $this->mapDownload($download_id, $data['product_id']);
         }
-        $this->cache->remove('html_cache');
+        $this->cache->flush('html_cache');
         return true;
     }
 
@@ -173,7 +173,7 @@ class ModelCatalogDownload extends Model
                                 product_id = '".(int)$product_id."',
                                 download_id = '".(int)$download_id."'");
 
-        $this->cache->remove('html_cache');
+        $this->cache->flush('html_cache');
         return $this->db->getLastId();
     }
 
@@ -195,7 +195,7 @@ class ModelCatalogDownload extends Model
         $this->db->query("DELETE FROM ".$this->db->table_name('products_to_downloads')."
                           WHERE product_id = '".(int)$product_id."'
                             AND download_id = '".(int)$download_id."'");
-        $this->cache->remove('html_cache');
+        $this->cache->flush('html_cache');
         return true;
     }
 
@@ -214,7 +214,7 @@ class ModelCatalogDownload extends Model
 
         $this->db->query("DELETE FROM ".$this->db->table_name('products_to_downloads')."
                           WHERE product_id = '".(int)$product_id."'");
-        $this->cache->remove('html_cache');
+        $this->cache->flush('html_cache');
         return true;
     }
 
@@ -253,6 +253,7 @@ class ModelCatalogDownload extends Model
      *
      * @return null
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function deleteDownload($download_id)
     {
@@ -282,7 +283,7 @@ class ModelCatalogDownload extends Model
             .(int)$download_id."'");
         $this->db->query("DELETE FROM ".$this->db->table_name("products_to_downloads")." WHERE download_id = '"
             .(int)$download_id."'");
-        $this->cache->remove('html_cache');
+        $this->cache->flush('html_cache');
         return true;
     }
 
@@ -493,7 +494,7 @@ class ModelCatalogDownload extends Model
                         ('".$attribute['attribute_id']."', '".$download_id."', '".$value."')");
             }
         }
-        $this->cache->remove('html_cache');
+        $this->cache->flush('html_cache');
     }
 
     /**
@@ -530,7 +531,7 @@ class ModelCatalogDownload extends Model
                                     download_id = '".$download_id."'");
             }
         }
-        $this->cache->remove('html_cache');
+        $this->cache->flush('html_cache');
     }
 
     /**
@@ -615,7 +616,7 @@ class ModelCatalogDownload extends Model
                               SET ".implode(', ', $update)."
                               WHERE order_download_id='".(int)$order_download_id."'");
         }
-        $this->cache->remove('html_cache');
+        $this->cache->flush('html_cache');
         return true;
     }
 
@@ -668,6 +669,7 @@ class ModelCatalogDownload extends Model
      * @return array
      * @throws \abc\core\lib\AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getTextStatusForOrderDownload($download_info)
     {

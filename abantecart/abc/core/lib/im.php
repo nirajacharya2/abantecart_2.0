@@ -21,6 +21,7 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
+use abc\core\engine\AForm;
 use abc\core\engine\Registry;
 use abc\models\customer\CustomerCommunication;
 use Exception;
@@ -29,16 +30,16 @@ use H;
 /**
  * Class AIM for Instant Messages
  *
- * @property ACustomer                                   $customer
- * @property \abc\core\engine\ALanguage                  $language
- * @property ADB                                         $db
- * @property ALog                                        $log
- * @property \abc\core\engine\ALoader                    $load
- * @property \abc\core\engine\AHtml                      $html
- * @property \abc\core\engine\ExtensionsAPI              $extensions
- * @property ASession                                    $session
- * @property AConfig                                     $config
- * @property AResponse                                   $response
+ * @property ACustomer $customer
+ * @property \abc\core\engine\ALanguage $language
+ * @property ADB $db
+ * @property ALog $log
+ * @property \abc\core\engine\ALoader $load
+ * @property \abc\core\engine\AHtml $html
+ * @property \abc\core\engine\ExtensionsAPI $extensions
+ * @property ASession $session
+ * @property AConfig $config
+ * @property AResponse $response
  * @property  array()                                    $admin_sendpoints
  */
 class AIM
@@ -51,10 +52,10 @@ class AIM
      * each key of array is text_id of sendpoint.
      * To get sendpoint title needs to request language definition in format im_sendpoint_name_{sendpoint_text_id}
      * All sendpoint titles must to be saved in common/im language block for both sides! (admin + storefront)
-     * Values of array is language definitions key that stores in the same block. 
+     * Values of array is language definitions key that stores in the same block.
      *          This values can have %s that will be replaced by sendpoint text variables.
-     * for ex. message have url to product page. 
-     *          Text will have #storefront#rt=product/product&product_id=%s 
+     * for ex. message have url to product page.
+     *          Text will have #storefront#rt=product/product&product_id=%s
      *          and customer will receive full url to product.
      * Some sendpoints have few text variables, for ex. order status and order status name
      * For additional sendpoints ( from extensions) you can store language keys wherever you want.
@@ -122,7 +123,7 @@ class AIM
 
     /**
      * @param string $key
-     * @param mixed  $value
+     * @param mixed $value
      */
     public function __set($key, $value)
     {
@@ -182,7 +183,7 @@ class AIM
      * @param array $filter_arr
      *
      * @return array
-     * @throws Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getIMDriverObjects($filter_arr = ['status' => 1])
     {
@@ -194,10 +195,8 @@ class AIM
             $filter['status'] = (int)$filter_arr['status'];
         }
 
-
         $extensions = $this->extensions->getExtensionsList($filter);
         $driver_list = ['email' => new AMailIM()];
-
 
         $active_drivers = [];
 
@@ -225,12 +224,11 @@ class AIM
                 continue;
             }
 
-
             //NOTE! all IM drivers MUST have class by these path
             try {
                 /** @noinspection PhpIncludeInspection */
                 include_once(ABC::env('DIR_APP_EXTENSIONS').$driver_txt_id.'/core/lib/'.$driver_txt_id.'.php');
-            } catch (AException $e) {
+            } catch (\Exception $e) {
             }
             $classname = preg_replace('/[^a-zA-Z]/', '', $driver_txt_id);
             if (!class_exists($classname)) {
@@ -251,7 +249,6 @@ class AIM
      * @param array $data_array
      *
      * @return bool
-     * @throws \ReflectionException
      */
     public function addSendPoint($name, $data_array)
     {
@@ -283,6 +280,7 @@ class AIM
      * 0 - storefront (customer) and 1 - Admin (user)
      * notes: If message is not provided, message text will be takes from languages based on checkpoint text key.
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      */
     public function send($sendpoint, $msg_details = [])
@@ -399,7 +397,7 @@ class AIM
                             //use safe call
                             try {
                                 $driver->send($to, $store_name.$message);
-                                if (Registry::getInstance()->get('config')->get('config_save_customer_communication'))
+                                if (Registry::getInstance()->get('config')->get('config_save_customer_communication')) {
                                     if ($protocol != 'email') {
                                         CustomerCommunication::createCustomerCommunicationIm(
                                             $this->customer->getId(),
@@ -409,6 +407,7 @@ class AIM
                                             $protocol
                                         );
                                     }
+                                }
                             } catch (Exception $e) {
                             }
                         }
@@ -589,6 +588,7 @@ final class AMailIM
     private $registry;
     private $config;
     private $language;
+    private $load;
 
     public function __construct()
     {
@@ -670,8 +670,8 @@ final class AMailIM
     /**
      * Function builds form element for storefront side (customer account page)
      *
-     * @param \abc\core\engine\AForm $form
-     * @param string                 $value
+     * @param AForm $form
+     * @param string $value
      *
      * @return object
      */

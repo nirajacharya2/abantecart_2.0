@@ -28,7 +28,7 @@ use abc\core\engine\Registry;
  *
  * @property ASession               $session
  * @property AConfig                $config
- * @property \abc\core\cache\ACache $cache
+ * @property AbcCache               $cache
  * @property ADB                    $db
  * @property ACustomer              $customer
  */
@@ -49,6 +49,7 @@ class ATax
      * @param null|array $c_data
      *
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function __construct($registry, &$c_data = null)
     {
@@ -98,6 +99,7 @@ class ATax
      * @param int $zone_id
      *
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function setZone($country_id, $zone_id)
     {
@@ -130,6 +132,7 @@ class ATax
      *
      * @return mixed|null
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getTaxes($country_id, $zone_id)
     {
@@ -141,9 +144,9 @@ class ATax
         $default_lang_id = $language->getDefaultLanguageID();
 
         $cache_key = 'localization.tax_class.'.$country_id.'.'.$zone_id.'.lang_'.$language_id;
-        $results = $this->cache->pull($cache_key);
+        $results = $this->cache->get($cache_key);
 
-        if ($results === false) {
+        if ($results === null) {
             //Note: Default language text is picked up if no selected language available
             $sql = "SELECT tr.tax_class_id,
 							tr.rate AS rate, tr.rate_prefix AS rate_prefix, 
@@ -176,7 +179,7 @@ class ATax
 					ORDER BY tr.priority ASC";
             $tax_rate_query = $this->db->query($sql);
             $results = $tax_rate_query->rows;
-            $this->cache->push($cache_key, $results);
+            $this->cache->put($cache_key, $results);
         }
 
         return $results;

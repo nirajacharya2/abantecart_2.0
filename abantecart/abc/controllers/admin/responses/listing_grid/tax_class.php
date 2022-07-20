@@ -135,6 +135,9 @@ class ControllerResponsesListingGridTaxClass extends AController
      * update only one field
      *
      * @return void
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function update_field()
     {
@@ -197,6 +200,9 @@ class ControllerResponsesListingGridTaxClass extends AController
      * update only one field
      *
      * @return void
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function update_rate_field()
     {

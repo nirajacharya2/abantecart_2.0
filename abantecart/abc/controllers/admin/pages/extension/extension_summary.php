@@ -41,7 +41,9 @@ class ControllerPagesExtensionExtensionSummary extends AController
 
         $icon_ext_img_url = ABC::env('HTTPS_EXT').$extension.'/images/icon.png';
         $icon_ext_dir = ABC::env('DIR_EXT').$extension.'/images/icon.png';
-        $icon = (is_file($icon_ext_dir) ? $icon_ext_img_url : ABC::env('RDIR_ASSETS').'images/default_extension.png');
+        $icon = (is_file($icon_ext_dir)
+            ? $icon_ext_img_url
+            : ABC::env('RDIR_ASSETS').'images/default_extension.png');
 
         $this->data['extension_info']['icon'] = $icon;
         $this->data['extension_info']['name'] = $this->language->get($extension.'_name');
@@ -60,13 +62,14 @@ class ControllerPagesExtensionExtensionSummary extends AController
                 $datetime_format
             );
         }
-        $updates = $this->cache->pull('extensions.updates');
+        $updates = $this->cache->get('extensions.updates');
 
         // if update available
         if (is_array($updates) && in_array($extension, array_keys($updates))) {
             if ($updates[$extension]['installation_key']) {
                 $update_now_url = $this->html->getSecureURL(
-                    'tool/package_installer', '&extension_key='.$updates[$extension]['installation_key']
+                    'tool/package_installer',
+                    '&extension_key='.$updates[$extension]['installation_key']
                 );
             } else {
                 $update_now_url = $updates[$extension]['url'];

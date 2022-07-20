@@ -1,9 +1,10 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\order;
 
 use abc\models\order\OrderProduct;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class OrderProductModelTest
@@ -52,7 +53,7 @@ class OrderProductModelTest extends ATestCase
             $errors = $orderProduct->errors()['validation'];
              //var_Dump(array_diff(array_keys($errors), array_keys($data) ));
         }
-        $this->assertEquals(22, count($errors));
+        $this->assertCount(22, $errors);
 
         //valid data
         $data = [
@@ -108,10 +109,10 @@ class OrderProductModelTest extends ATestCase
             $orderProduct->save();
         } catch (ValidationException $e) {
             $errors = $orderProduct->errors()['validation'];
-            var_Dump(array_diff(array_keys($data), array_keys($errors)));
+//            var_Dump(array_diff(array_keys($data), array_keys($errors)));
             var_Dump($errors);
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
         $orderProduct->forceDelete();
 
 
@@ -121,6 +122,6 @@ class OrderProductModelTest extends ATestCase
     {
         //test getOrderProductOptions
         $orderProductOption = OrderProduct::getOrderProductOptions(4,18);
-        $this->assertEquals(27, count($orderProductOption->toArray()[0]));
+        $this->assertCount(27, $orderProductOption->toArray()[0]);
     }
 }

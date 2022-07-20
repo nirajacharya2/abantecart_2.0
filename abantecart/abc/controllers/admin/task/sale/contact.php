@@ -23,7 +23,6 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\lib\AError;
-use abc\core\lib\AException;
 use abc\core\lib\AJson;
 use abc\core\lib\AMail;
 use abc\core\lib\AMailIM;
@@ -237,7 +236,13 @@ class ControllerTaskSaleContact extends AController
         $text_unsubscribe = $this->language->get('text_unsubscribe');
         $message_body = $data['message'];
         if ($data['subscriber']) {
-            $customer_info = Customer::getCustomers(['filter' => ['email' => $email]]);
+            $customer_info = Customer::search(
+                [
+                    'filter' => [
+                        'email' => $email,
+                    ],
+                ]
+            );
             $customer_id = $customer_info[0]['customer_id'];
             if ($customer_id) {
                 $message_body .= "\n\n<br><br>".sprintf(

@@ -83,6 +83,7 @@ class CheckoutBase extends ALibBase
      * @param array $data
      *
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function __construct(Registry $registry, array $data)
     {
@@ -158,6 +159,7 @@ class CheckoutBase extends ALibBase
     /**
      * @return array
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      */
     public function getPaymentList()
@@ -248,6 +250,7 @@ class CheckoutBase extends ALibBase
 
     /**
      * @return array
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getShippingList()
     {
@@ -490,7 +493,7 @@ class CheckoutBase extends ALibBase
     /**
      * @param ACustomer $customer
      *
-     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function setCustomer(ACustomer $customer)
     {
@@ -514,7 +517,6 @@ class CheckoutBase extends ALibBase
      *
      * @throws LibException
      * @throws AException
-     * @throws \ReflectionException
      */
     public function confirmOrder($data = []){
 
@@ -577,7 +579,6 @@ class CheckoutBase extends ALibBase
      *
      * @return mixed
      * @throws LibException
-     * @throws \ReflectionException
      */
     public function processPayment(array $data = []){
         $handler = $this->getPaymentHandler($this->getPaymentKey());

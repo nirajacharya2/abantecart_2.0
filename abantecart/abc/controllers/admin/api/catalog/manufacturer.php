@@ -171,13 +171,13 @@ class ControllerApiCatalogManufacturer extends AControllerAPI
             $this->rest->setResponseData(['Error' => $e->getMessage()]);
             $this->rest->sendResponse(200);
             return null;
-        } catch (AException $e) {
+        } catch (\Exception $e) {
             $this->rest->setResponseData(['Error' => $e->getMessage()]);
             $this->rest->sendResponse(200);
             return null;
         }
 
-        (Registry::getInstance())->get('cache')->remove('*');
+        Registry::cache()->flush();
 
         $this->data['result'] = [
             'status'      => $updateBy ? 'updated' : 'created',
@@ -210,7 +210,7 @@ class ControllerApiCatalogManufacturer extends AControllerAPI
             if ($deleteBy) {
                 Manufacturer::withTrashed()->where($deleteBy, $request[$deleteBy])
                     ->forceDelete();
-                (Registry::getInstance())->get('cache')->remove('*');
+                Registry::cache()->flush();
             } else {
                 $this->rest->setResponseData(['Error' => 'Not correct request, manufacturer_id not found']);
                 $this->rest->sendResponse(200);

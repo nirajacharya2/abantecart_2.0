@@ -43,7 +43,11 @@ class ControllerCommonTemplateDebug extends AController
         $tmpl_data['parent']['tpl_path'] = $details['parent_tpl'];
         $tmpl_data['parent']['controller'] = $parent_block['controller'];
         $tmpl_data['parent']['controller_path'] =
-            str_replace(ABC::env('DIR_ROOT').'/', '', $details['parent_controller']);
+            str_replace(
+                ABC::env('DIR_ROOT').'/',
+                '',
+                $details['parent_controller']
+            );
 
         $this->view->batchAssign($tmpl_data);
         $this->processTemplate('common/template_debug.tpl');

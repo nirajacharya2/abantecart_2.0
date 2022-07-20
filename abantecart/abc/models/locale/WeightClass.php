@@ -38,15 +38,46 @@ class WeightClass extends BaseModel
     ];
 
     protected $fillable = [
+        'weight_class_id',
         'value',
         'date_added',
         'date_modified',
+    ];
+    protected $rules = [
+        'weight_class_id' => [
+            'checks' => [
+                'integer',
+                'required',
+                'sometimes',
+                'min:1'
+            ],
+            'messages' => [
+                'integer' => [
+                    'language_key' => 'error_weight_class_id',
+                    'language_block' => 'localisation/weight_class',
+                    'default_text' => 'weight class id must be integer!',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_weight_class_id',
+                    'language_block' => 'localisation/weight_class',
+                    'default_text' => 'weight class id required!',
+                    'section' => 'admin'
+                ],
+                'min' => [
+                    'language_key' => 'error_weight_class_id',
+                    'language_block' => 'localisation/weight_class',
+                    'default_text' => 'weight class id must be more 1!',
+                    'section' => 'admin'
+                ],
+            ]
+        ],
     ];
 
     public function description()
     {
         return $this->hasOne(WeightClassDescription::class, 'weight_class_id')
-                    ->where('language_id', $this->registry->get('language')->getContentLanguageID());
+            ->where('language_id', $this->registry->get('language')->getContentLanguageID());
     }
 
     public function descriptions()

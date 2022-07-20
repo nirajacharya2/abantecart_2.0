@@ -25,6 +25,7 @@ use abc\core\engine\AController;
 use abc\core\engine\ALanguage;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AError;
+use abc\core\lib\AException;
 use abc\core\lib\AJson;
 use abc\core\lib\AMail;
 use abc\models\customer\Address;
@@ -32,6 +33,8 @@ use abc\models\customer\Customer;
 use abc\models\order\Order;
 use abc\modules\events\ABaseEvent;
 use H;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 use stdClass;
 
 class ControllerResponsesListingGridCustomer extends AController
@@ -87,7 +90,7 @@ class ControllerResponsesListingGridCustomer extends AController
             }
         }
 
-        $total = Customer::getCustomers($data, 'total_only');
+        $total = Customer::getTotalCustomers($data);
         if ($total > 0) {
             $total_pages = ceil($total / $limit);
         } else {
@@ -106,16 +109,16 @@ class ControllerResponsesListingGridCustomer extends AController
         $orders_count = 0;
 
         if ($sidx == 'orders_count') {
-            $mode = 'default';
+            $data['mode'] = 'default';
         } else {
-            $mode = 'quick';
+            $data['mode'] = 'quick';
         }
 
-        $results = Customer::getCustomers($data, $mode);
+        $results = Customer::search($data);
         //push result into public scope to get access from extensions
         $this->data['results'] = $results;
 
-        if ($mode) {
+        if ($data['mode'] == 'quick') {
             //get orders count for customers list by separate request to prevent slow sql issue
             $customers_ids = [];
             foreach ($results as $result) {
@@ -125,7 +128,7 @@ class ControllerResponsesListingGridCustomer extends AController
         }
         $i = 0;
         foreach ($results as $result) {
-            if ($mode) {
+            if ($data['mode'] == 'quick') {
                 $order_cnt = (int)$orders_count[$result['customer_id']];
             } else {
                 $order_cnt = (int)$result['orders_count'];
@@ -188,7 +191,7 @@ class ControllerResponsesListingGridCustomer extends AController
             case 'del':
                 $ids = explode(',', $this->request->post['id']);
                 if (!empty($ids)) {
-                        Customer::destroy($ids);
+                    Customer::whereIn('customer_id', $ids)->forceDelete();
                 }
                 break;
             case 'save':
@@ -219,10 +222,10 @@ class ControllerResponsesListingGridCustomer extends AController
 
                             if ($do_approve && !$customer->isSubscriber()) {
                                 //send email when customer was not approved
-                                H::event('admin\sendApprovalEmail', [new ABaseEvent($customer->toArray())] );
+                                H::event('admin\sendApprovalEmail', [new ABaseEvent($customer->toArray())]);
                             }
                             //do not change order of calls here!!!
-                            $customer->update(['approved'=> $do_approve]);
+                            $customer->update(['approved' => $do_approve]);
                         } else {
                             $error = new AError('');
                             return $error->toJSONResponse('VALIDATION_ERROR_406',
@@ -247,8 +250,9 @@ class ControllerResponsesListingGridCustomer extends AController
      * update only one field
      *
      * @return null
-     * @throws \abc\core\lib\AException
-     * @throws \ReflectionException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function update_field()
     {
@@ -289,11 +293,11 @@ class ControllerResponsesListingGridCustomer extends AController
                 }
                 //passwords do match, save
                 $customer = Customer::find($customer_id);
-                if($customer){
+                if ($customer) {
                     $customer->update(
                         [
-                            'password' => $post_data['password'],
-                            'password_confirmation' => $post_data['password_confirmation']
+                            'password'              => $post_data['password'],
+                            'password_confirmation' => $post_data['password_confirmation'],
                         ]
                     );
                 }
@@ -309,16 +313,16 @@ class ControllerResponsesListingGridCustomer extends AController
                         if ($field == 'approved') {
                             //send email when customer was not approved
                             if ($value && !$customer->isSubscriber()) {
-                                H::event('admin\sendApprovalEmail', [new ABaseEvent($customer->toArray())] );
+                                H::event('admin\sendApprovalEmail', [new ABaseEvent($customer->toArray())]);
                             }
                         }
                         if ($field == 'default' && $address_id) {
                             //set default address
-                            $customer->update([ 'address_id' => $address_id ]);
+                            $customer->update(['address_id' => $address_id]);
                         } else {
                             if (H::has_value($address_id)) {
                                 $address = Address::find($address_id);
-                                $address->update([ $field => $value ]);
+                                $address->update([$field => $value]);
                             } else {
                                 $customer->update([$field => $value]);
                             }
@@ -350,7 +354,7 @@ class ControllerResponsesListingGridCustomer extends AController
                     if ($field == 'approved') {
                         if ($v && !$customer->isSubscriber()) {
                             //send email when customer was not approved
-                            H::event('admin\sendApprovalEmail', [new ABaseEvent($customer->toArray())] );
+                            H::event('admin\sendApprovalEmail', [new ABaseEvent($customer->toArray())]);
                         }
                     }
                     $customer->update([$field => $v]);
@@ -406,9 +410,9 @@ class ControllerResponsesListingGridCustomer extends AController
                     $this->error = $this->language->get('error_email');
                 }//check unique email
                 else {
-                    $exists = Customer::getCustomers(['filter' => ['email'=> $value ]]);
-                    if ($exists){
-                        foreach($exists as $details) {
+                    $exists = Customer::search(['filter' => ['email' => $value]])->toArray();
+                    if ($exists) {
+                        foreach ($exists as $details) {
                             if ($details['customer_id'] != $customer_id) {
                                 $this->error = $this->language->get('error_email_exists');
                                 break;
@@ -468,14 +472,14 @@ class ControllerResponsesListingGridCustomer extends AController
             ];
             if (H::has_value($this->session->data['current_store_id'])) {
                 $filter['store_id'] = (int)$this->session->data['current_store_id'];
-            }else {
+            } else {
                 $this->load->model('setting/store');
             }
             if (!$filter['store_id'] && !$this->model_setting_store->isDefaultStore()) {
                 $filter['store_id'] = $this->config->get('config_store_id');
             }
 
-            $customers = Customer::getCustomers($filter);
+            $customers = Customer::search($filter)->toArray();
             foreach ($customers as $cdata) {
                 $customers_data[] = [
                     'id'   => $cdata['customer_id'],
@@ -503,8 +507,8 @@ class ControllerResponsesListingGridCustomer extends AController
             return $error->toJSONResponse('VALIDATION_ERROR_406',
                 [
                     'error_text'  => sprintf(
-                                    $this->language->get('error_permission_modify'),
-                                    'sale/customer'
+                        $this->language->get('error_permission_modify'),
+                        'sale/customer'
                     ),
                     'reset_value' => false,
                 ]);
@@ -514,21 +518,21 @@ class ControllerResponsesListingGridCustomer extends AController
 
         $customer_info = Customer::find($customer_id);
 
-        $error_text  = $this->validateBeforePasswordReset($customer_info);
-        if($error_text){
+        $error_text = $this->validateBeforePasswordReset($customer_info);
+        if ($error_text) {
             $error = new AError('');
             return $error->toJSONResponse('VALIDATION_ERROR_406',
-            [
-                'error_text'  => $error_text,
-                'reset_value' => false,
-            ]);
+                [
+                    'error_text'  => $error_text,
+                    'reset_value' => false,
+                ]);
         }
 
         $code = H::genToken(32);
         //save password reset code
         $data = $customer_info->data;
         $data['password_reset'] = $code;
-        Customer::find($customer_id)->update(['data' => $data ]);
+        Customer::find($customer_id)->update(['data' => $data]);
         //build reset link
         /**
          * @var AEncryption $enc
@@ -536,17 +540,17 @@ class ControllerResponsesListingGridCustomer extends AController
         $enc = ABC::getObjectByAlias('AEncryption', [$this->config->get('encryption_key')]);
         $rtoken = $enc->encrypt($customer_id.'::'.$code);
 
-        $link = $this->html->getSecureURL('account/forgotten/reset', '&rtoken=' . $rtoken, null, 'storefront');
+        $link = $this->html->getSecureURL('account/forgotten/reset', '&rtoken='.$rtoken, null, 'storefront');
 
-        $language = new ALanguage($this->registry, $this->language->getLanguageCode(),0);
+        $language = new ALanguage($this->registry, $this->language->getLanguageCode(), 0);
         $language->load('mail/account_forgotten');
 
         $subject = sprintf($language->get('text_subject'), $this->config->get('store_name'));
-        $message = sprintf($this->language->get('text_password_was_reset'), $this->config->get('store_name')) . "\n\n";
-        $message .= $language->get('text_password') . "\n\n";
+        $message = sprintf($this->language->get('text_password_was_reset'), $this->config->get('store_name'))."\n\n";
+        $message .= $language->get('text_password')."\n\n";
         $message .= $link;
 
-        $mail = new AMail( $this->config );
+        $mail = new AMail($this->config);
         $mail->setTo($customer_info['email']);
         $mail->setFrom($this->config->get('store_main_email'));
         $mail->setSender($this->config->get('store_name'));
@@ -558,34 +562,34 @@ class ControllerResponsesListingGridCustomer extends AController
             $mail->setUser($this->user);
         }
         $result = $mail->send();
-        if(!$result) {
+        if (!$result) {
             $error = new AError('');
             return $error->toJSONResponse('VALIDATION_ERROR_406',
-            [
-                'error_text'  => $this->language->get('error_reset_link_not_sent'),
-                'reset_value' => false,
-            ]);
-        }else {
+                [
+                    'error_text'  => $this->language->get('error_reset_link_not_sent'),
+                    'reset_value' => false,
+                ]);
+        } else {
             $this->extensions->hk_UpdateData($this, __FUNCTION__);
         }
         $this->load->library('json');
         $this->response->addJSONHeader();
         $this->response->setOutput(AJson::encode(
-                [
-                    'result'=>true,
-                    'success' => $this->language->get('text_password_reset_success')
-                ]
-            )
+            [
+                'result'  => true,
+                'success' => $this->language->get('text_password_reset_success'),
+            ]
+        )
         );
     }
 
     protected function validateBeforePasswordReset($customer_info)
     {
-        if(!$customer_info){
+        if (!$customer_info) {
             return $this->language->get('error_unknown_customer');
-        }elseif(!$customer_info['email']){
+        } elseif (!$customer_info['email']) {
             return $this->language->get('error_no_email');
-        }elseif(!$customer_info['status'] || !$customer_info['approved']){
+        } elseif (!$customer_info['status'] || !$customer_info['approved']) {
             return $this->language->get('error_disabled_customer');
         }
         return '';

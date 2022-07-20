@@ -25,10 +25,6 @@ use abc\core\engine\Model;
 use abc\core\lib\AConnect;
 use abc\core\lib\AExtensionManager;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
 /**
  * Class ModelToolUpdater
  *
@@ -42,7 +38,7 @@ class ModelToolUpdater extends Model
      *
      * @var array
      */
-    public $error = array();
+    public $error = [];
     /**
      * size of data in bytes
      *
@@ -54,20 +50,23 @@ class ModelToolUpdater extends Model
      * this method checks for updates on remote server if date about updates absent in cache (cache expires about day)
      *
      * @param bool $force - sign to do request to mp-server forcibly
+     *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \abc\core\lib\AException
      */
     public function check4Updates($force = false)
     {
         if (!$force) {
-            $update_info = $this->cache->pull('extensions.updates');
+            $update_info = $this->cache->get('extensions.updates');
         } else {
-            $update_info = false;
+            $update_info = null;
         }
 
-        if ($update_info === false) {
+        if ($update_info === null) {
             $update_info = $this->_getUpdateInfo();
 
             if ($update_info) {
-                $this->cache->push('extensions.updates', $update_info);
+                $this->cache->put('extensions.updates', $update_info);
             }
         }
     }
@@ -76,7 +75,7 @@ class ModelToolUpdater extends Model
     {
         $e = new AExtensionManager();
         $extensions_list = $e->getExtensionsList();
-        $list = array();
+        $list = [];
         $installed_extensions = $this->extensions->getInstalled('');
         if ($extensions_list->num_rows) {
             foreach ($extensions_list->rows as $extension) {
@@ -86,17 +85,18 @@ class ModelToolUpdater extends Model
                 }
                 // if extension is installed
                 if (in_array($extension['key'], $installed_extensions)) {
-                    $status = $extension['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled');
+                    $status =
+                        $extension['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled');
 
                     $extension_name = trim($this->extensions->getExtensionName($extension['key']));
-                    $list[$extension['key']] = array(
+                    $list[$extension['key']] = [
                         'name'        => $extension_name,
                         'type'        => $extension['type'],
                         'category'    => $extension['category'],
                         'status'      => $status,
                         'license_key' => $extension['license_key'],
                         'version'     => $extension['version'],
-                    );
+                    ];
                 }
             }
         }
@@ -108,9 +108,12 @@ class ModelToolUpdater extends Model
      * this method gets json-formatted response from remote server and write it to cache
      *
      * @return array
+     * @throws \abc\core\lib\AException
      */
     private function _getUpdateInfo()
     {
+        $installed = [];
+
         $el = $this->getExtensionsList();
 
         $this->load->model('tool/mp_api');
@@ -131,32 +134,30 @@ class ModelToolUpdater extends Model
 
         // get array with updates information
         if (!$info) {
-            return array();
+            return [];
         }
 
         //filter data
-        $output = array();
+        $output = [];
         foreach ((array)$info as $key => $versions) {
-            if (is_array($versions)) {
-                foreach ($versions as $version => $version_info) {
-                    //skip not installed
-                    if (!isset($installed[$key])) {
-                        continue 1;
-                    }
-                    //skip not supported by cart
-                    if (!$version_info['cart_versions'] || !in_array(ABC::env('VERSION'), $version_info['cart_versions'])) {
-                        continue;
-                    }
-                    //skip old or current versions
-                    if (version_compare($installed[$key], $version, '>=')) {
-                        continue;
-                    }
-                    //if we have 2 or more versions for cart version
-                    if (!isset($output[$key][$version])
-                        || version_compare($installed[$key], $version, '<')) {
-                        $version_info['version'] = $version;
-                        $output[$key] = $version_info;
-                    }
+            foreach ($versions as $version => $version_info) {
+                //skip not installed
+                if (!isset($installed[$key])) {
+                    continue 1;
+                }
+                //skip not supported by cart
+                if (!$version_info['cart_versions'] || !in_array(ABC::env('VERSION'), $version_info['cart_versions'])) {
+                    continue;
+                }
+                //skip old or current versions
+                if (version_compare($installed[$key], $version, '>=')) {
+                    continue;
+                }
+                //if we have 2 or more versions for cart version
+                if (!isset($output[$key][$version])
+                    || version_compare($installed[$key], $version, '<')) {
+                    $version_info['version'] = $version;
+                    $output[$key] = $version_info;
                 }
             }
         }

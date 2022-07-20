@@ -30,7 +30,7 @@ use abc\core\engine\AController;
  */
 class ControllerPagesSettings extends AController
 {
-    private $error = array();
+    private $error = [];
 
     public function main()
     {
@@ -39,7 +39,7 @@ class ControllerPagesSettings extends AController
             abc_redirect(ABC::env('HTTPS_SERVER').'index.php?rt=finish');
         }
 
-        $template_data = array();
+        $template_data = [];
         if ($this->request->is_POST() && ($this->validate())) {
             abc_redirect(ABC::env('HTTPS_SERVER').'index.php?rt=install');
         }
@@ -103,7 +103,7 @@ class ControllerPagesSettings extends AController
         $template_data['directories'] = [
             ABC::env('DIR_CONFIG'),
             ABC::env('DIR_SYSTEM'),
-            ABC::env('CACHE')['DIR_CACHE'],
+            ABC::env('CACHE')['stores']['file']['path'],
             ABC::env('DIR_LOGS'),
             ABC::env('DIR_DOWNLOADS'),
             ABC::env('DIR_APP_EXTENSIONS'),
@@ -133,6 +133,7 @@ class ControllerPagesSettings extends AController
 
     /**
      * @return bool
+     * @throws \abc\core\lib\AException
      */
     public function validate()
     {

@@ -35,7 +35,7 @@ use stdClass;
  */
 class ControllerResponsesListingGridMenu extends AController
 {
-    public $data = array();
+    public $data = [];
     /**
      * @var AMenu_Storefront
      */
@@ -82,8 +82,8 @@ class ControllerResponsesListingGridMenu extends AController
         }
 
         //sort
-        $allowedSort = array('item_id', 'item_text', 'sort_order');
-        $allowedDirection = array(SORT_ASC => 'asc', SORT_DESC => 'desc');
+        $allowedSort = ['item_id', 'item_text', 'sort_order'];
+        $allowedDirection = [SORT_ASC => 'asc', SORT_DESC => 'desc'];
         if (!in_array($sidx, $allowedSort)) {
             $sidx = $allowedSort[0];
         }
@@ -125,20 +125,20 @@ class ControllerResponsesListingGridMenu extends AController
                     $icon = '<i class="fa fa-code fa-2x"></i>';
                 }
                 $response->rows[$i]['id'] = $result['item_id'];
-                $response->rows[$i]['cell'] = array(
+                $response->rows[$i]['cell'] = [
                     $icon,
                     $result['item_id'],
                     $result['item_text'][$language_id],
-                    $this->html->buildInput(array(
+                    $this->html->buildInput([
                         'name'  => 'sort_order['.$result['item_id'].']',
                         'value' => $result['sort_order'],
-                    )),
+                    ]),
                     'action',
                     $new_level,
                     ($menu_parent_id ? $menu_parent_id : null),
                     ($result['item_id'] == $leaf_nodes[$result['item_id']] ? true : false),
                     false,
-                );
+                ];
                 $i++;
             }
         } else {
@@ -166,14 +166,14 @@ class ControllerResponsesListingGridMenu extends AController
         if (!$this->user->canModify('listing_grid/menu')) {
             $error = new AError('');
             return $error->toJSONResponse('NO_PERMISSIONS_402',
-                array(
+                [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/menu'),
                     'reset_value' => true,
-                ));
+                ]);
         }
 
         $menu = new AMenu_Storefront();
-        $item_keys = array('item_text', 'item_url', 'parent_id', 'sort_order');
+        $item_keys = ['item_text', 'item_url', 'parent_id', 'sort_order'];
         switch ($this->request->post['oper']) {
             case 'del':
                 $ids = explode(',', $this->request->post['id']);
@@ -188,7 +188,7 @@ class ControllerResponsesListingGridMenu extends AController
                 break;
             case 'save':
                 $ids = explode(',', $this->request->post['id']);
-                $array = array();
+                $array = [];
                 if (!empty($ids)) {
                     //resort required.
                     if ($this->request->post['resort'] == 'yes') {
@@ -201,7 +201,7 @@ class ControllerResponsesListingGridMenu extends AController
                         $this->request->post['sort_order'] = $new_sort;
                     }
                     foreach ($ids as $item_id) {
-                        $item_values = array();
+                        $item_values = [];
                         foreach ($item_keys as $key) {
                             if (isset($this->request->post[$key][$item_id])) {
                                 $item_values[$key] = $this->request->post[$key][$item_id];
@@ -225,6 +225,8 @@ class ControllerResponsesListingGridMenu extends AController
      * update only one field
      *
      * @return void
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
     public function update_field()
@@ -237,14 +239,14 @@ class ControllerResponsesListingGridMenu extends AController
         if (!$this->user->canModify('listing_grid/menu')) {
             $error = new AError('');
             return $error->toJSONResponse('NO_PERMISSIONS_402',
-                array(
+                [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/menu'),
                     'reset_value' => true,
-                ));
+                ]);
         }
 
         $menu = new AMenu_Storefront();
-        $allowedFields = array_merge(array('item_icon', 'item_text', 'item_url', 'parent_id', 'sort_order'),
+        $allowedFields = array_merge(['item_icon', 'item_text', 'item_url', 'parent_id', 'sort_order'],
             (array)$this->data['allowed_fields']);
 
         if (isset($this->request->get['id'])) {
@@ -253,7 +255,7 @@ class ControllerResponsesListingGridMenu extends AController
                 if (!in_array($key, $allowedFields)) {
                     continue;
                 }
-                $data = array($key => $value);
+                $data = [$key => $value];
                 $menu->updateMenuItem($this->request->get['id'], $data);
             }
             return null;
@@ -265,7 +267,7 @@ class ControllerResponsesListingGridMenu extends AController
                 continue;
             }
             foreach ($value as $k => $v) {
-                $data = array($key => $v);
+                $data = [$key => $v];
                 $menu->updateMenuItem($k, $data);
             }
         }

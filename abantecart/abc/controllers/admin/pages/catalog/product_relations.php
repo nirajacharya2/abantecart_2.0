@@ -65,34 +65,27 @@ class ControllerPagesCatalogProductRelations extends AController
         }
 
         $this->document->initBreadcrumb([
-                                            'href'      => $this->html->getSecureURL('index/home'),
-                                            'text'      => $this->language->get('text_home'),
-                                            'separator' => false,
-                                        ]);
+            'href'      => $this->html->getSecureURL('index/home'),
+            'text'      => $this->language->get('text_home'),
+            'separator' => false,
+        ]);
         $this->document->addBreadcrumb([
-                                           'href'      => $this->html->getSecureURL('catalog/product'),
-                                           'text'      => $this->language->get('heading_title'),
-                                           'separator' => ' :: ',
-                                       ]);
+            'href'      => $this->html->getSecureURL('catalog/product'),
+            'text'      => $this->language->get('heading_title'),
+            'separator' => ' :: ',
+        ]);
         $this->document->addBreadcrumb([
-                                           'href'      => $this->html->getSecureURL(
-                                               'catalog/product/update', '&product_id='.$product_id
-                                           ),
-                                           'text'      => $this->language->get('text_edit').'&nbsp;'
-                                               .$this->language->get(
-                                                   'text_product'
-                                               ).' - '
-                                               .$this->data['product_description'][$language_id]['name'],
-                                           'separator' => ' :: ',
-                                       ]);
+            'href'      => $this->html->getSecureURL('catalog/product/update', '&product_id='.$product_id),
+            'text'      => $this->language->get('text_edit').'&nbsp;'.$this->language->get('text_product').' - '
+                .$this->data['product_description'][$language_id]['name'],
+            'separator' => ' :: ',
+        ]);
         $this->document->addBreadcrumb([
-                                           'href'      => $this->html->getSecureURL(
-                                               'catalog/product_relations', '&product_id='.$product_id
-                                           ),
-                                           'text'      => $this->language->get('tab_relations'),
-                                           'separator' => ' :: ',
-                                           'current'   => true,
-                                       ]);
+            'href'      => $this->html->getSecureURL('catalog/product_relations', '&product_id='.$product_id),
+            'text'      => $this->language->get('tab_relations'),
+            'separator' => ' :: ',
+            'current'   => true,
+        ]);
 
         $this->data['categories'] = [];
         $results = Category::getCategories();
@@ -119,54 +112,50 @@ class ControllerPagesCatalogProductRelations extends AController
         $this->data['related_products'] = $this->html->getSecureURL('product/product/related');
         $this->data['action'] = $this->html->getSecureURL('catalog/product_relations', '&product_id='.$product_id);
         $this->data['form_title'] = $this->language->get('text_edit').'&nbsp;'.$this->language->get('text_product');
-        $this->data['update'] = $this->html->getSecureURL(
-            'listing_grid/product/update_relations_field',
-            '&id='.$product_id
-        );
+        $this->data['update'] = $this->html->getSecureURL('listing_grid/product/update_relations_field',
+            '&id='.$product_id);
         $form = new AForm('HS');
 
         $form->setForm([
-                           'form_name' => 'productFrm',
-                           'update'    => $this->data['update'],
-                       ]);
+            'form_name' => 'productFrm',
+            'update'    => $this->data['update'],
+        ]);
 
         $this->data['form']['id'] = 'productFrm';
         $this->data['form']['form_open'] = $form->getFieldHtml([
-                                                                   'type'   => 'form',
-                                                                   'name'   => 'productFrm',
-                                                                   'action' => $this->data['action'],
-                                                                   'attr'   => 'data-confirm-exit="true" class="aform form-horizontal"',
-                                                               ]);
+            'type'   => 'form',
+            'name'   => 'productFrm',
+            'action' => $this->data['action'],
+            'attr'   => 'data-confirm-exit="true" class="aform form-horizontal"',
+        ]);
         $this->data['form']['submit'] = $form->getFieldHtml([
-                                                                'type'  => 'button',
-                                                                'name'  => 'submit',
-                                                                'text'  => $this->language->get('button_save'),
-                                                                'style' => 'button1',
-                                                            ]);
+            'type'  => 'button',
+            'name'  => 'submit',
+            'text'  => $this->language->get('button_save'),
+            'style' => 'button1',
+        ]);
         $this->data['form']['cancel'] = $form->getFieldHtml([
-                                                                'type'  => 'button',
-                                                                'href'  => $this->html->getSecureURL(
-                                                                    'catalog/product/update', '&product_id='.$product_id
-                                                                ),
-                                                                'name'  => 'cancel',
-                                                                'text'  => $this->language->get('button_cancel'),
-                                                                'style' => 'button2',
-                                                            ]);
+            'type'  => 'button',
+            'href'  => $this->html->getSecureURL('catalog/product/update', '&product_id='.$product_id),
+            'name'  => 'cancel',
+            'text'  => $this->language->get('button_cancel'),
+            'style' => 'button2',
+        ]);
         $this->data['cancel'] = $this->html->getSecureURL('catalog/product');
 
+        $this->data['categories'] = [];
         $results = Category::getCategories();
         $this->data['categories'] = array_column($results, 'name', 'category_id');
 
         $this->data['form']['fields']['category'] = $form->getFieldHtml([
-                                                                            'type'        => 'checkboxgroup',
-                                                                            'name'        => 'product_category[]',
-                                                                            'value'       => $this->data['product_category'],
-                                                                            'options'     => $this->data['categories'],
-                                                                            'style'       => 'chosen',
-                                                                            'placeholder' => $this->language->get(
-                                                                                'text_select_category'
-                                                                            ),
-                                                                        ]);
+            'type'        => 'checkboxgroup',
+            'name'        => 'product_category[]',
+            'value'       => $this->data['product_category'],
+            'options'     => $this->data['categories'],
+            'style'       => 'chosen',
+            'placeholder' => $this->language->get('text_select_category'),
+        ]);
+
         //load only prior saved products
         $this->data['products'] = [];
         if (count($this->data['product_related'])) {
@@ -196,28 +185,30 @@ class ControllerPagesCatalogProductRelations extends AController
             }
         }
 
-        $this->data['form']['fields']['related'] = $form->getFieldHtml([
-                                                                           'type'        => 'multiselectbox',
-                                                                           'name'        => 'product_related[]',
-                                                                           'value'       => $this->data['product_related'],
-                                                                           'options'     => $this->data['products'],
-                                                                           'style'       => 'chosen',
-                                                                           'ajax_url'    => $this->html->getSecureURL(
-                                                                               'r/product/product/products',
-                                                                               '&exclude[]='.$product_id
-                                                                           ),
-                                                                           'placeholder' => $this->language->get(
-                                                                               'text_select_from_lookup'
-                                                                           ),
-                                                                       ]);
+        $this->data['form']['fields']['related'] = $form->getFieldHtml(
+            [
+               'type'        => 'multiselectbox',
+               'name'        => 'product_related[]',
+               'value'       => $this->data['product_related'],
+               'options'     => $this->data['products'],
+               'style'       => 'chosen',
+               'ajax_url'    => $this->html->getSecureURL(
+                   'r/product/product/products',
+                   '&exclude[]='.$product_id
+               ),
+               'placeholder' => $this->language->get(
+                   'text_select_from_lookup'
+               ),
+           ]
+        );
 
         $this->data['form']['fields']['store'] = $form->getFieldHtml([
-                                                                         'type'    => 'checkboxgroup',
-                                                                         'name'    => 'product_store[]',
-                                                                         'value'   => $this->data['product_store'],
-                                                                         'options' => $this->data['stores'],
-                                                                         'style'   => 'chosen',
-                                                                     ]);
+            'type'    => 'checkboxgroup',
+            'name'    => 'product_store[]',
+            'value'   => $this->data['product_store'],
+            'options' => $this->data['stores'],
+            'style'   => 'chosen',
+        ]);
         if ($this->config->get('config_embed_status')) {
             $this->data['embed_url'] = $this->html->getSecureURL(
                 'common/do_embed/product',

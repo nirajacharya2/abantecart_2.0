@@ -1,9 +1,10 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\order;
 
 use abc\models\order\OrderDatum;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class OrderDatumModelTest
@@ -33,7 +34,7 @@ class OrderDatumModelTest extends ATestCase
             //  var_Dump($errors);
         }
 
-        $this->assertEquals(2, count($errors));
+        $this->assertCount(2, $errors);
 
         //check validation of presence in database
         $data = [
@@ -49,7 +50,7 @@ class OrderDatumModelTest extends ATestCase
             //var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
 
-        $this->assertEquals(2, count($errors));
+        $this->assertCount(2, $errors);
 
         $data = [
             'type_id'  => 2,
@@ -59,7 +60,6 @@ class OrderDatumModelTest extends ATestCase
 
         $orderDatum = new OrderDatum($data);
         $errors = [];
-        $order_id = null;
         try {
             $orderDatum->validate();
             $orderDatum->save();
@@ -68,7 +68,7 @@ class OrderDatumModelTest extends ATestCase
             //var_Dump(array_intersect_key($data, $errors ));
         }
 
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
         $orderDatum->forceDelete();
 
     }

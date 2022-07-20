@@ -21,7 +21,7 @@
 namespace abc\core\engine;
 
 use abc\core\ABC;
-use abc\core\cache\ACache;
+use abc\core\lib\AbcCache;
 use abc\core\lib\ADB;
 use abc\core\lib\ADebug;
 use abc\core\lib\AError;
@@ -30,6 +30,7 @@ use abc\core\lib\AException;
 use abc\models\storefront\ModelLocalisationLanguage;
 use Exception;
 use H;
+use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 
 /**
@@ -52,7 +53,7 @@ class ALanguage
      */
     protected $db;
     /**
-     * @var ACache
+     * @var AbcCache
      */
     protected $cache;
     /**
@@ -74,7 +75,6 @@ class ALanguage
      * @param int $section - 0(storefront) or 1 (admin)
      *
      * @throws AException
-     * @throws ReflectionException
      */
     public function __construct($registry, $code = '', $section = 0)
     {
@@ -99,7 +99,10 @@ class ALanguage
             //problem no languages available
             $err = new AError('Error: no languages available in AbanteCart !', AC_ERR_LOAD);
             $err->toLog()->toDebug();
-            throw new AException(AC_ERR_LOAD, 'Error: Can not Load any language!');
+            throw new AException(
+                'Error: Can not Load any language!',
+                AC_ERR_LOAD
+            );
         }
 
         //If No language code, we need to detect language, set site language to use and set content language separately
@@ -162,6 +165,7 @@ class ALanguage
      * @return null|string - Definition value
      * @throws ReflectionException
      * @throws AException
+     * @throws InvalidArgumentException
      */
     public function get($key, $block = '', $silent = false)
     {
@@ -200,6 +204,7 @@ class ALanguage
      * @return string
      * @throws ReflectionException
      * @throws AException
+     * @throws InvalidArgumentException
      */
     public function get_error($key)
     {
@@ -235,6 +240,7 @@ class ALanguage
      * @return array  Array with key/definition
      * @throws ReflectionException
      * @throws AException
+     * @throws InvalidArgumentException
      */
     public function getASet($block = '')
     {
@@ -263,6 +269,7 @@ class ALanguage
      * @return array|null - Array with key/definition loaded
      * @throws ReflectionException
      * @throws AException
+     * @throws InvalidArgumentException
      */
     public function load($block = '', $mode = '')
     {
@@ -358,7 +365,7 @@ class ALanguage
      *
      * @return int|null|string - language code for detected locale
      * @throws AException
-     * @throws ReflectionException
+     * @throws ReflectionException|InvalidArgumentException
      */
     public function getClientBrowserLanguage()
     {
@@ -513,7 +520,7 @@ class ALanguage
      *
      * @return string
      * @throws AException
-     * @throws ReflectionException
+     * @throws ReflectionException|InvalidArgumentException
      */
     public function getDefaultLanguageCode()
     {
@@ -527,7 +534,7 @@ class ALanguage
      *
      * @return int
      * @throws AException
-     * @throws ReflectionException
+     * @throws ReflectionException|InvalidArgumentException
      */
     public function getDefaultLanguageID()
     {
@@ -540,7 +547,7 @@ class ALanguage
      *
      * @return array
      * @throws AException
-     * @throws ReflectionException
+     * @throws ReflectionException|InvalidArgumentException
      */
     public function getDefaultLanguage()
     {
@@ -675,6 +682,7 @@ class ALanguage
      * @return array|null
      * @throws ReflectionException
      * @throws AException
+     * @throws InvalidArgumentException
      */
     public function _load($filename, $mode = '')
     {
@@ -692,8 +700,10 @@ class ALanguage
         $cache_key = 'localization.lang.'.$this->code.'.'.(($this->is_admin) ? 'a' : 's').'.'.$filename;
         $cache_key = str_replace('/', '_', $cache_key);
 
-        $load_data = $this->cache?->pull($cache_key);
-        if ($load_data === false) {
+        if ($this->cache) {
+            $load_data = $this->cache->get($cache_key);
+        }
+        if ($load_data === null) {
             //Check that filename has proper name with no other special characters.
             $block_name = str_replace('/', '_', $filename);
             //prevent error for pre and post controllers
@@ -759,7 +769,9 @@ class ALanguage
             }
 
             $load_data = $_;
-            $this->cache?->push($cache_key, $load_data);
+            if ($this->cache) {
+                $this->cache->put($cache_key, $load_data);
+            }
         }
 
         ADebug::checkpoint('ALanguage '.$this->language_details['name'].' '.$filename.' is loaded');
@@ -901,8 +913,8 @@ class ALanguage
         $block = str_replace('/', '_', $filename);
         ADebug::checkpoint('ALanguage '.$this->language_details['name'].' '.$block.' saving to database');
 
-        $sql = "INSERT INTO ".$this->db->table_name("language_definitions")." ";
-        $sql .= "(language_id,block,section,language_key,language_value,date_added) VALUES ";
+        $sql = "INSERT INTO ".$this->db->table_name("language_definitions");
+        $sql .= " (language_id,block,section,language_key,language_value,date_added) VALUES ";
         $values = [];
         foreach ($definitions as $k => $v) {
             //preventing duplication sql-error by unique index
@@ -973,7 +985,7 @@ class ALanguage
      *
      * @return array|null
      * @throws ReflectionException
-     * @throws AException
+     * @throws AException|InvalidArgumentException
      */
     protected function loadFromXml($filename, $directory, $mode)
     {
@@ -1059,6 +1071,7 @@ class ALanguage
      * @return null|string
      * @throws AException
      * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     protected function getLastLanguageValue(
         $key,
@@ -1107,6 +1120,7 @@ class ALanguage
      * @param array $data
      *
      * @throws AException
+     * @throws InvalidArgumentException
      * @throws ReflectionException
      */
     protected function writeMissingDefinition($data)
@@ -1126,8 +1140,7 @@ class ALanguage
                         (`".implode("`, `", array_keys($update_data))."`)
                         VALUES ('".implode("', '", $update_data)."') ";
                 $this->db->query($sql);
-                $this->cache->remove('localization');
-                $this->cache->remove('storefront_menu');
+                $this->cache->flush();
             }
         }
         if ($this->registry->get('config')->get('warn_lang_text_missing')) {

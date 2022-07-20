@@ -21,8 +21,8 @@ namespace install\models;
 use abc\core\ABC;
 use abc\commands\Deploy;
 use abc\commands\Install;
-use abc\core\cache\ACache;
 use abc\core\engine\Model;
+use abc\core\lib\AbcCache;
 use abc\core\lib\ADB;
 use abc\core\lib\AException;
 
@@ -37,6 +37,7 @@ class ModelInstall extends Model
      * @param array $data
      *
      * @return bool
+     * @throws \DebugBar\DebugBarException
      */
     public function validateSettings($data)
     {
@@ -166,7 +167,7 @@ class ModelInstall extends Model
                 .'children files/directories need to be writable for AbanteCart to work!';
         }
 
-        if (!is_writable(ABC::env('CACHE')['DIR_CACHE'])) {
+        if (!is_writable(ABC::env('CACHE')['stores']['file']['path'])) {
             $this->error['warning'] = 'Warning: Cache directory needs to be writable for AbanteCart to work!';
         }
 
@@ -262,6 +263,8 @@ class ModelInstall extends Model
      * @param array $data
      *
      * @return null
+     * @throws AException
+     * @throws \DebugBar\DebugBarException
      */
     public function loadDemoData($data)
     {
@@ -276,10 +279,8 @@ class ModelInstall extends Model
         }
 
         //clear earlier created cache by AConfig and ALanguage classes in previous step
-        $cache = new ACache();
-        $cache->setCacheStorageDriver('file');
-        $cache->enableCache();
-        $cache->remove('*');
+        $cache = new AbcCache('file');
+        $cache->flush();
 
         return null;
     }

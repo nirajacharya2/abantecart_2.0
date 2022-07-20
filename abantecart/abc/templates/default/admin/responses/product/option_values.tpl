@@ -79,12 +79,12 @@
 			 </button>
 			 &nbsp;
 			 <a id="reset_option" class="btn btn-default" href="<?php echo $button_reset->href; ?>">
-			     <i class="fa fa-sync"></i> <?php echo $button_reset->text; ?>
-			 </a>
+                 <i class="fa fa-sync"></i> <?php echo $button_reset->text; ?>
+             </a>
             <?php } ?>
-		</div>
-	</div>
-</div>
+        </div>
+    </div>
+    </div>
 </div>
 
 <div class="col-md-12">
@@ -110,47 +110,47 @@
 					<th class="left"><?php echo $entry_track_option_stock; ?></th>
 					<?php } ?>
 
-					<th class="left"><?php echo $entry_option_price; ?></th>
-					<th class="left"><?php echo $entry_option_prefix; ?></th>
-					<th class="left"><?php echo $entry_sort_order; ?></th>
-					<th class="left"></th>
-					<?php if ($selectable){?>
-						<th class="left"></th>
-					<?php }?>
-				</tr>
-			</thead>
-		    <?php foreach ($option_values as $item) { ?>
-		        <?php echo $item['row']; ?>
-		    <?php } ?>
+                        <th class="left"><?php echo $entry_option_price; ?></th>
+                        <th class="left"><?php echo $entry_option_prefix; ?></th>
+                        <th class="left"><?php echo $entry_sort_order; ?></th>
+                        <th class="left"></th>
+                        <?php if ($selectable) { ?>
+                            <th class="left"></th>
+                        <?php } ?>
+                    </tr>
+                    </thead>
+                    <?php foreach ($option_values as $item) { ?>
+                        <?php echo $item['row']; ?>
+                    <?php } ?>
 
-		</table>
-	</div>
-	<div class="panel-footer">
-		<div class="center">
-			<?php
-            if($button_save){
-                if (in_array($option_data['element_type'], $elements_with_options)) { ?>
-                <a href="#" title="<?php echo $button_add?>" id="add_option_value" class="btn btn-success"><i class="fa fa-plus-circle fa-lg"></i></a>&nbsp;&nbsp;
-                <?php } ?>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fa fa-save"></i> <?php echo $button_save->text; ?>
-                </button>
-                &nbsp;
-                <a id="reset_option" class="btn btn-default" href="<?php echo $button_reset->href; ?>">
-                    <i class="fa fa-sync"></i> <?php echo $button_reset->text; ?>
-                </a>
-            <?php } ?>
-		</div>
-	</div>
-    </form>
-</div>
-</div>
+                </table>
+            </div>
+            <div class="panel-footer">
+                <div class="center">
+                    <?php
+                    if ($button_save) {
+                        if (in_array($option_data['element_type'], $elements_with_options)) { ?>
+                            <a href="#" title="<?php echo $button_add ?>" id="add_option_value" class="btn btn-success"><i
+                                        class="fa fa-plus-circle fa-lg"></i></a>&nbsp;&nbsp;
+                        <?php } ?>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-save"></i> <?php echo $button_save->text; ?>
+                        </button>
+                        &nbsp;
+                        <a id="reset_option" class="btn btn-default" href="<?php echo $button_reset->href; ?>">
+                            <i class="fa fa-sync"></i> <?php echo $button_reset->text; ?>
+                        </a>
+                    <?php } ?>
+                </div>
+            </div>
+            </form>
+        </div>
+    </div>
 
 
-
-<table style="display:none;" id="new_row_table">
-	<?php echo $new_option_row ?>
-</table>
+    <table style="display:none;" id="new_row_table">
+        <?php echo $new_option_row ?>
+    </table>
 
 
 </div>

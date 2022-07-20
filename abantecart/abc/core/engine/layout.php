@@ -23,14 +23,13 @@ namespace abc\core\engine;
 use abc\core\ABC;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
-use abc\core\lib\AUser;
 use H;
 
 
 /**
  * Class ALayout
  *
- * @property \abc\core\cache\ACache $cache
+ * @property \abc\core\lib\AbcCache $cache
  * @property \abc\core\lib\AUser $user
  * @property \abc\core\lib\AConfig $config
  * @property \abc\core\lib\ADB $db
@@ -89,6 +88,7 @@ class ALayout
      * @return int
      * @throws \abc\core\lib\AException
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function buildPageData($controller)
     {
@@ -166,9 +166,11 @@ class ALayout
             $layouts = $this->getDefaultLayout();
             if (sizeof($layouts) == 0) {
                 // ????? How to terminate ????
-                throw new AException(AC_ERR_LOAD_LAYOUT,
+                throw new AException(
                     'No layout found for page_id/controller '.$this->page_id.'::'.$this->page['controller'].'! '
-                    .H::genExecTrace('full'));
+                    .H::genExecTrace('full'),
+                    AC_ERR_LOAD_LAYOUT
+                );
             }
         }
 
@@ -188,6 +190,7 @@ class ALayout
      *
      * @return array|null
      * @throws \ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getPages($controller = '', $key_param = '', $key_value = '')
     {
@@ -197,8 +200,8 @@ class ALayout
             .(!empty($key_param) ? '.'.$key_param : '')
             .(!empty($key_value) ? '.'.$key_value : '');
         $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id;
-        $pages = $this->cache->pull($cache_key);
-        if ($pages !== false) {
+        $pages = $this->cache->get($cache_key);
+        if ($pages !== null) {
             // return cached pages
             return $pages;
         }
@@ -240,7 +243,7 @@ class ALayout
                 ."ORDER BY key_param DESC, key_value DESC, p.page_id ASC";
         $query = $this->db->query($sql);
         $pages = $query->rows;
-        $this->cache->push($cache_key, $pages);
+        $this->cache->put($cache_key, $pages);
         return $pages;
     }
 
@@ -276,15 +279,16 @@ class ALayout
     /**
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getDefaultLayout()
     {
         $store_id = (int)$this->config->get('config_store_id');
         $cache_key = 'layout.default.'.$this->tmpl_id;
         $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id;
-        $layouts = $this->cache->pull($cache_key);
+        $layouts = $this->cache->get($cache_key);
 
-        if ($layouts === false) {
+        if ($layouts === null) {
             $where = "WHERE template_id = 'default' AND layout_type = '0' ";
 
             $sql = "SELECT layout_id, layout_type, layout_name, date_added, date_modified
@@ -295,7 +299,7 @@ class ALayout
             $result = $this->db->query($sql);
             $layouts = $result->rows;
 
-            $this->cache->push($cache_key, $layouts);
+            $this->cache->put($cache_key, $layouts);
         }
 
         return $layouts;
@@ -306,6 +310,7 @@ class ALayout
      *
      * @return array|null
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getLayouts($layout_type = null)
     {
@@ -314,11 +319,12 @@ class ALayout
             return null;
         }
         $store_id = (int)$this->config->get('config_store_id');
-        $cache_key = 'layout.layouts.'.$this->tmpl_id.'.'.$this->page_id
-            .(!empty($layout_type) ? '.'.$layout_type : '');
+        $cache_key = 'layout.layouts.'.$this->tmpl_id.'.'
+            .$this->page_id.(!empty($layout_type) ? '.'.$layout_type : '');
         $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id;
-        $layouts = $this->cache->pull($cache_key);
-        if ($layouts === false) {
+
+        $layouts = $this->cache->get($cache_key);
+        if ($layouts === null) {
             $where = 'WHERE l.template_id = "'.$this->db->escape($this->tmpl_id).'" ';
             $join = ", ".$this->db->table_name("pages_layouts")." as pl ";
             $where .= " AND pl.page_id = '".(int)$this->page_id."' AND l.layout_id = pl.layout_id ";
@@ -339,10 +345,11 @@ class ALayout
                 .$where
                 ." ORDER BY "
                 ."l.layout_id Asc";
-
             $query = $this->db->query($sql);
             $layouts = $query->rows;
-            $this->cache->push($cache_key, $layouts);
+            if ($layouts) {
+                $this->cache->put($cache_key, $layouts);
+            }
         }
         return $layouts;
     }
@@ -352,17 +359,18 @@ class ALayout
      *
      * @return array|null
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getLayoutBlocks($layout_id)
     {
         if (empty($layout_id)) {
-            throw new AException(AC_ERR_LOAD_LAYOUT, 'No layout specified for getLayoutBlocks!'.$layout_id);
+            throw new AException('No layout specified for getLayoutBlocks!'.$layout_id, AC_ERR_LOAD_LAYOUT);
         }
         $store_id = (int)$this->config->get('config_store_id');
         $cache_key = 'layout.blocks.'.$layout_id;
         $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id;
-        $blocks = $this->cache->pull($cache_key);
-        if ($blocks === false) {
+        $blocks = $this->cache->get($cache_key);
+        if ($blocks === null) {
             $where = "WHERE bl.layout_id = '".$layout_id."' ";
             $where .= "AND bl.block_id = b.block_id AND bl.status = 1 ";
 
@@ -383,7 +391,7 @@ class ALayout
 
             $query = $this->db->query($sql);
             $blocks = $query->rows;
-            $this->cache->push($cache_key, $blocks);
+            $this->cache->put($cache_key, $blocks);
         }
         return $blocks;
     }
@@ -462,6 +470,7 @@ class ALayout
      *
      * @return string
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getBlockTemplate($instance_id)
     {
@@ -497,8 +506,8 @@ class ALayout
 
             $cache_key = 'layout.block.template.'.$block_id.'.'.$parent_block_id;
             $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id;
-            $template = $this->cache->pull($cache_key);
-            if ($template === false) {
+            $template = $this->cache->get($cache_key);
+            if ($template === null) {
 
                 $where = 'WHERE bt.block_id = "'.(int)($block_id).'" ';
                 //locate template based on block parent ID or 0 if generic template is set
@@ -516,7 +525,7 @@ class ALayout
 
                 $query = $this->db->query($sql);
                 $template = (string)$query->row['template'];
-                $this->cache->push($cache_key, $template);
+                $this->cache->put($cache_key, $template);
             }
         }
         return $template;
@@ -527,6 +536,7 @@ class ALayout
      *
      * @return array
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getBlockDescriptions($custom_block_id = 0)
     {
@@ -534,8 +544,8 @@ class ALayout
             return [];
         }
         $cache_key = 'layout.block.descriptions.'.$custom_block_id;
-        $output = $this->cache->pull($cache_key);
-        if ($output !== false) {
+        $output = $this->cache->get($cache_key);
+        if ($output !== null) {
             // return cached blocks
             return $output;
         }
@@ -551,7 +561,7 @@ class ALayout
                 $output[$row['language_id']] = $row;
             }
         }
-        $this->cache->push($cache_key, $output);
+        $this->cache->put($cache_key, $output);
         return $output;
     }
 

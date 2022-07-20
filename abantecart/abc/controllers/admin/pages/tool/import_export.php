@@ -252,6 +252,7 @@ class ControllerPagesToolImportExport extends AController
      *
      * @return array
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      */
     protected function buildTableFields($form, $data)

@@ -17,44 +17,52 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\models\admin;
+
 use abc\core\ABC;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Model;
 use abc\core\lib\AWarning;
+use H;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+class ModelToolImage extends Model
+{
+    /**
+     * @param string $filename
+     * @param int $width
+     * @param int $height
+     *
+     * @return null|string
+     * @throws \ReflectionException
+     */
+    function resize($filename, $width, $height)
+    {
+        $orig_image_filepath = is_file(ABC::env('DIR_IMAGES').$filename) ? ABC::env('DIR_IMAGES').$filename : '';
+        $orig_image_filepath = $orig_image_filepath == '' && is_file(ABC::env('DIR_RESOURCES').'image/'.$filename)
+            ? ABC::env('DIR_RESOURCES').'image/'.$filename
+            : $orig_image_filepath;
 
-class ModelToolImage extends Model{
-	/**
-	 * @param string $filename
-	 * @param int $width
-	 * @param int $height
-	 * @return null|string
-	 */
-	function resize($filename, $width, $height){
-		$orig_image_filepath = is_file(ABC::env('DIR_IMAGES') . $filename) ? ABC::env('DIR_IMAGES') . $filename : '';
-		$orig_image_filepath = $orig_image_filepath == '' && is_file(ABC::env('DIR_RESOURCES') . 'image/' . $filename) ? ABC::env('DIR_RESOURCES') . 'image/' . $filename : $orig_image_filepath;
+        $info = pathinfo($filename);
+        $extension = $info['extension'];
+        if (in_array($extension, ['ico', 'svg', 'svgz'])) {
+            $new_image = $filename;
+        } else {
+            $new_image = 'thumbnails/'
+                .substr($filename, 0, strrpos($filename, '.'))
+                .'-'.$width.'x'.$height.'.'.$extension;
+            if (!H::check_resize_image($orig_image_filepath, $new_image, $width, $height,
+                $this->config->get('config_image_quality'))) {
+                $err = new AWarning('Resize image error. File: '.$orig_image_filepath
+                    .'. Try to increase memory limit for PHP or decrease image size.');
+                $err->toLog()->toDebug();
+                return false;
+            }
+        }
 
-		$info = pathinfo($filename);
-		$extension = $info['extension'];
-		if (in_array($extension, array('ico','svg','svgz'))){
-			$new_image = $filename;
-		} else{
-			$new_image = 'thumbnails/' . substr($filename, 0, strrpos($filename, '.')) . '-' . $width . 'x' . $height . '.' . $extension;
-			if (!AHelperUtils::check_resize_image($orig_image_filepath, $new_image, $width, $height, $this->config->get('config_image_quality'))){
-				$err= new AWarning('Resize image error. File: '.$orig_image_filepath.'. Try to increase memory limit for PHP or decrease image size.');
-				$err->toLog()->toDebug();
-				return false;
-			}
-		}
-
-		if (ABC::env('HTTPS')){
-			return ABC::env('HTTPS_IMAGE') . $new_image;
-		} else{
-			return ABC::env('HTTP_IMAGE') . $new_image;
-		}
-	}
+        if (ABC::env('HTTPS')) {
+            return ABC::env('HTTPS_IMAGE').$new_image;
+        } else {
+            return ABC::env('HTTP_IMAGE').$new_image;
+        }
+    }
 }

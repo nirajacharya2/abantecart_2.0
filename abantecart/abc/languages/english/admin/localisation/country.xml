@@ -63,6 +63,10 @@ Zone Code = {zone_code}<br />
 Country = {country}</span>]]></value>
   </definition>
   <definition>
+  <key>error_country_id</key>
+    <value><![CDATA[Country_id required!]]></value>
+  </definition>
+  <definition>
     <key>error_permission</key>
     <value><![CDATA[Warning: You do not have permission to modify countries!]]></value>
   </definition>

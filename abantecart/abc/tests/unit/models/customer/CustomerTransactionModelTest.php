@@ -1,16 +1,15 @@
 <?php
-namespace abc\tests\unit;
+namespace Tests\unit\models\customer;
 
 use abc\core\lib\ACustomer;
 use abc\models\customer\CustomerTransaction;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class CustomerTransactionModelTest
  */
 class CustomerTransactionModelTest extends ATestCase{
-
-
 
     public function testValidator()
     {
@@ -27,7 +26,7 @@ class CustomerTransactionModelTest extends ATestCase{
             $errors = $customerTransaction->errors()['validation'];
         }
 
-        $this->assertEquals(5, count($errors));//validate new customer
+        $this->assertCount(5, $errors);//validate new customer
 
         $errors = [];
 
@@ -47,7 +46,7 @@ class CustomerTransactionModelTest extends ATestCase{
             $errors = $customerTransaction->errors()['validation'];
         }
 
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
         $customerTransaction->fill($validData)->save();
 

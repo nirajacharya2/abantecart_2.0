@@ -2,6 +2,8 @@
 
 namespace abc\core\lib;
 
+use abc\core\lib\contracts\ApiClient;
+
 class ProductApiClient extends BaseApiClient implements ApiClient
 {
     public function create(array $data)

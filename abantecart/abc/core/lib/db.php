@@ -22,6 +22,7 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\QueryException;
 
@@ -30,9 +31,12 @@ use Illuminate\Database\QueryException;
  *
  * @package abc\core\lib
  *
+ * @method transaction(\Closure $function) Capsule
  * @method beginTransaction() Capsule
  * @method commit() Capsule
  * @method rollback() Capsule
+ * @method enableQueryLog() void
+ * @method getQueryLog() array
  */
 class ADB
 {
@@ -79,6 +83,7 @@ class ADB
 
             $this->orm->setAsGlobal();  //this is important
             //register ORM-model event listeners
+            /** @var Dispatcher $evd */
             $evd = ABC::getObjectByAlias('EventDispatcher');
             if (is_object($evd)) {
                 $this->orm->setEventDispatcher($evd);
@@ -98,11 +103,11 @@ class ADB
                 $debug_bar->addCollector(new PHPDebugBarEloquentCollector($this->orm));
             }
             if ($this->db_config['driver'] == 'mysql') {
-                //$this->orm->getConnection($this->conName)->select($this->raw("SET SQL_MODE='NO_ZERO_DATE,NO_ZERO_IN_DATE';"));
                 $this->orm->getConnection($this->conName)->select($this->raw("SET SQL_MODE='';"));
                 try {
+                    $timezone = date_default_timezone_get();
                     $this->orm->getConnection($this->conName)->select(
-                        $this->raw("SET time_zone='".date_default_timezone_get()."';")
+                        $this->raw("SET time_zone='".$timezone."';")
                     );
                 }catch(\PDOException $e){
                     error_log($e->getMessage());
@@ -119,7 +124,7 @@ class ADB
             );
         } catch (\Error $e) {
             error_log($e->getMessage());
-            exit($e->getTraceAsString());
+            exit($e->getMessage()."\n".$e->getTraceAsString());
         }
         $this->registry = Registry::getInstance();
     }

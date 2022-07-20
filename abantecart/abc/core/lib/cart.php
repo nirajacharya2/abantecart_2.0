@@ -166,6 +166,7 @@ class ACart extends ALibBase
      *
      * @return array
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws ReflectionException
      */
     public function getProducts($recalculate = false)
@@ -240,6 +241,7 @@ class ACart extends ALibBase
      * @return array
      * @throws AException
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getProduct($key, $recalculate = false)
     {
@@ -262,6 +264,7 @@ class ACart extends ALibBase
      *
      * @return array
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function buildProductDetails($product_id, $quantity = 0, $options = [], $custom_price = null)
     {
@@ -492,18 +495,18 @@ class ACart extends ALibBase
 
         $result = $productInfo;
 
-        $result['option'] = $option_data;
-        $result['download'] = $download_data;
+        $result['option']             = $option_data;
+        $result['download']           = $download_data;
         $result['inventory_quantity'] =
             $productInfo['subtract']
                 ? (int) $productInfo['quantity']
                 : 1000000;
 
-        $result['quantity'] = $quantity;
-        $result['stock'] = $stock;
-        $result['price'] = $final_price;
-        $result['total'] = $final_price * $quantity;
-        $result['sku'] = implode(", ", $SKUs);
+        $result['quantity']           = $quantity;
+        $result['stock']              = $stock;
+        $result['price']              = $final_price;
+        $result['total']              = $final_price * $quantity;
+        $result['sku']                = implode(", ", $SKUs);
 
         return $result;
     }
@@ -517,8 +520,8 @@ class ACart extends ALibBase
      * @throws AException
      */
     public function buildProductDetailsByOrderProduct(
-        int   $order_product_id,
-        int   $quantity = 0,
+        int $order_product_id,
+        int $quantity = 0,
         float $custom_price = null
     ) {
         if (!$this->conciergeMode) {
@@ -580,6 +583,7 @@ class ACart extends ALibBase
      * @return string
      * @throws AException
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function add($product_id, $qty = 1, $options = [], $custom_price = null, $order_product_id = null)
     {
@@ -623,7 +627,7 @@ class ACart extends ALibBase
 
     /**
      * @param string $key
-     * @param array $data
+     * @param array  $data
      *
      * @return bool
      */
@@ -668,6 +672,7 @@ class ACart extends ALibBase
      *
      * @throws AException
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function update($key, $qty)
     {
@@ -716,6 +721,7 @@ class ACart extends ALibBase
      * @return int
      * @throws AException
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getWeight($product_ids = [])
     {
@@ -758,7 +764,8 @@ class ACart extends ALibBase
                     }
                 }
                 $weight += $this->weight->convert(
-                    $product_weight * $product['quantity'], $product['weight_class'],
+                    $product_weight * $product['quantity'],
+                    $product['weight_class'],
                     $this->config->get('config_weight_class')
                 );
             }
@@ -772,6 +779,7 @@ class ACart extends ALibBase
      * @return array
      * @throws AException
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function basicShippingProducts()
     {
@@ -792,6 +800,7 @@ class ACart extends ALibBase
      * @return array
      * @throws AException
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function specialShippingProducts()
     {
@@ -813,6 +822,7 @@ class ACart extends ALibBase
      * @return bool
      * @throws AException
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function areAllFreeShipping()
     {
@@ -871,6 +881,8 @@ class ACart extends ALibBase
      * @return float
      * @throws AException
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
      */
     public function getSubTotal($recalculate = false)
     {
@@ -893,6 +905,7 @@ class ACart extends ALibBase
      * @return array
      * @throws AException
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getTaxes()
     {
@@ -908,6 +921,7 @@ class ACart extends ALibBase
      * @return array
      * @throws AException
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getAppliedTaxes($recalculate = false)
     {
@@ -963,6 +977,7 @@ class ACart extends ALibBase
      * @return float
      * @throws AException
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getTotal($recalculate = false)
     {
@@ -987,6 +1002,7 @@ class ACart extends ALibBase
      *
      * @return float
      * @throws AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws ReflectionException
      */
     public function getFinalTotal($recalculate = false)
@@ -1048,6 +1064,7 @@ class ACart extends ALibBase
      * @return array
      * @throws AException
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getFinalTotalData($recalculate = false)
     {
@@ -1071,6 +1088,7 @@ class ACart extends ALibBase
      * @return array
      * @throws AException
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function buildTotalDisplay($recalculate = false)
     {
@@ -1097,6 +1115,7 @@ class ACart extends ALibBase
      * @return float
      * @throws AException
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getTotalAmount($recalc = false)
     {
@@ -1109,6 +1128,7 @@ class ACart extends ALibBase
      * @return bool
      * @throws AException
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function hasMinRequirement()
     {
@@ -1125,6 +1145,7 @@ class ACart extends ALibBase
      * @return bool
      * @throws AException
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function hasMaxRequirement()
     {
@@ -1165,6 +1186,7 @@ class ACart extends ALibBase
      * @return bool
      * @throws AException
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function hasStock()
     {
@@ -1184,6 +1206,7 @@ class ACart extends ALibBase
      * @return bool
      * @throws AException
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function hasShipping()
     {
@@ -1204,6 +1227,7 @@ class ACart extends ALibBase
      * @return bool
      * @throws AException
      * @throws ReflectionException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function hasDownload()
     {

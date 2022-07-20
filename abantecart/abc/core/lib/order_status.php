@@ -20,18 +20,14 @@
 
 namespace abc\core\lib;
 
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
-
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use H;
 
 /**
  * Class AOrderStatus
  *
  * @property ADB                    $db
- * @property \abc\core\cache\ACache $cache
+ * @property \abc\core\lib\AbcCache $cache
  */
 class AOrderStatus
 {
@@ -42,7 +38,7 @@ class AOrderStatus
     /**
      * @var array
      */
-    protected $base_statuses = array(
+    protected $base_statuses = [
         0  => 'incomplete',
         1  => 'pending',
         2  => 'processing',
@@ -56,16 +52,18 @@ class AOrderStatus
         12 => 'reversed',
         13 => 'chargeback',
         14 => 'canceled_by_customer',
-    );
+    ];
     /**
      * @var array
      */
-    protected $statuses = array();
+    protected $statuses = [];
 
     /**
      * AOrderStatus constructor.
      *
      * @param Registry $registry
+     *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function __construct($registry = null)
     {
@@ -74,7 +72,7 @@ class AOrderStatus
 
         //todo add cache
         $cache_key = 'localization.order_status.list';
-        $order_statuses = $this->cache->pull($cache_key);
+        $order_statuses = $this->cache->get($cache_key);
         if ($order_statuses === false) {
             $order_statuses = $this->db->query("SELECT * FROM ".$this->db->table_name('order_statuses'));
             foreach ($order_statuses->rows as $s) {
@@ -82,7 +80,7 @@ class AOrderStatus
                     $this->statuses[$s['order_status_id']] = $s['status_text_id'];
                 }
             }
-            $this->cache->push($cache_key, $this->statuses);
+            $this->cache->put($cache_key, $this->statuses);
         }
     }
 
@@ -92,16 +90,17 @@ class AOrderStatus
     }
 
     /**
-     * @param int    $order_status_id
+     * @param int $order_status_id
      * @param string $status_text_id
      *
      * @return bool
+     * @throws \ReflectionException
      */
     public function addStatus($order_status_id, $status_text_id)
     {
         $order_status_id = (int)$order_status_id;
         //preformat text_id at first
-        $status_text_id = AHelperUtils::preformatTextID($status_text_id);
+        $status_text_id = H::preformatTextID($status_text_id);
 
         if (in_array($order_status_id, array_keys($this->statuses)) || in_array($status_text_id, $this->statuses)) {
             $error_text = 'Error: Cannot add new order status with id '.$order_status_id.' and text id '.$status_text_id

@@ -1,9 +1,10 @@
 <?php
 
-namespace abc\tests\unit;
+namespace Tests\unit\models\order;
 
 use abc\models\order\OrderOption;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class OrderOptionModelTest
@@ -42,7 +43,7 @@ class OrderOptionModelTest extends ATestCase
             $errors = $orderOption->errors()['validation'];
             // var_Dump(array_diff(array_keys($data), array_keys($errors) ));
         }
-        $this->assertEquals(11, count($errors));
+        $this->assertCount(11, $errors);
 
         //check validation of presence in database
         $data = [
@@ -63,9 +64,9 @@ class OrderOptionModelTest extends ATestCase
             $orderOption->validate($data);
         } catch (ValidationException $e) {
             $errors = $orderOption->errors()['validation'];
-            //var_Dump($errors);
+            var_dump($errors);
         }
-        $this->assertEquals(3, count($errors));
+        $this->assertCount(3, $errors);
 
         //check validation of nullables
         $data = [
@@ -86,7 +87,7 @@ class OrderOptionModelTest extends ATestCase
             $errors = $orderOption->errors()['validation'];
             //var_Dump($errors);
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
         //valid data
         $data = [
@@ -110,10 +111,10 @@ class OrderOptionModelTest extends ATestCase
             $orderOption->save();
         } catch (ValidationException $e) {
             $errors = $orderOption->errors()['validation'];
-            var_Dump(array_diff(array_keys($data), array_keys($errors)));
-            var_Dump($errors);
+//            var_Dump(array_diff(array_keys($data), array_keys($errors)));
+            var_dump($errors);
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
         $orderOption->forceDelete();
     }
 }

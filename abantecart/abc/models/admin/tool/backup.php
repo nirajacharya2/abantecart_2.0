@@ -245,8 +245,7 @@ class ModelToolBackup extends Model
                     ),
                     'last_time_run' => '0000-00-00 00:00:00',
                     'last_result'   => '0',
-                    'configuration' => $job_configuration,
-
+                    'configuration' => $job_configuration
                 ]
             );
         } catch (AException $e) {

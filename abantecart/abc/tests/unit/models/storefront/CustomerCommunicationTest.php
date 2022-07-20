@@ -1,10 +1,10 @@
 <?php
 
-namespace abc\tests\unit\models\storefront;
+namespace Tests\unit\models\models\storefront;
 
 use abc\core\lib\ADB;
 use abc\models\customer\CustomerCommunication;
-use abc\tests\unit\ATestCase;
+use Tests\unit\ATestCase;
 
 /**
  * Class CustomerCommunicationTest
