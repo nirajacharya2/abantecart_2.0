@@ -32,6 +32,7 @@ use Illuminate\Container\Container;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Redis\RedisManager;
 use Psr\SimpleCache\InvalidArgumentException;
 
 /**
@@ -125,6 +126,7 @@ class AbcCache
         Container::setInstance($app);
         $this->initFileApp($app);
         $this->initMemcachedApp($app);
+        $this->initRedisApp($app);
 
         $config = $this->getConfig();
         $config['cache.default'] = static::$currentStore;
@@ -155,28 +157,54 @@ class AbcCache
      */
     protected function initMemcachedApp(&$app)
     {
-
         $app['memcached.connector'] = new MemcachedConnector();
     }
+    /**
+     * @param Application $app
+     *
+     */
+    protected function initRedisApp(&$app)
+    {
+        $app->singleton('redis', function($app){
+            $config = $this->getConfig('redis');
+            return new RedisManager($app,$config['client'],$config );
+        });
+    }
 
-    public function getConfig()
+    /**
+     * @param string $name
+     * @return array|array[]|mixed
+     */
+    public function getConfig($name = '')
     {
         $output = [];
-        if (isset(ABC::env('CACHE')['stores']['file'])) {
-            $output = [
-                'cache.stores.file' => [
-                    'driver' => 'file',
-                    'path'   => AbcCache::$storeConfig['path'],
-                ],
-            ];
-        }
+        if(!$name) {
+            if (isset(ABC::env('CACHE')['stores']['file'])) {
+                $output = [
+                    'cache.stores.file' => [
+                        'driver' => 'file',
+                        'path' => AbcCache::$storeConfig['path'],
+                    ],
+                ];
+            }
 
-        if (isset(ABC::env('CACHE')['stores']['memcached'])) {
-            $output['cache.stores.memcached'] =
-                array_merge(
-                    ['driver' => 'memcached'],
-                    ABC::env('CACHE')['stores']['memcached']
-                );
+            if (isset(ABC::env('CACHE')['stores']['redis'])) {
+                $output['cache.stores.redis'] =
+                    array_merge(
+                        ['driver' => 'redis'],
+                        ABC::env('CACHE')['stores']['redis']
+                    );
+            }
+
+            if (isset(ABC::env('CACHE')['stores']['memcached'])) {
+                $output['cache.stores.memcached'] =
+                    array_merge(
+                        ['driver' => 'memcached'],
+                        ABC::env('CACHE')['stores']['memcached']
+                    );
+            }
+        }else{
+            $output = ABC::env('CACHE')['stores'][$name];
         }
 
         return $output;
@@ -189,8 +217,6 @@ class AbcCache
     {
         return $this->manager;
     }
-
-
 
     /**
      * @return string
@@ -413,9 +439,6 @@ class AbcCache
                 $output .= '.'.$key."=".$val;
             }
         }
-
         return $output;
     }
-
-
 }
