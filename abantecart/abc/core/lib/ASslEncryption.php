@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -53,9 +53,9 @@ $conf = array (
 	'encrypt_key'      => true
 );
 $enc = new ASSLEncryption ();
-$keys = $enc->generate_ssl_key_pair($conf, $password);
+$keys = $enc->generateSslKeyPair($conf, $password);
 $enc->save_ssl_key_pair($keys, 'key_with_pass');
-AHelperUtils::echoArray($keys);
+H::echoArray($keys);
 
 2. Encrypt
 
@@ -87,8 +87,8 @@ contact www.abantecart.com for forum or paid support
 
 final class ASSLEncryption
 {
-    private $public_key;
-    private $private_key;
+    private $public_key = '';
+    private $private_key = '';
     private $key_path;
     private $failed_str = "*****";
     public $active = false;
@@ -105,8 +105,8 @@ final class ASSLEncryption
 
         //Validate if SSL PHP support is installed
         if (!function_exists('openssl_pkey_get_public')) {
-            $error =
-                "Error: PHP OpenSSL is not available on your server! Check if OpenSSL installed for PHP and enabled";
+            $error = "Error: PHP OpenSSL is not available on your server! "
+                ."Check if OpenSSL installed for PHP and enabled";
             $this->log->write($error);
             $this->message->saveError('OpenSSL Error', $error);
             return null;
@@ -114,12 +114,8 @@ final class ASSLEncryption
 
         //construct key storage path
         //NOTE: ENCRYPTION_KEYS_DIR needs to be added into configuration file
-        //Suggested:  Directory to be secured for read a write ONLY for users root and apache (web server).
-        if (ABC::env('ENCRYPTION_KEYS_DIR')) {
-            $this->key_path = ABC::env('ENCRYPTION_KEYS_DIR');
-        } else {
-            $this->key_path = ABC::env('DIR_SYSTEM').'keys/';
-        }
+        //Suggested:  Directory to be secured for read and write ONLY for users root and apache (web server).
+        $this->key_path = ABC::env('ENCRYPTION_KEYS_DIR') ?:  ABC::env('DIR_SYSTEM').'keys/';
 
         if ($public_key_name) {
             $this->public_key = $this->getPublicKey($public_key_name.'.pub');
@@ -138,7 +134,7 @@ final class ASSLEncryption
      *
      * @return array
      */
-    public function generate_ssl_key_pair($config = [], $pass_phrase = null)
+    public function generateSslKeyPair($config = [], $pass_phrase = null)
     {
         $default_length = 2048;
 
@@ -160,7 +156,7 @@ final class ASSLEncryption
 
         //# Do we need to use pass-phrase for the key?
         $private_key = '';
-        if ((isset($config['encrypt_key'])) && ($config['encrypt_key'] == true)) {
+        if ($config['encrypt_key']) {
             openssl_pkey_export($res, $private_key, $pass_phrase);
         } else {
             openssl_pkey_export($res, $private_key);
@@ -181,7 +177,7 @@ final class ASSLEncryption
      *
      * @return string
      */
-    public function save_ssl_key_pair($keys = [], $key_name)
+    public function save_ssl_key_pair($keys = [], $key_name = '')
     {
         if (!file_exists($this->key_path)) {
             $result = mkdir($this->key_path, 0700, true); // create dir with nested folders
@@ -241,7 +237,7 @@ final class ASSLEncryption
      * Load private key based on key name provided.
      * Input : Key name and pass-phrase (if used)
      * Key's are stored in the path based on the configuration
-     * NOTE: Private key value never returned back
+     * NOTE: Private key value never turn back
      *
      * @param string $key_name
      * @param string $pass_phrase

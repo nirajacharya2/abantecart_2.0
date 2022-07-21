@@ -1,20 +1,30 @@
 <?php
-/*
- * jQuery File Upload Plugin PHP Example 5.2.7
- * https://github.com/blueimp/jQuery-File-Upload
- *
- * Copyright 2010, Sebastian Tschan
- * https://blueimp.net
- *
- * Licensed under the MIT license:
- * http://creativecommons.org/licenses/MIT/
- */
+/*------------------------------------------------------------------------------
+  $Id$
+
+  AbanteCart, Ideal OpenSource Ecommerce Solution
+  http://www.AbanteCart.com
+
+  Copyright © 2011-2022 Belavier Commerce LLC
+
+  This source file is subject to Open Software License (OSL 3.0)
+  License details is bundled with this package in the file LICENSE.txt.
+  It is also available at this URL:
+  <http://www.opensource.org/licenses/OSL-3.0>
+
+ UPGRADE NOTE:
+   Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+   versions in the future. If you wish to customize AbanteCart for your
+   needs please refer to http://www.AbanteCart.com for more information.
+------------------------------------------------------------------------------*/
 
 namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
-use abc\core\helper\AHelperUtils;
+use H;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 use stdClass;
 
 if (!class_exists('abc\core\ABC')) {
@@ -27,7 +37,7 @@ class ResourceUploadHandler
 
     function __construct($options = null)
     {
-        $this->options = array(
+        $this->options = [
             'script_url'              => $_SERVER['PHP_SELF'],
             'upload_dir'              => dirname(__FILE__).'/files/',
             'upload_url'              => dirname($_SERVER['PHP_SELF']).'/files/',
@@ -39,7 +49,7 @@ class ResourceUploadHandler
             'accept_file_types'       => '/.+$/i',
             'max_number_of_files'     => null,
             'discard_aborted_uploads' => true,
-            'image_versions'          => array(
+            'image_versions'          => [
                 // Uncomment the following version to restrict the size of
                 // uploaded images. You can also add additional versions with
                 // their own upload directories:
@@ -51,14 +61,14 @@ class ResourceUploadHandler
                                     'max_height' => 1200
                                 ),
                                 */
-                'thumbnail' => array(
+                'thumbnail' => [
                     'upload_dir' => dirname(__FILE__).'/thumbnails/',
                     'upload_url' => dirname($_SERVER['PHP_SELF']).'/thumbnails/',
                     'max_width'  => 80,
                     'max_height' => 80,
-                ),
-            ),
-        );
+                ],
+            ],
+        ];
         if ($options) {
             $this->options = array_replace_recursive($this->options, $options);
         }
@@ -109,43 +119,43 @@ class ResourceUploadHandler
     private function get_file_objects()
     {
         return array_values(array_filter(array_map(
-            array($this, 'get_file_object'),
+            [$this, 'get_file_object'],
             scandir($this->options['upload_dir'])
         )));
     }
 
     /**
      * @return array
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function post()
     {
         Registry::getInstance()->get('language')->load('common/resource_library');
-        if (isset($_FILES[$this->options['param_name']])) {
-            $upload = $_FILES[$this->options['param_name']];
-        } else {
-            $upload = array(
+        $upload = $_FILES[$this->options['param_name']]
+            ?? [
                 'tmp_name' => null,
-                'name'     => null,
-                'size'     => null,
-                'type'     => null,
-                'error'    => 'emptyResult',
-            );
-        }
+                'name' => null,
+                'size' => null,
+                'type' => null,
+                'error' => 'emptyResult',
+            ];
 
-        $info = array();
+        $info = [];
         if (!is_array($upload['tmp_name'])) {
-            $upload['tmp_name'] = array(0 => $upload['tmp_name']);
-            $upload['name'] = array(0 => $upload['name']);
-            $upload['size'] = array(0 => $upload['size']);
-            $upload['type'] = array(0 => $upload['type']);
+            $upload['tmp_name'] = [0 => $upload['tmp_name']];
+            $upload['name'] = [0 => $upload['name']];
+            $upload['size'] = [0 => $upload['size']];
+            $upload['type'] = [0 => $upload['type']];
         }
 
         foreach ($upload['tmp_name'] as $index => $value) {
             $info[] = $this->handle_file_upload(
                 $upload['tmp_name'][$index],
-                isset($_SERVER['HTTP_X_FILE_NAME']) ? $_SERVER['HTTP_X_FILE_NAME'] : $upload['name'][$index],
-                isset($_SERVER['HTTP_X_FILE_SIZE']) ? $_SERVER['HTTP_X_FILE_SIZE'] : $upload['size'][$index],
-                isset($_SERVER['HTTP_X_FILE_TYPE']) ? $_SERVER['HTTP_X_FILE_TYPE'] : $upload['type'][$index],
+                $_SERVER['HTTP_X_FILE_NAME'] ?? $upload['name'][$index],
+                $_SERVER['HTTP_X_FILE_SIZE'] ?? $upload['size'][$index],
+                $_SERVER['HTTP_X_FILE_TYPE'] ?? $upload['type'][$index],
                 $upload['error'][$index]
             );
         }
@@ -164,7 +174,7 @@ class ResourceUploadHandler
      */
     private function handle_file_upload($uploaded_file, $name, $size, $type, $error)
     {
-
+        $error_text = '';
         $file = new stdClass();
         // Remove path information and dots around the filename, to prevent uploading
         // into different directories or replacing hidden system files.
@@ -174,7 +184,7 @@ class ResourceUploadHandler
 
         // basename removes first part of filename like тест_архив.zip (with non-latin characters).
         // Basename of that name will be _архив.zip
-        if ($this->strpos_array($name, array('/', '\'')) !== false) {
+        if ($this->strpos_array($name, ['/', '\'']) !== false) {
             $name = basename($name);
 
         } else {
@@ -196,7 +206,7 @@ class ResourceUploadHandler
 
         // error check
         if ($error) {
-            $error_text = AHelperUtils::getTextUploadError($error);
+            $error_text = H::getTextUploadError($error);
         }
         $error_text = $this->has_error($uploaded_file, $file, $error_text);
         if (!$error_text && $file->name) {
@@ -285,7 +295,7 @@ class ResourceUploadHandler
     public function strpos_array($haystack, $needle)
     {
         if (!is_array($needle)) {
-            $needle = array($needle);
+            $needle = [$needle];
         }
         foreach ($needle as $what) {
             if (($pos = strpos($haystack, $what)) !== false) {
@@ -297,11 +307,14 @@ class ResourceUploadHandler
     }
 
     /**
-     * @param string   $uploaded_file
+     * @param string $uploaded_file
      * @param stdClass $file
-     * @param string   $error
+     * @param string $error
      *
      * @return string
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     private function has_error($uploaded_file, $file, $error)
     {
@@ -344,12 +357,9 @@ class ResourceUploadHandler
      */
     public function delete()
     {
-        $file_name = isset($_REQUEST['file']) ?
-            basename(stripslashes($_REQUEST['file'])) : null;
+        $file_name = isset($_REQUEST['file']) ? basename(stripslashes($_REQUEST['file'])) : null;
         $file_path = $this->options['upload_dir'].$file_name;
-        $success = is_file($file_path) && $file_name[0] !== '.' && unlink($file_path);
-
-        return $success;
+        return is_file($file_path) && $file_name[0] !== '.' && unlink($file_path);
     }
 
 }

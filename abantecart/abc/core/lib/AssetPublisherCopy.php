@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,11 +21,8 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\engine\ALoader;
-use abc\core\engine\ExtensionsApi;
-use abc\core\helper\AHelperUtils;
-use abc\core\engine\Registry;
 use abc\core\lib\contracts\AssetPublisherDriverInterface;
+use H;
 
 class AssetPublisherCopy implements AssetPublisherDriverInterface
 {
@@ -138,7 +135,7 @@ class AssetPublisherCopy implements AssetPublisherDriverInterface
 
             //then copy all asset files of template to temporary directory
             foreach ($list as $rel_file) {
-                $res = AHelperUtils::CopyFileRelative(
+                $res = H::CopyFileRelative(
                     $rel_file,
                     $src_dir.$template.DS,
                     $new_temp_dir.DS
@@ -150,7 +147,7 @@ class AssetPublisherCopy implements AssetPublisherDriverInterface
                 }
             }
 
-            //if all fine - do renaming of temporary directory
+            //if all fine - rename of temporary directory
             if (!$this->errors) {
                 //if live assets presents - rename it
                 if (is_dir($live_dir)) {
@@ -163,7 +160,7 @@ class AssetPublisherCopy implements AssetPublisherDriverInterface
                     //check parent directory before rename
                     $parent_dir = dirname($live_dir);
                     if (!is_dir($parent_dir)) {
-                        $results = AHelperUtils::MakeNestedDirs($parent_dir);
+                        $results = H::MakeNestedDirs($parent_dir);
                         if (!$results['result']) {
                             $this->errors[] = $results['message'];
                         }
@@ -177,7 +174,7 @@ class AssetPublisherCopy implements AssetPublisherDriverInterface
                         return false;
                     } else {
                         //if all fine - clean old silently
-                        AHelperUtils::RemoveDirRecursively($old_temp_dir);
+                        H::RemoveDirRecursively($old_temp_dir);
                     }
                     //if all fine - remove old live directory
                 } else {

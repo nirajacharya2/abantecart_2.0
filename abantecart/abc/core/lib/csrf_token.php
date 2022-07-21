@@ -20,8 +20,8 @@
 
 namespace abc\core\lib;
 
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\Registry;
+use H;
 
 if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -36,28 +36,23 @@ if (!class_exists('abc\core\ABC')) {
 class CSRFToken
 {
 
-    /**
-     * @var Registry - access to application registry
-     */
+    /** @var Registry - access to application registry */
     protected $registry;
-    /**
-     * @var string CSRF-token
-     */
+    /** @var string CSRF-token */
     private $token;
-    /**
-     * @var int CSRF-token instance
-     */
+    /** @var int CSRF-token instance */
     private $instance;
+
+    public $error = [];
 
     public function __construct()
     {
         $this->registry = Registry::getInstance();
-        $this->errors = array();
         $this->token = $this->session->data['csrftoken'];
     }
 
     /**
-     * @param  $key - key to load data from registry
+     * @param  string $key - key to load data from registry
      *
      * @return mixed  - data from registry
      */
@@ -107,7 +102,7 @@ class CSRFToken
             //create new token instance
             $this->instance = $this->setInstance();
         }
-        $this->token = AHelperUtils::genToken();
+        $this->token = H::genToken();
 
         $this->session->data['csrftoken'][$this->instance] = $this->token;
         return $this->token;
@@ -128,7 +123,7 @@ class CSRFToken
             $token = $this->request->get_or_post('csrftoken');
         }
         //note: $instance can be zero!
-        if (!empty($token) && AHelperUtils::has_value($instance)
+        if (!empty($token) && H::has_value($instance)
             && $this->session->data['csrftoken'][$instance] === $token) {
             $this->instance = $instance;
             $this->token = $this->session->data['csrftoken'][$instance];
