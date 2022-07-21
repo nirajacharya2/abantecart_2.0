@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright 2011-2017 Belavier Commerce LLC
+  Copyright 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,7 +21,7 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AControllerAPI;
-use abc\core\helper\AHelperUtils;
+use H;
 
 if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -53,7 +53,7 @@ class ControllerApiCommonAccess extends AControllerAPI
 
     private function validateIP()
     {
-        if (!AHelperUtils::has_value($this->config->get('config_admin_access_ip_list'))) {
+        if (!H::has_value($this->config->get('config_admin_access_ip_list'))) {
             return true;
         }
 
@@ -81,13 +81,13 @@ class ControllerApiCommonAccess extends AControllerAPI
             if (isset($part[1])) {
                 $route .= '/'.$part[1];
             }
-            $ignore = array(
+            $ignore = [
                 'api/index/login',
                 'api/common/access',
                 'api/error/not_found',
                 'api/error/no_access',
                 'api/error/no_permission',
-            );
+            ];
 
             if (!in_array($route, $ignore)) {
                 return $this->dispatch('api/index/login');
@@ -121,13 +121,13 @@ class ControllerApiCommonAccess extends AControllerAPI
             if (isset($part[1])) {
                 $route .= '/'.$part[1];
             }
-            $ignore = array(
+            $ignore = [
                 'api/index/login',
                 'api/common/access',
                 'api/error/not_found',
                 'api/error/no_access',
                 'api/error/no_permission',
-            );
+            ];
 
             if (!in_array($route, $ignore)) {
                 if (!$this->user->canAccess($route)) {

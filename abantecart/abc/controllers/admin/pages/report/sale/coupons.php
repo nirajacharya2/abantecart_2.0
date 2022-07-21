@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -17,22 +17,26 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\admin;
+
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\core\helper\AHelperUtils;
+use H;
 
 if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
+    header('Location: static_pages/?forbidden=' . basename(__FILE__));
 }
-class ControllerPagesReportSaleCoupons extends AController{
-	public $data = array();
-    public function main()   {
+
+class ControllerPagesReportSaleCoupons extends AController
+{
+    public function main()
+    {
 
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
-		
-        $grid_settings = array(
+
+        $grid_settings = [
             //id of grid
             'table_id' => 'report_coupons_grid',
             // url to load data from
@@ -41,100 +45,100 @@ class ControllerPagesReportSaleCoupons extends AController{
             'sortname' => 'date_end',
             'columns_search' => false,
             'multiselect' => 'false',
-        );
+        ];
 
         $form = new AForm();
-        $form->setForm(array(
+        $form->setForm([
             'form_name' => 'report_coupons_grid_search',
-        ));
+        ]);
 
-        $this->data['grid_search_form'] = array();
+        $this->data['grid_search_form'] = [];
         $this->data['grid_search_form']['id'] = 'report_coupons_grid_search';
-        $this->data['grid_search_form']['form_open'] = $form->getFieldHtml(array(
+        $this->data['grid_search_form']['form_open'] = $form->getFieldHtml([
             'type' => 'form',
             'name' => 'report_coupons_grid_search',
             'action' => '',
-        ));
-        $this->data['grid_search_form']['submit'] = $form->getFieldHtml(array(
+        ]);
+        $this->data['grid_search_form']['submit'] = $form->getFieldHtml([
             'type' => 'button',
             'name' => 'submit',
             'text' => $this->language->get('button_go'),
             'style' => 'button1',
-        ));
-		$this->view->assign('js_date_format', AHelperUtils::format4Datepicker($this->language->get('date_format_short')));
-        $this->data['grid_search_form']['fields']['date_start'] = $form->getFieldHtml(array(
+        ]);
+        $this->view->assign('js_date_format', H::format4Datepicker($this->language->get('date_format_short')));
+        $this->data['grid_search_form']['fields']['date_start'] = $form->getFieldHtml([
             'type' => 'input',
             'name' => 'date_start',
-            'default' => AHelperUtils::dateInt2Display(strtotime('-7 day')),
-        ));
+            'default' => H::dateInt2Display(strtotime('-7 day')),
+        ]);
 
-        $this->data['grid_search_form']['fields']['date_end'] = $form->getFieldHtml(array(
+        $this->data['grid_search_form']['fields']['date_end'] = $form->getFieldHtml([
             'type' => 'input',
             'name' => 'date_end',
-            'default' => AHelperUtils::dateInt2Display(time()),
-        ));
+            'default' => H::dateInt2Display(time()),
+        ]);
 
         $grid_settings['search_form'] = true;
 
-        $grid_settings['colNames'] = array(
+        $grid_settings['colNames'] = [
             $this->language->get('column_coupon_name'),
             $this->language->get('column_code'),
             $this->language->get('column_orders'),
             $this->language->get('column_total'),
             $this->language->get('column_discount_total'),
-        );
+        ];
 
-        $grid_settings['colModel'] = array(
-            array(
+        $grid_settings['colModel'] = [
+            [
                 'name' => 'coupon_name',
                 'index' => 'coupon_name',
                 'width' => 100,
                 'align' => 'center',
                 'sorttype' => 'string',
-            ),
-            array(
+            ],
+            [
                 'name' => 'code',
                 'index' => 'code',
                 'width' => 100,
                 'align' => 'center',
                 'sorttype' => 'string',
-            ),
-            array(
+            ],
+            [
                 'name' => 'orders',
                 'index' => 'orders',
                 'width' => 100,
                 'align' => 'center',
-            ),
-            array(
+            ],
+            [
                 'name' => 'total',
                 'index' => 'total',
                 'width' => 110,
                 'align' => 'center',
-            ),
-            array(
+            ],
+            [
                 'name' => 'discount_total',
                 'index' => 'discount_total',
                 'width' => 110,
                 'align' => 'center',
-            ),
-        );
+            ],
+        ];
 
-        $grid = $this->dispatch('common/listing_grid', array($grid_settings));
+        $grid = $this->dispatch('common/listing_grid', [$grid_settings]);
         $this->view->assign('listing_grid', $grid->dispatchGetOutput());
         $this->view->assign('search_form', $this->data['grid_search_form']);
 
         $this->document->setTitle($this->language->get('heading_title'));
-        $this->document->initBreadcrumb(array(
+        $this->document->initBreadcrumb([
             'href' => $this->html->getSecureURL('index/home'),
             'text' => $this->language->get('text_home'),
             'separator' => FALSE
-        ));
-        $this->document->addBreadcrumb(array(
+        ]);
+        $this->document->addBreadcrumb([
             'href' => $this->html->getSecureURL('report/sale/coupon'),
             'text' => $this->language->get('heading_title'),
             'separator' => ' :: ',
-			'current'	=> true
-        ));
+            'current' => true
+        ]);
 
         $this->processTemplate('pages/report/sale/coupons.tpl');
 

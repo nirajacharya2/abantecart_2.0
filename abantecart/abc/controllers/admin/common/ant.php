@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -20,10 +20,10 @@
 namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\AConnect;
+use H;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
+if (!class_exists('abc\core\ABC') || !ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -35,17 +35,17 @@ class ControllerCommonANT extends AController {
 
 	public function main() {
 		// disable for login-logout pages
-		if (in_array($this->request->get['rt'], array('index/logout', 'index/login'))) {
+		if (in_array($this->request->get['rt'], ['index/logout', 'index/login'])) {
 			unset($this->session->data['ant_messages']);
 			return null;
 		}
 
-		if (!AHelperUtils::has_value($this->session->data['ant_messages']['date_modified'])) {
+		if (!H::has_value($this->session->data['ant_messages']['date_modified'])) {
 			unset($this->session->data['ant_messages']);
 		}
 
 		// prevent repeats of requests or if last update older then 24hours
-		if (AHelperUtils::has_value($this->session->data['ant_messages']) && (time() - $this->session->data['ant_messages']['date_modified'] < 86400)) {
+		if (H::has_value($this->session->data['ant_messages']) && (time() - $this->session->data['ant_messages']['date_modified'] < 86400)) {
 			return null;
 		}
 
@@ -76,11 +76,11 @@ class ControllerCommonANT extends AController {
 		//do connect without any http-redirects
 		$connect = new AConnect (true, true);
 		$result = $connect->getResponse($url);
-		$this->session->data ['ant_messages'] = array(); // prevent requests in future at this session
+		$this->session->data ['ant_messages'] = []; // prevent requests in future at this session
 		// insert new messages in database
 		if ($result && is_array($result)) {
 			//set array for check response
-			$check_array = array(
+			$check_array = [
 					'message_id',
 					'type',
 					'date_added',
@@ -95,10 +95,10 @@ class ControllerCommonANT extends AController {
 					'html',
 					'url',
 					'published',
-					'language_code');
-			$banners = array();
+					'language_code'];
+			$banners = [];
 			foreach ($result as $notify) {
-				$tmp = array();
+				$tmp = [];
 				foreach ($notify as $key => $value) {
 					if (!in_array($key, $check_array)) {
 						continue;
