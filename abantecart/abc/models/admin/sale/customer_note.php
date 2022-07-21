@@ -1,17 +1,29 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: denis
- * Date: 17.09.2018
- * Time: 17:17
- */
+/*------------------------------------------------------------------------------
+  $Id$
+
+  AbanteCart, Ideal OpenSource Ecommerce Solution
+  http://www.AbanteCart.com
+
+  Copyright © 2011-2022 Belavier Commerce LLC
+
+  This source file is subject to Open Software License (OSL 3.0)
+  License details is bundled with this package in the file LICENSE.txt.
+  It is also available at this URL:
+  <http://www.opensource.org/licenses/OSL-3.0>
+
+ UPGRADE NOTE:
+   Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+   versions in the future. If you wish to customize AbanteCart for your
+   needs please refer to http://www.AbanteCart.com for more information.
+------------------------------------------------------------------------------*/
 
 namespace abc\models\admin;
 
+use abc\core\ABC;
 use abc\core\engine\Model;
-use abc\core\helper\AHelperUtils;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
+if (!class_exists('abc\core\ABC') || !ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 /**

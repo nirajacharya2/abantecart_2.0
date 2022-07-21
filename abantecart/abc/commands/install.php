@@ -725,14 +725,26 @@ return [
                                 'ttl'    => 86400
                             ],
                             /*'memcached' => [ 
-                                               'servers' => [
-                                                    [
-                                                        'host' => '127.0.0.1',
-                                                        'port' => 11211,
-                                                        'weight' => 100
-                                                    ]
-                                               ]
-                                            ]*/
+                               'servers' => [
+                                    [
+                                        'host' => '127.0.0.1',
+                                        'port' => 11211,
+                                        'weight' => 100
+                                    ]
+                               ]
+                            ],
+                            //NOTE: if you plan to use phpredis client you should to install ext-redis (php-extension)
+                            // on debian just type: sudo apt install php8.1-redis 
+                            'redis' => [
+                                'client' => 'phpredis',
+                                'default' => [
+                                    'host' => 'localhost',
+                                    'password' => 'secret_redis',
+                                    'port' => 6379,
+                                    'database' => 'REDIS_DB',
+                                ],
+                            ]
+                            */
                         ]
                     ],
         //enable debug info collection
