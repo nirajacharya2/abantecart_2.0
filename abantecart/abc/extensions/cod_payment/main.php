@@ -16,11 +16,6 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-use abc\extensions\cod_payment\modules\PaymentHandler;
-
-require_once __DIR__.DS.'modules'.DS.'handler.php';
-
-
 $controllers = [
     'storefront' => ['responses/extension/cod_payment'],
     'admin'      => [],
@@ -45,9 +40,4 @@ $templates = [
         'responses/cod_payment.tpl',
     ],
     'admin'      => [],
-];
-$modules = [
-    'handlers' => [
-            'payment' => PaymentHandler::class
-    ]
 ];

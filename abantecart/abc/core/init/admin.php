@@ -14,7 +14,6 @@ $lib_list = [
     'resource_upload',
     'listing_manager',
     'language_manager',
-    'backup',
     'file_uploads_manager',
     'im_manager',
     'checkoutAdmin',

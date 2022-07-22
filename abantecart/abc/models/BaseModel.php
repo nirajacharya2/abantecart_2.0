@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2021 Belavier Commerce LLC
+ * Copyright 2011-2022 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -291,6 +291,7 @@ abstract class BaseModel extends OrmModel
         $className = get_called_class();
         /** @var ModelSearch $searchObj */
         $searchObj = ABC::getObjectByAlias('ModelSearch', [new $className]);
+
         //check and convert parameters for data set into correct format
         foreach ($searchParams as $name => $value) {
             if (is_string($value) && str_starts_with($value, 'with_')) {
@@ -412,7 +413,7 @@ abstract class BaseModel extends OrmModel
         if (!$abac) {
             return true;
         }
-        $resourceObject = new stdClass();
+        $resourceObject = new \stdClass();
         $resourceObject->name = $this->policyObject;
         $resourceObject->getColumns = $columns;
 

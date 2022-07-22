@@ -516,7 +516,6 @@ class Category extends BaseModel
 
             //allow to extends this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
-            Registry::log()->write($query->toSql());
             $categories = $query->get();
 
             foreach ($categories as $category) {

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,19 +21,23 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
+use abc\core\engine\AHtml;
 use abc\core\engine\AResource;
 use abc\core\engine\Registry;
+use abc\models\catalog\ResourceDescription;
+use abc\models\catalog\ResourceLibrary;
 use H;
+use Psr\SimpleCache\InvalidArgumentException;
 
 
 /**
  * Class AResourceManager
  *
- * @property ADB                            $db
- * @property \abc\core\engine\AHtml         $html
- * @property \abc\core\lib\AbcCache         $cache
- * @property AConfig                        $config
- * @property \abc\core\lib\ALanguageManager $language
+ * @property ADB $db
+ * @property AHtml $html
+ * @property AbcCache $cache
+ * @property AConfig $config
+ * @property ALanguageManager $language
  */
 class AResourceManager extends AResource
 {
@@ -61,7 +65,6 @@ class AResourceManager extends AResource
     /**
      * @param string $type
      *
-     * @throws \ReflectionException
      */
     public function setType($type)
     {
@@ -71,7 +74,7 @@ class AResourceManager extends AResource
             $this->loadType();
 
             if (!$this->type_id) {
-                $message = "Error: Incorrect or missing resource type ".$type;
+                $message = "Error: Incorrect or missing resource type " . $type;
                 $error = new AError ($message);
                 $error->toLog()->toDebug();
             }
@@ -81,7 +84,7 @@ class AResourceManager extends AResource
     /**
      * @return array
      * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getResourceTypes()
     {
@@ -92,7 +95,7 @@ class AResourceManager extends AResource
      * @param string $type_name
      *
      * @return array
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getResourceTypeByName($type_name)
     {
@@ -117,12 +120,12 @@ class AResourceManager extends AResource
         if (empty($data) || !H::has_value($data['type_id'])) {
             return null;
         }
-        $sql = "UPDATE ".$this->db->table_name('resource_types')."
-                SET type_name='".$this->db->escape($data['type_name'])."',
-                    default_directory='".$this->db->escape($data['default_directory'])."',
-                    default_icon='".$this->db->escape($data['default_icon'])."',
-                    file_types='".$this->db->escape($data['file_types'])."'
-                WHERE type_id =  ".(int)$data['type_id'];
+        $sql = "UPDATE " . $this->db->table_name('resource_types') . "
+                SET type_name='" . $this->db->escape($data['type_name']) . "',
+                    default_directory='" . $this->db->escape($data['default_directory']) . "',
+                    default_icon='" . $this->db->escape($data['default_icon']) . "',
+                    file_types='" . $this->db->escape($data['file_types']) . "'
+                WHERE type_id =  " . (int)$data['type_id'];
         $this->db->query($sql);
 
         $this->cache->flush('resources');
@@ -155,24 +158,24 @@ class AResourceManager extends AResource
         if (!(int)$resource_id || empty($file_path)) {
             return false;
         }
-        $resource_path = $this->getHexPath($resource_id).strtolower(substr(strrchr($file_path, '.'), 0));
+        $resource_path = $this->getHexPath($resource_id) . strtolower(substr(strrchr($file_path, '.'), 0));
         $resource_dir = dirname($resource_path);
-        if (!is_dir(ABC::env('DIR_RESOURCES').$this->type_dir.$resource_dir)) {
+        if (!is_dir(ABC::env('DIR_RESOURCES') . $this->type_dir . $resource_dir)) {
             $path = '';
             $directories = explode('/', $resource_dir);
             foreach ($directories as $directory) {
-                $path = $path.'/'.$directory;
-                if (!is_dir(ABC::env('DIR_RESOURCES').$this->type_dir.$path)) {
-                    if (!is_dir(ABC::env('DIR_RESOURCES').$this->type_dir)) {
-                        @mkdir(ABC::env('DIR_RESOURCES').$this->type_dir, 0777);
+                $path = $path . '/' . $directory;
+                if (!is_dir(ABC::env('DIR_RESOURCES') . $this->type_dir . $path)) {
+                    if (!is_dir(ABC::env('DIR_RESOURCES') . $this->type_dir)) {
+                        @mkdir(ABC::env('DIR_RESOURCES') . $this->type_dir, 0777);
                     }
-                    @mkdir(ABC::env('DIR_RESOURCES').$this->type_dir.$path, 0777);
-                    chmod(ABC::env('DIR_RESOURCES').$this->type_dir.$path, 0777);
+                    @mkdir(ABC::env('DIR_RESOURCES') . $this->type_dir . $path, 0777);
+                    chmod(ABC::env('DIR_RESOURCES') . $this->type_dir . $path, 0777);
                 }
             }
         }
-        if (is_file(ABC::env('DIR_RESOURCES').$this->type_dir.$resource_path)) {
-            unlink(ABC::env('DIR_RESOURCES').$this->type_dir.$resource_path);
+        if (is_file(ABC::env('DIR_RESOURCES') . $this->type_dir . $resource_path)) {
+            unlink(ABC::env('DIR_RESOURCES') . $this->type_dir . $resource_path);
         }
 
         return $resource_path;
@@ -186,7 +189,7 @@ class AResourceManager extends AResource
      * @return int resource id
      * @throws \ReflectionException
      * @throws AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function addResource($resource)
     {
@@ -194,21 +197,17 @@ class AResourceManager extends AResource
             $message = "Error: Incorrect or missing resource type. Please set type using setType() method ";
             $error = new AError ($message);
             $error->toLog()->toDebug();
-
             return false;
         }
-
-        $sql = "INSERT INTO ".$this->db->table_name("resource_library")."
-                SET type_id = '".$this->type_id."',
-                    date_added = NOW()";
-        $this->db->query($sql);
-        $resource_id = $this->db->getLastId();
+        $rl = new ResourceLibrary(['type_id' => $this->type_id, 'stage_id' => 0]);
+        $rl->save();
+        $resource_id = $rl->resource_id;
 
         if (!empty($resource['resource_path'])) {
             $resource_path = $this->buildResourcePath($resource_id, $resource['resource_path']);
             if ($resource_path === false) {
                 $message = "Error: Incorrect or missing resource path. "
-                    ."Please set correct path to build internal path of resource. ";
+                    . "Please set correct path to build internal path of resource. ";
                 $error = new AError ($message);
                 $error->toLog()->toDebug();
                 //remove resource on fail
@@ -217,11 +216,11 @@ class AResourceManager extends AResource
                 return false;
             }
             //move file
-            $result = @rename(ABC::env('DIR_RESOURCES').$this->type_dir.$resource['resource_path'],
-                ABC::env('DIR_RESOURCES').$this->type_dir.$resource_path);
+            $result = @rename(ABC::env('DIR_RESOURCES') . $this->type_dir . $resource['resource_path'],
+                ABC::env('DIR_RESOURCES') . $this->type_dir . $resource_path);
             if (!$result) {
                 $message = "Error: Cannot move resource to resources directory. Please check permissions of "
-                    .dirname(ABC::env('DIR_RESOURCES').$this->type_dir.$resource_path).' directory!';
+                    . dirname(ABC::env('DIR_RESOURCES') . $this->type_dir . $resource_path) . ' directory!';
                 $error = new AError ($message);
                 $error->toLog()->toDebug();
                 //remove resource on fail
@@ -242,12 +241,12 @@ class AResourceManager extends AResource
                 ['resource_id' => (int)$resource_id],
                 [
                     (int)$language_id => [
-                        'name'          => $resource['name'][$language_id],
-                        'title'         => $resource['title'][$language_id],
-                        'description'   => $resource['description'][$language_id],
+                        'name' => $resource['name'][$language_id],
+                        'title' => $resource['title'][$language_id],
+                        'description' => $resource['description'][$language_id],
                         'resource_path' => $resource_path,
                         'resource_code' => $resource['resource_code'],
-                        'date_added'    => date('Y-m-d H:i:s'),
+                        'date_added' => date('Y-m-d H:i:s'),
                     ],
                 ]);
         }
@@ -262,7 +261,7 @@ class AResourceManager extends AResource
      *
      * @return bool
      * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function updateResource($resource_id, $data)
     {
@@ -294,10 +293,8 @@ class AResourceManager extends AResource
         }
 
         if ($data['resource_path']) {
-            $sql = "UPDATE ".$this->db->table_name('resource_descriptions')."
-                    SET resource_path='".$this->db->escape($data['resource_path'])."'
-                    WHERE resource_id =  ".$resource_id;
-            $this->db->query($sql);
+            $rl = ResourceLibrary::find($resource_id);
+            $rl->descriptions()->update(['resource_path' => $data['resource_path']]);
             $this->deleteThumbnail($resource_id);
         }
 
@@ -310,7 +307,7 @@ class AResourceManager extends AResource
      * @param string $resource_id
      *
      * @return bool
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function deleteThumbnail($resource_id = '')
     {
@@ -329,11 +326,11 @@ class AResourceManager extends AResource
         foreach ($resource['name'] as $lang_id => $name) {
             $name = preg_replace('/[^a-zA-Z0-9]/', '_', $name);
             $fileMask = ABC::env('DIR_IMAGES')
-                .'thumbnails'.DS
-                .dirname($resource['resource_path']).DS
-                .$name
-                .'-'.$resource_id
-                .'-*';
+                . 'thumbnails' . DS
+                . dirname($resource['resource_path']) . DS
+                . $name
+                . '-' . $resource_id
+                . '-*';
             $file_list = glob($fileMask, GLOB_NOSORT);
             if ($file_list) {
                 foreach ($file_list as $thumb) {
@@ -352,7 +349,7 @@ class AResourceManager extends AResource
      * @param $resource_id
      *
      * @return bool
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function deleteResource($resource_id)
     {
@@ -365,23 +362,13 @@ class AResourceManager extends AResource
         }
 
         if ($resource['resource_path']
-            && is_file(ABC::env('DIR_RESOURCES').$resource['type_name'].DS.$resource['resource_path'])) {
-            unlink(ABC::env('DIR_RESOURCES').$resource['type_name'].DS.$resource['resource_path']);
+            && is_file(ABC::env('DIR_RESOURCES') . $resource['type_name'] . DS . $resource['resource_path'])) {
+            unlink(ABC::env('DIR_RESOURCES') . $resource['type_name'] . DS . $resource['resource_path']);
         }
         //remove thumbnail before removing
         $this->deleteThumbnail($resource_id);
 
-        $this->db->query(
-            "DELETE FROM ".$this->db->table_name("resource_map")." 
-            WHERE resource_id = '".(int)$resource_id."' ");
-        $this->db->query(
-            "DELETE FROM ".$this->db->table_name("resource_descriptions")." 
-            WHERE resource_id = '".(int)$resource_id."' "
-        );
-        $this->db->query(
-            "DELETE FROM ".$this->db->table_name("resource_library")." 
-            WHERE resource_id = '".(int)$resource_id."' "
-        );
+        ResourceLibrary::find($resource_id)?->delete();
 
         $this->cache->flush('resources');
         return true;
@@ -394,7 +381,7 @@ class AResourceManager extends AResource
      *
      * @return bool|null
      * @throws \ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function unmapAndDeleteResources($object_name, $object_id, $type = '')
     {
@@ -419,7 +406,7 @@ class AResourceManager extends AResource
      * @param int $object_id
      *
      * @return bool|null
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function deleteResources($resource_ids, $object_name = '', $object_id = 0)
     {
@@ -439,13 +426,13 @@ class AResourceManager extends AResource
                 $res = $this->unmapResource($object_name, $object_id, $resource_id);
                 if (!$res) {
                     $this->error[] = $resource['name'][$this->language->getContentLanguageID()]
-                        .' cannot be deleted. Unlink it first.';
+                        . ' cannot be deleted. Unlink it first.';
                     $result = false;
                     continue;
                 }
             } elseif ($mapped_cnt) {
-                $this->error[] =
-                    $resource['name'][$this->language->getContentLanguageID()].' cannot be deleted. Unlink it first.';
+                $this->error[] = $resource['name'][$this->language->getContentLanguageID()]
+                    . ' cannot be deleted. Unlink it first.';
                 $result = false;
                 continue;
             }
@@ -454,8 +441,8 @@ class AResourceManager extends AResource
             $this->cache->flush('resources');
 
             if ($resource['resource_path']
-                && is_file(ABC::env('DIR_RESOURCES').$resource['type_name'].DS.$resource['resource_path'])) {
-                unlink(ABC::env('DIR_RESOURCES').$resource['type_name'].DS.$resource['resource_path']);
+                && is_file(ABC::env('DIR_RESOURCES') . $resource['type_name'] . DS . $resource['resource_path'])) {
+                unlink(ABC::env('DIR_RESOURCES') . $resource['type_name'] . DS . $resource['resource_path']);
             }
         }
 
@@ -465,16 +452,16 @@ class AResourceManager extends AResource
 
         $ids = implode(', ', $ids);
         $this->db->query(
-            "DELETE FROM ".$this->db->table_name("resource_map")." 
-            WHERE resource_id IN (".$ids.")"
+            "DELETE FROM " . $this->db->table_name("resource_map") . " 
+            WHERE resource_id IN (" . $ids . ")"
         );
         $this->db->query(
-            "DELETE FROM ".$this->db->table_name("resource_descriptions")." 
-            WHERE resource_id IN (".$ids.")"
+            "DELETE FROM " . $this->db->table_name("resource_descriptions") . " 
+            WHERE resource_id IN (" . $ids . ")"
         );
         $this->db->query(
-            "DELETE FROM ".$this->db->table_name("resource_library")." 
-            WHERE resource_id IN (".$ids.")"
+            "DELETE FROM " . $this->db->table_name("resource_library") . " 
+            WHERE resource_id IN (" . $ids . ")"
         );
 
         $this->cache->flush('resources');
@@ -488,7 +475,7 @@ class AResourceManager extends AResource
      * @param int $resource_id
      *
      * @return null
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function mapResource($object_name, $object_id, $resource_id)
     {
@@ -499,10 +486,10 @@ class AResourceManager extends AResource
         }
 
         $sql = "SELECT resource_id 
-                FROM ".$this->db->table_name("resource_map")." 
-                WHERE resource_id = '".(int)$resource_id."'
-                      AND object_name = '".$this->db->escape($object_name)."'
-                      AND object_id = '".(int)$object_id."'";
+                FROM " . $this->db->table_name("resource_map") . " 
+                WHERE resource_id = '" . (int)$resource_id . "'
+                      AND object_name = '" . $this->db->escape($object_name) . "'
+                      AND object_id = '" . (int)$object_id . "'";
         $result = $this->db->query($sql);
 
         if ($result->num_rows) {
@@ -511,17 +498,17 @@ class AResourceManager extends AResource
 
         //need to get sort order
         $sql = "SELECT MAX(sort_order) AS sort_order
-                FROM ".$this->db->table_name("resource_map")." 
-                WHERE object_name = '".$this->db->escape($object_name)."'
-                      AND object_id = '".(int)$object_id."'";
+                FROM " . $this->db->table_name("resource_map") . " 
+                WHERE object_name = '" . $this->db->escape($object_name) . "'
+                      AND object_id = '" . (int)$object_id . "'";
         $result = $this->db->query($sql);
         $new_sort_order = $result->row['sort_order'] + 1;
 
-        $sql = "INSERT INTO ".$this->db->table_name("resource_map")."
-                SET resource_id = '".(int)$resource_id."',
-                    object_name = '".$this->db->escape($object_name)."',
-                    object_id = '".(int)$object_id."',
-                    sort_order = '".(int)$new_sort_order."',
+        $sql = "INSERT INTO " . $this->db->table_name("resource_map") . "
+                SET resource_id = '" . (int)$resource_id . "',
+                    object_name = '" . $this->db->escape($object_name) . "',
+                    object_id = '" . (int)$object_id . "',
+                    sort_order = '" . (int)$new_sort_order . "',
                     date_added = NOW()";
         $this->db->query($sql);
 
@@ -536,7 +523,7 @@ class AResourceManager extends AResource
      * @param int $object_id
      *
      * @return bool|null
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function mapResources($resource_ids, $object_name, $object_id)
     {
@@ -554,10 +541,10 @@ class AResourceManager extends AResource
             }
             //skip already mapped
             $sql = "SELECT resource_id
-                    FROM ".$this->db->table_name("resource_map")." 
-                    WHERE resource_id = '".(int)$id."'
-                          AND object_name = '".$this->db->escape($object_name)."'
-                          AND object_id = '".(int)$object_id."'";
+                    FROM " . $this->db->table_name("resource_map") . " 
+                    WHERE resource_id = '" . (int)$id . "'
+                          AND object_name = '" . $this->db->escape($object_name) . "'
+                          AND object_id = '" . (int)$object_id . "'";
             $result = $this->db->query($sql);
 
             if ($result->num_rows) {
@@ -571,17 +558,17 @@ class AResourceManager extends AResource
         foreach ($ids as $resource_id) {
             //need to get sort order
             $sql = "SELECT MAX(sort_order) AS sort_order
-                    FROM ".$this->db->table_name("resource_map")." 
-                    WHERE object_name = '".$this->db->escape($object_name)."'
-                          AND object_id = '".(int)$object_id."'";
+                    FROM " . $this->db->table_name("resource_map") . " 
+                    WHERE object_name = '" . $this->db->escape($object_name) . "'
+                          AND object_id = '" . (int)$object_id . "'";
             $result = $this->db->query($sql);
             $new_sort_order = $result->row['sort_order'] + 1;
 
-            $sql = "INSERT INTO ".$this->db->table_name("resource_map")." 
-                    SET resource_id = '".(int)$resource_id."',
-                        object_name = '".$this->db->escape($object_name)."',
-                        object_id = '".(int)$object_id."',
-                        sort_order = '".(int)$new_sort_order."',
+            $sql = "INSERT INTO " . $this->db->table_name("resource_map") . " 
+                    SET resource_id = '" . (int)$resource_id . "',
+                        object_name = '" . $this->db->escape($object_name) . "',
+                        object_id = '" . (int)$object_id . "',
+                        sort_order = '" . (int)$new_sort_order . "',
                         date_added = NOW()";
             $this->db->query($sql);
         }
@@ -595,7 +582,7 @@ class AResourceManager extends AResource
      * @param int $resource_id
      *
      * @return bool
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function unmapResource($object_name, $object_id, $resource_id)
     {
@@ -604,10 +591,10 @@ class AResourceManager extends AResource
             return false;
         }
 
-        $sql = "DELETE FROM ".$this->db->table_name("resource_map")." 
-                WHERE resource_id = '".(int)$resource_id."'
-                    AND object_name = '".$this->db->escape($object_name)."'
-                    AND object_id = '".(int)$object_id."'";
+        $sql = "DELETE FROM " . $this->db->table_name("resource_map") . " 
+                WHERE resource_id = '" . (int)$resource_id . "'
+                    AND object_name = '" . $this->db->escape($object_name) . "'
+                    AND object_id = '" . (int)$object_id . "'";
         $this->db->query($sql);
         $this->cache->flush('resources');
         return true;
@@ -619,7 +606,7 @@ class AResourceManager extends AResource
      * @param int $object_id
      *
      * @return bool|null
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function unmapResources($resource_ids, $object_name, $object_id)
     {
@@ -639,10 +626,10 @@ class AResourceManager extends AResource
             $this->cache->flush('resources');
         }
 
-        $sql = "DELETE FROM ".$this->db->table_name("resource_map")." 
-                WHERE resource_id IN (".implode(", ", $ids).")
-                    AND object_name = '".$this->db->escape($object_name)."'
-                    AND object_id = '".(int)$object_id."'";
+        $sql = "DELETE FROM " . $this->db->table_name("resource_map") . " 
+                WHERE resource_id IN (" . implode(", ", $ids) . ")
+                    AND object_name = '" . $this->db->escape($object_name) . "'
+                    AND object_id = '" . (int)$object_id . "'";
         $this->db->query($sql);
 
         return true;
@@ -654,7 +641,7 @@ class AResourceManager extends AResource
      * @param int $object_id
      *
      * @return bool
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function updateSortOrder($data, $object_name, $object_id)
     {
@@ -667,11 +654,11 @@ class AResourceManager extends AResource
             if (empty($resource)) {
                 continue;
             }
-            $sql = "UPDATE ".$this->db->table_name("resource_map")."
-                    SET sort_order = '".(int)$sort_order."'
-                    WHERE resource_id = '".(int)$resource_id."'
-                            AND object_name = '".$this->db->escape($object_name)."'
-                            AND object_id = '".(int)$object_id."'";
+            $sql = "UPDATE " . $this->db->table_name("resource_map") . "
+                    SET sort_order = '" . (int)$sort_order . "'
+                    WHERE resource_id = '" . (int)$resource_id . "'
+                            AND object_name = '" . $this->db->escape($object_name) . "'
+                            AND object_id = '" . (int)$object_id . "'";
             $this->db->query($sql);
 
             $this->cache->flush('resources');
@@ -685,7 +672,7 @@ class AResourceManager extends AResource
      * @param int $language_id
      *
      * @return array|null
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getResource($resource_id, $language_id = 0)
     {
@@ -744,7 +731,7 @@ class AResourceManager extends AResource
                           rd.title,
                           rd.description,
                           (SELECT COUNT(resource_id) 
-                           FROM ".$this->db->table_name("resource_map")." rm1 
+                           FROM " . $this->db->table_name("resource_map") . " rm1 
                            WHERE rm1.resource_id = rd.resource_id
                           ) as mapped, 
             ";
@@ -763,13 +750,13 @@ class AResourceManager extends AResource
         }
 
         $where = $join = '';
-        $join = " LEFT JOIN ".$this->db->table_name("resource_descriptions")." rd 
-                    ON (rl.resource_id = rd.resource_id AND rd.language_id = '".$language_id."') ";
+        $join = " LEFT JOIN " . $this->db->table_name("resource_descriptions") . " rd 
+                    ON (rl.resource_id = rd.resource_id AND rd.language_id = '" . $language_id . "') ";
         if ($language_id != (int)$this->language->getDefaultLanguageID()) {
             //add default language
-            $join .= " LEFT JOIN ".$this->db->table_name("resource_descriptions")." rdd 
+            $join .= " LEFT JOIN " . $this->db->table_name("resource_descriptions") . " rdd 
                         ON (rl.resource_id = rdd.resource_id AND rdd.language_id = '"
-                .$this->language->getDefaultLanguageID()."') ";
+                . $this->language->getDefaultLanguageID() . "') ";
         }
 
         if ($data['sort'] == 'sort_order' || !empty($data['object_name']) || !empty($data['object_id'])) {
@@ -778,30 +765,30 @@ class AResourceManager extends AResource
             }
             $sub_join = '';
             if (!empty($data['object_name'])) {
-                $sub_join .= " AND rm.object_name = '".$this->db->escape($data['object_name'])."'";
+                $sub_join .= " AND rm.object_name = '" . $this->db->escape($data['object_name']) . "'";
             }
             if (!empty($data['object_id'])) {
-                $sub_join .= " AND rm.object_id = '".(int)$data['object_id']."'";
+                $sub_join .= " AND rm.object_id = '" . (int)$data['object_id'] . "'";
             }
-            $join .= " INNER JOIN ".$this->db->table_name("resource_map")." rm ON (rl.resource_id = rm.resource_id "
-                .$sub_join.") ";
+            $join .= " INNER JOIN " . $this->db->table_name("resource_map") . " rm ON (rl.resource_id = rm.resource_id "
+                . $sub_join . ") ";
         }
 
         if (!empty($data['keyword'])) {
             $where .= ($where ? " AND" : ' WHERE ');
-            $where .= " ( LCASE(rd.name) LIKE '%".$this->db->escape(strtolower($data['keyword']), true)."%'";
-            $where .= " OR LCASE(rd.title) LIKE '%".$this->db->escape(strtolower($data['keyword']), true)."%' )";
+            $where .= " ( LCASE(rd.name) LIKE '%" . $this->db->escape(strtolower($data['keyword']), true) . "%'";
+            $where .= " OR LCASE(rd.title) LIKE '%" . $this->db->escape(strtolower($data['keyword']), true) . "%' )";
         }
 
         if (!empty($data['type_id'])) {
             $where .= ($where ? " AND " : ' WHERE ');
-            $where .= " rl.type_id = '".(int)$data['type_id']."'";
+            $where .= " rl.type_id = '" . (int)$data['type_id'] . "'";
         }
 
-        $sql = "SELECT ".$top_sql." FROM ".$this->db->table_name("resource_library")." rl".$join.$where;
+        $sql = "SELECT " . $top_sql . " FROM " . $this->db->table_name("resource_library") . " rl" . $join . $where;
 
         if (!empty($data['subsql_filter'])) {
-            $sql .= ($where ? " AND " : 'WHERE ').$data['subsql_filter'];
+            $sql .= ($where ? " AND " : 'WHERE ') . $data['subsql_filter'];
         }
 
         //If for total, we done building the query
@@ -812,13 +799,13 @@ class AResourceManager extends AResource
         }
 
         $sort_data = [
-            'name'       => 'rd.name',
+            'name' => 'rd.name',
             'date_added' => 'rl.date_added',
             'sort_order' => 'rm.sort_order',
         ];
 
         if (isset($data['sort']) && in_array($data['sort'], array_keys($sort_data))) {
-            $sql .= " ORDER BY ".$sort_data[$data['sort']];
+            $sql .= " ORDER BY " . $sort_data[$data['sort']];
         } else {
             //for faster SQL do default sorting on main table
             $sql .= " ORDER BY rl.date_added ";
@@ -837,7 +824,7 @@ class AResourceManager extends AResource
             if ($data['limit'] < 1) {
                 $data['limit'] = 12;
             }
-            $sql .= " LIMIT ".(int)$data['start'].",".(int)$data['limit'];
+            $sql .= " LIMIT " . (int)$data['start'] . "," . (int)$data['limit'];
         }
 
         $query = $this->db->query($sql);
@@ -851,7 +838,7 @@ class AResourceManager extends AResource
      *
      * @return array
      * @throws AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      * @throws \ReflectionException
      */
     public function getResourceObjects($resource_id, $language_id = 0)
@@ -862,11 +849,11 @@ class AResourceManager extends AResource
         }
         $objects = $this->getAllObjects();
         foreach ($objects as $object) {
-            if (is_callable([$this, 'getResource'.$object])) {
-                $result = call_user_func_array([$this, 'getResource'.$object],
+            if (is_callable([$this, 'getResource' . $object])) {
+                $result = call_user_func_array([$this, 'getResource' . $object],
                     [$resource_id, $language_id]);
                 if ($result) {
-                    $key = $this->language->get('text_'.$object);
+                    $key = $this->language->get('text_' . $object);
                     $key = !$key ? $object : $key;
                     $resource_objects[$key] = $result;
                 }
@@ -893,11 +880,11 @@ class AResourceManager extends AResource
             return null;
         }
         $sql = "SELECT count(*) AS total
-                FROM ".$this->db->table_name('resource_map')." rm
-                WHERE rm.resource_id = '".(int)$resource_id."'";
+                FROM " . $this->db->table_name('resource_map') . " rm
+                WHERE rm.resource_id = '" . (int)$resource_id . "'";
 
         if ($object_name) {
-            $sql .= " AND rm.object_name = '".$this->db->escape($object_name)."' AND object_id = ".(int)$object_id;
+            $sql .= " AND rm.object_name = '" . $this->db->escape($object_name) . "' AND object_id = " . (int)$object_id;
         }
         $query = $this->db->query($sql);
         if ($query->row['total'] > 0) {
@@ -913,7 +900,7 @@ class AResourceManager extends AResource
      *
      * @return array
      * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function getResourceProducts($resource_id, $language_id = 0)
     {
@@ -921,16 +908,16 @@ class AResourceManager extends AResource
             $language_id = $this->language->getContentLanguageID();
         }
         $store_id = (int)$this->config->get('config_store_id');
-        $cache_key = 'resources.products.'.$resource_id;
-        $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id.'_lang_'.$language_id;
+        $cache_key = 'resources.products.' . $resource_id;
+        $cache_key = preg_replace('/[^a-zA-Z0-9.]/', '', $cache_key) . '.store_' . $store_id . '_lang_' . $language_id;
 
         $resource_objects = $this->cache->get($cache_key);
         if ($resource_objects === null) {
             $sql = "SELECT rm.object_id, 'products' AS object_name, pd.name
-                    FROM ".$this->db->table_name("resource_map")." rm
-                    LEFT JOIN ".$this->db->table_name("product_descriptions")." pd
-                        ON ( rm.object_id = pd.product_id AND pd.language_id = '".(int)$language_id."')
-                    WHERE rm.resource_id = '".(int)$resource_id."'
+                    FROM " . $this->db->table_name("resource_map") . " rm
+                    LEFT JOIN " . $this->db->table_name("product_descriptions") . " pd
+                        ON ( rm.object_id = pd.product_id AND pd.language_id = '" . (int)$language_id . "')
+                    WHERE rm.resource_id = '" . (int)$resource_id . "'
                         AND rm.object_name = 'products'";
             $query = $this->db->query($sql);
             $resource_objects = $query->rows;
@@ -940,10 +927,10 @@ class AResourceManager extends AResource
         $result = [];
         foreach ($resource_objects as $row) {
             $result[] = [
-                'object_id'   => $row['object_id'],
+                'object_id' => $row['object_id'],
                 'object_name' => $row['object_name'],
-                'name'        => $row['name'],
-                'url'         => $this->html->getSecureURL('catalog/product/update', '&product_id='.$row['object_id']),
+                'name' => $row['name'],
+                'url' => $this->html->getSecureURL('catalog/product/update', '&product_id=' . $row['object_id']),
             ];
         }
 
@@ -956,7 +943,7 @@ class AResourceManager extends AResource
      *
      * @return array
      * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function getResourceProduct_Option_Value($resource_id, $language_id = 0)
     {
@@ -966,8 +953,8 @@ class AResourceManager extends AResource
         }
         $store_id = (int)$this->config->get('config_store_id');
 
-        $cache_key = 'resources.product_option_value.'.$resource_id;
-        $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id.'_lang_'.$language_id;
+        $cache_key = 'resources.product_option_value.' . $resource_id;
+        $cache_key = preg_replace('/[^a-zA-Z0-9.]/', '', $cache_key) . '.store_' . $store_id . '_lang_' . $language_id;
 
         $resource_objects = $this->cache->get($cache_key);
         if ($resource_objects === null) {
@@ -976,12 +963,12 @@ class AResourceManager extends AResource
                         pd.name, 
                         pov.product_id, 
                         pov.product_option_id
-                    FROM ".$this->db->table_name("resource_map")." rm
-                    LEFT JOIN ".$this->db->table_name("product_option_value_descriptions")." pd
-                        ON ( rm.object_id = pd.product_option_value_id AND pd.language_id = '".(int)$language_id."')
-                    LEFT JOIN ".$this->db->table_name("product_option_values")." pov
+                    FROM " . $this->db->table_name("resource_map") . " rm
+                    LEFT JOIN " . $this->db->table_name("product_option_value_descriptions") . " pd
+                        ON ( rm.object_id = pd.product_option_value_id AND pd.language_id = '" . (int)$language_id . "')
+                    LEFT JOIN " . $this->db->table_name("product_option_values") . " pov
                         ON ( pd.product_option_value_id = pov.product_option_value_id )
-                    WHERE rm.resource_id = '".(int)$resource_id."'
+                    WHERE rm.resource_id = '" . (int)$resource_id . "'
                         AND rm.object_name = 'product_option_value'";
             $query = $this->db->query($sql);
             $resource_objects = $query->rows;
@@ -991,12 +978,12 @@ class AResourceManager extends AResource
         $result = [];
         foreach ($resource_objects as $row) {
             $result[$row['product_option_id']] = [
-                'object_id'    => $row['object_id'],
-                'object_name'  => $row['object_name'],
+                'object_id' => $row['object_id'],
+                'object_name' => $row['object_name'],
                 'object_title' => $this->language->get('text_product_option_value'),
-                'name'         => $row['name'],
-                'url'          => $this->html->getSecureURL('catalog/product_options',
-                    '&product_id='.$row['product_id'].'&product_option_id='.$row['product_option_id']),
+                'name' => $row['name'],
+                'url' => $this->html->getSecureURL('catalog/product_options',
+                    '&product_id=' . $row['product_id'] . '&product_option_id=' . $row['product_option_id']),
             ];
         }
 
@@ -1009,7 +996,7 @@ class AResourceManager extends AResource
      *
      * @return array
      * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function getResourceCategories($resource_id, $language_id = 0)
     {
@@ -1019,15 +1006,15 @@ class AResourceManager extends AResource
         }
         $store_id = (int)$this->config->get('config_store_id');
 
-        $cache_key = 'resources.categories.'.$resource_id;
-        $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id.'_lang_'.$language_id;
+        $cache_key = 'resources.categories.' . $resource_id;
+        $cache_key = preg_replace('/[^a-zA-Z0-9.]/', '', $cache_key) . '.store_' . $store_id . '_lang_' . $language_id;
         $resource_objects = $this->cache->get($cache_key);
         if ($resource_objects === null) {
             $sql = "SELECT rm.object_id, 'categories' AS object_name, cd.name
-                    FROM ".$this->db->table_name("resource_map")." rm
-                    LEFT JOIN ".$this->db->table_name("category_descriptions")." cd
-                        ON ( rm.object_id = cd.category_id AND cd.language_id = '".(int)$language_id."')
-                    WHERE rm.resource_id = '".(int)$resource_id."'
+                    FROM " . $this->db->table_name("resource_map") . " rm
+                    LEFT JOIN " . $this->db->table_name("category_descriptions") . " cd
+                        ON ( rm.object_id = cd.category_id AND cd.language_id = '" . (int)$language_id . "')
+                    WHERE rm.resource_id = '" . (int)$resource_id . "'
                         AND rm.object_name = 'categories'";
             $query = $this->db->query($sql);
             $resource_objects = $query->rows;
@@ -1037,11 +1024,11 @@ class AResourceManager extends AResource
         $result = [];
         foreach ($resource_objects as $row) {
             $result[] = [
-                'object_id'   => $row['object_id'],
+                'object_id' => $row['object_id'],
                 'object_name' => $row['object_name'],
-                'name'        => $row['name'],
-                'url'         => $this->html->getSecureURL('catalog/category/update',
-                    '&category_id='.$row['object_id']),
+                'name' => $row['name'],
+                'url' => $this->html->getSecureURL('catalog/category/update',
+                    '&category_id=' . $row['object_id']),
             ];
         }
 
@@ -1054,7 +1041,7 @@ class AResourceManager extends AResource
      *
      * @return array
      * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function getResourceManufacturers($resource_id, $language_id = 0)
     {
@@ -1063,15 +1050,15 @@ class AResourceManager extends AResource
             $language_id = $this->language->getContentLanguageID();
         }
         $store_id = (int)$this->config->get('config_store_id');
-        $cache_key = 'resources.manufacturers.'.$resource_id;
-        $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id.'_lang_'.$language_id;
+        $cache_key = 'resources.manufacturers.' . $resource_id;
+        $cache_key = preg_replace('/[^a-zA-Z0-9.]/', '', $cache_key) . '.store_' . $store_id . '_lang_' . $language_id;
         $resource_objects = $this->cache->get($cache_key);
         if ($resource_objects === null) {
             $sql = "SELECT rm.object_id, 'manufacturers' AS object_name, m.name
-                    FROM ".$this->db->table_name("resource_map")." rm
-                    LEFT JOIN ".$this->db->table_name("manufacturers")." m
+                    FROM " . $this->db->table_name("resource_map") . " rm
+                    LEFT JOIN " . $this->db->table_name("manufacturers") . " m
                         ON ( rm.object_id = m.manufacturer_id )
-                    WHERE rm.resource_id = '".(int)$resource_id."'
+                    WHERE rm.resource_id = '" . (int)$resource_id . "'
                         AND rm.object_name = 'manufacturers'";
             $query = $this->db->query($sql);
             $resource_objects = $query->rows;
@@ -1081,11 +1068,11 @@ class AResourceManager extends AResource
         $result = [];
         foreach ($resource_objects as $row) {
             $result[] = [
-                'object_id'   => $row['object_id'],
+                'object_id' => $row['object_id'],
                 'object_name' => $row['object_name'],
-                'name'        => $row['name'],
-                'url'         => $this->html->getSecureURL('catalog/manufacturer/update',
-                    '&manufacturer_id='.$row['object_id']),
+                'name' => $row['name'],
+                'url' => $this->html->getSecureURL('catalog/manufacturer/update',
+                    '&manufacturer_id=' . $row['object_id']),
             ];
         }
 

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -24,7 +24,6 @@ use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\models\user\User;
 use Cake\Database\Exception;
-use H;
 use Illuminate\Support\Carbon;
 
 /**
@@ -80,8 +79,8 @@ final class AUser
             $user = User::find((int)$this->session->data['user_id']);
 
             if ($user) {
-                $this->userId = (int)$user->user_id;
-                $this->userGroupId = (int)$user->user_group_id;
+                $this->userId = $user->user_id;
+                $this->userGroupId = $user->user_group_id;
                 $this->email = $user->email;
                 $this->username = $user->username;
                 $this->firstname = $user->firstname;
@@ -121,8 +120,8 @@ final class AUser
         )->whereRaw(Registry::db()->table_name('users').'.password = '.$sqlString)
                     ->first();
         if ($user) {
-            $this->userId = $this->session->data['user_id'] = (int)$user->user_id;
-            $this->userGroupId = (int)$user->user_group_id;
+            $this->userId = $this->session->data['user_id'] = $user->user_id;
+            $this->userGroupId = $user->user_group_id;
             $this->username = $user->username;
 
             $this->lastLogin = $this->session->data['user_last_login'] = (string)$user->last_login;
@@ -208,7 +207,7 @@ final class AUser
             return true;
         } else {
             if (isset($this->permission[$key])) {
-                return $this->permission[$key][$value] == 1 ? true : false;
+                return ($this->permission[$key][$value] == 1);
             } else {
                 return false;
             }
@@ -268,7 +267,7 @@ final class AUser
      */
     public function getId()
     {
-        return (int)$this->userId;
+        return $this->userId;
     }
 
     /**
@@ -276,7 +275,7 @@ final class AUser
      */
     public function getUserGroupId()
     {
-        return (int)$this->userGroupId;
+        return $this->userGroupId;
     }
 
     /**
@@ -285,6 +284,13 @@ final class AUser
     public function getUserName()
     {
         return $this->username;
+    }
+    /**
+     * @return string
+     */
+    public function getEmail()
+    {
+        return $this->email;
     }
 
     /**
@@ -339,7 +345,7 @@ final class AUser
      */
     public function getAvatar()
     {
-        return H::getGravatar($this->email);
+        return '';
     }
 
     /**

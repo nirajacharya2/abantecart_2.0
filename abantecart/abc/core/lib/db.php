@@ -22,16 +22,23 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use Closure;
+use DebugBar\DebugBarException;
+use Error;
+use Exception;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Capsule\Manager as Capsule;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Database\QueryException;
+use PDOException;
+use stdClass;
 
 /**
  * Class ADB
  *
  * @package abc\core\lib
  *
- * @method transaction(\Closure $function) Capsule
+ * @method transaction(Closure $function) Capsule
  * @method beginTransaction() Capsule
  * @method commit() Capsule
  * @method rollback() Capsule
@@ -64,12 +71,12 @@ class ADB
      * @param string $conName
      *
      * @throws AException
-     * @throws \DebugBar\DebugBarException
+     * @throws DebugBarException
      */
     public function __construct($db_config = [], $conName = 'default')
     {
         if (!$db_config) {
-            throw new \Exception('Cannot initiate ADB class with empty config parameter!', AC_ERR_LOAD, __FILE__);
+            throw new Exception('Cannot initiate ADB class with empty config parameter!', AC_ERR_LOAD, __FILE__);
         }
         $this->db_config = $this->prepareDBConfig($db_config);
         $this->conName = $conName;
@@ -99,9 +106,7 @@ class ADB
             //check connection
             $this->table($this->raw('DUAL'))->first([$this->raw(1)]);
             $debug_bar = ADebug::$debug_bar;
-            if ($debug_bar) {
-                $debug_bar->addCollector(new PHPDebugBarEloquentCollector($this->orm));
-            }
+            $debug_bar?->addCollector(new PHPDebugBarEloquentCollector($this->orm));
             if ($this->db_config['driver'] == 'mysql') {
                 $this->orm->getConnection($this->conName)->select($this->raw("SET SQL_MODE='';"));
                 try {
@@ -109,12 +114,12 @@ class ADB
                     $this->orm->getConnection($this->conName)->select(
                         $this->raw("SET time_zone='".$timezone."';")
                     );
-                }catch(\PDOException $e){
+                }catch(PDOException $e){
                     error_log($e->getMessage());
                 }
             }
 
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             error_log($e->getMessage());
             throw new AException(
                 $e->getMessage()."\n".$e->getTraceAsString(),
@@ -122,7 +127,7 @@ class ADB
                 $e->getFile(),
                 $e->getLine()
             );
-        } catch (\Error $e) {
+        } catch (Error $e) {
             error_log($e->getMessage());
             exit($e->getMessage()."\n".$e->getTraceAsString());
         }
@@ -192,8 +197,8 @@ class ADB
      * @param string $sql
      * @param bool   $noexcept
      *
-     * @return bool|\stdClass
-     * @throws \Exception
+     * @return bool|stdClass
+     * @throws Exception
      */
     public function query($sql, $noexcept = false)
     {
@@ -211,7 +216,7 @@ class ADB
      * @param string $sql
      * @param bool   $noexcept
      *
-     * @return bool|\stdClass
+     * @return bool|stdClass
      *
      * @throws AException
      */
@@ -221,11 +226,8 @@ class ADB
         try {
             $result = $orm->getConnection($this->conName)->select($this->raw($sql));
             $data = json_decode(json_encode($result), true);
-            /**
-             * @var \stdClass $output
-             */
-            $output = new \stdClass();
-            $output->row = isset($data[0]) ? $data[0] : [];
+            $output = new stdClass();
+            $output->row = $data[0] ?? [];
             //get total rows count for pagination
             if ($data && is_int(strpos($sql, $this->raw_sql_row_count()))) {
                 $output->total_num_rows = $this->sql_get_row_count();
@@ -306,9 +308,7 @@ class ADB
      */
     public function getLastId()
     {
-        $orm = $this->orm;
-
-        return $orm::connection($this->conName)->getPdo()->lastInsertId();
+        return (int)$this->orm::connection($this->conName)->getPdo()->lastInsertId();
     }
 
     /**
@@ -345,7 +345,7 @@ class ADB
      * @param string $file
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function performSql($file)
     {
@@ -354,7 +354,7 @@ class ADB
             $query = '';
             foreach ($sql as $line) {
                 $tsl = trim($line);
-                if (($sql != '') && (substr($tsl, 0, 2) != "--") && (substr($tsl, 0, 1) != '#')) {
+                if (($sql != '') && (!str_starts_with($tsl, "--")) && (!str_starts_with($tsl, '#'))) {
                     $query .= $line;
                     if (preg_match('/;\s*$/', $line)) {
                         $query = str_replace("`ac_", "`".$this->db_config['prefix'], $query);
@@ -375,7 +375,7 @@ class ADB
      * @param string $function_name
      * @param array  $args
      *
-     * @return \Illuminate\Database\Capsule\Manager | null
+     * @return Capsule | null
      */
     public function __call($function_name, $args)
     {
@@ -390,7 +390,7 @@ class ADB
     /**
      * @param string $table_name - table name without prefix
      *
-     * @return \Illuminate\Database\Query\Builder
+     * @return Builder
      */
     public function table($table_name)
     {
@@ -422,7 +422,7 @@ class ADB
 
 
     /**
-     * @return mixed
+     * @return string
      */
     public function CurrentTimeStamp()
     {

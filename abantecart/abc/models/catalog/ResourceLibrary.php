@@ -6,7 +6,9 @@ use abc\core\ABC;
 use abc\core\lib\AFile;
 use abc\core\lib\AResourceManager;
 use abc\models\BaseModel;
+use Carbon\Carbon;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -14,12 +16,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property int $resource_id
  * @property int $type_id
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
+ * @property int $stage_id
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
  *
  * @property ResourceType $resource_type
- * @property \Illuminate\Database\Eloquent\Collection $resource_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $resource_maps
+ * @property Collection $resource_descriptions
+ * @property Collection $resource_maps
+ *
+ * @method static ResourceLibrary find(int $resource_id) ResourceLibrary
+ * @method static ResourceLibrary select(mixed $select) Builder
  *
  * @package abc\models
  */
@@ -35,6 +41,7 @@ class ResourceLibrary extends BaseModel
 
     protected $casts = [
         'type_id' => 'int',
+        'stage_id' => 'int',
     ];
 
     protected $dates = [
@@ -46,6 +53,7 @@ class ResourceLibrary extends BaseModel
         'type_id',
         'date_added',
         'date_modified',
+        'stage_id'
     ];
 
     public function resource_type()
@@ -150,14 +158,14 @@ class ResourceLibrary extends BaseModel
                 $titles = [];
             }
 
-            $resource = array(
+            $resource = [
                 'language_id'   => $language_id,
                 'name'          => $titles,
                 'title'         => $titles,
                 'description'   => '',
                 'resource_path' => $image_basename,
                 'resource_code' => '',
-            );
+            ];
             foreach ($language_list as $lang) {
                 $resource['name'][$lang['language_id']] = $title;
                 $resource['title'][$lang['language_id']] = $title;
@@ -167,7 +175,6 @@ class ResourceLibrary extends BaseModel
                 $rm->mapResource($object_txt_id, $object_id, $resource_id);
             } else {
                 $this->errors[] = "Error: Image resource can not be created. ".$this->registry->get('db')->error;
-                continue;
             }
         }
 

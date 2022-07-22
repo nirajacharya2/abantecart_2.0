@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -27,36 +27,19 @@ use H;
 
 class AMenu
 {
-    /**
-     * registry to provide access to cart objects
-     *
-     * @var object Registry
-     */
+    /** @var object Registry */
     protected $registry;
-    /**
-     * @var object
-     */
+    /** @var object */
     protected $dataset;
     /** @var ADB */
     protected $db;
-    /**
-     * @var integer
-     */
-    protected $dataset_id = 0;
-    /**
-     * @var array
-     */
     protected $menu_items = [];
     /**
      * array form quick search menu item without dig in menu levels
-     *
-     * @var array
      */
     protected $dataset_rows = [];
     /**
      * array for checking for unique menu item id
-     *
-     * @var array
      */
     protected $item_ids = [];
 
@@ -68,53 +51,80 @@ class AMenu
         }
 
         $this->registry = Registry::getInstance();
-        $this->db = $this->registry->get('db');
+        $this->db = Registry::db();
         //check for correct menu name
         if (!in_array($menu_name, ['admin', 'storefront'])) {
             throw new AException (
-                'Error: Could not initialize AMenu class! Unknown menu name: "'.$menu_name.'"',
+                'Error: Could not initialize AMenu class! Unknown menu name: "' . $menu_name . '"',
                 AC_ERR_LOAD
             );
         }
 
         $this->dataset = new ADataset ('menu', $menu_name);
         $this->menu_items = $this->_build_menu($this->dataset->getRows());
-
     }
 
     protected function _build_menu($values)
     {
-
+        $output = [];
         // need to resort by sort_order property
-        $offset = 0; // it needs for process repeating sort numbers
-        $tmp = $this->item_ids = [];
+        $this->item_ids = [];
         if (is_array($values)) {
+            // need to resort by sort_order property and exclude disabled extension items
+            $enabled_extension = $this->registry->get('extensions')->getEnabledExtensions();
             $rm = new AResourceManager();
             $rm->setType('image');
             $language_id = $this->registry->get('language')->getContentLanguageID();
-
+            $indexes = [];
             foreach ($values as &$item) {
+                //checks for disabled extension
+                if ($item ['item_type'] == 'extension') {
+                    // looks for this name in enabled extensions list. if is not there - skip it
+                    if (!$this->_find_itemId_in_extensions($item ['item_id'], $enabled_extension)) {
+                        continue;
+                    } else { // if all fine - loads language of extension for menu item text show
+                        if (!str_contains($item ['item_url'], 'http')) {
+                            Registry::load()->language($item ['item_id'] . '/' . $item ['item_id'], 'silent');
+                            $item['language'] = $item['item_id'] . '/' . $item ['item_id'];
+                        }
+                    }
+                }
+
                 if ($item['item_icon_rl_id']) {
                     $r = $rm->getResource($item['item_icon_rl_id'], $language_id);
                     $item['item_icon_code'] = $r['resource_code'];
                 }
-                if (isset ($tmp [$item ['parent_id']] [$item ['sort_order']])) {
-                    $offset++;
-                }
-                $tmp [$item ['parent_id']] [$item ['sort_order'] + $offset] = $item;
+                $output [$item ['parent_id']] [] = $item;
+                $indexes[$item ['parent_id']][] = $item ['sort_order'];
                 $this->item_ids [] = $item ['item_id'];
             }
-        }
-        unset($item);
 
+            foreach ($output as $parentId => &$rows) {
+                array_multisort($indexes[$parentId], $rows, SORT_NUMERIC, SORT_ASC);
+            }
+        }
         $this->dataset_rows = $values;
+        return $output;
+    }
 
-        $menu = [];
-        foreach ($tmp as $key => $item) {
-            ksort($item);
-            $menu [$key] = $item;
+    /**
+     * @param $item_id
+     * @param $extension_list
+     *
+     * @return bool
+     */
+    private function _find_itemId_in_extensions($item_id, $extension_list)
+    {
+        if (in_array($item_id, $extension_list)) {
+            return true;
         }
-        return $menu;
+        foreach ($extension_list as $ext_id) {
+            $pos = strpos($item_id, $ext_id);
+            if ($pos === 0 && substr($item_id, strlen($ext_id), 1) == '_') {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -231,9 +241,7 @@ class AMenu
      */
     public function insertMenuItem($item = [])
     {
-
-        $check_array =
-            ["item_id", "item_text", "item_url", "parent_id", "sort_order", "item_type", "item_icon_rl_id"];
+        $check_array = ["item_id", "item_text", "item_url", "parent_id", "sort_order", "item_type", "item_icon_rl_id"];
 
         //clean text id
         $item ["item_id"] = H::preformatTextID($item ["item_id"]);
@@ -248,7 +256,7 @@ class AMenu
         }
 
         if ($item ['parent_id'] && !in_array($item ['parent_id'], $this->item_ids)) {
-            return 'Error: Cannot to add menu item because parent "'.$item ['parent_id'].'" is not exists';
+            return 'Error: Cannot to add menu item because parent "' . $item ['parent_id'] . '" is not exists';
         }
 
         // then insert
@@ -265,13 +273,12 @@ class AMenu
             }
             $new_sort_order++;
             $item ["sort_order"] = $new_sort_order;
-
         }
 
         // checks for unique item_id
         if (in_array($item ["item_id"], $this->item_ids)) {
-            return 'Error: Cannot to add menu item because item with item_id "'.$item ["item_id"]
-                .'" is already exists.';
+            return 'Error: Cannot to add menu item because item with item_id "'
+                . $item ["item_id"] . '" is already exists.';
         }
         $result = $this->dataset->addRows([$item]);
         // rebuild menu var after changing
@@ -303,7 +310,6 @@ class AMenu
      */
     public function updateMenuItem($item_id, $new_values)
     {
-
         if (empty ($new_values) || !$item_id) {
             return false;
         }

@@ -274,7 +274,9 @@
     "php-amqplib/php-amqplib": "3.1.1",
     "vdvpie22/audit-log-client": "1.7",
     "mustache/mustache": "2.14.0",
-    "zircote/swagger-php": "^4.4"
+    "zircote/swagger-php": "^4.4",
+    "ext-dom": "*",
+    "ext-simplexml": "*"
   },
   "extra": {
     "installer-paths": {
