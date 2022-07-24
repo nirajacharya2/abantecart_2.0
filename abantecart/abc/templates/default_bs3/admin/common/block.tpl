@@ -10,7 +10,7 @@ $blockName = $customBlockId ? $customName . ' <span>(' . $name . ')</span>' : $n
 <?php if ($editUrl && $customBlockId) { ?>    
       <a class="button" href="<?php echo $editUrl; ?>" target="_new" data-toggle="tooltip" data-placement="right" title="<?php echo $text_edit; ?>"><i class="fa fa-cog"></i></a>
 <?php } ?>
-<?php if (\abc\core\helper\AHelperUtils::has_value($blockId) || \abc\core\helper\AHelperUtils::has_value($customBlockId)) { ?>
+<?php if (H::has_value($blockId) || H::has_value($customBlockId)) { ?>
       <a class="button blk-switch" data-toggle="tooltip" data-placement="right" title="<?php echo $text_enable; ?>"><i class="fa fa-power-off"></i></a>
       <a class="button blk-info" data-info-block="<?php echo $block_info_url; ?>" data-toggle="tooltip" data-placement="right" title="<?php echo $text_details; ?>"><i class="fa fa-info-circle"></i></a>
       <a class="button blk-delete pull-right" data-toggle="tooltip" data-placement="left" title="<?php echo $text_delete; ?>"><i class="fa fa-trash"></i></a>

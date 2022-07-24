@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -23,16 +23,13 @@ namespace abc\controllers\storefront;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\core\helper\AHelperUtils;
+use abc\core\lib\AMailIM;
+use H;
 
-if ( ! class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 class ControllerPagesCheckoutGuestStep1 extends AController
 {
-    public $error = array();
-    public $data = array();
+    public $error = [];
 
     public function main()
     {
@@ -42,16 +39,16 @@ class ControllerPagesCheckoutGuestStep1 extends AController
 
         //is this an embed mode
         $cart_rt = 'checkout/cart';
-        if ($this->config->get('embed_mode') == true) {
+        if ($this->config->get('embed_mode')) {
             $cart_rt = 'r/checkout/cart/embed';
         }
 
-        if ( ! $this->cart->hasProducts() || ( ! $this->cart->hasStock() && ! $this->config->get('config_stock_checkout'))) {
+        if (!$this->cart->hasProducts() || (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout'))) {
             abc_redirect($this->html->getSecureURL($cart_rt));
         }
 
         //validate if order min/max are met
-        if ( ! $this->cart->hasMinRequirement() || ! $this->cart->hasMaxRequirement()) {
+        if (!$this->cart->hasMinRequirement() || !$this->cart->hasMaxRequirement()) {
             abc_redirect($this->html->getSecureURL($cart_rt));
         }
 
@@ -59,7 +56,7 @@ class ControllerPagesCheckoutGuestStep1 extends AController
             abc_redirect($this->html->getSecureURL('checkout/shipping'));
         }
 
-        if ( ! $this->config->get('config_guest_checkout') || $this->cart->hasDownload()) {
+        if (!$this->config->get('config_guest_checkout') || $this->cart->hasDownload()) {
             $this->session->data['redirect'] = $this->html->getSecureURL('checkout/shipping');
             abc_redirect($this->html->getSecureURL('account/login'));
         }
@@ -82,7 +79,7 @@ class ControllerPagesCheckoutGuestStep1 extends AController
             //IM addresses
             $protocols = $this->im->getProtocols();
             foreach ($protocols as $protocol) {
-                if (AHelperUtils::has_value($_post[$protocol]) && ! AHelperUtils::has_value($_session['guest'][$protocol])) {
+                if (H::has_value($_post[$protocol]) && !H::has_value($_session['guest'][$protocol])) {
                     $_session['guest'][$protocol] = $_post[$protocol];
                 }
             }
@@ -167,33 +164,33 @@ class ControllerPagesCheckoutGuestStep1 extends AController
         $this->document->setTitle($this->language->get('heading_title'));
         $this->document->resetBreadcrumbs();
         $this->document->addBreadcrumb(
-            array(
+            [
                 'href'      => $this->html->getHomeURL(),
                 'text'      => $this->language->get('text_home'),
                 'separator' => false,
-            ));
+            ]);
         $this->document->addBreadcrumb(
-            array(
+            [
                 'href'      => $this->html->getSecureURL($cart_rt),
                 'text'      => $this->language->get('text_cart'),
                 'separator' => $this->language->get('text_separator'),
-            ));
+            ]);
         $this->document->addBreadcrumb(
-            array(
+            [
                 'href'      => $this->html->getSecureURL('checkout/guest_step_1'),
                 'text'      => $this->language->get('text_guest_step_1'),
                 'separator' => $this->language->get('text_separator'),
-            ));
+            ]);
 
         $form = new AForm();
-        $form->setForm(array('form_name' => 'guestFrm'));
+        $form->setForm(['form_name' => 'guestFrm']);
         $this->data['form']['form_open'] = $form->getFieldHtml(
-            array(
+            [
                 'type'   => 'form',
                 'name'   => 'guestFrm',
                 'action' => $this->html->getSecureURL('checkout/guest_step_1'),
                 'csrf'   => true,
-            )
+            ]
         );
 
         if (isset($_post['firstname'])) {
@@ -204,12 +201,12 @@ class ControllerPagesCheckoutGuestStep1 extends AController
             $firstname = '';
         }
 
-        $this->data['form']['fields']['general']['firstname'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['general']['firstname'] = $form->getFieldHtml([
             'type'     => 'input',
             'name'     => 'firstname',
             'value'    => $firstname,
             'required' => true,
-        ));
+        ]);
 
         if (isset($_post['lastname'])) {
             $lastname = $_post['lastname'];
@@ -219,12 +216,12 @@ class ControllerPagesCheckoutGuestStep1 extends AController
             $lastname = '';
         }
         $this->data['form']['fields']['general']['lastname'] = $form->getFieldHtml(
-            array(
+            [
                 'type'     => 'input',
                 'name'     => 'lastname',
                 'value'    => $lastname,
                 'required' => true,
-            ));
+            ]);
         if (isset($_post['email'])) {
             $email = $_post['email'];
         } elseif (isset($_session['guest']['email'])) {
@@ -234,12 +231,12 @@ class ControllerPagesCheckoutGuestStep1 extends AController
         }
 
         $this->data['form']['fields']['general']['email'] = $form->getFieldHtml(
-            array(
+            [
                 'type'     => 'input',
                 'name'     => 'email',
                 'value'    => $email,
                 'required' => true,
-            ));
+            ]);
         if (isset($_post['telephone'])) {
             $telephone = $_post['telephone'];
         } elseif (isset($_session['guest']['telephone'])) {
@@ -248,11 +245,11 @@ class ControllerPagesCheckoutGuestStep1 extends AController
             $telephone = '';
         }
         $this->data['form']['fields']['general']['telephone'] = $form->getFieldHtml(
-            array(
+            [
                 'type'  => 'input',
                 'name'  => 'telephone',
                 'value' => $telephone,
-            ));
+            ]);
         if (isset($_post['fax'])) {
             $fax = $_post['fax'];
         } elseif (isset($_session['guest']['fax'])) {
@@ -261,21 +258,21 @@ class ControllerPagesCheckoutGuestStep1 extends AController
             $fax = '';
         }
         $this->data['form']['fields']['general']['fax'] = $form->getFieldHtml(
-            array(
+            [
                 'type'     => 'input',
                 'name'     => 'fax',
                 'value'    => $fax,
                 'required' => false,
-            ));
+            ]);
 
         //get only active IM drivers
         $im_drivers = $this->im->getIMDriverObjects();
         if ($im_drivers) {
             /**
-             * @var \abc\core\lib\AMailIM $driver_obj
+             * @var AMailIM $driver_obj
              */
             foreach ($im_drivers as $protocol => $driver_obj) {
-                if ( ! is_object($driver_obj) || $protocol == 'email') {
+                if (!is_object($driver_obj) || $protocol == 'email') {
                     continue;
                 }
 
@@ -289,7 +286,7 @@ class ControllerPagesCheckoutGuestStep1 extends AController
 
                 $fld = $driver_obj->getURIField($form, $uri);
                 $this->data['form']['fields']['general'][$protocol] = $fld;
-                $this->data['entry_'.$protocol] = $fld->label_text;
+                $this->data['entry_' . $protocol] = $fld->label_text;
             }
         }
 
@@ -302,12 +299,12 @@ class ControllerPagesCheckoutGuestStep1 extends AController
         }
 
         $this->data['form']['fields']['address']['company'] = $form->getFieldHtml(
-            array(
+            [
                 'type'     => 'input',
                 'name'     => 'company',
                 'value'    => $company,
                 'required' => false,
-            ));
+            ]);
         if (isset($_post['address_1'])) {
             $address_1 = $_post['address_1'];
         } elseif (isset($_session['guest']['address_1'])) {
@@ -316,12 +313,12 @@ class ControllerPagesCheckoutGuestStep1 extends AController
             $address_1 = '';
         }
         $this->data['form']['fields']['address']['address_1'] = $form->getFieldHtml(
-            array(
+            [
                 'type'     => 'input',
                 'name'     => 'address_1',
                 'value'    => $address_1,
                 'required' => true,
-            ));
+            ]);
 
         if (isset($_post['address_2'])) {
             $address_2 = $_post['address_2'];
@@ -331,12 +328,12 @@ class ControllerPagesCheckoutGuestStep1 extends AController
             $address_2 = '';
         }
         $this->data['form']['fields']['address']['address_2'] = $form->getFieldHtml(
-            array(
+            [
                 'type'     => 'input',
                 'name'     => 'address_2',
                 'value'    => $address_2,
                 'required' => false,
-            ));
+            ]);
 
         if (isset($_post['city'])) {
             $city = $_post['city'];
@@ -347,12 +344,12 @@ class ControllerPagesCheckoutGuestStep1 extends AController
         }
 
         $this->data['form']['fields']['address']['city'] = $form->getFieldHtml(
-            array(
+            [
                 'type'     => 'input',
                 'name'     => 'city',
                 'value'    => $city,
                 'required' => true,
-            ));
+            ]);
 
         if (isset($_post['zone_id'])) {
             $zone_id = $_post['zone_id'];
@@ -364,11 +361,11 @@ class ControllerPagesCheckoutGuestStep1 extends AController
         $this->view->assign('zone_id', $zone_id);
 
         $this->data['form']['fields']['address']['zone'] = $form->getFieldHtml(
-            array(
+            [
                 'type'     => 'selectbox',
                 'name'     => 'zone_id',
                 'required' => true,
-            ));
+            ]);
 
         if (isset($_post['postcode'])) {
             $postcode = $_post['postcode'];
@@ -379,12 +376,12 @@ class ControllerPagesCheckoutGuestStep1 extends AController
         }
 
         $this->data['form']['fields']['address']['postcode'] = $form->getFieldHtml(
-            array(
+            [
                 'type'     => 'input',
                 'name'     => 'postcode',
                 'value'    => $postcode,
                 'required' => true,
-            ));
+            ]);
 
         if (isset($_post['country_id'])) {
             $country_id = $_post['country_id'];
@@ -396,29 +393,27 @@ class ControllerPagesCheckoutGuestStep1 extends AController
 
         $this->loadModel('localisation/country');
         $countries = $this->model_localisation_country->getCountries();
-        $options = array("FALSE" => $this->language->get('text_select'));
+        $options = ["FALSE" => $this->language->get('text_select')];
         foreach ($countries as $item) {
             $options[$item['country_id']] = $item['name'];
         }
         $this->data['form']['fields']['address']['country'] = $form->getFieldHtml(
-            array(
+            [
                 'type'     => 'selectbox',
                 'name'     => 'country_id',
                 'options'  => $options,
                 'value'    => $country_id,
                 'required' => true,
-            ));
+            ]);
 
         $this->data['form']['shipping_indicator'] = $form->getFieldHtml(
-            array(
+            [
                 'type'       => 'checkbox',
                 'name'       => 'shipping_indicator',
                 'value'      => 1,
-                'checked'    => (isset($_post['shipping_indicator'])
-                    ? (bool)$_post['shipping_indicator']
-                    : false),
+                'checked'    => (isset($_post['shipping_indicator']) && (bool)$_post['shipping_indicator']),
                 'label_text' => $this->language->get('text_indicator'),
-            ));
+            ]);
 
         if (isset($_post['shipping_firstname'])) {
             $shipping_firstname = $_post['shipping_firstname'];
@@ -428,12 +423,12 @@ class ControllerPagesCheckoutGuestStep1 extends AController
             $shipping_firstname = '';
         }
         $this->data['form']['fields']['shipping']['shipping_firstname'] = $form->getFieldHtml(
-            array(
+            [
                 'type'     => 'input',
                 'name'     => 'shipping_firstname',
                 'value'    => $shipping_firstname,
                 'required' => true,
-            ));
+            ]);
         if (isset($_post['shipping_lastname'])) {
             $shipping_lastname = $_post['shipping_lastname'];
         } elseif (isset($_session['guest']['shipping']['lastname'])) {
@@ -442,12 +437,12 @@ class ControllerPagesCheckoutGuestStep1 extends AController
             $shipping_lastname = '';
         }
         $this->data['form']['fields']['shipping']['shipping_lastname'] = $form->getFieldHtml(
-            array(
+            [
                 'type'     => 'input',
                 'name'     => 'shipping_lastname',
                 'value'    => $shipping_lastname,
                 'required' => true,
-            ));
+            ]);
         if (isset($_post['shipping_company'])) {
             $shipping_company = $_post['shipping_company'];
         } elseif (isset($_session['guest']['shipping']['company'])) {
@@ -456,12 +451,12 @@ class ControllerPagesCheckoutGuestStep1 extends AController
             $shipping_company = '';
         }
         $this->data['form']['fields']['shipping']['shipping_company'] = $form->getFieldHtml(
-            array(
+            [
                 'type'     => 'input',
                 'name'     => 'shipping_company',
                 'value'    => $shipping_company,
                 'required' => false,
-            ));
+            ]);
         if (isset($_post['shipping_address_1'])) {
             $shipping_address_1 = $_post['shipping_address_1'];
         } elseif (isset($_session['guest']['shipping']['address_1'])) {
@@ -470,12 +465,12 @@ class ControllerPagesCheckoutGuestStep1 extends AController
             $shipping_address_1 = '';
         }
         $this->data['form']['fields']['shipping']['shipping_address_1'] = $form->getFieldHtml(
-            array(
+            [
                 'type'     => 'input',
                 'name'     => 'shipping_address_1',
                 'value'    => $shipping_address_1,
                 'required' => true,
-            ));
+            ]);
         if (isset($_post['shipping_address_2'])) {
             $shipping_address_2 = $_post['shipping_address_2'];
         } elseif (isset($_session['guest']['shipping']['address_2'])) {
@@ -484,12 +479,12 @@ class ControllerPagesCheckoutGuestStep1 extends AController
             $shipping_address_2 = '';
         }
         $this->data['form']['fields']['shipping']['shipping_address_2'] = $form->getFieldHtml(
-            array(
+            [
                 'type'     => 'input',
                 'name'     => 'shipping_address_2',
                 'value'    => $shipping_address_2,
                 'required' => false,
-            ));
+            ]);
 
         if (isset($_post['shipping_city'])) {
             $shipping_city = $_post['shipping_city'];
@@ -499,12 +494,12 @@ class ControllerPagesCheckoutGuestStep1 extends AController
             $shipping_city = '';
         }
         $this->data['form']['fields']['shipping']['shipping_city'] = $form->getFieldHtml(
-            array(
+            [
                 'type'     => 'input',
                 'name'     => 'shipping_city',
                 'value'    => $shipping_city,
                 'required' => true,
-            ));
+            ]);
 
         if (isset($_post['shipping_zone_id'])) {
             $shipping_zone_id = $_post['shipping_zone_id'];
@@ -515,11 +510,11 @@ class ControllerPagesCheckoutGuestStep1 extends AController
         }
         $this->view->assign('shipping_zone_id', $shipping_zone_id);
         $this->data['form']['fields']['shipping']['shipping_zone'] = $form->getFieldHtml(
-            array(
+            [
                 'type'     => 'selectbox',
                 'name'     => 'shipping_zone_id',
                 'required' => true,
-            ));
+            ]);
 
         if (isset($_post['shipping_postcode'])) {
             $shipping_postcode = $_post['shipping_postcode'];
@@ -529,14 +524,14 @@ class ControllerPagesCheckoutGuestStep1 extends AController
             $shipping_postcode = '';
         }
         $this->data['form']['fields']['shipping']['shipping_postcode'] = $form->getFieldHtml(
-            array(
+            [
                 'type'     => 'input',
                 'name'     => 'shipping_postcode',
                 'value'    => $shipping_postcode,
                 'required' => true,
-            ));
+            ]);
 
-        $options = array("FALSE" => $this->language->get('text_select'));
+        $options = ["FALSE" => $this->language->get('text_select')];
         foreach ($countries as $item) {
             $options[$item['country_id']] = $item['name'];
         }
@@ -548,13 +543,13 @@ class ControllerPagesCheckoutGuestStep1 extends AController
             $shipping_country_id = $this->config->get('config_country_id');
         }
         $this->data['form']['fields']['shipping']['shipping_country'] = $form->getFieldHtml(
-            array(
+            [
                 'type'     => 'selectbox',
                 'name'     => 'shipping_country_id',
                 'options'  => $options,
                 'value'    => $shipping_country_id,
                 'required' => true,
-            ));
+            ]);
 
         if (isset($_post['shipping_indicator'])) {
             $this->view->assign('shipping_addr', true);
@@ -571,32 +566,32 @@ class ControllerPagesCheckoutGuestStep1 extends AController
         $this->view->assign('back', $this->html->getSecureURL($cart_rt));
 
         $this->data['form']['back'] = $form->getFieldHtml(
-            array(
+            [
                 'type'  => 'button',
                 'name'  => 'back',
                 'text'  => $this->language->get('button_back'),
                 'style' => 'button',
-            ));
+            ]);
 
         $this->data['form']['continue'] = $form->getFieldHtml(
-            array(
+            [
                 'type' => 'submit',
                 'name' => $this->language->get('button_continue'),
-            ));
+            ]);
 
         //fill error messages.
-        foreach ($this->data['form']['fields'] as $section => $fields) {
+        foreach ($this->data['form']['fields'] as $fields) {
             foreach ($fields as $key => $text) {
-                $this->data['error_'.$key] = (string)$this->error[$key];
+                $this->data['error_' . $key] = (string)$this->error[$key];
             }
         }
 
         //TODO: REMOVE THIS IN 2.0!!!
         // backward compatibility code
         $deprecated = $this->data['form']['fields'];
-        foreach ($deprecated as $section => $fields) {
+        foreach ($deprecated as $fields) {
             foreach ($fields as $name => $fld) {
-                if (in_array($name, array('country', 'zone'))) {
+                if (in_array($name, ['country', 'zone'])) {
                     $name .= '_id';
                 }
                 $this->data['form'][$name] = $fld;
@@ -613,7 +608,7 @@ class ControllerPagesCheckoutGuestStep1 extends AController
 
     private function _validate($data)
     {
-        if ( ! $this->csrftoken->isTokenValid()) {
+        if (!$this->csrftoken->isTokenValid()) {
             $this->error['warning'] = $this->language->get('error_unknown');
 
             return false;
@@ -628,7 +623,7 @@ class ControllerPagesCheckoutGuestStep1 extends AController
             $this->error['lastname'] = $this->language->get('error_lastname');
         }
 
-        if ( ! preg_match(ABC::env('EMAIL_REGEX_PATTERN'), $data['email'])) {
+        if (!preg_match(ABC::env('EMAIL_REGEX_PATTERN'), $data['email'])) {
             $this->error['email'] = $this->language->get('error_email');
         }
 
@@ -688,7 +683,7 @@ class ControllerPagesCheckoutGuestStep1 extends AController
 
         $this->extensions->hk_ValidateData($this);
 
-        if ( ! $this->error) {
+        if (!$this->error) {
             return true;
         } else {
             $this->error['warning'] = $this->language->get('gen_data_entry_error');

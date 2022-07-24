@@ -1,4 +1,22 @@
 <?php
+/*------------------------------------------------------------------------------
+  $Id$
+
+  AbanteCart, Ideal OpenSource Ecommerce Solution
+  http://www.AbanteCart.com
+
+  Copyright © 2011-2022 Belavier Commerce LLC
+
+  This source file is subject to Open Software License (OSL 3.0)
+  License details is bundled with this package in the file LICENSE.txt.
+  It is also available at this URL:
+  <http://www.opensource.org/licenses/OSL-3.0>
+
+ UPGRADE NOTE:
+   Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+   versions in the future. If you wish to customize AbanteCart for your
+   needs please refer to http://www.AbanteCart.com for more information.
+------------------------------------------------------------------------------*/
 
 namespace abc\models\locale;
 
@@ -29,6 +47,7 @@ use abc\models\system\StoreDescription;
 use abc\models\system\TaxClassDescription;
 use abc\models\system\TaxRateDescription;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -44,36 +63,36 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $sort_order
  * @property int $status
  *
- * @property \Illuminate\Database\Eloquent\Collection $banner_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $block_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $category_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $content_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $country_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $coupon_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $download_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $field_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $fields_group_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $form_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $global_attributes_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $global_attributes_value_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $language_definitions
- * @property \Illuminate\Database\Eloquent\Collection $length_class_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $order_data_types
- * @property \Illuminate\Database\Eloquent\Collection $order_status_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $orders
- * @property \Illuminate\Database\Eloquent\Collection $page_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $product_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $product_option_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $product_option_value_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $product_tags
- * @property \Illuminate\Database\Eloquent\Collection $resource_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $stock_statuses
- * @property \Illuminate\Database\Eloquent\Collection $store_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $tax_class_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $tax_rate_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $url_aliases
- * @property \Illuminate\Database\Eloquent\Collection $weight_class_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $zone_descriptions
+ * @property Collection $banner_descriptions
+ * @property Collection $block_descriptions
+ * @property Collection $category_descriptions
+ * @property Collection $content_descriptions
+ * @property Collection $country_descriptions
+ * @property Collection $coupon_descriptions
+ * @property Collection $download_descriptions
+ * @property Collection $field_descriptions
+ * @property Collection $fields_group_descriptions
+ * @property Collection $form_descriptions
+ * @property Collection $global_attributes_descriptions
+ * @property Collection $global_attributes_value_descriptions
+ * @property Collection $language_definitions
+ * @property Collection $length_class_descriptions
+ * @property Collection $order_data_types
+ * @property Collection $order_status_descriptions
+ * @property Collection $orders
+ * @property Collection $page_descriptions
+ * @property Collection $product_descriptions
+ * @property Collection $product_option_descriptions
+ * @property Collection $product_option_value_descriptions
+ * @property Collection $product_tags
+ * @property Collection $resource_descriptions
+ * @property Collection $stock_statuses
+ * @property Collection $store_descriptions
+ * @property Collection $tax_class_descriptions
+ * @property Collection $tax_rate_descriptions
+ * @property Collection $url_aliases
+ * @property Collection $weight_class_descriptions
+ * @property Collection $zone_descriptions
  *
  * @method static Language find(int $language_id) Language
  * @method static Language select(mixed $select) Builder
@@ -507,9 +526,6 @@ class Language extends BaseModel
 
     public static function getCodeById($language_id)
     {
-        /**
-         * @var Language $language
-         */
         $language = static::find($language_id);
         if (!$language) {
             return false;

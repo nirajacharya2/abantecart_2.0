@@ -26,6 +26,7 @@ use abc\core\engine\AResource;
 use abc\core\engine\Registry;
 use abc\models\catalog\ResourceDescription;
 use abc\models\catalog\ResourceLibrary;
+use abc\models\catalog\ResourceType;
 use H;
 use Psr\SimpleCache\InvalidArgumentException;
 
@@ -120,30 +121,26 @@ class AResourceManager extends AResource
         if (empty($data) || !H::has_value($data['type_id'])) {
             return null;
         }
-        $sql = "UPDATE " . $this->db->table_name('resource_types') . "
-                SET type_name='" . $this->db->escape($data['type_name']) . "',
-                    default_directory='" . $this->db->escape($data['default_directory']) . "',
-                    default_icon='" . $this->db->escape($data['default_icon']) . "',
-                    file_types='" . $this->db->escape($data['file_types']) . "'
-                WHERE type_id =  " . (int)$data['type_id'];
-        $this->db->query($sql);
+        $rt = ResourceType::find($data['type_id']);
+        $rt->fill( $data);
+        $rt->save();
 
         $this->cache->flush('resources');
 
         return true;
     }
 
-    /* not yet supported */
-    //TODO
-    public function addResourceType()
+    public function addResourceType($data)
     {
+        $rt = new ResourceType( $data);
+        $rt->save();
         $this->cache->flush('resources');
     }
 
-    /* not yet supported */
-    //TODO
-    public function deleteResourceType()
+    public function deleteResourceType($type_id)
     {
+        $rt = new ResourceType( $type_id );
+        $rt->delete();
         $this->cache->flush('resources');
     }
 
@@ -269,34 +266,10 @@ class AResourceManager extends AResource
         if (!$resource_id) {
             return false;
         }
-        $_update = [];
 
-        if (isset($data['resource_code'])) {
-            $_update['resource_code'] = $data['resource_code'];
-        }
-        $fields = ['name', 'title', 'description', 'resource_path', 'resource_code'];
-        if ($data['name']) {
-            foreach ($data['name'] as $language_id => $name) {
-                if ($this->config->get('translate_override_existing') && $language_id != $data['language_id']) {
-                    continue;
-                }
-                $update = $_update;
-                foreach ($fields as $f) {
-                    if (isset($data[$f][$language_id])) {
-                        $update[$f] = $data[$f][$language_id];
-                    }
-                }
-                $this->language->replaceDescriptions('resource_descriptions',
-                    ['resource_id' => (int)$resource_id],
-                    [(int)$language_id => $update]);
-            }
-        }
-
-        if ($data['resource_path']) {
-            $rl = ResourceLibrary::find($resource_id);
-            $rl->descriptions()->update(['resource_path' => $data['resource_path']]);
-            $this->deleteThumbnail($resource_id);
-        }
+        $rl = ResourceLibrary::find($resource_id);
+        $rl->descriptions()->where('language_id', $data['language_id'])->update($data);
+        $this->deleteThumbnail($resource_id);
 
         $this->cache->flush('resources');
 
@@ -318,7 +291,7 @@ class AResourceManager extends AResource
 
         //get $resource with all translations
         $resource = $this->getResource($resource_id);
-        //skip when resource is html-code or does not exists
+        //skip when resource is html-code or does not exist
         if (!$resource['resource_path'] || !$resource) {
             return false;
         }
@@ -368,7 +341,10 @@ class AResourceManager extends AResource
         //remove thumbnail before removing
         $this->deleteThumbnail($resource_id);
 
-        ResourceLibrary::find($resource_id)?->delete();
+        $resource = ResourceLibrary::find($resource_id);
+        if($resource) {
+            $resource->delete();
+        }
 
         $this->cache->flush('resources');
         return true;

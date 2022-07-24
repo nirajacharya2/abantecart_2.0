@@ -17,6 +17,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property \Illuminate\Database\Eloquent\Collection $resource_libraries
  *
+ * @method static ResourceType find(int $resource_id) ResourceType
+ * @method static ResourceType select(mixed $select) Builder
+ *
  * @package abc\models
  */
 class ResourceType extends BaseModel

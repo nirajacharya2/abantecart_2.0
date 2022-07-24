@@ -25,18 +25,23 @@ use abc\core\lib\AbcCache;
 use abc\core\lib\AConfig;
 use abc\core\lib\ADB;
 use abc\core\lib\AException;
+use abc\core\lib\ALanguageManager;
 use abc\core\lib\AWarning;
+use abc\models\storefront\ModelToolImage;
+use Exception;
 use H;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 /**
- * @property \abc\models\storefront\ModelToolImage | \abc\models\admin\ModelToolImage $model_tool_image
+ * @property ModelToolImage | \abc\models\admin\ModelToolImage $model_tool_image
  * @property  ExtensionsAPI $extensions
  * @property  ALoader $load
  * @property  AHtml $html
  * @property  AConfig $config
  * @property  AbcCache $cache
  * @property  ADB $db
- * @property  \abc\core\lib\ALanguageManager $language
+ * @property  ALanguageManager $language
  */
 class AResource
 {
@@ -77,7 +82,6 @@ class AResource
     /**
      * @param string $type
      *
-     * @throws \ReflectionException
      */
     public function __construct($type)
     {
@@ -101,7 +105,7 @@ class AResource
     protected function loadType()
     {
         $cache_key = 'resources.'.$this->type;
-        $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '',$cache_key)
+        $cache_key = preg_replace('/[^a-zA-Z\d.]/', '',$cache_key)
                     .'.store_'.(int)$this->config->get('config_store_id');
 
         $type_data = $this->cache->get($cache_key);
@@ -157,22 +161,21 @@ class AResource
      */
     public function getHexPath($resource_id)
     {
-        $result = rtrim(chunk_split(dechex($resource_id), 2, '/'), '/');
-        return $result;
+        return rtrim(chunk_split(dechex($resource_id), 2, '/'), '/');
     }
 
     /**
      * @param string $path
      *
-     * @return null|number
-     * @throws \Exception
+     * @return int|null
+     * @throws Exception
      */
     public function getIdFromHexPath($path)
     {
         if (empty($path)) {
             return null;
         }
-        if (strpos($path, '/') !== false) {
+        if (str_contains($path, '/')) {
             //find first in file to solve tar.gz problem
             if (preg_match("/\.tar\.gz$/i", $path)) {
                 $ext = 'tar.gz';
@@ -195,7 +198,7 @@ class AResource
      * @param string $filename
      *
      * @return int
-     * @throws \Exception
+     * @throws Exception
      */
     public function getIdByName($filename)
     {
@@ -219,8 +222,8 @@ class AResource
      *
      * @return string
      * @throws AException
-     * @throws \ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public function getResourceThumb($resource_id, $width, $height, $language_id = '')
     {
@@ -252,8 +255,8 @@ class AResource
      * @param int $language_id
      *
      * @return array
-     * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws Exception
+     * @throws InvalidArgumentException
      */
     public function getResource($resource_id, $language_id = 0)
     {
@@ -268,7 +271,7 @@ class AResource
 
         //attempt to load cache
         $cache_key = 'resources.'.$resource_id;
-        $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key);
+        $cache_key = preg_replace('/[^a-zA-Z\d.]/', '', $cache_key);
         $resource = $this->cache->get($cache_key);
         if ($resource === null) {
             $where = "WHERE rl.resource_id = ".$this->db->escape($resource_id);
@@ -282,12 +285,10 @@ class AResource
                     LEFT JOIN ".$this->db->table_name("resource_descriptions")." rd
                         ON (rl.resource_id = rd.resource_id)
                     LEFT JOIN ".$this->db->table_name("resource_descriptions")." rdd
-                        ON (rl.resource_id = rdd.resource_id AND rdd.language_id = '"
-                .$this->language->getDefaultLanguageID()."')
+                        ON (rl.resource_id = rdd.resource_id AND rdd.language_id = '".$this->language->getDefaultLanguageID()."')
                     LEFT JOIN ".$this->db->table_name("resource_types")." rt
                         ON (rl.type_id = rt.type_id )
                     ".$where;
-
             $query = $this->db->query($sql);
             $result = $query->rows;
             $resource = [];
@@ -313,24 +314,24 @@ class AResource
     /**
      * function returns URL to resource if image it will resize.
      *
-     * @param array $rsrc_info - resource details
+     * @param array $resourceInfo - resource details
      * @param int $width
      * @param int $height
      *
      * @return string
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    public function getResizedImageURL($rsrc_info = [], $width, $height)
+    public function getResizedImageURL($resourceInfo, $width, $height)
     {
-        $resource_id = (int)$rsrc_info['resource_id'];
+        $resource_id = (int)$resourceInfo['resource_id'];
         //get original file path & details
-        $origin_path = ABC::env('DIR_RESOURCES').$this->type_dir.$rsrc_info['resource_path'];
+        $origin_path = ABC::env('DIR_RESOURCES').$this->type_dir. $resourceInfo['resource_path'];
         $info = pathinfo($origin_path);
         $extension = $info['extension'];
         if (in_array($extension, ['ico', 'svg', 'svgz'])) {
             // returns ico-file as original
-            return $this->buildResourceURL($rsrc_info['resource_path'], 'full');
+            return $this->buildResourceURL($resourceInfo['resource_path'], 'full');
         }
 
         $type_image = is_file(ABC::env('DIR_IMAGES').'icon_resource_'.$this->type.'.png')
@@ -338,30 +339,30 @@ class AResource
                         : '';
 
         //is this a resource with code ?
-        if (!empty($rsrc_info['resource_code'])) {
+        if (!empty($resourceInfo['resource_code'])) {
             //we have resource code, nothing to do
-            return $rsrc_info['resource_code'];
+            return $resourceInfo['resource_code'];
         }
         //is this image resource
         switch ($this->type) {
             case 'image' :
-                if (!$rsrc_info['default_icon']) {
-                    $rsrc_info['default_icon'] = 'no_image.jpg';
+                if (!$resourceInfo['default_icon']) {
+                    $resourceInfo['default_icon'] = 'no_image.jpg';
                 }
-                if (!$rsrc_info['resource_path']) {
+                if (!$resourceInfo['resource_path']) {
                     $origin_path = '';
                 }
                 break;
             default :
                 //this is non image type return original
-                if (!$rsrc_info['default_icon'] && !$type_image) {
-                    $rsrc_info['default_icon'] = 'no_image.jpg';
+                if (!$resourceInfo['default_icon'] && !$type_image) {
+                    $resourceInfo['default_icon'] = 'no_image.jpg';
                     $origin_path = '';
                 } elseif ($type_image) {
-                    $rsrc_info['default_icon'] = $type_image;
+                    $resourceInfo['default_icon'] = $type_image;
                     $origin_path = '';
                 } else {
-                    return $this->buildResourceURL($rsrc_info['resource_path'], 'full');
+                    return $this->buildResourceURL($resourceInfo['resource_path'], 'full');
                 }
         }
 
@@ -369,23 +370,23 @@ class AResource
         $height = (int)$height;
         if (!$width || !$height) {
             //if no size, return original
-            return $this->buildResourceURL($rsrc_info['resource_path'], 'full');
+            return $this->buildResourceURL($resourceInfo['resource_path'], 'full');
         }
 
         //resource name MUST be provided here, if missing use resource ID.
-        if (!$rsrc_info['name'] && $resource_id) {
-            $rsrc_info['name'] = $resource_id;
+        if (!$resourceInfo['name'] && $resource_id) {
+            $resourceInfo['name'] = $resource_id;
         }
-        $name = preg_replace('/[^a-zA-Z0-9]/', '_', $rsrc_info['name']);
+        $name = preg_replace('/[^a-zA-Z\d]/', '_', $resourceInfo['name']);
 
         if (!is_file($origin_path) || !$resource_id) {
             //missing original resource. oops
             $this->load->model('tool/image');
-            return $this->model_tool_image->resize($rsrc_info['default_icon'], $width, $height);
+            return $this->model_tool_image->resize($resourceInfo['default_icon'], $width, $height);
         } else {
             //Build thumbnails path similar to resource library path
             $sub_path = 'thumbnails'.DS
-                        .dirname($rsrc_info['resource_path']).DS
+                        .dirname($resourceInfo['resource_path']).DS
                         .$name.'-'.$resource_id.'-'.$width.'x'.$height;
             $new_image = $sub_path.'.'.$extension;
             if (!H::check_resize_image($origin_path, $new_image, $width, $height,
@@ -438,8 +439,8 @@ class AResource
 
     /**
      * @return array
-     * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws Exception
+     * @throws InvalidArgumentException
      */
     public function getAllResourceTypes()
     {
@@ -475,8 +476,8 @@ class AResource
      *
      * @return array
      * @throws AException
-     * @throws \ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public function getMainThumb($object_name, $object_id, $width, $height, $noimage = true)
     {
@@ -510,8 +511,8 @@ class AResource
      *
      * @return array
      * @throws AException
-     * @throws \ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public function getResourceAllObjects(
         $object_name,
@@ -534,7 +535,7 @@ class AResource
         }
 
         if ($limit && !$noimage) {
-            $slice_limit = $limit > sizeof($results) ? sizeof($results) : $limit;
+            $slice_limit = min($limit, sizeof($results));
             $results = array_slice($results, 0, $slice_limit);
         }
 
@@ -701,8 +702,8 @@ class AResource
      * @param int $language_id
      *
      * @return array
-     * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws Exception
+     * @throws InvalidArgumentException
      */
     public function getResources($object_name, $object_id, $language_id = 0)
     {
@@ -719,7 +720,7 @@ class AResource
 
         //attempt to load cache
         $cache_key = 'resources.'.$this->type.'.'.$object_name.'.'.$object_id;
-        $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id.'_lang_'.$language_id;
+        $cache_key = preg_replace('/[^a-zA-Z\d.]/', '', $cache_key).'.store_'.$store_id.'_lang_'.$language_id;
         $resources = $this->cache->get($cache_key);
         if ($resources !== null) {
             return $resources;
@@ -776,8 +777,8 @@ class AResource
      *
      * @return array
      * @throws AException
-     * @throws \ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public function getMainThumbList($object_name, $object_ids = [], $width = 0, $height = 0, $noimage = true)
     {
@@ -808,7 +809,7 @@ class AResource
         //attempt to load cache
         $cache_key = 'resources.list.'.$this->type.'.'.$object_name.'.'.$width.'x'.$height.'.'.md5(implode('.',
                 $object_ids));
-        $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id.'_lang_'.$language_id;
+        $cache_key = preg_replace('/[^a-zA-Z\d.]/', '', $cache_key).'.store_'.$store_id.'_lang_'.$language_id;
         $output = $this->cache->get($cache_key);
         if ($output !== null) {
             return $output;
@@ -838,7 +839,7 @@ class AResource
             WHERE rm.object_name = '".$this->db->escape($object_name)."'
                  AND rl.type_id = ".$this->type_id."
                  AND rm.object_id IN (".implode(", ", $object_ids).")
-            ORDER BY rm.object_id ASC, rm.sort_order ASC, rl.resource_id ASC";
+            ORDER BY rm.object_id, rm.sort_order, rl.resource_id";
         $result = $this->db->query($sql);
 
         $output = $selected_ids = [];
@@ -918,8 +919,8 @@ class AResource
      *
      * @return array
      * @throws AException
-     * @throws \ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public function getMainImage($object_name, $object_id, $width, $height, $noimage = true)
     {

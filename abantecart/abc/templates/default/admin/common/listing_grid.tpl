@@ -276,7 +276,7 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 		if (!empty($data['actions'])) {
 			foreach ($data['actions'] as $type => $action) {
 				$html_string = '';
-				$href = 'href="'.(\abc\core\helper\AHelperUtils::has_value($action['href']) ? $action['href'] : '#').'"';
+				$href = 'href="'.(H::has_value($action['href']) ? $action['href'] : '#').'"';
 
 				$html_string .= "actions_urls['".$type."'] = '".$href."';\n";
 				$html_string .= ' actions += \'';
@@ -343,7 +343,7 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 					$html_children = '<div class="dropdown-menu dropdown-menu-sm dropdown-menu-right" role="menu"><h5 class="title">'.htmlentities($text_select_from_list,ENT_QUOTES,ABC::env('APP_CHARSET')).'</h5><ul class="dropdown-list grid-dropdown">';
 					foreach($action['children'] as $id => $child){
 						$li_class = '';
-						$href = \abc\core\helper\AHelperUtils::has_value($child['href']) ? $child['href'] : '#';
+						$href = H::has_value($child['href']) ? $child['href'] : '#';
 						//for viewport mode
 						if($child['vhref']){
 							$href = 'data-toggle="modal" data-target="#viewport_modal" href="'.$child['vhref'].'" data-fullmode-href="'.$href.'"';

@@ -28,9 +28,8 @@ use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AWarning;
 use abc\models\BaseModel;
+use abc\models\locale\Language;
 use abc\models\QueryBuilder;
-use DOMDocument;
-use DOMElement;
 use Exception;
 use H;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -48,7 +47,7 @@ use stdClass;
 /**
  * short description.
  *
- * @property ACache $cache
+ * @property AbcCache $cache
  */
 abstract class Extension
 {
@@ -413,21 +412,21 @@ class ExtensionsApi
         $type = (string) $type;
         $extension_data = [];
         if (in_array($type, $this->extension_types)) {
-            $sql = "SELECT DISTINCT e.key
+            $sql = "SELECT DISTINCT e.`key`
                     FROM ".$this->db->table_name("extensions")." e
                     RIGHT JOIN ".$this->db->table_name("settings")." s ON s.group = e.key
                     WHERE e.type = '".$this->db->escape($type)."'";
         } elseif ($type == 'exts') {
-            $sql = "SELECT DISTINCT e.key
+            $sql = "SELECT DISTINCT e.`key`
                     FROM ".$this->db->table_name("extensions")." e
                     RIGHT JOIN ".$this->db->table_name("settings")." s ON s.group = e.key
                     WHERE e.type IN ('".implode("', '", $this->extension_types)."')";
         } elseif ($type == '') {
-            $sql = "SELECT DISTINCT e.key
+            $sql = "SELECT DISTINCT e.`key`
                     FROM ".$this->db->table_name("extensions")." e
                     RIGHT JOIN ".$this->db->table_name("settings")." s ON s.group = e.key";
         } else {
-            $sql = "SELECT DISTINCT e.key
+            $sql = "SELECT DISTINCT e.`key`
                     FROM ".$this->db->table_name("extensions")." e";
         }
 
@@ -853,9 +852,7 @@ class ExtensionsApi
      */
     public function loadEnabledExtensions($force_enabled_off = false)
     {
-        /**
-         * @var Registry
-         */
+
         $ext_controllers = $ext_models = $ext_languages = $ext_templates = $ext_libraries = $ext_modules = [];
         $enabled_extensions = $hook_extensions = [];
 
@@ -889,7 +886,7 @@ class ExtensionsApi
                 $ext_libraries[$ext] = $libraries;
                 $ext_modules[$ext] = $modules;
 
-                $class_alias = preg_replace('/[^a-zA-Z0-9]/', ' ', $ext);
+                $class_alias = preg_replace('/[^a-zA-Z\d]/', ' ', $ext);
                 $class_alias = ucwords($class_alias);
                 $class_alias = str_replace(" ", "", $class_alias);
                 $class = '\abc\core\extension\Extension'.$class_alias;
@@ -998,18 +995,17 @@ class ExtensionsApi
                 $source = $this->extension_models;
                 break;
             case 'L' :
-                $query = $this->registry->get('db')->query(
-                    "SELECT directory 
-                        FROM ".$this->db->table_name("languages")." 
-                        WHERE code='".$this->registry->get('session')->data['language']."'"
-                );
-                $file = $ext_section.'languages'.DS.$query->row['directory'].DS.$route.'.xml';
+                /** @var Language $langDetails */
+                $langDetails = Language::select('*')
+                    ->where('code', Registry::session()->data['language'])
+                    ->first();
+                $file = $ext_section.'languages'.DS.$langDetails->directory.DS.$route.'.xml';
                 $source = $this->extension_languages;
                 break;
             case 'T' :
                 $tmpl_id = ABC::env('IS_ADMIN')
-                    ? $this->registry->get('config')->get('admin_template')
-                    : $this->registry->get('config')->get('config_storefront_template');
+                    ? Registry::config()->get('admin_template')
+                    : Registry::config()->get('config_storefront_template');
                 $file = DS.$tmpl_id.$ext_section.DS.$route;
                 $source = $this->extension_templates;
                 break;

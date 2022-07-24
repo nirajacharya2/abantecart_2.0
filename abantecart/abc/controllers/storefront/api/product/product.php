@@ -17,6 +17,7 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
+
 namespace abc\controllers\storefront;
 
 use abc\core\ABC;
@@ -31,7 +32,7 @@ use Illuminate\Support\Collection;
  *
  * @package abc\controllers\storefront
  * @property \abc\models\storefront\ModelCatalogProduct $model_catalog_product
- * @property \abc\models\storefront\ModelCatalogReview  $model_catalog_review
+ * @property \abc\models\storefront\ModelCatalogReview $model_catalog_review
  *
  */
 class ControllerApiProductProduct extends AControllerAPI
@@ -230,9 +231,6 @@ class ControllerApiProductProduct extends AControllerAPI
             ABC::env('APP_CHARSET')
         );
 
-
-
-
         $this->loadModel('catalog/review');
         if ($this->config->get('enable_reviews')) {
             $average = $this->model_catalog_review->getAverageRating($product_id);
@@ -242,25 +240,13 @@ class ControllerApiProductProduct extends AControllerAPI
         }
         $product->update(
             [
-              'count'=> $this->db->raw('count+1')
+                'count' => $this->db->raw('count+1')
             ]
         );
-//        //$this->model_catalog_product->updateViewed($product_id);
-//
-//        $tags = [];
-//        $results = $this->model_catalog_product->getProductTags($product_id);
-//        if ($results) {
-//            foreach ($results as $result) {
-//                if ($result['tag']) {
-//                    $tags[] = ['tag' => $result['tag']];
-//                }
-//            }
-//        }
-//        $product_info['tags'] = $tags;
+
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
-//???? must be an array?
-        $this->rest->setResponseData($product );
+        $this->rest->setResponseData($product->toArray());
         $this->rest->sendResponse(200);
     }
 

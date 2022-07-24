@@ -267,8 +267,7 @@ class AMenu
             $new_sort_order = 0;
             if ($brothers) {
                 foreach ($brothers as $brother) {
-                    $new_sort_order =
-                        $brother ['sort_order'] > $new_sort_order ? $brother ['sort_order'] : $new_sort_order;
+                    $new_sort_order = max($brother ['sort_order'], $new_sort_order);
                 }
             }
             $new_sort_order++;

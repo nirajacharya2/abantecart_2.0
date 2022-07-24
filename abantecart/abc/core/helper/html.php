@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,10 +22,9 @@ namespace abc\core\helper;
 use abc\core\ABC;
 use abc\core\engine\AResource;
 use abc\core\engine\Registry;
+use H;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+
 class AHelperHtml extends AHelper{
 	//Possibly legacy and only for old template. Remove in 1.2
 	static function renderStoreMenu($menu, $level = 0){
@@ -167,7 +166,7 @@ class AHelperHtml extends AHelper{
 			$result .= '<a ' . $class . $href . $onclick . '>';
 
 			//check icon rl type html, image or none.
-			if (AHelperUtils::is_html($item['icon'])) {
+			if (H::is_html($item['icon'])) {
 				$result .= $item['icon'];
 			} else {
 				if ($item['icon']) {

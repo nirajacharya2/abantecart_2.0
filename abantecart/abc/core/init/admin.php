@@ -13,7 +13,6 @@ $lib_list = [
     'resource_manager',
     'resource_upload',
     'listing_manager',
-    'language_manager',
     'file_uploads_manager',
     'im_manager',
     'checkoutAdmin',

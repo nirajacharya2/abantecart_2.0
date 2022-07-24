@@ -1655,7 +1655,7 @@ class AHelperUtils extends AHelper
 
     /**
      * Function returns relative path of class based on full class name.
-     * Example: on "\abc\core\lib\ALanguageManager" will return "/abc/lib/language_manager.php"
+     * Example: on "\abc\core\lib\ALanguageManager" will return "/abc/lib/ALanguageManager.php"
      *
      * @param string $class_name - full class name
      *

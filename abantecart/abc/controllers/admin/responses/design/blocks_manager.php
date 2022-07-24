@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,19 +21,15 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
 use abc\core\engine\ALanguage;
 use abc\core\lib\AJson;
 use abc\core\lib\ALayoutManager;
 use abc\core\view\AView;
-
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
+use H;
 
 class ControllerResponsesDesignBlocksManager extends AController
 {
-    public $data = array();
+    public $data = [];
 
     public function main()
     {
@@ -43,19 +39,19 @@ class ControllerResponsesDesignBlocksManager extends AController
         $layout = new ALayoutManager();
         $installedBlocks = $layout->getInstalledBlocks();
 
-        $availableBlocks = array();
+        $availableBlocks = [];
 
         foreach ($installedBlocks as $block) {
             if ($block['parent_block_id'] == $section_id) {
-                $availableBlocks[] = array(
-                    'id'              => $block['block_id'].'_'.$block['custom_block_id'],
+                $availableBlocks[] = [
+                    'id'              => $block['block_id'] . '_' . $block['custom_block_id'],
                     'block_id'        => $block['block_id'],
                     'block_txt_id'    => $block['block_txt_id'],
                     'block_name'      => $block['block_name'],
                     'custom_block_id' => $block['custom_block_id'],
                     'controller'      => $block['controller'],
                     'template'        => $block['template'],
-                );
+                ];
             }
         }
 
@@ -64,12 +60,11 @@ class ControllerResponsesDesignBlocksManager extends AController
         $view->batchAssign($this->language->getASet());
         $view->assign('blocks', $availableBlocks);
         $view->assign('addBlock',
-            $this->html->getSecureURL('design/blocks_manager/addBlock', '&section_id='.$section_id));
+            $this->html->getSecureURL('design/blocks_manager/addBlock', '&section_id=' . $section_id));
         $blocks = $view->fetch('responses/design/blocks_manager.tpl');
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
-
         $this->response->setOutput($blocks);
     }
 
@@ -85,7 +80,7 @@ class ControllerResponsesDesignBlocksManager extends AController
 
         $view = new AView($this->registry, 0);
 
-        $selectedBlock = array();
+        $selectedBlock = [];
 
         foreach ($installedBlocks as $block) {
             if ($block['block_id'] == (int)$block_id && $block['custom_block_id'] == (int)$custom_block_id) {
@@ -98,12 +93,12 @@ class ControllerResponsesDesignBlocksManager extends AController
         if ($selectedBlock['custom_block_id']) {
             $customName = $selectedBlock['block_name'];
             $edit_url =
-                $this->html->getSecureURL('design/blocks/edit', '&custom_block_id='.$selectedBlock['custom_block_id']);
+                $this->html->getSecureURL('design/blocks/edit', '&custom_block_id=' . $selectedBlock['custom_block_id']);
         }
 
         $this->loadLanguage('design/blocks');
 
-        $view->batchAssign(array(
+        $view->batchAssign([
             'id'             => 0,
             'blockId'        => $selectedBlock['block_id'],
             'customBlockId'  => $selectedBlock['custom_block_id'],
@@ -113,7 +108,7 @@ class ControllerResponsesDesignBlocksManager extends AController
             'status'         => 1,
             'parentBlock'    => $section_id,
             'block_info_url' => $this->html->getSecureURL('design/blocks_manager/block_info'),
-        ));
+        ]);
 
         $blockTmpl = $view->fetch('common/block.tpl');
 
@@ -151,15 +146,15 @@ class ControllerResponsesDesignBlocksManager extends AController
                 //error
                 $this->load->library('json');
                 $this->response->addJSONHeader();
-                $this->response->setOutput(AJson::encode(array('error' => 'Incorrect Block ID')));
+                $this->response->setOutput(AJson::encode(['error' => 'Incorrect Block ID']));
                 return null;
             }
         }
 
         $info = $lm->getBlockInfo((int)$block_id);
         foreach ($info as &$i) {
-            $i['block_date_added'] = AHelperUtils::dateISO2Display($i['block_date_added'],
-                $this->language->get('date_format_short').' '.$this->language->get('time_format'));
+            $i['block_date_added'] = H::dateISO2Display($i['block_date_added'],
+                $this->language->get('date_format_short') . ' ' . $this->language->get('time_format'));
         }
         //expect only 1 block details per layout
         $this->data = array_merge($info[0], $this->data);
@@ -167,18 +162,18 @@ class ControllerResponsesDesignBlocksManager extends AController
 
         //get specific description
         if ($custom_block_id > 0) {
-            $descr = $lm->getBlockDescriptions((int)$custom_block_id);
+            $dscr = $lm->getBlockDescriptions((int)$custom_block_id);
             $language_id = $this->language->getContentLanguageID();
-            $this->data['title'] = $descr[$language_id]['title'];
-            $this->data['description'] = $descr[$language_id]['description'];
+            $this->data['title'] = $dscr[$language_id]['title'];
+            $this->data['description'] = $dscr[$language_id]['description'];
 
             //detect edit URL and build button
             if ($this->data['block_txt_id'] == 'html_block' || $this->data['block_txt_id'] == 'listing_block') {
-                $edit_url = $this->html->getSecureURL('design/blocks/edit', '&custom_block_id='.$custom_block_id);
+                $edit_url = $this->html->getSecureURL('design/blocks/edit', '&custom_block_id=' . $custom_block_id);
             } else {
                 if ($this->data['block_txt_id'] == 'banner_block') {
                     $edit_url = $this->html->getSecureURL('extension/banner_manager/edit_block',
-                        '&custom_block_id='.$custom_block_id);
+                        '&custom_block_id=' . $custom_block_id);
                 } else {
                     //just list all
                     $edit_url = $this->html->getSecureURL('design/blocks');
@@ -190,10 +185,10 @@ class ControllerResponsesDesignBlocksManager extends AController
 
         } else {
             //get details from language for static blocks from storefront
-            $alang = new ALanguage($this->registry, $this->language->getContentLanguageCode(), 0);
-            $alang->load($this->data['controller'], 'silent');
+            $aLang = new ALanguage($this->registry, $this->language->getContentLanguageCode(), 0);
+            $aLang->load($this->data['controller'], 'silent');
             //get title silently
-            $this->data['title'] = $alang->get('heading_title','', true);
+            $this->data['title'] = $aLang->get('heading_title', '', true);
             $this->data['title'] =
                 $this->data['title'] == 'heading_title' ? $this->data['block_txt_id'] : $this->data['title'];
         }
@@ -212,14 +207,14 @@ class ControllerResponsesDesignBlocksManager extends AController
 
     public function validate_block()
     {
-        $response = array();
+        $response = [];
         $this->loadLanguage('design/blocks');
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $block_id = $this->request->get['block_id'];
         $parent_block_id = $this->request->get['parent_block_id'];
 
-        if (AHelperUtils::has_value($block_id) && AHelperUtils::has_value($parent_block_id)) {
+        if (H::has_value($block_id) && H::has_value($parent_block_id)) {
             $lm = new ALayoutManager();
             $template = $lm->getBlockTemplate($block_id, $parent_block_id);
             if ($template) {
