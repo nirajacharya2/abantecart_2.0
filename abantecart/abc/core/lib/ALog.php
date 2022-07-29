@@ -197,9 +197,25 @@ final class ALog
         if (!$this->mode) {
             return null;
         }
-        $exception = new \Exception();
-        $this->loggers['error']->error($message.$exception->getTraceAsString());
+
+        $this->loggers['error']->error($message.' '.$this->getTraceString());
         return true;
+    }
+
+    private function getTraceString() {
+        $traceString = '';
+        $exception = new \Exception();
+        $trace = $exception->getTrace();
+
+        if (count($trace) < 2) {
+            return $traceString;
+        }
+
+        $traceInstance = $trace[1];
+        if ($traceInstance && $traceInstance['file'] && $traceInstance['line']) {
+            $traceString = ' '.$traceInstance['file'].' (line: '.$traceInstance['line'].')';
+        }
+        return $traceString;
     }
 
     /**
