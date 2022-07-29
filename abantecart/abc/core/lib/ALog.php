@@ -197,7 +197,8 @@ final class ALog
         if (!$this->mode) {
             return null;
         }
-        $this->loggers['error']->error($message);
+        $exception = new \Exception();
+        $this->loggers['error']->error($message.$exception->getTraceAsString());
         return true;
     }
 
