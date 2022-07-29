@@ -5,7 +5,12 @@ namespace abc\models\user;
 use abc\models\BaseModel;
 use abc\models\system\Audit;
 use abc\core\lib\AException;
+use Carbon\Carbon;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -21,12 +26,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $email
  * @property int $status
  * @property string $ip
- * @property \Carbon\Carbon $last_login
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
+ * @property Carbon $last_login
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
  *
  * @property UserGroup $user_group
- * @property \Illuminate\Database\Eloquent\Collection $user_notifications
+ * @property Collection $user_notifications
  *
  *
  * @method static User find(int $user_id) User
@@ -74,18 +79,7 @@ class User extends BaseModel
     ];
 
     /**
-     * User constructor.
-     *
-     * @param array $attributes
-     *
-     */
-    public function __construct(array $attributes = [])
-    {
-        parent::__construct($attributes = []);
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function user_group()
     {
@@ -93,7 +87,7 @@ class User extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function notifications()
     {
@@ -101,7 +95,7 @@ class User extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     * @return MorphMany
      */
     public function audits()
     {

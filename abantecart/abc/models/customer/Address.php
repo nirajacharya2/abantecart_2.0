@@ -1,13 +1,30 @@
 <?php
-
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2022 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
 namespace abc\models\customer;
 
 use abc\core\engine\Registry;
 use abc\core\lib\ADataEncryption;
+use abc\core\lib\AException;
 use abc\models\BaseModel;
 use abc\models\locale\Country;
 use abc\models\locale\Zone;
 use abc\models\QueryBuilder;
+use Exception;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
 
@@ -276,15 +293,12 @@ public function __construct(array $attributes = [])
      * @param array $options
      *
      * @return bool
-     * @throws \abc\core\lib\AException
+     * @throws AException
      */
     public function save(array $options = [])
     {
 
         $data = $this->attributes;
-        /**
-         * @var ADataEncryption $dcrypt
-         */
         $dcrypt = Registry::dcrypt();
         if ($dcrypt->active) {
             $data = $dcrypt->encrypt_data($data, 'addresses');
@@ -314,8 +328,8 @@ public function __construct(array $attributes = [])
      * @param int $customer_id
      *
      * @return array
-     * @throws \abc\core\lib\AException
-     * @throws \Exception
+     * @throws AException
+     * @throws Exception
      */
     public static function getAddressesByCustomerId(int $customer_id)
     {
@@ -328,9 +342,7 @@ public function __construct(array $attributes = [])
         if (!$rows) {
             return [];
         }
-        /**
-         * @var ADataEncryption $dcrypt
-         */
+
         $dcrypt = Registry::dcrypt();
 
         foreach ($rows as $row) {
@@ -339,7 +351,7 @@ public function __construct(array $attributes = [])
             /**
              * @var Country $country
              */
-            if( (int)$row['country_id'] ) {
+            if( $row['country_id'] ) {
                 $country = Country::with('description')->find($row['country_id']);
             }
             if ($country) {
@@ -358,7 +370,7 @@ public function __construct(array $attributes = [])
             /**
              * @var Zone $zone
              */
-            if( (int)$row['zone_id'] ) {
+            if( $row['zone_id'] ) {
                 $zone = Zone::with('description')->find($row['zone_id']);
             }
             if ($zone) {
@@ -457,10 +469,11 @@ public function __construct(array $attributes = [])
             }
         );
 
-        //allow to extends this method from extensions
+        //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
-
-        return $address_id ? $query->first() : $query->useCache('customer')->get();
+        return $address_id
+            ? $query->first()
+            : $query->useCache('customer')->get();
     }
 
 }

@@ -151,7 +151,7 @@ class Zone extends BaseModel
 
     public function description()
     {
-        return $this->hasOne(ZoneDescription::class, 'country_id')
+        return $this->hasOne(ZoneDescription::class, 'zone_id')
             ->where('language_id', '=', static::$current_language_id);
     }
 

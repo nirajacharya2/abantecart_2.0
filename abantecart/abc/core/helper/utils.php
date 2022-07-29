@@ -1592,7 +1592,7 @@ class AHelperUtils extends AHelper
             $classes[$default_class_name] = $default_args;
         }
 
-        $log = Registry::getInstance()->get('log');
+        $log = Registry::getInstance()?->get('log');
         if(!$log){
             $log = ABC::getObjectByAlias('ALog');
         }
@@ -1624,18 +1624,21 @@ class AHelperUtils extends AHelper
                     }
                     $instance = $reflection->newInstanceArgs($args);
                 } catch (ReflectionException $e) {
-
                     $log->write(
-                        'AHelperUtils Error: '.$e->getMessage().' '.$e->getLine().' (Class: '.$class.', args: '.var_export($arguments, true).' )'
+                        'AHelperUtils Error: '.$e->getMessage()
+                            .' '.$e->getLine()
+                            .' (Class: '.$class.', args: '.var_export($arguments, true).' )'
                     );
                 } catch(Exception $e){
                     Registry::getInstance()->get('log')->write(
-                        'AHelperUtils Error: '.$e->getMessage().' '.$e->getLine().' (Class: '.$class.', args: '.var_export($arguments, true).' )'
+                        'AHelperUtils Error: '.$e->getMessage().' '.$e->getLine()
+                            .' (Class: '.$class.', args: '.var_export($arguments, true).' )'
                             ."\n".$e->getTraceAsString()
                     );
                 } catch(Error $e){
                     echo(
-                        'AHelperUtils Error: '.$e->getMessage().' '.$e->getLine().' (Class: '.$class.', args: '.var_export($arguments, true).' )'
+                        'AHelperUtils Error: '.$e->getMessage().' '.$e->getLine()
+                            .' (Class: '.$class.', args: '.var_export($arguments, true).' )'
                             ."\n".$e->getTraceAsString()
                     );
                     exit;
@@ -1754,16 +1757,15 @@ class AHelperUtils extends AHelper
                 'user_name' => (function_exists('posix_getpwuid') ? posix_getpwuid($user_id)['name'] : 'system user'),
             ];
         } elseif (ABC::env('IS_ADMIN')) {
-            if (!class_exists(Registry::class) || !Registry::user()) {
+            $user_id = Registry::user()?->getId() ?: Registry::session()->data['user_id'];
+            if (!class_exists(Registry::class) || !$user_id ) {
                 return [];
             }
-            $registry = Registry::getInstance();
-            $user_id = $registry->get('user')->getId();
             $output = [
                 'user_type' => 1,
                 'user_type_name' => 'user',
                 'user_id'   => $user_id,
-                'user_name' => ($user_id ? $registry->get('user')->getUserName() : 'unknown admin'),
+                'user_name' => Registry::user()?->getUserName() ?: 'unknown admin',
             ];
         } else {
             if (!class_exists(Registry::class)) {

@@ -57,7 +57,7 @@ use stdClass;
  * Class BaseModel
  *
  * @package abc\models
- * @method static Collection find(int|array $Id) Collection
+ * @method static OrmModel|static|null find($key, $default = null)
  * @method static Collection get() Collection
  * @method static QueryBuilder|Builder where(string|array|Closure $column, string $operator = null, mixed $value = null, string $boolean = 'and') QueryBuilder
  * @method static QueryBuilder|Builder whereRaw(string $sql) QueryBuilder
@@ -279,6 +279,10 @@ abstract class BaseModel extends OrmModel
         }
     }
 
+    public function getActorDetails(){
+        return $this->actor;
+    }
+
     /**
      * Static wrapper for search method of model
      *
@@ -413,7 +417,7 @@ abstract class BaseModel extends OrmModel
         if (!$abac) {
             return true;
         }
-        $resourceObject = new \stdClass();
+        $resourceObject = new stdClass();
         $resourceObject->name = $this->policyObject;
         $resourceObject->getColumns = $columns;
 
@@ -431,9 +435,7 @@ abstract class BaseModel extends OrmModel
     public function save(array $options = [])
     {
         if ($this->hasPermission('update')) {
-            //if ($this->validate($this->toArray())) {
             parent::save();
-            //}
         } else {
             throw new Exception('No permission for object (class '.$this->getClass().') to save the model.');
         }
