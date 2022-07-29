@@ -162,7 +162,6 @@ class ControllerApiProductCategory extends AControllerAPI
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $results = Category::getCategories($parent_category_id, $storeId, 0, $languageId);
 
-        $this->log->write(print_r($results, true));
         $category_ids = $categories = [];
         foreach ($results as $result) {
             $category_ids[] = (int)$result['category_id'];

@@ -415,7 +415,6 @@ class Manufacturer extends BaseModel
             $cache[$i]['total_num_rows'] = $totalNumRows;
         }
         Registry::cache()->put($cacheKey, $cache);
-        Registry::log()->write(var_export($params, true));
         return $cache;
     }
 
