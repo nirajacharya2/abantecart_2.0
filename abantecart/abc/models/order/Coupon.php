@@ -1,10 +1,28 @@
 <?php
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2022 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
 
 namespace abc\models\order;
 
 use abc\models\BaseModel;
 use abc\models\catalog\Product;
+use Carbon\Carbon;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -17,17 +35,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $logged
  * @property int $shipping
  * @property float $total
- * @property \Carbon\Carbon $date_start
- * @property \Carbon\Carbon $date_end
+ * @property Carbon $date_start
+ * @property Carbon $date_end
  * @property int $uses_total
  * @property string $uses_customer
  * @property int $status
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
  *
- * @property \Illuminate\Database\Eloquent\Collection $coupon_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $coupons_products
- * @property \Illuminate\Database\Eloquent\Collection $orders
+ * @property CouponDescription $description
+ * @property CouponDescription $descriptions
+ * @property Collection $coupons_products
+ * @property Collection $orders
  *
  * @package abc\models
  */
@@ -203,6 +222,12 @@ class Coupon extends BaseModel
         ],
 
     ];
+
+    public function description()
+    {
+        return $this->hasOne(CouponDescription::class, 'coupon_id', 'coupon_id')
+            ->where('language_id', '=', static::$current_language_id);
+    }
 
     public function descriptions()
     {

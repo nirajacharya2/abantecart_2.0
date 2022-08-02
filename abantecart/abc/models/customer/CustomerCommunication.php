@@ -109,7 +109,7 @@ class CustomerCommunication extends BaseModel
          */
         $communication = new CustomerCommunication();
         $communication->subject = $mail->getSubject();
-        $communication->body = $mail->getHtml() ? $mail->getHtml() : nl2br($mail->getText());
+        $communication->body = $mail->getHtml() ? : nl2br($mail->getText());
         $customer_id = null;
         if (Registry::customer()) {
             $customer_id = Registry::customer()->getId();

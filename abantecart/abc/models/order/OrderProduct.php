@@ -1,12 +1,29 @@
 <?php
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2022 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
 
 namespace abc\models\order;
 
 use abc\core\engine\Registry;
 use abc\models\BaseModel;
 use abc\models\catalog\Product;
-use abc\models\QueryBuilder;
+use Carbon\Carbon;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -35,14 +52,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $ship_individually
  * @property int $free_shipping
  * @property float|null $shipping_price
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
  *
  * @property Order $order
  * @property Product $product
  * @property OrderOption $order_options
  * @property OrderDownload $order_downloads
- * @property \Illuminate\Database\Eloquent\Collection $order_downloads_histories
+ * @property Collection $order_downloads_histories
  *
  * @method static OrderProduct find(int $order_product_id) OrderProduct
  * @method static OrderProduct select(mixed $select) Builder
@@ -399,9 +416,7 @@ class OrderProduct extends BaseModel
         if(!$order_id || !$order_product_id){
             return false;
         }
-        /**
-         * @var QueryBuilder $query
-         */
+
         $query = OrderOption::select(
             [
                 'order_options.*',

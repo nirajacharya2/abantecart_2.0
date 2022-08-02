@@ -1,11 +1,28 @@
 <?php
-
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2022 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
 namespace abc\models\system;
 
 use abc\models\BaseModel;
 use abc\models\locale\Location;
 use abc\models\locale\Zone;
+use Carbon\Carbon;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -21,13 +38,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $threshold_condition
  * @property float $threshold
  * @property string $tax_exempt_groups
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
  *
  * @property TaxClass $tax_class
  * @property Location $location
  * @property Zone $zone
- * @property \Illuminate\Database\Eloquent\Collection $tax_rate_descriptions
+ * @property Collection $tax_rate_descriptions
  *
  * @package abc\models
  */

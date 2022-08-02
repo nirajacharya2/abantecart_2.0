@@ -4,6 +4,7 @@ namespace abc\models\catalog;
 
 use abc\models\BaseModel;
 use abc\models\locale\Language;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -16,8 +17,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $description
  * @property string $resource_path
  * @property string $resource_code
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
  *
  * @property ResourceLibrary $resource_library
  * @property Language $language

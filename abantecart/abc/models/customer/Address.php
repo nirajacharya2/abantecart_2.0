@@ -18,15 +18,16 @@
 namespace abc\models\customer;
 
 use abc\core\engine\Registry;
-use abc\core\lib\ADataEncryption;
 use abc\core\lib\AException;
 use abc\models\BaseModel;
 use abc\models\locale\Country;
 use abc\models\locale\Zone;
 use abc\models\QueryBuilder;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Collection;
 
 /**
  * Class Address
@@ -42,8 +43,8 @@ use Illuminate\Database\Query\JoinClause;
  * @property string $city
  * @property int $country_id
  * @property int $zone_id
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
  *
  * @property Customer $customer
  * @property Country $country
@@ -408,7 +409,7 @@ public function __construct(array $attributes = [])
      * @param int $language_id
      * @param int|null $address_id
      *
-     * @return mixed
+     * @return Collection|Address
      */
     public static function getAddresses(int $customer_id, int $language_id, int $address_id = null)
     {

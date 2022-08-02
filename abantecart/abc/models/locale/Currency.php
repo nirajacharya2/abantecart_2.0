@@ -1,7 +1,23 @@
 <?php
-
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2022 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
 namespace abc\models\locale;
 
+use abc\core\engine\Registry;
 use abc\core\lib\AException;
 use abc\models\BaseModel;
 use abc\models\order\Order;
@@ -10,7 +26,6 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use abc\core\lib\AConnect;
 use abc\core\lib\AError;
-use ReflectionException;
 
 /**
  * Class Currency
@@ -270,16 +285,14 @@ class Currency extends BaseModel
     /**
      * Return array with list of Currencies
      *
-     * @return array
+     * @return array|false
      */
-    public function getCurrencies(): array
+    public function getCurrencies()
     {
         if (!$this->hasPermission('read')) {
             return false;
         }
         $currency_data = null;
-        //????
-        //$currency_data = $this->cache->get('localization.currency');
 
         if ($currency_data === null) {
 
@@ -289,7 +302,7 @@ class Currency extends BaseModel
                 $currency_data[$result['code']] = $result;
             }
 
-            $this->cache->put('localization.currency', $currency_data);
+            Registry::cache()->put('localization.currency', $currency_data);
         }
 
         return $currency_data;
@@ -308,16 +321,15 @@ class Currency extends BaseModel
     }
 
     /**
-     * @throws ReflectionException
      * @throws AException
      */
     public function updateCurrencies()
     {
-        $api_key = $this->config->get('alphavantage_api_key')
-            ? $this->config->get('alphavantage_api_key')
+        $api_key = Registry::config()->get('alphavantage_api_key')
+            ? Registry::config()->get('alphavantage_api_key')
             : 'P6WGY9G9LB22GMBJ';
 
-        $base_currency_code = $this->config->get('config_currency');
+        $base_currency_code = Registry::config()->get('config_currency');
 
         $results = $this->where('code', $base_currency_code)
             ->where('date_modified', '>', date(strtotime('-1 day')))
@@ -348,7 +360,7 @@ class Currency extends BaseModel
         }
         $this->where('code', $base_currency_code)
             ->update(['value' => '1.00000']);
-        $this->cache->flush('localization');
+        Registry::cache()->flush('localization');
     }
 
     /**

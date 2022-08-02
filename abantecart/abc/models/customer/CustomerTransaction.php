@@ -1,9 +1,23 @@
 <?php
-
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2022 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
 namespace abc\models\customer;
 
 use abc\core\engine\Registry;
-use abc\core\lib\ADB;
 use abc\models\BaseModel;
 use abc\models\QueryBuilder;
 use Carbon\Carbon;
@@ -271,8 +285,7 @@ class CustomerTransaction extends BaseModel
             ->where('customer_id', '=', $customer_id)
             ->whereRaw( $transTable.".date_added > '".$customer->running_balance_datetime."' AND ".$transTable.".date_added < '".$now."'" )
             ->first();
-            $balance = $query->balance + $customer->running_balance;
-        return $balance;
+        return $query->balance + $customer->running_balance;
     }
 
     /**
@@ -283,9 +296,7 @@ class CustomerTransaction extends BaseModel
      */
     public static function getTransactions($data, $mode = 'default')
     {
-        /**
-         * @var ADB $db
-         */
+
         $db = Registry::db();
 
         $aliasCu = $db->table_name('customers');
@@ -306,9 +317,7 @@ class CustomerTransaction extends BaseModel
                 $db->raw($rawInc." as user")
             ];
         }
-        /**
-         * @var QueryBuilder $query
-         */
+
         $query = CustomerTransaction::selectRaw($db->raw_sql_row_count()." ".$db->table_name('customer_transactions').".*")
                 ->addSelect($select)
                 ->leftJoin(
@@ -371,24 +380,23 @@ class CustomerTransaction extends BaseModel
         ];
 
          // NOTE: Performance slowdown might be noticed or larger search results
-         if ($mode != 'total_only') {
-             $orderBy = $sort_data[$data['sort']] ? : 'customer_transactions.date_added';
-             if (isset($data['order']) && (strtoupper($data['order']) == 'DESC')) {
-                 $sorting = "desc";
-             } else {
-                 $sorting = "asc";
-             }
 
-             $query->orderBy( $orderBy, $sorting);
-             if (isset($data['start']) || isset($data['limit'])) {
-                 if ($data['start'] < 0) {
-                     $data['start'] = 0;
-                 }
-                 if ($data['limit'] < 1) {
-                     $data['limit'] = 20;
-                 }
-                 $query->offset((int)$data['start'])->limit((int)$data['limit']);
+         $orderBy = $sort_data[$data['sort']] ? : 'customer_transactions.date_added';
+         if (isset($data['order']) && (strtoupper($data['order']) == 'DESC')) {
+             $sorting = "desc";
+         } else {
+             $sorting = "asc";
+         }
+
+         $query->orderBy( $orderBy, $sorting);
+         if (isset($data['start']) || isset($data['limit'])) {
+             if ($data['start'] < 0) {
+                 $data['start'] = 0;
              }
+             if ($data['limit'] < 1) {
+                 $data['limit'] = 20;
+             }
+             $query->offset((int)$data['start'])->limit((int)$data['limit']);
          }
 
         //allow to extend this method from extensions
@@ -406,7 +414,7 @@ class CustomerTransaction extends BaseModel
     }
 
     /**
-     * @return mixed
+     * @return Collection
      */
     public static function getTransactionTypes()
     {

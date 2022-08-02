@@ -1382,7 +1382,7 @@ class Product extends BaseModel
      */
     public function getProductTypes()
     {
-        return $this->db->table('object_types as ot')
+        return Registry::db()->table('object_types as ot')
             ->join('object_type_descriptions as otd', 'ot.object_type_id', '=', 'otd.object_type_id')
             ->where(
                 [
@@ -1549,8 +1549,8 @@ class Product extends BaseModel
         $thumbnail = $resource->getMainThumb(
             'products',
             $this->product_id,
-            $this->config->get('config_image_thumb_width'),
-            $this->config->get('config_image_thumb_height')
+            Registry::config()->get('config_image_thumb_width'),
+            Registry::config()->get('config_image_thumb_height')
         );
         return $this->thumbURL = $thumbnail['thumb_url'];
     }
@@ -1563,6 +1563,7 @@ class Product extends BaseModel
      */
     public function images()
     {
+        $config = Registry::config();
         if ($this->images) {
             return $this->images;
         }
@@ -1570,12 +1571,12 @@ class Product extends BaseModel
         // main product image
         $sizes = [
             'main' => [
-                'width' => $this->config->get('config_image_popup_width'),
-                'height' => $this->config->get('config_image_popup_height'),
+                'width' => $config->get('config_image_popup_width'),
+                'height' => $config->get('config_image_popup_height'),
             ],
             'thumb' => [
-                'width' => $this->config->get('config_image_thumb_width'),
-                'height' => $this->config->get('config_image_thumb_height'),
+                'width' => $config->get('config_image_thumb_width'),
+                'height' => $config->get('config_image_thumb_height'),
             ],
         ];
         $this->images['image_main'] = $resource->getResourceAllObjects('products', $this->getKey(), $sizes, 1, false);
@@ -1586,16 +1587,16 @@ class Product extends BaseModel
         // additional images
         $sizes = [
             'main' => [
-                'width' => $this->config->get('config_image_popup_width'),
-                'height' => $this->config->get('config_image_popup_height'),
+                'width' => $config->get('config_image_popup_width'),
+                'height' => $config->get('config_image_popup_height'),
             ],
             'thumb' => [
-                'width' => $this->config->get('config_image_additional_width'),
-                'height' => $this->config->get('config_image_additional_height'),
+                'width' => $config->get('config_image_additional_width'),
+                'height' => $config->get('config_image_additional_height'),
             ],
             'thumb2' => [
-                'width' => $this->config->get('config_image_thumb_width'),
-                'height' => $this->config->get('config_image_thumb_height'),
+                'width' => $config->get('config_image_thumb_width'),
+                'height' => $config->get('config_image_thumb_height'),
             ],
         ];
         $this->images['images'] = $resource->getResourceAllObjects('products', $this->getKey(), $sizes, 0, false);
@@ -1686,7 +1687,7 @@ class Product extends BaseModel
         if ($resource_mdl->errors()) {
             $this->errors = array_merge($this->errors, $resource_mdl->errors());
         }
-        $this->cache->flush('product');
+        Registry::cache()->flush('product');
         return $result;
     }
 
@@ -1769,7 +1770,7 @@ class Product extends BaseModel
                 }
             }
         }
-        $this->cache->flush('product');
+        Registry::cache()->flush('product');
         return true;
     }
 
@@ -2287,28 +2288,29 @@ class Product extends BaseModel
 
     public function getCatalogOnlyProducts(int $limit = null)
     {
-        $arSelect = [$this->db->raw('SQL_CALC_FOUND_ROWS *'), 'pd.name as name'];
+        $db = Registry::db();
+        $arSelect = [$db->raw('SQL_CALC_FOUND_ROWS *'), 'pd.name as name'];
 
         //special prices
         if (Registry::Customer()?->isLogged()) {
             $customer_group_id = (int)Registry::Customer()->getCustomerGroupId();
         } else {
-            $customer_group_id = (int)$this->config->get('config_customer_group_id');
+            $customer_group_id = (int)Registry::config()->get('config_customer_group_id');
         }
 
         $sql
             = " ( SELECT p2sp.price
-                    FROM " . $this->db->table_name("product_specials") . " p2sp
-                    WHERE p2sp.product_id = " . $this->db->table_name("products") . ".product_id
+                    FROM " . $db->table_name("product_specials") . " p2sp
+                    WHERE p2sp.product_id = " . $db->table_name("products") . ".product_id
                             AND p2sp.customer_group_id = '" . $customer_group_id . "'
                             AND ((p2sp.date_start IS NULL OR p2sp.date_start < NOW())
                             AND (p2sp.date_end IS NULL OR p2sp.date_end > NOW()))
                     ORDER BY p2sp.priority ASC, p2sp.price ASC 
                     LIMIT 1
                  ) ";
-        $arSelect[] = $this->db->raw("COALESCE( " . $sql . ", " . $this->db->table_name("products") . ".price) as final_price");
+        $arSelect[] = $db->raw("COALESCE( " . $sql . ", " . $db->table_name("products") . ".price) as final_price");
 
-        $languageId = (int)$this->config->get('storefront_language_id');
+        $languageId = (int)Registry::config()->get('storefront_language_id');
 
         $products_info = Product::select($arSelect)
             ->where('products.catalog_only', '=', 1)
@@ -2338,7 +2340,7 @@ class Product extends BaseModel
 
         return [
             'products_info' => $products_info->toArray(),
-            'total_num_rows' => $this->db->sql_get_row_count(),
+            'total_num_rows' => Registry::db()->sql_get_row_count(),
         ];
     }
 
@@ -2622,9 +2624,7 @@ class Product extends BaseModel
         $db = Registry::db();
         $db->beginTransaction();
         try {
-            /**
-             * @var AttributeManager $am
-             */
+            /** @var AttributeManager $am */
             $am = ABC::getObjectByAlias('AttributeManager');
             $attribute = $am->getAttribute($attribute_id);
             if ($attribute) {
@@ -2685,8 +2685,7 @@ class Product extends BaseModel
             $this->touch();
             $db->commit();
         } catch (Exception $e) {
-            Registry::log()->write($e->getMessage());
-            Registry::log()->write($e->getTraceAsString());
+            Registry::log()->write($e->getMessage()."\n\n".$e->getTraceAsString());
             $db->rollback();
             return false;
         }
@@ -2784,10 +2783,8 @@ class Product extends BaseModel
         $filter['customer_group_id'] = $filter['customer_group_id']
             ?? Registry::config()->get('config_customer_group_id');
         $filter['keyword'] = trim($filter['keyword']);
-        $filter['language_id'] = (int)$filter['language_id'];
-        if (!$filter['language_id']) {
-            $filter['language_id'] = static::getCurrentLanguageID();
-        }
+        $filter['language_id'] = (int)$filter['language_id'] ?: static::$current_language_id;
+
         $filter['store_id'] = (int)$filter['store_id'];
         if (!$filter['store_id']) {
             $filter['store_id'] = ABC::env('IS_ADMIN') === true

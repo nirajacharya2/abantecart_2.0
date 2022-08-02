@@ -91,6 +91,9 @@ class Customer extends BaseModel
         'status'            => 'int',
         'approved'          => 'int',
         'customer_group_id' => 'int',
+        'running_balance'   => 'float',
+        'running_credit'    => 'float',
+        'running_debit'     => 'float',
         'cart'              => Serialized::class,
         'data'              => Serialized::class,
         'wishlist'          => Serialized::class,
@@ -747,17 +750,14 @@ class Customer extends BaseModel
     {
         $mode = (string)$inputData['mode'];
         $mode = $mode ?: 'quick';
-        /**
-         * @var ADataEncryption $dcrypt
-         */
-        $dcrypt = Registry::dcrypt();
+        $dCrypt = Registry::dcrypt();
         $db = Registry::db();
         $customer = new Customer();
 
         $aliasC = $db->table_name('customers');
 
         $select = [];
-        if ($mode == 'total_only' && !$dcrypt->active) {
+        if ($mode == 'total_only' && !$dCrypt->active) {
             $select[] = $db->raw('COUNT(*) as total');
         } else {
             $select = [
@@ -773,7 +773,7 @@ class Customer extends BaseModel
                                    as orders_count');
         }
 
-        if ($dcrypt->active) {
+        if ($dCrypt->active) {
             $select[] = 'customers.key_id';
         }
 
@@ -804,25 +804,32 @@ class Customer extends BaseModel
 
         if (H::has_value($filter['name_email'])) {
             $query->whereRaw(
-                "CONCAT(".$aliasC.".firstname, ' ', ".$aliasC.".lastname, ' ', ".$aliasC.".email) LIKE '%"
-                .$db->escape($filter['name_email'])."%'");
+                "CONCAT(".$aliasC.".firstname, ' ', ".$aliasC.".lastname, ' ', "
+                    .$aliasC.".email) LIKE '%".$db->escape($filter['name_email'])."%'"
+            );
         }
         //more specific login, last and first name search
         if (H::has_value($filter['loginname'])) {
             if ($filter['search_operator'] == 'equal') {
-                $query->whereRaw("LOWER(".$aliasC.".loginname) =  '".$db->escape(mb_strtolower($filter['loginname']))
-                    ."'");
+                $query->whereRaw(
+                    "LOWER(".$aliasC.".loginname) =  '".$db->escape(mb_strtolower($filter['loginname']))."'"
+                );
             } else {
-                $query->whereRaw("LOWER(".$aliasC.".loginname) LIKE '%".$db->escape(mb_strtolower($filter['loginname']))
-                    ."%'");
+                $query->whereRaw(
+                    "LOWER(".$aliasC.".loginname) LIKE '%".$db->escape(mb_strtolower($filter['loginname']))."%'"
+                );
             }
         }
 
         if (H::has_value($filter['firstname'])) {
             if ($filter['search_operator'] == 'equal') {
-                $query->whereRaw("LOWER(".$aliasC.".firstname) =  '".$db->escape(mb_strtolower($filter['firstname']))."'");
+                $query->whereRaw(
+                    "LOWER(".$aliasC.".firstname) =  '".$db->escape(mb_strtolower($filter['firstname']))."'"
+                );
             } else {
-                $query->whereRaw("LOWER(".$aliasC.".firstname) LIKE '".$db->escape(mb_strtolower($filter['firstname']))."%'");
+                $query->whereRaw(
+                    "LOWER(".$aliasC.".firstname) LIKE '".$db->escape(mb_strtolower($filter['firstname']))."%'"
+                );
             }
         }
 
@@ -843,8 +850,7 @@ class Customer extends BaseModel
                 $aliasC.".password = ".$enc->getRawSqlHash(
                     ABC::env('DB_CURRENT_DRIVER'),
                     'customers',
-                    $db->escape($filter['password']
-                    )
+                    $db->escape($filter['password'])
                 )
             );
         }
@@ -864,7 +870,7 @@ class Customer extends BaseModel
         }
 
         //select differently if encrypted
-        if (!$dcrypt->active) {
+        if (!$dCrypt->active) {
             if (H::has_value($filter['email'])) {
                 $emails = (array)$filter['email'];
                 $query->where(function ($query) use ($emails, $filter, $db) {
@@ -977,7 +983,7 @@ class Customer extends BaseModel
         }
 
         //If for total, we done building the query
-        if ($mode == 'total_only' && !$dcrypt->active) {
+        if ($mode == 'total_only' && !$dCrypt->active) {
             //allow to extend this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $inputData);
             $result = $query->first();
@@ -1034,7 +1040,7 @@ class Customer extends BaseModel
 
         $result_rows = $query->get();
         //TODO need to check when encrypted
-        if ($result_rows->count() && $dcrypt->active) {
+        if ($result_rows->count() && $dCrypt->active) {
 
             if (H::has_value($filter['email'])) {
                 $result_rows = H::filterByEncryptedField($result_rows->toArray(), 'email', $filter['email']);
@@ -1054,7 +1060,7 @@ class Customer extends BaseModel
         //finally, decrypt data and return result
         $totalNumRows = $db->sql_get_row_count();
         for ($i = 0; $i < $result_rows->count(); $i++) {
-            $result_rows[$i] = $dcrypt->decrypt_data($result_rows[$i], 'customers');
+            $result_rows[$i] = $dCrypt->decrypt_data($result_rows[$i], 'customers');
             $result_rows[$i]['total_num_rows'] = $totalNumRows;
         }
 

@@ -5,7 +5,9 @@ namespace abc\models\catalog;
 use abc\models\BaseModel;
 use abc\models\order\OrderDownload;
 use abc\models\order\OrderDownloadsHistory;
+use Carbon\Carbon;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -21,14 +23,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $activate_order_status_id
  * @property int $shared
  * @property int $status
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
  *
- * @property \Illuminate\Database\Eloquent\Collection $download_attribute_values
- * @property \Illuminate\Database\Eloquent\Collection $download_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $order_downloads
- * @property \Illuminate\Database\Eloquent\Collection $order_downloads_histories
- * @property \Illuminate\Database\Eloquent\Collection $products_to_downloads
+ * @property Collection $download_attribute_values
+ * @property DownloadDescription $description
+ * @property DownloadDescription $descriptions
+ * @property Collection $order_downloads
+ * @property Collection $order_downloads_histories
+ * @property Collection $products_to_downloads
  *
  * @package abc\models
  */
@@ -74,6 +77,11 @@ class Download extends BaseModel
         return $this->hasMany(DownloadAttributeValue::class, 'download_id');
     }
 
+    public function description()
+    {
+        return $this->hasOne(DownloadDescription::class, 'download_id', 'download_id')
+            ->where('language_id', '=', static::$current_language_id);
+    }
     public function descriptions()
     {
         return $this->hasMany(DownloadDescription::class, 'download_id');

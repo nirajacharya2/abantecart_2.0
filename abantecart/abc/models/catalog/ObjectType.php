@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2022 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -19,7 +19,6 @@
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -32,6 +31,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ObjectType extends BaseModel
 {
     use SoftDeletes;
+
     protected $primaryKey = 'object_type_id';
     public $timestamps = false;
 
@@ -50,7 +50,7 @@ class ObjectType extends BaseModel
     public function description()
     {
         return $this->hasOne(ObjectTypeDescription::class, 'object_type_id')
-            ->where('language_id', $this->registry->get('language')->getContentLanguageID());
+            ->where('language_id', static::$current_language_id);
     }
 
     public function descriptions()
@@ -60,27 +60,35 @@ class ObjectType extends BaseModel
 
     public function global_attribute_groups()
     {
-        return $this->belongsToMany(GlobalAttributesGroup::class, 'global_attribute_group_to_object_type',
-            'object_type_id', 'attribute_group_id');
+        return $this->belongsToMany(
+            GlobalAttributesGroup::class,
+            'global_attribute_group_to_object_type',
+            'object_type_id',
+            'attribute_group_id'
+        );
     }
 
-
+    /**
+     * @param array $data
+     * @return array
+     */
     public function getObjectTypes($data)
     {
-        $results = self::with(['description'])
+        return self::with(['description'])
             ->setGridRequest($data)
             ->get()
             ->toArray();
-
-        return $results;
     }
 
+    /**
+     * @param int $object_type_id
+     * @return array
+     */
     public function getObjectType($object_type_id)
     {
-        $result = ObjectType::with('description', 'global_attribute_groups')
+        return ObjectType::with('description', 'global_attribute_groups')
             ->find($object_type_id)
-           ->toArray();
-        return $result;
+            ->toArray();
     }
 
 }

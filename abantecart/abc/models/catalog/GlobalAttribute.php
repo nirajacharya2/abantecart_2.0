@@ -1,9 +1,25 @@
 <?php
-
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2022 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -20,9 +36,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $status
  * @property string $regexp_pattern
  *
- * @property \Illuminate\Database\Eloquent\Collection $global_attributes_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $global_attributes_value_descriptions
- * @property \Illuminate\Database\Eloquent\Collection $global_attributes_values
+ * @property Collection $global_attributes_descriptions
+ * @property Collection $global_attributes_value_descriptions
+ * @property Collection $global_attributes_values
  *
  * @package abc\models
  */
@@ -59,19 +75,19 @@ class GlobalAttribute extends BaseModel
     public function description()
     {
         return $this->hasOne(GlobalAttributesDescription::class, 'attribute_id')
-                    ->where('language_id', $this->registry->get('language')->getContentLanguageID());
+                    ->where('language_id', static::$current_language_id);
     }
 
     public function value_description()
     {
         return $this->hasOne(GlobalAttributesValueDescription::class, 'attribute_id')
-                    ->where('language_id', $this->registry->get('language')->getContentLanguageID());
+                    ->where('language_id', static::$current_language_id);
     }
 
     public function global_attributes_value_description()
     {
         return $this->hasMany(GlobalAttributesValueDescription::class, 'attribute_id')
-                    ->where('language_id', $this->registry->get('language')->getContentLanguageID());
+                    ->where('language_id', static::$current_language_id);
 
     }
 

@@ -1,4 +1,20 @@
 <?php
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2022 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
 
 namespace abc\models\catalog;
 
@@ -9,12 +25,15 @@ use abc\core\lib\AException;
 use abc\core\lib\ALayoutManager;
 use abc\core\lib\AResourceManager;
 use abc\models\BaseModel;
-use abc\models\QueryBuilder;
 use abc\models\system\Setting;
 use Dyrynda\Database\Support\GeneratesUuid;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
+use Exception;
 use H;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 /**
  * Class Manufacturer
@@ -24,7 +43,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $uuid
  * @property int $sort_order
  *
- * @property \Illuminate\Database\Eloquent\Collection $manufacturers_to_stores
+ * @property Collection $manufacturers_to_stores
  *
  * @method static Manufacturer find(int $customer_id) Manufacturer
  * @package abc\models
@@ -62,7 +81,7 @@ class Manufacturer extends BaseModel
      * @param $data
      *
      * @return bool|mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public static function addManufacturer($data)
     {
@@ -113,7 +132,7 @@ class Manufacturer extends BaseModel
         self::find($manufacturerId)->update($data);
         $manufacturerToStore = [];
         if (isset($data['manufacturer_store'])) {
-            $this->db->table('manufacturers_to_stores')
+            Registry::db()->table('manufacturers_to_stores')
                 ->where('manufacturer_id', '=', (int)$manufacturerId)
                 ->delete();
 
@@ -125,54 +144,55 @@ class Manufacturer extends BaseModel
             }
         }
 
-        $this->db->table('manufacturers_to_stores')->insert($manufacturerToStore);
+        Registry::db()->table('manufacturers_to_stores')->insert($manufacturerToStore);
 
         if ($data['keyword'] || $data['name']) {
             UrlAlias::setManufacturerKeyword($data['keyword'] ?: $data['name'], $manufacturerId);
         }
 
-        $this->cache->flush('manufacturer');
+        Registry::cache()->flush('manufacturer');
     }
 
     /**
      * @return array|false|mixed
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
+     * @throws InvalidArgumentException
      */
     public function getAllData()
     {
         $cache_key = 'manufacturer.alldata.'.$this->getKey();
-        $data = $this->cache->get($cache_key);
+        $data = Registry::cache()->get($cache_key);
         if ($data === null) {
             $this->load('stores');
             $data = $this->toArray();
             $data['images'] = $this->getImages();
-            $data['keyword'] = UrlAlias::getManufacturerKeyword($this->getKey(), $this->registry->get('language')->getContentLanguageID());
-            $this->cache->put($cache_key, $data);
+            $data['keyword'] = UrlAlias::getManufacturerKeyword($this->getKey(), static::$current_language_id);
+            Registry::cache()->put($cache_key, $data);
         }
         return $data;
     }
 
     /**
      * @return array
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
+     * @throws InvalidArgumentException
      */
     public function getImages()
     {
+        $config = Registry::config();
         $images = [];
         $resource = new AResource('image');
         // main product image
         $sizes = [
             'main'  => [
-                'width'  => $this->config->get('config_image_popup_width'),
-                'height' => $this->config->get('config_image_popup_height'),
+                'width'  => $config->get('config_image_popup_width'),
+                'height' => $config->get('config_image_popup_height'),
             ],
             'thumb' => [
-                'width'  => $this->config->get('config_image_thumb_width'),
-                'height' => $this->config->get('config_image_thumb_height'),
+                'width'  => $config->get('config_image_thumb_width'),
+                'height' => $config->get('config_image_thumb_height'),
             ],
         ];
         $images['image_main'] = $resource->getResourceAllObjects('manufacturers', $this->getKey(), $sizes, 1, false);
@@ -183,51 +203,52 @@ class Manufacturer extends BaseModel
         // additional images
         $sizes = [
             'main'   => [
-                'width'  => $this->config->get('config_image_popup_width'),
-                'height' => $this->config->get('config_image_popup_height'),
+                'width'  => $config->get('config_image_popup_width'),
+                'height' => $config->get('config_image_popup_height'),
             ],
             'thumb'  => [
-                'width'  => $this->config->get('config_image_additional_width'),
-                'height' => $this->config->get('config_image_additional_height'),
+                'width'  => $config->get('config_image_additional_width'),
+                'height' => $config->get('config_image_additional_height'),
             ],
             'thumb2' => [
-                'width'  => $this->config->get('config_image_thumb_width'),
-                'height' => $this->config->get('config_image_thumb_height'),
+                'width'  => $config->get('config_image_thumb_width'),
+                'height' => $config->get('config_image_thumb_height'),
             ],
         ];
         $images['images'] = $resource->getResourceAllObjects('manufacturers', $this->getKey(), $sizes, 0, false);
         if (!empty($images)) {
+            /** @var Setting $protocolSetting */
             $protocolSetting = Setting::select('value')->where('key', '=', 'protocol_url')->first();
             $protocol = 'http';
             if ($protocolSetting) {
                 $protocol = $protocolSetting->value;
             }
 
-            if (isset($images['image_main']['direct_url']) && strpos($images['image_main']['direct_url'], 'http') !== 0) {
+            if (isset($images['image_main']['direct_url']) && !str_starts_with($images['image_main']['direct_url'], 'http')) {
                 $images['image_main']['direct_url'] = $protocol.':'.$images['image_main']['direct_url'];
             }
-            if (isset($images['image_main']['main_url']) && strpos($images['image_main']['main_url'], 'http') !== 0) {
+            if (isset($images['image_main']['main_url']) && !str_starts_with($images['image_main']['main_url'], 'http')) {
                 $images['image_main']['main_url'] = $protocol.':'.$images['image_main']['main_url'];
             }
-            if (isset($images['image_main']['thumb_url']) && strpos($images['image_main']['thumb_url'], 'http') !== 0) {
+            if (isset($images['image_main']['thumb_url']) && !str_starts_with($images['image_main']['thumb_url'], 'http')) {
                 $images['image_main']['thumb_url'] = $protocol.':'.$images['image_main']['thumb_url'];
             }
-            if (isset($images['image_main']['thumb2_url']) && strpos($images['image_main']['thumb2_url'], 'http') !== 0) {
+            if (isset($images['image_main']['thumb2_url']) && !str_starts_with($images['image_main']['thumb2_url'], 'http')) {
                 $images['image_main']['thumb2_url'] = $protocol.':'.$images['image_main']['thumb2_url'];
             }
 
             if ($images['images']) {
                 foreach ($images['images'] as &$img) {
-                    if (isset($img['direct_url']) && strpos($img['direct_url'], 'http') !== 0) {
+                    if (isset($img['direct_url']) && !str_starts_with($img['direct_url'], 'http')) {
                         $img['direct_url'] = $protocol.':'.$img['direct_url'];
                     }
-                    if (isset($img['main_url']) && strpos($img['main_url'], 'http') !== 0) {
+                    if (isset($img['main_url']) && !str_starts_with($img['main_url'], 'http')) {
                         $img['main_url'] = $protocol.':'.$img['main_url'];
                     }
-                    if (isset($img['thumb_url']) && strpos($img['thumb_url'], 'http') !== 0) {
+                    if (isset($img['thumb_url']) && !str_starts_with($img['thumb_url'], 'http')) {
                         $img['thumb_url'] = $protocol.':'.$img['thumb_url'];
                     }
-                    if (isset($img['thumb2_url']) && strpos($img['thumb2_url'], 'http') !== 0) {
+                    if (isset($img['thumb2_url']) && !str_starts_with($img['thumb2_url'], 'http')) {
                         $img['thumb2_url'] = $protocol.':'.$img['thumb2_url'];
                     }
                 }
@@ -243,15 +264,14 @@ class Manufacturer extends BaseModel
         if (!$manufacturerId) {
             return false;
         }
-        $storeId = (int)$this->config->get('config_store_id');
+        $storeId = (int)Registry::config()->get('config_store_id');
         $cacheKey = 'manufacturer.'.$manufacturerId.'.store_'.$storeId;
-        $output = $this->cache->get($cacheKey);
+        $output = Registry::cache()->get($cacheKey);
 
         if ($output !== null) {
             return $output;
         }
 
-        /** @var QueryBuilder $query */
         $query = self::leftJoin(
             'manufacturers_to_stores',
             'manufacturers_to_stores.manufacturer_id',
@@ -269,7 +289,7 @@ class Manufacturer extends BaseModel
         $output = $manufacturer->toArray();
 
         if (ABC::env('IS_ADMIN')) {
-            $seoUrl = $this->db->table('url_aliases')
+            $seoUrl = Registry::db()->table('url_aliases')
                 ->where('query', '=', 'manufacturer_id='.(int)$manufacturerId)
                 ->get()
                 ->first();
@@ -278,7 +298,7 @@ class Manufacturer extends BaseModel
             }
         }
 
-        $this->cache->put($cacheKey, $output);
+        Registry::cache()->put($cacheKey, $output);
         return $output;
     }
 
@@ -293,30 +313,28 @@ class Manufacturer extends BaseModel
             $manufacturer->delete();
         }
 
-        $this->db->table('manufacturers_to_stores')
+        Registry::db()->table('manufacturers_to_stores')
             ->where('manufacturer_id', '=', (int)$manufacturer_id)
             ->delete();
 
-        $this->db->table('url_aliases')
+        Registry::db()->table('url_aliases')
             ->where('query', '=', 'manufacturer_id='.(int)$manufacturer_id)
             ->delete();
 
         try {
             $lm = new ALayoutManager();
             $lm->deletePageLayout('pages/product/manufacturer', 'manufacturer_id', (int)$manufacturer_id);
-        } catch (AException $e) {
-
-        } catch (\Exception $e) {
-
-        }
+        } catch (Exception $e) { }
 
         //delete resources
         try {
             $rm = new AResourceManager();
-            $resources = $rm->getResourcesList([
-                'object_name' => 'manufacturers',
-                'object_id'   => (int)$manufacturer_id,
-            ]);
+            $resources = $rm->getResourcesList(
+                [
+                    'object_name' => 'manufacturers',
+                    'object_id'   => (int)$manufacturer_id,
+                ]
+            );
             foreach ($resources as $r) {
                 $rm->unmapResource('manufacturers', $manufacturer_id, $r['resource_id']);
                 //if resource became orphan - delete it
@@ -324,18 +342,18 @@ class Manufacturer extends BaseModel
                     $rm->deleteResource($r['resource_id']);
                 }
             }
-        } catch (\Exception $e) {
-        }
-        $this->cache->flush('manufacturer');
+        } catch (Exception $e) { }
+
+        Registry::cache()->flush('manufacturer');
         return true;
     }
 
     public function getManufacturers($params = [])
     {
         $db = Registry::db();
-        $storeId = $params['store_id'] ?? (int) $this->config->get('config_store_id');
+        $storeId = $params['store_id'] ?? (int) Registry::config()->get('config_store_id');
         $cacheKey = 'manufacturers.'.md5(implode('', $params));
-        $cache = $this->cache->get($cacheKey);
+        $cache = Registry::cache()->get($cacheKey);
         $manTable = $db->table_name('manufacturers');
 
         if ($cache !== null) {

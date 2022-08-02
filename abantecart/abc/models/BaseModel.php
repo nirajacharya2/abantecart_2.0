@@ -21,9 +21,6 @@ namespace abc\models;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\Abac;
-use abc\core\lib\AbcCache;
-use abc\core\lib\AConfig;
-use abc\core\lib\ADB;
 use abc\core\lib\AException;
 use abc\modules\injections\models\ModelSearch;
 use Carbon\Carbon;
@@ -109,29 +106,9 @@ abstract class BaseModel extends OrmModel
     protected $actor;
 
     /**
-     * @var Registry
-     */
-    protected $registry;
-
-    /**
      * @var int
      */
     protected static $current_language_id;
-
-    /**
-     * @var AConfig
-     */
-    protected $config;
-
-    /**
-     * @var AbcCache
-     */
-    protected $cache;
-
-    /**
-     * @var ADB
-     */
-    protected $db;
 
     /**
      * @var array
@@ -251,14 +228,10 @@ abstract class BaseModel extends OrmModel
     public function __construct(array $attributes = [])
     {
         $this->actor = H::recognizeUser();
-        $this->registry = Registry::getInstance();
         //set current language for getting single description from relation
         if (!static::$current_language_id) {
             static::$current_language_id = static::getCurrentLanguageID();
         }
-        $this->config = $this->registry->get('config');
-        $this->cache = Registry::cache();
-        $this->db = Registry::db();
 
         static::$env = ABC::env('MODEL');
         Relation::morphMap(static::$env['MORPH_MAP']);
@@ -413,7 +386,7 @@ abstract class BaseModel extends OrmModel
         /**
          * @var Abac $abac
          */
-        $abac = $this->registry->get('abac');
+        $abac = Registry::abac();
         if (!$abac) {
             return true;
         }

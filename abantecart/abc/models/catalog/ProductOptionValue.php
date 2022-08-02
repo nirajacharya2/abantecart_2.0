@@ -19,6 +19,7 @@
 namespace abc\models\catalog;
 
 use abc\core\engine\AResource;
+use abc\core\engine\Registry;
 use abc\core\lib\AException;
 use abc\models\BaseModel;
 use abc\models\casts\Serialized;
@@ -307,18 +308,19 @@ class ProductOptionValue extends BaseModel
      */
     public function images()
     {
+        $config = Registry::config();
         if ($this->images) {
             return $this->images;
         }
         $resource = new AResource('image');
         $sizes = [
             'main'  => [
-                'width'  => $this->config->get('config_image_popup_width'),
-                'height' => $this->config->get('config_image_popup_height'),
+                'width'  => $config->get('config_image_popup_width'),
+                'height' => $config->get('config_image_popup_height'),
             ],
             'thumb' => [
-                'width'  => $this->config->get('config_image_thumb_width'),
-                'height' => $this->config->get('config_image_thumb_height'),
+                'width'  => $config->get('config_image_thumb_width'),
+                'height' => $config->get('config_image_thumb_height'),
             ],
         ];
         $this->images['images'] = $resource->getResourceAllObjects(
@@ -380,15 +382,15 @@ class ProductOptionValue extends BaseModel
         if (!$option_value_id) {
             return [];
         }
-
+        /** @var ProductOptionValue $option_value */
         $option_value = ProductOptionValue::with('descriptions')
-                                          ->where(
-                                              [
-                                                  'product_option_value_id' => $option_value_id,
-                                                  'group_id'                => 0,
-                                              ]
-                                          )
-                                          ->first();
+              ->where(
+                  [
+                      'product_option_value_id' => $option_value_id,
+                      'group_id'                => 0,
+                  ]
+              )
+              ->first();
 
         if (!$option_value) {
             return [];

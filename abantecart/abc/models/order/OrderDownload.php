@@ -1,4 +1,20 @@
 <?php
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2022 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
 
 namespace abc\models\order;
 
@@ -6,7 +22,10 @@ use abc\models\BaseModel;
 use abc\models\casts\Serialized;
 use abc\models\catalog\Download;
 use abc\models\QueryBuilder;
+use Carbon\Carbon;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
+use Exception;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -22,18 +41,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $status
  * @property int $remaining_count
  * @property int $percentage
- * @property \Carbon\Carbon $expire_date
+ * @property Carbon $expire_date
  * @property int $sort_order
  * @property string $activate
  * @property int $activate_order_status_id
  * @property string $attributes_data
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
  *
  * @property Download $download
  * @property Order $order
  * @property OrderProduct $order_product
- * @property \Illuminate\Database\Eloquent\Collection $order_downloads_histories
+ * @property Collection $order_downloads_histories
  *
  * @package abc\models
  */
@@ -270,7 +289,7 @@ class OrderDownload extends BaseModel
      * @param int $order_id
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public static function getOrderDownloads($order_id)
     {

@@ -1,8 +1,25 @@
 <?php
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2022 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
 
 namespace abc\models\catalog;
 
 use abc\core\ABC;
+use abc\core\engine\Registry;
 use abc\core\lib\AFile;
 use abc\core\lib\AResourceManager;
 use abc\models\BaseModel;
@@ -40,7 +57,7 @@ class ResourceLibrary extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'type_id' => 'int',
+        'type_id'  => 'int',
         'stage_id' => 'int',
     ];
 
@@ -78,7 +95,8 @@ class ResourceLibrary extends BaseModel
         $object_id = 0,
         $title = '',
         $language_id = 1
-    ) {
+    )
+    {
         $objects = [
             'products'             => 'Product',
             'product_option_value' => 'ProductOptionValue',
@@ -87,11 +105,11 @@ class ResourceLibrary extends BaseModel
         ];
 
         if (!in_array($object_txt_id, array_keys($objects)) || !$data || !is_array($data)) {
-            $this->errors[] = "Warning: Missing images for {$object_txt_id}.";
+            $this->errors[] = "Warning: Missing images for ".$object_txt_id;
             return true;
         }
 
-        $language_list = $this->registry->get('language')->getAvailableLanguages();
+        $language_list = Registry::language()->getAvailableLanguages();
         /**
          * @var AResourceManager $rm
          */
@@ -123,27 +141,27 @@ class ResourceLibrary extends BaseModel
             //check if image is absolute path or remote URL
             $host = parse_url($source, PHP_URL_HOST);
             $image_basename = basename($source);
-            $target = ABC::env('DIR_RESOURCES').$rm->getTypeDir().$image_basename;
-            if (!is_dir(ABC::env('DIR_RESOURCES').$rm->getTypeDir())) {
-                @mkdir(ABC::env('DIR_RESOURCES').$rm->getTypeDir(), 0777);
+            $target = ABC::env('DIR_RESOURCES') . $rm->getTypeDir() . $image_basename;
+            if (!is_dir(ABC::env('DIR_RESOURCES') . $rm->getTypeDir())) {
+                @mkdir(ABC::env('DIR_RESOURCES') . $rm->getTypeDir(), 0777);
             }
 
             if ($host === null) {
                 //this is a path to file
                 if (!copy($source, $target)) {
-                    $this->errors[] = "Error: Unable to copy file {$source} to {$target}";
+                    $this->errors[] = "Error: Unable to copy file ".$source." to ".$target;
                     continue;
                 }
             } else {
                 //this is URL to image. Download first
                 $fl = new AFile();
                 if (($file = $fl->downloadFile($source)) === false) {
-                    $this->errors[] = "Error: Unable to download file from {$source} ";
+                    $this->errors[] = "Error: Unable to download file from ".$source;
                     continue;
                 }
 
                 if (!$fl->writeDownloadToFile($file, $target)) {
-                    $this->errors[] = "Error: Unable to save downloaded file to ".$target;
+                    $this->errors[] = "Error: Unable to save downloaded file to " . $target;
                     continue;
                 }
             }
@@ -174,7 +192,7 @@ class ResourceLibrary extends BaseModel
             if ($resource_id) {
                 $rm->mapResource($object_txt_id, $object_id, $resource_id);
             } else {
-                $this->errors[] = "Error: Image resource can not be created. ".$this->registry->get('db')->error;
+                $this->errors[] = "Error: Image resource can not be created. " . Registry::db()->error;
             }
         }
 

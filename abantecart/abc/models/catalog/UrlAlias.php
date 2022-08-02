@@ -5,6 +5,7 @@ namespace abc\models\catalog;
 use abc\core\engine\Registry;
 use abc\models\BaseModel;
 use abc\models\locale\Language;
+use Exception;
 use H;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -96,10 +97,10 @@ class UrlAlias extends BaseModel
         if ($keyword) {
             Registry::language()->replaceDescriptions(
                 'url_aliases',
-                ['query' => $objectKeyName."=".(int)$objectId],
+                ['query' => $objectKeyName."=".$objectId],
                 [static::$current_language_id => ['keyword' => $keyword]]);
         } else {
-            self::where('query', '=', $objectKeyName."=".(int)$objectId)
+            self::where('query', '=', $objectKeyName."=".$objectId)
                 ->where('language_id', '=', static::$current_language_id)
                 ->delete();
         }
@@ -129,11 +130,11 @@ class UrlAlias extends BaseModel
     }
 
     /**
-     * @param array $data - ['language_id' => 1, 'keyword' => 'somekeyword']
+     * @param array $data - ['language_id' => 1, 'keyword' => 'some-keyword']
      * @param string $name - 'product_id', 'category_id' etc
      * @param int $id
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public static function replaceKeywords( $data, $name, $id)
     {
@@ -150,7 +151,7 @@ class UrlAlias extends BaseModel
             $urlAlias = new UrlAlias();
             $urlAlias->query = $query;
             $urlAlias->language_id = (int)$keyword['language_id'];
-            $urlAlias->keyword = \H::SEOEncode($keyword['keyword'], $name, $id);
+            $urlAlias->keyword = H::SEOEncode($keyword['keyword'], $name, $id);
             $urlAlias->save();
         }
     }
