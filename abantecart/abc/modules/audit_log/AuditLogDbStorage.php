@@ -56,6 +56,7 @@ class AuditLogDbStorage implements AuditLogStorageInterface
                 'event_type_id'           => AuditEvent::EVENT_NAMES[$data['entity']['group']] ?: 1,
                 'main_auditable_model_id' => $data['entity']['model_id'],
                 'main_auditable_id'       => $data['entity']['id'],
+                'audit_session_id'        => 0,
             ]
         );
 
@@ -96,7 +97,7 @@ class AuditLogDbStorage implements AuditLogStorageInterface
     public function getEvents(array $request)
     {
         /**
-         * @var array $filter
+         * @var array  $filter
          * @var string $date_from
          * @var string $date_to
          * @var string $user_name
@@ -173,10 +174,10 @@ class AuditLogDbStorage implements AuditLogStorageInterface
                         '=',
                         'audit_events.id'
                     )->groupBy('audit_events.id')
-                     ->whereIn(
-                         'audit_event_descriptions.field_name',
-                         $attributeNames
-                     );
+                        ->whereIn(
+                            'audit_event_descriptions.field_name',
+                            $attributeNames
+                        );
                 }
 
             }
@@ -277,7 +278,6 @@ class AuditLogDbStorage implements AuditLogStorageInterface
                 ->get()
                 ->toArray();
         }
-
 
         foreach ($this->data['response']['items'] as &$item) {
             if ($item['old_value'] === null) {
