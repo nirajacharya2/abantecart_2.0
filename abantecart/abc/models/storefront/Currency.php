@@ -18,6 +18,8 @@
 
 namespace abc\models\storefront;
 
+use abc\core\engine\Registry;
+
 class Currency extends \abc\models\locale\Currency
 {
     /**
@@ -64,7 +66,7 @@ class Currency extends \abc\models\locale\Currency
                 ];
             }
 
-            $this->cache->put('localization.currency', $currency_data);
+            Registry::cache()->put('localization.currency', $currency_data);
         }
 
         return $currency_data;
