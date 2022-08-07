@@ -57,10 +57,12 @@ class ABC extends ABCBase
         if (!$file || !is_file($file)) {
             $stage_name = @include(
                 dirname(getcwd())
-                .DS.'abc'
-                .DS.'config'
-                .DS.'enabled.config.php'
+                . DS . 'abc'
+                . DS . 'config'
+                . DS . 'enabled.config.php'
             );
+        } else {
+            $stage_name = @include($file);
         }
 
         @include __DIR__.DS.'init'.DS.'version.php';

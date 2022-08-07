@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2021 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -93,7 +93,6 @@ class ControllerPagesSaleCustomer extends AController
     {
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
-
         $this->document->setTitle($this->language->get('heading_title'));
 
         $this->document->initBreadcrumb([

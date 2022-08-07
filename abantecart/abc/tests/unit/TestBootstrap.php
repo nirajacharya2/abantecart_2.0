@@ -21,8 +21,6 @@ namespace Tests\unit;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 
-set_include_path(__DIR__);
-
 /**
  * Bootstrap singleton class for unit test
  */
@@ -55,10 +53,22 @@ class TestBootstrap
      */
     public function init()
     {
-        require_once dirname(__DIR__, 2).DS.'core'.DS.'ABC.php';
+        $dirApp = dirname(__DIR__, 2) . DS;
+        if ($dirApp != dirname(getcwd(), 2) . DS) {
+            foreach ($_SERVER['argv'] as $item) {
+                if (str_ends_with($item, 'phpunit.xml')) {
+                    $dirApp = dirname($item) . DS;
+                    break;
+                }
+            }
+        }
+
+        require_once $dirApp . 'core' . DS . 'ABC.php';
+        ABC::env('DIR_APP', $dirApp);
+        chdir(ABC::env('DIR_APP'));
 
         //run constructor of ABC class to load environment
-        $ABC = new ABC();
+        $ABC = new ABC($dirApp . 'config' . DS . 'enabled.config.php');
         //st default stage
         $stage_name = $ABC::getStageName();
         if (!$stage_name) {
@@ -68,15 +78,15 @@ class TestBootstrap
         //load core config for stage
         $ABC::loadConfig($stage_name);
 
-        ABC::env('DIR_TESTS', dirname(__DIR__).DS);
-        ABC::env('DIR_VENDOR', dirname(__DIR__, 2).DS.'vendor'.DS);
+        ABC::env('DIR_TESTS', ABC::env('DIR_APP') . 'tests' . DS);
+        ABC::env('DIR_VENDOR', ABC::env('DIR_APP') . 'vendor' . DS);
 
         //load tests config for stage
         $this->loadConfig($stage_name);
-        require_once ABC::env('DIR_APP').'core'.DS.'init'.DS.'base.php';
-        require_once ABC::env('DIR_APP').'core'.DS.'init'.DS.'cli.php';
+        require_once ABC::env('DIR_APP') . 'core' . DS . 'init' . DS . 'base.php';
+        require_once ABC::env('DIR_APP') . 'core' . DS . 'init' . DS . 'cli.php';
 
-        $GLOBALS['error_descriptions'] = 'ABC v'.ABC::env('VERSION').' PhpUnit Test';
+        $GLOBALS['error_descriptions'] = 'ABC v' . ABC::env('VERSION') . ' PhpUnit Test';
 
         $dirname = dirname(__FILE__);
         $dirname = dirname($dirname);

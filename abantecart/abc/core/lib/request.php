@@ -306,8 +306,10 @@ final class ARequest
             $ip = $this->server['HTTP_CF_CONNECTING_IP'];
         } elseif (!empty($this->server['HTTP_X_FORWARDED_FOR'])) {
             $ip = $this->server['HTTP_X_FORWARDED_FOR'];
-        } else {
+        } elseif ($this->server['REMOTE_ADDR']) {
             $ip = $this->server['REMOTE_ADDR'];
+        } else {
+            $ip = 'localhost';
         }
         return $ip;
     }

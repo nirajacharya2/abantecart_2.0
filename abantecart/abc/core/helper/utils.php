@@ -82,7 +82,7 @@ class AHelperUtils extends AHelper
             $value = str_replace($decimal_point, '.', $value);
         }
 
-        return (float)preg_replace('/[^0-9\-\.]/', '', $value);
+        return (float)preg_replace('/[^\d\-.]/', '', $value);
     }
 
     /*
@@ -484,8 +484,8 @@ class AHelperUtils extends AHelper
      */
     public static function versionCompare($version1, $version2, $operator)
     {
-        $version1 = explode('.', preg_replace('/[^0-9\.]/', '', $version1));
-        $version2 = explode('.', preg_replace('/[^0-9\.]/', '', $version2));
+        $version1 = explode('.', preg_replace('/[^\d.]/', '', $version1));
+        $version2 = explode('.', preg_replace('/[^\d.]/', '', $version2));
         $i = 0;
         while ($i < 3) {
             if (isset($version1[$i])) {
@@ -930,9 +930,11 @@ class AHelperUtils extends AHelper
         }
         unset(Registry::session()->data['curl_handler']);
         session_write_close();
-        $session = new ASession(ABC::env('UNIQUE_ID')
-            ? 'AC_SF_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10))
-            : 'AC_SF_PHPSESSID'
+
+        $session = new ASession(
+            ABC::env('UNIQUE_ID')
+                ? 'AC_SF_' . strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10))
+                : 'AC_SF_PHPSESSID'
         );
         foreach ($data as $k => $v) {
             $session->data[$k] = $v;
