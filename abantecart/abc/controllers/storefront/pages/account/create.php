@@ -75,9 +75,7 @@ class ControllerPagesAccountCreate extends AController
                 if (!$customer_data['customer_group_id']) {
                     $customer_data['customer_group_id'] = (int)$this->config->get('config_customer_group_id');
                 }
-                /**
-                 * @var Customer $customer
-                 */
+
                 $customer = $this->customer::createCustomer($customer_data);
                 $this->data['customer_model'] = $customer;
                 $this->data['customer_id'] = $customer->customer_id;
@@ -280,9 +278,7 @@ class ControllerPagesAccountCreate extends AController
                 'type'     => 'selectbox',
                 'name'     => 'country_id',
                 'options'  => $options,
-                'value'    => (isset($this->request->post['country_id'])
-                    ? $this->request->post['country_id']
-                    : $this->config->get('config_country_id')),
+                'value'    => ($this->request->post['country_id'] ?: $this->config->get('config_country_id')),
                 'required' => true,
             ]);
 
@@ -377,7 +373,7 @@ class ControllerPagesAccountCreate extends AController
             if ($content_info) {
                 $text_agree = $this->language->get('text_agree');
                 $this->data['text_agree_href'] = $this->html->getURL('r/content/content/loadInfo',
-                    '&content_id='.$this->config->get('config_account_id'));
+                    '&content_id=' . $this->config->get('config_account_id'));
                 $this->data['text_agree_href_text'] = $content_info['title'];
             } else {
                 $text_agree = '';
@@ -387,10 +383,12 @@ class ControllerPagesAccountCreate extends AController
         }
         $this->data['text_agree'] = $text_agree;
 
-        $text_account_already =
-            sprintf($this->language->get('text_account_already'), $this->html->getSecureURL('account/login'));
-        $this->data['text_account_already'] = $text_account_already;
+        $text_account_already = sprintf(
+            $this->language->get('text_account_already'),
+            $this->html->getSecureURL('account/login')
+        );
 
+        $this->data['text_account_already'] = $text_account_already;
 
         $this->view->batchAssign($this->data);
         $this->processTemplate('pages/account/create.tpl');

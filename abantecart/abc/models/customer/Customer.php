@@ -584,12 +584,14 @@ class Customer extends BaseModel
     {
         /** @var AEncryption $enc */
         $enc = ABC::getObjectByAlias('AEncryption');
+        if (!is_object($enc)) {
+            throw new Exception(AC_ERR_CLASS_CLASS_NOT_EXIST, 'AEncryption class not found in classmap!');
+        }
         $salt_key = $this->attributes['salt'] ?? H::genToken(8);
 
         if (!empty(trim($password))
             && $enc::getHash((string)$password, (string)$this->attributes['salt']) != $this->attributes['password']
         ) {
-            $salt_key = H::genToken(8);
             $this->fill(['salt' => $salt_key]);
             $this->attributes['password'] = $enc::getHash($password, $salt_key);
         } else {
