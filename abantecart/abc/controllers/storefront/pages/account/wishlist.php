@@ -23,7 +23,9 @@ namespace abc\controllers\storefront;
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
 use abc\core\engine\HtmlElementFactory;
+use abc\models\catalog\Product;
 use H;
+use Illuminate\Support\Collection;
 
 class ControllerPagesAccountWishlist extends AController
 {
@@ -50,7 +52,7 @@ class ControllerPagesAccountWishlist extends AController
     {
         $cart_rt = 'checkout/cart';
         //is this an embed mode
-        if ($this->config->get('embed_mode') == true) {
+        if ($this->config->get('embed_mode')) {
             $cart_rt = 'r/checkout/cart/embed';
         }
 
@@ -82,51 +84,49 @@ class ControllerPagesAccountWishlist extends AController
             ]
         );
 
-        $whishlist = $this->customer->getWishList();
+        $wishList = $this->customer->getWishList();
 
-        if ($whishlist) {
+        if ($wishList) {
             $this->loadModel('tool/seo_url');
-            $this->loadModel('catalog/product');
-
-            //get thumbnails by one pass
-            $resource = new AResource('image');
-            $thumbnails = $resource->getMainThumbList(
-                'products',
-                array_keys($whishlist),
-                $this->config->get('config_image_cart_width'),
-                $this->config->get('config_image_cart_width')
+            $results = Product::search(
+                [
+                    'include'           => array_keys($wishList),
+                    'with_final_price'  => true,
+                    'with_option_count' => true,
+                    'limit'             => $this->config->get('config_latest_limit'),
+                    'sort'              => 'date_added',
+                    'order'             => 'desc',
+                ]
             );
-            $products = [];
-            foreach ($whishlist as $product_id => $timestamp) {
-                $product_info = $this->model_catalog_product->getProduct($product_id);
-                $thumbnail = $thumbnails[$product_id];
-                $options = $this->model_catalog_product->getProductOptions($product_id);
-
-                $add = $this->html->getSEOURL(
-                    $options ? 'product/product' : $cart_rt,
-                    '&product_id='.$product_id,
-                    '&encode'
+            if ($results) {
+                $product_ids = $results->pluck('product_id')->toArray();
+                //get thumbnails by one pass
+                $resource = new AResource('image');
+                $thumbnails = $resource->getMainThumbList(
+                    'products',
+                    $product_ids,
+                    $this->config->get('config_image_product_width'),
+                    $this->config->get('config_image_product_height')
                 );
 
-                $products[] = [
-                    'product_id'    => $product_id,
-                    'name'          => $product_info['name'],
-                    'model'         => $product_info['model'],
-                    'thumb'         => $thumbnail,
-                    'added'         => H::dateInt2Display($timestamp),
-                    'price'         => $this->currency->format(
-                        $this->tax->calculate(
-                            $product_info['price'],
-                            $product_info['tax_class_id'],
-                            $this->config->get('config_tax')
-                        )
-                    ),
-                    'href'          => $this->html->getSEOURL('product/product', '&product_id='.$product_id, true),
-                    'call_to_order' => $product_info['call_to_order'],
-                    'add'           => $add,
-                ];
+                /** @var Collection|Product $result */
+                foreach ($results as $i => $result) {
+                    $this->data['products'][$i] = $result->toArray();
+                    $this->data['products'][$i]['thumbnails'] = $thumbnails[$result->product_id];
+                    $this->data['products'][$i]['added'] = H::dateInt2Display($wishList[$result->product_id]);
+                    $this->data['products'][$i]['add'] = $this->html->getSEOURL(
+                        $result->option_count ? 'product/product' : $cart_rt,
+                        '&product_id=' . $result->product_id,
+                        true
+                    );
+                    $this->data['products'][$i]['href'] = $this->html->getSEOURL(
+                        'product/product',
+                        '&product_id=' . $result->product_id,
+                        true
+                    );
+                }
             }
-            $this->data['products'] = $products;
+
             if (isset($this->session->data['redirect'])) {
                 $this->data['continue'] = str_replace('&amp;', '&', $this->session->data['redirect']);
                 unset($this->session->data['redirect']);

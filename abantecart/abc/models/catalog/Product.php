@@ -108,6 +108,7 @@ use ReflectionException;
  *
  * @method static Product find(int $product_id) Product
  * @method static Product select(mixed $select) Builder
+ * @method static Collection search(array $filterParams)
  * @method static WithFinalPrice(int $customer_group_id, Carbon|string $toDate = null) - adds "final_price" column into selected fields
  * @method static WithFirstSpecialPrice(int $customer_group_id, Carbon|string $toDate = null) - adds "special_price" column into selected fields
  * @method static WithFirstDiscountPrice(int $customer_group_id, Carbon|string $toDate = null) - adds "discount_price" column into selected fields
@@ -2733,6 +2734,7 @@ class Product extends BaseModel
     }
 
     /**
+     * Search method of model
      * @param array $params
      *   common parameters:
      *              - sort
@@ -2740,6 +2742,8 @@ class Product extends BaseModel
      *              - start
      *              - limit
      *  filter parameters - $params['filter']:
+     *              - include - filter by list of product ids
+     *              - exclude - do not include products from list of product ids
      *              - category_id
      *              - description
      *              - model
@@ -2755,7 +2759,6 @@ class Product extends BaseModel
      *              - with_special_price
      *              - with_discount_price
      *              - with_review_count
-     *              - with_option_count
      *              - with_option_count
      *              - with_rating
      *              - with_stock_info
