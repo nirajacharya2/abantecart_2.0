@@ -25,7 +25,9 @@ use abc\core\lib\AException;
 use abc\core\lib\ALayoutManager;
 use abc\core\lib\AResourceManager;
 use abc\models\BaseModel;
+use abc\models\QueryBuilder;
 use abc\models\system\Setting;
+use Carbon\Carbon;
 use Dyrynda\Database\Support\GeneratesUuid;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Exception;
@@ -46,6 +48,7 @@ use ReflectionException;
  * @property Collection $manufacturers_to_stores
  *
  * @method static Manufacturer find(int $customer_id) Manufacturer
+ * @method static WithProductCount(bool $only_enabled = true) - adds "product_count" column into selected fields
  * @package abc\models
  */
 class Manufacturer extends BaseModel
@@ -265,14 +268,14 @@ class Manufacturer extends BaseModel
             return false;
         }
         $storeId = (int)Registry::config()->get('config_store_id');
-        $cacheKey = 'manufacturer.'.$manufacturerId.'.store_'.$storeId;
+        $cacheKey = 'manufacturer.' . $manufacturerId . '.store_' . $storeId;
         $output = Registry::cache()->get($cacheKey);
 
         if ($output !== null) {
             return $output;
         }
-
-        $query = self::leftJoin(
+        /** @var QueryBuilder|Manufacturer $query */
+        $query = self::select()->leftJoin(
             'manufacturers_to_stores',
             'manufacturers_to_stores.manufacturer_id',
             '=',
@@ -280,6 +283,9 @@ class Manufacturer extends BaseModel
         );
         $query->where('manufacturers_to_stores.store_id', '=', $storeId);
         $query->where('manufacturers.manufacturer_id', '=', $manufacturerId);
+
+        /** @see Manufacturer::scopeWithProductCount() */
+        $query->WithProductCount();
         $manufacturer = $query->get()->first();
 
         if (!$manufacturer) {
@@ -434,6 +440,23 @@ class Manufacturer extends BaseModel
         }
         Registry::cache()->put($cacheKey, $cache);
         return $cache;
+    }
+
+    /**
+     * @param QueryBuilder $builder
+     * @param bool $only_enabled
+     */
+    public static function scopeWithProductCount($builder, $only_enabled = true)
+    {
+        $tableName = Registry::db()->table_name("products");
+        $sql = "( SELECT COUNT(" . $tableName . ".product_id)
+                 FROM " . $tableName . "
+                 WHERE " . $tableName . ".manufacturer_id = " . Registry::db()->table_name("manufacturers") . ".manufacturer_id ";
+        if ($only_enabled) {
+            $sql .= " AND " . $tableName . ".status = 1 ";
+        }
+        $sql .= ") as product_count";
+        $builder->selectRaw($sql);
     }
 
 }

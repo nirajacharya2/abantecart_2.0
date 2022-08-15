@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -37,24 +37,12 @@ use abc\modules\traits\ProductListingTrait;
  */
 class ControllerPagesProductManufacturer extends AController
 {
-    public $data = [];
-
     use ProductListingTrait;
 
     public function __construct(Registry $registry, $instance_id, $controller, $parent_controller = '')
     {
         parent::__construct($registry, $instance_id, $controller, $parent_controller);
         $this->fillSortsList();
-    }
-
-    /**
-     * Check if HTML Cache is enabled for the method
-     *
-     * @return array - array of data keys to be used for cache key building
-     */
-    public static function main_cache_keys()
-    {
-        return ['manufacturer_id', 'page', 'limit', 'sort', 'order'];
     }
 
     public function main()
@@ -68,7 +56,7 @@ class ControllerPagesProductManufacturer extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request = $this->request->get;
-        if ($this->config->get('embed_mode') == true) {
+        if ($this->config->get('embed_mode')) {
             $cart_rt = 'r/checkout/cart/embed';
 
             //load special headers
@@ -91,46 +79,39 @@ class ControllerPagesProductManufacturer extends AController
             'separator' => false,
         ]);
 
-        if (isset($request['manufacturer_id'])) {
-            $manufacturer_id = $request['manufacturer_id'];
-        } else {
-            $manufacturer_id = 0;
-        }
+        $manufacturer_id = $request['manufacturer_id'] ?? 0;
 
-        $manufacturer_info = (new Manufacturer())->getManufacturer($manufacturer_id);
-        if ($manufacturer_info) {
+        $manufacturerInfo = (new Manufacturer())->getManufacturer($manufacturer_id);
+        if ($manufacturerInfo) {
             $this->document->addBreadcrumb([
-                'href'      => $this->html->getSEOURL('product/manufacturer',
-                    '&manufacturer_id='.$request['manufacturer_id'], '&encode'),
-                'text'      => $manufacturer_info['name'],
+                'href'      => $this->html->getSEOURL(
+                    'product/manufacturer',
+                    '&manufacturer_id=' . $request['manufacturer_id'],
+                    true
+                ),
+                'text'      => $manufacturerInfo['name'],
                 'separator' => $this->language->get('text_separator'),
             ]);
 
-            $this->document->setTitle($manufacturer_info['name']);
-            $this->view->assign('heading_title', $manufacturer_info['name']);
-            $this->view->assign('text_sort', $this->language->get('text_sort'));
+            $this->document->setTitle($manufacturerInfo['name']);
+            $this->data['heading_title'] = $manufacturerInfo['name'];
+            $this->data['text_sort'] = $this->language->get('text_sort');
 
             $resource = new AResource('image');
             $thumbnail = $resource->getMainThumb('manufacturers',
-                $manufacturer_info['manufacturer_id'],
+                $manufacturerInfo['manufacturer_id'],
                 $this->config->get('config_image_grid_width'),
                 $this->config->get('config_image_grid_height')
             );
-            if (!preg_match('/no_image/', $thumbnail['thumb_url'])) {
+            if (!str_contains($thumbnail['thumb_url'], 'no_image')) {
                 $this->view->assign('manufacturer_icon', $thumbnail['thumb_url']);
             }
 
-            $product_total =
-                $this->model_catalog_product->getTotalProductsByManufacturerId($request['manufacturer_id']);
-            if ($product_total) {
-                if (isset($request['page'])) {
-                    $page = $request['page'];
-                } else {
-                    $page = 1;
-                }
+            if ($manufacturerInfo['product_count']) {
+                $page = $request['page'] ?? 1;
                 if (isset($request['limit'])) {
                     $limit = (int)$request['limit'];
-                    $limit = $limit > 50 ? 50 : $limit;
+                    $limit = min($limit, 50);
                 } else {
                     $limit = $this->config->get('config_catalog_limit');
                 }
@@ -150,12 +131,11 @@ class ControllerPagesProductManufacturer extends AController
                 $this->view->assign('button_add_to_cart', $this->language->get('button_add_to_cart'));
                 $product_ids = $products = [];
 
-                $products_result =
-                    $this->model_catalog_product->getProductsByManufacturerId($request['manufacturer_id'],
-                        $sort,
-                        $order,
-                        ($page - 1) * $limit,
-                        $limit);
+                $products_result = $this->model_catalog_product->getProductsByManufacturerId($request['manufacturer_id'],
+                    $sort,
+                    $order,
+                    ($page - 1) * $limit,
+                    $limit);
                 foreach ($products_result as $result) {
                     $product_ids[] = (int)$result['product_id'];
                 }
@@ -187,13 +167,16 @@ class ControllerPagesProductManufacturer extends AController
                     }
 
                     if ($products_info[$result['product_id']]['options']) {
-                        $add =
-                            $this->html->getSEOURL('product/product', '&product_id='.$result['product_id'], '&encode');
+                        $add = $this->html->getSEOURL(
+                            'product/product',
+                            '&product_id=' . $result['product_id'],
+                            true
+                        );
                     } else {
                         if ($this->config->get('config_cart_ajax')) {
                             $add = '#';
                         } else {
-                            $add = $this->html->getSecureURL($cart_rt, '&product_id='.$result['product_id'], '&encode');
+                            $add = $this->html->getSecureURL($cart_rt, '&product_id=' . $result['product_id'], '&encode');
                         }
                     }
 
@@ -201,8 +184,9 @@ class ControllerPagesProductManufacturer extends AController
                     $track_stock = false;
                     $in_stock = false;
                     $no_stock_text = $this->language->get('text_out_of_stock');
-                    $stock_checkout = $result['stock_checkout']
-                    === '' ? $this->config->get('config_stock_checkout') : $result['stock_checkout'];
+                    $stock_checkout = $result['stock_checkout'] === ''
+                        ? $this->config->get('config_stock_checkout')
+                        : $result['stock_checkout'];
                     $total_quantity = 0;
                     if ($stock_info[$result['product_id']]['subtract']) {
                         $track_stock = true;
@@ -274,7 +258,7 @@ class ControllerPagesProductManufacturer extends AController
                         'name'       => 'pagination',
                         'text'       => $this->language->get('text_pagination'),
                         'text_limit' => $this->language->get('text_per_page'),
-                        'total'      => $product_total,
+                        'total'      => $manufacturerInfo['product_count'],
                         'page'       => $page,
                         'limit'      => $limit,
                         'url'        => $pagination_url,
@@ -285,8 +269,8 @@ class ControllerPagesProductManufacturer extends AController
                 $this->view->assign('order', $order);
                 $this->view->setTemplate('pages/product/manufacturer.tpl');
             } else {
-                $this->document->setTitle($manufacturer_info['name']);
-                $this->view->assign('heading_title', $manufacturer_info['name']);
+                $this->document->setTitle($manufacturerInfo['name']);
+                $this->view->assign('heading_title', $manufacturerInfo['name']);
                 $this->view->assign('text_error', $this->language->get('text_empty'));
                 $continue = $this->html->buildElement(
                     [
