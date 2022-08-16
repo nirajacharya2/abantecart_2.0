@@ -2,7 +2,7 @@
 
 namespace abc\core\lib;
 
-use abc\core\engine\Registry;
+use abc\core\lib\contracts\HttpClient;
 use GuzzleHttp\Client;
 
 class GuzzleHttpClient implements HttpClient
@@ -28,19 +28,19 @@ class GuzzleHttpClient implements HttpClient
         return new HttpResponse($response->getHeaders(), json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR));
     }
 
-    public function post(string $url, array $options = [])
+    public function post(string $url, array $options = []): HttpResponse
     {
         $response = $this->client->post($url, $options)->getBody();
         return new HttpResponse($response->getHeaders(), json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR));
     }
 
-    public function put(string $url, array $options = [])
+    public function put(string $url, array $options = []): HttpResponse
     {
         $response = $this->client->put($url, $options)->getBody();
         return new HttpResponse($response->getHeaders(), json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR));
     }
 
-    public function delete(string $url, array $options = [])
+    public function delete(string $url, array $options = []): HttpResponse
     {
         $response = $this->client->delete($url, $options)->getBody();
         return new HttpResponse($response->getHeaders(), json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR));

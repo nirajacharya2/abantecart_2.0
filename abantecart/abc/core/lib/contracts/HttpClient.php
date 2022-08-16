@@ -1,6 +1,8 @@
 <?php
 
-namespace abc\core\lib;
+namespace abc\core\lib\contracts;
+
+use abc\core\lib\HttpResponse;
 
 interface HttpClient
 {
