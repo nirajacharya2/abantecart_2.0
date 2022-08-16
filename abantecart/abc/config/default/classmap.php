@@ -13,6 +13,7 @@ use abc\core\lib\AdminCommands;
 use abc\core\lib\AUser;
 use abc\core\lib\AEncryption;
 use abc\core\lib\exceptions\AExceptionHandler;
+use abc\core\lib\GuzzleHttpClient;
 use abc\core\lib\JobManager;
 use abc\core\lib\AJson;
 use abc\core\lib\ALog as ALog;
@@ -67,5 +68,6 @@ return [
     'AuditLogStorage'   => AuditLogDbStorage::class,
     'ModelSearch'       => ModelSearch::class,
 
+    'HttpClient'            => GuzzleHttpClient::class,
     'FixCategoriesCounters' => FixCategoriesCounters::class,
 ];
