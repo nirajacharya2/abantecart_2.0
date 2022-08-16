@@ -276,7 +276,8 @@
     "mustache/mustache": "2.14.0",
     "zircote/swagger-php": "^4.4",
     "ext-dom": "*",
-    "ext-simplexml": "*"
+    "ext-simplexml": "*",
+    "guzzlehttp/guzzle": "^7.0"
   },
   "extra": {
     "installer-paths": {
