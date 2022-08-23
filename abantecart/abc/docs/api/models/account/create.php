@@ -17,15 +17,6 @@ class AccountCreateRequestModel
 {
     /**
      * @OA\Property(
-     *     description="Unique API key that is set in the control panel",
-     * )
-     *
-     * @var string
-     */
-    private $api_key;
-
-    /**
-     * @OA\Property(
      *     description="Customer’s first name (32 characters limit)",
      * )
      * @var string

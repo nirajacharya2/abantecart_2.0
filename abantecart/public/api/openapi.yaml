@@ -905,7 +905,6 @@ components:
     accountErrorModel:
       title: 'Account Error Response model'
       description: 'Account Error Response'
-      type: object
       allOf:
         -
           $ref: '#/components/schemas/ApiErrorResponse'
@@ -974,7 +973,6 @@ components:
     CreateStep2SuccessModel:
       title: 'Create Step 2 Success Response model'
       description: 'Create Step 2 Success Response'
-      type: object
       allOf:
         -
           $ref: '#/components/schemas/ApiSuccessResponse'
@@ -1077,7 +1075,6 @@ components:
     EditStep2SuccessModel:
       title: 'Edit Step 2 Success Response model'
       description: 'Edit Step 2 Success Response'
-      type: object
       allOf:
         -
           $ref: '#/components/schemas/ApiSuccessResponse'
@@ -1196,7 +1193,6 @@ components:
     loginSuccessModel:
       title: 'Login Success Response model'
       description: 'Login Success Response'
-      type: object
       allOf:
         -
           $ref: '#/components/schemas/ApiSuccessResponse'
@@ -1208,7 +1204,6 @@ components:
     loginErrorModel:
       title: 'Login Error Response model'
       description: 'Login Error Response'
-      type: object
       allOf:
         -
           $ref: '#/components/schemas/ApiErrorResponse'
