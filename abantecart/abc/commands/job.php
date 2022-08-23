@@ -57,7 +57,7 @@ class Job extends BaseCommand
             return ['Error: Unknown action.'];
         }
 
-        require_once ABC::env('DIR_WORKERS').'WorkerInterface.php';
+        require_once ABC::env('DIR_WORKERS').'AWorkerInterface.php';
         require_once ABC::env('DIR_WORKERS').'BaseWorker.php';
 
         if ($action == 'run') {

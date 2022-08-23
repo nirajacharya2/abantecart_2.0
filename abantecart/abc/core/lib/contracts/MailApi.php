@@ -3,6 +3,7 @@
 namespace abc\core\lib\contracts;
 
 use abc\core\lib\AMail;
+use abc\core\lib\MailApiResponse;
 
 interface MailApi
 {
