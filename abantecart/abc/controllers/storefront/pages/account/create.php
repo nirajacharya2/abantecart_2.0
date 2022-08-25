@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -23,9 +23,9 @@ namespace abc\controllers\storefront;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\core\lib\ACustomer;
 use abc\core\lib\AEncryption;
 use abc\models\customer\Customer;
+use abc\models\storefront\ModelCatalogContent;
 use abc\modules\events\ABaseEvent;
 use H;
 
@@ -33,12 +33,11 @@ use H;
  * Class ControllerPagesAccountCreate
  *
  * @package abc\controllers\storefront
- * @property \abc\models\storefront\ModelCatalogContent $model_catalog_content
+ * @property ModelCatalogContent $model_catalog_content
  */
 class ControllerPagesAccountCreate extends AController
 {
     public $errors = [];
-    public $data;
 
     public function main()
     {
