@@ -20,20 +20,20 @@
 
 namespace abc\controllers\storefront;
 
-use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
 use abc\core\engine\Registry;
 use abc\models\catalog\Manufacturer;
-use abc\models\storefront\ModelCatalogManufacturer;
+use abc\models\catalog\Product;
 use abc\modules\traits\ProductListingTrait;
+use Illuminate\Support\Collection;
+use stdClass;
 
 /**
  * Class ControllerPagesProductManufacturer
  *
  * @package abc\controllers\storefront
  *
- * @property ModelCatalogManufacturer $model_catalog_manufacturer
  */
 class ControllerPagesProductManufacturer extends AController
 {
@@ -48,8 +48,6 @@ class ControllerPagesProductManufacturer extends AController
     public function main()
     {
 
-        $this->loadModel('catalog/manufacturer');
-        $this->loadModel('catalog/product');
         $this->loadModel('tool/seo_url');
         $this->loadModel('tool/image');
 
@@ -79,32 +77,35 @@ class ControllerPagesProductManufacturer extends AController
             'separator' => false,
         ]);
 
-        $manufacturer_id = $request['manufacturer_id'] ?? 0;
+        $manufacturerId = $request['manufacturer_id'] ?? 0;
 
-        $manufacturerInfo = (new Manufacturer())->getManufacturer($manufacturer_id);
+        $manufacturerInfo = (new Manufacturer())->getManufacturer($manufacturerId);
         if ($manufacturerInfo) {
-            $this->document->addBreadcrumb([
-                'href'      => $this->html->getSEOURL(
-                    'product/manufacturer',
-                    '&manufacturer_id=' . $request['manufacturer_id'],
-                    true
-                ),
-                'text'      => $manufacturerInfo['name'],
-                'separator' => $this->language->get('text_separator'),
-            ]);
+            $this->document->addBreadcrumb(
+                [
+                    'href'      => $this->html->getSEOURL(
+                        'product/manufacturer',
+                        '&manufacturer_id=' . $request['manufacturer_id'],
+                        true
+                    ),
+                    'text'      => $manufacturerInfo['name'],
+                    'separator' => $this->language->get('text_separator'),
+                ]
+            );
 
             $this->document->setTitle($manufacturerInfo['name']);
             $this->data['heading_title'] = $manufacturerInfo['name'];
             $this->data['text_sort'] = $this->language->get('text_sort');
 
             $resource = new AResource('image');
-            $thumbnail = $resource->getMainThumb('manufacturers',
+            $thumbnail = $resource->getMainThumb(
+                'manufacturers',
                 $manufacturerInfo['manufacturer_id'],
                 $this->config->get('config_image_grid_width'),
                 $this->config->get('config_image_grid_height')
             );
             if (!str_contains($thumbnail['thumb_url'], 'no_image')) {
-                $this->view->assign('manufacturer_icon', $thumbnail['thumb_url']);
+                $this->data['manufacturer_icon'] = $thumbnail['thumb_url'];
             }
 
             if ($manufacturerInfo['product_count']) {
@@ -122,108 +123,164 @@ class ControllerPagesProductManufacturer extends AController
                 }
                 list($sort, $order) = explode("-", $sorting_href);
                 if ($sort == 'name') {
-                    $sort = 'pd.'.$sort;
+                    $sort = 'pd.' . $sort;
                 } elseif (in_array($sort, ['sort_order', 'price'])) {
-                    $sort = 'p.'.$sort;
+                    $sort = 'p.' . $sort;
                 }
 
-                $this->loadModel('catalog/review');
-                $this->view->assign('button_add_to_cart', $this->language->get('button_add_to_cart'));
-                $product_ids = $products = [];
+                $this->data['button_add_to_cart'] = $this->language->get('button_add_to_cart');
 
-                $products_result = $this->model_catalog_product->getProductsByManufacturerId($request['manufacturer_id'],
-                    $sort,
-                    $order,
-                    ($page - 1) * $limit,
-                    $limit);
-                foreach ($products_result as $result) {
-                    $product_ids[] = (int)$result['product_id'];
-                }
-                $products_info = $this->model_catalog_product->getProductsAllInfo($product_ids);
-                $thumbnails = $resource->getMainThumbList('products',
-                    $product_ids,
-                    (int)$this->config->get('config_image_product_width'),
-                    (int)$this->config->get('config_image_product_height')
+                $results = Product::search(
+                    [
+                        'filter'              => [
+                            'manufacturer_id' => $manufacturerId
+                        ],
+                        'with_final_price'    => true,
+                        'with_discount_price' => true,
+                        'with_special_price'  => true,
+                        'with_rating'         => true,
+                        'with_stock_info'     => true,
+                        'with_option_count'   => true,
+                        'start'               => ($page - 1) * $limit,
+                        'limit'               => $limit,
+                        'sort'                => $sort,
+                        'order'               => $order,
+                    ]
                 );
-                $stock_info = $this->model_catalog_product->getProductsStockInfo($product_ids);
+                $productIds = $results->pluck('product_id')->toArray();
 
-                foreach ($products_result as $result) {
-                    $thumbnail = $thumbnails[$result['product_id']];
-                    $rating = $products_info[$result['product_id']]['rating'];
+                //get thumbnails by one pass
+                $resource = new AResource('image');
+                $thumbnails = $resource->getMainThumbList(
+                    'products',
+                    $productIds,
+                    $this->config->get('config_image_product_width'),
+                    $this->config->get('config_image_product_height')
+                );
+
+                if ($this->customer->isLogged() || $this->customer->isUnauthCustomer()) {
+                    $this->data['is_customer'] = true;
+                    $wishlist = $this->customer->getWishList();
+                } else {
+                    $wishlist = [];
+                }
+
+                /** @var stdClass|Collection|Product $result */
+                foreach ($results as $i => $result) {
+                    $thumbnail = $thumbnails[$result->product_id];
+                    $rating = $result->rating;
                     $special = false;
-                    $discount = $products_info[$result['product_id']]['discount'];
+                    $discount = $result->discount_price;
+
                     if ($discount) {
-                        $price = $this->currency->format($this->tax->calculate($discount, $result['tax_class_id'],
-                            $this->config->get('config_tax')));
+                        $price = $this->currency->format(
+                            $this->tax->calculate(
+                                $discount,
+                                $result->tax_class_id,
+                                $this->config->get('config_tax')
+                            )
+                        );
                     } else {
-                        $price =
-                            $this->currency->format($this->tax->calculate($result['price'], $result['tax_class_id'],
-                                $this->config->get('config_tax')));
-                        $special = $products_info[$result['product_id']]['special'];
+                        $price = $this->currency->format(
+                            $this->tax->calculate(
+                                $result['price'],
+                                $result->tax_class_id,
+                                $this->config->get('config_tax')
+                            )
+                        );
+                        $special = $result['special_price'];
                         if ($special) {
-                            $special = $this->currency->format($this->tax->calculate($special, $result['tax_class_id'],
-                                $this->config->get('config_tax')));
+                            $special = $this->currency->format(
+                                $this->tax->calculate(
+                                    $special,
+                                    $result->tax_class_id,
+                                    $this->config->get('config_tax')
+                                )
+                            );
                         }
                     }
 
-                    if ($products_info[$result['product_id']]['options']) {
+                    $hasOptions = $result->option_count;
+
+                    if ($hasOptions) {
                         $add = $this->html->getSEOURL(
                             'product/product',
                             '&product_id=' . $result['product_id'],
-                            true
+                            '&encode'
                         );
                     } else {
                         if ($this->config->get('config_cart_ajax')) {
                             $add = '#';
                         } else {
-                            $add = $this->html->getSecureURL($cart_rt, '&product_id=' . $result['product_id'], '&encode');
+                            $add = $this->html->getSecureURL(
+                                $cart_rt,
+                                '&product_id=' . $result['product_id'],
+                                '&encode'
+                            );
                         }
                     }
-
                     //check for stock status, availability and config
                     $track_stock = false;
                     $in_stock = false;
                     $no_stock_text = $this->language->get('text_out_of_stock');
-                    $stock_checkout = $result['stock_checkout'] === ''
-                        ? $this->config->get('config_stock_checkout')
-                        : $result['stock_checkout'];
                     $total_quantity = 0;
-                    if ($stock_info[$result['product_id']]['subtract']) {
+                    $stock_checkout = $result->stock_checkout === ''
+                        ? $this->config->get('config_stock_checkout')
+                        : $result->stock_checkout;
+                    if ($result->subtract) {
                         $track_stock = true;
-                        $total_quantity = $stock_info[$result['product_id']]['quantity'];
+                        $total_quantity = $result->quantity;
                         //we have stock or out of stock checkout is allowed
                         if ($total_quantity > 0 || $stock_checkout) {
                             $in_stock = true;
                         }
                     }
 
-                    $products[] = [
-                        'product_id'     => $result['product_id'],
-                        'name'           => $result['name'],
-                        'blurb'          => $result['blurb'],
-                        'model'          => $result['model'],
-                        'rating'         => $rating,
-                        'stars'          => sprintf($this->language->get('text_stars'), $rating),
-                        'thumb'          => $thumbnail,
-                        'price'          => $price,
-                        'raw_price'      => $result['price'],
-                        'call_to_order'  => $result['call_to_order'],
-                        'options'        => $products_info[$result['product_id']]['options'],
-                        'special'        => $special,
-                        'href'           => $this->html->getSEOURL('product/product',
-                            '&manufacturer_id='.$request['manufacturer_id'].'&product_id='.$result['product_id'],
-                            '&encode'),
-                        'add'            => $add,
-                        'description'    => html_entity_decode($result['description'], ENT_QUOTES,
-                            ABC::env('APP_CHARSET')),
-                        'track_stock'    => $track_stock,
-                        'in_stock'       => $in_stock,
-                        'no_stock_text'  => $no_stock_text,
-                        'total_quantity' => $total_quantity,
-                        'tax_class_id'   => $result['tax_class_id'],
-                    ];
+                    $in_wishlist = false;
+                    if ($wishlist && $wishlist[$result->product_id]) {
+                        $in_wishlist = true;
+                    }
+
+                    $catalog_mode = false;
+                    if ($result->product_type_id) {
+                        $prodTypeSettings = Product::getProductTypeSettings((int)$result->product_id);
+
+                        if ($prodTypeSettings
+                            && is_array($prodTypeSettings)
+                            && isset($prodTypeSettings['catalog_mode'])
+                        ) {
+                            $catalog_mode = (bool)$prodTypeSettings['catalog_mode'];
+                        }
+                    }
+
+
+                    $this->data['products'][$i] = $result->toArray();
+                    $this->data['products'][$i]['stars'] = sprintf($this->language->get('text_stars'), $rating);
+                    $this->data['products'][$i]['price'] = $price;
+                    $this->data['products'][$i]['options'] = $hasOptions;
+                    $this->data['products'][$i]['special'] = $special;
+                    $this->data['products'][$i]['thumb'] = $thumbnail;
+                    $this->data['products'][$i]['href'] = $this->html->getSEOURL(
+                        'product/product',
+                        '&product_id=' . $result->product_id,
+                        '&encode'
+                    );
+                    $this->data['products'][$i]['add'] = $add;
+                    $this->data['products'][$i]['track_stock'] = $track_stock;
+                    $this->data['products'][$i]['in_stock'] = $in_stock;
+                    $this->data['products'][$i]['no_stock_text'] = $no_stock_text;
+                    $this->data['products'][$i]['total_quantity'] = $total_quantity;
+                    $this->data['products'][$i]['in_wishlist'] = $in_wishlist;
+                    $this->data['products'][$i]['product_wishlist_add_url'] = $this->html->getURL(
+                        'product/wishlist/add',
+                        '&product_id=' . $result->product_id
+                    );
+                    $this->data['products'][$i]['product_wishlist_remove_url'] = $this->html->getURL(
+                        'product/wishlist/remove',
+                        '&product_id=' . $result->product_id
+                    );
+                    $this->data['products'][$i]['catalog_mode'] = $catalog_mode;
                 }
-                $this->data['products'] = $products;
 
                 if ($this->config->get('config_customer_price')) {
                     $display_price = true;
@@ -232,27 +289,32 @@ class ControllerPagesProductManufacturer extends AController
                 } else {
                     $display_price = false;
                 }
-                $this->view->assign('display_price', $display_price);
+                $this->data['display_price'] = $display_price;
 
-                $sort_options = [];
-                foreach ($this->data['sorts'] as $item => $text) {
-                    $sort_options[$item] = $text;
-                }
                 $sorting = $this->html->buildSelectbox(
                     [
                         'name'    => 'sort',
-                        'options' => $sort_options,
+                        'options' => $this->data['sorts'],
                         'value'   => $sorting_href,
-                    ]);
-                $this->view->assign('sorting', $sorting);
-                $this->view->assign('url',
-                    $this->html->getSEOURL('product/manufacturer', '&manufacturer_id='.$request['manufacturer_id']));
+                    ]
+                );
 
-                $pagination_url = $this->html->getSEOURL('product/manufacturer',
-                    '&manufacturer_id='.$request['manufacturer_id'].'&sort='.$sorting_href.'&page={page}'.'&limit='
-                    .$limit, '&encode');
+                $this->data['sorting'] = $sorting;
+                $this->data['url'] = $this->html->getSEOURL(
+                    'product/manufacturer',
+                    '&manufacturer_id=' . $request['manufacturer_id']
+                );
 
-                $this->view->assign('pagination_bootstrap', $this->html->buildElement(
+                $pagination_url = $this->html->getSEOURL(
+                    'product/manufacturer',
+                    '&manufacturer_id=' . $request['manufacturer_id']
+                    . '&sort=' . $sorting_href
+                    . '&page={page}'
+                    . '&limit=' . $limit,
+                    '&encode'
+                );
+
+                $this->data['pagination_bootstrap'] = $this->html->buildElement(
                     [
                         'type'       => 'Pagination',
                         'name'       => 'pagination',
@@ -263,60 +325,57 @@ class ControllerPagesProductManufacturer extends AController
                         'limit'      => $limit,
                         'url'        => $pagination_url,
                         'style'      => 'pagination',
-                    ])
+                    ]
                 );
-                $this->view->assign('sort', $sort);
-                $this->view->assign('order', $order);
+                $this->data['sort'] = $sort;
+                $this->data['order'] = $order;
                 $this->view->setTemplate('pages/product/manufacturer.tpl');
             } else {
                 $this->document->setTitle($manufacturerInfo['name']);
-                $this->view->assign('heading_title', $manufacturerInfo['name']);
-                $this->view->assign('text_error', $this->language->get('text_empty'));
+                $this->data['heading_title'] = $manufacturerInfo['name'];
+                $this->data['text_error'] = $this->language->get('text_empty');
                 $continue = $this->html->buildElement(
                     [
                         'type'  => 'button',
                         'name'  => 'continue_button',
                         'text'  => $this->language->get('button_continue'),
                         'style' => 'button',
-                    ]);
-                $this->view->assign('button_continue', $continue);
-                $this->view->assign('continue', $this->html->getHomeURL());
+                    ]
+                );
+                $this->data['button_continue'] = $continue;
+                $this->data['continue'] = $this->html->getHomeURL();
                 $this->view->setTemplate('pages/error/not_found.tpl');
             }
         } else {
-            $url = '';
 
-            if (isset($request['sort'])) {
-                $url .= '&sort='.$request['sort'];
-            }
-
-            if (isset($request['order'])) {
-                $url .= '&order='.$request['order'];
-            }
-
-            if (isset($request['page'])) {
-                $url .= '&page='.$request['page'];
-            }
+            $url = $request['sort'] ? '&sort=' . $request['sort'] : '';
+            $url .= $request['order'] ? '&order=' . $request['order'] : '';
+            $url .= $request['page'] ? '&page=' . $request['page'] : '';
 
             $this->document->addBreadcrumb([
-                'href'      => $this->html->getSEOURL('product/manufacturer', '&manufacturer_id='.$manufacturer_id.$url,
-                    '&encode'),
+                'href'      => $this->html->getSEOURL(
+                    'product/manufacturer',
+                    '&manufacturer_id=' . $manufacturerId . $url,
+                    '&encode'
+                ),
                 'text'      => $this->language->get('text_error'),
                 'separator' => $this->language->get('text_separator'),
             ]);
 
             $this->document->setTitle($this->language->get('text_error'));
 
-            $this->view->assign('heading_title', $this->language->get('text_error'));
-            $this->view->assign('text_error', $this->language->get('text_error'));
-            $continue = $this->html->buildElement([
-                'type'  => 'button',
-                'name'  => 'continue_button',
-                'text'  => $this->language->get('button_continue'),
-                'style' => 'button',
-            ]);
-            $this->view->assign('button_continue', $continue);
-            $this->view->assign('continue', $this->html->getHomeURL());
+            $this->data['heading_title'] = $this->language->get('text_error');
+            $this->data['text_error'] = $this->language->get('text_error');
+            $continue = $this->html->buildElement(
+                [
+                    'type'  => 'button',
+                    'name'  => 'continue_button',
+                    'text'  => $this->language->get('button_continue'),
+                    'style' => 'button',
+                ]
+            );
+            $this->data['button_continue'] = $continue;
+            $this->data['continue'] = $this->html->getHomeURL();
 
             $this->view->setTemplate('pages/error/not_found.tpl');
         }

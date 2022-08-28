@@ -108,7 +108,7 @@ use ReflectionException;
  *
  * @method static Product find(int $product_id) Product
  * @method static Product select(mixed $select) Builder
- * @method static Collection search(array $filterParams)
+ * @method static Collection search(array $filterParams) - see getProducts() method
  * @method static WithFinalPrice(int $customer_group_id, Carbon|string $toDate = null) - adds "final_price" column into selected fields
  * @method static WithFirstSpecialPrice(int $customer_group_id, Carbon|string $toDate = null) - adds "special_price" column into selected fields
  * @method static WithFirstDiscountPrice(int $customer_group_id, Carbon|string $toDate = null) - adds "discount_price" column into selected fields
@@ -2745,6 +2745,7 @@ class Product extends BaseModel
      *              - include - filter by list of product ids
      *              - exclude - do not include products from list of product ids
      *              - category_id
+     *              - manufacturer_id
      *              - description
      *              - model
      *              - only_enabled - with status 1 and date_available less than current time
@@ -2779,6 +2780,7 @@ class Product extends BaseModel
         $filter['include'] = $filter['include'] ?? [];
         $filter['exclude'] = $filter['exclude'] ?? [];
         $filter['category_id'] = $filter['category_id'] ?? 0;
+        $filter['manufacturer_id'] = $filter['manufacturer_id'] ?? 0;
         $filter['description'] = $filter['description'] ?? false;
         $filter['model'] = $filter['model'] ?? false;
 
@@ -2962,6 +2964,10 @@ class Product extends BaseModel
                             ->whereIn('products_to_categories.category_id', $category_ids);
                     }
                 );
+            }
+
+            if ($filter['manufacturer_id']) {
+                $query->where('products.manufacturer_id', $filter['manufacturer_id']);
             }
 
             if ((array)$filter['include']) {

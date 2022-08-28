@@ -75,9 +75,9 @@ class ControllerBlocksLatest extends AController
             $this->data['is_customer'] = true;
             if ($this->customer->isLogged() || $this->customer->isUnauthCustomer()) {
                 $this->data['is_customer'] = true;
-                $whishlist = $this->customer->getWishList();
+                $wishlist = $this->customer->getWishList();
             } else {
-                $whishlist = [];
+                $wishlist = [];
             }
             /** @var Collection $result */
             foreach ($results as $i => $result) {
@@ -152,7 +152,7 @@ class ControllerBlocksLatest extends AController
                 }
 
                 $in_wishlist = false;
-                if ($whishlist && $whishlist[$result['product_id']]) {
+                if ($wishlist && $wishlist[$result['product_id']]) {
                     $in_wishlist = true;
                 }
 

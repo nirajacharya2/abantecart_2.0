@@ -14,9 +14,9 @@ trait ProductListingTrait
     {
         $default_sorting = $this->config->get('config_product_default_sort_order');
         $sort_prefix = '';
-        if (strpos($default_sorting, 'name-') === 0) {
+        if (str_starts_with($default_sorting, 'name-')) {
             $sort_prefix = 'pd.';
-        } elseif (strpos($default_sorting, 'price-') === 0) {
+        } elseif (str_starts_with($default_sorting, 'price-')) {
             $sort_prefix = 'p.';
         }
         $this->data['sorts'] = [
