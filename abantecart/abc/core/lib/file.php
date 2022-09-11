@@ -23,6 +23,7 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use H;
+use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 use stdClass;
 
@@ -33,9 +34,9 @@ use stdClass;
 
 /**
  * @property ALanguageManager $language
- * @property ADB                            $db
- * @property \abc\core\lib\AbcCache         $cache
- * @property AConfig                        $config
+ * @property ADB $db
+ * @property AbcCache $cache
+ * @property AConfig $config
  */
 class AFile
 {
@@ -63,24 +64,13 @@ class AFile
     }
 
     /**
-     * @param  string $key   - key to save data in registry
-     * @param  mixed  $value - key to save data in registry
-     *
-     * @void
-     */
-    public function __set($key, $value)
-    {
-        $this->registry->set($key, $value);
-    }
-
-    /**
      * @param       $settings
      * @param array $data
      *
      * @return array
      * @throws AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function validateFileOption($settings, $data)
     {
@@ -91,13 +81,16 @@ class AFile
         }
 
         if (!empty($settings['extensions'])) {
-            $allowed_extensions = explode(',', str_replace(' ', '', $settings['extensions']));
-            $extension = substr(strrchr($data['name'], '.'), 1);
+            $allowed = !is_array($settings['extensions']) ? explode(',', str_replace(' ', '', $settings['extensions'])) : $settings['extensions'];
+            $allowed = array_map('strtolower', $allowed);
+            $extension = strtolower(pathinfo($data['name'], PATHINFO_EXTENSION));
 
-            if (!in_array($extension, $allowed_extensions)) {
-                $errors[] =
-                    sprintf($this->language->get('error_file_extension'), $settings['extensions']).' ('.$data['name']
-                    .')';
+            if (!in_array($extension, $allowed)) {
+                $errors[] = sprintf(
+                        $this->language->get('error_file_extension'),
+                        $settings['extensions']
+                    )
+                    . ' (' . $data['name'] . ')';
             }
 
         }
@@ -133,24 +126,25 @@ class AFile
      *
      * @return array
      */
-    public function getUploadFilePath($upload_sub_dir, $file_name)
+    public function getUploadFilePath($upload_sub_dir, $file_name, $uploadsDir = null)
     {
         if (empty($file_name)) {
             return [];
         }
-        $uploads_dir = ABC::env('DIR_ROOT').'/admin/system/uploads';
-        H::is_writable_dir($uploads_dir);
-        $file_path = $uploads_dir.'/'.$upload_sub_dir.'/';
+        $uploadsDir = $uploadsDir ?: ABC::env('DIR_SYSTEM') . 'uploads' . DS;
+        $uploadsDir = rtrim($uploadsDir, DS) . DS;
+        H::is_writable_dir($uploadsDir);
+        $file_path = $uploadsDir . $upload_sub_dir . DS;
+
         H::is_writable_dir($file_path);
 
         $ext = strrchr($file_name, '.');
         $file_name = substr($file_name, 0, strlen($file_name) - strlen($ext));
 
-        $i = '';
-        $real_path = '';
+        $i = 0;
         do {
             if ($i) {
-                $new_name = $file_name.'_'.$i.$ext;
+                $new_name = $file_name . '_' . $i . $ext;
             } else {
                 $new_name = $file_name.$ext;
                 $i = 0;

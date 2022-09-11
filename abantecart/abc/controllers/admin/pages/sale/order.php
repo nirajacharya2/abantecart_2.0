@@ -560,9 +560,9 @@ class ControllerPagesSaleOrder extends AController
                     $file_settings = unserialize($option['settings']);
                     $filename = $value;
                     if (H::has_value($file_settings['directory'])) {
-                        $file = ABC::env('DIR_APP').'system'.DS.'uploads'.DS.$file_settings['directory'].DS.$filename;
+                        $file = ABC::env('DIR_SYSTEM') . 'uploads' . DS . $file_settings['directory'] . DS . $filename;
                     } else {
-                        $file = ABC::env('DIR_APP').'system'.DS.'uploads'.DS.$filename;
+                        $file = ABC::env('DIR_SYSTEM') . 'uploads' . DS . $filename;
                     }
 
                     if (is_file($file)) {
