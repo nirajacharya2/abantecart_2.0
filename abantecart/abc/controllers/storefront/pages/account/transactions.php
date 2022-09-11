@@ -69,11 +69,7 @@ class ControllerPagesAccountTransactions extends AController
 
         $this->data['action'] = $this->html->getSecureURL('account/transactions');
 
-        if (isset($this->request->get['page'])) {
-            $page = $this->request->get['page'];
-        } else {
-            $page = 1;
-        }
+        $page = $this->request->get['page'] ?? 1;
 
         if (isset($this->request->get['limit'])) {
             $limit = (int) $this->request->get['limit'];
@@ -181,20 +177,17 @@ class ControllerPagesAccountTransactions extends AController
                     'limit'      => $limit,
                     'url'        => $this->html->getSecureURL(
                         'account/transactions',
-                        '&date_start='.$this->data['date_start']->value
-                        .'&date_end='.$this->data['date_end']->value
-                        .'&limit='.$limit.'&page={page}'
+                        '&date_start=' . $this->data['date_start']->value
+                        . '&date_end=' . $this->data['date_end']->value
+                        . '&limit=' . $limit . '&page={page}'
                     ),
                     'style'      => 'pagination',
                 ]
             );
-
-            $this->data['continue'] = $this->html->getSecureURL('account/account');
-            $this->view->setTemplate('pages/account/transactions.tpl');
-        } else {
-            $this->data['continue'] = $this->html->getSecureURL('account/account');
-            $this->view->setTemplate('pages/account/transactions.tpl');
         }
+
+        $this->data['continue'] = $this->html->getSecureURL('account/account');
+        $this->view->setTemplate('pages/account/transactions.tpl');
         $this->data['transactions'] = $trans;
         $this->data['button_continue'] = $this->html->buildElement(
             [
