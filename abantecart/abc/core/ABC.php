@@ -295,13 +295,27 @@ class ABC extends ABCBase
     {
         //getting
         if ($value === null && !is_array($name)) {
+            $name = trim($name);
             //check environment values
             if (!sizeof(static::$env)) {
                 // DO NOT ALLOW RUN APP WITH EMPTY ENVIRONMENT
                 exit('Fatal Error: empty environment! Please check abc/config directory for data consistency.');
             }
-            if( isset(static::$env[$name])){
+            if (isset(static::$env[$name])) {
                 return static::$env[$name];
+            } //getting all keys
+            elseif ($name == '*') {
+                return static::$env;
+            } //getting by key mask
+            elseif (str_ends_with($name, '*')) {
+                $output = [];
+                $name = trim($name, '*');
+                foreach (static::$env as $n => $v) {
+                    if (str_starts_with($n, $name)) {
+                        $output[$n] = $v;
+                    }
+                }
+                return $output;
             }
         } // setting
         else {
