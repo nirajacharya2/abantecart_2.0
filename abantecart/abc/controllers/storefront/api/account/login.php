@@ -59,6 +59,7 @@ class ControllerApiAccountLogin extends AControllerAPI
      */
     public function post()
     {
+        $this->extensions->hk_InitData($this, __FUNCTION__);
         //This is login attempt
         $request = $this->rest->getRequestParams();
         if (isset($request['token'])) {
@@ -98,19 +99,25 @@ class ControllerApiAccountLogin extends AControllerAPI
                     return null;
                 }
                 $this->session->data['token'] = session_id();
-                $this->rest->setResponseData([
+                $this->data['response'] = [
                     'status'  => 1,
                     'success' => 'Logged in',
                     'token'   => $this->session->data['token'],
-                ]);
+                ];
+
+                $this->extensions->hk_UpdateData($this, __FUNCTION__);
+
+                $this->rest->setResponseData($this->data['response']);
                 $this->rest->sendResponse(200);
                 return null;
             } else {
-                $this->rest->setResponseData([
-                        'error_code' => 0,
-                        'error_title' => 'Unauthorized',
-                        'error_text' => 'Login attempt failed!'
-                    ]);
+                $this->data['response'] = [
+                    'error_code' => 0,
+                    'error_title' => 'Unauthorized',
+                    'error_text' => 'Login attempt failed!'
+                ];
+                $this->extensions->hk_UpdateData($this, __FUNCTION__);
+                $this->rest->setResponseData($this->data['response']);
                 $this->rest->sendResponse(401);
                 return null;
             }
