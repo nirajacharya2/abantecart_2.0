@@ -23,7 +23,7 @@ use application\components\workers\WorkerException;
  * ExportWorker for larger objects to a file.
  *
  */
-final class ExportWorker extends BaseWorker
+final class ExportWorker extends ABaseWorker
 {
     /**
      * @inheritdoc

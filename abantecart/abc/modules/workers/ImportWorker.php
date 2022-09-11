@@ -19,7 +19,7 @@
 use application\components\workers\WorkerException;
 use application\modules\membership\models\MembershipFile;
 
-final class MembershipWorker extends BaseWorker
+final class MembershipWorker extends ABaseWorker
 {
     /**
      * @inheritdoc

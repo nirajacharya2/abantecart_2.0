@@ -21,7 +21,7 @@ use application\components\workers\WorkerException;
 /**
  * Class ElasticWorker
  */
-class ElasticWorker extends BaseWorker
+class ElasticWorker extends ABaseWorker
 {
     protected function init()
     {
