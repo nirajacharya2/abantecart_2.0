@@ -73,6 +73,10 @@ class ControllerApiAccountEdit extends ASecureControllerAPI
 
         $this->loadLanguage('account/edit');
         $this->loadLanguage('account/success');
+        $request_data['customer_id'] = $this->customer->getId();
+        if ($request_data['email']) {
+            $request_data['email_confirmation'] = $request_data['email'];
+        }
         $this->v_error = $this->customer::validateRegistrationData($request_data);
         if (!$this->v_error) {
             $request_data['newsletter'] = 1;
