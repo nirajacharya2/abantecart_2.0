@@ -76,9 +76,9 @@ class ControllerApiAccountHistory extends ASecureControllerAPI
             }
 
             if (isset($request_data['limit']) && is_integer($request_data['limit'])) {
-                $this->data['limit'] = (int)$request_data['limit'];
+                $this->data['limit'] = (int) $request_data['limit'];
             } else {
-                $this->data['limit'] = $this->config->get('config_catalog_limit');
+                $this->data['limit'] = (int) $this->config->get('config_catalog_limit');
             }
 
             $orders = [];
