@@ -398,7 +398,7 @@ var statusMarker = function($obj) {
 	var $input = $obj.find('input.status_switch');
 	if(!$input.length){
 		//check generic marker based on input name status
-		$input = $obj.find('input[name=status]');
+		$input = $obj.find('input[name=status]').not('.ui-jqgrid-view input[name=status]');
 	}
 	if($input.length > 0){
 		if ($input.val() == 0) {

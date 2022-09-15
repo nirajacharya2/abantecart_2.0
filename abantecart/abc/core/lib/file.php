@@ -140,6 +140,7 @@ class AFile
 
         $ext = strrchr($file_name, '.');
         $file_name = substr($file_name, 0, strlen($file_name) - strlen($ext));
+        $file_name = H::preformatTextID($file_name);
 
         $i = 0;
         do {
