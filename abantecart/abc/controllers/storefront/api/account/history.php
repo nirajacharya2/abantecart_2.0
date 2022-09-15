@@ -66,7 +66,7 @@ class ControllerApiAccountHistory extends ASecureControllerAPI
         $this->loadLanguage('account/history');
 
         $order_total = Order::where('customer_id', '=', $this->customer->getId())
-                            ->where('order_status_id', '>', 0)->count();
+            ->where('order_status_id', '>', 0)->count();
 
         if ($order_total) {
             if (isset($request_data['page']) && is_integer($request_data['page'])) {
@@ -76,31 +76,30 @@ class ControllerApiAccountHistory extends ASecureControllerAPI
             }
 
             if (isset($request_data['limit']) && is_integer($request_data['limit'])) {
-                $this->data['limit'] = (int)$request_data['limit'];
+                $this->data['limit'] = (int) $request_data['limit'];
             } else {
-                $this->data['limit'] = $this->config->get('config_catalog_limit');
+                $this->data['limit'] = (int) $this->config->get('config_catalog_limit');
             }
 
             $orders = [];
             $results = (new Order())
-                        ->getCustomerOrdersArray(
-                            $this->customer->getId(),
-                            ($page - 1) * $this->data['limit'],
-                            $this->data['limit']
-                        );
+                ->getCustomerOrdersArray(
+                    $this->customer->getId(),
+                    ($page - 1) * $this->data['limit'],
+                    $this->data['limit']
+                );
 
             foreach ($results as $result) {
                 $product_total = OrderProduct::where('order_id', '=', $result['order_id'])->count();
                 $orders[] = [
-                    'order_id'   => $result['order_id'],
-                    'name'       => $result['firstname'].' '.$result['lastname'],
-                    'status'     => $result['status'],
-                    'date_added' => H::dateISO2Display(
-                        $result['date_added'],
-                        $this->language->get('date_format_short')
-                    ),
-                    'products'   => $product_total,
-                    'total'      => $this->currency->format($result['total'], $result['currency'], $result['value']),
+                    'order_id' => $result['order_id'],
+                    'name' => $result['firstname'] . ' ' . $result['lastname'],
+                    'status' => $result['status'],
+                    'date_added' => $result['date_added'],
+                    'products' => $product_total,
+                    'total' => $result['total'],
+                    'currency' => $result['currency'],
+                    'value' => $result['value'],
                 ];
             }
 
