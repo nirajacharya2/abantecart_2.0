@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,6 +21,8 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
+use H;
+use function apache_request_headers;
 
 final class ARequest
 {
@@ -35,13 +37,12 @@ final class ARequest
     private $uniqueId;
     private $version;
     private $browser;
-    private $browser_version;
     private $platform;
     private $device_type;
 
     public function __construct()
     {
-        if (strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
+        if (str_contains($_SERVER['CONTENT_TYPE'], 'application/json')) {
             $_POST = json_decode(file_get_contents('php://input'), true);
         }
 
@@ -75,15 +76,14 @@ final class ARequest
     public function getRequestHeaders()
     {
         if (function_exists('apache_request_headers')) {
-            return \apache_request_headers();
-        }else{
+            return apache_request_headers();
+        } else {
             {
                 $arh = [];
                 $rx_http = '/\AHTTP_/';
                 foreach ($_SERVER as $key => $val) {
                     if (preg_match($rx_http, $key)) {
                         $arh_key = preg_replace($rx_http, '', $key);
-                        $rx_matches = [];
                         // do some nasty string manipulations to restore the original letter case
                         // this should work in most cases
                         $rx_matches = explode('_', $arh_key);
@@ -104,7 +104,7 @@ final class ARequest
      */
     public function setRequestId(string $requestId = null)
     {
-        $this->uniqueId = $requestId ?? \H::genRequestId();
+        $this->uniqueId = $requestId ?? H::genRequestId();
     }
 
     //todo: Include PHP module filter to process input params. http://us3.php.net/manual/en/book.filter.php
@@ -167,14 +167,14 @@ final class ARequest
                     exit('Request forbidden');
                 }
             }
-        } else if(!is_numeric($data)) {
+        } else if (!is_numeric($data)) {
             $data = htmlspecialchars($data, ENT_NOQUOTES, ABC::env('APP_CHARSET'));
         }
         return $data;
     }
 
     /**
-     * @param string - base64 $uri
+     * @param string $uri - base64 encoded
      *
      * @return array
      */
@@ -197,7 +197,7 @@ final class ARequest
 
         $nua = strtolower($_SERVER['HTTP_USER_AGENT']);
 
-        $agent['http'] = isset($nua) ? $nua : "";
+        $agent['http'] = $nua ?? "";
         $agent['version'] = 'unknown';
         $agent['browser'] = 'unknown';
         $agent['platform'] = 'unknown';
@@ -268,14 +268,10 @@ final class ARequest
     {
         return $this->uniqueId;
     }
+
     public function getBrowser()
     {
         return $this->browser;
-    }
-
-    public function getBrowserVersion()
-    {
-        return $this->browser_version;
     }
 
     public function getDeviceType()
@@ -319,7 +315,7 @@ final class ARequest
      */
     public function is_POST()
     {
-        return ($this->server['REQUEST_METHOD'] == 'POST' ? true : false);
+        return $this->server['REQUEST_METHOD'] == 'POST';
     }
 
     /**
@@ -327,7 +323,7 @@ final class ARequest
      */
     public function is_GET()
     {
-        return ($this->server['REQUEST_METHOD'] == 'GET' ? true : false);
+        return $this->server['REQUEST_METHOD'] == 'GET';
     }
 
     /**

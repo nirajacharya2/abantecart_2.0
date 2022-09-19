@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2021 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -24,10 +24,7 @@ use abc\core\ABC;
 use abc\core\lib\ADebug;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
-use abc\core\lib\ARequest;
-use abc\core\lib\AResponse;
 use abc\core\lib\AWarning;
-use abc\core\view\AView;
 use H;
 use ReflectionClass;
 use ReflectionException;
@@ -36,84 +33,55 @@ use ReflectionMethod;
 /**
  * Class ADispatcher
  *
- * @property  ARequest $request
- * @property AResponse $response
- * @property AView $view
- * @property ExtensionsApi $extensions
  */
 final class ADispatcher
 {
-    /**
-     * @var Registry
-     */
+    /** @var Registry */
     protected $registry;
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $file;
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $class;
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $method;
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $controller;
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $controller_type;
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $args = [];
 
     /**
      * @param string $rt
      * @param array $args
      *
-     * @throws ReflectionException
      */
     public function __construct($rt, $args = [])
     {
 
         $this->registry = Registry::getInstance();
         $rt = str_replace('../', '', $rt);
-        if ( ! empty($args)) {
+        if (!empty($args)) {
             $this->args = $args;
         }
 
-        ADebug::checkpoint('ADispatch: '.$rt.' construct start');
+        ADebug::checkpoint('ADispatch: ' . $rt . ' construct start');
         // We always get full RT (route) to dispatcher. Needs to have pages/ or responses/
-        if ( ! $this->processPath($rt)) {
-            $warning_txt = 'ADispatch: '.$rt.' construct FAILED. '
-                . 'Side: '.(ABC::env('IS_ADMIN') ? 'Admin' : 'StoreFront')
-                .' Missing or incorrect controller route path. '
-                .'Possibly, layout block is enabled for disabled or missing extension! '
-                .H::genExecTrace('full');
+        if (!$this->processPath($rt)) {
+            $warning_txt = 'ADispatch: ' . $rt . ' construct FAILED. '
+                . 'Side: ' . (ABC::env('IS_ADMIN') ? 'Admin' : 'StoreFront')
+                . ' Missing or incorrect controller route path. '
+                . 'Possibly, layout block is enabled for disabled or missing extension! '
+                . H::genExecTrace('full');
             $warning = new AWarning($warning_txt);
             $warning->toLog()->toDebug();
         }
-        ADebug::checkpoint('ADispatch: '.$rt.' construct end. file: class: '.$this->class.'; method: '.$this->method);
+        ADebug::checkpoint('ADispatch: ' . $rt . ' construct end. file: class: ' . $this->class . '; method: ' . $this->method);
     }
 
     public function __destruct()
     {
         $this->clear();
-    }
-
-    public function __get($key)
-    {
-        return $this->registry->get($key);
-    }
-
-    public function __set($key, $value)
-    {
-        $this->registry->set($key, $value);
     }
 
     /**
@@ -128,24 +96,22 @@ final class ADispatcher
 
         //looking for controller in admin/storefront section
         if (ABC::env('INSTALL') === true) {
-            $dir_app = ABC::env('DIR_INSTALL').'controllers'.DS;
+            $dir_app = ABC::env('DIR_INSTALL') . 'controllers' . DS;
             $namespace = '\install\controllers\\';
-            $pathfound = $this->detectPath($dir_app, $namespace, $path_nodes);
-            if ( ! $pathfound) {
-                $dir_app = ABC::env('DIR_APP').'controllers'.DS.'admin'.DS;
+            $pathFound = $this->detectPath($dir_app, $namespace, $path_nodes);
+            if (!$pathFound) {
+                $dir_app = ABC::env('DIR_APP') . 'controllers' . DS . 'admin' . DS;
                 $namespace = '\abc\controllers\admin\\';
-                $pathfound = $this->detectPath($dir_app, $namespace, $path_nodes);
+                $pathFound = $this->detectPath($dir_app, $namespace, $path_nodes);
             }
+        } elseif (ABC::env('IS_ADMIN') === true) {
+            $dir_app = ABC::env('DIR_APP') . 'controllers' . DS . 'admin' . DS;
+            $namespace = '\abc\controllers\admin\\';
+            $pathFound = $this->detectPath($dir_app, $namespace, $path_nodes);
         } else {
-            if (ABC::env('IS_ADMIN') === true) {
-                $dir_app = ABC::env('DIR_APP').'controllers'.DS.'admin'.DS;
-                $namespace = '\abc\controllers\admin\\';
-                $pathfound = $this->detectPath($dir_app, $namespace, $path_nodes);
-            } else {
-                $dir_app = ABC::env('DIR_APP').'controllers'.DS.'storefront'.DS;
-                $namespace = '\abc\controllers\storefront\\';
-                $pathfound = $this->detectPath($dir_app, $namespace, $path_nodes);
-            }
+            $dir_app = ABC::env('DIR_APP') . 'controllers' . DS . 'storefront' . DS;
+            $namespace = '\abc\controllers\storefront\\';
+            $pathFound = $this->detectPath($dir_app, $namespace, $path_nodes);
         }
 
         //Last part is the method of function to call
@@ -159,54 +125,52 @@ final class ADispatcher
 
         //already found the path, so return. This will optimize performance,
         // and will not allow override core controllers.
-        if ($pathfound == true) {
-            return $pathfound;
+        if ($pathFound) {
+            return $pathFound;
         }
 
         // looking for controller in extensions section
-        $result = $this->registry->get('extensions')->isExtensionController($rt);
+        $result = Registry::extensions()?->isExtensionController($rt);
         if ($result) {
             $this->controller = $result['route'];
             $this->file = $result['file'];
-            $this->class = $namespace.$result['class'];
+            $this->class = $namespace . $result['class'];
             $this->method = $result['method'];
             // if controller was found in admin/storefront section && in extensions section
             // warning will be added to log about controller override
-            if ($pathfound) {
-                $warning = new AWarning("Extension <b>{$result['extension']}</b> override controller <b>$rt</b>");
-                $warning->toDebug();
-            }
-            $pathfound = true;
+            $warning = new AWarning("Extension <b>" . $result['extension'] . "</b> override controller <b>" . $rt . "</b>");
+            $warning->toDebug();
+            $pathFound = true;
         }
-        return $pathfound;
+        return $pathFound;
     }
 
     private function detectPath($dir_app, $namespace, &$path_nodes)
     {
         $path_build = '';
-        $pathfound = false;
+        $pathFound = false;
         foreach ($path_nodes as $path_node) {
             $path_build .= $path_node;
-            if (is_dir($dir_app.$path_build)) {
+            if (is_dir($dir_app . $path_build)) {
                 $path_build .= DS;
                 array_shift($path_nodes);
                 continue;
             }
 
-            if (is_file($dir_app.$path_build.'.php')) {
+            if (is_file($dir_app . $path_build . '.php')) {
                 //Set pure controller route
                 $this->controller = $path_build;
                 //Set full file path to controller
-                $this->file = $dir_app.$path_build.'.php';
+                $this->file = $dir_app . $path_build . '.php';
                 //Build Controller class name
-                $this->class = $namespace.'Controller'.preg_replace('/[^a-zA-Z0-9]/', '', $path_build);
+                $this->class = $namespace . 'Controller' . preg_replace('/[^a-zA-Z0-9]/', '', $path_build);
                 array_shift($path_nodes);
-                $pathfound = true;
+                $pathFound = true;
                 break;
             }
         }
 
-        return $pathfound;
+        return $pathFound;
     }
 
     // Clear function is public in case controller needs to be cleaned explicitly
@@ -227,18 +191,19 @@ final class ADispatcher
     protected function dispatchPrePost($route)
     {
         $result = '';
-        if ($this->extensions->isExtensionController($route)) {
+        $responseObj = Registry::response();
+        if (Registry::extensions()->isExtensionController($route)) {
             //save output
-            $output = $this->response->getOutput();
+            $output = $responseObj->getOutput();
             //reset to save controller output
-            $this->response->setOutput('');
+            $responseObj->setOutput('');
 
             $dispatch_pre = new ADispatcher($route, ["instance_id" => '']);
             $dispatch_pre->dispatch();
-            $result = $this->response->getOutput();
+            $result = $responseObj->getOutput();
 
             //restore output
-            $this->response->setOutput($output);
+            $responseObj->setOutput($output);
         }
 
         return $result;
@@ -254,11 +219,10 @@ final class ADispatcher
      */
     public function dispatchGetOutput($controller = '')
     {
-
         $this->dispatch($controller);
-        $output = $this->response->getOutput();
-        $this->response->setOutput('');
-
+        $responseObj = Registry::response();
+        $output = $responseObj->getOutput();
+        $responseObj->setOutput('');
         return $output;
     }
 
@@ -270,7 +234,8 @@ final class ADispatcher
      */
     public function dispatch($parent_controller = '')
     {
-        ADebug::checkpoint($this->class.'/'.$this->method.' dispatch START');
+        ADebug::checkpoint($this->class . '/' . $this->method . ' dispatch START');
+        $responseObj = Registry::response();
 
         //Process the controller, layout and children
 
@@ -280,15 +245,15 @@ final class ADispatcher
             $backtrace = debug_backtrace();
             $function_stack = '';
             if (is_object($parent_controller) && strlen($parent_controller->rt()) > 1) {
-                $function_stack = 'Parent Controller: '.$parent_controller->rt().' | ';
+                $function_stack = 'Parent Controller: ' . $parent_controller->rt() . ' | ';
             }
             for ($i = 1; $i < count($backtrace); $i++) {
-                $function_stack .= ' < '.$backtrace[$i]['function'];
+                $function_stack .= ' < ' . $backtrace[$i]['function'];
             }
-            $url = $this->request->server['REQUEST_URI'];
+            $url = Registry::request()->server['REQUEST_URI'];
             $error = new AError(
-                'Error: URL: '.$url.' Could not load controller '
-                    .$this->controller.'! Call stack: '.$function_stack,
+                'Error: URL: ' . $url . ' Could not load controller '
+                . $this->controller . '! Call stack: ' . $function_stack,
                 AC_ERR_CLASS_CLASS_NOT_EXIST);
             $error->toLog()->toDebug();
             return null;
@@ -302,7 +267,7 @@ final class ADispatcher
         }
 
         //check for controller.pre
-        $output_pre = $this->dispatchPrePost($this->controller.ABC::env('POSTFIX_PRE'));
+        $output_pre = $this->dispatchPrePost($this->controller . ABC::env('POSTFIX_PRE'));
 
         require_once($this->file);
         /**
@@ -318,7 +283,7 @@ final class ADispatcher
             );
             $controller->dispatcher = $this;
         } else {
-            $error = new AError('Error: controller class not exist '.$this->class.'!', AC_ERR_CLASS_CLASS_NOT_EXIST);
+            $error = new AError('Error: controller class not exist ' . $this->class . '!', AC_ERR_CLASS_CLASS_NOT_EXIST);
             $error->toLog()->toDebug();
         }
         try {
@@ -336,20 +301,18 @@ final class ADispatcher
 
                 $rfl = new ReflectionClass($controller);
                 $method = $rfl->getMethod($this->method);
-                if($method) {
-                    $allParameters = $method->getParameters();
-                    if($allParameters) {
-                        $methodParams = [];
-                        foreach ($allParameters as $p) {
-                            if (isset($args[$p->name])) {
-                                $methodParams[$p->name] = $args[$p->name];
-                            }
+                $allParameters = $method->getParameters();
+                if ($allParameters) {
+                    $methodParams = [];
+                    foreach ($allParameters as $p) {
+                        if (isset($args[$p->name])) {
+                            $methodParams[$p->name] = $args[$p->name];
                         }
-                        if($methodParams && H::isAssocArray($args)) {
-                            $args = $methodParams;
-                        }elseif(!$methodParams && H::isAssocArray($args)){
-                            $args = [];
-                        }
+                    }
+                    if ($methodParams && H::isAssocArray($args)) {
+                        $args = $methodParams;
+                    } elseif (!$methodParams && H::isAssocArray($args)) {
+                        $args = [];
                     }
                 }
 
@@ -358,7 +321,7 @@ final class ADispatcher
                 if ($dispatch && is_object($dispatch)) {
                     if ($this->args["instance_id"] == 0) {
                         //If main controller come back for new dispatch
-                        return $dispatch->getController().'/'.$dispatch->getMethod();
+                        return $dispatch->getController() . '/' . $dispatch->getMethod();
                     } else {
                         // Call new dispatch for new controller and exit
                         $dispatch->dispatch();
@@ -377,15 +340,15 @@ final class ADispatcher
                  */
                 $children = $controller->getChildren();
 
-                ADebug::variable('Processing children of '.$this->controller, $children);
+                ADebug::variable('Processing children of ' . $this->controller, $children);
 
                 //Process each child controller
                 foreach ($children as $child) {
-                    //Add highest Debug level here with backtrace to review this
+                    //Add the highest debug level here with backtrace to review this
                     ADebug::checkpoint(
                         $child['controller']
-                        .' ( child of '.$this->controller.', instance_id: '.$child['instance_id']
-                        .' ) dispatch START'
+                        . ' ( child of ' . $this->controller . ', instance_id: ' . $child['instance_id']
+                        . ' ) dispatch START'
                     );
                     //Process each child and create dispatch to call recursive
                     $dispatch = new ADispatcher($child['controller'], ["instance_id" => $child['instance_id']]);
@@ -394,33 +357,33 @@ final class ADispatcher
                     if (isset($child['position'])
                         && $child['position']) { // made for recognizing few custom_blocks in the same placeholder
                         $controller->view->assign(
-                            $child['block_txt_id'].'_'.$child['instance_id'],
-                            $this->response->getOutput()
+                            $child['block_txt_id'] . '_' . $child['instance_id'],
+                            $responseObj->getOutput()
                         );
                     } else {
-                        $controller->view->assign($child['block_txt_id'], $this->response->getOutput());
+                        $controller->view->assign($child['block_txt_id'], $responseObj->getOutput());
                     }
                     //clean up and remove output
-                    $this->response->setOutput('');
-                    ADebug::checkpoint($child['controller'].' ( child of '.$this->controller.' ) dispatch END');
+                    $responseObj->setOutput('');
+                    ADebug::checkpoint($child['controller'] . ' ( child of ' . $this->controller . ' ) dispatch END');
                 }
                 //Request controller to generate output
                 $controller->finalize();
 
                 //check for controller.pre
-                $output_post = $this->dispatchPrePost($this->controller.ABC::env('POSTFIX_POST'));
+                $output_post = $this->dispatchPrePost($this->controller . ABC::env('POSTFIX_POST'));
 
                 //add pre and post controllers output
-                $this->response->setOutput($output_pre.$this->response->getOutput().$output_post);
+                $responseObj->setOutput($output_pre . $responseObj->getOutput() . $output_post);
 
-            //clean up and destroy the object
+                //clean up and destroy the object
                 unset($controller, $dispatch);
-        } else {
-            $err = new AError(
-                'Error: controller method not exist '.$this->class.'::'.$this->method.'!',
-                AC_ERR_CLASS_METHOD_NOT_EXIST
-            );
-            $err->toLog()->toDebug();
+            } else {
+                $err = new AError(
+                    'Error: controller method not exist ' . $this->class . '::' . $this->method . '!',
+                    AC_ERR_CLASS_METHOD_NOT_EXIST
+                );
+                $err->toLog()->toDebug();
                 if (in_array($this->controller_type, ['responses', 'api', 'task'])) {
                     $dd = new ADispatcher('responses/error/ajaxerror/not_found');
                     $dd->dispatch();
@@ -432,7 +395,7 @@ final class ADispatcher
                 throw $e;
             }
         }
-        ADebug::checkpoint(''.$this->class.'/'.$this->method.' dispatch END');
+        ADebug::checkpoint($this->class . '/' . $this->method . ' dispatch END');
 
         return null;
     }

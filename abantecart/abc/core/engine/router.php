@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -24,30 +24,20 @@ use abc\core\ABC;
 use abc\core\lib\AException;
 
 if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
+    header('Location: static_pages/?forbidden=' . basename(__FILE__));
 }
 
 final class ARouter
 {
-    /**
-     * @var Registry
-     */
+    /** @var Registry */
     protected $registry;
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $rt;
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $request_type;
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $controller;
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $method;
 
     /**
@@ -61,16 +51,6 @@ final class ARouter
     public function __destruct()
     {
         $this->rt = '';
-    }
-
-    public function __get($key)
-    {
-        return $this->registry->get($key);
-    }
-
-    public function __set($key, $value)
-    {
-        $this->registry->set($key, $value);
     }
 
     /**
@@ -224,12 +204,12 @@ final class ARouter
                         $api_controller->addPreDispatch('api/common/access/login');
                         $api_controller->addPreDispatch('api/common/access/permission');
                     }
-                    //Validate controller only. If does not exist process not found
+                    //Validate controller only. If it does not exist process not found
                     if ($this->_detect_controller("api")) {
                         // Build the response
                         $api_controller->build($this->rt);
                     } else {
-                        $api_controller->build('error/ajaxerror/not_found');
+                        $api_controller->build('api/error/not_found');
                     }
                 } else {
                     if ($this->request_type == 'task') {
@@ -243,7 +223,7 @@ final class ARouter
                             $resp_controller->addPreDispatch('responses/common/access/login');
                             $resp_controller->addPreDispatch('responses/common/access/permission');
                         }
-                        //Validate controller only. If does not exist process not found
+                        //Validate controller only. If it does not exist process not found
                         if ($this->_detect_controller("task")) {
                             // Build the response
                             $task_controller->build($this->rt);
@@ -262,7 +242,6 @@ final class ARouter
                 }
             }
         }
-
     }
 
     /**
@@ -273,33 +252,39 @@ final class ARouter
     private function _detect_controller($type)
     {
         //looking for controller in admin/storefront section
-        $dir_app =
-            ABC::env('DIR_APP').'controllers/'.(ABC::env('IS_ADMIN') === true ? 'admin/' : 'storefront/').$type.'/';
+        $dir_app = ABC::env('DIR_APP')
+            . 'controllers'
+            . DS . (ABC::env('IS_ADMIN') === true ? 'admin' : 'storefront')
+            . DS . $type . DS;
         $path_nodes = explode('/', $this->rt);
         $path_build = '';
 
         // looking for controller in extensions section
-        $result = $this->registry->get('extensions')->isExtensionController($type.'/'.$this->rt);
+        $result = $this->registry::extensions()->isExtensionController($type . '/' . $this->rt);
         if ($result) {
             $extension_id = $result['extension'];
             // set new path if controller was found in admin/storefront section && in extensions section
             $current_section = ABC::env('IS_ADMIN') ? ABC::env('DIRNAME_ADMIN') : ABC::env('DIRNAME_STORE');
-            $dir_app = ABC::env('DIR_APP_EXTENSIONS').$extension_id.'/controllers/'.$current_section.$type.'/';
+            $dir_app = ABC::env('DIR_APP_EXTENSIONS')
+                . $extension_id . DS
+                . 'controllers' . DS
+                . $current_section
+                . $type . DS;
         }
         //process path and try to locate the controller
         foreach ($path_nodes as $path_node) {
             $path_node = trim($path_node);
             $path_build .= $path_node;
-            if (is_dir($dir_app.$path_build)) {
+            if (is_dir($dir_app . $path_build)) {
                 $path_build .= '/';
                 array_shift($path_nodes);
                 continue;
             }
 
-            if (is_file($dir_app.$path_build.'.php')) {
+            if (is_file($dir_app . $path_build . '.php')) {
                 //Controller found. Save information and return TRUE
                 //Set controller and method for future use
-                $this->controller = $type.'/'.$path_build;
+                $this->controller = $type . '/' . $path_build;
                 //Last part is the method of function to call
                 $method_to_call = array_shift($path_nodes);
                 if ($method_to_call) {

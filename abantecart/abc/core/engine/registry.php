@@ -58,6 +58,7 @@ use abc\models\admin\ModelToolOnlineNow;
  * @method static AIM|AIMManager im()
  * @method static AConfig|AConfigManager config()
  * @method static ARequest request()
+ * @method static AResponse response()
  * @method static ASession session()
  * @method static ALoader load()
  * @method static ExtensionsApi extensions()

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -26,8 +26,8 @@ class ControllerApiErrorNoAccess extends AControllerAPI
 {
     public function main()
     {
-        $this->rest->setResponseData(array('error' => 'Access to API is disabled!'));
-        $this->rest->sendResponse(401);
+        $this->rest->setResponseData(['error' => 'Access to API is disabled!']);
+        $this->rest->sendResponse(503);
         return null;
     }
 }

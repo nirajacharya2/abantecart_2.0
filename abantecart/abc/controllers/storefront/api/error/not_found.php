@@ -26,8 +26,8 @@ class ControllerApiErrorNotFound extends AControllerAPI
 {
     public function main()
     {
-        $this->rest->setResponseData(array('error' => 'Requested Route was not found!'));
-        $this->rest->sendResponse(401);
+        $this->rest->setResponseData(['error' => 'Requested Route was not found!']);
+        $this->rest->sendResponse(404);
         return null;
     }
 }
