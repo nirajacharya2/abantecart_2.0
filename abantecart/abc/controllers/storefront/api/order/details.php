@@ -1,0 +1,180 @@
+<?php
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2018 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
+
+namespace abc\controllers\storefront;
+
+use abc\core\ABC;
+use abc\core\engine\AControllerAPI;
+use abc\core\engine\AResource;
+use abc\core\engine\ASecureControllerAPI;
+use abc\models\order\Order;
+use abc\models\order\OrderOption;
+use abc\models\order\OrderProduct;
+use abc\models\order\OrderStatusDescription;
+use abc\models\order\OrderTotal;
+use H;
+
+
+class ControllerApiOrderDetails extends ASecureControllerAPI
+{
+
+    public function get()
+    {
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
+
+        $this->loadLanguage('sale/order');
+
+        $request = $this->rest->getRequestParams();
+
+        if (!H::has_value($request['order_id'])) {
+            $this->rest->setResponseData([
+                'error_code' => 0,
+                'error_title' => 'Bad request',
+                'error_text' => 'Order ID is missing'
+            ]);
+            $this->rest->sendResponse(400);
+            return null;
+        }
+        $orderId = $request['order_id'];
+
+        $orderDetails = Order::getOrderArray($request['order_id'], 'any', $this->customer->getId());
+        if (!count($orderDetails)) {
+            $this->rest->setResponseData([
+                'error_code' => 0,
+                'error_title' => 'Not found',
+                'error_text' => 'Order with ID is not found'
+            ]);
+            $this->rest->sendResponse(404);
+            return null;
+        }
+
+        $this->data = $orderDetails;
+
+        $products = [];
+        $orderProducts = OrderProduct::where('order_id', '=', $orderId)->get();
+        $orderStatuses = OrderStatusDescription::where('language_id', '=', $this->language->getLanguageID())
+            ->get()
+            ->toArray();
+        $orderStatuses = array_column($orderStatuses, 'name', 'order_status_id');
+        $product_ids = $orderProducts->pluck('product_id')->toArray();
+
+        //get thumbnails by one pass
+        $resource = new AResource('image');
+        $thumbnails = $resource->getMainThumbList(
+            'products',
+            $product_ids,
+            $this->config->get('config_image_cart_width'),
+            $this->config->get('config_image_cart_width'),
+            false
+        );
+
+        foreach ($orderProducts as $product) {
+            $options = OrderOption::where(
+                [
+                    'order_id' => $orderId,
+                    'order_product_id' => $product->order_product_id
+                ]
+            )->get();
+            $thumbnail = $thumbnails[$product['product_id']];
+            $option_data = [];
+            foreach ($options as $option) {
+                if ($option->element_type == 'H') {
+                    continue;
+                } //hide hidden options
+
+                $value = $option->value;
+                $title = '';
+                // hide binary value for checkbox
+                if ($option->element_type == 'C' && in_array($value, [0, 1])) {
+                    $value = '';
+                }
+                // strip long textarea value
+                if ($option->element_type == 'T') {
+                    $title = strip_tags($value);
+                    $title = str_replace('\r\n', "\n", $title);
+
+                    $value = str_replace('\r\n', "\n", $value);
+                    if (mb_strlen($value) > 64) {
+                        $value = mb_substr($value, 0, 64) . '...';
+                    }
+                }
+
+                $option_data[] = [
+                    'name' => $option->name,
+                    'value' => $value,
+                    'title' => $title,
+                ];
+                // product image by option value
+                $mSizes = [
+                    'main' =>
+                        [
+                            'width' => $this->config->get('config_image_cart_width'),
+                            'height' => $this->config->get('config_image_cart_height')
+                        ],
+                    'thumb' => [
+                        'width' => $this->config->get('config_image_cart_width'),
+                        'height' => $this->config->get('config_image_cart_height')
+                    ],
+                ];
+
+
+                $main_image = $resource->getResourceAllObjects(
+                    'product_option_value',
+                    $option->product_option_value_id,
+                    $mSizes,
+                    1,
+                    false
+                );
+
+                if(!empty($main_image)) {
+                    $thumbnail = (ABC::env('HTTPS') ? 'https:' : 'http:') .$main_image['thumb_url'];
+                }
+            }
+
+            $products[] = [
+                'id' => $product->product_id,
+                'order_product_id' => $product->order_product_id,
+                'order_status_id' => $product->order_status_id,
+                'order_status' => $orderStatuses[$product->order_status_id],
+                'thumbnail' => $thumbnail,
+                'name' => $product->name,
+                'model' => $product->model,
+                'option' => $option_data,
+                'quantity' => $product->quantity,
+                'price' => $product->price,
+                'total' => $product->price * $product->quantity
+            ];
+        }
+        $this->data['products'] = $products;
+        $this->data['totals'] = OrderTotal::where('order_id', '=', $orderId)
+            ->get()
+            ->toArray();
+
+        foreach ($this->data['totals'] as &$total) {
+            $total['text'] = html_entity_decode($total['text'], ENT_QUOTES, ABC::env('APP_CHARSET'));
+        }
+
+        $this->data['comment'] = $orderDetails['comment'];
+
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+
+        $this->rest->setResponseData($this->data);
+        $this->rest->sendResponse(200);
+    }
+}
