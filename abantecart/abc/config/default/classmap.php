@@ -3,6 +3,7 @@
  * Class Map of default stage
  */
 
+use abc\core\ABC;
 use abc\core\engine\Attribute;
 use abc\core\lib\AbcCache;
 use abc\core\lib\AttributeManager;
@@ -32,18 +33,25 @@ use abc\modules\workers\FixCategoriesCounters;
 use Illuminate\Events\Dispatcher as EventDispatcher;
 use PhpAbac\AbacFactory;
 
+$aLog = ABCEXEC
+    // class with parameters for constructor. CLI mode.
+    // NOTE: if you do not want to use file logger remove second parameter
+    ?   [ ALog::class, ['app'=> 'cli.log'] ]
+    // use file logger for web-application
+    :   [
+            ALog::class,
+            [
+                'app'      => 'application.log',
+                'security' => 'security.log',
+                'warn'     => 'application.log',
+                'debug'    => 'debug.log',
+            ],
+        ];
+
 return [
     'cache'             => AbcCache::class,
     'AViewRender'       => AViewDefaultRender::class,
-    'ALog'              => [
-        ALog::class,
-        [
-            'app'      => 'application.log',
-            'security' => 'security.log',
-            'warn'     => 'application.log',
-            'debug'    => 'debug.log',
-        ],
-    ],
+    'ALog'              => $aLog,
     'ABAC'              => Abac::class,
     'ABACFactory'       => AbacFactory::class,
     'Checkout'          => CheckOut::class,
