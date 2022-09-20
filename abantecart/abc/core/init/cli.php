@@ -230,7 +230,7 @@ if($registry->has('db')){
 registerClass($registry, 'download', 'ADownload', [], ADownload::class, []);
 
 // Log
-$registry->set('log', ABC::getObjectByAlias('ALog', [['app' => 'cli.log']]));
+$registry->set('log', ABC::getObjectByAlias('ALog'));
 
 // Document
 registerClass($registry, 'document', 'ADocument', [], ADocument::class, []);

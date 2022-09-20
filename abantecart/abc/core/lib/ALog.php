@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2022 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -20,6 +20,7 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use Exception;
 use H;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\RotatingFileHandler;
@@ -35,71 +36,78 @@ final class ALog
     private $mode = true;
     protected $app_filename, $security_filename, $warning_filename, $debug_filename;
     protected $loggers = [];
-    //maximum of file count for rotation log
-    const MAX_FILE_COUNT = 10;
 
     /**
      * ALog constructor.
      *
-     * @param array  $file_names
-     * @param string $dir_logs
+     * @param array $fileNames
+     * @param string $dirLogs
      *
-     * @throw \DebugBar\DebugBarException
+     * @throws Exception
      */
-    public function __construct(array $file_names, $dir_logs = '')
+    public function __construct(array $fileNames = null, $dirLogs = '')
     {
-        $application_log_filename = (string)$file_names['app'];
-        $security_filename = (string)$file_names['security'];
-        $warning_filename = (string)$file_names['warn'];
-        $debug_filename = (string)$file_names['debug'];
+        if ($fileNames) {
+            $this->initFileMode($fileNames, $dirLogs);
+        } else {
+            $this->mode = 'stdout';
+        }
+    }
 
-        $dir_logs = !$dir_logs || !is_dir($dir_logs) || !is_writable($dir_logs)
+    protected function initFileMode(array $fileNames, $dirLogs = '')
+    {
+        $appLogFilename = (string)$fileNames['app'];
+        $secLogFilename = (string)$fileNames['security'];
+        $warningLogFilename = (string)$fileNames['warn'];
+        $debugLogFilename = (string)$fileNames['debug'];
+
+        $dirLogs = !$dirLogs || !is_dir($dirLogs) || !is_writable($dirLogs)
             ? ABC::env('DIR_LOGS')
-            : $dir_logs;
+            : $dirLogs;
 
-        if (!$dir_logs || !is_writable($dir_logs)) {
+        if (!$dirLogs || !is_writable($dirLogs)) {
             error_log(
                 'Error: Log directory "'
-                .$dir_logs
-                .'" is non-writable or undefined! Please check or change permissions.'
+                . $dirLogs
+                . '" is non-writable or undefined! Please check or change permissions.'
             );
         }
 
-        if (!$application_log_filename) {
+        if (!$appLogFilename) {
             error_log('ALog Error: Please set error Log filename as argument! Empty value given!');
         } else {
-            $security_filename = !$security_filename ? $application_log_filename : $security_filename;
-            $warning_filename = !$warning_filename ? $application_log_filename : $warning_filename;
-            $debug_filename = !$debug_filename ? $application_log_filename : $debug_filename;
+            $secLogFilename = !$secLogFilename ? $appLogFilename : $secLogFilename;
+            $warningLogFilename = !$warningLogFilename ? $appLogFilename : $warningLogFilename;
+            $debugLogFilename = !$debugLogFilename ? $appLogFilename : $debugLogFilename;
         }
 
-        $this->app_filename = $dir_logs.$application_log_filename;
+        $this->app_filename = $dirLogs . $appLogFilename;
 
-        if(!is_file($this->app_filename)){
-            $tmp = fopen($this->app_filename,'a');
+        if (!is_file($this->app_filename)) {
+            $tmp = fopen($this->app_filename, 'a');
             chmod($this->app_filename, 0664);
             fclose($tmp);
         }
 
         if (is_file($this->app_filename) && !is_writable($this->app_filename)) {
-            $error_text = 'ALog Error: Log file '.$this->app_filename.' is not writable!';
+            $error_text = 'ALog Error: Log file ' . $this->app_filename . ' is not writable!';
             error_log($error_text);
-            throw new \Exception($error_text);
+            throw new Exception($error_text);
         } else {
-            $this->security_filename = $dir_logs.$security_filename;
+            $this->security_filename = $dirLogs . $secLogFilename;
             if (is_file($this->security_filename) && !is_writable($this->security_filename)) {
-                error_log('ALog Error: Log file '.$this->security_filename.' is not writable!');
+                error_log('ALog Error: Log file ' . $this->security_filename . ' is not writable!');
                 $this->security_filename = $this->app_filename;
             }
-            $this->warning_filename = $dir_logs.$warning_filename;
+            $this->warning_filename = $dirLogs . $warningLogFilename;
             if (is_file($this->warning_filename) && !is_writable($this->warning_filename)) {
-                error_log('ALog Error: Log file '.$this->warning_filename.' is not writable!');
+                error_log('ALog Error: Log file ' . $this->warning_filename . ' is not writable!');
                 $this->warning_filename = $this->app_filename;
             }
 
-            $this->debug_filename = $dir_logs.$debug_filename;
+            $this->debug_filename = $dirLogs . $debugLogFilename;
             if (is_file($this->debug_filename) && !is_writable($this->debug_filename)) {
-                error_log('ALog Error: Log file '.$this->debug_filename.' is not writable!');
+                error_log('ALog Error: Log file ' . $this->debug_filename . ' is not writable!');
                 $this->debug_filename = $this->app_filename;
             }
         }
@@ -110,11 +118,11 @@ final class ALog
         // the default output format is "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n"
         if (Registry::request()) {
             $request_id = Registry::request()->getUniqueId();
-        } elseif(class_exists('\H')) {
+        } elseif (class_exists('\H')) {
             $request_id = H::genRequestId();
         }
-        $output = "%datetime% > ".ABC::env('APP_NAME')." v".ABC::env('VERSION')." > Request ID: ".$request_id
-            ." > %level_name% > %message%\n";
+        $output = "%datetime% > " . ABC::env('APP_NAME') . " v" . ABC::env('VERSION')
+            . " > Request ID: " . $request_id. " > %level_name% > %message%\n";
         // create a formatter which allows line breaks in the message
         $formatter = new LineFormatter($output, $dateFormat, true);
         $stream->setFormatter($formatter);
@@ -158,8 +166,8 @@ final class ALog
             $stream = new RotatingFileHandler($this->debug_filename, 10, Logger::DEBUG, true, 0664);
             $stream->setFilenameFormat('{filename}-{date}', 'Y-m-d');
 
-            $output = "%datetime% > ".ABC::env('APP_NAME')." v"
-                .ABC::env('VERSION')." > ".$_GET['rt']."> %level_name% > %message%\n";
+            $output = "%datetime% > " . ABC::env('APP_NAME') . " v". ABC::env('VERSION')
+                . " > " . $_GET['rt'] . "> %level_name% > %message%\n";
             $formatter = new LineFormatter($output, $dateFormat, true);
             $stream->setFormatter($formatter);
             $logger = new Logger('debug_logger');
@@ -173,38 +181,42 @@ final class ALog
             $this->loggers['debug'] = $this->loggers['error'];
         }
 
-        if (class_exists('\abc\core\engine\Registry')) {
+        if (class_exists(Registry::class)) {
             // for disabling via settings
             $registry = Registry::getInstance();
             if (is_callable($registry->get('config')) && $registry->get('config')->get('config_error_log') !== null) {
-                $this->mode = $registry->get('config')->get('config_error_log') ? true : false;
+                $this->mode = $registry->get('config')->get('config_error_log') ? 'logger' : false;
             }
         }
     }
 
-    public function getLoggers()
-    {
-        return $this->loggers;
+    protected function write2Stdout($message){
+        fwrite(STDOUT, $message."\n");
     }
 
     /**
+     * @return array|false
+     */
+    public function getLoggers()
+    {
+        return $this->mode == 'logger' ? $this->loggers : false;
+    }
+
+    /**
+     * @deprecated
      * @param string $message
      *
      * @return null
      */
     public function write($message)
     {
-        if (!$this->mode) {
-            return null;
-        }
-
-        $this->loggers['error']->error($message.' '.$this->getTraceString());
-        return true;
+        return $this->error($message);
     }
 
-    private function getTraceString() {
+    protected function getTraceString()
+    {
         $traceString = '';
-        $exception = new \Exception();
+        $exception = new Exception();
         $trace = $exception->getTrace();
 
         if (count($trace) < 2) {
@@ -213,7 +225,7 @@ final class ALog
 
         $traceInstance = $trace[1];
         if ($traceInstance && $traceInstance['file'] && $traceInstance['line']) {
-            $traceString = ' '.$traceInstance['file'].' (line: '.$traceInstance['line'].')';
+            $traceString = ' ' . $traceInstance['file'] . ' (line: ' . $traceInstance['line'] . ')';
         }
         return $traceString;
     }
@@ -228,7 +240,13 @@ final class ALog
         if (!$this->mode) {
             return null;
         }
-        return $this->loggers['error']->error($message);
+        $message .= ' ' . $this->getTraceString();
+        /** @var Logger $logger */
+        $logger = $this->loggers['error'];
+        $this->mode == 'logger'
+            ? $logger->error($message)
+            : $this->write2Stdout($message);
+        return true;
     }
 
     /**
@@ -241,7 +259,12 @@ final class ALog
         if (!$this->mode) {
             return null;
         }
-        return $this->loggers['security']->alert($message);
+        /** @var Logger $logger */
+        $logger = $this->loggers['security'];
+        $this->mode == 'logger'
+            ? $logger->emergency($message)
+            : $this->write2Stdout($message);
+        return true;
     }
 
     /**
@@ -249,12 +272,17 @@ final class ALog
      *
      * @return null
      */
-    public function warning($message)
+    public function warning(string $message)
     {
         if (!$this->mode) {
             return null;
         }
-        return $this->loggers['warning']->notice($message);
+        /** @var Logger $logger */
+        $logger = $this->loggers['warning'];
+        $this->mode == 'logger'
+            ? $logger->warning($message)
+            : $this->write2Stdout($message);
+        return true;
     }
 
     /**
@@ -267,7 +295,13 @@ final class ALog
         if (!$this->mode) {
             return null;
         }
-        return $this->loggers['debug']->debug($message);
+        $message .= ' ' . $this->getTraceString();
+        /** @var Logger $logger */
+        $logger = $this->loggers['debug'];
+        $this->mode == 'logger'
+            ? $logger->debug($message)
+            : $this->write2Stdout($message);
+        return true;
     }
 
     /**
@@ -280,6 +314,11 @@ final class ALog
         if (!$this->mode) {
             return null;
         }
-        return $this->loggers['error']->critical($message);
+        /** @var Logger $logger */
+        $logger = $this->loggers['error'];
+        $this->mode == 'logger'
+            ? $logger->critical($message)
+            : $this->write2Stdout($message);
+        return true;
     }
 }
