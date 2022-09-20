@@ -209,7 +209,7 @@ class ControllerApiOrderDetails extends ASecureControllerAPI
                 'thumbnail' => $thumbnail,
                 'name' => html_entity_decode($product->name, ENT_QUOTES, ABC::env('APP_CHARSET')),
                 'model' => $product->model,
-                'option' => $option_data,
+                'options' => $option_data,
                 'quantity' => $product->quantity,
                 'price' => $product->price,
                 'total' => $product->price * $product->quantity
