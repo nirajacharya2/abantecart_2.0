@@ -93,10 +93,11 @@ class ControllerApiAccountHistory extends ASecureControllerAPI
                 $product_total = OrderProduct::where('order_id', '=', $result['order_id'])->count();
                 $orders[] = [
                     'order_id' => $result['order_id'],
-                    'name' => $result['firstname'] . ' ' . $result['lastname'],
-                    'status' => $result['status'],
+                    'firstname' => $result['firstname'],
+                    'lastname' =>  $result['lastname'],
+                    'status' => $result['order_status_name'],
                     'date_added' => $result['date_added'],
-                    'products' => $product_total,
+                    'product_count' => $product_total,
                     'total' => $result['total'],
                     'currency' => $result['currency'],
                     'value' => $result['value'],

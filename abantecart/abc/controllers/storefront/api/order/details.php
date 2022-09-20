@@ -66,19 +66,73 @@ class ControllerApiOrderDetails extends ASecureControllerAPI
 
         $this->data = $orderDetails;
 
+        $this->data['shipping'] = [
+            'address' => [
+                'firstname' => $this->data['shipping_firstname'],
+                'lastname' => $this->data['shipping_lastname'],
+                'company' => $this->data['shipping_company'],
+                'address_1' => $this->data['shipping_address_1'],
+                'address_2' => $this->data['shipping_address_2'],
+                'city' => $this->data['shipping_city'],
+                'postcode' => $this->data['shipping_postcode'],
+                'zone' => $this->data['shipping_zone'],
+                'zone_id' => $this->data['shipping_zone_id'],
+                'country' => $this->data['shipping_country'],
+                'country_id' => $this->data['shipping_country_id'],
+                'address_format' => $this->data['shipping_address_format'],
+            ],
+            'method' => $this->data['shipping_method'],
+            'method_key' => $this->data['shipping_method_key'],
+        ];
+
+
+        $this->data['payment'] = [
+            'address' => [
+                'firstname' => $this->data['payment_firstname'],
+                'lastname' => $this->data['payment_lastname'],
+                'company' => $this->data['payment_company'],
+                'address_1' => $this->data['payment_address_1'],
+                'address_2' => $this->data['payment_address_2'],
+                'city' => $this->data['payment_city'],
+                'postcode' => $this->data['payment_postcode'],
+                'zone' => $this->data['payment_zone'],
+                'zone_id' => $this->data['payment_zone_id'],
+                'country' => $this->data['payment_country'],
+                'country_id' => $this->data['payment_country_id'],
+                'address_format' => $this->data['payment_address_format'],
+            ],
+            'method' => $this->data['payment_method'],
+            'method_key' => $this->data['payment_method_key'],
+        ];
+
+        foreach ($this->data as $key => $value) {
+            if (str_starts_with($key, 'shipping_')) {
+                unset($this->data[$key]);
+            }
+            if (str_starts_with($key, 'payment_')) {
+                unset($this->data[$key]);
+            }
+        }
+
+        $this->data['status_id'] = $this->data['order_status_id'];
+        unset($this->data['order_status_id']);
+
+        $this->data['status'] = $this->data['order_status_name'];
+        unset($this->data['order_status_name']);
+
         $products = [];
         $orderProducts = OrderProduct::where('order_id', '=', $orderId)->get();
         $orderStatuses = OrderStatusDescription::where('language_id', '=', $this->language->getLanguageID())
             ->get()
             ->toArray();
         $orderStatuses = array_column($orderStatuses, 'name', 'order_status_id');
-        $product_ids = $orderProducts->pluck('product_id')->toArray();
+        $productIds = $orderProducts->pluck('product_id')->toArray();
 
         //get thumbnails by one pass
         $resource = new AResource('image');
         $thumbnails = $resource->getMainThumbList(
             'products',
-            $product_ids,
+            $productIds,
             $this->config->get('config_image_cart_width'),
             $this->config->get('config_image_cart_width'),
             false
@@ -142,8 +196,8 @@ class ControllerApiOrderDetails extends ASecureControllerAPI
                     false
                 );
 
-                if(!empty($main_image)) {
-                    $thumbnail = (ABC::env('HTTPS') ? 'https:' : 'http:') .$main_image['thumb_url'];
+                if (!empty($main_image)) {
+                    $thumbnail = (ABC::env('HTTPS') ? 'https:' : 'http:') . $main_image['thumb_url'];
                 }
             }
 
@@ -153,7 +207,7 @@ class ControllerApiOrderDetails extends ASecureControllerAPI
                 'order_status_id' => $product->order_status_id,
                 'order_status' => $orderStatuses[$product->order_status_id],
                 'thumbnail' => $thumbnail,
-                'name' => $product->name,
+                'name' => html_entity_decode($product->name, ENT_QUOTES, ABC::env('APP_CHARSET')),
                 'model' => $product->model,
                 'option' => $option_data,
                 'quantity' => $product->quantity,
@@ -167,7 +221,7 @@ class ControllerApiOrderDetails extends ASecureControllerAPI
             ->toArray();
 
         foreach ($this->data['totals'] as &$total) {
-            $total['text'] = html_entity_decode($total['text'], ENT_QUOTES, ABC::env('APP_CHARSET'));
+            unset($total['text']);
         }
 
         $this->data['comment'] = $orderDetails['comment'];
