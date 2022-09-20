@@ -147,8 +147,12 @@ class ControllerApiOrderDetails extends ASecureControllerAPI
             )->get();
             $thumbnail = $thumbnails[$product['product_id']];
             $optionData = [];
-            if (count($options) === 0 && $thumbnail['thumb_url']) {
-                $thumbnail = (ABC::env('HTTPS') ? 'https:' : 'http:') . $thumbnail['thumb_url'];
+            if (count($options) === 0) {
+                if ($thumbnail['thumb_url']) {
+                    $thumbnail = (ABC::env('HTTPS') ? 'https:' : 'http:') . $thumbnail['thumb_url'];
+                } else {
+                    $thumbnail = null;
+                }
             } else {
                 foreach ($options as $option) {
                     if ($option->element_type == 'H') {
