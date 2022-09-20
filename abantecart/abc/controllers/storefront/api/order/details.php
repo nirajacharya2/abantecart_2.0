@@ -146,58 +146,62 @@ class ControllerApiOrderDetails extends ASecureControllerAPI
                 ]
             )->get();
             $thumbnail = $thumbnails[$product['product_id']];
-            $option_data = [];
-            foreach ($options as $option) {
-                if ($option->element_type == 'H') {
-                    continue;
-                } //hide hidden options
+            $optionData = [];
+            if (count($options) === 0 && $thumbnail['thumb_url']) {
+                $thumbnail = (ABC::env('HTTPS') ? 'https:' : 'http:') . $thumbnail['thumb_url'];
+            } else {
+                foreach ($options as $option) {
+                    if ($option->element_type == 'H') {
+                        continue;
+                    } //hide hidden options
 
-                $value = $option->value;
-                $title = '';
-                // hide binary value for checkbox
-                if ($option->element_type == 'C' && in_array($value, [0, 1])) {
-                    $value = '';
-                }
-                // strip long textarea value
-                if ($option->element_type == 'T') {
-                    $title = strip_tags($value);
-                    $title = str_replace('\r\n', "\n", $title);
-
-                    $value = str_replace('\r\n', "\n", $value);
-                    if (mb_strlen($value) > 64) {
-                        $value = mb_substr($value, 0, 64) . '...';
+                    $value = $option->value;
+                    $title = '';
+                    // hide binary value for checkbox
+                    if ($option->element_type == 'C' && in_array($value, [0, 1])) {
+                        $value = '';
                     }
-                }
+                    // strip long textarea value
+                    if ($option->element_type == 'T') {
+                        $title = strip_tags($value);
+                        $title = str_replace('\r\n', "\n", $title);
 
-                $option_data[] = [
-                    'name' => $option->name,
-                    'value' => $value,
-                    'title' => $title,
-                ];
-                // product image by option value
-                $mSizes = [
-                    'main' =>
-                        [
+                        $value = str_replace('\r\n', "\n", $value);
+                        if (mb_strlen($value) > 64) {
+                            $value = mb_substr($value, 0, 64) . '...';
+                        }
+                    }
+
+                    $optionData[] = [
+                        'name' => $option->name,
+                        'value' => $value,
+                        'title' => $title,
+                    ];
+                    // product image by option value
+                    $mSizes = [
+                        'main' =>
+                            [
+                                'width' => $this->config->get('config_image_cart_width'),
+                                'height' => $this->config->get('config_image_cart_height')
+                            ],
+                        'thumb' => [
                             'width' => $this->config->get('config_image_cart_width'),
                             'height' => $this->config->get('config_image_cart_height')
                         ],
-                    'thumb' => [
-                        'width' => $this->config->get('config_image_cart_width'),
-                        'height' => $this->config->get('config_image_cart_height')
-                    ],
-                ];
+                    ];
 
 
-                $main_image = $resource->getResourceAllObjects(
-                    'product_option_value',
-                    $option->product_option_value_id,
-                    $mSizes,
-                    1,
-                    false
-                );
+                    $main_image = $resource->getResourceAllObjects(
+                        'product_option_value',
+                        $option->product_option_value_id,
+                        $mSizes,
+                        1,
+                        false
+                    );
 
-                if (!empty($main_image)) {
-                    $thumbnail = (ABC::env('HTTPS') ? 'https:' : 'http:') . $main_image['thumb_url'];
+                    if (!empty($main_image)) {
+                        $thumbnail = (ABC::env('HTTPS') ? 'https:' : 'http:') . $main_image['thumb_url'];
+                    }
                 }
             }
 
@@ -209,7 +213,7 @@ class ControllerApiOrderDetails extends ASecureControllerAPI
                 'thumbnail' => $thumbnail,
                 'name' => html_entity_decode($product->name, ENT_QUOTES, ABC::env('APP_CHARSET')),
                 'model' => $product->model,
-                'options' => $option_data,
+                'options' => $optionData,
                 'quantity' => $product->quantity,
                 'price' => $product->price,
                 'total' => $product->price * $product->quantity
