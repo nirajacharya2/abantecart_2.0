@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -99,7 +99,7 @@ class ControllerApiProductCategory extends AControllerAPI
                 'error_text' => 'Bad request',
             ]);
             $this->rest->sendResponse(400);
-            return null;
+            return;
         }
         $storeId = $this->request->get['store_id'];
         $languageId = $this->request->get['language_id'];
@@ -118,7 +118,7 @@ class ControllerApiProductCategory extends AControllerAPI
                 'error_text' => 'Category not found',
             ]);
             $this->rest->sendResponse(404);
-            return null;
+            return;
         }
 
         $this->rest->setResponseData($category_info);
@@ -133,7 +133,7 @@ class ControllerApiProductCategory extends AControllerAPI
 
         $category_info = Category::getCategory($category_id, $storeId, 0, $languageId);
         if (!$category_info) {
-            return false;
+            return [];
         }
         $resource = new AResource('image');
         $thumbnail = $resource->getMainThumb('categories',
@@ -148,7 +148,7 @@ class ControllerApiProductCategory extends AControllerAPI
             ENT_QUOTES,
             ABC::env('APP_CHARSET')
         );
-        $category_info['total_products'] = $this->model_catalog_product->getTotalProductsByCategoryId($category_id);
+        $category_info['total_products'] = Category::getTotalProductsByCategoryId($category_id,$storeId);
         $category_info['total_subcategories'] = Category::getTotalCategoriesByCategoryId($category_id);
         if ($category_info['total_products']) {
             $category_info['subcategories'] = $this->getCategories($category_id, $languageId, $storeId);
@@ -157,15 +157,14 @@ class ControllerApiProductCategory extends AControllerAPI
         return $category_info;
     }
 
-    public function getCategories($parent_category_id = 0, $languageId, $storeId)
+    public function getCategories($parent_category_id = 0, $languageId = 1 , $storeId = 0)
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $results = Category::getCategories($parent_category_id, $storeId, 0, $languageId);
 
-        $category_ids = $categories = [];
-        foreach ($results as $result) {
-            $category_ids[] = (int)$result['category_id'];
-        }
+        $categories = [];
+        $category_ids = array_map('intval', array_column($results, 'category_id'));
+
         //get thumbnails by one pass
         $resource = new AResource('image');
         $thumbnails = $resource->getMainThumbList(
@@ -175,15 +174,11 @@ class ControllerApiProductCategory extends AControllerAPI
             $this->config->get('config_image_category_height')
         );
 
-        foreach ($results as $result) {
+        foreach ($results as $k => $result) {
             $thumbnail = $thumbnails[$result['category_id']];
-            $categories[] = [
-                'name'                => $result['name'],
-                'category_id'         => $result['category_id'],
-                'sort_order'          => $result['sort_order'],
-                'thumb'               =>  (ABC::env('HTTPS') ? 'https:' : 'http:') .$thumbnail['thumb_url'],
-                'total_subcategories' => Category::getTotalCategoriesByCategoryId($result['category_id']),
-            ];
+            $categories[$k] = $result;
+            $categories[$k]['thumb'] =  (ABC::env('HTTPS') ? 'https:' : 'http:') .$thumbnail['thumb_url'];
+            $categories[$k]['total_subcategories'] = Category::getTotalCategoriesByCategoryId($result['category_id']);
         }
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
