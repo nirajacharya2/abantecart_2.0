@@ -33,7 +33,7 @@ use abc\modules\workers\FixCategoriesCounters;
 use Illuminate\Events\Dispatcher as EventDispatcher;
 use PhpAbac\AbacFactory;
 
-$aLog = ABCEXEC
+$aLog = defined('ABCEXEC') && ABCEXEC
     // class with parameters for constructor. CLI mode.
     // NOTE: if you do not want to use file logger remove second parameter
     ?   [ ALog::class, ['app'=> 'cli.log'] ]
