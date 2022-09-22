@@ -60,7 +60,7 @@ class ControllerResponsesErrorAjaxError extends AController
             'error_text'  => $this->language->get('text_permission'),
             'show_dialog' => true,
         ];
-        return $error->toJSONResponse('NO_PERMISSIONS_402', $err_data);
+        return $error->toJSONResponse('NO_PERMISSIONS_403', $err_data);
     }
 
     public function login()

@@ -109,7 +109,7 @@ class ControllerResponsesListingGridAttributeGroups extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
         if (!$this->user->canModify('catalog/attribute_groups')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'),
                         'catalog/attribute_groups'),
@@ -176,7 +176,7 @@ class ControllerResponsesListingGridAttributeGroups extends AController
 
         if (!$this->user->canModify('catalog/attribute_groups')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'),
                         'catalog/attribute_groups'),

@@ -121,7 +121,7 @@ class ControllerResponsesListingGridMessageGrid extends AController
         if (!$this->user->canModify('listing_grid/message_grid')) {
             $error = new AError('');
             $error->toJSONResponse(
-                'NO_PERMISSIONS_402',
+                'NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf(
                         $this->language->get('error_permission_modify'),

@@ -190,7 +190,7 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
         if (!$this->csrftoken->isTokenValid()) {
             $error = new AError('');
             $error->toJSONResponse(
-                'NO_PERMISSIONS_402',
+                'NO_PERMISSIONS_403',
                 ['error_text' => 'Unknown error']
             );
             return;
@@ -202,7 +202,7 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
         if (!$this->user->canModify('listing_grid/customer_transaction') || $this->request->is_GET()) {
             $error = new AError('');
             $error->toJSONResponse(
-                'NO_PERMISSIONS_402',
+                'NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf(
                         $this->language->get('error_permission_modify'),
@@ -267,7 +267,7 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
         if (!$this->user->canAccess('listing_grid/customer_transaction')) {
             $error = new AError('');
             $error->toJSONResponse(
-                'NO_PERMISSIONS_402',
+                'NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf(
                         $this->language->get('error_permission_access'),

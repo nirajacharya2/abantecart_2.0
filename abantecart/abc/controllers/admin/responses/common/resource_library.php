@@ -237,7 +237,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
     {
         if (!$this->user->canModify('common/resource_library')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'),
                         'common/resource_library'),
@@ -594,7 +594,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
 
         if (!$this->user->canModify('common/resource_library')) {
             $error = new AError('');
-            $error->toJSONResponse('NO_PERMISSIONS_402',
+            $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf(
                         $this->language->get('error_permission_modify'),
@@ -705,7 +705,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
 
         if (!$this->user->canModify('common/resource_library')) {
             $error = new AError('');
-            $error->toJSONResponse('NO_PERMISSIONS_402',
+            $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'),
                         'common/resource_library'),
@@ -818,7 +818,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
 
         if (!$this->user->canModify('common/resource_library')) {
             $error = new AError('');
-            $error->toJSONResponse('NO_PERMISSIONS_402',
+            $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'),
                         'common/resource_library'),
@@ -995,7 +995,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
     {
         if (!$this->user->canModify('common/resource_library')) {
             $error = new AError('');
-            $error->toJSONResponse('NO_PERMISSIONS_402',
+            $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf(
                         $this->language->get('error_permission_modify'),
@@ -1039,7 +1039,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
     {
         if (!$this->user->canModify('common/resource_library')) {
             $error = new AError('');
-            $error->toJSONResponse('NO_PERMISSIONS_402',
+            $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf(
                         $this->language->get('error_permission_modify'),
@@ -1079,7 +1079,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
 
         if (!$this->user->canModify('common/resource_library')) {
             $error = new AError('');
-            $error->toJSONResponse('NO_PERMISSIONS_402',
+            $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf(
                         $this->language->get('error_permission_modify'),
@@ -1129,7 +1129,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
 
         if (!$this->user->canModify('common/resource_library')) {
             $error = new AError('');
-            $error->toJSONResponse('NO_PERMISSIONS_402',
+            $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf(
                         $this->language->get('error_permission_modify'),
@@ -1204,7 +1204,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
     {
         if (!$this->user->canModify('common/resource_library')) {
             $error = new AError('');
-            $error->toJSONResponse('NO_PERMISSIONS_402',
+            $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf(
                         $this->language->get('error_permission_modify'),
@@ -1221,7 +1221,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
 
         if (!$this->request->post) {
             $error = new AError('');
-            $error->toJSONResponse('NO_PERMISSIONS_402',
+            $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => 'Error: No data to save!',
                     'reset_value' => true,
@@ -1267,7 +1267,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
 
         if (!$this->user->canModify('common/resource_library')) {
             $error = new AError('');
-            $error->toJSONResponse('NO_PERMISSIONS_402',
+            $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'),
                         'common/resource_library'),
@@ -1343,7 +1343,7 @@ class ControllerResponsesCommonResourceLibrary extends AController
 
         if (!$this->user->canModify('common/resource_library')) {
             $error = new AError('');
-            $error->toJSONResponse('NO_PERMISSIONS_402',
+            $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf(
                                         $this->language->get('error_permission_modify'),

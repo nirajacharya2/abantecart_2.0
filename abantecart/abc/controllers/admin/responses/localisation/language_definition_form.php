@@ -44,7 +44,7 @@ class ControllerResponsesLocalisationLanguageDefinitionForm extends AController
 
         if (!$this->user->canModify($this->rt)) {
             $error = new AError('');
-            $error->toJSONResponse('NO_PERMISSIONS_402',
+            $error->toJSONResponse('NO_PERMISSIONS_403',
                                    [
                                        'error_text'  => sprintf(
                                            $this->language->get('error_permission_modify'), $this->rt

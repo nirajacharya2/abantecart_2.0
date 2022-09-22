@@ -46,7 +46,7 @@ class ControllerResponsesSaleOrder extends AController
         $output = [];
         if (!$this->user->canModify('sale/order')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'sale/order'),
                     'reset_value' => true,
@@ -195,7 +195,7 @@ class ControllerResponsesSaleOrder extends AController
 
         if (!$coupon) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => $this->language->get('error_coupon'),
                     'reset_value' => true,
@@ -220,7 +220,7 @@ class ControllerResponsesSaleOrder extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
         /*if (!$this->user->canModify('sale/order')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'sale/order'),
                     'reset_value' => true,

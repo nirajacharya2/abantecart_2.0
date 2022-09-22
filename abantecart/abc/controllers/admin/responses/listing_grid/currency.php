@@ -114,7 +114,7 @@ class ControllerResponsesListingGridCurrency extends AController
         $this->loadLanguage('localisation/currency');
         if (!$this->user->canModify('listing_grid/currency')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/currency'),
                     'reset_value' => true,
@@ -214,7 +214,7 @@ class ControllerResponsesListingGridCurrency extends AController
         $this->loadLanguage('localisation/currency');
         if (!$this->user->canModify('listing_grid/currency')) {
             $error = new AError('');
-            $error->toJSONResponse('NO_PERMISSIONS_402',
+            $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/currency'),
                     'reset_value' => true,

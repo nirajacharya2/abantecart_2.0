@@ -210,7 +210,7 @@ class ControllerResponsesSaleInvoice extends AController
 
         if (!$this->user->canModify('sale/invoice')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'sale/invoice'),
                     'reset_value' => true,

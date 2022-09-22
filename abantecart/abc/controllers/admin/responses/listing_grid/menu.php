@@ -165,7 +165,7 @@ class ControllerResponsesListingGridMenu extends AController
         $this->loadLanguage('design/menu');
         if (!$this->user->canModify('listing_grid/menu')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/menu'),
                     'reset_value' => true,
@@ -238,7 +238,7 @@ class ControllerResponsesListingGridMenu extends AController
         $this->loadLanguage('localisation/language');
         if (!$this->user->canModify('listing_grid/menu')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/menu'),
                     'reset_value' => true,
