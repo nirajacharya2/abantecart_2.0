@@ -28,6 +28,12 @@ if (version_compare(phpversion(), PHP_MIN_VERSION, '<')) {
 set_include_path(__DIR__);
 define('DS', DIRECTORY_SEPARATOR);
 define('ABCEXEC', TRUE);
+//Detect if included or run directly
+if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
+    define('DIRECT', TRUE);
+} else {
+    define('DIRECT', FALSE);
+}
 
 //process command
 $args = $argv;
@@ -64,8 +70,12 @@ try {
     }
     require __DIR__.DS.'core'.DS.'init'.DS.'cli.php';
 } catch (\Exception $e) {
-    showException($e);
-    exit(1);
+    if (DIRECT){
+        showException($e);
+        exit(1);
+   } else {
+        throw $e;
+   }
 }
 //set sign
 ABC::env('abcexec', true);
@@ -90,19 +100,27 @@ if (!$options && !$action) {
 //validate command and options
 $errors = $executor->validate($action, $options);
 if ($errors) {
-    showError("Validation errors occurred");
-    foreach ($errors as $error) {
-        showError("\t".$error);
+    if (DIRECT){
+        showError("Validation errors occurred");
+        foreach ($errors as $error) {
+            showError("\t".$error);
+        }
+        exit(1);
+    } else {
+        throw $errors;
     }
-    exit(1);
 }
 
 //run command
 try {
     showResult($executor->run($action, $options));
 } catch (Exception $e) {
-    showException($e);
-    exit(1);
+    if (DIRECT){
+        showException($e);
+        exit(1);
+    } else {
+        throw $e;
+    }
 }
 
 //if all fine - run post-trigger
@@ -111,8 +129,12 @@ try {
     $executor->finish($action, $options);
     showResult($executor->getOutput());
 } catch (Exception $e) {
-    showException($e);
-    exit(1);
+    if (DIRECT){
+        showException($e);
+        exit(1);
+    } else {
+        throw $e;
+    }
 }
 
 exit(0);
