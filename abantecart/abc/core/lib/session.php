@@ -72,14 +72,7 @@ final class ASession
         $path = '';
         if (ABC::env('IS_API')) {
             //set up session specific for API based on the token or create new
-            $token = $this->getTokenFromHeaders();
-//            if ($_GET && $_GET['token']) {
-//                $token = $_GET['token'];
-//            } else {
-//                if ($_POST && $_POST['token']) {
-//                    $token = $_POST['token'];
-//                }
-//            }
+            $token = $this->getTokenFromHeaders() ?: $_GET['token'] ?: $_POST['token'];
             $final_session_id = $this->prepareSessionId($token);
             session_id($final_session_id);
         } else {

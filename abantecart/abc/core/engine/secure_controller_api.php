@@ -35,13 +35,14 @@ class ASecureControllerAPI extends AControllerAPI
 
     private function isLoggedIn() {
         $headers = $this->request->getHeaders();
-        if (!$headers || !$headers['Authorization']) {
+        $token = $this->rest->getRequestParam('token');
+        if (!$headers || (!$headers['Authorization'] && !$token)) {
             return false;
         }
 
         $token = str_replace('Bearer ', '', $headers['Authorization'])
             //deprecated way. do not send token via post!
-            ?: $this->rest->getRequestParam('token');
+            ?: $token;
         return !$token ? false : $this->customer->isLoggedWithToken($token);
     }
 }
