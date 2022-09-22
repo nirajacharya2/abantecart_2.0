@@ -37,6 +37,11 @@ class ControllerApiCommonAccess extends AControllerAPI
             return $this->dispatch('api/error/no_access');
         }
         $headers = $this->request->getHeaders();
+        //backward compatibility
+        if($headers) {
+            $headers['X-App-Api-Key'] = $headers['X-App-Api-Key'] ?: $this->request->post['api_key'];
+        }
+
         //validate if API enabled and KEY matches.
         if ($this->config->get('config_admin_api_status')) {
             if ($this->config->get('config_admin_api_key')

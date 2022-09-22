@@ -21,21 +21,15 @@ class ASecureControllerAPI extends AControllerAPI
         switch ($this->rest->getRequestMethod()) {
             case 'get':
                 return $this->get();
-                break;
             case 'post':
                 return $this->post();
-                break;
             case 'put':
                 return $this->put();
-                break;
             case 'delete':
                 return $this->delete();
-                break;
             default:
                 $this->rest->sendResponse(405);
-
                 return null;
-                break;
         }
     }
 
@@ -45,10 +39,9 @@ class ASecureControllerAPI extends AControllerAPI
             return false;
         }
 
-        $token = str_replace('Bearer ', '', $headers['Authorization']);
-        if (!$token) {
-            return false;
-        }
-        return $this->customer->isLoggedWithToken($token);
+        $token = str_replace('Bearer ', '', $headers['Authorization'])
+            //deprecated way. do not send token via post!
+            ?: $this->rest->getRequestParam('token');
+        return !$token ? false : $this->customer->isLoggedWithToken($token);
     }
 }
