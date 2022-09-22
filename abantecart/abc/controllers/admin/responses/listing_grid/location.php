@@ -82,7 +82,7 @@ class ControllerResponsesListingGridLocation extends AController
         $this->loadLanguage('localisation/location');
         if (!$this->user->canModify('listing_grid/location')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'),
                         'listing_grid/listing_grid/location'),
@@ -151,7 +151,7 @@ class ControllerResponsesListingGridLocation extends AController
         $this->loadLanguage('localisation/location');
         if (!$this->user->canModify('listing_grid/location')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/location'),
                     'reset_value' => true,
@@ -209,7 +209,7 @@ class ControllerResponsesListingGridLocation extends AController
         $this->loadLanguage('localisation/location');
         if (!$this->user->canModify('listing_grid/location')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/location'),
                     'reset_value' => true,

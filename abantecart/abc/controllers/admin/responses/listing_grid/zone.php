@@ -129,7 +129,7 @@ class ControllerResponsesListingGridZone extends AController
 
         if (!$this->user->canModify('listing_grid/zone')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/zone'),
                     'reset_value' => true,
@@ -217,7 +217,7 @@ class ControllerResponsesListingGridZone extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
         if (!$this->user->canModify('listing_grid/zone')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/zone'),
                     'reset_value' => true,

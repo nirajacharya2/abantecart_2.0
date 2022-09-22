@@ -275,7 +275,7 @@ class ControllerResponsesListingGridExtension extends AController
         if (!$this->user->canModify('listing_grid/extension')) {
             $error = new AError('');
             $error->toJSONResponse(
-                'NO_PERMISSIONS_402',
+                'NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/extension'),
                     'reset_value' => true,

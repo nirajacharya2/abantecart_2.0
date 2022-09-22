@@ -147,7 +147,7 @@ class ControllerResponsesListingGridContent extends AController
         $this->acm = new AContentManager();
         if ( ! $this->user->canModify('listing_grid/content')) {
             $error = new AError('');
-            $error->toJSONResponse('NO_PERMISSIONS_402',
+            $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/content'),
                     'reset_value' => true,
@@ -242,7 +242,7 @@ class ControllerResponsesListingGridContent extends AController
         $this->acm = new AContentManager();
         if ( ! $this->user->canModify('listing_grid/content')) {
             $error = new AError('');
-            $error->toJSONResponse('NO_PERMISSIONS_402',
+            $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/content'),
                     'reset_value' => true,

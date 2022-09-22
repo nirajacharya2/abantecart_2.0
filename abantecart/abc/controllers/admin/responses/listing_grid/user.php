@@ -96,7 +96,7 @@ class ControllerResponsesListingGridUser extends AController
 
         if (!$this->user->canModify('listing_grid/user')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/user'),
                     'reset_value' => true,
@@ -151,7 +151,7 @@ class ControllerResponsesListingGridUser extends AController
 
         if (!$this->user->canModify('listing_grid/user')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/user'),
                     'reset_value' => true,
@@ -176,7 +176,7 @@ class ControllerResponsesListingGridUser extends AController
 
                             $error = new AError('');
                             return $error->toJSONResponse(
-                                'NO_PERMISSIONS_402',
+                                'NO_PERMISSIONS_403',
                                 [
                                     'error_text'  => $this->language->get('error_user_group'),
                                     'reset_value' => true,

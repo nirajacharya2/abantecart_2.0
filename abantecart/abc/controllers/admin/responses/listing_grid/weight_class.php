@@ -127,7 +127,7 @@ class ControllerResponsesListingGridWeightClass extends AController
 
         if (!$this->user->canModify('listing_grid/weight_class')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'),
                         'listing_grid/weight_class'),
@@ -196,7 +196,7 @@ class ControllerResponsesListingGridWeightClass extends AController
 
         if (!$this->user->canModify('listing_grid/weight_class')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'),
                         'listing_grid/weight_class'),

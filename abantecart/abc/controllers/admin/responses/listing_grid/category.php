@@ -188,7 +188,7 @@ class ControllerResponsesListingGridCategory extends AController
         $this->loadLanguage('catalog/category');
         if ( ! $this->user->canModify('listing_grid/category')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/category'),
                     'reset_value' => true,
@@ -204,7 +204,7 @@ class ControllerResponsesListingGridCategory extends AController
                             Category::deleteCategory($id);
                         }catch(\Exception $e) {
                             $error = new AError('');
-                            return $error->toJSONResponse('NO_PERMISSIONS_402',
+                            return $error->toJSONResponse('NO_PERMISSIONS_403',
                                 [
                                     'error_text'  => $e->getMessage(),
                                     'reset_value' => true,
@@ -260,7 +260,7 @@ class ControllerResponsesListingGridCategory extends AController
         if ( ! $this->user->canModify('listing_grid/category')) {
             $error = new AError('');
 
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/category'),
                     'reset_value' => true,

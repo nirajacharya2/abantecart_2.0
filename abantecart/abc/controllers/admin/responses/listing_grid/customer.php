@@ -180,7 +180,7 @@ class ControllerResponsesListingGridCustomer extends AController
         $this->loadLanguage('sale/customer');
         if (!$this->user->canModify('listing_grid/customer')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/customer'),
                     'reset_value' => true,
@@ -264,7 +264,7 @@ class ControllerResponsesListingGridCustomer extends AController
 
         if (!$this->user->canModify('listing_grid/customer')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/customer'),
                     'reset_value' => true,

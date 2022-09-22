@@ -226,7 +226,7 @@ class ControllerResponsesListingGridTotal extends AController
 
         if (!$this->user->canModify('listing_grid/total')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/total'),
                     'reset_value' => true,
@@ -235,7 +235,7 @@ class ControllerResponsesListingGridTotal extends AController
         foreach ($ids as $id) {
             if (!$this->user->canModify('total/'.$id)) {
                 $error = new AError('');
-                return $error->toJSONResponse('NO_PERMISSIONS_402',
+                return $error->toJSONResponse('NO_PERMISSIONS_403',
                     [
                         'error_text'  => sprintf($this->language->get('error_permission_modify'), 'total/'.$id),
                         'reset_value' => true,

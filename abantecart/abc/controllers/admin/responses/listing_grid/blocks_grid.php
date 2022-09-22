@@ -124,7 +124,7 @@ class ControllerResponsesListingGridBlocksGrid extends AController
         if (!$this->user->canModify('listing_grid/blocks_grid')) {
             $error = new AError('');
             return $error->toJSONResponse(
-                'NO_PERMISSIONS_402',
+                'NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf(
                         $this->language->get('error_permission_modify'),

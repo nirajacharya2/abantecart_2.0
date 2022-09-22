@@ -167,7 +167,7 @@ class ControllerResponsesProductProduct extends AController
 
         if (!$this->user->canModify('product/product')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'product/product'),
                     'reset_value' => true,
@@ -345,7 +345,7 @@ class ControllerResponsesProductProduct extends AController
     {
         if (!$this->user->canModify('product/product')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'product/product'),
                     'reset_value' => true,
@@ -355,7 +355,7 @@ class ControllerResponsesProductProduct extends AController
         $option = ProductOption::with('description')->find($get['option_id']);
         if (!$option || $option->product_id != $this->request->get['product_id']) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => $this->language->get('text_not_found'),
                     'reset_value' => true,
@@ -622,7 +622,7 @@ class ControllerResponsesProductProduct extends AController
 
         if (!$this->user->canModify('product/product')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'product/product'),
                     'reset_value' => true,
@@ -636,7 +636,7 @@ class ControllerResponsesProductProduct extends AController
             $option->forceDelete();
         } else {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => 'Option ID '.$this->request->get['product_option_id'].' not found!',
                     'reset_value' => true,
@@ -652,7 +652,7 @@ class ControllerResponsesProductProduct extends AController
     {
         if (!$this->user->canModify('product/product')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'product/product'),
                     'reset_value' => true,
@@ -1014,7 +1014,7 @@ class ControllerResponsesProductProduct extends AController
 
         if (!$this->user->canModify('product/product')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'product/product'),
                     'reset_value' => true,

@@ -126,7 +126,7 @@ class ControllerResponsesListingGridAttribute extends AController
 
         if (!$this->user->canModify('listing_grid/attribute')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/attribute'),
                     'reset_value' => true,
@@ -202,7 +202,7 @@ class ControllerResponsesListingGridAttribute extends AController
 
         if (!$this->user->canModify('listing_grid/attribute')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/attribute'),
                     'reset_value' => true,

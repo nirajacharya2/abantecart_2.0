@@ -98,7 +98,7 @@ class ControllerResponsesListingGridLanguageDefinitions extends AController
 
         if (!$this->user->canModify('listing_grid/language_definitions')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'),
                         'listing_grid/language_definitions'),
@@ -153,7 +153,7 @@ class ControllerResponsesListingGridLanguageDefinitions extends AController
         $this->loadLanguage('localisation/language_definitions');
         if (!$this->user->canModify('listing_grid/language_definitions')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'),
                         'listing_grid/language_definitions'),
