@@ -1632,7 +1632,7 @@ class AHelperUtils extends AHelper
                             .' (Class: '.$class.', args: '.var_export($arguments, true).' )'
                     );
                 } catch(Exception $e){
-                    Registry::getInstance()->get('log')->write(
+                    $log->write(
                         'AHelperUtils Error: '.$e->getMessage().' '.$e->getLine()
                             .' (Class: '.$class.', args: '.var_export($arguments, true).' )'
                             ."\n".$e->getTraceAsString()

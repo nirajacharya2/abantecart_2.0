@@ -57,7 +57,7 @@ class ADB
     public $registry;
 
     /**
-     * @param array  $db_config array(
+     * @param array $db_config array(
      *                          'driver'    => 'mysql',
      *                          'host'      => 'localhost', // or array ['read' => '****', 'write' = '*****']
      *                          'port'      => '3306', // or array ['read' => '***', 'write' = '***']
@@ -79,11 +79,12 @@ class ADB
             throw new Exception('Cannot initiate ADB class with empty config parameter!', AC_ERR_LOAD, __FILE__);
         }
         $this->db_config = $this->prepareDBConfig($db_config);
+
         $this->conName = $conName;
         try {
-            if(Registry::db()){
+            if (Registry::db()) {
                 $this->orm = Registry::db()->getOrm();
-            }else {
+            } else {
                 $this->orm = new Capsule;
             }
             $this->orm->addConnection($this->db_config, $this->conName);
@@ -104,17 +105,19 @@ class ADB
             $this->orm->bootEloquent();
 
             //check connection
-            $this->table($this->raw('DUAL'))->first([$this->raw(1)]);
+            $this->orm->getConnection($this->conName)->getPdo();
+
             $debug_bar = ADebug::$debug_bar;
             $debug_bar?->addCollector(new PHPDebugBarEloquentCollector($this->orm));
+
             if ($this->db_config['driver'] == 'mysql') {
                 $this->orm->getConnection($this->conName)->select($this->raw("SET SQL_MODE='';"));
                 try {
                     $timezone = date_default_timezone_get();
                     $this->orm->getConnection($this->conName)->select(
-                        $this->raw("SET time_zone='".$timezone."';")
+                        $this->raw("SET time_zone='" . $timezone . "';")
                     );
-                }catch(PDOException $e){
+                } catch (PDOException $e) {
                     error_log($e->getMessage());
                 }
             }
@@ -122,14 +125,14 @@ class ADB
         } catch (PDOException $e) {
             error_log($e->getMessage());
             throw new AException(
-                $e->getMessage()."\n".$e->getTraceAsString(),
+                $e->getMessage() . "\n" . $e->getTraceAsString(),
                 $e->getCode(),
                 $e->getFile(),
                 $e->getLine()
             );
         } catch (Error $e) {
             error_log($e->getMessage());
-            exit($e->getMessage()."\n".$e->getTraceAsString());
+            exit($e->getMessage() . "\n" . $e->getTraceAsString());
         }
         $this->registry = Registry::getInstance();
     }
@@ -181,13 +184,13 @@ class ADB
         }
 
         $output += [
-            'driver'    => $cfg['db_driver'],
-            'database'  => $cfg['db_name'],
-            'username'  => $cfg['db_user'],
-            'password'  => $cfg['db_password'],
-            'charset'   => 'utf8',
+            'driver' => $cfg['db_driver'],
+            'database' => $cfg['db_name'],
+            'username' => $cfg['db_user'],
+            'password' => $cfg['db_password'],
+            'charset' => 'utf8',
             'collation' => 'utf8_unicode_ci',
-            'prefix'    => $cfg['db_prefix'],
+            'prefix' => $cfg['db_prefix'],
         ];
 
         return $output;
@@ -195,7 +198,7 @@ class ADB
 
     /**
      * @param string $sql
-     * @param bool   $noexcept
+     * @param bool $noexcept
      *
      * @return bool|stdClass
      * @throws Exception
@@ -214,7 +217,7 @@ class ADB
 
     /**
      * @param string $sql
-     * @param bool   $noexcept
+     * @param bool $noexcept
      *
      * @return bool|stdClass
      *
@@ -238,7 +241,7 @@ class ADB
 
             return $output;
         } catch (QueryException $ex) {
-            $this->error = 'SQL Error: '.$ex->getMessage()."\nError No: ".$ex->getCode()."\nSQL: \n".$sql;
+            $this->error = 'SQL Error: ' . $ex->getMessage() . "\nError No: " . $ex->getCode() . "\nSQL: \n" . $sql;
             if (!$noexcept) {
                 throw new AException($this->error, AC_ERR_MYSQL);
             } else {
@@ -260,7 +263,7 @@ class ADB
             $postfix = $this->registry->get('dcrypt')->postfix($table_name);
         }
 
-        return $this->db_config['prefix'].$table_name.$postfix;
+        return $this->db_config['prefix'] . $table_name . $postfix;
     }
 
     /**
@@ -357,7 +360,7 @@ class ADB
                 if (($sql != '') && (!str_starts_with($tsl, "--")) && (!str_starts_with($tsl, '#'))) {
                     $query .= $line;
                     if (preg_match('/;\s*$/', $line)) {
-                        $query = str_replace("`ac_", "`".$this->db_config['prefix'], $query);
+                        $query = str_replace("`ac_", "`" . $this->db_config['prefix'], $query);
                         $result = $this->_query($query, true);
                         if (!$result) {
                             return false;
@@ -373,7 +376,7 @@ class ADB
 
     /**
      * @param string $function_name
-     * @param array  $args
+     * @param array $args
      *
      * @return Capsule | null
      */
