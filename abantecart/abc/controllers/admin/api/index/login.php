@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2022 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -18,9 +18,10 @@
 
 namespace abc\controllers\admin;
 
+use abc\core\ABC;
 use abc\core\engine\AControllerAPI;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
+if (!ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
@@ -42,15 +43,15 @@ class ControllerApiIndexLogin extends AControllerAPI
         } else {
             if (isset($request['username']) && isset($request['password']) && $this->_validate($request['username'], $request['password'])) {
                 if (!session_id()) {
-                    $this->rest->setResponseData(array('status' => 0, 'error' => 'Unable to get session ID.'));
+                    $this->rest->setResponseData(['status' => 0, 'error' => 'Unable to get session ID.']);
                     $this->rest->sendResponse(501);
                     return null;
                 }
                 $this->session->data['token'] = session_id();
-                $this->rest->setResponseData(array('status' => 1, 'success' => 'Logged in', 'token' => $this->session->data['token']));
+                $this->rest->setResponseData(['status' => 1, 'success' => 'Logged in', 'token' => $this->session->data['token']]);
                 $this->rest->sendResponse(200);
             } else {
-                $this->rest->setResponseData(array('status' => 0, 'error' => 'Login attempt failed!'));
+                $this->rest->setResponseData(['status' => 0, 'error' => 'Login attempt failed!']);
                 $this->rest->sendResponse(401);
             }
         }
@@ -70,12 +71,11 @@ class ControllerApiIndexLogin extends AControllerAPI
     private function _validate_token($token)
     {
         if (isset($token) && $this->user->isLoggedWithToken($token)) {
-            $this->rest->setResponseData(array('status' => 1, 'request' => 'authorized'));
+            $this->rest->setResponseData(['status' => 1, 'request' => 'authorized']);
             $this->rest->sendResponse(200);
         } else {
-            $this->rest->setResponseData(array('status' => 0, 'request' => 'unauthorized'));
+            $this->rest->setResponseData(['status' => 0, 'request' => 'unauthorized ']);
             $this->rest->sendResponse(401);
         }
     }
-
-}  
+}
