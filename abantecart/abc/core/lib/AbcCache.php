@@ -390,12 +390,15 @@ class AbcCache
         if( !$this->enabled ){
             return null;
         }
-
+        //backward compatibility
         if($name == 'push'){
             $name = 'put';
         }
         if($name == 'pull'){
             $name = 'get';
+        }
+        if($name == 'remove'){
+            $name = 'flush';
         }
         //use current store or default - see static function
         $storage = $this->getStorage();
