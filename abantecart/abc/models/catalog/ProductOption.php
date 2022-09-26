@@ -26,7 +26,6 @@ use abc\core\lib\AResourceManager;
 use abc\core\lib\AttributeManager;
 use abc\models\BaseModel;
 use abc\models\casts\Serialized;
-use abc\models\QueryBuilder;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -247,14 +246,14 @@ class ProductOption extends BaseModel
     public function getAllData()
     {
         $cache_key = 'product.alldata.'.$this->getKey();
-        $data = $this->cache->get($cache_key);
+        $data = Registry::cache()->get($cache_key);
         if ($data === null) {
             $this->load('descriptions', 'values');
             $data = $this->toArray();
             foreach ($this->values as $optionValue) {
                 $data['values'][] = $optionValue->getAllData();
             }
-            $this->cache->put($cache_key, $data);
+            Registry::cache()->put($cache_key, $data);
         }
         return $data;
     }
