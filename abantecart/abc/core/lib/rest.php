@@ -176,7 +176,10 @@ class ARest
 
     public function getRequestParam($param_name)
     {
-        return $this->request['params'][$param_name];
+        if (is_array($this->request['params']) && isset($this->request['params'][$param_name])) {
+            return $this->request['params'][$param_name];
+        }
+        return null;
     }
 
     private function _xmlHelper($data, $version = '1.0', $encoding = 'UTF-8')
