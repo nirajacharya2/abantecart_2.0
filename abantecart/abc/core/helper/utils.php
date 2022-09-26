@@ -1617,34 +1617,19 @@ class AHelperUtils extends AHelper
                         $r = $reflection->getMethod('__construct');
                         $params = $r->getParameters();
                     }else{
+                        //in case when constructor does not have parameters
                         $params = [];
                     }
-                    if (!$params) {
-                        $args = [];
-                    } else {
-                        $args = $arguments;
-                    }
-                    $instance = $reflection->newInstanceArgs($args);
-                } catch (ReflectionException $e) {
-                    $log->write(
-                        'AHelperUtils Error: '.$e->getMessage()
-                            .' '.$e->getLine()
-                            .' (Class: '.$class.', args: '.var_export($arguments, true).' )'
-                    );
-                } catch(Exception $e){
-                    $log->write(
-                        'AHelperUtils Error: '.$e->getMessage().' '.$e->getLine()
-                            .' (Class: '.$class.', args: '.var_export($arguments, true).' )'
-                            ."\n".$e->getTraceAsString()
-                    );
+                    $args = !$params ? [] :  $arguments;
+                    $instance = new $class(...$args);
                 } catch(Error $e){
-                    echo(
-                        'AHelperUtils Error: '.$e->getMessage().' '.$e->getLine()
+                    echo 'AHelperUtils Error: '.$e->getMessage().' '.$e->getLine()
                             .' (Class: '.$class.', args: '.var_export($arguments, true).' )'
-                            ."\n".$e->getTraceAsString()
-                    );
+                            ."\n".$e->getTraceAsString();
                     exit;
                 }
+            }else{
+                throw new AException('Class '.$class_name.' not found in config/*/classmap.php file', 1000);
             }
 
             if (is_object($instance)) {
@@ -1653,7 +1638,7 @@ class AHelperUtils extends AHelper
         }
 
         if (!$instance) {
-            throw new AException('Class '.$class_name.' not found in config/*.classmap.php file', 1000);
+            throw new AException('Cannot to create instance of class '.$class_name, 1000);
         }
         return $instance;
     }
@@ -1773,8 +1758,8 @@ class AHelperUtils extends AHelper
             if (!class_exists(Registry::class)) {
                 return [];
             }
-            $user_id = Registry::customer() ? Registry::customer()->getId() : 0;
-            $user_name = Registry::customer() ? Registry::customer()->getLoginName() : 'guest';
+            $user_id = (int)Registry::customer()?->getId();
+            $user_name = Registry::customer()?->getLoginName() ?: 'guest';
             $output = [
                 'user_type' => 2,
                 'user_type_name' => 'customer',
