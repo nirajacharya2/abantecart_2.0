@@ -2954,14 +2954,16 @@ class Product extends BaseModel
             }
 
             if ($filter['category_id']) {
-                $path = Category::getPath($filter['category_id'], 'id');
-                $category_ids = array_map('intval', explode('_', $path));
+                $categories = Category::getCategories($filter['category_id']);
+                $categoryIds = array_map(function ($category) {
+                    return $category['category_id'];
+                }, $categories);
                 $query->join(
                     "products_to_categories",
-                    function ($join) use ($category_ids) {
+                    function ($join) use ($categoryIds) {
                         /** @var JoinClause $join */
                         $join->on('products.product_id', '=', 'products_to_categories.product_id')
-                            ->whereIn('products_to_categories.category_id', $category_ids);
+                            ->whereIn('products_to_categories.category_id', $categoryIds);
                     }
                 );
             }
