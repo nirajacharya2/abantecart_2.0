@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2022 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -28,6 +28,10 @@ use abc\models\QueryBuilder;
 use abc\modules\events\ABaseEvent;
 use abc\core\lib\AException;
 use Exception;
+use H;
+use PDOException;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 /**
  * Class ControllerApiCatalogProduct
@@ -37,14 +41,6 @@ use Exception;
  */
 class ControllerApiCatalogProduct extends AControllerAPI
 {
-    /**
-     *
-     */
-    const DEFAULT_STATUS = 1;
-
-    /**
-     * @return null
-     */
     public function get()
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
@@ -60,10 +56,10 @@ class ControllerApiCatalogProduct extends AControllerAPI
             $getBy = $request['get_by'];
         }
 
-        if (!\H::has_value($getBy) || !isset($request[$getBy])) {
+        if (!H::has_value($getBy) || !isset($request[$getBy])) {
             $this->rest->setResponseData(['Error' => $getBy.' is missing']);
             $this->rest->sendResponse(200);
-            return null;
+            return;
         }
         /**
          * @var QueryBuilder $query
@@ -74,10 +70,11 @@ class ControllerApiCatalogProduct extends AControllerAPI
                 ['Error' => "Product with ".$getBy." ".$request[$getBy]." does not exist"]
             );
             $this->rest->sendResponse(200);
-            return null;
+            return;
         }
 
         $this->data['result'] = [];
+        /** @var Product $item */
         $item = $query->first();
         if ($item) {
             $this->data['result'] = $item->getAllData();
@@ -93,7 +90,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception|InvalidArgumentException
      */
     public function post()
     {
@@ -101,39 +98,38 @@ class ControllerApiCatalogProduct extends AControllerAPI
         $request = $this->rest->getRequestParams();
 
         if(!$request){
-            return null;
+            return;
         }
 
         try {
-
             $this->data['request'] = $request;
             $request = $this->prepareData($request);
 
             //are we updating or creating
-            $updateBy = null;
-            if (isset($request['product_id']) && $request['product_id']) {
-                $updateBy = 'product_id';
-            }
-            if (isset($request['update_by']) && $request['update_by']) {
-                $updateBy = $request['update_by'];
-            }
+            $updateBy = (isset($request['product_id']) && $request['product_id'])
+                ? 'product_id'
+                : null;
+
+            $updateBy = (isset($request['update_by']) && $request['update_by'])
+                ? $request['update_by']
+                : $updateBy;
 
             if ($updateBy) {
-                /**
-                 * @var Product $product
-                 */
+                /** @var Product|null|false $product */
                 $product = Product::where($updateBy, $request[$updateBy])->first();
                 if ($product === null) {
                     $this->rest->setResponseData(
-                        ['Error' => "Product with {$updateBy}: {$request[$updateBy]} does not exist"]
+                        [
+                            'Error' => "Product with ".$updateBy.": ".$request[$updateBy]." does not exist"
+                        ]
                     );
                     $this->rest->sendResponse(200);
-                    return null;
+                    return;
                 }
 
                 $product = $this->updateProduct($product, $request);
                 if (is_object($product)) {
-                    \H::event(
+                    H::event(
                         'abc\controllers\admin\api\catalog\product@update',
                         new ABaseEvent($product->toArray(), ['products'])
                     );
@@ -143,7 +139,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
             } else {
                 $product = $this->createProduct($request);
                 if (is_object($product)) {
-                    \H::event(
+                    H::event(
                         'abc\controllers\admin\api\catalog\product@create',
                         new ABaseEvent($product->toArray(), ['products'])
                     );
@@ -151,33 +147,32 @@ class ControllerApiCatalogProduct extends AControllerAPI
                     $product = false;
                 }
             }
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             $trace = $e->getTraceAsString();
-            $this->log->error($e->getMessage());
-            $this->log->error($trace);
+            $this->log->error($e->getMessage() ."\n". $trace);
             $this->rest->setResponseData(['Error' => $e->getMessage()]);
             $this->rest->sendResponse(200);
-            return null;
+            return;
         } catch (AException $e) {
             $this->rest->setResponseData(['Error' => $e->getMessage()]);
             $this->rest->sendResponse(200);
-            return null;
+            return;
         }
 
         if ($product === false) {
             $this->rest->setResponseData(['Error' => "Product was not created. Please fill required fields."]);
             $this->rest->sendResponse(200);
-            return null;
+            return;
         }
         if ($product->errors()) {
             $this->rest->setResponseData($product->errors());
             $this->rest->sendResponse(200);
-            return null;
+            return;
         }
         if (!$product_id = $product->getKey()) {
             $this->rest->setResponseData(['Error' => "Product was not created"]);
             $this->rest->sendResponse(200);
-            return null;
+            return;
         }
 
         Registry::cache()->flush();
@@ -196,7 +191,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
      * @param $data
      *
      * @return Product | false
-     * @throws \Exception
+     * @throws Exception
      */
     private function createProduct($data)
     {
@@ -216,7 +211,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
         $product = new Product($data);
         $product->save();
 
-        if (!$product || !$product->getKey()) {
+        if (!$product->getKey()) {
             $this->rest->setResponseData(['Error' => "Product cannot be created"]);
             $this->rest->sendResponse(200);
             return null;
@@ -229,18 +224,15 @@ class ControllerApiCatalogProduct extends AControllerAPI
         //touch category to run recalculation of products count in it
         foreach( (array)$data['category_uuids'] as $uuid ){
             $category = Category::where( [ 'uuid' => $uuid ] )->first();
-            if($category){
-                $category->touch();
-            }
+            $category?->touch();
         }
 
         $product->updateImages($data);
         if($product->errors()){
-            $this->log->write(__CLASS__.': '.implode("\n",$product->errors()));
+            $this->log->error(__CLASS__.': '.implode("\n",$product->errors()));
         }
 
         UrlAlias::replaceKeywords($data['keywords'], $product->getKeyName(), $product->getKey());
-
         return $product;
     }
 
@@ -248,7 +240,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
      * @param Product $product
      * @param         $data
      *
-     * @return mixed
+     * @return Product
      * @throws Exception
      */
     protected function updateProduct($product, $data)
@@ -262,7 +254,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
             }
         }
         //get previous categories to update it via listener that calculates products count
-        $prev_categories = array_column( (array)$product->categories->toArray(), 'uuid' );
+        $prev_categories = array_column( $product->categories->toArray(), 'uuid' );
 
         $product->update($data);
 
@@ -270,15 +262,13 @@ class ControllerApiCatalogProduct extends AControllerAPI
         $product->updateRelationships($rels);
         $product->updateImages($data);
         if($product->errors()){
-            $this->log->write(__CLASS__.': '.implode("\n",$product->errors()));
+            $this->log->error(__CLASS__.': '.implode("\n",$product->errors()));
         }
 
         //touch category to run recalculation of products count in it
         foreach( array_merge($prev_categories, (array)$data['category_uuids']) as $uuid ){
             $category = Category::where( [ 'uuid' => $uuid ] )->first();
-            if($category){
-                $category->touch();
-            }
+            $category?->touch();
         }
 
         UrlAlias::replaceKeywords($data['keywords'], $product->getKeyName(), $product->getKey());
@@ -288,7 +278,10 @@ class ControllerApiCatalogProduct extends AControllerAPI
     /**
      * @param array $data
      *
-     * @return mixed
+     * @return array
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     protected function prepareData($data)
     {
@@ -302,20 +295,15 @@ class ControllerApiCatalogProduct extends AControllerAPI
         if ($data['category_uuids']) {
             $categories = Category::select(['category_id'])
                 ->whereIn('uuid', $data['category_uuids'])
-                ->get();
-            if ($categories) {
-                $data['categories'] = [];
-                foreach ($categories as $category) {
-                    $data['categories'][] = $category->category_id;
-                }
-            }
+                ->get()?->toArray();
+            $data['categories'] = array_column((array)$categories,'category_id');
         }else{
             //if product does not assigned to any category
             $data['categories'] = [];
         }
         if ($data['manufacturer']['uuid']) {
             $manufacturer = Manufacturer::where('uuid', '=', $data['manufacturer']['uuid'])
-                ->get()->first();
+                ->get()?->first();
             if ($manufacturer) {
                 $data['manufacturer_id'] = $manufacturer->manufacturer_id;
                 unset($data['manufacturer']);
@@ -329,8 +317,8 @@ class ControllerApiCatalogProduct extends AControllerAPI
      * @param array $category
      * @param int $language_id
      *
-     * @return bool|mixed
-     * @throws \Exception
+     * @return int
+     * @throws Exception|InvalidArgumentException
      */
     protected function replaceCategories($category, $language_id){
         /** @var Category $exists */
@@ -343,7 +331,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
                     'sort_order' => $category['sort_order'],
                     'category_description' => [
                         $language_id => [
-                            'name' => html_entity_decode($category['name']),
+                            'name'             => html_entity_decode($category['name']),
                             'meta_keywords'    => html_entity_decode($category['meta_keywords']),
                             'meta_description' => html_entity_decode($category['meta_description']),
                             'description'      => html_entity_decode($category['description']),
