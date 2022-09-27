@@ -190,8 +190,8 @@ final class ALog
         }
     }
 
-    protected function write2Stderr($message){
-        fwrite(STDERR, $message."\n");
+    protected function write2StdOut($message){
+        fwrite(STDOUT, $message."\n");
     }
 
     /**
@@ -245,7 +245,7 @@ final class ALog
         $logger = $this->loggers['error'];
         $this->mode == 'logger'
             ? $logger->error($message)
-            : $this->write2Stderr($message);
+            : $this->write2StdOut($message);
         return true;
     }
 
@@ -263,7 +263,7 @@ final class ALog
         $logger = $this->loggers['security'];
         $this->mode == 'logger'
             ? $logger->emergency($message)
-            : $this->write2Stderr($message);
+            : $this->write2StdOut($message);
         return true;
     }
 
@@ -281,7 +281,7 @@ final class ALog
         $logger = $this->loggers['warning'];
         $this->mode == 'logger'
             ? $logger->warning($message)
-            : $this->write2Stderr($message);
+            : $this->write2StdOut($message);
         return true;
     }
 
@@ -300,7 +300,7 @@ final class ALog
         $logger = $this->loggers['debug'];
         $this->mode == 'logger'
             ? $logger->debug($message)
-            : $this->write2Stderr($message);
+            : $this->write2StdOut($message);
         return true;
     }
 
@@ -318,7 +318,7 @@ final class ALog
         $logger = $this->loggers['error'];
         $this->mode == 'logger'
             ? $logger->critical($message)
-            : $this->write2Stderr($message);
+            : $this->write2StdOut($message);
         return true;
     }
 }
