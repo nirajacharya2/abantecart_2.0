@@ -191,6 +191,16 @@ class ControllerApiProductFilter extends AControllerAPI
 
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
+
+        if ($this->config->get('config_require_customer_login') && !$this->customer->isLogged()) {
+            $this->rest->setResponseData([
+                'error_code' => 403,
+                'error_text' => 'Access denied',
+            ]);
+            $this->rest->sendResponse(403);
+            return;
+        }
+
         $this->loadModel('catalog/product');
         $filter_params = array('category_id', 'manufacturer_id', 'keyword', 'match', 'pfrom', 'pto');
         $grid_filter_params = array('name', 'description', 'model', 'sku');
