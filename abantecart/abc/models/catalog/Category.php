@@ -716,7 +716,11 @@ class Category extends BaseModel
         $params['parent_id'] = (isset($params['parent_id']) && (int)$params['parent_id'] > 0)
             ? (int)$params['parent_id'] : null;
 
-        $query->where('categories.parent_id', '=', $params['parent_id']);
+        if ($params['parent_id']) {
+            $query->where('categories.parent_id', '=', $params['parent_id']);
+        } else {
+            $query->whereNull('categories.parent_id');
+        }
 
         if (H::has_value($params['status'])) {
             $query->where('categories.status', '=', (int)$params['status']);

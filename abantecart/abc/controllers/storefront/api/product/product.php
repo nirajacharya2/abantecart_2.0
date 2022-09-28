@@ -111,6 +111,16 @@ class ControllerApiProductProduct extends AControllerAPI
 
 
         $this->extensions->hk_InitData($this, __FUNCTION__);
+
+        if ($this->config->get('config_require_customer_login') && !$this->customer->isLogged()) {
+            $this->rest->setResponseData([
+                'error_code' => 403,
+                'error_text' => 'Access denied',
+            ]);
+            $this->rest->sendResponse(403);
+            return;
+        }
+
         $request = $this->rest->getRequestParams();
 
         $product_id = $request['product_id'];
