@@ -15,6 +15,7 @@
  * versions in the future. If you wish to customize AbanteCart for your
  * needs please refer to http://www.abantecart.com for more information.
  */
+
 namespace abc\models\customer;
 
 use abc\models\BaseModel;
@@ -31,15 +32,12 @@ class CustomerNotes extends BaseModel
     protected $mainClassKey = 'customer_id';
 
     protected $casts = [
-        'customer_id' => 'int',
-        'user_id'      => 'int',
+        'customer_id'   => 'int',
+        'user_id'       => 'int',
         'stage_id'      => 'int',
-        'note'      => 'string',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'note'          => 'string',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [
@@ -73,7 +71,7 @@ class CustomerNotes extends BaseModel
             'users.lastname',
             'users.firstname',
             'users.username',
-        ]) ->leftJoin('users', 'customer_notes.user_id', '=', 'users.user_id')
+        ])->leftJoin('users', 'customer_notes.user_id', '=', 'users.user_id')
             ->where('customer_id', '=', $customerId)
             ->orderBy('note_added')
             ->get();

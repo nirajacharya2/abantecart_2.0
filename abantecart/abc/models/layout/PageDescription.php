@@ -54,13 +54,10 @@ class PageDescription extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'page_id'     => 'int',
-        'language_id' => 'int',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'page_id'       => 'int',
+        'language_id'   => 'int',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [

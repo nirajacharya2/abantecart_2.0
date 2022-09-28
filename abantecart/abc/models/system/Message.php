@@ -43,13 +43,10 @@ class Message extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'viewed'   => 'int',
-        'repeated' => 'int',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'viewed'        => 'int',
+        'repeated'      => 'int',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [

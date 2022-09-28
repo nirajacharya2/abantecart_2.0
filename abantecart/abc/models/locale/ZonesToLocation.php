@@ -45,14 +45,11 @@ class ZonesToLocation extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'country_id' => 'int',
-        'zone_id' => 'int',
-        'location_id' => 'int',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'country_id'    => 'int',
+        'zone_id'       => 'int',
+        'location_id'   => 'int',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [

@@ -76,12 +76,9 @@ class OrderDownload extends BaseModel
         'sort_order'               => 'int',
         'activate_order_status_id' => 'int',
         'attributes_data'          => Serialized::class,
-    ];
-
-    protected $dates = [
-        'expire_date',
-        'date_added',
-        'date_modified',
+        'expire_date'              => 'datetime',
+        'date_added'               => 'datetime',
+        'date_modified'            => 'datetime'
     ];
 
     protected $fillable = [

@@ -47,17 +47,14 @@ class Job extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'status'      => 'int',
-        'last_result' => 'int',
-        'actor_type'  => 'int',
-        'actor_id'    => 'int',
-    ];
-
-    protected $dates = [
-        'start_time',
-        'last_time_run',
-        'date_added',
-        'date_modified',
+        'status'        => 'int',
+        'last_result'   => 'int',
+        'actor_type'    => 'int',
+        'actor_id'      => 'int',
+        'start_time'    => 'datetime',
+        'last_time_run' => 'datetime',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [

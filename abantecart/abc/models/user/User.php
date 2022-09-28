@@ -65,13 +65,10 @@ class User extends BaseModel
     protected $casts = [
         'user_group_id' => 'int',
         'status'        => 'int',
-        'ip'            => 'string'
-    ];
-
-    protected $dates = [
-        'last_login',
-        'date_added',
-        'date_modified',
+        'ip'            => 'string',
+        'last_login'    => 'datetime',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $hidden = [

@@ -53,16 +53,13 @@ class OrderTotal extends BaseModel
 
     protected $touches = ['order'];
 
-    protected $dates = [
-        'date_added',
-        'date_modified',
-    ];
-
     protected $casts = [
-        'order_id'   => 'int',
-        'value'      => 'float',
-        'data'       => Serialized::class,
-        'sort_order' => 'int',
+        'order_id'      => 'int',
+        'value'         => 'float',
+        'data'          => Serialized::class,
+        'sort_order'    => 'int',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [

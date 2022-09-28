@@ -16,6 +16,7 @@
  * needs please refer to http://www.abantecart.com for more information.
  *
  */
+
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
@@ -56,13 +57,10 @@ class ProductSpecial extends BaseModel
         'customer_group_id' => 'int',
         'priority'          => 'int',
         'price'             => 'float',
-    ];
-
-    protected $dates = [
-        'date_start',
-        'date_end',
-        'date_added',
-        'date_modified',
+        'date_start'        => 'datetime',
+        'date_end'          => 'datetime',
+        'date_added'        => 'datetime',
+        'date_modified'     => 'datetime'
     ];
 
     protected $fillable = [

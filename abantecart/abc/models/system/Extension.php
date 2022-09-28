@@ -43,14 +43,11 @@ class Extension extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'status'   => 'int',
-        'priority' => 'int',
-    ];
-
-    protected $dates = [
-        'date_installed',
-        'date_added',
-        'date_modified',
+        'status'         => 'int',
+        'priority'       => 'int',
+        'date_installed' => 'datetime',
+        'date_added'     => 'datetime',
+        'date_modified'  => 'datetime'
     ];
 
     protected $fillable = [

@@ -54,17 +54,14 @@ class Banner extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'status'      => 'int',
-        'banner_type' => 'int',
-        'blank'       => 'bool',
-        'sort_order'  => 'int',
-    ];
-
-    protected $dates = [
-        'start_date',
-        'end_date',
-        'date_added',
-        'date_modified',
+        'status'        => 'int',
+        'banner_type'   => 'int',
+        'blank'         => 'bool',
+        'sort_order'    => 'int',
+        'start_date'    => 'datetime',
+        'end_date'      => 'datetime',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [

@@ -32,14 +32,12 @@ class OrderStatusDescription extends BaseModel
 
     protected $mainClassName = OrderStatus::class;
     protected $mainClassKey = 'order_status_id';
-    protected $dates = [
-        'date_added',
-        'date_modified',
-    ];
 
     protected $casts = [
         'order_status_id' => 'int',
         'language_id'     => 'int',
+        'date_added'      => 'datetime',
+        'date_modified'   => 'datetime'
     ];
 
     protected $fillable = [

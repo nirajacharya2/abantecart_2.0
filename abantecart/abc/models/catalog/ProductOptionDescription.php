@@ -60,12 +60,8 @@ class ProductOptionDescription extends BaseModel
         'product_option_id' => 'int',
         'language_id'       => 'int',
         'product_id'        => 'int',
-    ];
-
-    /** @var array */
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'date_added'        => 'datetime',
+        'date_modified'     => 'datetime'
     ];
 
     protected $fillable = [

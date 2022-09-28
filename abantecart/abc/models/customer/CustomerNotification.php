@@ -49,13 +49,10 @@ class CustomerNotification extends BaseModel
     protected $primaryKey = 'id';
 
     protected $casts = [
-        'customer_id' => 'int',
-        'status'      => 'int',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'customer_id'   => 'int',
+        'status'        => 'int',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [

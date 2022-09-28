@@ -47,12 +47,9 @@ class CustomBlock extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'block_id' => 'int',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'block_id'      => 'int',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [

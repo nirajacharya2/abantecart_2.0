@@ -62,11 +62,8 @@ class BlockDescription extends BaseModel
         'custom_block_id' => 'int',
         'language_id'     => 'int',
         'block_framed'    => 'bool',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'date_added'      => 'datetime',
+        'date_modified'   => 'datetime'
     ];
 
     protected $fillable = [

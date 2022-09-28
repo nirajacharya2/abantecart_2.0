@@ -70,10 +70,7 @@ class Audit extends BaseModel
         return $this->morphTo();
     }
 
-
     public function auditable() {
         return $this->morphTo();
     }
-
-
 }

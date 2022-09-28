@@ -48,10 +48,7 @@ class DatasetValue extends BaseModel
         'value_float'       => 'float',
         'value_boolean'     => 'bool',
         'row_id'            => 'int',
-    ];
-
-    protected $dates = [
-        'value_timestamp',
+        'value_timestamp' => 'datetime'
     ];
 
     protected $fillable = [

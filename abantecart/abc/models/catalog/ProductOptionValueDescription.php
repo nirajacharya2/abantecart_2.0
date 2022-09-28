@@ -62,13 +62,9 @@ class ProductOptionValueDescription extends BaseModel
         'product_option_value_id' => 'int',
         'language_id'             => 'int',
         'product_id'              => 'int',
-        'grouped_attribute_names' => Serialized::class
-    ];
-
-    /** @var array */
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'grouped_attribute_names' => Serialized::class,
+        'date_added'              => 'datetime',
+        'date_modified'           => 'datetime'
     ];
 
     protected $fillable = [

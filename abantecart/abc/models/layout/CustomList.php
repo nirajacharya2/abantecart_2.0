@@ -47,11 +47,8 @@ class CustomList extends BaseModel
         'custom_block_id' => 'int',
         'id'              => 'int',
         'sort_order'      => 'int',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'date_added'      => 'datetime',
+        'date_modified'   => 'datetime'
     ];
 
     protected $fillable = [

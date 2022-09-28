@@ -44,9 +44,9 @@ class UserGroup extends BaseModel
     protected $primaryKey = 'user_group_id';
     public $timestamps = false;
 
-    protected $dates = [
-        'date_added',
-        'date_modified',
+    protected $casts = [
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [
@@ -65,7 +65,7 @@ class UserGroup extends BaseModel
      */
     public function __construct(array $attributes = [])
     {
-        parent::__construct($attributes = []);
+        parent::__construct($attributes);
         if (!$this->isUser()) {
             throw new AException ('Error: permission denied to access '.__CLASS__, AC_ERR_LOAD);
         }

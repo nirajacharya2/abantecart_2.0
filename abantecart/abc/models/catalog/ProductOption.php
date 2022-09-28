@@ -69,35 +69,21 @@ class ProductOption extends BaseModel
 
     protected $mainClassName = Product::class;
     protected $mainClassKey = 'product_id';
-    /**
-     * @var string
-     */
     protected $primaryKey = 'product_option_id';
-
     protected $touches = ['product'];
 
-    /**
-     * @var array
-     */
     protected $casts = [
-        'attribute_id' => 'int',
-        'product_id'   => 'int',
-        'group_id'     => 'int',
-        'sort_order'   => 'int',
-        'status'       => 'int',
-        'required'     => 'int',
-        'settings'     => Serialized::class,
+        'attribute_id'  => 'int',
+        'product_id'    => 'int',
+        'group_id'      => 'int',
+        'sort_order'    => 'int',
+        'status'        => 'int',
+        'required'      => 'int',
+        'settings'      => Serialized::class,
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
-    /** @var array */
-    protected $dates = [
-        'date_added',
-        'date_modified',
-    ];
-
-    /**
-     * @var array
-     */
     protected $fillable = [
         'product_id',
         'attribute_id',

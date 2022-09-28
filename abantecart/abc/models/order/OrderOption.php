@@ -64,12 +64,9 @@ class OrderOption extends BaseModel
         'product_option_value_id' => 'int',
         'price'                   => 'float',
         'settings'                => Serialized::class,
-        'weight'                  => 'float'
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'weight'                  => 'float',
+        'date_added'              => 'datetime',
+        'date_modified'           => 'datetime'
     ];
 
     protected $fillable = [

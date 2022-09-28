@@ -51,11 +51,8 @@ class Download extends BaseModel
         'activate_order_status_id' => 'int',
         'shared'                   => 'int',
         'status'                   => 'int',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'date_added'               => 'datetime',
+        'date_modified'            => 'datetime'
     ];
 
     protected $fillable = [
@@ -82,6 +79,7 @@ class Download extends BaseModel
         return $this->hasOne(DownloadDescription::class, 'download_id', 'download_id')
             ->where('language_id', '=', static::$current_language_id);
     }
+
     public function descriptions()
     {
         return $this->hasMany(DownloadDescription::class, 'download_id');

@@ -46,12 +46,9 @@ class Setting extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'store_id' => 'int',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'store_id'      => 'int',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [

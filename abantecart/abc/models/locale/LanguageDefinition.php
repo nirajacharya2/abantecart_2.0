@@ -45,13 +45,10 @@ class LanguageDefinition extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'language_id' => 'int',
-        'section' => 'bool',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'language_id'   => 'int',
+        'section'       => 'bool',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [

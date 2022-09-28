@@ -155,11 +155,8 @@ class Order extends BaseModel
         'value'               => 'float',
         'coupon_id'           => 'int',
         'payment_method_data' => Serialized::class,
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'date_added'          => 'datetime',
+        'date_modified'       => 'datetime'
     ];
 
     protected $fillable = [

@@ -72,11 +72,8 @@ class CustomerTransaction extends BaseModel
         'transaction_type' => 'string',
         'comment'          => 'string',
         'description'      => 'string',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'date_added'       => 'datetime',
+        'date_modified'    => 'datetime'
     ];
 
     protected $guarded = [

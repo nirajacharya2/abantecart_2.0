@@ -46,12 +46,9 @@ class OrderDataType extends BaseModel
 
     protected $primaryKey = 'type_id';
     protected $casts = [
-        'language_id' => 'int',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'language_id'   => 'int',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [

@@ -45,8 +45,12 @@ class AntMessage extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'priority' => 'int',
-        'viewed'   => 'int',
+        'priority'      => 'int',
+        'viewed'        => 'int',
+        'start_date'    => 'datetime',
+        'end_date'      => 'datetime',
+        'viewed_date'   => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $dates = [
@@ -71,7 +75,7 @@ class AntMessage extends BaseModel
 
     public function __construct(array $attributes = [])
     {
-        parent::__construct($attributes = []);
+        parent::__construct($attributes);
         if (!$this->isUser()) {
             throw new AException ('Error: permission denied to access '.__CLASS__, AC_ERR_LOAD);
         }

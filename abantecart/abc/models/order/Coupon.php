@@ -64,13 +64,10 @@ class Coupon extends BaseModel
         'uses_total'    => 'int',
         'uses_customer' => 'int',
         'status'        => 'int',
-    ];
-
-    protected $dates = [
-        'date_start',
-        'date_end',
-        'date_added',
-        'date_modified',
+        'date_start'    => 'datetime',
+        'date_end'      => 'datetime',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [

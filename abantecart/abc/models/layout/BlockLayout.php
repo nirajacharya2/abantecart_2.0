@@ -49,11 +49,8 @@ class BlockLayout extends BaseModel
         'parent_instance_id' => 'int',
         'position'           => 'int',
         'status'             => 'int',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'date_added'         => 'datetime',
+        'date_modified'      => 'datetime'
     ];
 
     protected $fillable = [

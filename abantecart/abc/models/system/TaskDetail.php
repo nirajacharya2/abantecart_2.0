@@ -40,9 +40,9 @@ class TaskDetail extends BaseModel
     protected $primaryKey = 'task_id';
     public $timestamps = false;
 
-    protected $dates = [
-        'date_added',
-        'date_modified',
+    protected $casts = [
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [

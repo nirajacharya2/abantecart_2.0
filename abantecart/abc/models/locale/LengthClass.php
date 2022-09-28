@@ -47,12 +47,9 @@ class LengthClass extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'value' => 'float',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'value'         => 'float',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [

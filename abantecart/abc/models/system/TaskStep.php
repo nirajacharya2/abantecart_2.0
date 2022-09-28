@@ -52,12 +52,9 @@ class TaskStep extends BaseModel
         'status'             => 'int',
         'last_result'        => 'int',
         'max_execution_time' => 'int',
-    ];
-
-    protected $dates = [
-        'last_time_run',
-        'date_added',
-        'date_modified',
+        'last_time_run'      => 'datetime',
+        'date_added'         => 'datetime',
+        'date_modified'      => 'datetime'
     ];
 
     protected $fillable = [

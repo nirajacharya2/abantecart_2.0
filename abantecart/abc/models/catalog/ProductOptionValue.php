@@ -16,6 +16,7 @@
  * needs please refer to http://www.abantecart.com for more information.
  *
  */
+
 namespace abc\models\catalog;
 
 use abc\core\engine\AResource;
@@ -91,12 +92,8 @@ class ProductOptionValue extends BaseModel
         'grouped_attribute_data' => Serialized::class,
         'sort_order'             => 'int',
         'default'                => 'int',
-    ];
-
-    /** @var array */
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'date_added'             => 'datetime',
+        'date_modified'          => 'datetime'
     ];
 
     protected $fillable = [
@@ -289,7 +286,7 @@ class ProductOptionValue extends BaseModel
     public function description()
     {
         return $this->hasOne(ProductOptionValueDescription::class, 'product_option_value_id')
-                    ->where('language_id', '=', static::$current_language_id);
+            ->where('language_id', '=', static::$current_language_id);
     }
 
     /**
@@ -359,7 +356,7 @@ class ProductOptionValue extends BaseModel
                 'product_option_id' => $product_option_id,
             ]
         )->orderBy('sort_order')
-                                    ->get();
+            ->get();
 
         $result = [];
         if ($values) {
@@ -384,13 +381,13 @@ class ProductOptionValue extends BaseModel
         }
         /** @var ProductOptionValue $option_value */
         $option_value = ProductOptionValue::with('descriptions')
-              ->where(
-                  [
-                      'product_option_value_id' => $option_value_id,
-                      'group_id'                => 0,
-                  ]
-              )
-              ->first();
+            ->where(
+                [
+                    'product_option_value_id' => $option_value_id,
+                    'group_id'                => 0,
+                ]
+            )
+            ->first();
 
         if (!$option_value) {
             return [];

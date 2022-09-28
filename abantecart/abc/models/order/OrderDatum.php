@@ -52,14 +52,11 @@ class OrderDatum extends BaseModel
     protected $touches = ['order'];
 
     protected $casts = [
-        'order_id' => 'int',
-        'type_id'  => 'int',
-        'data'     => Serialized::class,
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'order_id'      => 'int',
+        'type_id'       => 'int',
+        'data'          => Serialized::class,
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [

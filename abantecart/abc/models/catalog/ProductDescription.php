@@ -16,6 +16,7 @@
  * needs please refer to http://www.abantecart.com for more information.
  *
  */
+
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
@@ -27,17 +28,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * Class ProductDescription
  *
- * @property int      $product_id
- * @property int      $language_id
- * @property string   $name
- * @property string   $meta_keywords
- * @property string   $meta_description
- * @property string   $description
- * @property string   $blurb
- * @property string   $date_modified
- * @property string   $date_added
+ * @property int $product_id
+ * @property int $language_id
+ * @property string $name
+ * @property string $meta_keywords
+ * @property string $meta_description
+ * @property string $description
+ * @property string $blurb
+ * @property string $date_modified
+ * @property string $date_added
  *
- * @property Product  $product
+ * @property Product $product
  * @property Language $language
  *
  * @package abc\models
@@ -56,17 +57,13 @@ class ProductDescription extends BaseModel
         'language_id',
     ];
     protected $casts = [
-        'product_id'  => 'int',
-        'language_id' => 'int',
-        'description' => Html::class,
-        'name'        => Html::class,
-        'blurb'       => Html::class,
-    ];
-
-    /** @var array */
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'product_id'    => 'int',
+        'language_id'   => 'int',
+        'description'   => Html::class,
+        'name'          => Html::class,
+        'blurb'         => Html::class,
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $touches = ['product'];
@@ -83,7 +80,7 @@ class ProductDescription extends BaseModel
 
     protected $rules = [
         /** @see validate() */
-        'product_id' => [
+        'product_id'       => [
             'checks'   => [
                 'integer',
                 'required',
@@ -93,7 +90,7 @@ class ProductDescription extends BaseModel
                 '*' => ['default_text' => 'Product ID is not Integer or absent in products table!'],
             ],
         ],
-        'language_id' => [
+        'language_id'      => [
             'checks'   => [
                 'integer',
                 'required',
@@ -103,7 +100,7 @@ class ProductDescription extends BaseModel
                 '*' => ['default_text' => 'Language ID is not Integer or not presents in languages table!'],
             ],
         ],
-        'name' => [
+        'name'             => [
             'checks'   => [
                 'string',
                 'sometimes',
@@ -119,14 +116,14 @@ class ProductDescription extends BaseModel
                 ],
             ],
         ],
-        'meta_keywords' => [
+        'meta_keywords'    => [
             'checks'   => [
                 'string',
                 'max:255',
             ],
             'messages' => [
                 '*' => [
-                    'default_text'   => 'Meta keywords must be less than 255 characters!',
+                    'default_text' => 'Meta keywords must be less than 255 characters!',
                 ],
             ],
         ],
@@ -137,21 +134,21 @@ class ProductDescription extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'default_text'   => 'Meta description must be less than 255 characters!',
+                    'default_text' => 'Meta description must be less than 255 characters!',
                 ],
             ],
         ],
-        'description' => [
+        'description'      => [
             'checks'   => [
                 'string',
             ],
             'messages' => [
                 '*' => [
-                    'default_text'   => 'Description of product not set!',
+                    'default_text' => 'Description of product not set!',
                 ],
             ],
         ],
-        'blurb' => [
+        'blurb'            => [
             'checks'   => [
                 'string',
             ],

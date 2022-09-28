@@ -50,11 +50,8 @@ class OrderHistory extends BaseModel
         'order_id'        => 'int',
         'order_status_id' => 'int',
         'notify'          => 'int',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'date_added'      => 'datetime',
+        'date_modified'   => 'datetime'
     ];
 
     protected $fillable = [

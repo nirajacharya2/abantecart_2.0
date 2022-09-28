@@ -46,15 +46,12 @@ class Review extends BaseModel
     protected $primaryKey = 'review_id';
 
     protected $casts = [
-        'product_id'  => 'int',
-        'customer_id' => 'int',
-        'rating'      => 'int',
-        'status'      => 'int',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'product_id'    => 'int',
+        'customer_id'   => 'int',
+        'rating'        => 'int',
+        'status'        => 'int',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [

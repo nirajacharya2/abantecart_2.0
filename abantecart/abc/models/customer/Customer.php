@@ -1,4 +1,20 @@
 <?php
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2022 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
 
 namespace abc\models\customer;
 
@@ -30,6 +46,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
+use stdClass;
 
 /**
  * Class Customer
@@ -76,6 +93,7 @@ use ReflectionException;
 class Customer extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
+
     const SUBSCRIBERS_GROUP_NAME = 'Newsletter Subscribers';
     protected $cascadeDeletes = ['addresses', 'notifications', 'transactions'];
 
@@ -97,12 +115,9 @@ class Customer extends BaseModel
         'cart'              => Serialized::class,
         'data'              => Serialized::class,
         'wishlist'          => Serialized::class,
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
-        'last_login',
+        'date_added'        => 'datetime',
+        'date_modified'     => 'datetime',
+        'last_login'        => 'datetime'
     ];
 
     protected $hidden = [
@@ -443,7 +458,7 @@ class Customer extends BaseModel
      * @param array $messages
      * @param array $customAttributes
      *
-     * @return bool|void
+     * @void
      * @throws ValidationException
      * @throws ReflectionException
      * @throws AException
@@ -460,9 +475,9 @@ class Customer extends BaseModel
         //we cannot to define rule as function in the class body.
         //so, adding validation rule for uniqueness here
         $this->rules['loginname']['checks'][] = Rule::unique('customers', 'loginname')
-                                                    ->ignore($this->customer_id, 'customer_id');
+            ->ignore($this->customer_id, 'customer_id');
         $this->rules['email']['checks'][] = Rule::unique('customers', 'email')
-                                                ->ignore($this->customer_id, 'customer_id');
+            ->ignore($this->customer_id, 'customer_id');
 
         //do merging to make required_without rule work
         if ($this->customer_id) {
@@ -618,7 +633,7 @@ class Customer extends BaseModel
         }
         //prevent double mutation
         foreach ($data as $k => $v) {
-            if (method_exists($this, 'Set'.ucfirst($k).'Attribute')) {
+            if (method_exists($this, 'Set' . ucfirst($k) . 'Attribute')) {
                 unset($data[$k]);
             }
         }
@@ -697,7 +712,7 @@ class Customer extends BaseModel
     public function approve()
     {
         if (!$this->hasPermission('write', ['approved'])) {
-            throw new Exception('Permissions are restricted '.__CLASS__."::".__METHOD__."\n");
+            throw new Exception('Permissions are restricted ' . __CLASS__ . "::" . __METHOD__ . "\n");
         }
         $this->approved = 1;
         $this->save();
@@ -708,7 +723,7 @@ class Customer extends BaseModel
      */
     public function isSubscriber()
     {
-        $name = $this->customer_group()->where('customer_group_id', '=', $this->customer_group_id)->first()->name;
+        $name = $this->customer_group()->where('customer_group_id', '=', $this->customer_group_id)->first()?->name;
         return ($name == self::SUBSCRIBERS_GROUP_NAME);
     }
 
@@ -743,7 +758,6 @@ class Customer extends BaseModel
 
     /**
      * @param array $inputData
-     * @param string $mode
      *
      * @return Collection|int
      * @throws AException
@@ -763,15 +777,15 @@ class Customer extends BaseModel
             $select[] = $db->raw('COUNT(*) as total');
         } else {
             $select = [
-                $db->raw('CONCAT('.$aliasC.'.firstname, \' \', '.$aliasC.'.lastname) AS name'),
+                $db->raw('CONCAT(' . $aliasC . '.firstname, \' \', ' . $aliasC . '.lastname) AS name'),
                 'customer_groups.name AS customer_group',
             ];
         }
 
         if ($mode != 'total_only' && $mode != 'quick') {
             $select[] = $db->raw('(SELECT COUNT(o.order_id) as cnt 
-                                    FROM '.$db->table_name("orders").' o
-                                    WHERE '.$aliasC.'.customer_id = o.customer_id AND o.order_status_id>0) 
+                                    FROM ' . $db->table_name("orders") . ' o
+                                    WHERE ' . $aliasC . '.customer_id = o.customer_id AND o.order_status_id>0) 
                                    as orders_count');
         }
 
@@ -783,7 +797,7 @@ class Customer extends BaseModel
          * @var QueryBuilder $query
          */
         if ($mode != 'total_only') {
-            $query = $customer->selectRaw($db->raw_sql_row_count().' '.$aliasC.'.*');
+            $query = $customer->selectRaw($db->raw_sql_row_count() . ' ' . $aliasC . '.*');
         } else {
             $query = $customer->select();
         }
@@ -799,26 +813,26 @@ class Customer extends BaseModel
 
         if (H::has_value($filter['name'])) {
             $query->whereRaw(
-                "CONCAT(".$aliasC.".firstname, ' ', ".$aliasC.".lastname) LIKE '%"
-                .$db->escape($filter['name'])."%'"
+                "CONCAT(" . $aliasC . ".firstname, ' ', " . $aliasC . ".lastname) LIKE '%"
+                . $db->escape($filter['name']) . "%'"
             );
         }
 
         if (H::has_value($filter['name_email'])) {
             $query->whereRaw(
-                "CONCAT(".$aliasC.".firstname, ' ', ".$aliasC.".lastname, ' ', "
-                    .$aliasC.".email) LIKE '%".$db->escape($filter['name_email'])."%'"
+                "CONCAT(" . $aliasC . ".firstname, ' ', " . $aliasC . ".lastname, ' ', "
+                . $aliasC . ".email) LIKE '%" . $db->escape($filter['name_email']) . "%'"
             );
         }
         //more specific login, last and first name search
         if (H::has_value($filter['loginname'])) {
             if ($filter['search_operator'] == 'equal') {
                 $query->whereRaw(
-                    "LOWER(".$aliasC.".loginname) =  '".$db->escape(mb_strtolower($filter['loginname']))."'"
+                    "LOWER(" . $aliasC . ".loginname) =  '" . $db->escape(mb_strtolower($filter['loginname'])) . "'"
                 );
             } else {
                 $query->whereRaw(
-                    "LOWER(".$aliasC.".loginname) LIKE '%".$db->escape(mb_strtolower($filter['loginname']))."%'"
+                    "LOWER(" . $aliasC . ".loginname) LIKE '%" . $db->escape(mb_strtolower($filter['loginname'])) . "%'"
                 );
             }
         }
@@ -826,20 +840,20 @@ class Customer extends BaseModel
         if (H::has_value($filter['firstname'])) {
             if ($filter['search_operator'] == 'equal') {
                 $query->whereRaw(
-                    "LOWER(".$aliasC.".firstname) =  '".$db->escape(mb_strtolower($filter['firstname']))."'"
+                    "LOWER(" . $aliasC . ".firstname) =  '" . $db->escape(mb_strtolower($filter['firstname'])) . "'"
                 );
             } else {
                 $query->whereRaw(
-                    "LOWER(".$aliasC.".firstname) LIKE '".$db->escape(mb_strtolower($filter['firstname']))."%'"
+                    "LOWER(" . $aliasC . ".firstname) LIKE '" . $db->escape(mb_strtolower($filter['firstname'])) . "%'"
                 );
             }
         }
 
         if (H::has_value($filter['lastname'])) {
             if ($filter['search_operator'] == 'equal') {
-                $query->whereRaw("LOWER(".$aliasC.".lastname) =  '".$db->escape(mb_strtolower($filter['lastname']))."'");
+                $query->whereRaw("LOWER(" . $aliasC . ".lastname) =  '" . $db->escape(mb_strtolower($filter['lastname'])) . "'");
             } else {
-                $query->whereRaw("LOWER(".$aliasC.".lastname) LIKE '".$db->escape(mb_strtolower($filter['lastname']))."%'");
+                $query->whereRaw("LOWER(" . $aliasC . ".lastname) LIKE '" . $db->escape(mb_strtolower($filter['lastname'])) . "%'");
             }
         }
 
@@ -849,7 +863,7 @@ class Customer extends BaseModel
              */
             $enc = ABC::getObjectByAlias('AEncryption');
             $query->whereRaw(
-                $aliasC.".password = ".$enc->getRawSqlHash(
+                $aliasC . ".password = " . $enc->getRawSqlHash(
                     ABC::env('DB_CURRENT_DRIVER'),
                     'customers',
                     $db->escape($filter['password'])
@@ -865,10 +879,10 @@ class Customer extends BaseModel
             $query->join('order_products', function ($join) use ($filter) {
                 /** @var JoinClause $join */
                 $join->on('orders.order_id', '=', 'order_products.order_id')
-                     ->where('order_products.product_id', '=', (int)$filter['product_id']);
+                    ->where('order_products.product_id', '=', (int)$filter['product_id']);
             });
             $query->where('orders.order_status_id', '>', 0)
-                  ->distinct();
+                ->distinct();
         }
 
         //select differently if encrypted
@@ -881,17 +895,17 @@ class Customer extends BaseModel
                         if ($filter['search_operator'] == 'equal') {
                             $query->orWhere('customers.email', '=', $db->escape(mb_strtolower($email)));
                         } else {
-                            $query->orWhere('customers.email', 'LIKE', "%".$db->escape(mb_strtolower($email)."%"));
+                            $query->orWhere('customers.email', 'LIKE', "%" . $db->escape(mb_strtolower($email) . "%"));
                         }
                     }
                 });
             }
 
             if (H::has_value($filter['telephone'])) {
-                $query->where('customers.telephone', 'LIKE', "%".$db->escape($filter['telephone'])."%");
+                $query->where('customers.telephone', 'LIKE', "%" . $db->escape($filter['telephone']) . "%");
             }
             if (H::has_value($filter['sms'])) {
-                $query->where('customers.sms', 'LIKE', "%".$db->escape($filter['sms'])."%");
+                $query->where('customers.sms', 'LIKE', "%" . $db->escape($filter['sms']) . "%");
             }
         }
 
@@ -900,8 +914,8 @@ class Customer extends BaseModel
         }
         // select only subscribers (group + customers with subscription)
         $subscriberGroupId = CustomerGroup::where('name', '=', self::SUBSCRIBERS_GROUP_NAME)
-                                          ->first()
-                                          ->customer_group_id;
+            ->first()
+            ->customer_group_id;
 
         if (H::has_value($filter['only_subscribers'])) {
             $query->where(function ($query) use ($subscriberGroupId) {
@@ -919,18 +933,18 @@ class Customer extends BaseModel
                     ]
                 );
             })
-                  ->orWhere(function ($query) use ($subscriberGroupId) {
-                      /** @var QueryBuilder $query */
-                      $query->where('customers.newsletter', '=', 1)
-                            ->where('customer_groups.customer_group_id', '=', $subscriberGroupId);
-                  });
+                ->orWhere(function ($query) use ($subscriberGroupId) {
+                    /** @var QueryBuilder $query */
+                    $query->where('customers.newsletter', '=', 1)
+                        ->where('customer_groups.customer_group_id', '=', $subscriberGroupId);
+                });
         } // select only customers without newsletter subscribers
         elseif (H::has_value($filter['only_customers'])) {
             $query->where('customer_groups.customer_group_id', '<>', $subscriberGroupId);
         }
 
         if (H::has_value($filter['only_with_mobile_phones'])) {
-            $query->whereRaw("TRIM(COALESCE(".$aliasC.".sms,'')) <> ''");
+            $query->whereRaw("TRIM(COALESCE(" . $aliasC . ".sms,'')) <> ''");
         }
 
         if (H::has_value($filter['customer_id'])) {
@@ -962,7 +976,7 @@ class Customer extends BaseModel
         }
 
         if (H::has_value($filter['date_added'])) {
-            $query->whereRaw("DATE(".$aliasC.".date_added) = DATE('".$db->escape($filter['date_added'])."')");
+            $query->whereRaw("DATE(" . $aliasC . ".date_added) = DATE('" . $db->escape($filter['date_added']) . "')");
         }
 
         if ($inputData['store_id'] !== null) {
@@ -974,7 +988,7 @@ class Customer extends BaseModel
                 function ($join) use ($filter) {
                     /** @var JoinClause $join */
                     $join->on('customer_notifications.customer_id', '=', 'customers.customer_id')
-                         ->where('customer_notifications.sendpoint', '=', 'newsletter');
+                        ->where('customer_notifications.sendpoint', '=', 'newsletter');
                 });
             $query->where(
                 [
@@ -984,10 +998,10 @@ class Customer extends BaseModel
             );
         }
 
-        //If for total, we done building the query
         if ($mode == 'total_only' && !$dCrypt->active) {
             //allow to extend this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $inputData);
+            /** @var stdClass $result */
             $result = $query->first();
             return (int)$result->total;
         }
@@ -1012,7 +1026,7 @@ class Customer extends BaseModel
         //Total calculation for encrypted mode
         // NOTE: Performance slowdown might be noticed or larger search results
         if ($mode != 'total_only') {
-            $orderBy = $sort_data[$inputData['sort']] ? : 'name';
+            $orderBy = $sort_data[$inputData['sort']] ?: 'name';
             if (isset($inputData['order']) && (strtoupper($inputData['order']) == 'DESC')) {
                 $sorting = "desc";
             } else {
@@ -1043,7 +1057,6 @@ class Customer extends BaseModel
         $result_rows = $query->get();
         //TODO need to check when encrypted
         if ($result_rows->count() && $dCrypt->active) {
-
             if (H::has_value($filter['email'])) {
                 $result_rows = H::filterByEncryptedField($result_rows->toArray(), 'email', $filter['email']);
             }
@@ -1073,7 +1086,6 @@ class Customer extends BaseModel
      * @param array $data
      *
      * @return Collection|int
-     * @throws AException
      */
     public static function getTotalCustomers($data = [])
     {
@@ -1107,7 +1119,7 @@ class Customer extends BaseModel
                 continue;
             }
             foreach ($im_protocols as $protocol) {
-                $update[$sendpoint][$protocol] = (int) $row[$protocol];
+                $update[$sendpoint][$protocol] = (int)$row[$protocol];
             }
         }
 
@@ -1115,9 +1127,9 @@ class Customer extends BaseModel
             foreach ($update as $sendpoint => $row) {
                 foreach ($row as $protocol => $status) {
                     CustomerNotification::where('customer_id', '=', $this->customer_id)
-                                        ->where('sendpoint', '=', $sendpoint)
-                                        ->where('protocol', '=', $protocol)
-                                        ->delete();
+                        ->where('sendpoint', '=', $sendpoint)
+                        ->where('protocol', '=', $protocol)
+                        ->delete();
 
                     $cn = new CustomerNotification(compact('customer_id', 'sendpoint', 'protocol', 'status'));
                     $cn->save();
@@ -1160,7 +1172,7 @@ class Customer extends BaseModel
         /**
          * @var QueryBuilder $query
          */
-        $query->selectRaw($db->raw_sql_row_count().' '.$db->table_name('customers').'.*');
+        $query->selectRaw($db->raw_sql_row_count() . ' ' . $db->table_name('customers') . '.*');
         $query->join('orders', function ($join) {
             /** @var JoinClause $join */
             $join->on('orders.order_id', '=', 'order_products.order_id');
@@ -1169,8 +1181,8 @@ class Customer extends BaseModel
             /** @var JoinClause $join */
             $join->on('orders.customer_id', '=', 'customers.customer_id');
         })
-              ->where('orders.order_status_id', '>', 0)
-              ->distinct();
+            ->where('orders.order_status_id', '>', 0)
+            ->distinct();
 
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query);
@@ -1201,7 +1213,7 @@ class Customer extends BaseModel
         $aliasC = $db->table_name('customers');
 
         //exclude current customer from checking
-        $query = static::whereRaw("LOWER(".$aliasC.".loginname) = '".$db->escape(mb_strtolower($loginname))."'");
+        $query = static::whereRaw("LOWER(" . $aliasC . ".loginname) = '" . $db->escape(mb_strtolower($loginname)) . "'");
 
         if ($customer_id) {
             $query->where('customer_id', '<>', $customer_id);

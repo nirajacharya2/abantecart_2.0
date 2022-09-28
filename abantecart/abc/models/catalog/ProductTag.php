@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ProductTag extends BaseModel
 {
     use SoftDeletes;
+
     protected $primaryKey = 'id';
 
     protected $mainClassName = Product::class;
@@ -35,23 +36,19 @@ class ProductTag extends BaseModel
     ];
 
     protected $casts = [
-        'id'          => 'int',
-        'product_id'  => 'int',
-        'language_id' => 'int',
-        'tag' => 'string',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
-        'date_deleted',
+        'id'            => 'int',
+        'product_id'    => 'int',
+        'language_id'   => 'int',
+        'tag'           => 'string',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [
-            'id',
-            'product_id',
-            'language_id',
-            'tag'
+        'id',
+        'product_id',
+        'language_id',
+        'tag'
     ];
 
     protected $rules = [

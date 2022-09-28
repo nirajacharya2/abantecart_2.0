@@ -15,6 +15,7 @@
  * versions in the future. If you wish to customize AbanteCart for your
  * needs please refer to http://www.abantecart.com for more information.
  */
+
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
@@ -47,11 +48,8 @@ class GlobalAttributesTypeDescription extends BaseModel
     protected $casts = [
         'attribute_type_id' => 'int',
         'language_id'       => 'int',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'date_added'        => 'datetime',
+        'date_modified'     => 'datetime'
     ];
 
     protected $fillable = [

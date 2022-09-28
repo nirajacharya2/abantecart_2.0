@@ -15,6 +15,7 @@
  * versions in the future. If you wish to customize AbanteCart for your
  * needs please refer to http://www.abantecart.com for more information.
  */
+
 namespace abc\models\customer;
 
 use abc\models\BaseModel;
@@ -30,18 +31,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static CustomerGroup find(int $customer_group_id) CustomerGroup
  * @package abc\models
  */
-
 class CustomerGroup extends BaseModel
 {
     use SoftDeletes;
+
     protected $primaryKey = 'customer_group_id';
 
     protected $casts = [
-        'tax_exempt' => 'bool',
-    ];
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'tax_exempt'    => 'bool',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [

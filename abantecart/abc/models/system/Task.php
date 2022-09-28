@@ -53,13 +53,10 @@ class Task extends BaseModel
         'last_result'        => 'int',
         'run_interval'       => 'int',
         'max_execution_time' => 'int',
-    ];
-
-    protected $dates = [
-        'start_time',
-        'last_time_run',
-        'date_added',
-        'date_modified',
+        'start_time'         => 'datetime',
+        'last_time_run'      => 'datetime',
+        'date_added'         => 'datetime',
+        'date_modified'      => 'datetime'
     ];
 
     protected $fillable = [

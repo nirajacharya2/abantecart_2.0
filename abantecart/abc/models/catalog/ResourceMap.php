@@ -15,6 +15,7 @@
  * versions in the future. If you wish to customize AbanteCart for your
  * needs please refer to http://www.abantecart.com for more information.
  */
+
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
@@ -51,15 +52,12 @@ class ResourceMap extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'resource_id' => 'int',
-        'object_id'   => 'int',
-        'default'     => 'bool',
-        'sort_order'  => 'int',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'resource_id'   => 'int',
+        'object_id'     => 'int',
+        'default'       => 'bool',
+        'sort_order'    => 'int',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [

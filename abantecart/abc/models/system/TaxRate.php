@@ -58,17 +58,14 @@ class TaxRate extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'location_id'  => 'int',
-        'zone_id'      => 'int',
-        'tax_class_id' => 'int',
-        'priority'     => 'int',
-        'rate'         => 'float',
-        'threshold'    => 'float',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'location_id'   => 'int',
+        'zone_id'       => 'int',
+        'tax_class_id'  => 'int',
+        'priority'      => 'int',
+        'rate'          => 'float',
+        'threshold'     => 'float',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [

@@ -58,11 +58,8 @@ class OrderDownloadsHistory extends BaseModel
         'order_product_id'  => 'int',
         'download_id'       => 'int',
         'download_percent'  => 'int',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'date_added'        => 'datetime',
+        'date_modified'     => 'datetime'
     ];
 
     protected $fillable = [

@@ -46,12 +46,9 @@ class Layout extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'layout_type' => 'int',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'layout_type'   => 'int',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [

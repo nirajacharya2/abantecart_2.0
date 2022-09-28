@@ -39,10 +39,7 @@ class OnlineCustomer extends BaseModel
 
     protected $casts = [
         'customer_id' => 'int',
-    ];
-
-    protected $dates = [
-        'date_added',
+        'date_added' => 'datetime'
     ];
 
     protected $fillable = [

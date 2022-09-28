@@ -57,13 +57,10 @@ class ResourceLibrary extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'type_id'  => 'int',
-        'stage_id' => 'int',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'type_id'       => 'int',
+        'stage_id'      => 'int',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [
@@ -105,7 +102,7 @@ class ResourceLibrary extends BaseModel
         ];
 
         if (!in_array($object_txt_id, array_keys($objects)) || !$data || !is_array($data)) {
-            $this->errors[] = "Warning: Missing images for ".$object_txt_id;
+            $this->errors[] = "Warning: Missing images for " . $object_txt_id;
             return true;
         }
 
@@ -149,14 +146,14 @@ class ResourceLibrary extends BaseModel
             if ($host === null) {
                 //this is a path to file
                 if (!copy($source, $target)) {
-                    $this->errors[] = "Error: Unable to copy file ".$source." to ".$target;
+                    $this->errors[] = "Error: Unable to copy file " . $source . " to " . $target;
                     continue;
                 }
             } else {
                 //this is URL to image. Download first
                 $fl = new AFile();
                 if (($file = $fl->downloadFile($source)) === false) {
-                    $this->errors[] = "Error: Unable to download file from ".$source;
+                    $this->errors[] = "Error: Unable to download file from " . $source;
                     continue;
                 }
 

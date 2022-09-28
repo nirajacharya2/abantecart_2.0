@@ -15,6 +15,7 @@
  * versions in the future. If you wish to customize AbanteCart for your
  * needs please refer to http://www.abantecart.com for more information.
  */
+
 namespace abc\models\locale;
 
 use abc\core\engine\Registry;
@@ -26,6 +27,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use abc\core\lib\AConnect;
 use abc\core\lib\AError;
+use Psr\SimpleCache\InvalidArgumentException;
 
 /**
  * Class Currency
@@ -52,12 +54,9 @@ class Currency extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'value' => 'float',
-        'status' => 'int',
-    ];
-
-    protected $dates = [
-        'date_modified',
+        'value'         => 'float',
+        'status'        => 'int',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [
@@ -72,36 +71,36 @@ class Currency extends BaseModel
 
     ];
     protected $rules = [
-        'currency_id' => [
-            'checks' => [
+        'currency_id'   => [
+            'checks'   => [
                 'integer',
                 'required',
                 'sometimes',
                 'min:1'
             ],
             'messages' => [
-                'integer' => [
-                    'language_key' => 'error_currency_id',
+                'integer'  => [
+                    'language_key'   => 'error_currency_id',
                     'language_block' => 'localisation/currency',
-                    'default_text' => 'currency_id must be integer!',
-                    'section' => 'admin'
+                    'default_text'   => 'currency_id must be integer!',
+                    'section'        => 'admin'
                 ],
                 'required' => [
-                    'language_key' => 'error_currency_id',
+                    'language_key'   => 'error_currency_id',
                     'language_block' => 'localisation/currency',
-                    'default_text' => 'currency_id required!',
-                    'section' => 'admin'
+                    'default_text'   => 'currency_id required!',
+                    'section'        => 'admin'
                 ],
-                'min' => [
-                    'language_key' => 'error_currency_id',
+                'min'      => [
+                    'language_key'   => 'error_currency_id',
                     'language_block' => 'localisation/currency',
-                    'default_text' => 'currency_id must be more 1!',
-                    'section' => 'admin'
+                    'default_text'   => 'currency_id must be more 1!',
+                    'section'        => 'admin'
                 ],
             ],
         ],
-        'title' => [
-            'checks' => [
+        'title'         => [
+            'checks'   => [
                 'string',
                 'required',
                 'sometimes',
@@ -109,62 +108,62 @@ class Currency extends BaseModel
                 'max:32'
             ],
             'messages' => [
-                'min' => [
-                    'language_key' => 'error_title',
+                'min'      => [
+                    'language_key'   => 'error_title',
                     'language_block' => 'localisation/currency',
-                    'default_text' => 'Title must be more 2!',
-                    'section' => 'admin'
+                    'default_text'   => 'Title must be more 2!',
+                    'section'        => 'admin'
                 ],
-                'max' => [
-                    'language_key' => 'error_title',
+                'max'      => [
+                    'language_key'   => 'error_title',
                     'language_block' => 'localisation/currency',
-                    'default_text' => 'Title must not exceed 32 characters!',
-                    'section' => 'admin'
+                    'default_text'   => 'Title must not exceed 32 characters!',
+                    'section'        => 'admin'
                 ],
-                'string' => [
-                    'language_key' => 'error_title',
+                'string'   => [
+                    'language_key'   => 'error_title',
                     'language_block' => 'localisation/currency',
-                    'default_text' => 'Title must be string!',
-                    'section' => 'admin'
+                    'default_text'   => 'Title must be string!',
+                    'section'        => 'admin'
                 ],
                 'required' => [
-                    'language_key' => 'error_title',
+                    'language_key'   => 'error_title',
                     'language_block' => 'localisation/currency',
-                    'default_text' => 'Title required!',
-                    'section' => 'admin'
+                    'default_text'   => 'Title required!',
+                    'section'        => 'admin'
                 ],
             ],
         ],
-        'code' => [
-            'checks' => [
+        'code'          => [
+            'checks'   => [
                 'string',
                 'required',
                 'size:3',
                 'sometimes'
             ],
             'messages' => [
-                'max' => [
-                    'language_key' => 'error_code',
+                'max'      => [
+                    'language_key'   => 'error_code',
                     'language_block' => 'localisation/currency',
-                    'default_text' => 'code must not exceed 3 characters!',
-                    'section' => 'admin'
+                    'default_text'   => 'code must not exceed 3 characters!',
+                    'section'        => 'admin'
                 ],
-                'string' => [
-                    'language_key' => 'error_code',
+                'string'   => [
+                    'language_key'   => 'error_code',
                     'language_block' => 'localisation/currency',
-                    'default_text' => 'code must be string!',
-                    'section' => 'admin'
+                    'default_text'   => 'code must be string!',
+                    'section'        => 'admin'
                 ],
                 'required' => [
-                    'language_key' => 'error_code',
+                    'language_key'   => 'error_code',
                     'language_block' => 'localisation/currency',
-                    'default_text' => 'code required!',
-                    'section' => 'admin'
+                    'default_text'   => 'code required!',
+                    'section'        => 'admin'
                 ],
             ],
         ],
-        'symbol_left' => [
-            'checks' => [
+        'symbol_left'   => [
+            'checks'   => [
                 'string',
                 'sometimes',
                 'min:1',
@@ -172,102 +171,102 @@ class Currency extends BaseModel
             ],
             'messages' => [
                 'string' => [
-                    'language_key' => 'error_symbol_left',
+                    'language_key'   => 'error_symbol_left',
                     'language_block' => 'localisation/currency',
-                    'default_text' => 'Symbol left must be string!',
-                    'section' => 'admin'
+                    'default_text'   => 'Symbol left must be string!',
+                    'section'        => 'admin'
                 ],
-                'min' => [
-                    'language_key' => 'error_symbol_left',
+                'min'    => [
+                    'language_key'   => 'error_symbol_left',
                     'language_block' => 'localisation/currency',
-                    'default_text' => 'Symbol left must be more 1!',
-                    'section' => 'admin'
+                    'default_text'   => 'Symbol left must be more 1!',
+                    'section'        => 'admin'
                 ],
-                'max' => [
-                    'language_key' => 'error_symbol_left',
+                'max'    => [
+                    'language_key'   => 'error_symbol_left',
                     'language_block' => 'localisation/currency',
-                    'default_text' => 'Symbol left must be not exceed 12 characters!',
-                    'section' => 'admin'
+                    'default_text'   => 'Symbol left must be not exceed 12 characters!',
+                    'section'        => 'admin'
                 ]
             ]
         ],
-        'symbol_right' => [
-            'checks' => [
+        'symbol_right'  => [
+            'checks'   => [
                 'string',
                 'min:1',
                 'max:12'
             ],
             'messages' => [
                 'string' => [
-                    'language_key' => 'error_symbol_right',
+                    'language_key'   => 'error_symbol_right',
                     'language_block' => 'localisation/currency',
-                    'default_text' => 'Symbol left must be string!',
-                    'section' => 'admin'
+                    'default_text'   => 'Symbol left must be string!',
+                    'section'        => 'admin'
                 ],
-                'min' => [
-                    'language_key' => 'error_symbol_right',
+                'min'    => [
+                    'language_key'   => 'error_symbol_right',
                     'language_block' => 'localisation/currency',
-                    'default_text' => 'Symbol left must be more 1!',
-                    'section' => 'admin'
+                    'default_text'   => 'Symbol left must be more 1!',
+                    'section'        => 'admin'
                 ],
-                'max' => [
-                    'language_key' => 'error_symbol_right',
+                'max'    => [
+                    'language_key'   => 'error_symbol_right',
                     'language_block' => 'localisation/currency',
-                    'default_text' => 'Symbol left must be not exceed 12 characters!',
-                    'section' => 'admin'
+                    'default_text'   => 'Symbol left must be not exceed 12 characters!',
+                    'section'        => 'admin'
                 ]
             ]
         ],
         'decimal_place' => [
-            'checks' => [
+            'checks'   => [
                 'string',
                 'max:1'
             ],
             'messages' => [
                 'string' => [
-                    'language_key' => 'error_decimal_place',
+                    'language_key'   => 'error_decimal_place',
                     'language_block' => 'localisation/currency',
-                    'default_text' => 'Symbol left must be string!',
-                    'section' => 'admin'
+                    'default_text'   => 'Symbol left must be string!',
+                    'section'        => 'admin'
                 ],
-                'max' => [
-                    'language_key' => 'error_decimal_place',
+                'max'    => [
+                    'language_key'   => 'error_decimal_place',
                     'language_block' => 'localisation/currency',
-                    'default_text' => 'Decimal place must be more 1 characters',
-                    'section' => '??'
+                    'default_text'   => 'Decimal place must be more 1 characters',
+                    'section'        => '??'
                 ]
             ]
         ],
-        'value' => [
-            'checks' => [
+        'value'         => [
+            'checks'   => [
                 'min:0',
                 'max:15,8'
             ],
             'messages' => [
                 'min' => [
-                    'language_key' => 'error_value',
+                    'language_key'  => 'error_value',
                     'language_blog' => 'localisation/currency',
-                    'default_text' => 'Value must be more 0!',
-                    'section' => 'admin'
+                    'default_text'  => 'Value must be more 0!',
+                    'section'       => 'admin'
                 ],
                 'max' => [
-                    'language_key' => 'error_value',
+                    'language_key'  => 'error_value',
                     'language_blog' => 'localisation/currency',
-                    'default_text' => 'Value must be not exceed 18.8 characters!',
-                    'section' => 'admin'
+                    'default_text'  => 'Value must be not exceed 18.8 characters!',
+                    'section'       => 'admin'
                 ]
             ]
         ],
-        'status' => [
-            'checks' => [
+        'status'        => [
+            'checks'   => [
                 'integer',
             ],
             'messages' => [
                 'integer' => [
-                    'language_key' => 'error_currency_status',
+                    'language_key'   => 'error_currency_status',
                     'language_block' => 'localisation/currency',
-                    'default_text' => 'status is not integer!',
-                    'section' => 'admin'
+                    'default_text'   => 'status is not integer!',
+                    'section'        => 'admin'
                 ]
             ]
         ],
@@ -286,23 +285,22 @@ class Currency extends BaseModel
      * Return array with list of Currencies
      *
      * @return array|false
+     * @throws InvalidArgumentException
      */
     public function getCurrencies()
     {
         if (!$this->hasPermission('read')) {
             return false;
         }
-        $currency_data = null;
+        $cacheKey = 'localization.currency';
+        $currency_data = Registry::cache()->get($cacheKey);
 
         if ($currency_data === null) {
-
             $arCurrencies = $this->orderBy('title', 'ASC')->get()->toArray();
-
             foreach ($arCurrencies as $result) {
                 $currency_data[$result['code']] = $result;
             }
-
-            Registry::cache()->put('localization.currency', $currency_data);
+            Registry::cache()->put($cacheKey, $currency_data);
         }
 
         return $currency_data;
@@ -336,8 +334,8 @@ class Currency extends BaseModel
             ->get()->toArray();
 
         foreach ($results as $result) {
-            $url =
-                'https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=' . $base_currency_code
+            $url = 'https://www.alphavantage.co/query'
+                . '?function=CURRENCY_EXCHANGE_RATE&from_currency=' . $base_currency_code
                 . '&to_currency=' . $result['code'] . '&apikey=' . $api_key;
             $connect = new AConnect(true);
             $json = $connect->getData($url);

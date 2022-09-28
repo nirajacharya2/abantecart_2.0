@@ -16,6 +16,7 @@
  * needs please refer to http://www.abantecart.com for more information.
  *
  */
+
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
@@ -56,9 +57,9 @@ class CategoryDescription extends BaseModel
     ];
 
     protected $casts = [
-        'category_id' => 'int',
-        'language_id' => 'int',
-        'date_added'  => 'datetime',
+        'category_id'   => 'int',
+        'language_id'   => 'int',
+        'date_added'    => 'datetime',
         'date_modified' => 'datetime'
     ];
 
@@ -77,7 +78,7 @@ class CategoryDescription extends BaseModel
 
     protected $rules = [
         /** @see validate() */
-        'language_id' => [
+        'language_id'      => [
             'checks'   => [
                 'integer',
             ],
@@ -85,7 +86,7 @@ class CategoryDescription extends BaseModel
                 '*' => ['default_text' => 'Language ID is not Integer!'],
             ],
         ],
-        'name'        => [
+        'name'             => [
             'checks'   => [
                 'string',
                 'required',
@@ -97,7 +98,7 @@ class CategoryDescription extends BaseModel
                 ],
             ],
         ],
-        'meta_keywords'        => [
+        'meta_keywords'    => [
             'checks'   => [
                 'string',
                 'max:255',
@@ -108,7 +109,7 @@ class CategoryDescription extends BaseModel
                 ],
             ],
         ],
-        'meta_description'        => [
+        'meta_description' => [
             'checks'   => [
                 'string',
                 'max:255',

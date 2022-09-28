@@ -99,11 +99,8 @@ class OrderProduct extends BaseModel
         'ship_individually' => 'int',
         'free_shipping'     => 'boolean',
         'shipping_price'    => 'float',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'date_added'        => 'datetime',
+        'date_modified'     => 'datetime'
     ];
 
     protected $fillable = [

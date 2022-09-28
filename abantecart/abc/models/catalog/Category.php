@@ -85,11 +85,8 @@ class Category extends BaseModel
         'total_products_count'  => 'int',
         'active_products_count' => 'int',
         'children_count'        => 'int',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'date_added'            => 'datetime',
+        'date_modified'         => 'datetime'
     ];
 
     protected $guarded = [

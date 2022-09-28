@@ -40,13 +40,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Block extends BaseModel
 {
     use SoftDeletes, CascadeSoftDeletes;
+
     protected $cascadeDeletes = ['templates', 'custom_blocks'];
     protected $primaryKey = 'block_id';
     public $timestamps = false;
 
-    protected $dates = [
-        'date_added',
-        'date_modified',
+    protected $casts = [
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [
