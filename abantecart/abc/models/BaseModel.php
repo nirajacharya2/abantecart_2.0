@@ -90,6 +90,7 @@ abstract class BaseModel extends OrmModel
     const CREATED_AT = 'date_added';
     const UPDATED_AT = 'date_modified';
     const DELETED_AT = 'date_deleted';
+    public static $defaultDatetimeStringFormat = 'Y-m-d H:i:s';
 
     const CLI = 0;
     const USER = 1;
@@ -100,7 +101,6 @@ abstract class BaseModel extends OrmModel
      * @see config/{stage_name}/model.php
      */
     protected static $env = [];
-
     /**
      * @var array
      */
@@ -233,7 +233,6 @@ abstract class BaseModel extends OrmModel
         if (!static::$current_language_id) {
             static::$current_language_id = static::getCurrentLanguageID();
         }
-
         static::$env = ABC::env('MODEL');
         Relation::morphMap(static::$env['MORPH_MAP']);
 

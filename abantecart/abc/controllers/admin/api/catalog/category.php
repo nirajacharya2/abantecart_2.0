@@ -7,18 +7,18 @@ use abc\core\engine\Registry;
 use abc\core\lib\AException;
 use abc\models\catalog\Category;
 use abc\models\catalog\ResourceLibrary;
+use PDOException;
 
 class ControllerApiCatalogCategory extends AControllerAPI
 {
     public function get()
     {
-        $category = null;
+        $getBy = $category = null;
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $request = $this->rest->getRequestParams();
         $this->data['request'] = $request;
 
-        $getBy = null;
         if (isset($request['category_id']) && $request['category_id']) {
             $getBy = 'category_id';
         }
@@ -29,7 +29,7 @@ class ControllerApiCatalogCategory extends AControllerAPI
         if (!\H::has_value($getBy) || !isset($request[$getBy])) {
             $this->rest->setResponseData(['Error' => $getBy.' is missing']);
             $this->rest->sendResponse(200);
-            return null;
+            return;
         }
 
         if ($getBy !== 'pathTree') {
@@ -56,7 +56,7 @@ class ControllerApiCatalogCategory extends AControllerAPI
                 ]
             );
             $this->rest->sendResponse(200);
-            return null;
+            return;
         }
 
         $this->data['result'] = [];
@@ -90,10 +90,10 @@ class ControllerApiCatalogCategory extends AControllerAPI
             if (!is_array($this->data['request'])) {
                 $this->rest->setResponseData(['Error' => 'Not correct input data']);
                 $this->rest->sendResponse(200);
-                return null;
+                return;
             }
 
-            $this->data['request'] = $this->decodeRequest($this->data['request']);
+            $this->data['request'] = $this->prepareData($this->data['request']);
 
             $category_id = Category::addCategory($this->data['request']);
             if ($category_id) {
@@ -122,9 +122,8 @@ class ControllerApiCatalogCategory extends AControllerAPI
         } catch (\Exception $e) {
             $this->rest->setResponseData(['Error' => 'Create Error: '.$e->getMessage()]);
             $this->rest->sendResponse(200);
-            return null;
+            return;
         }
-
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
@@ -139,9 +138,7 @@ class ControllerApiCatalogCategory extends AControllerAPI
         $request = $this->rest->getRequestParams();
         $category =  null;
         try {
-
             $this->data['request'] = $request;
-
             //are we updating
             $updateBy = null;
             if (isset($request['category_id']) && $request['category_id']) {
@@ -152,14 +149,12 @@ class ControllerApiCatalogCategory extends AControllerAPI
             }
 
             if ($updateBy) {
-
                 if ($updateBy !== 'pathTree') {
                     $category = Category::where($updateBy, $request[$updateBy])->first();
                 } else {
                     $languageId = $this->language->getLanguageCodeByLocale('en');
                     Category::setCurrentLanguageID($languageId);
                     $categories = Category::withTrashed()->get();
-
                     foreach ($categories as $findCategory) {
                         $pathTree = Category::getPath($findCategory->category_id);
                         if ($pathTree === $request[$updateBy]) {
@@ -176,10 +171,10 @@ class ControllerApiCatalogCategory extends AControllerAPI
                         ]
                     );
                     $this->rest->sendResponse(200);
-                    return null;
+                    return;
                 }
 
-                $request = $this->decodeRequest($request);
+                $request = $this->prepareData($request);
 
                 if( !Category::editCategory($category->category_id, $request) ){
                     throw new AException('Cannot to save category. Please see error log for details');
@@ -211,17 +206,17 @@ class ControllerApiCatalogCategory extends AControllerAPI
                     $category->save();
                 }
             }
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             $trace = $e->getTraceAsString();
             $this->log->error($e->getMessage());
             $this->log->error($trace);
             $this->rest->setResponseData(['Error' => $e->getMessage()]);
             $this->rest->sendResponse(200);
-            return null;
+            return;
         } catch (AException $e) {
             $this->rest->setResponseData(['Error' => $e->getMessage()]);
             $this->rest->sendResponse(200);
-            return null;
+            return;
         }
 
         Registry::cache()->flush();
@@ -276,13 +271,13 @@ class ControllerApiCatalogCategory extends AControllerAPI
         $this->rest->sendResponse(200);
     }
 
-    private function decodeRequest($request)
+    private function prepareData($request)
     {
         foreach ($request as &$item) {
             if (!is_array($item)) {
                 $item = htmlspecialchars_decode(htmlspecialchars_decode($item));
             } else {
-                $item = $this->decodeRequest($item);
+                $item = $this->prepareData($item);
             }
         }
         return $request;

@@ -58,11 +58,8 @@ class CategoryDescription extends BaseModel
     protected $casts = [
         'category_id' => 'int',
         'language_id' => 'int',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'date_added'  => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $guarded = [

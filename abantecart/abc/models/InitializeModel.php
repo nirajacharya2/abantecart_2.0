@@ -49,6 +49,21 @@ trait InitializeModel
                 }
             }
         }
-
+        //need to remove this in the future!
+        if($this->dates){
+            foreach($this->dates as $attrName){
+                if(!isset($this->casts[$attrName]) || $this->casts[$attrName] == 'datetime'){
+                    $this->casts[$attrName] = 'datetime:'.static::$defaultDatetimeStringFormat;
+                }
+            }
+        }
+        if(in_array('datetime', $this->casts)){
+            foreach($this->casts as $attrName => $attrType){
+                if($this->casts[$attrName] == 'datetime'){
+                    $this->casts[$attrName] = 'datetime:'.static::$defaultDatetimeStringFormat;
+                }
+            }
+        }
+        //end of section to remove
     }
 }
