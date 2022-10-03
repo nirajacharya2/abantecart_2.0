@@ -148,6 +148,8 @@ class Product extends BaseModel
      */
     protected $primaryKey = 'product_id';
 
+    protected $hidden = ['pivot'];
+
     protected $touches = ['categories'];
     /**
      * @var array
@@ -392,7 +394,7 @@ class Product extends BaseModel
         ],
 
         'tax_class_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'required',
                 'sometimes',
@@ -2950,10 +2952,16 @@ class Product extends BaseModel
             }
 
             if ($filter['category_id']) {
-                $categories = Category::getCategories($filter['category_id']);
-                $categoryIds = array_map(function ($category) {
-                    return $category['category_id'];
-                }, $categories);
+                $categoryIds = [];
+                if (is_array($filter['category_id'])) {
+                    $categoryIds = $filter['category_id'];
+                } else {
+                    $categories = Category::getCategories($filter['category_id']);
+                    $categoryIds = array_map(function ($category) {
+                        return $category['category_id'];
+                    }, $categories);
+                }
+
                 $query->join(
                     "products_to_categories",
                     function ($join) use ($categoryIds) {
@@ -2964,6 +2972,10 @@ class Product extends BaseModel
                 );
             }
 
+            $query->with(['categories' => function ($query) {
+                $query->select('categories.category_id');
+            }]);
+
             if ($filter['manufacturer_id']) {
                 $query->where('products.manufacturer_id', $filter['manufacturer_id']);
             }
@@ -2973,6 +2985,13 @@ class Product extends BaseModel
             }
             if ((array)$filter['exclude']) {
                 $query->whereNotIn('products.product_id', (array)$filter['exclude']);
+            }
+
+            if ($filter['price_from']) {
+                $query->where('price', '>=', (double) $filter['price_from']);
+            }
+            if ($filter['price_to']) {
+                $query->where('price', '<=', (double) $filter['price_to']);
             }
 
             //show only enabled and available products for storefront!

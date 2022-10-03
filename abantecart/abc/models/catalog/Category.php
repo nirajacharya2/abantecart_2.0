@@ -89,6 +89,8 @@ class Category extends BaseModel
         'date_modified'         => 'datetime'
     ];
 
+    protected $hidden = ['pivot'];
+
     protected $guarded = [
         'date_added',
         'date_modified',
