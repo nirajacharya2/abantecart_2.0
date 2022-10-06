@@ -16,6 +16,7 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 namespace abc\models\casts;
+use abc\core\ABC;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Concerns\HasAttributes;
 use Illuminate\Database\Eloquent\Model;
@@ -34,7 +35,7 @@ class Html implements CastsAttributes
      */
     public function get($model, $key, $value, $attributes)
     {
-        return htmlspecialchars($value);
+        return html_entity_decode($value, ENT_QUOTES, ABC::env('APP_CHARSET'));
     }
 
     /**
