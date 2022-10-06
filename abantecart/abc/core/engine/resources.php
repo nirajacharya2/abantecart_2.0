@@ -95,24 +95,23 @@ class AResource
 
         if (!$this->type_id) {
             $backtrace = debug_backtrace();
-            $message = "Error: Incorrect or missing resource type.".$backtrace[0]['file'].":".$backtrace[0]['line'];
+            $message = "Error: Incorrect or missing resource type." . $backtrace[0]['file'] . ":" . $backtrace[0]['line'];
             $error = new AWarning($message);
             $error->toLog()->toDebug();
         }
-
     }
 
     protected function loadType()
     {
-        $cache_key = 'resources.'.$this->type;
-        $cache_key = preg_replace('/[^a-zA-Z\d.]/', '',$cache_key)
-                    .'.store_'.(int)$this->config->get('config_store_id');
+        $cache_key = 'resources.' . $this->type;
+        $cache_key = preg_replace('/[^a-zA-Z\d.]/', '', $cache_key)
+            . '.store_' . (int)$this->config->get('config_store_id');
 
         $type_data = $this->cache->get($cache_key);
         if ($type_data === null || empty($type_data['type_id'])) {
             $sql = "SELECT * "
-                ."FROM ".$this->db->table_name("resource_types")." "
-                ."WHERE type_name = '".$this->db->escape($this->type)."'";
+                . "FROM " . $this->db->table_name("resource_types") . " "
+                . "WHERE type_name = '" . $this->db->escape($this->type) . "'";
             $query = $this->db->query($sql);
             $type_data = $query->row;
             $this->cache->put($cache_key, $type_data);
@@ -154,6 +153,11 @@ class AResource
         return $this->file_types;
     }
 
+    protected function withProtocol(string $url): string
+    {
+        return (ABC::env('HTTPS') ? 'https:' : 'http:') . $url;
+    }
+
     /**
      * @param int $resource_id
      *
@@ -182,7 +186,7 @@ class AResource
             } else {
                 $ext = pathinfo($path, PATHINFO_EXTENSION);
             }
-            $path = str_replace(['.'.$ext, '/'], '', $path);
+            $path = str_replace(['.' . $ext, '/'], '', $path);
             $result = hexdec($path);
         } else {
             $result = $this->getIdByName($path);
@@ -203,8 +207,8 @@ class AResource
     public function getIdByName($filename)
     {
         $sql = "SELECT resource_id
-                FROM ".$this->db->table_name("resource_descriptions")."
-                WHERE name like '%".$this->db->escape($filename)."%'
+                FROM " . $this->db->table_name("resource_descriptions") . "
+                WHERE name like '%" . $this->db->escape($filename) . "%'
                 ORDER BY language_id";
         $query = $this->db->query($sql);
         return (int)$query->row['resource_id'];
@@ -212,8 +216,6 @@ class AResource
 
     /**
      * function returns URL to resource.
-     *
-     * @deprecated since 1.2.7
      *
      * @param int $resource_id - NOTE: can be zero to show default_image
      * @param int $width
@@ -224,6 +226,8 @@ class AResource
      * @throws AException
      * @throws ReflectionException
      * @throws InvalidArgumentException
+     * @deprecated since 1.2.7
+     *
      */
     public function getResourceThumb($resource_id, $width, $height, $language_id = '')
     {
@@ -247,7 +251,6 @@ class AResource
         } else {
             return '';
         }
-
     }
 
     /**
@@ -270,25 +273,26 @@ class AResource
         }
 
         //attempt to load cache
-        $cache_key = 'resources.'.$resource_id;
+        $cache_key = 'resources.' . $resource_id;
         $cache_key = preg_replace('/[^a-zA-Z\d.]/', '', $cache_key);
         $resource = $this->cache->get($cache_key);
         if ($resource === null) {
-            $where = "WHERE rl.resource_id = ".$this->db->escape($resource_id);
+            $where = "WHERE rl.resource_id = " . $this->db->escape($resource_id);
             $sql = "SELECT
                         rd.*,
                         COALESCE(rd.resource_path,rdd.resource_path) as resource_path,
                         COALESCE(rd.resource_code,rdd.resource_code) as resource_code,
                         rt.type_name,
                         rt.default_icon
-                    FROM ".$this->db->table_name("resource_library")." rl "."
-                    LEFT JOIN ".$this->db->table_name("resource_descriptions")." rd
+                    FROM " . $this->db->table_name("resource_library") . " rl " . "
+                    LEFT JOIN " . $this->db->table_name("resource_descriptions") . " rd
                         ON (rl.resource_id = rd.resource_id)
-                    LEFT JOIN ".$this->db->table_name("resource_descriptions")." rdd
-                        ON (rl.resource_id = rdd.resource_id AND rdd.language_id = '".$this->language->getDefaultLanguageID()."')
-                    LEFT JOIN ".$this->db->table_name("resource_types")." rt
+                    LEFT JOIN " . $this->db->table_name("resource_descriptions") . " rdd
+                        ON (rl.resource_id = rdd.resource_id AND rdd.language_id = '" . $this->language->getDefaultLanguageID(
+                ) . "')
+                    LEFT JOIN " . $this->db->table_name("resource_types") . " rt
                         ON (rl.type_id = rt.type_id )
-                    ".$where;
+                    " . $where;
             $query = $this->db->query($sql);
             $result = $query->rows;
             $resource = [];
@@ -326,7 +330,7 @@ class AResource
     {
         $resource_id = (int)$resourceInfo['resource_id'];
         //get original file path & details
-        $origin_path = ABC::env('DIR_RESOURCES').$this->type_dir. $resourceInfo['resource_path'];
+        $origin_path = ABC::env('DIR_RESOURCES') . $this->type_dir . $resourceInfo['resource_path'];
         $info = pathinfo($origin_path);
         $extension = $info['extension'];
         if (in_array($extension, ['ico', 'svg', 'svgz'])) {
@@ -334,9 +338,9 @@ class AResource
             return $this->buildResourceURL($resourceInfo['resource_path'], 'full');
         }
 
-        $type_image = is_file(ABC::env('DIR_IMAGES').'icon_resource_'.$this->type.'.png')
-                        ? 'icon_resource_'.$this->type.'.png'
-                        : '';
+        $type_image = is_file(ABC::env('DIR_IMAGES') . 'icon_resource_' . $this->type . '.png')
+            ? 'icon_resource_' . $this->type . '.png'
+            : '';
 
         //is this a resource with code ?
         if (!empty($resourceInfo['resource_code'])) {
@@ -385,24 +389,34 @@ class AResource
             return $this->model_tool_image->resize($resourceInfo['default_icon'], $width, $height);
         } else {
             //Build thumbnails path similar to resource library path
-            $sub_path = 'thumbnails'.DS
-                        .dirname($resourceInfo['resource_path']).DS
-                        .$name.'-'.$resource_id.'-'.$width.'x'.$height;
-            $new_image = $sub_path.'.'.$extension;
-            if (!H::check_resize_image($origin_path, $new_image, $width, $height,
-                $this->config->get('config_image_quality'))
+            $sub_path = 'thumbnails' . DS
+                . dirname($resourceInfo['resource_path']) . DS
+                . $name . '-' . $resource_id . '-' . $width . 'x' . $height;
+            $new_image = $sub_path . '.' . $extension;
+            if (!H::check_resize_image(
+                $origin_path,
+                $new_image,
+                $width,
+                $height,
+                $this->config->get('config_image_quality')
+            )
             ) {
-                $warning = new AWarning('Resize image error. File: '.$origin_path);
+                $warning = new AWarning('Resize image error. File: ' . $origin_path);
                 $warning->toLog()->toDebug();
                 return null;
             }
             //do retina version
             if ($this->config->get('config_retina_enable')) {
-                $new_image2x = $sub_path.'@2x.'.$extension;
-                if (!H::check_resize_image($origin_path, $new_image2x, $width * 2, $height * 2,
-                    $this->config->get('config_image_quality'))
+                $new_image2x = $sub_path . '@2x.' . $extension;
+                if (!H::check_resize_image(
+                    $origin_path,
+                    $new_image2x,
+                    $width * 2,
+                    $height * 2,
+                    $this->config->get('config_image_quality')
+                )
                 ) {
-                    $warning = new AWarning('Resize image error. File: '.$origin_path);
+                    $warning = new AWarning('Resize image error. File: ' . $origin_path);
                     $warning->toLog()->toDebug();
                 }
             }
@@ -413,7 +427,7 @@ class AResource
             if (!$http_path) {
                 $http_path = ABC::env('HTTPS_IMAGE');
             }
-            return $http_path.$new_image;
+            return $http_path . $new_image;
         }
     }
 
@@ -431,9 +445,9 @@ class AResource
             if (!$http_path) {
                 $http_path = ABC::env('HTTPS_DIR_RESOURCES');
             }
-            return $http_path.$this->type_dir.$resource_path;
+            return $http_path . $this->type_dir . $resource_path;
         } else {
-            return "resources".DS.$this->type_dir.$resource_path;
+            return "resources" . DS . $this->type_dir . $resource_path;
         }
     }
 
@@ -445,13 +459,13 @@ class AResource
     public function getAllResourceTypes()
     {
         //attempt to load cache
-        $cache_key = 'resources.types.store_'.(int)$this->config->get('config_store_id');
+        $cache_key = 'resources.types.store_' . (int)$this->config->get('config_store_id');
         $types = $this->cache->get($cache_key);
         if ($types !== null) {
             return $types;
         }
 
-        $sql = "SELECT * FROM ".$this->db->table_name("resource_types")." ";
+        $sql = "SELECT * FROM " . $this->db->table_name("resource_types") . " ";
         $query = $this->db->query($sql);
         $types = $query->rows;
         $this->cache->put($cache_key, $types);
@@ -486,15 +500,15 @@ class AResource
         $output = [];
         if ($result) {
             $output = [
-                'origin'      => $result['origin'],
-                'thumb_html'  => $result['thumb_html'],
-                'title'       => $result['title'],
+                'origin' => $result['origin'],
+                'thumb_html' => $result['thumb_html'],
+                'title' => $result['title'],
                 'description' => $result['description'],
-                'width'       => $width,
-                'height'      => $height,
+                'width' => $width,
+                'height' => $height,
             ];
             if ($result['thumb_url']) {
-                $output['thumb_url'] = (ABC::env('HTTPS') ? 'https:' : 'http:') . $result['thumb_url'];
+                $output['thumb_url'] = $this->withProtocol($result['thumb_url']);
             }
         }
         return $output;
@@ -518,8 +532,8 @@ class AResource
         $object_name,
         $object_id,
         $sizes = [
-            'main'   => [],
-            'thumb'  => [],
+            'main' => [],
+            'thumb' => [],
             'thumb2' => [],
         ],
         $limit = 0,
@@ -543,13 +557,13 @@ class AResource
         if (!$sizes || !is_array($sizes['main']) || !is_array($sizes['thumb'])) {
             if (!is_array($sizes['main'])) {
                 $sizes['main'] = [
-                    'width'  => $this->config->get('config_image_product_width'),
+                    'width' => $this->config->get('config_image_product_width'),
                     'height' => $this->config->get('config_image_product_height'),
                 ];
             }
             if (!is_array($sizes['thumb'])) {
                 $sizes['thumb'] = [
-                    'width'  => $this->config->get('config_image_thumb_width'),
+                    'width' => $this->config->get('config_image_thumb_width'),
                     'height' => $this->config->get('config_image_thumb_height'),
                 ];
             }
@@ -577,10 +591,10 @@ class AResource
                     $http_path = ABC::env('HTTPS_DIR_RESOURCES');
                 }
 
-                $direct_url = $http_path.$this->getTypeDir().$result['resource_path'];
+                $direct_url = $http_path . $this->getTypeDir() . $result['resource_path'];
                 $res_full_path = '';
                 if ($this->getType() == 'image') {
-                    $res_full_path = ABC::env('DIR_RESOURCES').$this->getTypeDir().$result['resource_path'];
+                    $res_full_path = ABC::env('DIR_RESOURCES') . $this->getTypeDir() . $result['resource_path'];
                     if ($sizes['main']) {
                         $main_url = $this->getResizedImageURL(
                             $result,
@@ -589,7 +603,7 @@ class AResource
                         );
                     } else {
                         // return href for image with size as-is
-                        $main_url = $http_path.$this->getTypeDir().$result['resource_path'];
+                        $main_url = $http_path . $this->getTypeDir() . $result['resource_path'];
                         //get original image size
                         $actual_sizes = H::get_image_size($res_full_path);
                         $sizes['main'] = $actual_sizes;
@@ -624,9 +638,7 @@ class AResource
                             $sizes['thumb2']['height']
                         );
                     }
-
                 } else {
-
                     $main_url = $direct_url;
                     $thumb_url = $this->getResizedImageURL(
                         $result,
@@ -636,53 +648,53 @@ class AResource
                 }
 
                 $resources[$k] = [
-                    'resource_id'   => $result['resource_id'],
-                    'origin'        => $origin,
-                    'direct_url'    => (ABC::env('HTTPS') ? 'https:' : 'http:') .$direct_url,
+                    'resource_id' => $result['resource_id'],
+                    'origin' => $origin,
+                    'direct_url' => $this->withProtocol($direct_url),
                     //set full path to original file only for images (see above)
-                    'resource_path' => (ABC::env('HTTPS') ? 'https:' : 'http:') .$res_full_path,
-                    'main_url'      => (ABC::env('HTTPS') ? 'https:' : 'http:') .$main_url,
-                    'main_width'    => $sizes['main']['width'],
-                    'main_height'   => $sizes['main']['height'],
-                    'main_html'     => $this->html->buildResourceImage([
-                        'url'    => $http_path.'images/'.$result['resource_path'],
-                        'width'  => $sizes['main']['width'],
+                    'resource_path' => $this->withProtocol($res_full_path),
+                    'main_url' => $this->withProtocol($main_url),
+                    'main_width' => $sizes['main']['width'],
+                    'main_height' => $sizes['main']['height'],
+                    'main_html' => $this->html->buildResourceImage([
+                        'url' => $http_path . 'images/' . $result['resource_path'],
+                        'width' => $sizes['main']['width'],
                         'height' => $sizes['main']['height'],
-                        'attr'   => 'alt="'.addslashes($rsrc_info['title']).'"',
+                        'attr' => 'alt="' . addslashes($rsrc_info['title']) . '"',
                     ]),
-                    'thumb_url'     => (ABC::env('HTTPS') ? 'https:' : 'http:') .$thumb_url,
-                    'thumb_width'   => $sizes['thumb']['width'],
-                    'thumb_height'  => $sizes['thumb']['height'],
-                    'thumb_html'    => $this->html->buildResourceImage([
-                        'url'    => (ABC::env('HTTPS') ? 'https:' : 'http:') . $thumb_url,
-                        'width'  => $sizes['thumb']['width'],
+                    'thumb_url' => $this->withProtocol($thumb_url),
+                    'thumb_width' => $sizes['thumb']['width'],
+                    'thumb_height' => $sizes['thumb']['height'],
+                    'thumb_html' => $this->html->buildResourceImage([
+                        'url' => $this->withProtocol($thumb_url),
+                        'width' => $sizes['thumb']['width'],
                         'height' => $sizes['thumb']['height'],
-                        'attr'   => 'alt="'.addslashes($rsrc_info['title']).'"',
+                        'attr' => 'alt="' . addslashes($rsrc_info['title']) . '"',
                     ]),
                 ];
                 if ($sizes['thumb2']) {
-                    $resources[$k]['thumb2_url'] = (ABC::env('HTTPS') ? 'https:' : 'http:') .$thumb2_url;
+                    $resources[$k]['thumb2_url'] = $this->withProtocol($thumb2_url);
                     $resources[$k]['thumb2_width'] = $sizes['thumb2']['width'];
                     $resources[$k]['thumb2_height'] = $sizes['thumb2']['height'];
                     $resources[$k]['thumb2_html'] = $this->html->buildResourceImage([
-                        'url'    => (ABC::env('HTTPS') ? 'https:' : 'http:') .$thumb2_url,
-                        'width'  => $sizes['thumb2']['width'],
+                        'url' => $this->withProtocol($thumb2_url),
+                        'width' => $sizes['thumb2']['width'],
                         'height' => $sizes['thumb2']['height'],
-                        'attr'   => 'alt="'.addslashes($rsrc_info['title']).'"',
+                        'attr' => 'alt="' . addslashes($rsrc_info['title']) . '"',
                     ]);
                 }
                 $resources[$k]['description'] = $rsrc_info['description'];
                 $resources[$k]['title'] = $rsrc_info['title'];
             } else {
                 $resources[$k] = [
-                    'origin'      => $origin,
-                    'main_html'   => $rsrc_info['resource_code'],
-                    'thumb_html'  => $rsrc_info['resource_code'],
-                    'title'       => $rsrc_info['title'],
+                    'origin' => $origin,
+                    'main_html' => $rsrc_info['resource_code'],
+                    'thumb_html' => $rsrc_info['resource_code'],
+                    'title' => $rsrc_info['title'],
                     'description' => $rsrc_info['description'],
                 ];
             }
-            if($limit && count($resources) == $limit){
+            if ($limit && count($resources) == $limit) {
                 break;
             }
         }
@@ -719,16 +731,16 @@ class AResource
         $store_id = (int)$this->config->get('config_store_id');
 
         //attempt to load cache
-        $cache_key = 'resources.'.$this->type.'.'.$object_name.'.'.$object_id;
-        $cache_key = preg_replace('/[^a-zA-Z\d.]/', '', $cache_key).'.store_'.$store_id.'_lang_'.$language_id;
+        $cache_key = 'resources.' . $this->type . '.' . $object_name . '.' . $object_id;
+        $cache_key = preg_replace('/[^a-zA-Z\d.]/', '', $cache_key) . '.store_' . $store_id . '_lang_' . $language_id;
         $resources = $this->cache->get($cache_key);
         if ($resources !== null) {
             return $resources;
         }
 
-        $where = "WHERE rm.object_name = '".$this->db->escape($object_name)."' "
-            ." and rm.object_id = '".$this->db->escape($object_id)."' "
-            ." and rl.type_id = ".$this->db->escape($this->type_id);
+        $where = "WHERE rm.object_name = '" . $this->db->escape($object_name) . "' "
+            . " and rm.object_id = '" . $this->db->escape($object_id) . "' "
+            . " and rl.type_id = " . $this->db->escape($this->type_id);
 
         $sql = "SELECT
                     rl.resource_id,
@@ -739,15 +751,15 @@ class AResource
                     COALESCE(rd.resource_code,rdd.resource_code) as resource_code,
                     rm.default,
                     rm.sort_order
-                FROM ".$this->db->table_name("resource_library")." rl "."
-                LEFT JOIN ".$this->db->table_name("resource_map")." rm
-                    ON rm.resource_id = rl.resource_id "."
-                LEFT JOIN ".$this->db->table_name("resource_descriptions")." rd
-                    ON (rl.resource_id = rd.resource_id AND rd.language_id = '".$language_id."')
-                LEFT JOIN ".$this->db->table_name("resource_descriptions")." rdd
+                FROM " . $this->db->table_name("resource_library") . " rl " . "
+                LEFT JOIN " . $this->db->table_name("resource_map") . " rm
+                    ON rm.resource_id = rl.resource_id " . "
+                LEFT JOIN " . $this->db->table_name("resource_descriptions") . " rd
+                    ON (rl.resource_id = rd.resource_id AND rd.language_id = '" . $language_id . "')
+                LEFT JOIN " . $this->db->table_name("resource_descriptions") . " rdd
                     ON (rl.resource_id = rdd.resource_id AND rdd.language_id = '"
-            .$this->language->getDefaultLanguageID()."')
-                ".$where."
+            . $this->language->getDefaultLanguageID() . "')
+                " . $where . "
                 ORDER BY rm.sort_order ASC";
 
         $query = $this->db->query($sql);
@@ -767,8 +779,6 @@ class AResource
     }
 
     /**
-     * @since 1.2.7
-     *
      * @param string $object_name
      * @param array $object_ids
      * @param int $width
@@ -779,6 +789,8 @@ class AResource
      * @throws AException
      * @throws ReflectionException
      * @throws InvalidArgumentException
+     * @since 1.2.7
+     *
      */
     public function getMainThumbList($object_name, $object_ids = [], $width = 0, $height = 0, $noimage = true)
     {
@@ -807,9 +819,13 @@ class AResource
 
         $store_id = (int)$this->config->get('config_store_id');
         //attempt to load cache
-        $cache_key = 'resources.list.'.$this->type.'.'.$object_name.'.'.$width.'x'.$height.'.'.md5(implode('.',
-                $object_ids));
-        $cache_key = preg_replace('/[^a-zA-Z\d.]/', '', $cache_key).'.store_'.$store_id.'_lang_'.$language_id;
+        $cache_key = 'resources.list.' . $this->type . '.' . $object_name . '.' . $width . 'x' . $height . '.' . md5(
+                implode(
+                    '.',
+                    $object_ids
+                )
+            );
+        $cache_key = preg_replace('/[^a-zA-Z\d.]/', '', $cache_key) . '.store_' . $store_id . '_lang_' . $language_id;
         $output = $this->cache->get($cache_key);
         if ($output !== null) {
             return $output;
@@ -827,18 +843,18 @@ class AResource
                 COALESCE(rd.resource_code,rdd.resource_code) as resource_code,
                 rm.default,
                 rm.sort_order
-            FROM ".$this->db->table_name("resource_library")." rl "."
-            LEFT JOIN ".$this->db->table_name("resource_map")." rm
-                ON rm.resource_id = rl.resource_id "."
-            LEFT JOIN ".$this->db->table_name("resource_descriptions")." rd
+            FROM " . $this->db->table_name("resource_library") . " rl " . "
+            LEFT JOIN " . $this->db->table_name("resource_map") . " rm
+                ON rm.resource_id = rl.resource_id " . "
+            LEFT JOIN " . $this->db->table_name("resource_descriptions") . " rd
                 ON (rl.resource_id = rd.resource_id
-                    AND rd.language_id = '".$language_id."')
-            LEFT JOIN ".$this->db->table_name("resource_descriptions")." rdd
+                    AND rd.language_id = '" . $language_id . "')
+            LEFT JOIN " . $this->db->table_name("resource_descriptions") . " rdd
                 ON (rl.resource_id = rdd.resource_id
-                    AND rdd.language_id = '".$default_language_id."')
-            WHERE rm.object_name = '".$this->db->escape($object_name)."'
-                 AND rl.type_id = ".$this->type_id."
-                 AND rm.object_id IN (".implode(", ", $object_ids).")
+                    AND rdd.language_id = '" . $default_language_id . "')
+            WHERE rm.object_name = '" . $this->db->escape($object_name) . "'
+                 AND rl.type_id = " . $this->type_id . "
+                 AND rm.object_id IN (" . implode(", ", $object_ids) . ")
             ORDER BY rm.object_id, rm.sort_order, rl.resource_id";
         $result = $this->db->query($sql);
 
@@ -852,11 +868,11 @@ class AResource
 
             $origin = $row['resource_path'] ? 'internal' : 'external';
             $output[$object_id] = [
-                'origin'      => $origin,
-                'title'       => $row['title'],
+                'origin' => $origin,
+                'title' => $row['title'],
                 'description' => $row['description'],
-                'width'       => $width,
-                'height'      => $height,
+                'width' => $width,
+                'height' => $height,
             ];
             //for external resources
             if ($origin == 'external') {
@@ -866,11 +882,12 @@ class AResource
                 $thumb_url = $this->getResizedImageURL($row, $width, $height);
                 $output[$object_id]['thumb_html'] = $this->html->buildResourceImage(
                     [
-                        'url'    => $thumb_url,
-                        'width'  => $width,
+                        'url' => $thumb_url,
+                        'width' => $width,
                         'height' => $height,
-                        'attr'   => 'alt="'.addslashes($row['title']).'"',
-                    ]);
+                        'attr' => 'alt="' . addslashes($row['title']) . '"',
+                    ]
+                );
                 $output[$object_id]['thumb_url'] = $thumb_url;
             }
             $selected_ids[] = $object_id;
@@ -885,21 +902,21 @@ class AResource
                     $thumb_url = $this->getResizedImageURL(['resource_id' => 0], $width, $height);
 
                     $output[$object_id] = [
-                        'origin'      => 'internal',
-                        'title'       => '',
+                        'origin' => 'internal',
+                        'title' => '',
                         'description' => '',
-                        'width'       => $width,
-                        'height'      => $height,
-                        'thumb_url'   => $thumb_url,
-                        'thumb_html'  => $this->html->buildResourceImage(
+                        'width' => $width,
+                        'height' => $height,
+                        'thumb_url' => $thumb_url,
+                        'thumb_html' => $this->html->buildResourceImage(
                             [
-                                'url'    => $thumb_url,
-                                'width'  => $width,
+                                'url' => $thumb_url,
+                                'width' => $width,
                                 'height' => $height,
-                                'attr'   => 'alt=""',
-                            ]),
+                                'attr' => 'alt=""',
+                            ]
+                        ),
                     ];
-
                 } else {
                     $output[$object_id] = [];
                 }
@@ -929,12 +946,12 @@ class AResource
         $output = [];
         if ($result) {
             $output = [
-                'origin'      => $result['origin'],
-                'main_html'   => $result['main_html'],
+                'origin' => $result['origin'],
+                'main_html' => $result['main_html'],
                 'description' => $result['description'],
-                'title'       => $result['title'],
-                'width'       => $width,
-                'height'      => $height,
+                'title' => $result['title'],
+                'width' => $width,
+                'height' => $height,
             ];
             if ($result['main_url']) {
                 $output['main_url'] = $result['main_url'];
