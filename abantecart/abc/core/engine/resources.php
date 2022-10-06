@@ -494,7 +494,7 @@ class AResource
                 'height'      => $height,
             ];
             if ($result['thumb_url']) {
-                $output['thumb_url'] = $result['thumb_url'];
+                $output['thumb_url'] = (ABC::env('HTTPS') ? 'https:' : 'http:') . $result['thumb_url'];
             }
         }
         return $output;
@@ -638,10 +638,10 @@ class AResource
                 $resources[$k] = [
                     'resource_id'   => $result['resource_id'],
                     'origin'        => $origin,
-                    'direct_url'    => $direct_url,
+                    'direct_url'    => (ABC::env('HTTPS') ? 'https:' : 'http:') .$direct_url,
                     //set full path to original file only for images (see above)
-                    'resource_path' => $res_full_path,
-                    'main_url'      => $main_url,
+                    'resource_path' => (ABC::env('HTTPS') ? 'https:' : 'http:') .$res_full_path,
+                    'main_url'      => (ABC::env('HTTPS') ? 'https:' : 'http:') .$main_url,
                     'main_width'    => $sizes['main']['width'],
                     'main_height'   => $sizes['main']['height'],
                     'main_html'     => $this->html->buildResourceImage([
@@ -650,22 +650,22 @@ class AResource
                         'height' => $sizes['main']['height'],
                         'attr'   => 'alt="'.addslashes($rsrc_info['title']).'"',
                     ]),
-                    'thumb_url'     => $thumb_url,
+                    'thumb_url'     => (ABC::env('HTTPS') ? 'https:' : 'http:') .$thumb_url,
                     'thumb_width'   => $sizes['thumb']['width'],
                     'thumb_height'  => $sizes['thumb']['height'],
                     'thumb_html'    => $this->html->buildResourceImage([
-                        'url'    => $thumb_url,
+                        'url'    => (ABC::env('HTTPS') ? 'https:' : 'http:') . $thumb_url,
                         'width'  => $sizes['thumb']['width'],
                         'height' => $sizes['thumb']['height'],
                         'attr'   => 'alt="'.addslashes($rsrc_info['title']).'"',
                     ]),
                 ];
                 if ($sizes['thumb2']) {
-                    $resources[$k]['thumb2_url'] = $thumb2_url;
+                    $resources[$k]['thumb2_url'] = (ABC::env('HTTPS') ? 'https:' : 'http:') .$thumb2_url;
                     $resources[$k]['thumb2_width'] = $sizes['thumb2']['width'];
                     $resources[$k]['thumb2_height'] = $sizes['thumb2']['height'];
                     $resources[$k]['thumb2_html'] = $this->html->buildResourceImage([
-                        'url'    => $thumb2_url,
+                        'url'    => (ABC::env('HTTPS') ? 'https:' : 'http:') .$thumb2_url,
                         'width'  => $sizes['thumb2']['width'],
                         'height' => $sizes['thumb2']['height'],
                         'attr'   => 'alt="'.addslashes($rsrc_info['title']).'"',
