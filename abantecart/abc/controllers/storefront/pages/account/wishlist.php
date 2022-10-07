@@ -62,40 +62,40 @@ class ControllerPagesAccountWishlist extends AController
 
         $this->document->addBreadcrumb(
             [
-                'href'      => $this->html->getHomeURL(),
-                'text'      => $this->language->get('text_home'),
+                'href' => $this->html->getHomeURL(),
+                'text' => $this->language->get('text_home'),
                 'separator' => false,
             ]
         );
 
         $this->document->addBreadcrumb(
             [
-                'href'      => $this->html->getSecureURL('account/account'),
-                'text'      => $this->language->get('text_account'),
+                'href' => $this->html->getSecureURL('account/account'),
+                'text' => $this->language->get('text_account'),
                 'separator' => $this->language->get('text_separator'),
             ]
         );
 
         $this->document->addBreadcrumb(
             [
-                'href'      => $this->html->getSecureURL('account/wishlist'),
-                'text'      => $this->language->get('heading_title'),
+                'href' => $this->html->getSecureURL('account/wishlist'),
+                'text' => $this->language->get('heading_title'),
                 'separator' => $this->language->get('text_separator'),
             ]
         );
 
         $wishList = $this->customer->getWishList();
 
-        if ($wishList) {
+        if ($wishList && count($wishList) > 0) {
             $this->loadModel('tool/seo_url');
             $results = Product::search(
                 [
-                    'include'           => array_keys($wishList),
-                    'with_final_price'  => true,
+                    'filter' => ['include' => array_keys($wishList)],
+                    'with_final_price' => true,
                     'with_option_count' => true,
-                    'limit'             => $this->config->get('config_latest_limit'),
-                    'sort'              => 'date_added',
-                    'order'             => 'desc',
+//                    'limit'             => $this->config->get('config_latest_limit'),
+                    'sort' => 'date_added',
+                    'order' => 'desc',
                 ]
             );
             if ($results) {
@@ -156,10 +156,10 @@ class ControllerPagesAccountWishlist extends AController
 
             $this->data['button_continue'] = HtmlElementFactory::create(
                 [
-                    'name'  => 'continue',
-                    'type'  => 'button',
-                    'text'  => $this->language->get('button_continue'),
-                    'href'  => $this->html->getHomeURL(),
+                    'name' => 'continue',
+                    'type' => 'button',
+                    'text' => $this->language->get('button_continue'),
+                    'href' => $this->html->getHomeURL(),
                     'style' => 'button',
                 ]
             );
