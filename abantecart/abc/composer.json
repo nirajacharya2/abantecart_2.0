@@ -278,7 +278,7 @@
     "zircote/swagger-php": "^4.4",
     "ext-dom": "*",
     "ext-simplexml": "*",
-    "guzzlehttp/guzzle": "^7.0"
+    "aws/aws-sdk-php": "3.226.0"
   },
   "extra": {
     "installer-paths": {
