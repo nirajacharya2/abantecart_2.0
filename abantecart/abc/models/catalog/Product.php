@@ -2972,9 +2972,9 @@ class Product extends BaseModel
                 );
             }
 
-            $query->with(['categories' => function ($query) {
-                $query->select('categories.category_id');
-            }]);
+//            $query->with(['categories' => function ($query) {
+//                $query->select('categories.category_id');
+//            }]);
 
             if ($filter['manufacturer_id']) {
                 $query->where('products.manufacturer_id', $filter['manufacturer_id']);
@@ -3044,6 +3044,8 @@ class Product extends BaseModel
 
             //allow to extend this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
+
+            $sql = $query->toSql();
 
             $cache = $query->get();
             //add total number of rows into each row
