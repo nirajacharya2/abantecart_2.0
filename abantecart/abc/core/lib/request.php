@@ -156,7 +156,9 @@ final class ARequest
      */
     public function clean($data)
     {
-        if (is_array($data)) {
+        if ($data === null) {
+            return null;
+        } elseif (is_array($data)) {
             foreach ($data as $key => $value) {
                 unset($data[$key]);
                 $key = $this->clean($key);

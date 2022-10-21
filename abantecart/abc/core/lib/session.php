@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,40 +22,43 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 /**
  * Class ASession
  */
 final class ASession
 {
-    public $registry = null;
-    public $data = array();
+    public $config = null;
+    public $data = [];
     public $ses_name = '';
 
     /**
      * @param string $ses_name
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function __construct($ses_name)
     {
 
-        if (class_exists('\abc\core\engine\Registry')) {
-            $this->registry = Registry::getInstance();
-        }
 
+        $this->config = Registry::config();
         if (!session_id() || $ses_name) {
             $this->ses_name = $ses_name;
             $this->init($this->ses_name);
         }
 
-        if ($this->registry && $this->registry->get('config')) {
-            $session_ttl = $this->registry->get('config')->get('config_session_ttl');
+        if ($this->config) {
+            $session_ttl = $this->config->get('config_session_ttl');
             if ((isset($_SESSION['user_id']) || isset($_SESSION['customer_id']))
                 && isset($_SESSION['LAST_ACTIVITY'])
                 && ((time() - $_SESSION['LAST_ACTIVITY']) / 60 > $session_ttl)
             ) {
                 // last request was more than 30 minutes ago
                 $this->clear();
-                abc_redirect($this->registry->get('html')->currentURL(array('token')));
+                abc_redirect(Registry::html()->currentURL(['token']));
             }
         }
         // update last activity time stamp
@@ -66,7 +69,7 @@ final class ASession
     /**
      * @param string $session_name
      */
-    public function init($session_name)
+    public function init(string $session_name)
     {
         $session_mode = '';
         $path = '';
@@ -90,8 +93,8 @@ final class ASession
             }
             if (php_sapi_name() != 'cli') {
                 // for shared ssl domain set session id of non-secure domain
-                if ($this->registry && $this->registry->get('config')) {
-                    if ($this->registry->get('config')->get('config_shared_session') && isset($_GET['session_id'])) {
+                if ($this->config) {
+                    if ($this->config->get('config_shared_session') && isset($_GET['session_id'])) {
                         header('P3P: CP="CAO COR CURa ADMa DEVa OUR IND ONL COM DEM PRE"');
                         session_id($_GET['session_id']);
                         setcookie($session_name, $_GET['session_id'], 0, $path, null, false, true);
@@ -127,10 +130,7 @@ final class ASession
 
     private function getHeaders()
     {
-        if (function_exists('apache_request_headers')) {
-            return apache_request_headers();
-        }
-        return [];
+        return getallheaders();
     }
 
     private function getTokenFromHeaders()
@@ -151,22 +151,21 @@ final class ASession
     {
         session_unset();
         session_destroy();
-        $_SESSION = array();
+        $_SESSION = [];
     }
 
     /**
      * This function to return clean validated session ID
      *
-     * @param string $session_id
+     * @param string|null $session_id
      *
      * @return string
      */
-    protected function prepareSessionId($session_id = '')
+    protected function prepareSessionId(?string $session_id = '')
     {
         if (!$session_id || !$this->isSessionIdValid($session_id)) {
             //if session ID is invalid, generate new one
             $session_id = uniqid(substr(ABC::env('UNIQUE_ID'), 0, 4), true);
-
             return preg_replace("/[^-,a-zA-Z0-9]/", '', $session_id);
         } else {
             return $session_id;

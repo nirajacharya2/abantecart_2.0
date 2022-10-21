@@ -1623,9 +1623,9 @@ class AHelperUtils extends AHelper
                     $args = !$params ? [] :  $arguments;
                     $instance = new $class(...$args);
                 } catch(Error $e){
-                    echo 'AHelperUtils Error: '.$e->getMessage().' '.$e->getLine()
-                            .' (Class: '.$class.', args: '.var_export($arguments, true).' )'
-                            ."\n".$e->getTraceAsString();
+                    echo __CLASS__ . ' Error: ' . $e->getMessage() . ' ' . $e->getLine()
+                        . ' (Class: ' . $class . ', args: ' . var_export($arguments, true) . ' )'
+                        . "\n" . $e->getTraceAsString();
                     exit;
                 }
             }else{
@@ -1717,9 +1717,7 @@ class AHelperUtils extends AHelper
                 ],
             ];
         } else {
-            /**
-             * @var $handler JobManager
-             */
+            /** @var $handler JobManager */
             $handler = static::getInstance($class_name, ['registry' => Registry::getInstance()]);
             $result = $handler->addJob($data);
             $output = ['job_id' => $result, 'errors' => $handler->errors];
