@@ -2950,16 +2950,12 @@ class Product extends BaseModel
                     }
                 );
             }
-
             if ($filter['category_id']) {
-                $categoryIds = [];
                 if (is_array($filter['category_id'])) {
                     $categoryIds = $filter['category_id'];
                 } else {
-                    $categories = Category::getCategories($filter['category_id']);
-                    $categoryIds = array_map(function ($category) {
-                        return $category['category_id'];
-                    }, $categories);
+                    $categoryIds = Category::getChildrenIDs($filter['category_id']);
+                    $categoryIds[] = $filter['category_id'];
                 }
 
                 $query->join(
@@ -3149,5 +3145,4 @@ class Product extends BaseModel
             ]
         );
     }
-
 }

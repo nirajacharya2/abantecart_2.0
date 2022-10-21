@@ -428,24 +428,25 @@ class Category extends BaseModel
             ->where('categories.category_id', '=', $category_id)
             ->selectRaw(
                 '(SELECT COUNT(' . $pAlias . '.product_id)
-            FROM ' . $pAlias . '
-            INNER JOIN ' . $p2cAlias . '
-                ON (' . $p2cAlias . '.product_id = ' . $pAlias . '.product_id)
-            WHERE ' . $pAlias . '.status = 1 
-                    AND COALESCE(' . $pAlias . '.date_available, NOW()) <= NOW()
-                    AND ' . $pAlias . '.date_deleted IS NULL
-                    AND ' . $p2cAlias . '.category_id IN (' . implode(", ", $childrenIDs) . ')
-            ) as active_products_count'
+                    FROM ' . $pAlias . '
+                    INNER JOIN ' . $p2cAlias . '
+                        ON (' . $p2cAlias . '.product_id = ' . $pAlias . '.product_id)
+                    WHERE ' . $pAlias . '.status = 1 
+                            AND COALESCE(' . $pAlias . '.date_available, NOW()) <= NOW()
+                            AND ' . $pAlias . '.date_deleted IS NULL
+                            AND ' . $p2cAlias . '.category_id IN (' . implode(", ", $childrenIDs) . ')
+                    ) as active_products_count'
             )->selectRaw(
                 '(SELECT COUNT(' . $pAlias . '.product_id)
-            FROM ' . $pAlias . '
-            INNER JOIN ' . $p2cAlias . '
-                ON (' . $p2cAlias . '.product_id = ' . $pAlias . '.product_id)
-            WHERE ' . $p2cAlias . '.category_id IN (' . implode(", ", $childrenIDs) . ')
-                AND ' . $pAlias . '.date_deleted IS NULL
-            ) as total_products_count'
+                    FROM ' . $pAlias . '
+                    INNER JOIN ' . $p2cAlias . '
+                        ON (' . $p2cAlias . '.product_id = ' . $pAlias . '.product_id)
+                    WHERE ' . $p2cAlias . '.category_id IN (' . implode(", ", $childrenIDs) . ')
+                        AND ' . $pAlias . '.date_deleted IS NULL
+                    ) as total_products_count'
             );
 
+        /** @var Category $category_info */
         $category_info = $query->distinct()->first();
 
         return [
@@ -507,15 +508,14 @@ class Category extends BaseModel
                 $query->whereNull('categories.parent_id');
             }
 
-            $query
-                ->where('category_descriptions.language_id', '=', $languageId);
+            $query->where('category_descriptions.language_id', '=', $languageId);
             if (!ABC::env('IS_ADMIN')) {
                 $query->active('categories');
             }
             $query->orderBy('categories.sort_order')
                 ->orderBy('category_descriptions.name');
 
-            //allow to extends this method from extensions
+            //allow to extend this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
             $categories = $query->get();
 
@@ -829,7 +829,7 @@ class Category extends BaseModel
         $total_num_rows = Registry::db()->sql_get_row_count();
         foreach ($result_rows as &$result) {
             $result['total_num_rows'] = $total_num_rows;
-            if ($params['basename'] == true) {
+            if ($params['basename']) {
                 $result->name = $result->basename;
             } else {
                 $result->name = static::getPath($result->category_id, 'name');
@@ -873,10 +873,10 @@ class Category extends BaseModel
             }
 
             $categoryToStore = [];
+            $db->table('categories_to_stores')
+                ->where('category_id', '=', (int)$categoryId)
+                ->delete();
             if (isset($data['category_store'])) {
-                $db->table('categories_to_stores')
-                    ->where('category_id', '=', (int)$categoryId)
-                    ->delete();
                 foreach ($data['category_store'] as $store_id) {
                     $categoryToStore[] = [
                         'category_id' => $categoryId,
@@ -884,9 +884,6 @@ class Category extends BaseModel
                     ];
                 }
             } else {
-                $db->table('categories_to_stores')
-                    ->where('category_id', '=', (int)$categoryId)
-                    ->delete();
                 $categoryToStore[] = [
                     'category_id' => $categoryId,
                     'store_id'    => 0,
@@ -915,7 +912,7 @@ class Category extends BaseModel
             $category->touch();
             return $categoryId;
         } catch (Exception $e) {
-            Registry::log()->write($e->getMessage());
+            Registry::log()->error($e->getMessage());
             $db->rollback();
             return false;
         }
@@ -953,11 +950,10 @@ class Category extends BaseModel
             }
 
             $categoryToStore = [];
+            $db->table('categories_to_stores')
+                ->where('category_id', '=', (int)$categoryId)
+                ->delete();
             if (isset($data['category_store'])) {
-                $db->table('categories_to_stores')
-                    ->where('category_id', '=', (int)$categoryId)
-                    ->delete();
-
                 foreach ($data['category_store'] as $store_id) {
                     $categoryToStore[] = [
                         'category_id' => $categoryId,
@@ -965,9 +961,6 @@ class Category extends BaseModel
                     ];
                 }
             } else {
-                $db->table('categories_to_stores')
-                    ->where('category_id', '=', (int)$categoryId)
-                    ->delete();
                 $categoryToStore[] = [
                     'category_id' => $categoryId,
                     'store_id'    => 0,
@@ -1000,7 +993,7 @@ class Category extends BaseModel
             return true;
         } catch (Exception $e) {
             $db->rollback();
-            Registry::log()->write(__CLASS__ . " " . $e->getMessage() . "\n" . $e->getTraceAsString());
+            Registry::log()->error(__CLASS__ . " " . $e->getMessage() . "\n" . $e->getTraceAsString());
             return false;
         }
     }
