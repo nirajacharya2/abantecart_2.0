@@ -59,10 +59,10 @@ class ControllerPagesProductCategory extends AController
     public function main()
     {
         $request = $this->request->get;
-        $whishlist = '';
+        $wishlist = '';
 
         //is this an embed mode
-        if ($this->config->get('embed_mode') == true) {
+        if ($this->config->get('embed_mode')) {
             $cart_rt = 'r/checkout/cart/embed';
         } else {
             $cart_rt = 'checkout/cart';
@@ -76,11 +76,13 @@ class ControllerPagesProductCategory extends AController
 
         $this->loadLanguage('product/category');
         $this->document->resetBreadcrumbs();
-        $this->document->addBreadcrumb([
-                                           'href'      => $this->html->getHomeURL(),
-                                           'text'      => $this->language->get('text_home'),
-                                           'separator' => false,
-                                       ]);
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getHomeURL(),
+                'text'      => $this->language->get('text_home'),
+                'separator' => false,
+            ]
+        );
 
         if ($this->config->get('config_require_customer_login') && !$this->customer->isLogged()) {
             abc_redirect($this->html->getSecureURL('account/login'));
@@ -140,6 +142,7 @@ class ControllerPagesProductCategory extends AController
         }
 
         if ($category_info) {
+            $this->view->assign('category_info', $category_info);
             $this->document->setTitle($category_info['name']);
             $this->document->setKeywords($category_info['meta_keywords']);
             $this->document->setDescription($category_info['meta_description']);
@@ -214,21 +217,21 @@ class ControllerPagesProductCategory extends AController
                     ($page - 1) * $limit,
                     $limit
                 );
-                $product_ids = array_map('intval', array_column($products_result, 'product_id'));
+                $productIds = array_map('intval', array_column($products_result, 'product_id'));
                 $products = [];
-                $products_info = $this->model_catalog_product->getProductsAllInfo($product_ids);
+                $products_info = $this->model_catalog_product->getProductsAllInfo($productIds);
                 $thumbnails = $resource->getMainThumbList(
                     'products',
-                    $product_ids,
+                    $productIds,
                     $this->config->get('config_image_product_width'),
                     $this->config->get('config_image_product_height')
                 );
-                $stock_info = $this->model_catalog_product->getProductsStockInfo($product_ids);
+                $stock_info = $this->model_catalog_product->getProductsStockInfo($productIds);
 
                 $this->data['is_customer'] = false;
                 if ($this->customer->isLogged() || $this->customer->isUnauthCustomer()) {
                     $this->data['is_customer'] = true;
-                    $whishlist = $this->customer->getWishList();
+                    $wishlist = $this->customer->getWishList();
                 }
 
                 foreach ($products_result as $k => $result) {
@@ -295,7 +298,7 @@ class ControllerPagesProductCategory extends AController
                     }
 
                     $in_wishlist = false;
-                    if ($whishlist && $whishlist[$result['product_id']]) {
+                    if ($wishlist && $wishlist[$result['product_id']]) {
                         $in_wishlist = true;
                     }
 

@@ -626,6 +626,7 @@ class Category extends BaseModel
         if ($mode == 'active_only') {
             $query->active('categories');
         }
+        $query->orderBy('sort_order');
 
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
