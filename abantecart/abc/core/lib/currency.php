@@ -187,13 +187,17 @@ class ACurrency
      *
      * @return string
      */
-    public function format_total($price, $qty, $currency = '', $crr_value = '')
+    public function format_total($price, $qty, $currency = '', $crr_value = '', $format = true)
     {
         if (!is_numeric($price) || !is_numeric($qty)) {
             return '';
         }
 
         $total = $this->format_number($price, $currency, $crr_value) * $qty;
+
+        if (!$format) {
+            return  $total;
+        }
 
         return $this->wrap_display_format($total, $currency);
     }
