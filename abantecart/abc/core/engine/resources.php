@@ -888,7 +888,7 @@ class AResource
                         'attr' => 'alt="' . addslashes($row['title']) . '"',
                     ]
                 );
-                $output[$object_id]['thumb_url'] = $thumb_url;
+                $output[$object_id]['thumb_url'] = $this->withProtocol($thumb_url);
             }
             $selected_ids[] = $object_id;
         }
@@ -907,7 +907,7 @@ class AResource
                         'description' => '',
                         'width' => $width,
                         'height' => $height,
-                        'thumb_url' => $thumb_url,
+                        'thumb_url' => $this->withProtocol($thumb_url),
                         'thumb_html' => $this->html->buildResourceImage(
                             [
                                 'url' => $thumb_url,
