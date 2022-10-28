@@ -273,7 +273,7 @@
     "koolphp/koolreport": "3.25.4",
     "dyrynda/laravel-model-uuid": "6.5.0",
     "php-amqplib/php-amqplib": "3.1.1",
-    "vdvpie22/audit-log-client": "1.7",
+    "vdvpie22/audit-log-client": "^1.9",
     "mustache/mustache": "2.14.0",
     "zircote/swagger-php": "^4.4",
     "ext-dom": "*",
