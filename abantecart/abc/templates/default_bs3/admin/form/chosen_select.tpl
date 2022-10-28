@@ -1,22 +1,25 @@
 <?php //NOTE: For multivalue, need to pass attribute multiple="multiple" ?>
-<select id="<?php
-echo $id ?>" name="<?php echo $name ?>" data-placeholder="<?php echo $placeholder; ?>"
-        class="chosen-select form-control aselect <?php echo $style ? : ''; ?>"
-        style="display: none;" <?php echo $attr; ?>>
-    <?php
-    if (is_array($options)) {
-        foreach ($options as $v => $text) {
-            $check_id = preg_replace('/[^a-zA-Z0-9_]/', '', $id.$v);
-            //special case for chosen
-            if (is_array($text)) {
-                $text = $text['name'];
-            }
-            ?>
-            <option id="<?php echo $check_id ?>" value="<?php echo $v ?>" <?php echo(in_array($v,
-                $value) ? ' selected="selected" ' : '') ?>data-orgvalue="<?php echo(in_array($v,
-                $value) ? 'true' : 'false') ?>"><?php echo $text ?></option>
+    <select id="<?php echo $id ?>"
+            name="<?php echo $name ?>"
+            data-placeholder="<?php echo $placeholder; ?>"
+            class="chosen-select form-control aselect <?php echo $style ?: ''; ?>"
+            style="display: none;" <?php echo $attr; ?>>
         <?php
-        }
+        if (is_array($options)) {
+            foreach ($options as $v => $text) {
+                $check_id = preg_replace('/[^a-zA-Z0-9_]/', '', $id . $v);
+                //special case for chosen
+                if (is_array($text)) {
+                    $text = $text['name'];
+                }
+                ?>
+                <option id="<?php echo $check_id ?>"
+                        value="<?php echo $v ?>" <?php echo(in_array($v, $value) ? ' selected="selected" ' : '') ?>
+                        data-orgvalue="<?php echo(in_array($v, $value) ? 'true' : 'false') ?>">
+                    <?php echo $text ?>
+                </option>
+                <?php
+            }
     } ?>
 </select>
 
@@ -38,31 +41,39 @@ echo $id ?>" name="<?php echo $name ?>" data-placeholder="<?php echo $placeholde
 //for chosen we populate HTML into options
 if (str_contains($style, 'chosen')) { ?>
     <script type="text/javascript">
-       $(document).ready(function () {
-<?php
+        $(document).ready(function () {
+            let elm = $("#<?php echo $id ?>");
+            <?php
             if(is_array($options)){
             foreach ( $options as $v => $text ) {
-                if (is_array($text)) {
-                    $check_id = preg_replace('/[^a-zA-Z0-9_]/', '', $id.$v);
-?>
-                    $('#<?php echo $check_id ?>').html('<?php echo $text['image']; ?>');
-                    $('#<?php echo $check_id ?>').append('<span class="hide_text"> <?php abc_js_echo($text['name']); ?></span>');
-<?php
-                    }
-                }
+            if (is_array($text)) {
+            $check_id = preg_replace('/[^a-zA-Z0-9_]/', '', $id . $v); ?>
+            $('#<?php echo $check_id ?>').html('<?php echo $text['image']; ?>');
+            $('#<?php echo $check_id ?>').append('<span class="hide_text"> <?php abc_js_echo($text['name']); ?></span>');
+            <?php           }
             }
-?>
-
-			$("#<?php echo $id ?>").chosen(
-				{
-					'width': '100%',
-					'white-space': 'nowrap',
-					'max_selected_options': <?php echo $extra['max_selected_options'] ?: 'null'; ?>
-				}
-			);
-
-		});
-	</script>
+            } ?>
+            elm.chosen(
+                {
+                    'width': '100%',
+                    'white-space': 'nowrap',
+                    'max_selected_options': <?php echo $extra['max_selected_options'] ?: 'null'; ?>
+                }
+            );
+            <?php if( $extra['max_selected_options']){ ?>
+            elm.chosen().change(
+                function () {
+                    let currVal = $(this).val();
+                    currVal = currVal === null ? [] : currVal;
+                    if (currVal.length === <?php echo (int)$extra['max_selected_options']; ?>) {
+                        $('#<?php echo $id?>_chosen li.search-field').hide();
+                    } else {
+                        $('#<?php echo $id?>_chosen li.search-field').show();
+                    }
+                });
+            <?php } ?>
+        });
+    </script>
 <?php } ?>
 <?php if ($ajax_url) {  //for chosen we populate data from ajax  ?>
 	<!-- Ajax Product Sector with Chosen (Multivalue lookup element) -->
