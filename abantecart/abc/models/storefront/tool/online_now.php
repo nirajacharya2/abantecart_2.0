@@ -35,22 +35,23 @@ class ModelToolOnlineNow extends Model
     public function setOnline($ip, $customer_id, $url, $referer)
     {
         //if we save data less than 10 seconds ago - skip
-        if( (time() - (int)$this->session->data['marked_as_online'] < 10)
+        if ((time() - (int)$this->session->data['marked_as_online'] < 10)
             //do not save data when maintenance mode is on
-            || $this->config->get('config_maintenance')){
+            || $this->config->get('config_maintenance')) {
             return;
         }
-        $this->db->beginTransaction();
+
         $this->deleteOld();
+        $this->db->beginTransaction();
         //insert new record
         $result = $this->db->query(
-                    "INSERT INTO `".$this->db->table_name("online_customers")."`
+            "INSERT INTO `" . $this->db->table_name("online_customers") . "`
                         ( `ip`, `customer_id`, `url`, `referer`, `date_added` )
                         VALUES (
-                            '".$this->db->escape($ip)."',
-                            '".(int)$customer_id."',
-                            '".$this->db->escape($url)."',
-                            '".$this->db->escape($referer)."',
+                            '" . $this->db->escape($ip) . "',
+                            '" . (int)$customer_id . "',
+                            '" . $this->db->escape($url) . "',
+                            '" . $this->db->escape($referer) . "',
                             NOW()
                             )",
                     true
