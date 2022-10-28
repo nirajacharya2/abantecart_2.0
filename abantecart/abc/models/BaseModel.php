@@ -66,7 +66,8 @@ use stdClass;
  * @method static QueryBuilder selectRaw(string $sql) QueryBuilder
  * @method static QueryBuilder distinct(array $columns) QueryBuilder
  * @method static QueryBuilder|Builder withTrashed()
- * @method static QueryBuilder updateOrCreate(array $attributes, array $values) QueryBuilder
+ * @method static OrmModel|static updateOrCreate(array $attributes = [], array $values = [])
+ * @method static OrmModel|static firstOrCreate(array $attributes = [], array $values = [])
  * @method static QueryBuilder create(array $values) BaseModel
  * @method static QueryBuilder active() QueryBuilder
  * @method static QueryBuilder join(string $table, \Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
