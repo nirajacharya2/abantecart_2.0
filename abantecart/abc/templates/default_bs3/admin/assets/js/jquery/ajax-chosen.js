@@ -22,11 +22,11 @@
         options = $.extend({}, defaultOptions, $(select).data(), settings);
         this.chosen(chosenOptions ? chosenOptions : {});
         return this.each(function () {
-            return $(this).next('.chosen-container').find(".search-field > input, .chosen-search > input").bind('keyup', function () {
+            return $(this).next(".chosen-container").find(".search-field > input, .chosen-search > input").bind('keyup', function () {
                 var field, msg, success, untrimmed_val, val;
                 val = $.trim($(this).val());
-                msg = val.length < options.minTermLength ? options.keepTypingMsg : options.lookingForMsg + (" '" + val + "'");
-                select.next('.chosen-container').find('.no-results').text(msg);
+                msg = val.length < options.minTermLength ? options.keepTypingMsg : options.lookingForMsg + ("'" + val + "'");
+                select.next(".chosen-container").find(".no-results").html(msg);
                 if (val === $(this).data('prevVal')) {
                     return false;
                 }

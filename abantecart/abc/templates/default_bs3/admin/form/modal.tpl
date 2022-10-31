@@ -22,14 +22,15 @@
 	//clean up modal for remote data source
 	if($data_source == 'ajax'){ //js for loaded content of modal?>
 
-	$('#<?php echo $id;?>').on("hidden.bs.modal", function (e) { 
-		$(e.target).removeData("bs.modal");
-		<?php if(!$title) { ?>
-		$(e.target).find("#<?php echo $id;?> .modal-title").empty(); 
-		<?php } ?>
+	$('#<?php echo $id;?>').on("hidden.bs.modal", function (e) {
+        //do not uncomment yet. It's a cause of issues when modal opened-closed and opened again
+        //$(e.target).removeData("bs.modal");
+        <?php if(!$title) { ?>
+        $(e.target).find(".modal-title").empty();
+        <?php } ?>
 		<?php if(!$content) { ?>
-		$(e.target).find("#<?php echo $id;?> .modal-body").empty(); 
-		<?php } ?>
+        $(e.target).find(".modal-body").html('');
+        <?php } ?>
 		<?php echo $js_onclose; ?>
 	});
 

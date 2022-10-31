@@ -26,29 +26,29 @@
 <?php if ($required == 'Y' || !empty ($help_url)) { ?>
 	<span class="input-group-addon">
 	<?php if ($required == 'Y') { ?>
-		<span class="required">*</span>
+        <span class="required">*</span>
     <?php }
     if (!empty ($help_url)) { ?>
-			<span class="help_element">
+        <span class="help_element">
                 <a href="<?php echo $help_url; ?>" target="new">
                     <i class="fa fa-question-circle fa-lg"></i>
                 </a>
             </span>
-        <?php } ?>
+    <?php } ?>
 	</span>
-<?php }
-
-//for chosen we populate HTML into options
-if (str_contains($style, 'chosen')) { ?>
-    <script type="text/javascript">
-        $(document).ready(function () {
-            let elm = $("#<?php echo $id ?>");
-            <?php
-            if(is_array($options)){
-            foreach ( $options as $v => $text ) {
-            if (is_array($text)) {
-            $check_id = preg_replace('/[^a-zA-Z0-9_]/', '', $id . $v); ?>
-            $('#<?php echo $check_id ?>').html('<?php echo $text['image']; ?>');
+<?php } ?>
+<script type="text/javascript">
+    <?php
+    //for chosen we populate HTML into options
+    if (str_contains($style, 'chosen')) { ?>
+    $(document).ready(function () {
+        let elm = $("#<?php echo $id ?>");
+        <?php
+        if(is_array($options)){
+        foreach ( $options as $v => $text ) {
+        if (is_array($text)) {
+        $check_id = preg_replace('/[^a-zA-Z0-9_]/', '', $id . $v); ?>
+        $('#<?php echo $check_id ?>').html('<?php echo $text['image']; ?>');
             $('#<?php echo $check_id ?>').append('<span class="hide_text"> <?php abc_js_echo($text['name']); ?></span>');
             <?php           }
             }
@@ -71,35 +71,35 @@ if (str_contains($style, 'chosen')) { ?>
                         $('#<?php echo $id?>_chosen li.search-field').show();
                     }
                 });
-            <?php } ?>
-        });
-    </script>
-<?php } ?>
-<?php if ($ajax_url) {  //for chosen we populate data from ajax  ?>
-	<!-- Ajax Product Sector with Chosen (Multivalue lookup element) -->
-	<script type="text/javascript">
-		$(document).ready(function () {
-			$("#<?php echo $id ?>").ajaxChosen({
-				type: 'POST',
-				url: '<?php echo $ajax_url; ?>',
-				dataType: 'json',
-				jsonTermKey: "term",
-				data: {
-					'exclude': <?php echo (int)$extra['exclude'] ?: '$("#'.$id.'").chosen().val()' ?>,
-					'filter': '<?php echo $filter_params; ?>'
-				},
-				keepTypingMsg: "<?php echo $text_continue_typing; ?>",
-				lookingForMsg: "<?php echo $text_looking_for; ?>"
-			}, function (data) {
-				var results = [];
-				$.each(data, function (i, val) {
-					var html = '', css = '';
-					if (val.hasOwnProperty('image')) {
-						html += val.image;
-						css = 'hide_text';
-					}
-					html += '<span class="' + css + '"> ' + val.name;
-					if (val.meta) {
+        <?php } ?>
+    });
+    <?php }
+
+    if ($ajax_url) {  //for chosen we populate data from ajax  ?>
+    <!-- Ajax Product Sector with Chosen (Multivalue lookup element) -->
+    alert('ee');
+    $(document).ready(function () {
+        $("#<?php echo $id ?>").ajaxChosen({
+            type: 'POST',
+            url: '<?php echo $ajax_url; ?>',
+            dataType: 'json',
+            jsonTermKey: "term",
+            data: {
+                'exclude': <?php echo (int)$extra['exclude'] ?: '$("#' . $id . '").chosen().val()' ?>,
+                'filter': '<?php echo $filter_params; ?>'
+            },
+            keepTypingMsg: <?php abc_js_echo('<span class="green">' . $text_continue_typing . '</span>'); ?>,
+            lookingForMsg: <?php abc_js_echo('<i class="fa fa-spinner fa-spin"></i>&nbsp;' . $text_looking_for); ?>
+        }, function (data) {
+            var results = [];
+            $.each(data, function (i, val) {
+                var html = '', css = '';
+                if (val.hasOwnProperty('image')) {
+                    html += val.image;
+                    css = 'hide_text';
+                }
+                html += '<span class="' + css + '"> ' + val.name;
+                if (val.meta) {
 						html += '&nbsp;(' + val.meta + ')';
 					}
 					html += '</span>';
@@ -121,5 +121,5 @@ if (str_contains($style, 'chosen')) { ?>
 				return results;
 			});
 		});
-	</script>
 <?php } ?>
+</script>
