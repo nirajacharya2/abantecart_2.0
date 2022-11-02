@@ -77,7 +77,6 @@
 
     if ($ajax_url) {  //for chosen we populate data from ajax  ?>
     <!-- Ajax Product Sector with Chosen (Multivalue lookup element) -->
-    alert('ee');
     $(document).ready(function () {
         $("#<?php echo $id ?>").ajaxChosen({
             type: 'POST',
