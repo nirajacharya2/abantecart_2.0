@@ -122,7 +122,19 @@ class ABC extends ABCBase
                 require_once $dirname . mb_strtolower($filename);
                 return true;
             }
-
+        }
+        // looking for class by namespace path
+        if (str_contains($className, 'Controller')) {
+            $shortClassName = basename(str_replace("\\", DS, $className));
+            $pre = str_replace($shortClassName, '', $className);
+            $pre = str_replace('\\', '/', $pre);
+            $shortClassName = str_replace('Controller', '', $shortClassName);
+            $arr = array_map('strtolower', preg_split('/(?=[A-Z])/', $shortClassName));
+            $filename = ABC::env('DIR_ROOT') . $pre . implode(DS, $arr) . '.php';
+            if (is_file($filename)) {
+                require_once $filename;
+                return true;
+            }
         }
         return false;
     }
@@ -333,7 +345,7 @@ class ABC extends ABCBase
                     static::$env[$name] = $value;
                     return true;
                 } else {
-                    if (class_exists('\abc\core\lib\ADebug')) {
+                    if (class_exists(ADebug::class)) {
                         ADebug::warning(
                             'Environment option override',
                             9101,
@@ -343,7 +355,7 @@ class ABC extends ABCBase
                 }
             }
         }
-        if (class_exists('\abc\core\lib\ADebug')) {
+        if (class_exists(ADebug::class)) {
             $dbg = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 5);
             ADebug::warning(
                 'Environment option "' . $name . '" not found',
@@ -445,6 +457,7 @@ class ABC extends ABCBase
      * @param array $args
      *
      * @return bool|object
+     * @throws AException
      */
     static function getModelObjectByAlias(string $class_alias, $args = [])
     {
@@ -539,14 +552,17 @@ class ABC extends ABCBase
 
     public function init()
     {
-        require dirname(getcwd())
-            . DS . 'abc' . DS . 'core' . DS . 'init' . DS . 'app.php';
+        require dirname(getcwd()) . DS
+            . 'abc' . DS
+            . 'core' . DS
+            . 'init' . DS
+            . 'app.php';
     }
 
     protected function validateApp()
     {
         // Required PHP Version
-        if (version_compare(phpversion(), static::env('MIN_PHP_VERSION'), '<') == true) {
+        if (version_compare(phpversion(), static::env('MIN_PHP_VERSION'), '<')) {
             exit(static::env('MIN_PHP_VERSION')
                 . '+ Required for AbanteCart to work properly! '
                 . 'Please contact your system administrator or host service provider.');
