@@ -36,6 +36,7 @@ use abc\models\system\Store;
 use abc\modules\events\ABaseEvent;
 use H;
 use Illuminate\Validation\ValidationException;
+use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 
 /**
@@ -774,17 +775,17 @@ class ControllerPagesSaleCustomer extends AController
         $this->processTemplate($tpl);
     }
 
-    private function getTabs(int $customer_id, $active = '')
+    public function getTabs(int $customer_id, $active = '')
     {
         $this->data['tabs']['general'] = [
-            'href'       => $this->html->getSecureURL('sale/customer/update', '&customer_id='.$customer_id),
+            'href'       => $this->html->getSecureURL('sale/customer/update', '&customer_id=' . $customer_id),
             'text'       => $this->language->get('tab_customer_details'),
             'active'     => ($active === 'general'),
             'sort_order' => 0,
         ];
         if (H::has_value($customer_id)) {
             $this->data['tabs']['transactions'] = [
-                'href'       => $this->html->getSecureURL('sale/customer_transaction', '&customer_id='.$customer_id),
+                'href'       => $this->html->getSecureURL('sale/customer_transaction', '&customer_id=' . $customer_id),
                 'text'       => $this->language->get('tab_transactions'),
                 'active'     => ($active === 'transactions'),
                 'sort_order' => 10,
@@ -799,7 +800,7 @@ class ControllerPagesSaleCustomer extends AController
                 $this->data['tabs']['communications'] = [
                     'href'       => $this->html->getSecureURL(
                         'sale/customer/communications',
-                        '&customer_id='.$customer_id
+                        '&customer_id=' . $customer_id
                     ),
                     'text'       => $this->language->get('tab_customer_communications'),
                     'active'     => ($active === 'communications'),
@@ -808,13 +809,16 @@ class ControllerPagesSaleCustomer extends AController
             }
         }
 
-        $obj = $this->dispatch('responses/common/tabs', [
-                'sale/customer',
+        $obj = $this->dispatch(
+            'responses/common/tabs',
+            [
+                $this->rt(),
                 //parent controller. Use customer to use for other extensions that will add tabs via their hooks
                 ['tabs' => $this->data['tabs']],
             ]
         );
         $this->data['tabs'] = $obj->dispatchGetOutput();
+        return $this->data['tabs'];
     }
 
     public function insert_address()
@@ -1204,7 +1208,7 @@ class ControllerPagesSaleCustomer extends AController
      * @param null $customer_id
      *
      * @return bool
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      * @throws ReflectionException
      * @throws AException
      */
@@ -1248,7 +1252,7 @@ class ControllerPagesSaleCustomer extends AController
 
     /**
      * @return bool
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      * @throws ReflectionException
      * @throws AException
      */
