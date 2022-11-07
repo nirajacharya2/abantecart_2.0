@@ -34,6 +34,7 @@ use abc\models\customer\CustomerTransaction;
 use abc\models\order\Order;
 use abc\models\system\Store;
 use abc\modules\events\ABaseEvent;
+use abc\modules\traits\CustomerTabsTrait;
 use H;
 use Illuminate\Validation\ValidationException;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -47,12 +48,11 @@ use ReflectionException;
  */
 class ControllerPagesSaleCustomer extends AController
 {
+    use CustomerTabsTrait;
     public $error = [];
     protected $model;
 
-    /*
-     * @var array - key -s field name mask, value - requirement
-     */
+    /** @var array - key -s field name mask, value - requirement */
     public $address_fields =
         [
             'firstname'  => [
@@ -247,6 +247,7 @@ class ControllerPagesSaleCustomer extends AController
             $this->language->get('column_approved'),
             $this->language->get('text_order'),
         ];
+
         $grid_settings['colModel'] = [
             [
                 'name'  => 'name',
@@ -325,39 +326,51 @@ class ControllerPagesSaleCustomer extends AController
 
         $grid_search_form = [];
         $grid_search_form['id'] = 'customer_grid_search';
-        $grid_search_form['form_open'] = $form->getFieldHtml([
-            'type'   => 'form',
-            'name'   => 'customer_grid_search',
-            'action' => '',
-        ]);
-        $grid_search_form['submit'] = $form->getFieldHtml([
-            'type'  => 'button',
-            'name'  => 'submit',
-            'text'  => $this->language->get('button_go'),
-            'style' => 'button1',
-        ]);
-        $grid_search_form['reset'] = $form->getFieldHtml([
-            'type'  => 'button',
-            'name'  => 'reset',
-            'text'  => $this->language->get('button_reset'),
-            'style' => 'button2',
-        ]);
+        $grid_search_form['form_open'] = $form->getFieldHtml(
+            [
+                'type'   => 'form',
+                'name'   => 'customer_grid_search',
+                'action' => '',
+            ]
+        );
+        $grid_search_form['submit'] = $form->getFieldHtml(
+            [
+                'type'  => 'button',
+                'name'  => 'submit',
+                'text'  => $this->language->get('button_go'),
+                'style' => 'button1',
+            ]
+        );
+        $grid_search_form['reset'] = $form->getFieldHtml(
+            [
+                'type'  => 'button',
+                'name'  => 'reset',
+                'text'  => $this->language->get('button_reset'),
+                'style' => 'button2',
+            ]
+        );
 
-        $grid_search_form['fields']['customer_group'] = $form->getFieldHtml([
-            'type'    => 'selectbox',
-            'name'    => 'customer_group',
-            'options' => $groups,
-        ]);
-        $grid_search_form['fields']['status'] = $form->getFieldHtml([
-            'type'    => 'selectbox',
-            'name'    => 'status',
-            'options' => $statuses,
-        ]);
-        $grid_search_form['fields']['approved'] = $form->getFieldHtml([
-            'type'    => 'selectbox',
-            'name'    => 'approved',
-            'options' => $approved,
-        ]);
+        $grid_search_form['fields']['customer_group'] = $form->getFieldHtml(
+            [
+                'type'    => 'selectbox',
+                'name'    => 'customer_group',
+                'options' => $groups,
+            ]
+        );
+        $grid_search_form['fields']['status'] = $form->getFieldHtml(
+            [
+                'type'    => 'selectbox',
+                'name'    => 'status',
+                'options' => $statuses,
+            ]
+        );
+        $grid_search_form['fields']['approved'] = $form->getFieldHtml(
+            [
+                'type'    => 'selectbox',
+                'name'    => 'approved',
+                'options' => $approved,
+            ]
+        );
 
         $grid_settings['search_form'] = true;
 
@@ -385,8 +398,8 @@ class ControllerPagesSaleCustomer extends AController
             if ($this->validateForm($data)) {
                 $customer = new Customer($data);
                 $customer->save();
-                $customer_id = (int) $customer->customer_id;
-                $redirect_url = $this->html->getSecureURL('sale/customer/insert_address', '&customer_id='.$customer_id);
+                $customer_id = $customer->customer_id;
+                $redirect_url = $this->html->getSecureURL('sale/customer/insert_address', '&customer_id=' . $customer_id);
                 $this->session->data['success'] = $this->language->get('text_success');
                 $this->extensions->hk_ProcessData($this, 'customer_insert', ['customer_id' => $customer_id]);
                 abc_redirect($redirect_url);
@@ -412,21 +425,24 @@ class ControllerPagesSaleCustomer extends AController
             unset($this->session->data['success']);
         }
 
-        $customer_id = (int) $this->request->get['customer_id'];
+        $customer_id = (int)$this->request->get['customer_id'];
         $customer = Customer::find($customer_id);
 
         if (!$customer) {
             abc_redirect($this->html->getSecureURL('sale/customer'));
         }
 
-        if ($customer && $this->request->is_POST() && $this->validateForm($this->request->post, $customer_id)) {
-            if ((int) $this->request->post['approved']) {
+        if ($customer
+            && $this->request->is_POST()
+            && $this->validateForm($this->request->post, $customer_id)
+        ) {
+            if ((int)$this->request->post['approved']) {
                 if (!$customer->approved && !$customer->isSubscriber()) {
                     H::event('admin\sendApprovalEmail', [new ABaseEvent($customer->toArray())]);
                 }
             }
             $customer->update($this->request->post);
-            $redirect_url = $this->html->getSecureURL('sale/customer/update', '&customer_id='.$customer_id);
+            $redirect_url = $this->html->getSecureURL('sale/customer/update', '&customer_id=' . $customer_id);
 
             $this->session->data['success'] = $this->language->get('text_success');
             $this->extensions->hk_ProcessData($this, 'customer_update');
@@ -442,28 +458,32 @@ class ControllerPagesSaleCustomer extends AController
     protected function getForm($args = [])
     {
         $viewport_mode = $args[0]['viewport_mode'] ?? '';
-        $customer_id = (int) $this->request->get['customer_id'];
+        $customer_id = (int)$this->request->get['customer_id'];
 
         $this->data['token'] = $this->session->data['token'];
         $this->data['error'] = $this->error;
 
-        $this->document->initBreadcrumb([
-            'href'      => $this->html->getSecureURL('index/home'),
-            'text'      => $this->language->get('text_home'),
-            'separator' => false,
-        ]);
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('sale/customer'),
-            'text'      => $this->language->get('heading_title'),
-            'separator' => ' :: ',
-        ]);
+        $this->document->initBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('index/home'),
+                'text'      => $this->language->get('text_home'),
+                'separator' => false,
+            ]
+        );
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('sale/customer'),
+                'text'      => $this->language->get('heading_title'),
+                'separator' => ' :: ',
+            ]
+        );
 
         $this->data['addresses'] = [];
         $customer_info = [];
         if ($customer_id) {
-            $customer = Customer::with(['addresses'])
-                                 ->where('customer_id', $customer_id)
-                                 ->first();
+            $customer = Customer::with('addresses')
+                ->where('customer_id', $customer_id)
+                ->first();
             if($customer) {
                 $customer_info = $customer->toArray();
                 $customer_info['orders_count'] = Order::where('customer_id', '=', $customer_id)
@@ -530,13 +550,7 @@ class ControllerPagesSaleCustomer extends AController
 
         $fields = array_keys($this->data['fields']);
         foreach ($fields as $f) {
-            if (isset ($this->request->post [$f])) {
-                $this->data [$f] = $this->request->post [$f];
-            } elseif (isset($customer_info)) {
-                $this->data[$f] = $customer_info[$f];
-            } else {
-                $this->data[$f] = '';
-            }
+            $this->data [$f] = $this->request->post [$f] ?? $customer_info[$f] ?? '';
         }
 
         if (!isset($this->data['customer_group_id'])) {
@@ -560,16 +574,20 @@ class ControllerPagesSaleCustomer extends AController
             $form = new AForm($formType);
         } else {
             $this->data['customer_id'] = $customer_id;
-            $this->data['action'] = $this->html->getSecureURL('sale/customer/update', '&customer_id='.$customer_id);
-            $this->data['heading_title'] =
-                $this->language->get('text_edit').$this->language->get('text_customer').' - '.$this->data['firstname']
-                .' '
-                .$this->data['lastname'];
+            $this->data['action'] = $this->html->getSecureURL('sale/customer/update', '&customer_id=' . $customer_id);
+            $this->data['heading_title'] = $this->language->get('text_edit')
+                . $this->language->get('text_customer')
+                . ' - '
+                . $this->data['firstname']
+                . ' '
+                . $this->data['lastname'];
+
             $this->data['update'] = $this->html->getSecureURL(
                 'listing_grid/customer/update_field',
-                '&id='.$customer_id
+                '&id=' . $customer_id
             );
-            $formType = $this->data['edit_customer_form_type'] ? : 'HS';
+
+            $formType = $this->data['edit_customer_form_type'] ?: 'HS';
             $form = new AForm($formType);
 
             $this->data['reset_password'] = $this->html->buildElement(
@@ -578,19 +596,21 @@ class ControllerPagesSaleCustomer extends AController
                     'name'  => 'reset_password_button',
                     'href'  => $this->html->getSecureURL(
                         'listing_grid/customer/resetPassword',
-                        '&customer_id='.$customer_id
+                        '&customer_id=' . $customer_id
                     ),
                     'title' => $this->language->get('text_resend_password'),
                 ]
             );
         }
 
-        $this->document->addBreadcrumb([
-            'href'      => $this->data['action'],
-            'text'      => $this->data['heading_title'],
-            'separator' => ' :: ',
-            'current'   => true,
-        ]);
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->data['action'],
+                'text'      => $this->data['heading_title'],
+                'separator' => ' :: ',
+                'current'   => true,
+            ]
+        );
 
         if ($customer_id) {
             $this->getTabs($customer_id, 'general');
@@ -598,77 +618,100 @@ class ControllerPagesSaleCustomer extends AController
 
         $this->load->model('setting/store');
         if (!$this->model_setting_store->isDefaultStore()) {
-            $this->data['warning_actonbehalf'] =
-                htmlspecialchars(
-                    $this->language->get('warning_actonbehalf_additional_store'), ENT_QUOTES,
-                    ABC::env('APP_CHARSET')
-                );
+            $this->data['warning_actonbehalf'] = htmlspecialchars(
+                $this->language->get('warning_actonbehalf_additional_store'),
+                ENT_QUOTES,
+                ABC::env('APP_CHARSET')
+            );
         }
 
-        $this->data['actas'] = $this->html->buildElement([
-            'type'   => 'button',
-            'text'   => $this->language->get('button_actas'),
-            'href'   => $this->html->getSecureURL('sale/customer/actonbehalf', '&customer_id='.$customer_id),
-            'target' => 'new',
-        ]);
-        $this->data['auditLog'] = $this->html->buildElement([
-            'type'   => 'button',
-            'text'  => $this->language->get('text_audit_log'),
-            'href'  => $this->html->getSecureURL('tool/audit_log', '&modal_mode=1&auditable_type=Customer&auditable_id='.$customer_id),
-            //quick view port URL
-            'vhref' => $this->html->getSecureURL(
-                'r/common/viewport/modal',
-                '&viewport_rt=tool/audit_log&modal_mode=1&auditable_type=Customer&auditable_id='.$customer_id),
-        ]);
-        $this->data['message'] = $this->html->buildElement([
-            'type'   => 'button',
-            'text'   => $this->language->get('button_message'),
-            'href'   => $this->html->getSecureURL('sale/contact', '&to[]='.$customer_id),
-            'target' => 'new',
-        ]);
-        $this->data['new_order'] = $this->html->buildElement([
-            'type'   => 'button',
-            'text'   => $this->language->get('text_create_order'),
-            'href'   => $this->html->getSecureURL('sale/order/createOrder', '&customer_id='.$customer_id),
-            'target' => 'new',
-        ]);
+        $this->data['actas'] = $this->html->buildElement(
+            [
+                'type'   => 'button',
+                'text'   => $this->language->get('button_actas'),
+                'href'   => $this->html->getSecureURL('sale/customer/actonbehalf', '&customer_id=' . $customer_id),
+                'target' => 'new',
+            ]
+        );
+        $this->data['auditLog'] = $this->html->buildElement(
+            [
+                'type'  => 'button',
+                'text'  => $this->language->get('text_audit_log'),
+                'href'  => $this->html->getSecureURL(
+                    'tool/audit_log',
+                    '&modal_mode=1&auditable_type=Customer&auditable_id=' . $customer_id
+                ),
+                //quick view port URL
+                'vhref' => $this->html->getSecureURL(
+                    'r/common/viewport/modal',
+                    '&viewport_rt=tool/audit_log&modal_mode=1&auditable_type=Customer&auditable_id=' . $customer_id),
+            ]
+        );
+        $this->data['message'] = $this->html->buildElement(
+            [
+                'type'   => 'button',
+                'text'   => $this->language->get('button_message'),
+                'href'   => $this->html->getSecureURL('sale/contact', '&to[]=' . $customer_id),
+                'target' => 'new',
+            ]
+        );
+        $this->data['new_order'] = $this->html->buildElement(
+            [
+                'type'   => 'button',
+                'text'   => $this->language->get('text_create_order'),
+                'href'   => $this->html->getSecureURL('sale/order/createOrder', '&customer_id=' . $customer_id),
+                'target' => 'new',
+            ]
+        );
 
-        $form->setForm([
-            'form_name' => 'cgFrm',
-            'update'    => $this->data['update'],
-        ]);
+        $form->setForm(
+            [
+                'form_name' => 'cgFrm',
+                'update'    => $this->data['update'],
+            ]
+        );
 
         $this->data['form']['id'] = 'cgFrm';
-        $this->data['form']['form_open'] = $form->getFieldHtml([
-            'type'   => 'form',
-            'name'   => 'cgFrm',
-            'attr'   => 'data-confirm-exit="true" class="form-horizontal"',
-            'csrf' => true,
-            'action' => $this->data['action'],
-        ]);
-        $this->data['form']['submit'] = $form->getFieldHtml([
-            'type' => 'button',
-            'name' => 'submit',
-            'text' => $this->language->get('button_save'),
-        ]);
-        $this->data['form']['reset'] = $form->getFieldHtml([
-            'type' => 'button',
-            'name' => 'reset',
-            'text' => $this->language->get('button_reset'),
-        ]);
+        $this->data['form']['form_open'] = $form->getFieldHtml(
+            [
+                'type'   => 'form',
+                'name'   => 'cgFrm',
+                'attr'   => 'data-confirm-exit="true" class="form-horizontal"',
+                'csrf'   => true,
+                'action' => $this->data['action'],
+            ]
+        );
+        $this->data['form']['submit'] = $form->getFieldHtml(
+            [
+                'type' => 'button',
+                'name' => 'submit',
+                'text' => $this->language->get('button_save'),
+            ]
+        );
+        $this->data['form']['reset'] = $form->getFieldHtml(
+            [
+                'type' => 'button',
+                'name' => 'reset',
+                'text' => $this->language->get('button_reset'),
+            ]
+        );
 
-        $this->data['form']['fields']['details']['status'] = $form->getFieldHtml([
-            'type'  => 'checkbox',
-            'name'  => 'status',
-            'value' => $this->data['status'],
-            'style' => 'btn_switch',
-        ]);
-        $this->data['form']['fields']['details']['approved'] = $form->getFieldHtml([
-            'type'  => 'checkbox',
-            'name'  => 'approved',
-            'value' => $this->data['approved'],
-            'style' => 'btn_switch',
-        ]);
+        $this->data['form']['fields']['details']['status'] = $form->getFieldHtml(
+            [
+                'type'  => 'checkbox',
+                'name'  => 'status',
+                'value' => $this->data['status'],
+                'style' => 'btn_switch',
+            ]
+        );
+        $this->data['form']['fields']['details']['approved'] = $form->getFieldHtml(
+            [
+                'type'  => 'checkbox',
+                'name'  => 'approved',
+                'value' => $this->data['approved'],
+                'style' => 'btn_switch',
+            ]
+        );
 
         $required_input = [];
         foreach ($this->data['fields'] as $field_name => $required) {
@@ -678,7 +721,7 @@ class ControllerPagesSaleCustomer extends AController
         }
 
         foreach ($required_input as $f) {
-            if ($viewport_mode == 'modal' && in_array($f, ['password'])) {
+            if ($viewport_mode == 'modal' && $f == 'password') {
                 continue;
             }
 
@@ -712,41 +755,45 @@ class ControllerPagesSaleCustomer extends AController
                 }
                 $fld = $driver_obj->getURIField($form, $this->data[$protocol]);
                 $this->data['form']['fields']['details'][$protocol] = $fld;
-                $this->data['entry_'.$protocol] = $fld->label_text;
-                $this->data['error_'.$protocol] = $this->error[$protocol];
+                $this->data['entry_' . $protocol] = $fld->label_text;
+                $this->data['error_' . $protocol] = $this->error[$protocol];
             }
         }
 
-        $this->data['form']['fields']['details']['newsletter'] = $form->getFieldHtml([
-            'type'    => 'selectbox',
-            'name'    => 'newsletter',
-            'value'   => $this->data['newsletter'],
-            'options' => [
-                1 => $this->language->get('text_enabled'),
-                0 => $this->language->get('text_disabled'),
-            ],
-        ]);
+        $this->data['form']['fields']['details']['newsletter'] = $form->getFieldHtml(
+            [
+                'type'    => 'selectbox',
+                'name'    => 'newsletter',
+                'value'   => $this->data['newsletter'],
+                'options' => [
+                    1 => $this->language->get('text_enabled'),
+                    0 => $this->language->get('text_disabled'),
+                ],
+            ]
+        );
 
-        $groups =
-            ['' => $this->language->get('text_select_group')]
-            +
-            array_column(CustomerGroup::all()->toArray(), 'name', 'customer_group_id');
+        $groups = ['' => $this->language->get('text_select_group')]
+            + array_column(CustomerGroup::all()?->toArray(), 'name', 'customer_group_id');
 
         $this->data['entry_customer_group_id'] = $this->language->get('entry_customer_group');
-        $this->data['form']['fields']['details']['customer_group_id'] = $form->getFieldHtml([
-            'type'    => 'selectbox',
-            'name'    => 'customer_group_id',
-            'value'   => $this->data['customer_group_id'],
-            'options' => $groups,
-        ]);
+        $this->data['form']['fields']['details']['customer_group_id'] = $form->getFieldHtml(
+            [
+                'type'    => 'selectbox',
+                'name'    => 'customer_group_id',
+                'value'   => $this->data['customer_group_id'],
+                'options' => $groups,
+            ]
+        );
 
         $this->data['entry_store_id'] = $this->language->get('tab_store');
-        $this->data['form']['fields']['details']['store_id'] = $form->getFieldHtml([
-            'type'    => 'selectbox',
-            'name'    => 'store_id',
-            'value'   => $this->data['store_id'],
-            'options' => array_column(Store::all()->toArray(), 'name', 'store_id')
-        ]);
+        $this->data['form']['fields']['details']['store_id'] = $form->getFieldHtml(
+            [
+                'type'    => 'selectbox',
+                'name'    => 'store_id',
+                'value'   => $this->data['store_id'],
+                'options' => array_column(Store::all()->toArray(), 'name', 'store_id')
+            ]
+        );
 
         $this->data['section'] = 'details';
 
@@ -773,52 +820,6 @@ class ControllerPagesSaleCustomer extends AController
         }
 
         $this->processTemplate($tpl);
-    }
-
-    public function getTabs(int $customer_id, $active = '')
-    {
-        $this->data['tabs']['general'] = [
-            'href'       => $this->html->getSecureURL('sale/customer/update', '&customer_id=' . $customer_id),
-            'text'       => $this->language->get('tab_customer_details'),
-            'active'     => ($active === 'general'),
-            'sort_order' => 0,
-        ];
-        if (H::has_value($customer_id)) {
-            $this->data['tabs']['transactions'] = [
-                'href'       => $this->html->getSecureURL('sale/customer_transaction', '&customer_id=' . $customer_id),
-                'text'       => $this->language->get('tab_transactions'),
-                'active'     => ($active === 'transactions'),
-                'sort_order' => 10,
-            ];
-            $this->data['tabs']['notes'] = [
-                'href'       => $this->html->getSecureURL('sale/customer/notes', '&customer_id='.$customer_id),
-                'text'       => $this->language->get('tab_customer_notes'),
-                'active'     => ($active === 'notes'),
-                'sort_order' => 20,
-            ];
-            if ($this->config->get('config_save_customer_communication')) {
-                $this->data['tabs']['communications'] = [
-                    'href'       => $this->html->getSecureURL(
-                        'sale/customer/communications',
-                        '&customer_id=' . $customer_id
-                    ),
-                    'text'       => $this->language->get('tab_customer_communications'),
-                    'active'     => ($active === 'communications'),
-                    'sort_order' => 30,
-                ];
-            }
-        }
-
-        $obj = $this->dispatch(
-            'responses/common/tabs',
-            [
-                $this->rt(),
-                //parent controller. Use customer to use for other extensions that will add tabs via their hooks
-                ['tabs' => $this->data['tabs']],
-            ]
-        );
-        $this->data['tabs'] = $obj->dispatchGetOutput();
-        return $this->data['tabs'];
     }
 
     public function insert_address()
@@ -1381,10 +1382,10 @@ class ControllerPagesSaleCustomer extends AController
 
         $notes = CustomerNotes::getNotes($customer_id);
         $this->data['notes'] = [];
-        foreach ($notes as &$note) {
+        foreach ($notes as $note) {
             $note->note_added = H::dateISO2Display(
                 $note->note_added,
-                $this->language->get('date_format_short').' '.$this->language->get('time_format')
+                $this->language->get('date_format_short') . ' ' . $this->language->get('time_format')
             );
             $this->data['notes'][] = $note;
         }

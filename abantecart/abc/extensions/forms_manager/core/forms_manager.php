@@ -2,16 +2,20 @@
 
 namespace abc\core\extension;
 
+use abc\controllers\admin\ControllerResponsesCommonTabs;
+use abc\core\engine\AHtml;
 use abc\core\engine\Extension;
 use abc\core\engine\Registry;
+use abc\core\lib\ALanguageManager;
 use abc\core\lib\ALayoutManager;
+use abc\core\lib\ARequest;
 
 /**
  * Class ExtensionFormsManager
  *
- * @property \abc\core\lib\ALanguageManager $language
- * @property \abc\core\engine\AHtml         $html
- * @property \abc\core\lib\ARequest         $request
+ * @property ALanguageManager $language
+ * @property AHtml $html
+ * @property ARequest $request
  */
 class ExtensionFormsManager extends Extension
 {
@@ -59,11 +63,12 @@ class ExtensionFormsManager extends Extension
     {
         $block_txt_id = '';
         $this->baseObject->loadLanguage( 'forms_manager/forms_manager' );
+
         if ( $this->baseObject_method == 'edit' ) {
             $lm = new ALayoutManager();
             $blocks = $lm->getAllBlocks();
 
-            foreach ( $blocks as $block ) {
+            foreach ($blocks as $block ) {
                 if ( $block['custom_block_id'] == (int)$this->request->get['custom_block_id'] ) {
                     $block_txt_id = $block['block_txt_id'];
                     break;
@@ -107,7 +112,7 @@ class ExtensionFormsManager extends Extension
             $lm = new ALayoutManager();
             $blocks = $lm->getAllBlocks();
 
-            foreach ( $blocks as $block ) {
+            foreach ($blocks as $block ) {
                 if ( $block['custom_block_id'] == (int)$this->request->get['custom_block_id'] ) {
                     $block_txt_id = $block['block_txt_id'];
                     break;
@@ -122,19 +127,20 @@ class ExtensionFormsManager extends Extension
 
     public function onControllerResponsesCommonTabs_InitData()
     {
+        /** @var ControllerResponsesCommonTabs $that */
+        $that = $this->baseObject;
 
-        if ( $this->baseObject->parent_controller == 'design/blocks' ) {
-            $that = $this->baseObject;
+        if ($that->group == 'block' && !$that->request->get['custom_block_id']) {
             $lm = new ALayoutManager();
-            $that->loadLanguage( 'forms_manager/forms_manager' );
-            $that->loadLanguage( 'design/blocks' );
-            $block = $lm->getBlockByTxtId( 'custom_form_block' );
+            $that->loadLanguage('forms_manager/forms_manager');
+            $that->loadLanguage('design/blocks');
+            $block = $lm->getBlockByTxtId('custom_form_block');
             $block_id = $block['block_id'];
             $that->data['tabs'][] = [
                 'name'       => $block_id,
-                'text'       => $that->language->get( 'custom_forms_block' ),
-                'href'       => $that->html->getSecureURL( 'tool/forms_manager/insert_block', '&block_id='.$block_id ),
-                'active'     => ( $block_id == $this->request->get['block_id'] ? true : false ),
+                'text'       => $that->language->get('custom_forms_block'),
+                'href'       => $that->html->getSecureURL('tool/forms_manager/insert_block', '&block_id=' . $block_id),
+                'active'     => $block_id == $that->request->get['block_id'],
                 'sort_order' => 4,
             ];
         }
