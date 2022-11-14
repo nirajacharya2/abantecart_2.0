@@ -93,7 +93,7 @@ class ControllerCommonSeoUrl extends AController
 
                 $rt = $get['rt'];
                 //remove pages prefix from rt for use in new generated urls
-                if (substr($get['rt'], 0, 6) == 'pages/') {
+                if (str_starts_with($get['rt'], 'pages/')) {
                     $get['rt'] = substr($get['rt'], 6);
                 }
                 unset($get['_route_']);
