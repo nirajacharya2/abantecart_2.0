@@ -1428,7 +1428,32 @@ class AHelperUtils extends AHelper
         $sz = 'BKMGTP';
         $factor = (int)floor((strlen($bytes) - 1) / 3);
 
-        return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)).@$sz[$factor];
+        return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$sz[$factor];
+    }
+
+    /**
+     * @param string $val
+     * @return int
+     */
+    public static function bytesFromHumanFilesize($val)
+    {
+        $val = trim($val);
+        if (is_numeric($val)) {
+            return $val;
+        }
+
+        $last = strtolower($val[strlen($val) - 1]);
+        $val = substr($val, 0, -1);
+        switch ($last) {
+            case 'g':
+                $val *= 1024;
+            case 'm':
+                $val *= 1024;
+            case 'k':
+                $val *= 1024;
+        }
+
+        return $val;
     }
 
     /**

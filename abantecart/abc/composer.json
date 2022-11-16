@@ -230,6 +230,7 @@
     "ext-curl": "*",
     "ext-fileinfo": "*",
     "ext-libxml": "*",
+    "ext-xmlwriter": "*",
     "mnsami/composer-custom-directory-installer": "2.0.*",
     "wikimedia/composer-merge-plugin": "2.0.1",
     "google/recaptcha": "1.2.4",
