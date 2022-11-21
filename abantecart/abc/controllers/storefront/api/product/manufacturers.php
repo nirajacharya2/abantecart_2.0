@@ -72,7 +72,7 @@ class ControllerApiProductManufacturers extends AControllerAPI
      *     ),
      *     @OA\Response(
      *         response="403",
-     *         description="Access denight",
+     *         description="Access denied",
      *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
      *     ),
      *     @OA\Response(

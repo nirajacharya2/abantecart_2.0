@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,31 +22,22 @@ namespace abc\controllers\storefront;
 
 use abc\core\ABC;
 use abc\core\engine\AControllerAPI;
+use abc\core\engine\ASecureControllerAPI;
 use abc\core\lib\AJson;
 use abc\core\lib\AOrder;
 
-class ControllerApiCheckoutProcess extends AControllerAPI
+class ControllerApiCheckoutProcess extends ASecureControllerAPI
 {
-    public $error = array();
-    public $data = array();
+    public $error = [];
 
     public function post()
     {
-
         $request = $this->rest->getRequestParams();
-
-        if (!$this->customer->isLoggedWithToken($request['token'])) {
-            $this->rest->sendResponse(401,
-                [
-                    'error' => 'Not logged in or Login attempt failed!',
-                ]
-            );
-            return null;
-        }
 
         //Check if confirmation details were reviewed.
         if (!$this->session->data['confirmed']) {
-            $this->rest->sendResponse(400,
+            $this->rest->sendResponse(
+                400,
                 [
                     'status' => 0,
                     'error'  => 'Need to review confirmation details first!',
@@ -80,7 +71,7 @@ class ControllerApiCheckoutProcess extends AControllerAPI
             return null;
         }
         if ($order_data['order_status_id'] > 0) {
-            $this->rest->sendResponse(200, array('status' => 4, 'error' => 'Order was already processed!'));
+            $this->rest->sendResponse(200, ['status' => 4, 'error' => 'Order was already processed!']);
             return null;
         }
 
@@ -97,7 +88,7 @@ class ControllerApiCheckoutProcess extends AControllerAPI
         //we process only response type payment extensions
         $payment_controller = $this->dispatch(
             'responses/extension/'.$this->session->data['process_rt'],
-            array($request)
+            [$request]
         );
         $this->load->library('json');
         $this->data = AJson::decode($payment_controller->dispatchGetOutput(), true);
