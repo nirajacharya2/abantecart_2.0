@@ -153,8 +153,11 @@ class AResource
         return $this->file_types;
     }
 
-    protected function withProtocol(string $url): string
+    public function withProtocol(string $url): string
     {
+        if (str_starts_with($url, 'http://') || str_starts_with($url, 'https://')) {
+            return $url;
+        }
         return (ABC::env('HTTPS') ? 'https:' : 'http:') . $url;
     }
 
