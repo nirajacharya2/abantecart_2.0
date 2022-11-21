@@ -425,12 +425,12 @@ class CheckoutBase extends ALibBase
     }
 
     /**
-     * @param array $shipping_method
+     * @param array|null $shipping_method
      */
-    public function setShippingMethod( $shipping_method)
+    public function setShippingMethod(?array $shipping_method)
     {
-        if($this->data['guest']){
-            $this->data['guest']['shipping_method']  = $shipping_method;
+        if ($this->data['guest']) {
+            $this->data['guest']['shipping_method'] = $shipping_method;
         }
         $this->data['shipping_method'] = $shipping_method;
     }

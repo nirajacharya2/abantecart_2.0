@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -27,23 +27,23 @@ use H;
 
 class ControllerResponsesCommonTabs extends AController
 {
-    public $data = [];
-    public $parent_controller = ''; //rt of page where you plan to place tabs
+    public $group = ''; //rt of page where you plan to place tabs
+    public $parentRt = ''; //rt of page where you plan to place tabs
 
-    public function main($parent_controller, $data)
+    public function main(string $group, string $parentRt, ?array $data)
     {
         $this->data = $data;
-        $this->parent_controller = $parent_controller; //use it in hooks to recognize what page controller calls
+        $this->parentRt = $parentRt; //use it in hooks to recognize what page controller calls
+        $this->group = $group; //group of pages, ex. customer, product, category etc
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $tabs = (array)$this->data['tabs'];
-        $this->data['tabs'] = $idx = [];
-        foreach ($tabs as $k => $tab) {
-            $idx[] = (int)$tab['sort_order'];
+        $idx = array_map('intval', array_column($tabs, 'sort_order'));
+        //resort an array
+        if (count($idx) > 1 && count($tabs) == count($idx)) {
+            array_multisort($idx, SORT_ASC, $tabs);
         }
-
-        array_multisort($idx, SORT_ASC, $tabs);
         $this->data['tabs'] = $tabs;
 
         $this->view->batchAssign($this->data);

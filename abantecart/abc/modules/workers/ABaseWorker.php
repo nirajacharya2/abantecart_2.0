@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2022 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -18,6 +18,7 @@
 
 namespace abc\modules\workers;
 
+use Error;
 use Exception;
 
 abstract class ABaseWorker implements AWorkerInterface
@@ -33,8 +34,6 @@ abstract class ABaseWorker implements AWorkerInterface
 
     public function __construct()
     {
-        //$this->outputType = BaseCommand::$outputType;
-        //$this->EOF = BaseCommand::$EOF;
         $this->pid = getmypid();
     }
 
@@ -51,8 +50,8 @@ abstract class ABaseWorker implements AWorkerInterface
     /**
      * Starting worker`s method for processing incoming jobs
      *
-     * @param string              $method
-     * @param array  $job_params (or AMQPMessage object)
+     * @param string $method
+     * @param array $job_params (or AMQPMessage object)
      *
      * @return bool
      */
@@ -73,11 +72,14 @@ abstract class ABaseWorker implements AWorkerInterface
                 /** @var boolean $result */
                 //run worker
                 $result = call_user_func([$this, $method], $job_params);
-            } catch (Exception $e) {
+            } catch (Exception|Error $e) {
                 $this->echoCli('!!!!!!!!!!! Exception !!!!!!!!!!!!!');
-                $error_message = 'Message: '.$e->getMessage();
-                if($e->getCode() != AC_ERR_USER_WARNING) {
-                    $error_message .= PHP_EOL.$e->getTraceAsString();
+                if ($job_params['exit-on-fail']) {
+                    throw $e;
+                }
+                $error_message = 'Message: ' . $e->getMessage();
+                if ($e->getCode() != AC_ERR_USER_WARNING) {
+                    $error_message .= PHP_EOL . $e->getTraceAsString();
                 }
                 $this->errors[] = $error_message;
                 $this->echoCli($error_message);

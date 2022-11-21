@@ -450,6 +450,7 @@ h1 a:hover, h2 a:hover, h3  a:hover {
 }
 
 .dropdown-list li:last-child {
+    margin-bottom: 8px;
 }
 
 .dropdown-list li .badge {
@@ -2518,23 +2519,42 @@ body.stickyheader .sticky_left {
 }
 
 .grid-dropdown {
- 	padding-left: 5px;
+    padding-left: 5px;
+    padding-bottom: 5px;
 }
-.grid-dropdown li{
- padding: 5px;
+
+.grid-dropdown li {
+    padding: 5px;
 }
-.grid-dropdown li a{
-	display: block;
-	width: 100%;
-	color: #333 !important;
+
+.grid-dropdown li:hover {
+    background-color: #f5f4f4;
 }
-.grid-dropdown li a:hover{
- color: #5894fb !important;
+
+.grid-dropdown li a {
+    display: block;
+    width: 100%;
+    color: #333 !important;
+    font-size: medium;
 }
+
+.btn_grid .caret {
+    margin-left: 5px !important;
+}
+
+.grid-dropdown li a i.fa {
+    font-size: medium;
+}
+
+.grid-dropdown li a:hover {
+    color: #5894fb !important;
+}
+
 .panel .table > tbody > tr > td,
 .panel .table > tbody > tr > th {
-	vertical-align: middle;
+    vertical-align: middle;
 }
+
 .import-table > thead td {
     text-align: center;
 }

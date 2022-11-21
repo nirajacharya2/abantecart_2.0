@@ -239,6 +239,7 @@ class ControllerPagesSaleCustomerGroup extends AController
         );
 
         $obj = $this->dispatch('responses/common/tabs', array(
+                'customer_group',
                 'sale/customer_group',
                 //parent controller. Use customer group to use for other extensions that will add tabs via their hooks
                 array('tabs' => $tabs)

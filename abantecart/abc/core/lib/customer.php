@@ -225,7 +225,9 @@ class ACustomer extends ALibBase
         /**
          * @var ModelToolOnlineNow $model ;
          */
-        $model->setOnline($ip, $customer_id, $url, $referer);
+        if (!ABC::env('IS_ADMIN')) {
+            $model->setOnline($ip, $customer_id, $url, $referer);
+        }
         //call hooks
         $this->extensions->hk_ProcessData($this, 'constructor', $customer_id);
     }

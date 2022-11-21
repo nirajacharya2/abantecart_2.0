@@ -285,78 +285,85 @@ echo $this->html->buildElement(
 
                         //for viewport mode
                         if ($action['vhref']) {
-                            $href = 'data-toggle="modal" data-target="#viewport_modal" href="'.$action['vhref']
-                                .'" data-fullmode-href="'.$action['href'].'"';
+                            $href = 'data-toggle="modal" data-target="#viewport_modal" href="' . $action['vhref']
+                                . '" data-fullmode-href="' . $action['href'] . '"';
                         } else {
-                            $href = 'href="'.(H::has_value($action['href']) ? $action['href'] : '#').'"';
+                            $href = 'href="' . ($action['href'] ?: '#') . '"';
                         }
 
-                        $html_string .= "actions_urls['".$type."'] = '".$href."';\n";
+                        $html_string .= "actions_urls['" . $type . "'] = '" . $href . "';\n";
                         $html_string .= ' actions += \'';
                         $has_children = isset($action['children']) && $action['children'];
-                        $html_btn = '<a class="btn btn-xs btn_grid tooltips grid_action_'.$type.'" title="'
-                            .htmlentities($action['text'], ENT_QUOTES, ABC::env('APP_CHARSET')).'" data-action-type="'
-                            .$type.'"';
-                        if ($has_children) {
-                            $html_btn .= ' data-toggle="dropdown" aria-expanded="false"';
-                        }
-                        switch ($type) {
-                            case 'edit':
-                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-edit fa-lg"></i>';
-                                break;
-                            case 'delete':
-                                if ($href != 'href="#"') {
-                                    $html_btn .= ' '.$href.' rel="%ID%" data-confirmation="delete"><i class="fa fa-trash fa-lg"></i>';
-                                } else {
-                                    $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-trash fa-lg"></i>';
-                                }
-                                break;
-                            case 'save':
-                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-save fa-lg"></i>';
-                                break;
-                            case 'expand':
-                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-plus-square-o fa-lg"></i>';
-                                break;
-                            case 'restart':
-                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-repeat fa-lg"></i>';
-                                break;
-                            case 'run':
-                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-play fa-lg"></i>';
-                                break;
-                            case 'approve':
-                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-check-square fa-lg"></i>';
-                                break;
-                            case 'actonbehalfof':
-                                $html_btn .= ' '.$href.' target="_blank" rel="%ID%"><i class="fa fa-male fa-lg"></i>';
-                                break;
-                            case 'clone':
-                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-clone fa-lg"></i>';
-                                break;
-                            case 'remote_install':
-                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-play fa-lg"></i>';
-                                break;
-                            case 'install':
-                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-play fa-lg"></i>';
-                                break;
-                            case 'uninstall':
-                                $html_btn .= ' '.$href .' rel="%ID%" data-confirmation="delete"><i class="fa fa-times fa-lg"></i>';
-                                break;
-                            case 'view':
-                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-eye fa-lg"></i>';
-                                break;
-                            case 'tracking':
-                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-box-open fa-lg"></i>';
-                                break;
-                            default:
-                                $html_btn .= ' '.$href.' id="action_'.$type.'_%ID%"  '
-                                    .(!empty($action['target']) ? 'target="'.$action['target'].'"' : '')
-                                    .'><i class="fa fa-'.$type.' fa-lg"></i>';
-                        }
 
-                        if ($has_children) {
-                            $html_btn .= '<span class="caret"></span>';
+                        // allow to use custom buttons as html-code here
+                        if ($action['html']) {
+                            $html_btn = str_replace("\n", '', $action['html']);
+                        } // otherwise use an array
+                        else {
+                            $html_btn = '<a class="btn btn-xs btn_grid tooltips grid_action_' . $type . '" title="'
+                                . htmlentities($action['text'], ENT_QUOTES, ABC::env('APP_CHARSET')) . '" data-action-type="'
+                                . $type . '"';
+                            if ($has_children) {
+                                $html_btn .= ' data-toggle="dropdown" aria-expanded="false"';
+                            }
+                            switch ($type) {
+                                case 'edit':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-edit fa-lg"></i>';
+                                    break;
+                                case 'delete':
+                                    if ($href != 'href="#"') {
+                                        $html_btn .= ' ' . $href . ' rel="%ID%" data-confirmation="delete"><i class="fa fa-trash fa-lg"></i>';
+                                    } else {
+                                        $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-trash fa-lg"></i>';
+                                    }
+                                    break;
+                                case 'save':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-save fa-lg"></i>';
+                                    break;
+                                case 'expand':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-plus-square-o fa-lg"></i>';
+                                    break;
+                                case 'restart':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-repeat fa-lg"></i>';
+                                    break;
+                                case 'run':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-play fa-lg"></i>';
+                                    break;
+                                case 'approve':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-check-square fa-lg"></i>';
+                                    break;
+                                case 'actonbehalfof':
+                                    $html_btn .= ' ' . $href . ' target="_blank" rel="%ID%"><i class="fa fa-male fa-lg"></i>';
+                                    break;
+                                case 'clone':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-clone fa-lg"></i>';
+                                    break;
+                                case 'remote_install':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-play fa-lg"></i>';
+                                    break;
+                                case 'install':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-play fa-lg"></i>';
+                                    break;
+                                case 'uninstall':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%" data-confirmation="delete"><i class="fa fa-times fa-lg"></i>';
+                                    break;
+                                case 'view':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-eye fa-lg"></i>';
+                                    break;
+                                case 'tracking':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-box-open fa-lg"></i>';
+                                    break;
+                                default:
+                                    $html_btn .= ' ' . $href . ' id="action_' . $type . '_%ID%"  '
+                                        . (!empty($action['target']) ? 'target="' . $action['target'] . '"' : '')
+                                        . '><i class="fa fa-' . $type . ' fa-lg"></i>';
+                            }
+
+                            if ($has_children) {
+                                $html_btn .= '<span class="caret"></span>';
+                            }
+                            $html_btn .= '</a>';
                         }
-                        $html_btn .= '</a>';
 
                         //for dropdown
                         if ($action['children']) {
@@ -365,17 +372,23 @@ echo $this->html->buildElement(
                                 .htmlentities($text_select_from_list, ENT_QUOTES, ABC::env('APP_CHARSET'))
                                 .'</h5><ul class="dropdown-list grid-dropdown">';
                             foreach ($action['children'] as $id => $child) {
-                                $li_class = '';
-                                $href = H::has_value($child['href']) ? $child['href'] : '#';
-                                //for viewport mode
-                                if ($child['vhref']) {
-                                    $href = 'data-toggle="modal" data-target="#viewport_modal" href="'.$child['vhref']
-                                        .'" data-fullmode-href="'.$href.'"';
+                                $html_children .= '<li class="' . $id . '">';
+                                if ($child['html']) {
+                                    $html_children .= str_replace("\n", '', $child['html']);
                                 } else {
-                                    $href = 'href="'.$href.'"';
+                                    $href = $child['href'] ?: '#';
+                                    //for viewport mode
+                                    if ($child['vhref']) {
+                                        $href = 'data-toggle="modal" data-target="#viewport_modal" href="' . $child['vhref']
+                                            . '" data-fullmode-href="' . $href . '"';
+                                    } else {
+                                        $href = 'href="' . $href . '"';
+                                    }
+                                    $html_children .= '<a ' . $href . ' rel="' . $id . '">'
+                                        . ($child['icon_class'] ? '<i class="fa fa-' . $child['icon_class'] . ' mr10"></i>' : '')
+                                        . htmlentities($child['text'], ENT_QUOTES, ABC::env('APP_CHARSET')) . '</a>';
                                 }
-                                $html_children .= '<li class="'.$li_class.' '.$id.'"><a '.$href.' rel="'.$id.'">'
-                                    .htmlentities($child['text'], ENT_QUOTES, ABC::env('APP_CHARSET')).'</a></li>';
+                                $html_children .= '</li>';
                             }
                             $html_children .= '</ul></div>';
                             $html_btn = '<div class="btn-group">'.$html_btn.''.$html_children.'</div>';
@@ -386,10 +399,10 @@ echo $this->html->buildElement(
 
                 } // end of action
                 ?>
-                if (actions != '') {
+                if (actions !== '') {
                     var ids = jQuery(table_id).jqGrid('getDataIDs');
                     for (var i = 0; i < ids.length; i++) {
-                        if (ids[i] != 'null') {
+                        if (ids[i] !== 'null') {
                             var _a = actions.replace(/%ID%/g, ids[i]);
                             jQuery(table_id).jqGrid('setRowData', ids[i], {action: _a});
                         }

@@ -1,9 +1,10 @@
-<?php
+<?php /** @noinspection SqlResolve */
+
 /**
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2022 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -22,7 +23,6 @@ use abc\core\ABC;
 use abc\core\engine\ALanguage;
 use abc\core\engine\Registry;
 use abc\core\lib\AConfig;
-use abc\core\lib\ADataEncryption;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
@@ -32,16 +32,20 @@ use abc\core\lib\ASession;
 use abc\core\lib\Atargz;
 use abc\core\lib\AWarning;
 use abc\models\order\Order;
+use abc\models\QueryBuilder;
 use DateTime;
 use DOMDocument;
 use DOMElement;
+use DOMException;
 use DOMNode;
 use DOMXPath;
 use Error;
 use Exception;
+use Illuminate\Database\Connection;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Support\Collection;
 use PharData;
+use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionClass;
 use ReflectionException;
 use SimpleXmlElement;
@@ -118,22 +122,21 @@ class AHelperUtils extends AHelper
      *
      * @return string
      * @throws AException
+     * @throws InvalidArgumentException
      * @throws ReflectionException
      * @since 1.1.8
-     *
      */
 
     public static function moneyDisplayFormat($value, $mode = 'no_round')
     {
-        $registry = Registry::getInstance();
 
-        $decimal_point = $registry->get('language')->get('decimal_point');
+        $decimal_point = Registry::language()->get('decimal_point');
         $decimal_point = !$decimal_point ? '.' : $decimal_point;
 
-        $thousand_point = $registry->get('language')->get('thousand_point');
+        $thousand_point = Registry::language()->get('thousand_point');
         $thousand_point = !$thousand_point ? '' : $thousand_point;
 
-        $currency = $registry->get('currency')->getCurrency();
+        $currency = Registry::currency()->getCurrency();
         $decimal_place = (int)$currency['decimal_place'];
         $decimal_place = !$decimal_place ? 2 : $decimal_place;
 
@@ -446,21 +449,22 @@ class AHelperUtils extends AHelper
 
         if (is_dir($dir)) {
             $objects = scandir($dir);
-            foreach ($objects as $obj) {
-                if ($obj != "." && $obj != "..") {
-                    @chmod($dir.DS.$obj, 0777);
-                    $err = is_dir($dir.DS.$obj) ? static::RemoveDirRecursively($dir.DS.$obj) : @unlink($dir.DS.$obj);
-                    if (!$err) {
-                        $error_text = __METHOD__.": Error: Can't to delete file or directory: '".$dir.DS.$obj."'.";
+            if ($objects) {
+                foreach ($objects as $obj) {
+                    if ($obj != "." && $obj != "..") {
+                        @chmod($dir . DS . $obj, 0777);
+                        $err = is_dir($dir . DS . $obj) ? static::RemoveDirRecursively($dir . DS . $obj) : @unlink($dir . DS . $obj);
+                        if (!$err) {
+                            $error_text = __METHOD__ . ": Error: Can't to delete file or directory: '" . $dir . DS . $obj . "'.";
 
-                        return [
-                            'result'  => false,
-                            'message' => $error_text,
-                        ];
+                            return [
+                                'result'  => false,
+                                'message' => $error_text,
+                            ];
+                        }
                     }
                 }
             }
-            reset($objects);
             $result = @rmdir($dir);
 
             return ['result' => $result];
@@ -618,13 +622,13 @@ class AHelperUtils extends AHelper
      * @return string
      * @throws AException
      * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public static function dateDisplay2ISO($string_date, $format = '')
     {
 
-        if (empty($format)) {
-            $registry = Registry::getInstance();
-            $format = $registry->get('language')->get('date_format_short');
+        if (!$format) {
+            $format = Registry::language()->get('date_format_short');
         }
 
         if ($string_date) {
@@ -644,6 +648,7 @@ class AHelperUtils extends AHelper
      *
      * @return string
      * @throws AException
+     * @throws InvalidArgumentException
      * @throws ReflectionException
      */
     public static function dateISO2Display($iso_date, $format = '')
@@ -672,22 +677,17 @@ class AHelperUtils extends AHelper
      *
      * @return string
      * @throws AException
+     * @throws InvalidArgumentException
      * @throws ReflectionException
      */
     public static function dateInt2Display($int_date, $format = '')
     {
 
-        if (empty($format)) {
-            $registry = Registry::getInstance();
-            $format = $registry->get('language')->get('date_format_short');
+        if (!$format) {
+            $format = Registry::language()->get('date_format_short');
         }
 
-        if ($int_date) {
-            return date($format, $int_date);
-        } else {
-            return '';
-        }
-
+        return $int_date ? date($format, $int_date) : '';
     }
 
     /**
@@ -699,21 +699,20 @@ class AHelperUtils extends AHelper
      *
      * @return string
      * @throws AException
+     * @throws InvalidArgumentException
      * @throws ReflectionException
      */
     public static function dateNowDisplay($format = '')
     {
-        if (empty($format)) {
-            $registry = Registry::getInstance();
-            $format = $registry->get('language')->get('date_format_short');
+        if (!$format) {
+            $format = Registry::language()->get('date_format_short');
         }
-
         return date($format);
     }
 
     /**
-     * @param             $string_date
-     * @param             $date_format
+     * @param string $string_date
+     * @param string $date_format
      * @param null|string $timezone
      *
      * @return int|null
@@ -725,57 +724,17 @@ class AHelperUtils extends AHelper
         if (empty($date_format)) {
             return null;
         }
-        $string_date = empty($string_date) ? date($date_format) : $string_date;
+        $string_date = $string_date ?: date($date_format);
 
         $iso_date = DateTime::createFromFormat($date_format, $string_date, $timezone);
         return $iso_date ? $iso_date->getTimestamp() : null;
-    }
-
-    /**TODO: is really needed??
-     *
-     * @param $date
-     * @param $format
-     *
-     * @return array|bool
-     */
-    public static function strptime($date, $format)
-    {
-        if (function_exists("\strptime")) {
-            return strptime($date, $format);
-        }
-
-        //strptime function with solution for windows
-        $masks = [
-            '%d' => '(?P<d>[0-9]{2})',
-            '%m' => '(?P<m>[0-9]{2})',
-            '%Y' => '(?P<Y>[0-9]{4})',
-            '%H' => '(?P<H>[0-9]{2})',
-            '%M' => '(?P<M>[0-9]{2})',
-            '%S' => '(?P<S>[0-9]{2})',
-        ];
-
-        $regexp = "#".strtr(preg_quote($format), $masks)."#";
-        if (!preg_match($regexp, $date, $out)) {
-            return false;
-        }
-
-        $ret = [
-            "tm_sec"  => (int)$out['S'],
-            "tm_min"  => (int)$out['M'],
-            "tm_hour" => (int)$out['H'],
-            "tm_mday" => (int)$out['d'],
-            "tm_mon"  => $out['m'] ? $out['m'] - 1 : 0,
-            "tm_year" => $out['Y'] > 1900 ? $out['Y'] - 1900 : 0,
-        ];
-
-        return $ret;
     }
 
     /**
      * @param string $extension_txt_id
      *
      * @return SimpleXMLElement | false
-     * @throws ReflectionException
+     * @throws DOMException
      */
     public static function getExtensionConfigXml($extension_txt_id)
     {
@@ -791,9 +750,7 @@ class AHelperUtils extends AHelper
         if (!is_file($filename) || !is_readable($filename)) {
             $ext_configs = false;
         } else {
-            /**
-             * @var $ext_configs SimpleXMLElement|false
-             */
+            /** @var SimpleXMLElement|false $ext_configs */
             $ext_configs = @simplexml_load_file($filename);
         }
 
@@ -911,10 +868,13 @@ class AHelperUtils extends AHelper
      * NOTE: do not try to save into session any data after this function call!
      * Also function returns false on POST-requests!
      *
-     * @param       $user_id int - control panel user_id
-     * @param array $data    data for writing into new session storage
+     * @param int $user_id - control panel user_id
+     * @param array $data data for writing into new session storage
      *
      * @return bool
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public static function startStorefrontSession($user_id, $data = [])
     {
@@ -1106,8 +1066,8 @@ class AHelperUtils extends AHelper
             return false;
         }
 
-        if ($dst == false) {
-            $dst = $src.".gz";
+        if (!$dst) {
+            $dst = $src . ".gz";
         }
         if (file_exists($src)) {
             $src_handle = fopen($src, "r");
@@ -1468,7 +1428,32 @@ class AHelperUtils extends AHelper
         $sz = 'BKMGTP';
         $factor = (int)floor((strlen($bytes) - 1) / 3);
 
-        return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)).@$sz[$factor];
+        return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$sz[$factor];
+    }
+
+    /**
+     * @param string $val
+     * @return int
+     */
+    public static function bytesFromHumanFilesize($val)
+    {
+        $val = trim($val);
+        if (is_numeric($val)) {
+            return $val;
+        }
+
+        $last = strtolower($val[strlen($val) - 1]);
+        $val = substr($val, 0, -1);
+        switch ($last) {
+            case 'g':
+                $val *= 1024;
+            case 'm':
+                $val *= 1024;
+            case 'k':
+                $val *= 1024;
+        }
+
+        return $val;
     }
 
     /**
@@ -1477,7 +1462,6 @@ class AHelperUtils extends AHelper
      * @param $filename
      *
      * @return array
-     * @throws ReflectionException
      */
     public static function get_image_size($filename)
     {
@@ -2016,18 +2000,13 @@ class AHelperUtils extends AHelper
     public static function parseOrderToken( $ot )
     {
         $dcrypt = Registry::dcrypt();
-        /**
-         * @var AConfig $config
-         */
         $config = Registry::config();
         if ( ! $ot || ! $config->get( 'config_guest_checkout' ) ) {
             return [];
         }
 
         //try to decrypt order token
-        /**
-         * @var AEncryption $enc
-         */
+        /** @var AEncryption $enc */
         $enc = ABC::getObjectByAlias('AEncryption', [$config->get('encryption_key')]);
         $decrypted = $enc->decrypt( (string)$ot );
         list( $order_id, $email ) = explode( '::', $decrypted );
@@ -2059,7 +2038,7 @@ class AHelperUtils extends AHelper
      *
      * @return null|string
      * @throws AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      * @throws ReflectionException
      */
     public static function lng(string $key, $block= '', $default_text = '', $section = ''){

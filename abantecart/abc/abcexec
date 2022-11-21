@@ -4,7 +4,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2022 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -60,7 +60,7 @@ if (!preg_match('/^--(.*)$/', $command)) {
 }
 
 try {
-    require __DIR__.DS.'core'.DS.'ABC.php';
+    require __DIR__ . DS . 'core' . DS . 'ABC.php';
     //run constructor of ABC class to load environment
 
     $ABC = new ABC();
@@ -68,14 +68,14 @@ try {
         $ABC->loadDefaultStage();
         echo "Default stage environment loaded.\n\n";
     }
-    require __DIR__.DS.'core'.DS.'init'.DS.'cli.php';
-} catch (\Exception $e) {
-    if (DIRECT){
+    require __DIR__ . DS . 'core' . DS . 'init' . DS . 'cli.php';
+} catch (Exception $e) {
+    if (DIRECT) {
         showException($e);
         exit(1);
-   } else {
+    } else {
         throw $e;
-   }
+    }
 }
 //set sign
 ABC::env('abcexec', true);
@@ -86,7 +86,7 @@ if (!$class || $class == 'help' || $action == 'help') {
 
 //try to get instance of executor or die
 /**
- * @var \abc\commands\Install | array $executor
+ * @var Install | array $executor
  */
 $executor = getExecutor($class);
 

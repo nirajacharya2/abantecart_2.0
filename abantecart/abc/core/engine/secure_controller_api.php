@@ -1,7 +1,24 @@
 <?php
-namespace abc\core\engine;
+/*------------------------------------------------------------------------------
+  $Id$
 
-use abc\core\lib\ARest;
+  AbanteCart, Ideal OpenSource Ecommerce Solution
+  http://www.AbanteCart.com
+
+  Copyright © 2011-2022 Belavier Commerce LLC
+
+  This source file is subject to Open Software License (OSL 3.0)
+  License details is bundled with this package in the file LICENSE.txt.
+  It is also available at this URL:
+  <http://www.opensource.org/licenses/OSL-3.0>
+
+ UPGRADE NOTE:
+   Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+   versions in the future. If you wish to customize AbanteCart for your
+   needs please refer to http://www.AbanteCart.com for more information.
+------------------------------------------------------------------------------*/
+
+namespace abc\core\engine;
 
 class ASecureControllerAPI extends AControllerAPI
 {
@@ -9,7 +26,7 @@ class ASecureControllerAPI extends AControllerAPI
     {
         if (!$this->isLoggedIn()) {
             $this->rest->setResponseData([
-                'error_code' => 401,
+                'error_code'  => 401,
                 'error_title' => 'Unauthorized',
                 'error_text' => 'Not logged in or Login attempt failed!'
             ]);
@@ -43,6 +60,6 @@ class ASecureControllerAPI extends AControllerAPI
         $token = str_replace('Bearer ', '', $headers['Authorization'])
             //deprecated way. do not send token via post!
             ?: $token;
-        return !$token ? false : $this->customer->isLoggedWithToken($token);
+        return $token ? $this->customer->isLoggedWithToken($token) : false;
     }
 }

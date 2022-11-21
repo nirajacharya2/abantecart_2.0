@@ -168,7 +168,7 @@ class Job extends BaseCommand
             $this->errors[] = $e->getMessage().PHP_EOL.$e->getTraceAsString();
         }
 
-        return $result ? true : false;
+        return (bool)$result;
     }
 
     /**
@@ -198,7 +198,7 @@ class Job extends BaseCommand
     }
 
     /**
-     * @return bool
+     * @return bool|array
      * @throws AException
      */
     protected function runNextJobs()
@@ -236,8 +236,8 @@ class Job extends BaseCommand
 
     /**
      * @param $options
-     *
      * @return bool
+     * @throws AException
      */
     protected function runWorker($options)
     {
@@ -254,21 +254,18 @@ class Job extends BaseCommand
 
         $result = false;
         try {
-
-            /**
-             * @var ABaseWorker $worker
-             */
-            $worker = H::getInstance($worker_class_name, $options);
+            /** @var ABaseWorker $worker */
+            $worker = H::getInstance($worker_class_name);
 
             if (!$worker instanceof ABaseWorker) {
-                throw new AException('Class  "'.$worker_class_name.'" is not a worker class!');
+                throw new AException('Class  "' . $worker_class_name . '" is not a worker class!');
             }
             //check methods/ If method not set - try to find "main"
             $run_method = $options['method'];
             $run_method = !$run_method ? 'main' : $run_method;
             $methods = $worker->getModuleMethods();
             if (!in_array($run_method, $methods)) {
-                throw new AException('Cannot to find method '.$run_method.' of worker class '.$worker_class_name.'!');
+                throw new AException('Cannot to find method ' . $run_method . ' of worker class ' . $worker_class_name . '!');
             }
             $result = $worker->runJob(
                 $run_method,
@@ -280,8 +277,12 @@ class Job extends BaseCommand
             if (!$result) {
                 $this->errors = array_merge($this->errors, $worker->errors);
             }
-        } catch (AException $e) {
-            $this->errors[] = $e->getMessage(). $e->getTraceAsString();
+        } catch (\Exception|\Error $e) {
+
+            if ($options['exit-on-fail']) {
+                throw $e;
+            }
+            $this->errors[] = $e->getMessage() . $e->getTraceAsString();
         }
 
         return $result;
@@ -291,7 +292,7 @@ class Job extends BaseCommand
      * @param string $action
      * @param array $options
      *
-     * @return bool|void
+     * @void
      */
     public function finish(string $action, array $options)
     {
@@ -329,13 +330,13 @@ class Job extends BaseCommand
                         ],
                         '--method'   => [
                             'description'   => 'Method of worker class which will be called.'
-                                .' Used with --worker options',
+                                . ' Used with --worker options',
                             'default_value' => '',
                             'required'      => false,
                             'alias'         => '*',
                         ],
                     ],
-                    'example'     => 'php abcexec job:run --job-id=1234',
+                    'example'     => 'php abcexec job:run --job-id=1234 {--exit-on-fail}',
                 ],
             'consumer' =>
                 [
