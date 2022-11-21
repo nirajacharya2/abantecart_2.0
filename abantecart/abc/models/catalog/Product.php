@@ -2789,10 +2789,10 @@ class Product extends BaseModel
         $filter['language_id'] = (int)$filter['language_id'] ?: static::$current_language_id;
 
         $filter['store_id'] = (int)$filter['store_id'];
-        if (!$filter['store_id']) {
+        if (!isset($filter['store_id'])) {
             $filter['store_id'] = ABC::env('IS_ADMIN') === true
-                ? Registry::session()->data['current_store_id']
-                : Registry::config()->get('config_store_id');
+                ? (int) Registry::session()->data['current_store_id']
+                : (int) Registry::config()->get('config_store_id');
         }
 
         $cacheKey = 'product.list.'
@@ -2968,10 +2968,6 @@ class Product extends BaseModel
                 );
             }
 
-//            $query->with(['categories' => function ($query) {
-//                $query->select('categories.category_id');
-//            }]);
-
             if ($filter['manufacturer_id']) {
                 $query->where('products.manufacturer_id', $filter['manufacturer_id']);
             }
@@ -3040,8 +3036,6 @@ class Product extends BaseModel
 
             //allow to extend this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
-
-            $sql = $query->toSql();
 
             $cache = $query->get();
             //add total number of rows into each row
