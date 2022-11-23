@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -20,13 +20,13 @@
 
 namespace abc\controllers\storefront;
 
-use abc\core\engine\AControllerAPI;
+use abc\core\engine\ASecureControllerAPI;
+use abc\extensions\free_shipping\models\storefront\extension\ModelExtensionFreeShipping;
 use abc\models\customer\Address;
 
-class ControllerApiCheckoutShipping extends AControllerAPI
+class ControllerApiCheckoutShipping extends ASecureControllerAPI
 {
     public $error = [];
-    public $data = [];
 
     public function post()
     {
@@ -34,13 +34,9 @@ class ControllerApiCheckoutShipping extends AControllerAPI
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request = $this->rest->getRequestParams();
 
-        if (!$this->customer->isLoggedWithToken($request['token'])) {
-            $this->rest->sendResponse(401, ['error' => 'Not logged in or Login attempt failed!']);
-            return null;
-        }
-        if ($request['mode'] != 'select' && $request['mode'] != 'list') {
+        if (!in_array($request['mode'], ['select', 'list'])) {
             $this->rest->sendResponse(400, ['error' => 'Incorrect request mode!']);
-            return null;
+            return;
         }
 
         //load language from main section
@@ -71,13 +67,21 @@ class ControllerApiCheckoutShipping extends AControllerAPI
         }
 
         if (!$this->cart->hasShipping()) {
-            unset($this->session->data['shipping_address_id']);
-            unset($this->session->data['shipping_method']);
-            unset($this->session->data['shipping_methods']);
+            unset(
+                $this->session->data['shipping_address_id'],
+                $this->session->data['shipping_method'],
+                $this->session->data['shipping_methods']
+            );
 
             $this->tax->setZone($this->session->data['country_id'], $this->session->data['zone_id']);
-            $this->rest->sendResponse(200, ['status' => 0, 'shipping' => 'products do not require shipping']);
-            return null;
+            $this->rest->sendResponse(
+                200,
+                [
+                    'status'   => 0,
+                    'shipping' => 'products do not require shipping'
+                ]
+            );
+            return;
         }
 
         if (!isset($this->session->data['shipping_address_id'])) {
@@ -86,19 +90,28 @@ class ControllerApiCheckoutShipping extends AControllerAPI
 
         if (!$this->session->data['shipping_address_id']) {
             //Problem. Missing shipping address
-            $this->rest->sendResponse(200, ['status' => 4, 'error' => 'Missing shipping address!']);
-            return null;
+            $this->rest->sendResponse(
+                200,
+                [
+                    'status' => 4,
+                    'error'  => 'Missing shipping address!'
+                ]
+            );
+            return;
         }
 
-        $shipping_address = [];
-        if($address = Address::find($this->session->data['shipping_address_id'])){
-            $shipping_address = $address->toArray();
-        }
+        $shipping_address = Address::find($this->session->data['shipping_address_id'])?->toArray();
 
         if (!$shipping_address) {
             //Problem. Missing shipping address
-            $this->rest->sendResponse(500, ['status' => 4, 'error' => 'Inaccessible shipping address!']);
-            return null;
+            $this->rest->sendResponse(
+                400,
+                [
+                    'status' => 4,
+                    'error'  => 'Inaccessible shipping address!'
+                ]
+            );
+            return;
         }
 
         // if tax zone is taken from shipping address
@@ -118,9 +131,9 @@ class ControllerApiCheckoutShipping extends AControllerAPI
 
             $results = $this->model_checkout_extension->getExtensions('shipping');
             foreach ($results as $result) {
-                $this->loadModel('extension/'.$result['key']);
-
-                $quote = $this->{'model_extension_'.$result['key']}->getQuote($shipping_address);
+                /** @var ModelExtensionFreeShipping|object $mdl */
+                $mdl = $this->loadModel('extension/' . $result['key']);
+                $quote = $mdl->getQuote($shipping_address);
 
                 if ($quote) {
                     $quote_data[$result['key']] = [
@@ -150,12 +163,11 @@ class ControllerApiCheckoutShipping extends AControllerAPI
         }
 
         $this->data['address'] = $this->customer->getFormattedAddress(
-                                                                $shipping_address,
-                                                                $shipping_address['address_format']
-                                                            );
-        $this->data['shipping_methods'] =
-            $this->session->data['shipping_methods'] ? $this->session->data['shipping_methods'] : [];
-        $this->data['comment'] = isset($request['comment']) ? $request['comment'] : $this->session->data['comment'];
+            $shipping_address,
+            $shipping_address['address_format']
+        );
+        $this->data['shipping_methods'] = $this->session->data['shipping_methods'] ?: [];
+        $this->data['comment'] = $request['comment'] ?? $this->session->data['comment'];
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
@@ -176,6 +188,6 @@ class ControllerApiCheckoutShipping extends AControllerAPI
 
         //validate post data
         $this->extensions->hk_ValidateData($this);
-        return $this->error ? false : true;
+        return !$this->error;
     }
 }

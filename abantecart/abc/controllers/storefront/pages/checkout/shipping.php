@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -35,11 +35,9 @@ use abc\models\customer\Address;
 class ControllerPagesCheckoutShipping extends AController
 {
     public $error = [];
-    public $data = [];
 
     public function main()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -48,7 +46,7 @@ class ControllerPagesCheckoutShipping extends AController
         $payment_rt = 'checkout/payment';
         $login_rt = 'account/login';
         $address_rt = 'checkout/address/shipping';
-        if ($this->config->get('embed_mode') == true) {
+        if ($this->config->get('embed_mode')) {
             $cart_rt = 'r/checkout/cart/embed';
         }
 
@@ -71,7 +69,9 @@ class ControllerPagesCheckoutShipping extends AController
             abc_redirect($this->html->getSecureURL($payment_rt));
         }
 
-        if (!$this->cart->hasProducts() || (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout'))) {
+        if (!$this->cart->hasProducts()
+            || (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout'))
+        ) {
             abc_redirect($this->html->getSecureURL($cart_rt));
         }
 
@@ -83,9 +83,11 @@ class ControllerPagesCheckoutShipping extends AController
 
         //if no products require shipping go to payment step
         if (!$this->cart->hasShipping()) {
-            unset($this->session->data['shipping_address_id']);
-            unset($this->session->data['shipping_method']);
-            unset($this->session->data['shipping_methods']);
+            unset(
+                $this->session->data['shipping_address_id'],
+                $this->session->data['shipping_method'],
+                $this->session->data['shipping_methods']
+            );
 
             $this->tax->setZone($this->session->data['country_id'], $this->session->data['zone_id']);
             abc_redirect($this->html->getSecureURL($payment_rt, "&back=cart"));
@@ -105,12 +107,12 @@ class ControllerPagesCheckoutShipping extends AController
         $shipping_address = [];
 
         $address = Address::getAddresses(
-                                        $this->customer->getId(),
-                                        $this->language->getLanguageID(),
-                                        $this->session->data['shipping_address_id']
+            $this->customer->getId(),
+            $this->language->getLanguageID(),
+            $this->session->data['shipping_address_id']
         );
 
-        if($address){
+        if ($address) {
             $shipping_address = $address->toArray();
         }
         //something wrong with shipping address go to address selection page
@@ -137,10 +139,10 @@ class ControllerPagesCheckoutShipping extends AController
             $only_method = (array)$this->session->data['shipping_methods'];
             foreach ($only_method as $key => $value) {
                 #Check config if we allowed to set this shipping and skip the step
-                $autoselect = $only_method[$key]['settings'][$key."_autoselect"];
-                if ($autoselect) {
-                    if (sizeof($only_method[$key]['quote']) == 1) {
-                        $this->session->data['shipping_method'] = current($only_method[$key]['quote']);
+                $autoSelect = $value['settings'][$key . "_autoselect"];
+                if ($autoSelect) {
+                    if (sizeof($value['quote']) == 1) {
+                        $this->session->data['shipping_method'] = current($value['quote']);
                         abc_redirect($this->html->getSecureURL($payment_rt, "&back=cart"));
                     }
                 }
@@ -155,21 +157,24 @@ class ControllerPagesCheckoutShipping extends AController
                 'href'      => $this->html->getHomeURL(),
                 'text'      => $this->language->get('text_home'),
                 'separator' => false,
-            ]);
+            ]
+        );
 
         $this->document->addBreadcrumb(
             [
                 'href'      => $this->html->getSecureURL($cart_rt),
                 'text'      => $this->language->get('text_basket'),
                 'separator' => $this->language->get('text_separator'),
-            ]);
+            ]
+        );
 
         $this->document->addBreadcrumb(
             [
                 'href'      => $this->html->getSecureURL($checkout_rt),
                 'text'      => $this->language->get('text_shipping'),
                 'separator' => $this->language->get('text_separator'),
-            ]);
+            ]
+        );
 
         $this->data['error_warning'] = $this->error['warning'];
 
@@ -188,7 +193,8 @@ class ControllerPagesCheckoutShipping extends AController
                 'name'  => 'change_address',
                 'style' => 'button',
                 'text'  => $this->language->get('button_change_address'),
-            ]);
+            ]
+        );
         $this->data['change_address'] = $item;
         $this->data['change_address_href'] = $this->html->getSecureURL($address_rt);
 
@@ -203,9 +209,7 @@ class ControllerPagesCheckoutShipping extends AController
             ]
         );
 
-        $this->data['shipping_methods'] = $this->session->data['shipping_methods']
-            ? $this->session->data['shipping_methods']
-            : [];
+        $this->data['shipping_methods'] = $this->session->data['shipping_methods'] ?: [];
 
         $shipping = $this->session->data['shipping_method']['id'];
         if ($this->data['shipping_methods']) {
@@ -229,7 +233,8 @@ class ControllerPagesCheckoutShipping extends AController
                                 'name'    => 'shipping_method',
                                 'options' => [$val['id'] => ''],
                                 'value'   => $selected,
-                            ]);
+                            ]
+                        );
                     }
                 }
             }
@@ -237,16 +242,15 @@ class ControllerPagesCheckoutShipping extends AController
             $this->data['shipping_methods'] = [];
         }
 
-        $this->data['comment'] = isset($this->request->post['comment'])
-            ? $this->request->post['comment']
-            : $this->session->data['comment'];
+        $this->data['comment'] = $this->request->post['comment'] ?? $this->session->data['comment'];
         $this->data['form']['comment'] = $form->getFieldHtml(
             [
                 'type'  => 'textarea',
                 'name'  => 'comment',
                 'value' => $this->data['comment'],
                 'attr'  => ' rows="3" style="width: 99%" ',
-            ]);
+            ]
+        );
         $this->data['back'] = $this->html->getSecureURL($cart_rt);
         $this->data['form']['back'] = $form->getFieldHtml(
             [
@@ -254,15 +258,17 @@ class ControllerPagesCheckoutShipping extends AController
                 'name'  => 'back',
                 'style' => 'button',
                 'text'  => $this->language->get('button_back'),
-            ]);
+            ]
+        );
         $this->data['form']['continue'] = $form->getFieldHtml(
             [
                 'type' => 'submit',
                 'name' => $this->language->get('button_continue'),
-            ]);
+            ]
+        );
         //render buttons
         $this->view->batchAssign($this->data);
-        if ($this->config->get('embed_mode') == true) {
+        if ($this->config->get('embed_mode')) {
             $this->view->assign('buttons', $this->view->fetch('embed/checkout/shipping.buttons.tpl'));
             //load special headers
             $this->addChild('responses/embed/head', 'head');
@@ -292,14 +298,8 @@ class ControllerPagesCheckoutShipping extends AController
                 }
             }
         }
-
         //validate post data
         $this->extensions->hk_ValidateData($this);
-
-        if (!$this->error) {
-            return true;
-        } else {
-            return false;
-        }
+        return (!$this->error);
     }
 }
