@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -20,9 +20,6 @@
 
 namespace abc\core\engine;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 /**
  * Class APage
@@ -33,9 +30,9 @@ class APage{
 	/**
 	 * @var Registry
 	 */
-	protected $registry;
-	protected $pre_dispatch = array ();
-	protected $error;
+    protected $registry;
+    protected $pre_dispatch = [];
+    protected $error;
 	private $page_id;
 	private $recursion_limit = 0;
 
@@ -56,7 +53,7 @@ class APage{
 	}
 
 	public function addPreDispatch($dispatch_rt){
-		$this->pre_dispatch[] = new ADispatcher($dispatch_rt, array ("instance_id" => "0"));
+        $this->pre_dispatch[] = new ADispatcher($dispatch_rt, ["instance_id" => "0"]);
 	}
 
 	public function build($dispatch_rt){
@@ -99,8 +96,8 @@ class APage{
 				$dispatch_rt = "common/page";
 			}
 			//Do the magic
-			$dispatch = new ADispatcher($dispatch_rt, array ("instance_id" => "0"));
-			$dispatch_rt = $dispatch->dispatch();
+            $dispatch = new ADispatcher($dispatch_rt, ["instance_id" => "0"]);
+            $dispatch_rt = $dispatch->dispatch();
 		}
 
 		unset($dispatch);

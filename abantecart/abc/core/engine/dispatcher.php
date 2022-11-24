@@ -301,18 +301,20 @@ final class ADispatcher
 
                 $rfl = new ReflectionClass($controller);
                 $method = $rfl->getMethod($this->method);
-                $allParameters = $method->getParameters();
-                if ($allParameters) {
-                    $methodParams = [];
-                    foreach ($allParameters as $p) {
-                        if (isset($args[$p->name])) {
-                            $methodParams[$p->name] = $args[$p->name];
+                if ($method) {
+                    $allParameters = $method->getParameters();
+                    if ($allParameters) {
+                        $methodParams = [];
+                        foreach ($allParameters as $p) {
+                            if (isset($args[$p->name])) {
+                                $methodParams[$p->name] = $args[$p->name];
+                            }
                         }
-                    }
-                    if ($methodParams && H::isAssocArray($args)) {
-                        $args = $methodParams;
-                    } elseif (!$methodParams && H::isAssocArray($args)) {
-                        $args = [];
+                        if ($methodParams && H::isAssocArray($args)) {
+                            $args = $methodParams;
+                        } elseif (!$methodParams && H::isAssocArray($args)) {
+                            $args = [];
+                        }
                     }
                 }
 
