@@ -66,7 +66,7 @@ final class AResponse
 
     public function addJSONHeader()
     {
-        $this->headers['Content-Type'] = 'Content-Type: application/json;';
+        $this->headers['Content-Type'] = 'Content-Type: application/json';
     }
 
     /**
