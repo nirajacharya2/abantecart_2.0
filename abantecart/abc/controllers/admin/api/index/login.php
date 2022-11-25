@@ -37,7 +37,7 @@ class ControllerApiIndexLogin extends AControllerAPI
     {
         //This is a login attempt
         $request = $this->rest->getRequestParams();
-        if (isset($request['token'])) {
+        if (trim($request['token'])) {
             //this is the request to authorized
             $this->_validate_token($request['token']);
         } else {

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,8 +22,6 @@ namespace abc\controllers\storefront;
 
 use abc\core\engine\AControllerAPI;
 use abc\models\customer\Address;
-use abc\core\engine\BaseErrorResponse;
-use abc\core\engine\SecureRequestModel;
 
 
 class ControllerApiAccountLogin extends AControllerAPI
@@ -62,13 +60,13 @@ class ControllerApiAccountLogin extends AControllerAPI
         $this->extensions->hk_InitData($this, __FUNCTION__);
         //This is login attempt
         $request = $this->rest->getRequestParams();
-        if (isset($request['token'])) {
+        if (trim($request['token'])) {
             //this is the request to authorized
             if ($this->customer->isLoggedWithToken($request['token'])) {
                 $this->rest->setResponseData([
-                    'status' => 1,
+                    'status'  => 1,
                     'success' => 'authorized',
-                    'token' => $request['token']
+                    'token'   => $request['token']
                 ]);
                 $this->rest->sendResponse(200);
                 return null;
@@ -130,7 +128,7 @@ class ControllerApiAccountLogin extends AControllerAPI
             return false;
         } else {
             unset($this->session->data['guest']);
-
+            /** @var Address $address */
             $address = Address::where('customer_id', '=', $this->customer->getAddressId())
                               ->orderBy('address_id', 'desc')->first();
             $this->session->data['country_id'] = $address->country_id;
@@ -139,4 +137,3 @@ class ControllerApiAccountLogin extends AControllerAPI
         }
     }
 }
-
