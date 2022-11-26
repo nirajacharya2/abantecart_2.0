@@ -2187,6 +2187,7 @@ class ResourceImageHtmlElement extends HtmlElement
  * @property bool $required
  * @property string $dateformat
  * @property string $highlight
+ * @property array $extra
  */
 class DateHtmlElement extends HtmlElement
 {
@@ -2234,7 +2235,8 @@ class DateHtmlElement extends HtmlElement
                 'required'   => $this->required,
                 'style'      => $this->style,
                 'dateformat' => $this->dateformat ?: H::format4Datepicker($this->language->get('date_format_short')),
-                'highlight'  => $this->highlight
+                'highlight'  => $this->highlight,
+                'extra'      => $this->extra
             ]
         );
         if (!empty($this->help_url)) {

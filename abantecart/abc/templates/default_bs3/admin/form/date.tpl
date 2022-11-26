@@ -24,8 +24,12 @@
     $(document).ready(
         function () {
             $('#<?php echo $id ?>').datepicker(
+                <?php // merge two js-objects ?>
                 {
-                    dateFormat: '<?php echo $dateformat ?>'
+                    ...{
+                        dateFormat: '<?php echo $dateformat ?>',
+                    },
+                    <?php echo $extra ? '...' . json_encode($extra) : '';?>
                 }
             );
             <?php if ( $highlight == 'past' ){ ?>
