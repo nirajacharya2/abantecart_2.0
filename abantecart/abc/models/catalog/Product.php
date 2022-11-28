@@ -2356,8 +2356,7 @@ class Product extends BaseModel
         /**
          * @var QueryBuilder $query
          */
-        $query = ProductOption::with('description')
-            ->with('values', 'values.description')
+        $query = ProductOption::with('description', 'values', 'values.description')
             ->where(
                 [
                     'product_id' => $product_id,
@@ -2763,9 +2762,7 @@ class Product extends BaseModel
      *              - with_stock_info
      *
      * @return false|Collection|mixed
-     * @throws AException
      * @throws InvalidArgumentException
-     * @throws ReflectionException
      */
     public static function getProducts(array $params = [])
     {
@@ -2791,8 +2788,8 @@ class Product extends BaseModel
         $filter['store_id'] = (int)$filter['store_id'];
         if (!isset($filter['store_id'])) {
             $filter['store_id'] = ABC::env('IS_ADMIN') === true
-                ? (int) Registry::session()->data['current_store_id']
-                : (int) Registry::config()->get('config_store_id');
+                ? (int)Registry::session()->data['current_store_id']
+                : (int)Registry::config()->get('config_store_id');
         }
 
         $cacheKey = 'product.list.'
@@ -2802,6 +2799,8 @@ class Product extends BaseModel
 
         if ($cache === null) {
             $db = Registry::db();
+            //override to use prepared version of filter inside hooks
+            $params['filter'] = $filter;
 
             //full table names
             $p_table = $db->table_name('products');
@@ -2915,38 +2914,40 @@ class Product extends BaseModel
             if ($filter['keyword']) {
                 $tags = explode(' ', trim($filter['keyword']));
                 $query->where(
-                    function ($query) use ($filter, $tags, $db, $pt_table, $pd_table, $p_table) {
-                        /** @var QueryBuilder $query */
+                    function ($subQuery) use ($params, $tags, $db, $pt_table, $pd_table, $p_table) {
+                        $filter = $params['filter'];
+                        /** @var QueryBuilder $subQuery */
                         if (sizeof($tags) > 1) {
-                            $query->orWhereRaw(
+                            $subQuery->orWhereRaw(
                                 "LCASE(" . $pt_table . ".tag) = '"
-                                . $db->escape(mb_strtolower(trim($filter['keyword'])))
-                                . "'"
+                                . $db->escape(mb_strtolower(trim($filter['keyword']))) . "'"
                             );
                         }
                         foreach ($tags as $tag) {
-                            $query->orWhereRaw(
-                                "LCASE(" . $pt_table . ".tag) = '" . $db->escape(mb_strtolower(trim($tag)))
-                                . "'"
+                            $subQuery->orWhereRaw(
+                                "LCASE(" . $pt_table . ".tag) = '" . $db->escape(mb_strtolower(trim($tag))) . "'"
                             );
                         }
-                        $query->orWhereRaw(
+                        $subQuery->orWhereRaw(
                             "LCASE(" . $pd_table . ".name) LIKE '%"
                             . $db->escape(mb_strtolower($filter['keyword']), true) . "%'"
                         );
                         if ($filter['description']) {
-                            $query->orWhereRaw(
+                            $subQuery->orWhereRaw(
                                 "LCASE(" . $pd_table . ".description) LIKE '%"
-                                . $db->escape(mb_strtolower($filter['keyword']), true)
-                                . "%'"
+                                . $db->escape(mb_strtolower($filter['keyword']), true) . "%'"
                             );
                         }
                         if ($filter['model']) {
-                            $query->orWhereRaw(
-                                "LCASE(" . $p_table . ".model) LIKE '%" . $db->escape(mb_strtolower($filter['keyword']), true)
-                                . "%'"
+                            $subQuery->orWhereRaw(
+                                "LCASE(" . $p_table . ".model) LIKE '%"
+                                . $db->escape(mb_strtolower($filter['keyword']), true) . "%'"
                             );
                         }
+                        //allow to extend search criteria
+                        $hookParams = $params;
+                        $hookParams['subquery_keyword'] = true;
+                        Registry::extensions()->hk_extendQuery(new static, 'getProducts', $subQuery, $hookParams);
                     }
                 );
             }
@@ -2980,10 +2981,10 @@ class Product extends BaseModel
             }
 
             if ($filter['price_from']) {
-                $query->where('price', '>=', (double) $filter['price_from']);
+                $query->where('price', '>=', (double)$filter['price_from']);
             }
             if ($filter['price_to']) {
-                $query->where('price', '<=', (double) $filter['price_to']);
+                $query->where('price', '<=', (double)$filter['price_to']);
             }
 
             //show only enabled and available products for storefront!
@@ -3035,7 +3036,7 @@ class Product extends BaseModel
             }
 
             //allow to extend this method from extensions
-            Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
+            Registry::extensions()->hk_extendQuery(new static, 'getProducts', $query, $params);
 
             $cache = $query->get();
             //add total number of rows into each row
@@ -3056,9 +3057,7 @@ class Product extends BaseModel
      * @param array $filter
      *
      * @return array|false|Collection|mixed
-     * @throws AException
      * @throws InvalidArgumentException
-     * @throws ReflectionException
      */
     public static function getPopularProducts($limit = 0, $filter = [])
     {
@@ -3079,9 +3078,7 @@ class Product extends BaseModel
      * @param $filter
      *
      * @return array|false|Collection|mixed
-     * @throws AException
      * @throws InvalidArgumentException
-     * @throws ReflectionException
      */
     public static function getLatestProducts($limit = 0, $filter = [])
     {
@@ -3101,9 +3098,7 @@ class Product extends BaseModel
      * @param array $data
      *
      * @return array|false|Collection|mixed
-     * @throws AException
      * @throws InvalidArgumentException
-     * @throws ReflectionException
      *
      */
     public static function getProductSpecials($data = [])
