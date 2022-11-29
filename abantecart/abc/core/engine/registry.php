@@ -40,6 +40,7 @@ use abc\core\lib\AOrderStatus;
 use abc\core\lib\ARequest;
 use abc\core\lib\AResponse;
 use abc\core\lib\ASession;
+use abc\core\lib\ATax;
 use abc\core\lib\AUser;
 use abc\core\lib\CSRFToken;
 use abc\models\admin\ModelLocalisationCountry;
@@ -67,6 +68,7 @@ use abc\models\admin\ModelToolOnlineNow;
  * @method static AHtml html()
  * @method static AUser user()
  * @method static ACurrency currency()
+ * @method static ATax tax()
  * @method static ADownload download()
  * @method static AbcCache cache()
  * @method static AOrderStatus order_status()
