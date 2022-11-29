@@ -59,25 +59,6 @@ trait ProductListingTrait
 
         $productIds = $list->pluck('product_id')->toArray();
 
-        $page = $request['page'] ?? 1;
-        if (isset($request['limit'])) {
-            $limit = (int)$request['limit'];
-            $limit = min($limit, 50);
-        } else {
-            $limit = $this->config->get('config_catalog_limit');
-        }
-
-        $sorting_href = $request['sort'];
-        if (!$sorting_href || !isset($this->data['sorts'][$request['sort']])) {
-            $sorting_href = $this->config->get('config_product_default_sort_order');
-        }
-        list($sort, $order) = explode("-", $sorting_href);
-        if ($sort == 'name') {
-            $sort = 'pd.' . $sort;
-        } elseif (in_array($sort, ['sort_order', 'price'])) {
-            $sort = 'p.' . $sort;
-        }
-
         //get thumbnails by one pass
         $resource = new AResource('image');
         $thumbnails = $resource->getMainThumbList(

@@ -1059,6 +1059,7 @@ class Product extends BaseModel
      * @param QueryBuilder $builder
      * @param int $customer_group_id
      * @param Carbon|null $toDate
+     * @return string - sql sub-query of final price
      */
     public static function scopeWithFinalPrice($builder, $customer_group_id, Carbon $toDate = null)
     {
@@ -1077,8 +1078,9 @@ class Product extends BaseModel
                     ORDER BY p2sp.priority ASC, p2sp.price ASC 
                     LIMIT 1
                  ) ";
-        $sql = "COALESCE( " . $sql . ", " . Registry::db()->table_name("products") . ".price) as final_price";
-        $builder->selectRaw($sql);
+        $sql = "COALESCE( " . $sql . ", " . Registry::db()->table_name("products") . ".price)";
+        $builder->selectRaw($sql . " as final_price");
+        return $sql;
     }
 
     /**
@@ -2732,7 +2734,7 @@ class Product extends BaseModel
 
     /**
      * Search method of model
-     * @param array $params
+     * @param array $params = [
      *   common parameters:
      *              - sort
      *              - order
@@ -2750,6 +2752,8 @@ class Product extends BaseModel
      *              - keyword
      *              - language_id
      *              - store_id
+     *              - price_from
+     *              - price_to
      *
      *  parameters for data set:
      *              - with_all
@@ -2766,6 +2770,8 @@ class Product extends BaseModel
      */
     public static function getProducts(array $params = [])
     {
+        $finalPriceSql = '';
+
         $params['sort'] = $params['sort'] ?? 'products.sort_order';
         $params['order'] = $params['order'] ?? 'ASC';
         $params['start'] = max($params['start'], 0);
@@ -2812,7 +2818,7 @@ class Product extends BaseModel
             $query = self::selectRaw(Registry::db()->raw_sql_row_count() . ' ' . $p_table . '.*');
             if ($params['with_final_price'] || $params['with_all']) {
                 /** @see Product::scopeWithFinalPrice() */
-                $query->WithFinalPrice($filter['customer_group_id']);
+                $finalPriceSql = $query->WithFinalPrice($filter['customer_group_id']);
             }
             if ($params['with_special_price'] || $params['with_all']) {
                 /** @see Product::scopeWithFirstSpecialPrice() */
@@ -2980,11 +2986,20 @@ class Product extends BaseModel
                 $query->whereNotIn('products.product_id', (array)$filter['exclude']);
             }
 
-            if ($filter['price_from']) {
-                $query->where('price', '>=', (double)$filter['price_from']);
-            }
-            if ($filter['price_to']) {
-                $query->where('price', '<=', (double)$filter['price_to']);
+            if ($filter['price_from'] || $filter['price_to']) {
+                if ($finalPriceSql) {
+                    $query->whereRaw(
+                        $finalPriceSql . ' BETWEEN ' . ((double)$filter['price_from'] ?: 0.0) . ' AND ' . ((double)$filter['price_to'] ?: 100000000)
+                    );
+                } else {
+                    $query->whereBetween(
+                        'price',
+                        [
+                            (double)$filter['price_from'] ?: 0.0,
+                            (double)$filter['price_to'] ?: 100000000
+                        ]
+                    );
+                }
             }
 
             //show only enabled and available products for storefront!

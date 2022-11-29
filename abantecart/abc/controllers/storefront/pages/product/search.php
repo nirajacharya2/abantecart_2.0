@@ -53,15 +53,62 @@ class ControllerPagesProductSearch extends AController
     {
         $this->loadModel('tool/seo_url');
 
-        $request = $this->request->get;
+        $request = array_merge($this->request->get, $this->request->post);
         $this->path = explode(',', $request['category_id']);
 
         //is this an embed mode
-        if ($this->config->get('embed_mode') == true) {
+        if ($this->config->get('embed_mode')) {
             $cart_rt = 'r/checkout/cart/embed';
         } else {
             $cart_rt = 'checkout/cart';
         }
+
+        if (isset($request['category_id'])) {
+            $category_id = explode(',', $request['category_id']);
+            end($category_id);
+            $category_id = current($category_id);
+        } else {
+            $category_id = '';
+        }
+
+        $page = $request['page'] ?? 1;
+
+        $sorting_href = $request['sort'];
+        if (!$sorting_href || !isset($this->data['sorts'][$request['sort']])) {
+            $sorting_href = $this->config->get('config_product_default_sort_order');
+        }
+
+        list($sort, $order) = explode("-", $sorting_href);
+
+        $limit = $this->config->get('config_catalog_limit');
+        if (isset($request['limit']) && intval($request['limit']) > 0) {
+            $limit = intval($request['limit']);
+            if ($limit > 50) {
+                $limit = 50;
+            }
+        }
+
+        $this->data['search_parameters'] =
+            [
+                'with_final_price'    => true,
+                'with_discount_price' => true,
+                'with_special_price'  => true,
+                'with_rating'         => true,
+                'with_stock_info'     => true,
+                'with_option_count'   => true,
+                'filter'              => [
+                    'keyword'     => $request['keyword'],
+                    'category_id' => $category_id,
+                    'model'       => $request['model'],
+                    'description' => $request['description'],
+                    'price_from'  => $request['price_from'],
+                    'price_to'    => $request['price_to'],
+                ],
+                'sort'                => $sort,
+                'order'               => $order,
+                'start'               => ($page - 1) * $limit,
+                'limit'               => $limit,
+            ];
 
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
@@ -115,15 +162,6 @@ class ControllerPagesProductSearch extends AController
             ]
         );
 
-        $page = $request['page'] ?? 1;
-
-        $sorting_href = $request['sort'];
-        if (!$sorting_href || !isset($this->data['sorts'][$request['sort']])) {
-            $sorting_href = $this->config->get('config_product_default_sort_order');
-        }
-
-        list($sort, $order) = explode("-", $sorting_href);
-
         $this->data['keyword'] = $this->html->buildElement(
             [
                 'type'  => 'input',
@@ -176,52 +214,18 @@ class ControllerPagesProductSearch extends AController
         ]);
 
         if (isset($request['keyword'])) {
-            if (isset($request['category_id'])) {
-                $category_id = explode(',', $request['category_id']);
-                end($category_id);
-                $category_id = current($category_id);
-            } else {
-                $category_id = '';
-            }
+            /** @see Product::getProducts() */
+            $productsList = Product::search($this->data['search_parameters']);
 
-            $limit = $this->config->get('config_catalog_limit');
-            if (isset($request['limit']) && intval($request['limit']) > 0) {
-                $limit = intval($request['limit']);
-                if ($limit > 50) {
-                    $limit = 50;
-                }
-            }
-
-            /** @see Product::getProducts() $productsList */
-            $productsList = Product::search(
-                [
-                    'with_final_price'    => true,
-                    'with_discount_price' => true,
-                    'with_special_price'  => true,
-                    'with_rating'         => true,
-                    'with_stock_info'     => true,
-                    'with_option_count'   => true,
-                    'filter'              => [
-                        'keyword'     => $request['keyword'],
-                        'category_id' => $category_id,
-                        'model'       => $request['model'],
-                        'description' => $request['description'],
-                    ],
-                    'sort'                => $sort,
-                    'order'               => $order,
-                    'start'               => ($page - 1) * $limit,
-                    'limit'               => $limit,
-                ]
-            );
             $product_total = $productsList[0]['total_num_rows'];
             if ($product_total) {
                 $url = '';
                 if (isset($request['category_id'])) {
-                    $url .= '&category_id='.$request['category_id'];
+                    $url .= '&category_id=' . $request['category_id'];
                 }
 
                 if (isset($request['description'])) {
-                    $url .= '&description='.$request['description'];
+                    $url .= '&description=' . $request['description'];
                 }
 
                 if (isset($request['model'])) {
