@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2022 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -31,11 +31,13 @@ class ModelExtensionFreeShipping extends Model
         $language->load('free_shipping/free_shipping');
 
         if ($this->config->get('free_shipping_status')) {
-            $query = $this->db->query("SELECT *
-                                        FROM ".$this->db->table_name("zones_to_locations")."
-                                        WHERE location_id = '".(int)$this->config->get('free_shipping_location_id')."'
-                                            AND country_id = '".(int)$address['country_id']."'
-                                            AND (zone_id = '".(int)$address['zone_id']."' OR zone_id IS NULL )");
+            $query = $this->db->query(
+                "SELECT *
+                FROM " . $this->db->table_name("zones_to_locations") . "
+                WHERE location_id = '" . (int)$this->config->get('free_shipping_location_id') . "'
+                    AND country_id = '" . (int)$address['country_id'] . "'
+                    AND (zone_id = '" . (int)$address['zone_id'] . "' OR zone_id IS NULL )"
+            );
 
             if (!$this->config->get('free_shipping_location_id')) {
                 $status = true;
@@ -69,7 +71,7 @@ class ModelExtensionFreeShipping extends Model
                 'id'         => 'free_shipping',
                 'title'      => $language->get('text_title'),
                 'quote'      => $quote_data,
-                'sort_order' => $this->config->get('free_shipping_sort_order'),
+                'sort_order' => (int)$this->config->get('free_shipping_sort_order'),
                 'error'      => false,
             ];
         }
