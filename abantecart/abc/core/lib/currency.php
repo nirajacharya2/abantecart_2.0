@@ -350,7 +350,7 @@ class ACurrency
     public function getValue($currency)
     {
         if (isset($this->currencies[$currency])) {
-            return $this->currencies[$currency]['value'];
+            return (float)$this->currencies[$currency]['value'];
         } else {
             return 0.00;
         }
