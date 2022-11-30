@@ -364,8 +364,8 @@ class AOrder extends ALibBase
         $thumbnails = $resource->getMainThumbList(
             'products',
             $product_ids,
-            $this->config->get('config_image_product_width'),
-            $this->config->get('config_image_product_height')
+            $inData['thumbnail_width'] ?: $this->config->get('config_image_product_width'),
+            $inData['thumbnail_height'] ?: $this->config->get('config_image_product_height')
         );
 
         foreach ($cartProducts as $key => $product) {

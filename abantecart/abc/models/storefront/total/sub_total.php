@@ -61,7 +61,7 @@ class ModelTotalSubTotal extends Model
                 'text'       => $converted_sum_txt,
                 'converted'  => $converted_sum,
                 'value'      => $subtotal,
-                'sort_order' => $this->config->get('sub_total_sort_order'),
+                'sort_order' => (int)$this->config->get('sub_total_sort_order'),
                 'total_type' => $this->config->get('sub_total_total_type'),
             ];
             $total += $this->cart->getSubTotal();

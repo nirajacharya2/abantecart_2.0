@@ -29,10 +29,10 @@ class ModelTotalShipping extends Model
             $total_data[] = [
                 'id'         => 'shipping',
                 'key'        => 'shipping',
-                'title'      => $ship_data['title'].':',
+                'title'      => $ship_data['title'] . ':',
                 'text'       => $this->currency->format($ship_data['cost']),
                 'value'      => $ship_data['cost'],
-                'sort_order' => $this->config->get('shipping_sort_order'),
+                'sort_order' => (int)$this->config->get('shipping_sort_order'),
                 'total_type' => $this->config->get('shipping_total_type'),
             ];
 

@@ -119,13 +119,13 @@ class ModelTotalCoupon extends Model
                 $total_data[] = [
                     'id'         => 'coupon',
                     'key'        => 'coupon',
-                    'title'      => $coupon['name'].':',
-                    'text'       => '-'.$this->currency->format($discount_total),
+                    'title'      => $coupon['name'] . ':',
+                    'text'       => '-' . $this->currency->format($discount_total),
                     'value'      => -$discount_total,
                     'data'       => [
                         'coupon_details' => $coupon,
                     ],
-                    'sort_order' => $this->config->get('coupon_sort_order'),
+                    'sort_order' => (int)$this->config->get('coupon_sort_order'),
                     'total_type' => $this->config->get('coupon_total_type'),
                 ];
 

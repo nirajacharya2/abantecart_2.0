@@ -64,9 +64,9 @@ class ModelTotalTax extends Model
                         $decimal_place = 2;
                         $tax_amount = round($tax_amount, $decimal_place);
                         if ($tax_amount > 0) {
-                            $sort_order = $this->config->get('tax_sort_order');
+                            $sort_order = (int)$this->config->get('tax_sort_order');
                             if (is_numeric($tax_class['priority'])) {
-                                $sort_order = $sort_order.'.'.$tax_class['priority'];
+                                $sort_order = (float)$sort_order . '.' . $tax_class['priority'];
                             }
 
                             $total_data[] = [
