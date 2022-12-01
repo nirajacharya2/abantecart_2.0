@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -46,12 +46,9 @@ class ControllerApiAccountLogout extends ASecureControllerAPI
     public function post()
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
-        $request_data = $this->rest->getRequestParams();
-
         $this->logout();
-        $this->rest->setResponseData(array('status' => 1, 'success' => 'Logged out',));
+        $this->rest->setResponseData(['status' => 1, 'success' => 'Logged out',]);
         $this->rest->sendResponse(200);
-        return null;
     }
 
     /**
@@ -76,12 +73,15 @@ class ControllerApiAccountLogout extends ASecureControllerAPI
     public function get()
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
-        $request_data = $this->rest->getRequestParams();
-
         $this->logout();
-        $this->rest->setResponseData(array('status' => 1, 'success' => 'Logged out',));
+        $this->rest->setResponseData(
+            [
+                'status'  => 1,
+                'success' => 'Logged out'
+            ]
+        );
+
         $this->rest->sendResponse(200);
-        return null;
     }
 
     protected function logout()
@@ -90,22 +90,18 @@ class ControllerApiAccountLogout extends ASecureControllerAPI
         $this->customer->logout();
         $this->cart->clear();
 
-        unset($this->session->data['shipping_address_id']);
-        unset($this->session->data['shipping_method']);
-        unset($this->session->data['shipping_methods']);
-        unset($this->session->data['payment_address_id']);
-        unset($this->session->data['payment_method']);
-        unset($this->session->data['payment_methods']);
-        unset($this->session->data['comment']);
-        unset($this->session->data['order_id']);
-        unset($this->session->data['coupon']);
+        unset(
+            $this->session->data['shipping_address_id'],
+            $this->session->data['shipping_method'],
+            $this->session->data['shipping_methods'],
+            $this->session->data['payment_address_id'],
+            $this->session->data['payment_method'],
+            $this->session->data['payment_methods'],
+            $this->session->data['comment'],
+            $this->session->data['order_id'],
+            $this->session->data['coupon']
+        );
 
-        if ($this->config->get('config_tax_store')) {
-            $country_id = $this->config->get('config_country_id');
-            $zone_id = $this->config->get('config_zone_id');
-        } else {
-            $country_id = $zone_id = 0;
-        }
-        $this->tax->setZone($country_id, $zone_id);
+        session_destroy();
     }
 }

@@ -188,7 +188,7 @@ final class ASession
         if (empty($session_id) || in_array($session_id, $reserved)) {
             return false;
         } else {
-            return preg_match('/^[-,a-zA-Z0-9]{1,128}$/', $session_id) > 0;
+            return preg_match('/^[-,a-zA-Z0-9]{25,128}$/', $session_id) > 0;
         }
     }
 }
