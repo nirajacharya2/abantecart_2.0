@@ -181,7 +181,11 @@ final class ASession
      */
     protected function isSessionIdValid($session_id)
     {
-        if (empty($session_id)) {
+        $reserved = [
+            'null',
+            'undefined',
+        ];
+        if (empty($session_id) || in_array($session_id, $reserved)) {
             return false;
         } else {
             return preg_match('/^[-,a-zA-Z0-9]{1,128}$/', $session_id) > 0;
