@@ -38,7 +38,12 @@ class ContentsToStore extends BaseModel
      */
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
-        'category_id',
+        'content_id',
+        'store_id'
+    ];
+
+    protected $fillable = [
+        'content_id',
         'store_id'
     ];
 

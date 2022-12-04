@@ -22,15 +22,19 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use abc\models\catalog\UrlAlias;
+use abc\models\content\Content;
+use abc\models\content\ContentsToStore;
 use Exception;
 use H;
+use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 
 /**
  * Class AContentManager
  *
- * @property ADB                    $db
- * @property ALanguageManager       $language
+ * @property ADB $db
+ * @property ALanguageManager $language
  * @property AConfig                $config
  * @property ASession               $session
  * @property AbcCache               $cache
@@ -65,77 +69,94 @@ class AContentManager
     /**
      * @param array $data
      *
-     * @return int
-     * @throws AException
+     * @return int|false
+     * @throws InvalidArgumentException
      */
     public function addContent($data)
     {
         if (!is_array($data) || !$data) {
             return false;
         }
-        $sql = "INSERT INTO ".$this->db->table_name("contents")." 
-                            (parent_content_id, sort_order, status, hide_title)
-                             VALUES (".((int) $data['parent_content_id'][0] ? : "NULL").",  
-                                    '".( int ) $data ['sort_order'][0]."',
-                                    '".( int ) $data ['status']."', 
-                                    '".(int) $data ['hide_title']."')";
-        $this->db->query($sql);
-        $content_id = (int) $this->db->getLastId();
-        //exclude first record from loop above
-        unset($data['parent_content_id'][0], $data ['sort_order'][0]);
 
-        if (empty ($data['keyword'])) {
-            $seo_key = H::SEOEncode($data['title'], 'content_id', $content_id);
-        } else {
-            $seo_key = H::SEOEncode($data['keyword'], 'content_id', $content_id);
-        }
-        if ($seo_key) {
-            $this->language->replaceDescriptions('url_aliases',
-                ['query' => "content_id=".( int )$content_id],
-                [(int)$this->language->getContentLanguageID() => ['keyword' => $seo_key]]);
-        } else {
-            $this->db->query(
-                "DELETE
-                FROM ".$this->db->table_name("url_aliases")." 
-                WHERE query = 'content_id=".$content_id."'
-                    AND language_id = '".(int) $this->language->getContentLanguageID()."'"
-            );
-        }
-
-        if ($data['parent_content_id']) {
-            foreach ($data['parent_content_id'] as $k => $parent_id) {
-                $sql = "INSERT INTO ".$this->db->table_name("contents")." 
-                            (content_id,parent_content_id, sort_order, status)
-                        VALUES ('".$content_id."',
-                                '".(int) $parent_id."',
-                                '".( int ) $data['sort_order'][$k]."',
-                                '".( int ) $data ['status']."')";
-                $this->db->query($sql);
-            }
-        }
-        $languages = $this->language->getAvailableLanguages();
-
-        foreach ($languages as $language) {
-            $this->language->replaceDescriptions(
-                'content_descriptions',
-                ['content_id' => $content_id],
+        $this->db->beginTransaction();
+        try {
+            $content = new Content(
                 [
-                    ( int ) $language['language_id'] => [
-                        'title'            => $data ['title'],
-                        'description'      => $data ['description'],
-                        'meta_description' => $data ['meta_description'],
-                        'meta_keywords'    => $data ['meta_keywords'],
-                        'content'          => $data ['content'],
-                    ],
+                    'parent_content_id' => $data['parent_content_id'][0],
+                    'sort_order'        => ( int )$data ['sort_order'][0],
+                    'status'            => ( int )$data ['status'],
+                    'hide_title'        => (int)$data ['hide_title']
                 ]
             );
-        }
-        if ($data ['store_id']) {
-            foreach ($data ['store_id'] as $store_id) {
-                $sql = "INSERT INTO ".$this->db->table_name("contents_to_stores")." (content_id,store_id)
-                                VALUES ('".$content_id."','".(int) $store_id."')";
-                $this->db->query($sql);
+            $content->save();
+
+            $content_id = $content->content_id;
+            //exclude first record from loop above
+            unset($data['parent_content_id'][0], $data ['sort_order'][0]);
+
+            $seo_key = H::SEOEncode(
+                $data['keyword'] ?: $data['title'],
+                'content_id',
+                $content_id
+            );
+
+            if ($seo_key) {
+                $this->language->replaceDescriptions('url_aliases',
+                    ['query' => "content_id=" . ( int )$content_id],
+                    [(int)$this->language->getContentLanguageID() => ['keyword' => $seo_key]]);
+            } else {
+                UrlAlias::where('query', '=', 'content_id=' . $content_id)
+                    ->where('language_id', $this->language->getContentLanguageID())
+                    ->delete();
             }
+
+            if ($data['parent_content_id']) {
+                foreach ($data['parent_content_id'] as $k => $parent_id) {
+                    $cnt = new Content(
+                        [
+                            'content_id'        => $content_id,
+                            'parent_content_id' => (int)$parent_id,
+                            'sort_order'        => ( int )$data['sort_order'][$k],
+                            'status'            => ( int )$data ['status']
+                        ]
+                    );
+                    $cnt->save();
+                }
+            }
+            $languages = $this->language->getAvailableLanguages();
+
+            foreach ($languages as $language) {
+                $this->language->replaceDescriptions(
+                    'content_descriptions',
+                    ['content_id' => $content_id],
+                    [
+                        ( int )$language['language_id'] => [
+                            'title'            => $data ['title'],
+                            'description'      => $data ['description'],
+                            'meta_description' => $data ['meta_description'],
+                            'meta_keywords'    => $data ['meta_keywords'],
+                            'content'          => $data ['content'],
+                        ],
+                    ]
+                );
+            }
+            if ($data ['store_id']) {
+                $c2Stores = [];
+                foreach ($data ['store_id'] as $store_id) {
+                    $c2Stores[] = new ContentsToStore(
+                        [
+                            'content_id' => $content_id,
+                            'store_id'   => $store_id
+                        ]
+                    );
+                }
+                $content->stores()->saveMany($c2Stores);
+            }
+            $this->db->commit();
+        } catch (Exception $e) {
+            Registry::log()->error($e->getMessage());
+            $this->db->rollback();
+            return false;
         }
 
         $this->cache->flush('content');
@@ -149,6 +170,8 @@ class AContentManager
      *
      * @return bool
      * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function editContent($content_id, $data)
     {

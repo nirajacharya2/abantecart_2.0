@@ -150,16 +150,21 @@ class ControllerPagesDesignContent extends AController
         if ($this->request->is_POST() && $this->_validateForm()) {
             $savedata = $this->request->post;
             unset($savedata['parent_content_id'], $savedata['sort_order']);
-            $content_ids = (array) $this->request->post['parent_content_id'];
+            $content_ids = (array)$this->request->post['parent_content_id'];
             foreach ($content_ids as $par_id) {
                 list(, $parent_id) = explode('_', $par_id);
-                $savedata['parent_content_id'][] = (int) $parent_id;
-                $savedata['sort_order'][] = (int) $this->request->post['sort_order'][$par_id];
+                $savedata['parent_content_id'][] = (int)$parent_id;
+                $savedata['sort_order'][] = (int)$this->request->post['sort_order'][$par_id];
             }
 
             $content_id = $this->acm->addContent($savedata);
-            $this->session->data['success'] = $this->language->get('text_success');
-            abc_redirect($this->html->getSecureURL('design/content/update', '&content_id='.$content_id));
+
+            if ($content_id) {
+                $this->session->data['success'] = $this->language->get('text_success');
+                abc_redirect($this->html->getSecureURL('design/content/update', '&content_id=' . $content_id));
+            } else {
+                $this->error[] = $this->language->get('error_application_error');
+            }
         }
 
         // content language switcher
