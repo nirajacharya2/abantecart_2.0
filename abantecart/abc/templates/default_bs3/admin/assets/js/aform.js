@@ -565,7 +565,7 @@
             var $field = $(elem);
             var $wrapper = $(elem).closest('.afield');
             //locate btn container if it is present
-            var $btncontainer = $wrapper.find(o.btnContainer);
+            var $btncontainer = $wrapper.find(o.btnContainer).last();
 
             //show quicksave button set only if not yet shown or configured
             if (!o.showButtons || $btncontainer.find(o.btnGrpSelector).length != 0) {
@@ -575,7 +575,7 @@
             //can not find input-group-addon span button container create new one
             if ($btncontainer.length == 0) {
                 $wrapper.append(o.btnContainerHTML);
-                $btncontainer = $wrapper.find(o.btnContainer);
+                $btncontainer = $wrapper.find(o.btnContainer).last();
             }
 
             //add quick save button classes and tooltips
@@ -602,13 +602,13 @@
                      //clean up
                      $btncontainer.parent('.afield').removeClass(o.changedClass);
                      $field.removeClass(o.hoverClass + " " + o.focusClass + " " + o.activeClass + " " + o.changedClass);
-                     $(o.btnGrpSelector, $btncontainer).remove();
-                     $('.field_err', $btncontainer).remove();
+                     $(o.btnGrpSelector, $btncontainer).last().remove();
+                     $('.field_err', $btncontainer).last().remove();
                      $btncontainer.removeClass('quicksave');
                      //remove button container if it is empty
-                     if( ($btncontainer.text()).length == 0 ){
-                        //do not remove for now. Isues in country/zones
-                        //$btncontainer.remove();
+                     if (($btncontainer.text()).length == 0) {
+                         //do not remove for now. Isues in country/zones
+                         //$btncontainer.remove();
                      }
                  }
              });
