@@ -27,6 +27,7 @@ use abc\core\view\AView;
 use abc\core\lib\ADebug;
 use abc\core\lib\ARequest;
 use abc\core\lib\AException;
+use abc\models\admin\ModelLocalisationCountry;
 use abc\models\admin\ModelLocalisationLanguage;
 use abc\models\admin\ModelSettingStore;
 use abc\models\storefront\ModelLocalisationZone;
@@ -2496,6 +2497,7 @@ class CountriesHtmlElement extends HtmlElement
  * @property string $value
  * @property string $submit_mode
  * @property int|array $default_value
+ * @property string $zone_label
  * @property string $zone_field_name
  * @property string $default_zone_field_name
  * @property string $default_zone_name
@@ -2507,17 +2509,18 @@ class CountriesHtmlElement extends HtmlElement
  * @property string $style
  * @property string $attr
  * @property bool $required
+ * @property bool $zone_required
  * @property string $placeholder
  * @property string $help_url
  */
 class ZonesHtmlElement extends HtmlElement
 {
-    //private $default_zone_value, $default_value;
     public function __construct($data)
     {
         parent::__construct($data);
-        $this->registry->get('load')->model('localisation/country');
-        $results = $this->registry->get('model_localisation_country')->getCountries();
+        /** @var ModelLocalisationCountry $mdl */
+        $mdl = $this->registry->get('load')->model('localisation/country');
+        $results = $mdl->getCountries();
         $this->options = [];
         $this->zone_options = [];
         $this->default_zone_field_name = 'zone_id';
@@ -2557,25 +2560,23 @@ class ZonesHtmlElement extends HtmlElement
             $url = $html->getSecureURL('common/zone/names');
         }
 
-        $this->registry->get('load')->model('localisation/zone');
+        /** @var ModelLocalisationZone $zoneMdl */
+        $zoneMdl = $this->registry->get('load')->model('localisation/zone');
 
-        /**
-         * @var ModelLocalisationZone $model_zone
-         */
-        $model_zone = $this->registry->get('model_localisation_zone');
         $config_country_id = $this->registry->get('config')->get('config_country_id');
         if ($this->submit_mode == 'id') {
             $id = $this->value ? key($this->value) : $config_country_id;
-            $results = $model_zone->getZonesByCountryId($id);
+            $results = $zoneMdl->getZonesByCountryId($id);
         } else {
             if ($this->value) {
                 $name = current($this->value);
             } else {
-                $this->registry->get('load')->model('localisation/country');
-                $temp = $this->registry->get('model_localisation_country')->getCountry($config_country_id);
+                /** @var ModelLocalisationCountry $countryMdl */
+                $countryMdl = $this->registry->get('load')->model('localisation/country');
+                $temp = $countryMdl->getCountry($config_country_id);
                 $name = $temp['name'];
             }
-            $results = $model_zone->getZonesByCountryName($name);
+            $results = $zoneMdl->getZonesByCountryName($name);
         }
 
         if (!is_array($this->zone_value)) {
@@ -2603,15 +2604,18 @@ class ZonesHtmlElement extends HtmlElement
                 'value'           => $this->value ?: $this->default_value,
                 'options'         => $this->options,
                 'attr'            => $this->attr,
-                'required'        => $this->required,
                 'style'           => $this->style,
                 'url'             => $url,
+                'placeholder'     => $this->placeholder,
+                'zone_label'      => $this->zone_label ?: $this->language->t('entry_zone', 'Region/State:'),
                 'zone_field_name' => $this->zone_field_name ?: $this->default_zone_field_name,
                 'zone_name'       => $this->zone_name ?: $this->default_zone_name,
                 'zone_value'      => (array)($this->zone_value ?: $this->default_zone_value),
                 'zone_options'    => $this->zone_options,
                 'submit_mode'     => $this->submit_mode,
-                'placeholder'     => $this->placeholder
+
+                'required'      => $this->required,
+                'zone_required' => $this->zone_required ?? $this->required,
             ]
         );
         if (!empty($this->help_url)) {

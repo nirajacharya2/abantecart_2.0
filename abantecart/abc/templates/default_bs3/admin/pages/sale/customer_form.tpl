@@ -10,38 +10,43 @@
 			<?php if (!empty ($list_url)) { ?>
 			<div class="btn-group">
 				<a class="btn btn-white tooltips" href="<?php echo $list_url; ?>" data-toggle="tooltip" data-original-title="<?php echo $text_back_to_list; ?>">
-					<i class="fa fa-arrow-left fa-lg"></i>
-				</a>
-			</div>
-			<?php } ?>
+                    <i class="fa fa-arrow-left fa-lg"></i>
+                </a>
+            </div>
+            <?php } ?>
 
-			<div class="btn-group">
-				<button class="btn btn-default dropdown-toggle tooltips" data-original-title="<?php echo $text_edit_address; ?>" title="<?php echo $text_edit_address; ?>" type="button" data-toggle="dropdown">
-					<i class="fa fa-book"></i>
-					<?php echo $current_address; ?><span class="caret"></span>
-				</button>
-				<ul class="dropdown-menu">
-					<?php foreach ($addresses as $address) { ?>
-						<li><a href="<?php echo $address['href'] ?>"
-							   class="<?php echo $address['title'] == $current_address ? 'disabled' : ''; ?>">
-							   <?php if ($address['default']) { ?>
-							   <i class="fa fa-check"></i>
-							   <?php } ?>
-							   <?php echo $address['title'] ?>
-							   </a>
-						</li>
-					<?php } ?>
-				</ul>
-			</div>
-			<div class="btn-group mr20 toolbar">
-				<a class="actionitem btn btn-primary tooltips" href="<?php echo $add_address_url; ?>" title="<?php echo $text_add_address; ?>">
-				<i class="fa fa-plus fa-fw"></i>
-				</a>
-			</div>
-			<div class="btn-group mr10 toolbar">
-				<?php echo $this->getHookVar('toolbar_pre'); ?>
-				<?php if($register_date){?>
-				<a class="btn btn-white disabled"><?php echo $register_date; ?></a>
+            <div class="btn-group">
+                <button class="btn btn-default dropdown-toggle tooltips"
+                        data-original-title="<?php echo $text_edit_address; ?>"
+                        title="<?php echo $text_edit_address; ?>" type="button" data-toggle="dropdown">
+                    <i class="fa fa-book"></i>
+                    <?php echo $current_address; ?><span class="caret"></span>
+                </button>
+                <?php if ($addresses) { ?>
+                    <ul class="dropdown-menu">
+                        <?php foreach ($addresses as $address) { ?>
+                            <li><a href="<?php echo $address['href'] ?>"
+                                   class="<?php echo $address['title'] == $current_address ? 'disabled' : ''; ?>">
+                                    <?php if ($address['default']) { ?>
+                                        <i class="fa fa-check"></i>
+                                    <?php } ?>
+                                    <?php echo $address['title'] ?>
+                                </a>
+                            </li>
+                        <?php } ?>
+                    </ul>
+                <?php } ?>
+            </div>
+            <div class="btn-group mr20 toolbar">
+                <a class="actionitem btn btn-primary tooltips" href="<?php echo $add_address_url; ?>"
+                   title="<?php echo $text_add_address; ?>">
+                    <i class="fa fa-plus fa-fw"></i>
+                </a>
+            </div>
+            <div class="btn-group mr10 toolbar">
+                <?php echo $this->getHookVar('toolbar_pre'); ?>
+                <?php if ($register_date) { ?>
+                    <a class="btn btn-white disabled"><?php echo $register_date; ?></a>
 				<?php } ?>
 				<?php if($last_login){?>
 				<a class="btn btn-white disabled"><?php echo $last_login; ?></a>
@@ -177,7 +182,6 @@
 		</div>
 	</div>
 	</form>
-
 </div>
 
 <script type="application/javascript">
@@ -185,28 +189,27 @@
 		$.ajax({
 			url: '<?php echo $reset_password->href; ?>',
 			type:'POST',
-			success: function(data){
-				if(data.result === true) {
-					success_alert(data.success);
-				}
-			}
-		});
-	}
+            success: function (data) {
+                if (data.result === true) {
+                    success_alert(data.success);
+                }
+            }
+        });
+    }
 </script>
 
 <?php
-	//load quick view port modal
-	echo $this->html->buildElement(
-array(
-'type' => 'modal',
-'id' => 'viewport_modal',
-'modal_type' => 'lg',
-'data_source' =>'ajax',
-'js_onload' => "
-var url = $(this).data('bs.modal').options.fullmodeHref;
-$('#viewport_modal .modal-header a.btn').attr('href',url);
-",
-'js_onclose' => "$('#".$data['table_id']."').trigger('reloadGrid',[{current:true}]);"
-)
-);
-?>
+//load quick view port modal
+echo $this->html->buildElement(
+    [
+        'type'        => 'modal',
+        'id'          => 'viewport_modal',
+        'modal_type'  => 'lg',
+        'data_source' => 'ajax',
+        'js_onload'   => "
+        var url = $(this).data('bs.modal').options.fullmodeHref;
+        $('#viewport_modal .modal-header a.btn').attr('href',url);
+        ",
+        'js_onclose'  => "$('#" . $data['table_id'] . "').trigger('reloadGrid',[{current:true}]);"
+    ]
+); ?>

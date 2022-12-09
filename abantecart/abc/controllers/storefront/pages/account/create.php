@@ -118,7 +118,18 @@ class ControllerPagesAccountCreate extends AController
 
                 abc_redirect($redirect_url);
             } else {
-                $this->errors['warning'] = implode('<br>', $this->errors);
+                //prevent duplicates of texts (for example email/login uniqueness check)
+                if (count($this->errors) != count(array_unique($this->errors))) {
+                    $errors = [];
+                    foreach ($this->errors as $k => $text) {
+                        if (!in_array($text, $errors)) {
+                            $errors[$k] = $text;
+                        }
+                    }
+                } else {
+                    $errors = $this->errors;
+                }
+                $this->errors['warning'] = implode('<br>', $errors);
             }
         }
 

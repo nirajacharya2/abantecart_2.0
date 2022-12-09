@@ -1089,12 +1089,9 @@ class ControllerPagesSaleCustomer extends AController
             ]);
         }
         foreach ($this->address_fields as $name => $desc) {
-            $fld_array = [
-                'type'     => $desc['type'],
-                'name'     => $name,
-                'value'    => $this->data['address'][$name],
-                'required' => $desc['required'],
-            ];
+            $fld_array = $desc;
+            $fld_array['name'] = $name;
+            $fld_array['value'] = $this->data['address'][$name];
             if ($desc['type'] == 'zones') {
                 $fld_array['submit_mode'] = 'id';
                 $fld_array['zone_name'] = $this->data['address']['zone'];

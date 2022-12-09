@@ -541,8 +541,8 @@ class Category extends BaseModel
     public static function getCategory($categoryId, $storeId = null, $limit = 0, $languageId = null)
     {
         $db = Registry::db();
-        $storeId = $storeId !== null ? $storeId : (int)Registry::config()->get('config_store_id');
-        $languageId = $languageId !== null ? $languageId : static::$current_language_id;
+        $storeId = $storeId ?? (int)Registry::config()->get('config_store_id');
+        $languageId = $languageId ?? static::$current_language_id;
 
         $cacheKey = 'product.listing.category.' . (int)$categoryId . '.store_' . $storeId . '_lang_' . $languageId;
         $cache = Registry::cache()->get($cacheKey);

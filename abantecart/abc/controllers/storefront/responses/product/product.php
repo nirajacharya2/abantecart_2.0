@@ -267,10 +267,13 @@ class ControllerResponsesProductProduct extends AController
                     ],
                 ];
 
-                $main_image =
-                    $resource->getResourceAllObjects(
-                        'product_option_value', $option['product_option_value_id'], $mSizes, 1, false
-                    );
+                $main_image = $resource->getResourceAllObjects(
+                    'product_option_value',
+                    $option['product_option_value_id'],
+                    $mSizes,
+                    1,
+                    false
+                );
 
                 if (!empty($main_image)) {
                     $thumbnail['origin'] = $main_image['origin'];

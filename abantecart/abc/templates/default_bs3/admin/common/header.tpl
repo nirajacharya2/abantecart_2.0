@@ -13,8 +13,9 @@ if ($logged){ ?>
                     echo $this->getHookVar('logoimage_hookvar');
                 } else{
                     ?>
-                    <img class="logo_image" src="<?php echo $this->templateResource('assets/images/logo.png'); ?>" width="190"
-                         title="<?php echo $heading_title; ?>"/>
+                    <img class="logo_image"
+                         src="<?php echo $this->getHookVar('logo_url') ?: $this->templateResource('assets/images/logo.png'); ?>"
+                         width="190" title="<?php echo $heading_title; ?>"/>
                     <?php
                 }
                 ?>
@@ -385,9 +386,10 @@ echo $this->html->buildElement(
                 <?php
                 if ($this->getHookVar('logoimage_hookvar')){
                     echo $this->getHookVar('logoimage_hookvar');
-                } else{
+                } else {
                     ?>
-                    <img class="logo_image" src="<?php echo $this->templateResource('assets/images/logo.png'); ?>"
+                    <img class="logo_image"
+                         src="<?php echo $this->getHookVar('logo_url') ?: $this->templateResource('assets/images/logo.png'); ?>"
                          title="<?php echo $heading_title; ?>"/>
                     <?php
                 }

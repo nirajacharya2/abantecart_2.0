@@ -138,14 +138,18 @@
 	</definition>
 	<definition>
 		<key>entry_meta_description</key>
-		<value><![CDATA[ Meta Tag Description: ]]></value>
-	</definition>
-	<definition>
-		<key>entry_meta_keywords</key>
-		<value><![CDATA[Meta Tag Keywords:]]></value>
-  </definition>
-  <definition>
-		<key>entry_hide_title</key>
-		<value><![CDATA[Hide Title:]]></value>
-  </definition>
+        <value><![CDATA[ Meta Tag Description: ]]></value>
+    </definition>
+    <definition>
+        <key>entry_meta_keywords</key>
+        <value><![CDATA[Meta Tag Keywords:]]></value>
+    </definition>
+    <definition>
+        <key>entry_hide_title</key>
+        <value><![CDATA[Hide Title:]]></value>
+    </definition>
+    <definition>
+        <key>error_application_error</key>
+        <value><![CDATA[Application error occurred. Please see menu System->Logs->Error Logs for details]]></value>
+    </definition>
 </definitions>

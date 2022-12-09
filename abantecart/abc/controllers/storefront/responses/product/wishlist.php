@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,18 +21,14 @@ namespace abc\controllers\storefront;
 use abc\core\engine\AController;
 use abc\core\lib\AJson;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 class ControllerResponsesProductWishlist extends AController {
-	public $error = array();
-	public $data = array();
+    public $error = [];
 	public function add() {
 
         //init controller data
         $this->extensions->hk_InitData($this,__FUNCTION__);
 
-		$json = array();
+        $json = [];
 		if ($this->customer->isLogged() || $this->customer->isUnauthCustomer()) {
 			if ($this->request->get['product_id']) {
 				$this->customer->addToWishList($this->request->get['product_id']);
@@ -54,7 +50,7 @@ class ControllerResponsesProductWishlist extends AController {
         //init controller data
         $this->extensions->hk_InitData($this,__FUNCTION__);
 
-		$json = array();
+        $json = [];
 		if ($this->customer->isLogged() || $this->customer->isUnauthCustomer()) {
 			if ($this->request->get['product_id']) {
 				$this->customer->removeFromWishList($this->request->get['product_id']);
