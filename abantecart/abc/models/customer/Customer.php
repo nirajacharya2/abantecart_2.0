@@ -117,7 +117,8 @@ class Customer extends BaseModel
         'wishlist'          => Serialized::class,
         'date_added'        => 'datetime',
         'date_modified'     => 'datetime',
-        'last_login'        => 'datetime'
+        'last_login'        => 'datetime',
+        'settings'          => Serialized::class,
     ];
 
     protected $hidden = [
@@ -156,6 +157,7 @@ class Customer extends BaseModel
         "data",
         "stage_id",
         "last_login",
+        "settings",
         "date_deleted",
     ];
 
