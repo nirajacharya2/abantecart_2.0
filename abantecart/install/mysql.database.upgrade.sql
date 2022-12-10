@@ -387,34 +387,36 @@ ALTER TABLE `ac_global_attributes_value_descriptions`
 
 DROP TABLE IF EXISTS `ac_jobs`;
 CREATE TABLE `ac_jobs` (
-    `job_id` int(11) NOT NULL AUTO_INCREMENT,
-    `job_name` varchar(255) NOT NULL,
-    `status` int(11) DEFAULT '0' COMMENT '0 - disabled, 1 - ready, 2 - running, 3 - failed, 4 - scheduled, 5 - completed',
-    `configuration` longtext COMMENT 'configuration for job-class',
-    `start_time` datetime DEFAULT NULL,
-    `last_time_run` timestamp NULL DEFAULT NULL,
-    `last_result` int(11) NOT NULL DEFAULT '0' COMMENT '1 - success, 0 - failed',
-    `actor_type` int(11) DEFAULT NULL COMMENT '0 - System user, 1 - Admin user, 2 - Customer',
-    `actor_id` int(11) DEFAULT 0,
-    `actor_name` varchar(128) DEFAULT '',
-    `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-    `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`job_id`, `job_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+                           `job_id`        int(11) NOT NULL AUTO_INCREMENT,
+                           `job_name`      varchar(255) NOT NULL,
+                           `status`        int(11)          DEFAULT '0' COMMENT '0 - disabled, 1 - ready, 2 - running, 3 - failed, 4 - scheduled, 5 - completed',
+                           `configuration` longtext COMMENT 'configuration for job-class',
+                           `start_time`    datetime         DEFAULT NULL,
+                           `last_time_run` timestamp NULL   DEFAULT NULL,
+                           `last_result`   int(11) NOT NULL DEFAULT '0' COMMENT '1 - success, 0 - failed',
+                           `actor_type`    int(11)          DEFAULT NULL COMMENT '0 - System user, 1 - Admin user, 2 - Customer',
+                           `actor_id`      int(11)          DEFAULT 0,
+                           `actor_name`    varchar(128)     DEFAULT '',
+                           `date_added`    timestamp NULL   DEFAULT CURRENT_TIMESTAMP,
+                           `date_modified` timestamp NULL   DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                           PRIMARY KEY (`job_id`, `job_name`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
 
 ALTER TABLE `ac_customers`
-  CHANGE COLUMN `last_login` `last_login` timestamp NULL DEFAULT NULL,
-  CHANGE COLUMN `customer_group_id` `customer_group_id` INT(11) NULL;
+    CHANGE COLUMN `last_login` `last_login` timestamp NULL DEFAULT NULL,
+    CHANGE COLUMN `customer_group_id` `customer_group_id` INT(11) NULL,
+    ADD COLUMN `settings` MEDIUMTEXT COMMENT 'php-serialized stretch data' AFTER `last_login`;
 
-CREATE INDEX `ac_customers_email_idx` ON `ac_customers` ( `email` );
+CREATE INDEX `ac_customers_email_idx` ON `ac_customers` (`email`);
 
 ALTER TABLE `ac_users`
-  CHANGE COLUMN `last_login` `last_login` timestamp NULL DEFAULT NULL;
+    CHANGE COLUMN `last_login` `last_login` timestamp NULL DEFAULT NULL;
 ALTER TABLE `ac_ant_messages`
-  CHANGE COLUMN `start_date` `start_date` timestamp NULL default NULL,
-  CHANGE COLUMN `end_date` `end_date` timestamp NULL default NULL;
+    CHANGE COLUMN `start_date` `start_date` timestamp NULL default NULL,
+    CHANGE COLUMN `end_date` `end_date` timestamp NULL default NULL;
 ALTER TABLE `ac_extensions`
-  CHANGE COLUMN `date_installed` `date_installed` timestamp NULL default NULL;
+    CHANGE COLUMN `date_installed` `date_installed` timestamp NULL default NULL;
 ALTER TABLE `ac_tasks`
   CHANGE COLUMN `last_time_run` `date_installed` timestamp NULL default NULL;
 ALTER TABLE `ac_task_steps`
