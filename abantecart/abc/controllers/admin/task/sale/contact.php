@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2021 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -23,11 +23,13 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\lib\AError;
+use abc\core\lib\AException;
 use abc\core\lib\AJson;
 use abc\core\lib\AMail;
 use abc\core\lib\AMailIM;
 use abc\core\lib\ATaskManager;
 use abc\core\view\AView;
+use abc\models\admin\ModelSettingStore;
 use abc\models\customer\Customer;
 use Exception;
 
@@ -86,11 +88,9 @@ class ControllerTaskSaleContact extends AController
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
         $output = ['result' => $result];
-        if ($result) {
-            $output['message'] = $this->sent_count.' emails sent.';
-        } else {
-            $output['error_text'] = $this->sent_count.' emails sent.';
-        }
+
+        $msgKey = $result ? 'message' : 'error_text';
+        $output[$msgKey] = $this->sent_count . ' emails sent.';
         $this->response->setOutput(AJson::encode($output));
         return $result;
     }
@@ -129,13 +129,13 @@ class ControllerTaskSaleContact extends AController
         $tm->updateStep($step_id, ['last_time_run' => date('Y-m-d H:i:s')]);
 
         if (!$step_info['settings']) {
-            $error_text = 'Cannot run task step #'.$step_id.'. Unknown settings for it.';
+            $error_text = 'Cannot run task step #' . $step_id . '. Unknown settings for it.';
             $this->_return_error($error_text);
         }
 
-        $this->loadModel('sale/customer');
-        $this->loadModel('setting/store');
-        $store_info = $this->model_setting_store->getStore((int) $this->session->data['current_store_id']);
+        /** @var ModelSettingStore $mdl */
+        $mdl = $this->loadModel('setting/store');
+        $store_info = $mdl->getStore((int)$this->session->data['current_store_id']);
         $from = '';
         if ($store_info) {
             $from = $store_info['store_main_email'];
@@ -250,14 +250,18 @@ class ControllerTaskSaleContact extends AController
                         $email,
                         $this->html->getCatalogURL(
                             'account/notification',
-                            '&email='.$email.'&customer_id='.$customer_id
+                            '&email=' . $email . '&customer_id=' . $customer_id
                         )
                     );
             }
         }
 
-        $this->data['mail_template_data']['body'] =
-            html_entity_decode($message_body, ENT_QUOTES, ABC::env('APP_CHARSET'));
+        $this->data['mail_template_data']['body'] = html_entity_decode(
+            $message_body,
+            ENT_QUOTES,
+            ABC::env('APP_CHARSET')
+        );
+
         $this->data['mail_template'] = 'mail/contact.tpl';
 
         //allow change email data from extensions

@@ -52,8 +52,9 @@ class ModelSaleContact extends Model
         }
 
         //define recipient count
-        $this->load->model('setting/store');
-        $store_info = $this->model_setting_store->getStore(
+        /** @var ModelSettingStore $mdl */
+        $mdl = $this->load->model('setting/store');
+        $store_info = $mdl->getStore(
             (int)$this->session->data['current_store_id']
         );
 
@@ -61,7 +62,7 @@ class ModelSaleContact extends Model
 
         //get URIs of recipients
         $uris = $subscribers = $task_controller = '';
-        if ($data['protocol'] == 'email'){
+        if ($data['protocol'] == 'email') {
             list($uris, $subscribers) = $this->_get_email_list($data);
             $task_controller = 'task/sale/contact/sendEmail';
 
@@ -110,6 +111,7 @@ class ModelSaleContact extends Model
             ]
         );
         if (!$task_id) {
+            $this->errors[] = 'Task not created! ' . var_export($task_id, true);
             $this->errors = array_merge($this->errors, $tm->errors);
             return false;
         }
@@ -150,6 +152,7 @@ class ModelSaleContact extends Model
             );
 
             if (!$step_id) {
+                $this->errors[] = 'Step not created!';
                 $this->errors = array_merge($this->errors, $tm->errors);
                 return false;
             } else {

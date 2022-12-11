@@ -28,6 +28,7 @@ use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AJson;
 use abc\core\lib\AMail;
+use abc\models\admin\ModelSettingStore;
 use abc\models\customer\Address;
 use abc\models\customer\Customer;
 use abc\models\order\Order;
@@ -463,6 +464,9 @@ class ControllerResponsesListingGridCustomer extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
+        /** @var ModelSettingStore $mdl */
+        $mdl = $this->load->model('setting/store');
+
         if (isset($this->request->post['term'])) {
             $filter = [
                 'limit'               => 20,
@@ -476,10 +480,9 @@ class ControllerResponsesListingGridCustomer extends AController
             ];
             if (H::has_value($this->session->data['current_store_id'])) {
                 $filter['store_id'] = (int)$this->session->data['current_store_id'];
-            } else {
-                $this->load->model('setting/store');
             }
-            if (!$filter['store_id'] && !$this->model_setting_store->isDefaultStore()) {
+
+            if (!$filter['store_id'] && !$mdl->isDefaultStore()) {
                 $filter['store_id'] = $this->config->get('config_store_id');
             }
 
