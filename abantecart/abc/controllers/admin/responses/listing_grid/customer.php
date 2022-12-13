@@ -79,7 +79,7 @@ class ControllerResponsesListingGridCustomer extends AController
 
         $allowedFields = array_merge(['name', 'email'], (array)$this->data['allowed_fields']);
 
-        if (isset($this->request->post['_search']) && $this->request->post['_search'] == 'true') {
+        if ($this->request->post['_search'] === 'true') {
             $searchData = AJson::decode(htmlspecialchars_decode($this->request->post['filters']), true);
 
             foreach ($searchData['rules'] as $rule) {
@@ -289,7 +289,7 @@ class ControllerResponsesListingGridCustomer extends AController
         $customer_id = $this->request->get['id'];
         $address_id = $this->request->get['address_id'];
         $post = $this->request->post;
-        if (isset($customer_id)) {
+        if ($customer_id) {
             if ($post['password'] || $post['password_confirm']) {
                 $error = new AError('');
                 if (mb_strlen($post['password']) < 4) {
@@ -467,7 +467,7 @@ class ControllerResponsesListingGridCustomer extends AController
         /** @var ModelSettingStore $mdl */
         $mdl = $this->load->model('setting/store');
 
-        if (isset($this->request->post['term'])) {
+        if ($this->request->post['term']) {
             $filter = [
                 'limit'               => 20,
                 'content_language_id' => $this->language->getContentLanguageID(),
