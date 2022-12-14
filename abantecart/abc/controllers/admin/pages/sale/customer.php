@@ -1253,7 +1253,7 @@ class ControllerPagesSaleCustomer extends AController
             H::SimplifyValidationErrors($customer->errors()['validation'], $this->error);
         }
 
-        $this->extensions->hk_ValidateData($this);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $data);
 
         if (!$this->error) {
             return true;
@@ -1297,7 +1297,7 @@ class ControllerPagesSaleCustomer extends AController
             H::SimplifyValidationErrors($address->errors()['validation'], $this->error);
         }
 
-        $this->extensions->hk_ValidateData($this);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $data);
 
         if (!$this->error) {
             return true;
