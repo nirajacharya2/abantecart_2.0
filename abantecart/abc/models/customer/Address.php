@@ -131,13 +131,13 @@ class Address extends BaseModel
         'company'     => [
             'checks'   => [
                 'string',
-                'max:32',
+                'max:64',
             ],
             'messages' => [
                 '*' => [
                     'language_key'   => 'error_company',
                     'language_block' => 'account/address',
-                    'default_text'   => 'Company Name must be less than 32 character!',
+                    'default_text'   => 'Company Name must be less than 64 character!',
                     'section'        => 'storefront',
                 ],
             ],
@@ -165,7 +165,7 @@ class Address extends BaseModel
                 'string',
                 //required only when new customer creating
                 'required_without:customer_id',
-                'between:1,32',
+                'between:1,40',
             ],
             'messages' => [
                 '*' => [
@@ -214,7 +214,7 @@ class Address extends BaseModel
                 'string',
                 //required only when new customer creating
                 'required_without:customer_id',
-                'between:2,10',
+                'between:2,15',
             ],
             'messages' => [
                 '*' => [

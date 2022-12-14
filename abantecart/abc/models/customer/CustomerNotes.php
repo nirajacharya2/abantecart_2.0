@@ -22,6 +22,9 @@ use abc\models\BaseModel;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @method static CustomerNotes create(array $data)
+ */
 class CustomerNotes extends BaseModel
 {
     use SoftDeletes;

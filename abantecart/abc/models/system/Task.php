@@ -37,6 +37,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property Carbon $date_added
  * @property Carbon $date_modified
  *
+ * @method static Task create(array $data)
+ *
  * @package abc\models
  */
 class Task extends BaseModel

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -23,10 +23,11 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\engine\ADispatcher;
 use abc\core\engine\Registry;
+use abc\models\system\Task;
 use abc\modules\events\ABaseEvent;
+use Error;
 use Exception;
 use H;
-use ReflectionException;
 
 /**
  * Class ATaskManager
@@ -47,9 +48,9 @@ class ATaskManager
     /**
      * @var string - can be 'html' for running task.php directly from browser,
      *                      'ajax' - for running task by ajax-requests and
-     *                      'cli' - shell run
+     *                      'cli' - console run
      */
-    private $mode = 'html';
+    private $mode;
 
     protected $run_log = [];
     /**
@@ -239,7 +240,6 @@ class ATaskManager
      * @param array $step_details
      *
      * @return bool
-     * @throws ReflectionException
      * @throws AException
      */
     public function runStep($step_details)
@@ -289,8 +289,8 @@ class ATaskManager
             } else {
                 $response_message = $response['error_text'] ?? '';
             }
-        } catch (\Exception|\Error $e) {
-            $this->log->write($e);
+        } catch (Exception|Error $e) {
+            $this->log->error($e);
             $result = false;
         }
 
@@ -307,13 +307,13 @@ class ATaskManager
 
         if (!$result) {
             //write to AbanteCart log
-            $error_msg = 'Task_id: '.$task_id.' : step_id: '.$step_id.' - Failed. '.$response_message;
-            $this->log->write($error_msg."\n step details:\n".var_export($step_details, true));
+            $error_msg = 'Task_id: ' . $task_id . ' : step_id: ' . $step_id . ' - Failed. ' . $response_message;
+            $this->log->error($error_msg . "\n step details:\n" . var_export($step_details, true));
             //write to task log
             $this->toLog($error_msg, 0);
         } else {
             //write to task log
-            $this->toLog('Task_id: '.$task_id.' : step_id: '.$step_id.'. '.$response_message, 1);
+            $this->toLog('Task_id: ' . $task_id . ' : step_id: ' . $step_id . '. ' . $response_message);
         }
         return $result;
     }
@@ -358,7 +358,6 @@ class ATaskManager
      * @param array $task_settings - for future. it can be "reference" for callback
      *
      * @return bool
-     * @throws ReflectionException
      * @throws AException
      */
     private function runSteps($task_id, $task_settings)
@@ -467,7 +466,7 @@ class ATaskManager
         } else {
             $this->run_log[] = $message;
         }
-        $this->task_log?->write($message);
+        $this->task_log?->error($message);
 
         return true;
     }
@@ -486,37 +485,29 @@ class ATaskManager
         }
         // check
         $sql = "SELECT *
-                FROM ".$this->db->table_name('tasks')."
-                WHERE name = '".$this->db->escape($data['name'])."'";
+                FROM " . $this->db->table_name('tasks') . "
+                WHERE name = '" . $this->db->escape($data['name']) . "'";
         $res = $this->db->query($sql);
         if ($res->num_rows) {
             $this->deleteTask($res->row['task_id']);
-            $this->toLog('Error: Task with name "'.$data['name'].'" is already exists. Override!');
+            $this->toLog('Error: Task with name "' . $data['name'] . '" is already exists. Override!');
         }
 
-        $sql = "INSERT INTO ".$this->db->table_name('tasks')."
-                (`name`,
-                `starter`,
-                `status`,
-                `start_time`,
-                `last_time_run`,
-                `progress`,
-                `last_result`,
-                `run_interval`,
-                `max_execution_time`,
-                `date_added`)
-                VALUES ('".$this->db->escape($data['name'])."',
-                        '".(int)$data['starter']."',
-                        '".(int)$data['status']."',
-                        '".$this->db->escape($data['start_time'])."',
-                        '".$this->db->escape($data['last_time_run'])."',
-                        '".(int)$data['progress']."',
-                        '".(int)$data['last_result']."',
-                        '".(int)$data['run_interval']."',
-                        '".(int)$data['max_execution_time']."',
-                        NOW())";
-        $this->db->query($sql);
-        $task_id = $this->db->getLastId();
+        $task = Task::create(
+            [
+                'name'               => $data['name'],
+                'starter'            => (int)$data['starter'],
+                'status'             => (int)$data['status'],
+                'start_time'         => $data['start_time'],
+                'last_time_run'      => $data['last_time_run'],
+                'progress'           => (int)$data['progress'],
+                'last_result'        => (int)$data['last_result'],
+                'run_interval'       => (int)$data['run_interval'],
+                'max_execution_time' => (int)$data['max_execution_time']
+            ]
+        );
+
+        $task_id = $task->task_id;
         if (H::has_value($data['created_by']) || H::has_value($data['settings'])) {
             $this->updateTaskDetails($task_id, $data);
         }
@@ -558,8 +549,6 @@ class ATaskManager
                         break;
                     case 'string':
                     case 'timestamp':
-                        $value = $this->db->escape($data[$fld_name]);
-                        break;
                     default:
                         $value = $this->db->escape($data[$fld_name]);
                 }
@@ -831,18 +820,18 @@ class ATaskManager
             foreach ($result->rows as $row) {
                 $used = memory_get_usage();
                 if ($memory_limit - $used <= 204800) {
-                    $this->log->write(
+                    $this->log->error(
                         'Error: Task Manager Memory overflow! To Get all Steps of '
-                        .'Task you should to increase memory_limit_size in your php.ini'
+                        . 'Task you should to increase memory_limit_size in your php.ini'
                     );
                 }
                 $row['settings'] = $row['settings'] ? unserialize($row['settings']) : '';
                 $output[(string)$row['step_id']] = $row;
             }
         } catch (AException $e) {
-            $this->log->write(
+            $this->log->error(
                 'Error: Task Manager Memory overflow! To Get all Steps of Task '
-                .'you should to increase memory_limit_size in your php.ini'
+                . 'you should to increase memory_limit_size in your php.ini'
             );
         }
         return $output;
@@ -933,10 +922,10 @@ class ATaskManager
     {
 
         $sql = "SELECT td.*, t.*
-                FROM ".$this->db->table_name('tasks')." t
-                LEFT JOIN ".$this->db->table_name('task_details')." td 
+                FROM " . $this->db->table_name('tasks') . " t
+                LEFT JOIN " . $this->db->table_name('task_details') . " td 
                     ON td.task_id = t.task_id
-                WHERE 1=1 ";
+                WHERE t.task_id>0 ";
 
         if (!empty($data['subsql_filter'])) {
             $sql .= " AND ".$data['subsql_filter'];

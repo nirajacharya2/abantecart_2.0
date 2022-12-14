@@ -50,13 +50,14 @@ class ControllerResponsesSaleContact extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         if ($this->request->is_POST() && $this->_validate()) {
-            $this->loadModel('sale/contact');
-            $task_details = $this->model_sale_contact->createTask('send_now_'.date('Ymd-H:i:s'), $this->request->post);
+            /** @var ModelSaleContact $mdl */
+            $mdl = $this->loadModel('sale/contact');
+            $task_details = $mdl->createTask('send_now_' . date('Ymd-H:i:s'), $this->request->post);
             $task_api_key = $this->config->get('task_api_key');
 
             if (!$task_details) {
-                $this->errors = array_merge($this->errors, $this->model_sale_contact->errors);
-                $error = new AError("Mail/Notification Sending Error: \n ".implode(' ', $this->errors));
+                $this->errors = array_merge($this->errors, $mdl->errors);
+                $error = new AError("Mail/Notification Sending Error: \n " . implode(' ', $this->errors));
                 $error->toJSONResponse(
                     'APP_ERROR_402',
                     [
