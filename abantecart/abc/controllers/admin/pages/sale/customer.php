@@ -851,6 +851,7 @@ class ControllerPagesSaleCustomer extends AController
                 Customer::find($customer_id)->update(['address_id' => $address_id]);
             }
 
+            $this->extensions->hk_ProcessData($this, __FUNCTION__);
             $this->session->data['success'] = $this->language->get('text_success');
             abc_redirect($redirect_url);
         }
@@ -896,7 +897,7 @@ class ControllerPagesSaleCustomer extends AController
                 'sale/customer/update_address',
                 '&customer_id=' . $customer_id . '&address_id=' . $address_id
             );
-
+            $this->extensions->hk_ProcessData($this, __FUNCTION__);
             $this->session->data['success'] = $this->language->get('text_success');
             abc_redirect($redirect_url);
         }
