@@ -203,7 +203,7 @@ class ControllerApiOrderDetails extends ASecureControllerAPI
                 );
 
                 if (!empty($main_image)) {
-                    $thumbnail = (ABC::env('HTTPS') ? 'https:' : 'http:') . $main_image['thumb_url'];
+                    $thumbnail = $main_image['thumb_url'];
                 }
             }
 
