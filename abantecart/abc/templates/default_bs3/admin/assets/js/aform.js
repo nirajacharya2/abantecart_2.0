@@ -467,7 +467,9 @@
                     //mark filed chaneged
                     $field.addClass(o.changedClass);
                     //build quick save button set
-                    showQuickSave($field);
+                    if (!$field.hasClass('no-quicksave')) {
+                        showQuickSave($field);
+                    }
                 } else {
                     //clean up
                     $field.removeClass(o.changedClass);
