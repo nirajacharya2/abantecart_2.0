@@ -177,7 +177,7 @@ class ControllerApiProductCategory extends AControllerAPI
         foreach ($results as $k => $result) {
             $thumbnail = $thumbnails[$result['category_id']];
             $categories[$k] = $result;
-            $categories[$k]['thumb'] =  (ABC::env('HTTPS') ? 'https:' : 'http:') .$thumbnail['thumb_url'];
+            $categories[$k]['thumb'] =  $thumbnail['thumb_url'];
             $categories[$k]['total_subcategories'] = Category::getTotalCategoriesByCategoryId($result['category_id']);
         }
 

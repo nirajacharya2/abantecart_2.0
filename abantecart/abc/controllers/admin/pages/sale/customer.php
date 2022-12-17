@@ -851,6 +851,7 @@ class ControllerPagesSaleCustomer extends AController
                 Customer::find($customer_id)->update(['address_id' => $address_id]);
             }
 
+            $this->extensions->hk_ProcessData($this, __FUNCTION__);
             $this->session->data['success'] = $this->language->get('text_success');
             abc_redirect($redirect_url);
         }
@@ -896,7 +897,7 @@ class ControllerPagesSaleCustomer extends AController
                 'sale/customer/update_address',
                 '&customer_id=' . $customer_id . '&address_id=' . $address_id
             );
-
+            $this->extensions->hk_ProcessData($this, __FUNCTION__);
             $this->session->data['success'] = $this->language->get('text_success');
             abc_redirect($redirect_url);
         }
@@ -1253,7 +1254,7 @@ class ControllerPagesSaleCustomer extends AController
             H::SimplifyValidationErrors($customer->errors()['validation'], $this->error);
         }
 
-        $this->extensions->hk_ValidateData($this);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $data);
 
         if (!$this->error) {
             return true;
@@ -1297,7 +1298,7 @@ class ControllerPagesSaleCustomer extends AController
             H::SimplifyValidationErrors($address->errors()['validation'], $this->error);
         }
 
-        $this->extensions->hk_ValidateData($this);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $data);
 
         if (!$this->error) {
             return true;

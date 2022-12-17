@@ -141,7 +141,7 @@ class AProduct
             (int)$config->get('config_image_grid_height')
         );
         if (!str_contains($thumbnail['thumb_url'], 'no_image')) {
-            $product->manufacturer_icon = (ABC::env('HTTPS') ? 'https:' : 'http:') . $thumbnail['thumb_url'];
+            $product->manufacturer_icon = $thumbnail['thumb_url'];
         }
 
         // Prepare options and values for display

@@ -334,7 +334,7 @@ class ControllerResponsesListingGridCustomer extends AController
                             //set default address
                             $customer->update(['address_id' => $address_id]);
                         } else {
-                            if (H::has_value($address_id)) {
+                            if ($address_id) {
                                 $address = Address::find($address_id);
                                 $address->update([$field => $value]);
                             } else {
