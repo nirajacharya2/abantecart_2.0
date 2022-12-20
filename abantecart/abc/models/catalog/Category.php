@@ -427,7 +427,7 @@ class Category extends BaseModel
         $query = Category::select('parent_id')
             ->where('categories.category_id', '=', $category_id)
             ->selectRaw(
-                '(SELECT COUNT(' . $pAlias . '.product_id)
+                '(SELECT COUNT(DISTINCT ' . $pAlias . '.product_id)
                     FROM ' . $pAlias . '
                     INNER JOIN ' . $p2cAlias . '
                         ON (' . $p2cAlias . '.product_id = ' . $pAlias . '.product_id)
@@ -437,7 +437,7 @@ class Category extends BaseModel
                             AND ' . $p2cAlias . '.category_id IN (' . implode(", ", $childrenIDs) . ')
                     ) as active_products_count'
             )->selectRaw(
-                '(SELECT COUNT(' . $pAlias . '.product_id)
+                '(SELECT COUNT(DISTINCT ' . $pAlias . '.product_id)
                     FROM ' . $pAlias . '
                     INNER JOIN ' . $p2cAlias . '
                         ON (' . $p2cAlias . '.product_id = ' . $pAlias . '.product_id)
@@ -1255,26 +1255,11 @@ class Category extends BaseModel
         return $query->first();
     }
 
-    public static function getTotalProductsByCategoryId($categoryId = 0, $storeId = 0)
+    public static function getTotalActiveProductsByCategoryId($categoryId = 0, $storeId = 0)
     {
-        $storeId = $storeId ?? (int)Registry::config()->get('config_store_id');
-        //get all children category ids
-        $subCategories = Category::getChildrenIDs((int)$categoryId);
-        $categList = array_merge($subCategories, [(int)$categoryId]);
-        $query = Product::whereHas(
-            'categories',
-            function ($query) use ($categList) {
-                $query->whereIn('products_to_categories.category_id', $categList);
-            }
-        )->whereHas('stores',
-            function ($query) use ($storeId) {
-                $query->where('products_to_stores.store_id', $storeId);
-            }
-        )->active('products')
-            ->whereRaw('date_available <= NOW()');
-
+        $query = Category::where('category_id', '=', $categoryId);
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
-        return $query->get()->count();
+        return $query->first()->active_products_count;
     }
 }

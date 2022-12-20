@@ -3052,7 +3052,6 @@ class Product extends BaseModel
 
             //allow to extend this method from extensions
             Registry::extensions()->hk_extendQuery(new static, 'getProducts', $query, $params);
-
             $cache = $query->get();
             //add total number of rows into each row
             $totalNumRows = $db->sql_get_row_count();
