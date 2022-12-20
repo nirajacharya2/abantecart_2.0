@@ -33,8 +33,6 @@ use H;
  * @property \abc\models\admin\ModelToolUpdater $model_tool_updater
  * @property \abc\models\admin\ModelSettingStore $model_setting_store
  * @property \abc\models\admin\ModelCatalogDownload $model_catalog_download
- * @property \abc\models\admin\ModelCatalogProduct | \abc\models\storefront\ModelCatalogProduct $model_catalog_product
- * @property \abc\models\admin\ModelCatalogManufacturer | \abc\models\storefront\ModelCatalogManufacturer $model_catalog_manufacturer
  * @property \abc\models\admin\ModelLocalisationStockStatus $model_localisation_stock_status
  * @property \abc\models\admin\ModelLocalisationTaxClass $model_localisation_tax_class
  * @property \abc\models\admin\ModelLocalisationWeightClass $model_localisation_weight_class
