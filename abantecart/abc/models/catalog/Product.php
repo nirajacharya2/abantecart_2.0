@@ -2961,7 +2961,8 @@ class Product extends BaseModel
                 if (is_array($filter['category_id'])) {
                     $categoryIds = $filter['category_id'];
                 } else {
-                    $categoryIds = Category::getChildrenIDs($filter['category_id']);
+                    $mode = $filter['only_enabled'] ? 'active_only' : '';
+                    $categoryIds = Category::getChildrenIDs($filter['category_id'], $mode);
                     $categoryIds[] = $filter['category_id'];
                 }
 
@@ -3052,6 +3053,7 @@ class Product extends BaseModel
 
             //allow to extend this method from extensions
             Registry::extensions()->hk_extendQuery(new static, 'getProducts', $query, $params);
+            //Registry::log()->error($query->toSql());
             $cache = $query->get();
             //add total number of rows into each row
             $totalNumRows = $db->sql_get_row_count();

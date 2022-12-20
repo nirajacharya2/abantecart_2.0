@@ -138,6 +138,7 @@ class ControllerPagesProductCategory extends AController
         $this->data['products_search_parameters'] = [
             'filter'              => [
                 'category_id' => $category_id,
+                'only_enabled' => true
             ],
             'with_final_price'    => true,
             'with_discount_price' => true,

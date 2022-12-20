@@ -624,7 +624,8 @@ class Category extends BaseModel
         $query->where('categories.parent_id', '=', $categoryId);
         $query->where('categories_to_stores.store_id', '=', $storeId);
         if ($mode == 'active_only') {
-            $query->active('categories');
+            $query->active('categories')
+                ->where('categories.active_products_count', '>', 0);
         }
         $query->orderBy('sort_order');
 
