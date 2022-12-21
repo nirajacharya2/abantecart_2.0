@@ -1287,7 +1287,7 @@ class ACustomer extends ALibBase
             }
         }
 
-        Registry::extensions()->hk_ValidateData( Registry::customer(), [ __METHOD__ ] );
+        Registry::extensions()->hk_ValidateData(Registry::customer(), __METHOD__, $data);
         return static::$errors;
     }
 

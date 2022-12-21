@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,21 +22,26 @@ namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
+use abc\core\lib\AMailIM;
 use abc\models\customer\Customer;
 
 class ControllerPagesAccountEdit extends AController
 {
     public $error = [];
-    public $data = [
-        'predefined_fields' => [
-                'loginname',
-                'firstname',
-                'lastname',
-                'telephone',
-                'email',
-                'fax'
-        ]
-    ];
+
+    public function __construct($registry, $instance_id, $controller, $parent_controller = '')
+    {
+        parent::__construct($registry, $instance_id, $controller, $parent_controller);
+        $this->data['predefined_fields'] = [
+            'loginname',
+            'firstname',
+            'lastname',
+            'telephone',
+            'email',
+            'fax'
+        ];
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+    }
 
     public function main()
     {
@@ -56,7 +61,7 @@ class ControllerPagesAccountEdit extends AController
             abc_redirect($this->html->getSecureURL('account/login'));
         }
 
-        $this->document->setTitle($this->language->get('heading_title','account/edit'));
+        $this->document->setTitle($this->language->get('heading_title', 'account/edit'));
 
         $request_data = $this->request->post;
         if ($this->request->is_POST()) {
@@ -77,7 +82,6 @@ class ControllerPagesAccountEdit extends AController
 
             if (!$this->error) {
                 $this->customer->editCustomer($request_data);
-               // $this->customer->model()->editCustomerNotifications($request_data);
                 $this->session->data['success'] = $this->language->get('text_success');
                 $this->extensions->hk_ProcessData($this);
                 abc_redirect($this->html->getSecureURL('account/account'));
@@ -93,47 +97,51 @@ class ControllerPagesAccountEdit extends AController
 
         $this->document->resetBreadcrumbs();
 
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getHomeURL(),
-            'text'      => $this->language->get('text_home'),
-            'separator' => false,
-        ]);
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getHomeURL(),
+                'text'      => $this->language->get('text_home'),
+                'separator' => false,
+            ]
+        );
 
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('account/account'),
-            'text'      => $this->language->get('text_account'),
-            'separator' => $this->language->get('text_separator'),
-        ]);
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('account/account'),
+                'text'      => $this->language->get('text_account'),
+                'separator' => $this->language->get('text_separator'),
+            ]
+        );
 
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('account/edit'),
-            'text'      => $this->language->get('text_edit'),
-            'separator' => $this->language->get('text_separator'),
-        ]);
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('account/edit'),
+                'text'      => $this->language->get('text_edit'),
+                'separator' => $this->language->get('text_separator'),
+            ]
+        );
 
-        $this->view->assign('error_warning', $this->error['warning']);
-        $this->view->assign('error_loginname', $this->error['loginname']);
-        $this->view->assign('error_firstname', $this->error['firstname']);
-        $this->view->assign('error_lastname', $this->error['lastname']);
-        $this->view->assign('error_email', $this->error['email']);
-        $this->view->assign('error_telephone', $this->error['telephone']);
+        $this->data['error_warning'] = $this->error['warning'];
+        $this->data['error_loginname'] = $this->error['loginname'];
+        $this->data['error_firstname'] = $this->error['firstname'];
+        $this->data['error_lastname'] = $this->error['lastname'];
+        $this->data['error_email'] = $this->error['email'];
+        $this->data['error_telephone'] = $this->error['telephone'];
 
         $customer_info = Customer::getCustomer($this->customer->getId());
-        if($customer_info){
+        if ($customer_info) {
             $customer_info = $customer_info->toArray();
         }
 
-
-        foreach($this->data['predefined_fields'] as $field_name){
+        foreach ($this->data['predefined_fields'] as $field_name) {
             if (isset($request_data[$field_name])) {
                 $$field_name = $request_data[$field_name];
             } elseif (isset($customer_info)) {
                 $$field_name = $customer_info[$field_name];
-            }else{
+            } else {
                 $$field_name = '';
             }
         }
-
 
         $form = new AForm();
         $form->setForm(['form_name' => 'AccountFrm']);
@@ -167,41 +175,44 @@ class ControllerPagesAccountEdit extends AController
                 'name'     => 'firstname',
                 'value'    => $firstname,
                 'required' => true,
-            ]);
+            ]
+        );
         $this->data['form']['fields']['lastname'] = $form->getFieldHtml(
             [
                 'type'     => 'input',
                 'name'     => 'lastname',
                 'value'    => $lastname,
                 'required' => true,
-            ]);
+            ]
+        );
         $this->data['form']['fields']['email'] = $form->getFieldHtml(
             [
                 'type'     => 'input',
                 'name'     => 'email',
                 'value'    => $email,
                 'required' => true,
-            ]);
+            ]
+        );
         $this->data['form']['fields']['telephone'] = $form->getFieldHtml(
             [
                 'type'  => 'input',
                 'name'  => 'telephone',
                 'value' => $telephone,
-            ]);
+            ]
+        );
         $this->data['form']['fields']['fax'] = $form->getFieldHtml(
             [
                 'type'     => 'input',
                 'name'     => 'fax',
                 'value'    => $fax,
                 'required' => false,
-            ]);
+            ]
+        );
 
         //get only active IM drivers
         $im_drivers = $this->im->getIMDriverObjects();
         if ($im_drivers) {
-            /**
-             * @var \abc\core\lib\AMailIM $driver_obj
-             */
+            /** @var AMailIM $driver_obj */
             foreach ($im_drivers as $protocol => $driver_obj) {
                 if (!is_object($driver_obj) || $protocol == 'email') {
                     continue;
@@ -215,8 +226,8 @@ class ControllerPagesAccountEdit extends AController
 
                 $fld = $driver_obj->getURIField($form, $value);
                 $this->data['form']['fields'][$protocol] = $fld;
-                $this->data['entry_'.$protocol] = $fld->label_text;
-                $this->data['error_'.$protocol] = $this->error[$protocol];
+                $this->data['entry_' . $protocol] = $fld->label_text;
+                $this->data['error_' . $protocol] = $this->error[$protocol];
             }
         }
 
@@ -225,7 +236,9 @@ class ControllerPagesAccountEdit extends AController
                 'type' => 'submit',
                 'icon' => 'fa fa-check',
                 'name' => $this->language->get('button_continue'),
-            ]);
+            ]
+        );
+
         $this->data['form']['back'] = $form->getFieldHtml(
             [
                 'type'  => 'button',
@@ -233,7 +246,9 @@ class ControllerPagesAccountEdit extends AController
                 'style' => 'button',
                 'icon'  => 'fa fa-arrow-left',
                 'text'  => $this->language->get('button_back'),
-            ]);
+            ]
+        );
+
         $this->data['back'] = $this->html->getSecureURL('account/account');
         $this->view->batchAssign($this->data);
         $this->processTemplate('pages/account/edit.tpl');

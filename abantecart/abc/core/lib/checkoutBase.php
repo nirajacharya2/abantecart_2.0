@@ -559,7 +559,7 @@ class CheckoutBase extends ALibBase
             throw new LibException($handler->getErrors());
         }
         $this->errors = [];
-        $this->registry->get('extensions')->hk_ValidateData($this, [__FUNCTION__]);
+        $this->registry->get('extensions')->hk_ValidateData($this, __FUNCTION__);
 
         if ($this->errors) {
             throw new LibException($this->errors);

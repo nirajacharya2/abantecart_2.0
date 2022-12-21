@@ -495,13 +495,9 @@ class ControllerPagesToolFormsManager extends AController
             $this->error['form_description'] = $this->language->get('error_form_description');
         }
 
-        $this->extensions->hk_ValidateData($this);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $data);
 
-        if (!$this->error) {
-            return true;
-        } else {
-            return false;
-        }
+        return (!$this->error);
     }
 
     public function insert_block()
@@ -518,7 +514,7 @@ class ControllerPagesToolFormsManager extends AController
         $block = $lm->getBlockByTxtId('custom_form_block');
         $this->data['block_id'] = $block['block_id'];
 
-        if ($this->request->is_POST() && $this->validateBlockForm()) {
+        if ($this->request->is_POST() && $this->validateBlockForm($this->request->post)) {
             if (isset($this->session->data['layout_params'])) {
                 $layout = new ALayoutManager(
                     $this->session->data['layout_params']['tmpl_id'],
@@ -656,7 +652,7 @@ class ControllerPagesToolFormsManager extends AController
 
         $this->data['tabs'] = $this->getTabs($tabs);
 
-        if ($this->request->is_POST() && $this->validateBlockForm()) {
+        if ($this->request->is_POST() && $this->validateBlockForm($this->request->post)) {
 
             // get form html
             $content = [];
@@ -946,7 +942,7 @@ class ControllerPagesToolFormsManager extends AController
         $this->processTemplate('pages/tool/forms_manager_block_form.tpl');
     }
 
-    protected function validateBlockForm()
+    protected function validateBlockForm($data)
     {
         $required = [];
         if (!$this->user->canModify('tool/forms_manager')) {
@@ -975,13 +971,9 @@ class ControllerPagesToolFormsManager extends AController
             }
         }
 
-        $this->extensions->hk_ValidateData($this);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $data);
 
-        if (!$this->error) {
-            return true;
-        } else {
-            return false;
-        }
+        return (!$this->error);
     }
 
 }

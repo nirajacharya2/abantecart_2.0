@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -23,25 +23,27 @@ namespace abc\controllers\admin;
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
 use abc\core\lib\AError;
+use abc\core\lib\AException;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
-use abc\models\catalog\Category;
+use abc\models\admin\ModelCatalogProduct;
 use abc\models\catalog\Product;
 use abc\models\catalog\ProductDiscount;
 use abc\models\catalog\ProductSpecial;
+use Exception;
 use H;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 use stdClass;
 
 /**
  * Class ControllerResponsesListingGridProduct
  *
  * @package abc\controllers\admin
- * @property \abc\models\admin\ModelCatalogProduct $model_catalog_product
+ * @property ModelCatalogProduct $model_catalog_product
  */
 class ControllerResponsesListingGridProduct extends AController
 {
-    public $data = [];
-
     public function main()
     {
         //init controller data
@@ -93,10 +95,7 @@ class ControllerResponsesListingGridProduct extends AController
         $response->userdata = new stdClass();
         $response->userdata->classes = [];
 
-        $product_ids = [];
-        foreach ($results as $result) {
-            $product_ids[] = (int)$result['product_id'];
-        }
+        $product_ids = array_map('intval', array_column($results, 'product_id'));
 
         $resource = new AResource('image');
         $thumbnails = $resource->getMainThumbList(
@@ -119,28 +118,35 @@ class ControllerResponsesListingGridProduct extends AController
             } else {
                 $price = $this->html->buildInput(
                     [
-                        'name'  => 'price['.$result['product_id'].']',
+                        'name'  => 'price[' . $result['product_id'] . ']',
                         'value' => H::moneyDisplayFormat($result['price']),
-                    ]);
+                    ]
+                );
             }
 
             $response->rows[$i]['cell'] = [
                 $thumbnail['thumb_html'],
-                $this->html->buildInput([
-                    'name'  => 'product_description['.$result['product_id'].'][name]',
-                    'value' => $result['name'],
-                ]),
-                $this->html->buildInput([
-                    'name'  => 'model['.$result['product_id'].']',
-                    'value' => $result['model'],
-                ]),
+                $this->html->buildInput(
+                    [
+                        'name'  => 'product_description[' . $result['product_id'] . '][name]',
+                        'value' => $result['name'],
+                    ]
+                ),
+                $this->html->buildInput(
+                    [
+                        'name'  => 'model[' . $result['product_id'] . ']',
+                        'value' => $result['model'],
+                    ]
+                ),
                 $price,
                 (int)$result['quantity'],
-                $this->html->buildCheckbox([
-                    'name'  => 'status['.$result['product_id'].']',
-                    'value' => $result['status'],
-                    'style' => 'btn_switch',
-                ]),
+                $this->html->buildCheckbox(
+                    [
+                        'name'  => 'status[' . $result['product_id'] . ']',
+                        'value' => $result['status'],
+                        'style' => 'btn_switch',
+                    ]
+                ),
             ];
             $i++;
         }
@@ -158,14 +164,13 @@ class ControllerResponsesListingGridProduct extends AController
 
         if (!$this->user->canModify('listing_grid/product')) {
             $error = new AError('');
-
             $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/product'),
                     'reset_value' => true,
                 ]
             );
-            return null;
+            return;
         }
 
         $this->loadModel('catalog/product');
@@ -182,7 +187,13 @@ class ControllerResponsesListingGridProduct extends AController
                             $err = $this->validateDelete($id);
                             if (!empty($err)) {
                                 $error = new AError('');
-                                return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                                $error->toJSONResponse(
+                                    'VALIDATION_ERROR_406',
+                                    [
+                                        'error_text' => $err
+                                    ]
+                                );
+                                return;
                             }
                             $product = Product::with('categories')->find($id);
                             $categories = $product->categories;
@@ -194,11 +205,17 @@ class ControllerResponsesListingGridProduct extends AController
                             }
                         }
                         $this->db->commit();
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         $this->db->rollback();
                         $error = new AError($e->getMessage());
                         $error->toLog();
-                        return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $e->getMessage()]);
+                        $error->toJSONResponse(
+                            'VALIDATION_ERROR_406',
+                            [
+                                'error_text' => $e->getMessage()
+                            ]
+                        );
+                        return;
                     }
                 }
                 break;
@@ -220,8 +237,13 @@ class ControllerResponsesListingGridProduct extends AController
                                 $err = $this->validateField($f, $this->request->post[$f][$id]);
                                 if (!empty($err)) {
                                     $error = new AError('');
-
-                                    return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                                    $error->toJSONResponse(
+                                        'VALIDATION_ERROR_406',
+                                        [
+                                            'error_text' => $err
+                                        ]
+                                    );
+                                    return;
                                 }
                                 $upd[$f] = $this->request->post[$f][$id];
                             }
@@ -244,16 +266,15 @@ class ControllerResponsesListingGridProduct extends AController
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
-        return null;
     }
 
     /**
      * update only one field
      *
      * @return void
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function update_field()
     {
@@ -267,8 +288,9 @@ class ControllerResponsesListingGridProduct extends AController
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/product'),
                     'reset_value' => true,
-                ]);
-            return null;
+                ]
+            );
+            return;
         }
 
         $this->loadLanguage('catalog/product');
@@ -282,7 +304,7 @@ class ControllerResponsesListingGridProduct extends AController
                 if (!empty($err)) {
                     $error = new AError('');
                     $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
-                    return null;
+                    return;
                 }
                 if ($key == 'date_available') {
                     $value = H::dateDisplay2ISO($value);
@@ -291,7 +313,7 @@ class ControllerResponsesListingGridProduct extends AController
                 Product::updateProduct($product_id, $data);
             }
             $this->extensions->hk_ProcessData($this, 'update_field', ['product_id' => $product_id]);
-            return null;
+            return;
         }
 
         //request sent from jGrid. ID is key of array
@@ -306,7 +328,7 @@ class ControllerResponsesListingGridProduct extends AController
                     if (!empty($err)) {
                         $error = new AError('');
                         $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
-                        return null;
+                        return;
                     }
                     Product::updateProduct($k, [$f => $v]);
                     $this->extensions->hk_ProcessData($this, 'update_field', ['product_id' => $k]);
@@ -320,7 +342,6 @@ class ControllerResponsesListingGridProduct extends AController
 
     public function update_discount_field()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -368,11 +389,16 @@ class ControllerResponsesListingGridProduct extends AController
         if (!$this->user->canModify('listing_grid/product')) {
             $error = new AError('');
 
-            return $error->toJSONResponse('NO_PERMISSIONS_403',
+            $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
-                    'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/product'),
+                    'error_text'  => sprintf(
+                        $this->language->get('error_permission_modify'),
+                        'listing_grid/product'
+                    ),
                     'reset_value' => true,
-                ]);
+                ]
+            );
+            return;
         }
 
         $this->loadLanguage('catalog/product');
@@ -407,12 +433,16 @@ class ControllerResponsesListingGridProduct extends AController
 
         if (!$this->user->canModify('listing_grid/product')) {
             $error = new AError('');
-
-            return $error->toJSONResponse('NO_PERMISSIONS_403',
+            $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
-                    'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/product'),
+                    'error_text'  => sprintf(
+                        $this->language->get('error_permission_modify'),
+                        'listing_grid/product'
+                    ),
                     'reset_value' => true,
-                ]);
+                ]
+            );
+            return;
         }
 
         $this->loadLanguage('catalog/product');
@@ -420,7 +450,9 @@ class ControllerResponsesListingGridProduct extends AController
         if (isset($this->request->get['id'])) {
             //request sent from edit form. ID in url
             foreach ($this->request->post as $key => $value) {
-                $data = [$key => $value];
+                $data = [
+                    $key => $value
+                ];
                 Product::updateProductLinks($this->request->get['id'], $data);
             }
 
@@ -453,7 +485,7 @@ class ControllerResponsesListingGridProduct extends AController
                 }
                 break;
             case 'keyword' :
-                $this->data['error'] = $this->html->isSEOkeywordExists('product_id='.$this->request->get['id'], $value);
+                $this->data['error'] = $this->html->isSEOkeywordExists('product_id=' . $this->request->get['id'], $value);
                 break;
             case 'length' :
             case 'width'  :
@@ -465,7 +497,7 @@ class ControllerResponsesListingGridProduct extends AController
                 }
                 break;
         }
-        $this->extensions->hk_ValidateData($this, [__FUNCTION__, $field, $value]);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $field, $value);
 
         return $this->data['error'];
     }
@@ -473,9 +505,8 @@ class ControllerResponsesListingGridProduct extends AController
     protected function validateDelete($id)
     {
         $this->data['error'] = '';
-        $this->extensions->hk_ValidateData($this, [__FUNCTION__, $id]);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $id);
 
-        return $this->data['error'];
+        return (!$this->data['error']);
     }
-
 }

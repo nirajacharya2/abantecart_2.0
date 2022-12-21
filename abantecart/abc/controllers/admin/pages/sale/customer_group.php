@@ -20,18 +20,18 @@
 
 namespace abc\controllers\admin;
 
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
+if (!class_exists('abc\core\ABC') || !ABC::env('IS_ADMIN')) {
+    header('Location: static_pages/?forbidden=' . basename(__FILE__));
 }
 
 class ControllerPagesSaleCustomerGroup extends AController
 {
-    public $data = array();
-    public $error = array();
-    private $errors = array('warning', 'name',);
+    public $error = [];
+    private $errors = ['warning', 'name',];
 
     public function main()
     {
@@ -46,20 +46,20 @@ class ControllerPagesSaleCustomerGroup extends AController
             unset($this->session->data['success']);
         }
 
-        $this->document->initBreadcrumb(array(
+        $this->document->initBreadcrumb([
             'href'      => $this->html->getSecureURL('index/home'),
             'text'      => $this->language->get('text_home'),
-      		'separator' => false
-        ));
+            'separator' => false
+        ]);
 
-        $this->document->addBreadcrumb(array(
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSecureURL('sale/customer_group'),
             'text'      => $this->language->get('breadcrumb_title'),
             'separator' => ' :: ',
-			'current'   => true
-        ));
+            'current'   => true
+        ]);
 
-        $grid_settings = array(
+        $grid_settings = [
             //id of grid
             'table_id'    => 'cg_grid',
             // url to load data from
@@ -69,38 +69,38 @@ class ControllerPagesSaleCustomerGroup extends AController
             'sortorder'   => 'asc',
             'multiselect' => 'true',
             // actions
-            'actions'     => array(
-                'edit'   => array(
+            'actions'     => [
+                'edit'   => [
                     'text' => $this->language->get('text_edit'),
-				    'href' => $this->html->getSecureURL('sale/customer_group/update', '&customer_group_id=%ID%')
-                ),
-                'delete' => array(
+                    'href' => $this->html->getSecureURL('sale/customer_group/update', '&customer_group_id=%ID%')
+                ],
+                'delete' => [
                     'text' => $this->language->get('button_delete'),
-                )
-            ),
-        );
+                ]
+            ],
+        ];
 
-        $grid_settings['colNames'] = array(
+        $grid_settings['colNames'] = [
             $this->language->get('column_name'),
             $this->language->get('column_tax_exempt'),
-        );
-        $grid_settings['colModel'] = array(
-            array(
+        ];
+        $grid_settings['colModel'] = [
+            [
                 'name'  => 'name',
                 'index' => 'name',
                 'width' => 600,
                 'align' => 'left',
-            ),
-            array(
+            ],
+            [
                 'name'   => 'tax_exempt',
                 'index'  => 'tax_exempt',
                 'width'  => 100,
                 'align'  => 'center',
-			    'search' => false
-            ),
-        );
+                'search' => false
+            ],
+        ];
 
-        $grid = $this->dispatch('common/listing_grid', array($grid_settings));
+        $grid = $this->dispatch('common/listing_grid', [$grid_settings]);
         $this->view->assign('listing_grid', $grid->dispatchGetOutput());
 
         $this->view->assign('heading_title', $this->language->get('breadcrumb_title'));
@@ -121,7 +121,7 @@ class ControllerPagesSaleCustomerGroup extends AController
 
         $this->document->setTitle($this->language->get('heading_title'));
 
-        if ($this->request->is_POST() && $this->validateForm()) {
+        if ($this->request->is_POST() && $this->validateForm($this->request->post)) {
             $customer_group_id = $this->model_sale_customer_group->addCustomerGroup($this->request->post);
             $this->data['customer_group_id'] = $customer_group_id;
             $this->extensions->hk_ProcessData($this, 'insert');
@@ -129,7 +129,7 @@ class ControllerPagesSaleCustomerGroup extends AController
             abc_redirect(
                 $this->html->getSecureURL(
                     'sale/customer_group/update',
-                    '&customer_group_id='.$customer_group_id
+                    '&customer_group_id=' . $customer_group_id
                 )
             );
         }
@@ -154,14 +154,17 @@ class ControllerPagesSaleCustomerGroup extends AController
             unset($this->session->data['success']);
         }
 
-        if ($this->request->is_POST() && $this->validateForm()) {
-            $this->model_sale_customer_group->editCustomerGroup($this->request->get['customer_group_id'],
-                $this->request->post);
+        if ($this->request->is_POST() && $this->validateForm($this->request->post)) {
+            $this->model_sale_customer_group->editCustomerGroup(
+                $this->request->get['customer_group_id'],
+                $this->request->post
+            );
             $this->data['customer_group_id'] = $this->request->get['customer_group_id'];
             $this->extensions->hk_ProcessData($this, 'update');
             $this->session->data['success'] = $this->language->get('text_success');
-            abc_redirect($this->html->getSecureURL('sale/customer_group/update',
-                '&customer_group_id='.$this->request->get['customer_group_id']));
+            abc_redirect(
+                $this->html->getSecureURL('sale/customer_group/update',
+                    '&customer_group_id=' . $this->request->get['customer_group_id']));
         }
         $this->getForm();
 
@@ -172,23 +175,23 @@ class ControllerPagesSaleCustomerGroup extends AController
     private function getForm()
     {
 
-        $this->data['error'] = array();
+        $this->data['error'] = [];
         foreach ($this->errors as $f) {
             if (isset ($this->error[$f])) {
                 $this->data['error'][$f] = $this->error[$f];
             }
         }
 
-        $this->document->initBreadcrumb(array(
+        $this->document->initBreadcrumb([
             'href'      => $this->html->getSecureURL('index/home'),
             'text'      => $this->language->get('text_home'),
             'separator' => false
-        ));
-        $this->document->addBreadcrumb(array(
+        ]);
+        $this->document->addBreadcrumb([
             'href'      => $this->html->getSecureURL('sale/customer_group'),
             'text'      => $this->language->get('breadcrumb_title'),
             'separator' => ' :: '
-        ));
+        ]);
 
         $this->data['cancel'] = $this->html->getSecureURL('sale/customer_group');
 
@@ -222,76 +225,76 @@ class ControllerPagesSaleCustomerGroup extends AController
             $form = new AForm('HS');
         }
 
-        $this->document->addBreadcrumb(array(
+        $this->document->addBreadcrumb([
             'href'      => $this->data['action'],
             'text'      => $this->data['heading_title'],
             'separator' => ' :: ',
             'current'   => true
-        ));
+        ]);
 
-        $tabs['general'] = array(
+        $tabs['general'] = [
             'name'       => 'customer_group_edit',
             'text'       => $this->language->get('tab_general'),
             'href'       => $this->html->getSecureURL('sale/customer_group/update',
-                '&customer_group_id='.$this->request->get['customer_group_id'], true),
+                '&customer_group_id=' . $this->request->get['customer_group_id'], true),
             'active'     => true,
             'sort_order' => 0
-        );
+        ];
 
-        $obj = $this->dispatch('responses/common/tabs', array(
+        $obj = $this->dispatch('responses/common/tabs', [
                 'customer_group',
                 'sale/customer_group',
                 //parent controller. Use customer group to use for other extensions that will add tabs via their hooks
-                array('tabs' => $tabs)
-            )
+                ['tabs' => $tabs]
+            ]
         );
         $this->data['tabs'] = $obj->dispatchGetOutput();
 
-        $form->setForm(array(
+        $form->setForm([
             'form_name' => 'cgFrm',
             'update'    => $this->data['update'],
-        ));
+        ]);
 
         $this->data['form']['id'] = 'cgFrm';
-        $this->data['form']['form_open'] = $form->getFieldHtml(array(
+        $this->data['form']['form_open'] = $form->getFieldHtml([
             'type'   => 'form',
             'name'   => 'cgFrm',
             'action' => $this->data['action'],
-        ));
-        $this->data['form']['submit'] = $form->getFieldHtml(array(
+        ]);
+        $this->data['form']['submit'] = $form->getFieldHtml([
             'type'  => 'button',
             'name'  => 'submit',
             'text'  => $this->language->get('button_save'),
             'style' => 'button1',
-        ));
-        $this->data['form']['cancel'] = $form->getFieldHtml(array(
+        ]);
+        $this->data['form']['cancel'] = $form->getFieldHtml([
             'type'  => 'button',
             'name'  => 'cancel',
             'text'  => $this->language->get('button_cancel'),
             'style' => 'button2',
-        ));
+        ]);
 
-        $this->data['form']['fields']['name'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['name'] = $form->getFieldHtml([
             'type'     => 'input',
             'name'     => 'name',
             'value'    => $this->data['name'],
             'required' => true,
-        ));
+        ]);
 
-        $this->data['form']['fields']['tax_exempt'] = $form->getFieldHtml(array(
+        $this->data['form']['fields']['tax_exempt'] = $form->getFieldHtml([
             'type'     => 'checkbox',
             'name'     => 'tax_exempt',
             'value'    => $this->data['tax_exempt'],
             'style'    => 'btn_switch',
             'required' => false,
-        ));
+        ]);
 
         $this->view->assign('help_url', $this->gen_help_url('customer_group_edit'));
         $this->view->batchAssign($this->data);
         $this->processTemplate('pages/sale/customer_group_form.tpl');
     }
 
-    private function validateForm()
+    private function validateForm($data)
     {
         if (!$this->user->canModify('sale/customer_group')) {
             $this->error['warning'] = $this->language->get('error_permission');
@@ -301,13 +304,8 @@ class ControllerPagesSaleCustomerGroup extends AController
             $this->error['name'] = $this->language->get('error_name');
         }
 
-        $this->extensions->hk_ValidateData($this);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $data);
 
-        if (!$this->error) {
-            return true;
-        } else {
-            return false;
-        }
+        return (!$this->error);
     }
-
 }
