@@ -471,72 +471,62 @@ class Category extends BaseModel
     {
         $languageId = $languageId !== null ? $languageId : static::$current_language_id;
 
-        $cacheKey = 'category.list.' . $parentId
-            . '.store_' . $storeId
-            . '_limit_' . $limit
-            . '_lang_' . $languageId
-            . '_side_' . (int)ABC::env('IS_ADMIN');
-        $cache = Registry::cache()->get($cacheKey);
+        $category_data = [];
 
-        if ($cache === null) {
-            $category_data = [];
-
-            $query = static::select();
-            $query->leftJoin(
-                'category_descriptions',
-                'categories.category_id',
-                '=',
-                'category_descriptions.category_id'
-            );
-            if (!is_null($storeId)) {
-                $query->rightJoin(
-                    'categories_to_stores',
-                    function ($join) use ($storeId) {
-                        /** @var JoinClause $join */
-                        $join->on(
-                            'categories.category_id',
-                            '=',
-                            'categories_to_stores.category_id'
-                        )->where('categories_to_stores.store_id', '=', (int)$storeId);
-                    }
-                );
-            }
-
-            if ((int)$parentId > 0) {
-                $query->where('categories.parent_id', '=', (int)$parentId);
-            } else {
-                $query->whereNull('categories.parent_id');
-            }
-
-            $query->where('category_descriptions.language_id', '=', $languageId);
-            if (!ABC::env('IS_ADMIN')) {
-                $query->active('categories');
-            }
-            $query->orderBy('categories.sort_order')
-                ->orderBy('category_descriptions.name');
-
-            //allow to extend this method from extensions
-            Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
-            $categories = $query->get();
-
-            foreach ($categories as $category) {
-                if (ABC::env('IS_ADMIN')) {
-                    $category->name = static::getPath($category->category_id);
+        $query = static::select();
+        $query->leftJoin(
+            'category_descriptions',
+            'categories.category_id',
+            '=',
+            'category_descriptions.category_id'
+        );
+        if (!is_null($storeId)) {
+            $query->rightJoin(
+                'categories_to_stores',
+                function ($join) use ($storeId) {
+                    /** @var JoinClause $join */
+                    $join->on(
+                        'categories.category_id',
+                        '=',
+                        'categories_to_stores.category_id'
+                    )->where('categories_to_stores.store_id', '=', (int)$storeId);
                 }
-                $category_data[] = $category->toArray();
-                $category_data = array_merge($category_data, static::getCategories($category->category_id, $storeId, $limit, $languageId));
-            }
-            $cache = $category_data;
-            Registry::cache()->put($cacheKey, $cache);
+            );
         }
-        return $cache;
+
+        if ((int)$parentId > 0) {
+            $query->where('categories.parent_id', '=', (int)$parentId);
+        } else {
+            $query->whereNull('categories.parent_id');
+        }
+
+        $query->where('category_descriptions.language_id', '=', $languageId);
+        if (!ABC::env('IS_ADMIN')) {
+            $query->active('categories');
+        }
+        $query->orderBy('categories.sort_order')
+            ->orderBy('category_descriptions.name');
+
+        //allow to extend this method from extensions
+        Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
+        $categories = $query->get();
+
+        foreach ($categories as $category) {
+            if (ABC::env('IS_ADMIN')) {
+                $category->name = static::getPath($category->category_id);
+            }
+            $category_data[] = $category->toArray();
+            $category_data = array_merge($category_data, static::getCategories($category->category_id, $storeId, $limit, $languageId));
+        }
+
+
+        return $category_data;
     }
 
     /**
      * @param int $categoryId
      *
      * @return false|mixed
-     * @throws InvalidArgumentException
      */
     public static function getCategory($categoryId, $storeId = null, $limit = 0, $languageId = null)
     {
@@ -544,57 +534,46 @@ class Category extends BaseModel
         $storeId = $storeId ?? (int)Registry::config()->get('config_store_id');
         $languageId = $languageId ?? static::$current_language_id;
 
-        $cacheKey = 'product.listing.category.' . (int)$categoryId . '.store_' . $storeId . '_lang_' . $languageId;
-        $cache = Registry::cache()->get($cacheKey);
-        if ($cache === null) {
+        $arSelect = ['*'];
 
-            $arSelect = ['*'];
-
-            if (ABC::env('IS_ADMIN')) {
-                $arSelect[] = $db->raw(
-                    "(SELECT keyword 
+        if (ABC::env('IS_ADMIN')) {
+            $arSelect[] = $db->raw(
+                "(SELECT keyword 
                       FROM " . $db->table_name("url_aliases")
-                    . " WHERE query = 'category_id=" . $categoryId . "' 
+                . " WHERE query = 'category_id=" . $categoryId . "' 
                                 AND language_id='" . $languageId . "' ) as keyword"
-                );
-            } else {
-                $arSelect[] = $db->raw(
-                    "(SELECT COUNT(p2c.product_id) as cnt
+            );
+        } else {
+            $arSelect[] = $db->raw(
+                "(SELECT COUNT(p2c.product_id) as cnt
                       FROM " . $db->table_name('products_to_categories') . " p2c
                       INNER JOIN " . $db->table_name('products') . " p 
                          ON p.product_id = p2c.product_id AND p.status = '1'
                       WHERE  p2c.category_id = " . $db->table_name('categories') . ".category_id
                      ) as products_count"
-                );
-            }
-            /** @var Collection|QueryBuilder $query */
-            $query = self::select($arSelect);
-            $query->leftJoin(
-                'category_descriptions',
-                function ($join) use ($languageId) {
-                    /** @var JoinClause $join */
-                    $join->on('category_descriptions.category_id', '=', 'categories.category_id')
-                        ->where('category_descriptions.language_id', '=', $languageId);
-                }
-            )
-                ->leftJoin(
-                    'categories_to_stores',
-                    'categories_to_stores.category_id',
-                    '=',
-                    'categories.category_id'
-                )
-                ->where('categories.category_id', '=', $categoryId)
-                ->where('categories_to_stores.store_id', '=', $storeId);
-            //allow to extend this method from extensions
-            Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
-            $category = $query->first();
-
-            if ($category) {
-                $cache = $category->toArray();
-                Registry::cache()->put($cacheKey, $cache);
-            }
+            );
         }
-        return $cache;
+        /** @var Collection|QueryBuilder $query */
+        $query = self::select($arSelect);
+        $query->leftJoin(
+            'category_descriptions',
+            function ($join) use ($languageId) {
+                /** @var JoinClause $join */
+                $join->on('category_descriptions.category_id', '=', 'categories.category_id')
+                    ->where('category_descriptions.language_id', '=', $languageId);
+            }
+        )
+            ->leftJoin(
+                'categories_to_stores',
+                'categories_to_stores.category_id',
+                '=',
+                'categories.category_id'
+            )
+            ->where('categories.category_id', '=', $categoryId)
+            ->where('categories_to_stores.store_id', '=', $storeId);
+        //allow to extend this method from extensions
+        Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
+        return $query->first()?->toArray();
     }
 
     /**
@@ -851,7 +830,7 @@ class Category extends BaseModel
         $db = Registry::db();
         $data['parent_id'] = (int)$data['parent_id'] > 0 ? (int)$data['parent_id'] : null;
         $db->beginTransaction();
-        $category = null;
+
         try {
             $category = new Category($data);
             $category->save();
@@ -1089,11 +1068,11 @@ class Category extends BaseModel
             'categories.category_id'
         )->whereNull('t2.category_id');
 
-        $categories = $query->get();
+        $categories = $query->useCache('category')->get();
 
         $result = [];
         if ($categories) {
-            return array_column($categories->toArray(), 'category_id', 'category_id');
+            return array_column((array)$categories?->toArray(), 'category_id', 'category_id');
         }
         return $result;
     }
@@ -1105,14 +1084,14 @@ class Category extends BaseModel
      */
     public static function getCategoryDescriptions($category_id)
     {
-        $category_description_data = [];
         $categoryDescriptions = CategoryDescription::where('category_id', '=', (int)$category_id)->get();
 
         if (!$categoryDescriptions) {
-            return $category_description_data;
+            return [];
         }
 
         $categoryDescriptions = $categoryDescriptions->toArray();
+        $category_description_data = [];
         foreach ($categoryDescriptions as $result) {
             $category_description_data[$result['language_id']] = [
                 'name'             => $result['name'],
@@ -1121,7 +1100,6 @@ class Category extends BaseModel
                 'description'      => $result['description'],
             ];
         }
-
         return $category_description_data;
     }
 
@@ -1221,7 +1199,7 @@ class Category extends BaseModel
 
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
-        return $query->get()->toArray();
+        return $query->get()?->toArray();
     }
 
     /**
@@ -1261,6 +1239,6 @@ class Category extends BaseModel
         $query = Category::where('category_id', '=', $categoryId);
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
-        return $query->first()->active_products_count;
+        return $query->first()?->active_products_count;
     }
 }

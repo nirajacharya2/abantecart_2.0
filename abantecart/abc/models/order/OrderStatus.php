@@ -156,7 +156,7 @@ class OrderStatus extends BaseModel
      * @param array $inputData
      * @param string $mode - can be empty or "total_only" (for counting rows)
      *
-     * @return int|\Illuminate\Support\Collection
+     * @return \Illuminate\Support\Collection|int
      */
     public static function getOrderStatuses($inputData = [], $mode = '')
     {
@@ -192,7 +192,7 @@ class OrderStatus extends BaseModel
         );
         $query->where('order_status_descriptions.language_id', '=', $language_id);
 
-        //If for total, we done building the query
+        //If for total, we'done building the query
         if ($mode == 'total_only') {
             //allow to extend this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $inputData);

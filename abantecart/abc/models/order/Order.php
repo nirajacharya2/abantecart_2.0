@@ -15,13 +15,12 @@
  * versions in the future. If you wish to customize AbanteCart for your
  * needs please refer to http://www.abantecart.com for more information.
  */
+
 namespace abc\models\order;
 
 use abc\core\engine\ALanguage;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
-use abc\core\lib\ADataEncryption;
-use abc\core\lib\ADB;
 use abc\core\lib\AException;
 use abc\models\BaseModel;
 use abc\models\casts\Serialized;
@@ -832,9 +831,6 @@ class Order extends BaseModel
     {
 
         $data = $this->attributes;
-        /**
-         * @var ADataEncryption $dcrypt
-         */
         $dcrypt = Registry::dcrypt();
         if ($dcrypt->active) {
             $data = $dcrypt->encrypt_data($data, 'orders');
@@ -955,9 +951,6 @@ class Order extends BaseModel
         $customer_id = (int)$customer_id;
         $order = null;
         try {
-            /**
-             * @var QueryBuilder $query
-             */
             $query = Order::select(
                 [
                     'orders.*',
@@ -965,7 +958,7 @@ class Order extends BaseModel
                     'languages.code as language_code',
                     'languages.filename as language_filename',
                 ])
-                          ->where('orders.order_id', '=', $order_id);
+                ->where('orders.order_id', '=', $order_id);
             if ($customer_id) {
                 $query->where('orders.customer_id', '=', $customer_id);
             }
@@ -998,22 +991,17 @@ class Order extends BaseModel
             if ($order_status_id === null) {
                 //processed order
                 $query->where('orders.order_status_id', '>', '0');
-
-            } elseif ($order_status_id == 'any') {
-                //unrestricted to status
-            } else {
+            } elseif ($order_status_id != 'any') {
                 //only specific status
                 $query->where('orders.order_status_id', '=', (int)$order_status_id);
-            }
+            } //else unrestricted to status
 
-            //allow to extends this method from extensions
+            //allow to extend this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
-            /**
-             * @var Order $order
-             */
+            /** @var Order $order */
             $order = $query->first();
         } catch (Exception $e) {
-            Registry::log()->write(__CLASS__.': '.$e->getMessage());
+            Registry::log()->error(__CLASS__ . ': ' . $e->getMessage());
 
         }
         $order_data = [];
@@ -1052,35 +1040,36 @@ class Order extends BaseModel
             [
                 'orders.*',
                 'order_status_descriptions.name as order_status_name',
-            ])
-                      ->where('orders.order_status_id', '>', 0)
-                      ->leftJoin(
-                          'order_status_descriptions',
-                          function ($join) {
-                              /**
-                               * @var JoinClause $join
-                               */
-                              $join
-                                  ->on(
-                                      'orders.order_status_id',
-                                      '=',
-                                      'order_status_descriptions.order_status_id'
-                                  )->on(
-                                      'order_status_descriptions.language_id',
-                                      '=',
-                                      'orders.language_id'
-                                  );
-                          }
-                      )
-                      ->where('orders.customer_id', '=', $customer_id);
+            ]
+        )
+            ->where('orders.order_status_id', '>', 0)
+            ->leftJoin(
+                'order_status_descriptions',
+                function ($join) {
+                    /**
+                     * @var JoinClause $join
+                     */
+                    $join
+                        ->on(
+                            'orders.order_status_id',
+                            '=',
+                            'order_status_descriptions.order_status_id'
+                        )->on(
+                            'order_status_descriptions.language_id',
+                            '=',
+                            'orders.language_id'
+                        );
+                }
+            )
+            ->where('orders.customer_id', '=', $customer_id);
         if ($order_id) {
             $query->where('order_id', '=', $order_id);
         }
         $query->orderByDesc('orders.date_added')
-              ->limit($limit)
-              ->offset($start);
+            ->limit($limit)
+            ->offset($start);
         Registry::extensions()->hk_extendQuery($this, __FUNCTION__, $query, func_get_args());
-        return $query->get()->toArray();
+        return $query->useCache('order')->get()?->toArray();
     }
 
     /**
@@ -1100,21 +1089,21 @@ class Order extends BaseModel
                 'order_product_id' => $order_product_id,
             ]
         )
-                            ->select(['order_options.*', 'product_options.element_type'])
-                            ->leftJoin(
-                                'product_option_values',
-                                'product_option_values.product_option_value_id',
-                                '=',
-                                'order_options.product_option_value_id'
-                            )
-                            ->leftJoin(
-                                'product_options',
-                                'product_options.product_option_id',
-                                '=',
-                                'product_option_values.product_option_id'
-                            );
+            ->select(['order_options.*', 'product_options.element_type'])
+            ->leftJoin(
+                'product_option_values',
+                'product_option_values.product_option_value_id',
+                '=',
+                'order_options.product_option_value_id'
+            )
+            ->leftJoin(
+                'product_options',
+                'product_options.product_option_id',
+                '=',
+                'product_option_values.product_option_id'
+            );
         Registry::extensions()->hk_extendQuery($this, __FUNCTION__, $query, func_get_args());
-        return $query->get();
+        return $query?->get();
     }
 
     /**
@@ -1124,7 +1113,6 @@ class Order extends BaseModel
      */
     public static function getOrderHistories($order_id)
     {
-        /** @var QueryBuilder $query */
         $query = OrderHistory::select(
             [
                 'order_history.*',
@@ -1183,29 +1171,30 @@ class Order extends BaseModel
         }
 
         $dataTypes = OrderDataType::whereIn('name', $protocols)
-                                  ->get()
-                                  ->pluck('type_id');
+            ->get()
+            ->pluck('type_id');
         /**
          * @var QueryBuilder $query
          */
         $query = OrderDatum::where(
             [
                 'order_id' => $order_id,
-            ]);
+            ]
+        );
         $query->whereIn('order_data.type_id', $dataTypes)
-              ->leftJoin('order_data_types',
-                  'order_data.type_id',
-                  '=',
-                  'order_data_types.type_id'
-              );
+            ->leftJoin('order_data_types',
+                'order_data.type_id',
+                '=',
+                'order_data_types.type_id'
+            );
         $query->whereNotIn('order_data_types.name', ['email']);
 
-        //allow to extends this method from extensions
+        //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
         /**
          * @var Order $order
          */
-        $output = $query->get()->pluck('data', 'name')->toArray();
+        $output = $query->get()?->pluck('data', 'name')?->toArray();
 
         if ($customer_id) {
             foreach ($protocols as $protocol) {
@@ -1266,12 +1255,6 @@ class Order extends BaseModel
                 static::editOrderProducts($orderInfo, $data, $oLanguage);
             }
 
-            if (!$data['order_totals']) {
-                H::event('abc\models\admin\order@update', [new ABaseEvent($order_id, $data)]);
-                Registry::db()->commit();
-                return true;
-            }
-
             //remove previous totals
             OrderTotal::where('order_id', '=', $order_id)->forceDelete();
             foreach ($data['order_totals'] as $orderTotal) {
@@ -1287,7 +1270,7 @@ class Order extends BaseModel
 
             H::event('abc\models\admin\order@update', [new ABaseEvent($order_id, $data)]);
         } catch (Exception $e) {
-            Registry::log()->write(__CLASS__.': '.$e->getMessage()."\nTrace: ".$e->getTraceAsString());
+            Registry::log()->error(__CLASS__ . ': ' . $e->getMessage() . "\nTrace: " . $e->getTraceAsString());
             Registry::db()->rollback();
             throw new AException('Error during order saving process. See log for details.');
         }
@@ -1426,11 +1409,11 @@ class Order extends BaseModel
                     $option_value_info = [];
                     foreach ($product_options_list as $row) {
                         //skip files
-                        if (in_array($row->element_type, ['U'])) {
+                        if ($row->element_type == 'U') {
                             $exclude_list[] = (int)$row->product_option_value_id;
                         }
                         //compound key for cases when val_id is null
-                        $option_value_info[$row->product_option_id.'_'.$row->product_option_value_id] = $row->toArray();
+                        $option_value_info[$row->product_option_id . '_' . $row->product_option_value_id] = $row->toArray();
                         $option_types[$row->product_option_id] = $row->element_type;
                     }
 
@@ -1447,7 +1430,7 @@ class Order extends BaseModel
                     $query->forceDelete();
 
                     foreach ($orderProduct['option'] as $opt_id => $values) {
-                        if (!is_array($values)) { // for non-multioptional elements
+                        if (!is_array($values)) { // for non-multi-optional elements
                             //do not save empty input and textarea
                             if (in_array($option_types[$opt_id], ['I', 'T']) && $values == '') {
                                 continue;
@@ -1457,8 +1440,8 @@ class Order extends BaseModel
                                 foreach ($option_value_info as $o) {
                                     if ($o['product_option_id'] == $opt_id) {
                                         if (!in_array($option_types[$opt_id], $elements_with_options)) {
-                                            $option_value_info[$o['product_option_id'].'_'
-                                            .$o['product_option_value_id']]['option_value_name'] = $values;
+                                            $option_value_info[$o['product_option_id'] . '_'
+                                            . $o['product_option_value_id']]['option_value_name'] = $values;
                                         }
                                         $values = [$o['product_option_value_id']];
                                         break;
@@ -1472,7 +1455,7 @@ class Order extends BaseModel
                             if (!$value) {
                                 continue;
                             }
-                            $arr_key = $opt_id.'_'.$value;
+                            $arr_key = $opt_id . '_' . $value;
                             $optionData = $option_value_info[$arr_key];
                             unset($optionData['date_added'], $optionData['date_modified']);
                             $optionData['order_id'] = $order_id;
@@ -1551,7 +1534,6 @@ class Order extends BaseModel
                         }
                     }
                 }//end processing options
-
             }
         }
         return true;
@@ -1568,15 +1550,15 @@ class Order extends BaseModel
          */
         $table_name = Registry::db()->table_name('orders');
         $query = OrderProduct::where('order_products.product_id', '=', $product_id)
-                             ->whereRaw("COALESCE(".$table_name.".customer_id,0) = 0")
-                             ->join(
-                                 'orders',
-                                 'orders.order_id',
-                                 '=',
-                                 'order_products.order_id'
-                             );
+            ->whereRaw("COALESCE(" . $table_name . ".customer_id,0) = 0")
+            ->join(
+                'orders',
+                'orders.order_id',
+                '=',
+                'order_products.order_id'
+            );
 
-        //allow to extends this method from extensions
+        //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
         $query->useCache('order');
         return $query->get();
@@ -1592,15 +1574,10 @@ class Order extends BaseModel
     {
         $mode = (string)$inputData['mode'];
         $language_id = static::$current_language_id;
-        /**
-         * @var ADataEncryption $dcrypt
-         */
         $dcrypt = Registry::dcrypt();
 
         $currency = Registry::currency();
-        /**
-         * @var ADB $db
-         */
+
         $db = Registry::db();
         $aliasO = $db->table_name('orders');
         $aliasOSD = $db->table_name('order_status_descriptions');
@@ -1611,19 +1588,16 @@ class Order extends BaseModel
             $select[] = $db->raw('COUNT(*) as total');
         } else {
             $select = [
-                $db->raw('CONCAT('.$aliasO.'.firstname, \' \', '.$aliasO.'.lastname) AS name'),
+                $db->raw('CONCAT(' . $aliasO . '.firstname, \' \', ' . $aliasO . '.lastname) AS name'),
                 $db->raw("(SELECT name
-                            FROM ".$aliasOSD."
-                            WHERE ".$aliasOSD.".order_status_id = ".$aliasO.".order_status_id
-                                AND ".$aliasOSD.".language_id = '".(int)$language_id."' LIMIT 1) AS status"),
+                            FROM " . $aliasOSD . "
+                            WHERE " . $aliasOSD . ".order_status_id = " . $aliasO . ".order_status_id
+                                AND " . $aliasOSD . ".language_id = '" . (int)$language_id . "' LIMIT 1) AS status"),
             ];
         }
 
-        /**
-         * @var QueryBuilder $query
-         */
         if ($mode != 'total_only') {
-            $query = $order->selectRaw($db->raw_sql_row_count().' '.$aliasO.'.*');
+            $query = $order->selectRaw($db->raw_sql_row_count() . ' ' . $aliasO . '.*');
         } else {
             $query = $order->select();
         }
@@ -1637,7 +1611,6 @@ class Order extends BaseModel
                 $query->where('orders.order_status_id', '=', (int)$filter['order_status_id']);
             } else {
                 $query->where('orders.order_status_id', '>', '0');
-
             }
         }
 
@@ -1665,25 +1638,25 @@ class Order extends BaseModel
 
         if (H::has_value($filter['customer_name'])) {
             $query->whereRaw(
-                "CONCAT(".$aliasO.".firstname, ' ', ".$aliasO.".lastname) LIKE '%".$filter['customer_name']."%'"
+                "CONCAT(" . $aliasO . ".firstname, ' ', " . $aliasO . ".lastname) LIKE '%" . $filter['customer_name'] . "%'"
             );
         }
 
         if (H::has_value($filter['date_added'])) {
             $query->whereRaw(
-                "DATE(".$aliasO.".date_added) = DATE('".$db->escape($filter['date_added'])."')"
+                "DATE(" . $aliasO . ".date_added) = DATE('" . $db->escape($filter['date_added']) . "')"
             );
         }
 
         if (H::has_value($filter['date_start'])) {
             $query->whereRaw(
-                "DATE(".$aliasO.".date_added) >= DATE('".$db->escape($filter['date_start'])."')"
+                "DATE(" . $aliasO . ".date_added) >= DATE('" . $db->escape($filter['date_start']) . "')"
             );
         }
 
         if (H::has_value($filter['date_end'])) {
             $query->whereRaw(
-                "DATE(".$aliasO.".date_added) <= DATE('".$db->escape($filter['date_end'])."')"
+                "DATE(" . $aliasO . ".date_added) <= DATE('" . $db->escape($filter['date_end']) . "')"
             );
         }
 
@@ -1716,9 +1689,9 @@ class Order extends BaseModel
             if ($compare) {
                 $query->whereRaw(
                     "FLOOR(
-                            CAST(".$aliasO.".total as DECIMAL(15,4))) ".
+                            CAST(" . $aliasO . ".total as DECIMAL(15,4))) " .
                     $compare
-                    ."  FLOOR(CAST(".$filter['total']." as DECIMAL(15,4)))");
+                    . "  FLOOR(CAST(" . $filter['total'] . " as DECIMAL(15,4)))");
             } else {
                 $currencies = $currency->getCurrencies();
                 $temp = $temp2 = [
@@ -1737,28 +1710,25 @@ class Order extends BaseModel
                     }
                 }
                 $query->where(function ($query) use ($aliasO, $temp, $temp2) {
-                    /**
-                     * @var QueryBuilder $query
-                     */
-                    $query->orWhereRaw("FLOOR(".$aliasO.".total) IN  (".implode(",", $temp).")");
+                    $query->orWhereRaw("FLOOR(" . $aliasO . ".total) IN  (" . implode(",", $temp) . ")");
                     $query->orWhereRaw(
                         "FLOOR(
-                             CAST(".$aliasO.".total as DECIMAL(15,4)) * CAST(".$aliasO.".value as DECIMAL(15,4))) 
-                                  IN  (".implode(",", $temp).")");
-                    $query->orWhereRaw("CEIL(".$aliasO.".total) IN  (".implode(",", $temp2).")");
+                             CAST(" . $aliasO . ".total as DECIMAL(15,4)) * CAST(" . $aliasO . ".value as DECIMAL(15,4))) 
+                                  IN  (" . implode(",", $temp) . ")");
+                    $query->orWhereRaw("CEIL(" . $aliasO . ".total) IN  (" . implode(",", $temp2) . ")");
                     $query->orWhereRaw(
                         "CEIL(
-                            CAST(".$aliasO.".total as DECIMAL(15,4)) * CAST(".$aliasO.".value as DECIMAL(15,4))) 
-                                IN  (".implode(",", $temp2).")");
+                            CAST(" . $aliasO . ".total as DECIMAL(15,4)) * CAST(" . $aliasO . ".value as DECIMAL(15,4))) 
+                                IN  (" . implode(",", $temp2) . ")");
                 });
             }
         }
 
-        //If for total, we done building the query
+        //If for total, we'done building the query
         if ($mode == 'total_only') {
-            //allow to extends this method from extensions
+            //allow to extend this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $inputData);
-            $result = $query->first();
+            $result = $query->useCache('order')->first();
             return (int)$result->total;
         }
 
@@ -1772,7 +1742,7 @@ class Order extends BaseModel
 
         // NOTE: Performance slowdown might be noticed or larger search results
 
-        $orderBy = $sort_data[$inputData['sort']] ? $sort_data[$inputData['sort']] : 'name';
+        $orderBy = $sort_data[$inputData['sort']] ?: 'name';
         if (isset($inputData['order']) && (strtoupper($inputData['order']) == 'DESC')) {
             $sorting = "desc";
         } else {
@@ -1790,10 +1760,9 @@ class Order extends BaseModel
             $query->offset((int)$inputData['start'])->limit((int)$inputData['limit']);
         }
 
-        //allow to extends this method from extensions
+        //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $inputData);
-        $query->useCache('order');
-        $result_rows = $query->get();
+        $result_rows = $query->useCache('order')->get();
 
         //finally decrypt data and return result
         $totalNumRows = $db->sql_get_row_count();
@@ -1803,7 +1772,6 @@ class Order extends BaseModel
         }
 
         return $result_rows;
-
     }
 
     /**
@@ -1826,17 +1794,13 @@ class Order extends BaseModel
         if (!$ids) {
             return [];
         }
-        /**
-         * @var QueryBuilder $query
-         */
         $query = Order::select('customer_id')
-                      ->selectRaw('COUNT(*) as count')
-                      ->whereIn('customer_id', $ids)
-                      ->where('order_status_id', '>', '0')
-                      ->groupBy('customer_id');
-        //allow to extends this method from extensions
+            ->selectRaw('COUNT(*) as count')
+            ->whereIn('customer_id', $ids)
+            ->where('order_status_id', '>', '0')
+            ->groupBy('customer_id');
+        //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $customers_ids);
-        return $query->get()->pluck('count', 'customer_id')->toArray();
+        return $query->useCache('order')->get()?->pluck('count', 'customer_id')->toArray();
     }
-
 }
