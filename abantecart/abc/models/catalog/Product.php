@@ -2864,36 +2864,34 @@ class Product extends BaseModel
         }
 
         if ($filter['keyword']) {
-            $tags = explode(' ', trim($filter['keyword']));
+            $tags = array_map('trim', explode(' ', $filter['keyword']));
             $query->where(
                 function ($subQuery) use ($params, $tags, $db, $pt_table, $pd_table, $p_table) {
                     $filter = $params['filter'];
+                    $keyWord = $db->escape(mb_strtolower($filter['keyword']));
+                    $keyWordSpecialChars = $db->escape(mb_strtolower($filter['keyword']), true);
                     /** @var QueryBuilder $subQuery */
                     if (sizeof($tags) > 1) {
                         $subQuery->orWhereRaw(
-                            "LCASE(" . $pt_table . ".tag) = '"
-                            . $db->escape(mb_strtolower(trim($filter['keyword']))) . "'"
-                        );
+                            "LCASE(" . $pt_table . ".tag) = '" . $keyWord . "'");
                     }
                     foreach ($tags as $tag) {
                         $subQuery->orWhereRaw(
-                            "LCASE(" . $pt_table . ".tag) = '" . $db->escape(mb_strtolower(trim($tag))) . "'"
+                            "LCASE(" . $pt_table . ".tag) = '" . $db->escape(mb_strtolower($tag)) . "'"
                         );
                     }
                     $subQuery->orWhereRaw(
-                        "LCASE(" . $pd_table . ".name) LIKE '%"
-                        . $db->escape(mb_strtolower($filter['keyword']), true) . "%'"
+                        'MATCH(' . $pd_table . '.name) AGAINST(? IN NATURAL LANGUAGE MODE)', [$keyWordSpecialChars]
                     );
+
                     if ($filter['description']) {
                         $subQuery->orWhereRaw(
-                            "LCASE(" . $pd_table . ".description) LIKE '%"
-                            . $db->escape(mb_strtolower($filter['keyword']), true) . "%'"
+                            "LCASE(" . $pd_table . ".description) LIKE '%" . $keyWordSpecialChars . "%'"
                         );
                     }
                     if ($filter['model']) {
                         $subQuery->orWhereRaw(
-                            "LCASE(" . $p_table . ".model) LIKE '%"
-                            . $db->escape(mb_strtolower($filter['keyword']), true) . "%'"
+                            "LCASE(" . $p_table . ".model) LIKE '%" . $keyWordSpecialChars . "%'"
                         );
                     }
                     //allow to extend search criteria
