@@ -57,11 +57,11 @@ class ControllerResponsesCommonExportTask extends AController
             $task_details = $this->addTask();
 
             if (is_bool($task_details)) {
-                $error = new AError("Create export error: \n ".implode(' ', $this->errors));
+                $error = new AError("Create export error: \n Result: " . var_export($task_details, true) . " \n" . implode("\n", $this->errors));
                 $error->toJSONResponse(
                     'APP_ERROR_402',
                     [
-                        'error_text'  => implode(' ', $this->errors),
+                        'error_text'  => 'Result: ' . var_export($task_details, true) . '  ' . implode("\n", $this->errors),
                         'reset_value' => true,
                     ]
                 );
