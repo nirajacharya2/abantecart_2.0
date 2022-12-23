@@ -115,9 +115,9 @@ class ControllerResponsesCommonExportTask extends AController
             } else {
                 $this->errors[] = $response['error_text'] ?? '';
             }
-        } catch (Exception $exception) {
-            $this->errors[] = $exception->getMessage();
-            Registry::log()->error($exception->getMessage());
+        } catch (Exception|\Error $e) {
+            $this->errors[] = $e->getMessage();
+            Registry::log()->error($e->getMessage());
         }
 
         if ($itemsCount === 0) {
@@ -142,6 +142,7 @@ class ControllerResponsesCommonExportTask extends AController
             ]
         );
         if (!$task_id) {
+            $this->errors[] = 'unexpected error during adding of task';
             $this->errors = array_merge($this->errors, $tm->errors);
             return false;
         }
@@ -169,6 +170,7 @@ class ControllerResponsesCommonExportTask extends AController
             );
 
             if (!$step_id) {
+                $this->errors[] = 'unexpected error during adding of step';
                 $this->errors = array_merge($this->errors, $tm->errors);
                 return false;
             }
