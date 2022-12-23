@@ -24,6 +24,8 @@ use abc\core\ABC;
 use abc\core\engine\ADispatcher;
 use abc\core\engine\Registry;
 use abc\models\system\Task;
+use abc\models\system\TaskDetail;
+use abc\models\system\TaskStep;
 use abc\modules\events\ABaseEvent;
 use Error;
 use Exception;
@@ -33,7 +35,7 @@ use H;
  * Class ATaskManager
  *
  * @link http://docs.abantecart.com/pages/developer/tasks_processing.html
- * @property ADB  $db
+ * @property ADB $db
  * @property ALog $log
  */
 class ATaskManager
@@ -591,29 +593,14 @@ class ATaskManager
             $this->errors[] = "Error: Can not to create task's step. Empty data given.";
             return false;
         }
-        $data['settings'] = !is_string($data['settings']) ? serialize($data['settings']) : $data['settings'];
-        $sql = "INSERT INTO ".$this->db->table_name('task_steps')."
-                (`task_id`,
-                `sort_order`,
-                `status`,
-                `last_time_run`,
-                `last_result`,
-                `max_execution_time`,
-                `controller`,
-                `settings`,
-                `date_modified`)
-                VALUES (
-                        '".(int)$data['task_id']."',
-                        '".(int)$data['sort_order']."',
-                        '".(int)$data['status']."',
-                        '".$this->db->escape($data['last_time_run'])."',
-                        '".(int)$data['last_result']."',
-                        '".(int)$data['max_execution_time']."',
-                        '".$this->db->escape($data['controller'])."',
-                        '".$this->db->escape($data['settings'])."',
-                        NOW())";
-        $this->db->query($sql);
-        return $this->db->getLastId();
+        try {
+            $step = new TaskStep($data);
+            $step->save();
+            return $step->step_id;
+        } catch (Exception $e) {
+            $this->errors[] = $e->getMessage();
+            return false;
+        }
     }
 
     /**
@@ -625,48 +612,18 @@ class ATaskManager
      */
     public function updateStep($step_id, $data = [])
     {
-        $step_id = (int)$step_id;
-        if (!$step_id) {
+        $step = TaskStep::find($step_id);
+        if (!$step) {
+            $this->errors[] = __FUNCTION__ . ': Step #' . $step_id . ' not found';
             return false;
         }
 
-        $upd_flds = [
-            'task_id'            => 'int',
-            'starter'            => 'int',
-            'status'             => 'int',
-            'sort_order'         => 'int',
-            'last_time_run'      => 'timestamp',
-            'last_result'        => 'int',
-            'max_execution_time' => 'int',
-            'controller'         => 'string',
-            'settings'           => 'string',
-            'date_modified'      => 'timestamp',
-        ];
-        $update = [];
-        foreach ($upd_flds as $fld_name => $fld_type) {
-            if (H::has_value($data[$fld_name])) {
-                switch ($fld_type) {
-                    case 'int':
-                        $value = (int)$data[$fld_name];
-                        break;
-                    case 'string':
-                    case 'timestamp':
-                        $value = $this->db->escape($data[$fld_name]);
-                        break;
-                    default:
-                        $value = $this->db->escape($data[$fld_name]);
-                }
-                $update[] = $fld_name." = '".$value."'";
-            }
-        }
-        if (!$update) { //if nothing to update
+        try {
+            $step->update($data);
+        } catch (Exception $e) {
+            $this->errors[] = $e->getMessage();
             return false;
         }
-
-        $sql = "UPDATE ".$this->db->table_name('task_steps')."
-                SET ".implode(', ', $update)."
-                WHERE step_id = ".(int)$step_id;
-        $this->db->query($sql);
         return true;
     }
 
@@ -677,15 +634,20 @@ class ATaskManager
      */
     public function deleteTask($task_id)
     {
-        $sql = [];
-        $sql[] = "DELETE FROM ".$this->db->table_name('task_steps')." WHERE task_id = '".(int)$task_id."'";
-        $sql[] = "DELETE FROM ".$this->db->table_name('task_details')." WHERE task_id = '".(int)$task_id."'";
-        $sql[] = "DELETE FROM ".$this->db->table_name('tasks')." WHERE task_id = '".(int)$task_id."'";
-        foreach ($sql as $q) {
-            $this->db->query($q);
+        Registry::db()->beginTransaction();
+        try {
+            TaskStep::where('task_id', '=', $task_id)->delete();
+            TaskDetail::where('task_id', '=', $task_id)->delete();
+            Task::find($task_id)->delete();
+            Registry::db()->commit();
+            //call event
+            H::event(__CLASS__ . '@deleteTask', [new ABaseEvent($task_id)]);
+            return true;
+        } catch (Exception $e) {
+            Registry::db()->rollback();
+            $this->errors[] = $e->getMessage();
+            return false;
         }
-        //call event
-        H::event(__CLASS__.'@deleteTask', [new ABaseEvent($task_id)]);
     }
 
     /**
@@ -695,8 +657,16 @@ class ATaskManager
      */
     public function deleteStep($step_id)
     {
-        $sql = "DELETE FROM ".$this->db->table_name('task_steps')." WHERE step_id = '".(int)$step_id."'";
-        $this->db->query($sql);
+        Registry::db()->beginTransaction();
+        try {
+            TaskStep::find($step_id)->delete();
+            Registry::db()->commit();
+            return true;
+        } catch (Exception $e) {
+            Registry::db()->rollback();
+            $this->errors[] = $e->getMessage();
+            return false;
+        }
     }
 
     /**

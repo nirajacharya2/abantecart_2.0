@@ -156,10 +156,10 @@ class ControllerResponsesCommonExportTask extends AController
                     'task_id'            => $task_id,
                     'sort_order'         => 1,
                     'status'             => 1,
-                    'last_time_run'      => '0000-00-00 00:00:00',
-                    'last_result'        => '0',
+                    'last_time_run'      => null,
+                    'last_result'        => 0,
                     'max_execution_time' => $timePerItem * $limit,
-                    'controller'         => $this->exportTaskController.'/export',
+                    'controller'         => $this->exportTaskController . '/export',
                     'settings'           => [
                         'start'   => $i * $limit - $limit,
                         'limit'   => $limit,
@@ -170,7 +170,6 @@ class ControllerResponsesCommonExportTask extends AController
             );
 
             if (!$step_id) {
-                $this->errors[] = 'unexpected error during adding of step';
                 $this->errors = array_merge($this->errors, $tm->errors);
                 return false;
             }
