@@ -57,7 +57,6 @@ class ATaskManager
      * @var string can be 'simple' or 'detailed'
      */
     protected $log_level = 'simple';
-    const STATUS_DISABLED = 0;
     const STATUS_READY = 1;
     const STATUS_RUNNING = 2;
     const STATUS_FAILED = 3;
@@ -164,13 +163,13 @@ class ATaskManager
     {
         $task_id = (int)$task_id;
         //get list only ready tasks for needed start-side (sf, admin or both)
-        $sql = "SELECT *
-                FROM ".$this->db->table_name('tasks')." t
-                WHERE t.status = ".self::STATUS_READY."
-                    AND t.starter IN ('".$this->starter."','2')
-                    ".($task_id ? " AND t.task_id = ".$task_id : '');
-        $result = $this->db->query($sql);
-        return $task_id ? $result->row : $result->rows;
+        $query = Task::where('status', '= ', self::STATUS_READY)
+            ->whereIn('starter', [2, $this->starter]);
+        if ($task_id) {
+            $query->where('task_id', '=', $task_id);
+            return $query->get()?->first()->toArray();
+        }
+        return $query->get()?->toArray();
     }
 
     /**
@@ -484,12 +483,9 @@ class ATaskManager
             return false;
         }
         // check
-        $sql = "SELECT *
-                FROM " . $this->db->table_name('tasks') . "
-                WHERE name = '" . $this->db->escape($data['name']) . "'";
-        $res = $this->db->query($sql);
-        if ($res->num_rows) {
-            $this->deleteTask($res->row['task_id']);
+        $res = Task::where('name', '=', $data['name'])->get();
+        if ($res->count()) {
+            $this->deleteTask($res->first()->task_id);
             $this->toLog('Error: Task with name "' . $data['name'] . '" is already exists. Override!');
         }
 
@@ -524,45 +520,12 @@ class ATaskManager
     public function updateTask($task_id, $data = [])
     {
         $task_id = (int)$task_id;
-        if (!$task_id) {
+        if (!$task_id || !$data) {
             return false;
         }
 
-        $upd_flds = [
-            'name'               => 'string',
-            'starter'            => 'int',
-            'status'             => 'int',
-            'start_time'         => 'timestamp',
-            'last_time_run'      => 'timestamp',
-            'progress'           => 'int',
-            'last_result'        => 'int',
-            'run_interval'       => 'int',
-            'max_execution_time' => 'int',
-            'date_modified'      => 'timestamp',
-        ];
-        $update = [];
-        foreach ($upd_flds as $fld_name => $fld_type) {
-            if (H::has_value($data[$fld_name])) {
-                switch ($fld_type) {
-                    case 'int':
-                        $value = (int)$data[$fld_name];
-                        break;
-                    case 'string':
-                    case 'timestamp':
-                    default:
-                        $value = $this->db->escape($data[$fld_name]);
-                }
-                $update[] = $fld_name." = '".$value."'";
-            }
-        }
-        if (!$update) { //if nothing to update
-            return false;
-        }
-
-        $sql = "UPDATE ".$this->db->table_name('tasks')."
-                SET ".implode(', ', $update)."
-                WHERE task_id = ".(int)$task_id;
-        $this->db->query($sql);
+        $task = Task::find($task_id);
+        $task->update($data);
 
         if (H::has_value($data['created_by']) || H::has_value($data['settings'])) {
             $this->updateTaskDetails($task_id, $data);

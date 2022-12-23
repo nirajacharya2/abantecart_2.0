@@ -116,7 +116,8 @@ class ControllerResponsesCommonExportTask extends AController
                 $this->errors[] = $response['error_text'] ?? '';
             }
         } catch (Exception $exception) {
-            Registry::log()->write($exception->getMessage());
+            $this->errors[] = $exception->getMessage();
+            Registry::log()->error($exception->getMessage());
         }
 
         if ($itemsCount === 0) {
