@@ -58,7 +58,7 @@ class ControllerResponsesCommonExportTask extends AController
 
             if (is_bool($task_details)) {
                 $error = new AError("Create export error: \n Result: " . var_export($task_details, true) . " \n" . implode("\n", $this->errors));
-                $error->toJSONResponse(
+                $error->toLog()->toJSONResponse(
                     'APP_ERROR_402',
                     [
                         'error_text'  => 'Result: ' . var_export($task_details, true) . '  ' . implode("\n", $this->errors),
@@ -72,8 +72,8 @@ class ControllerResponsesCommonExportTask extends AController
                 $this->data['output']['task_details'] = $task_details;
             }
         } else {
-            $error = new AError(implode('<br>', $this->errors));
-            $error->toJSONResponse(
+            $error = new AError('Invalid task Data: ' . implode('<br>', $this->errors));
+            $error->toLog()->toJSONResponse(
                 'VALIDATION_ERROR_406',
                 [
                     'error_text'  => implode('<br>', $this->errors),
