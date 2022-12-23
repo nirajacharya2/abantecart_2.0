@@ -27,14 +27,16 @@ use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\core\lib\ATaskManager;
 
+ob_start();
+
 const DS = DIRECTORY_SEPARATOR;
-require dirname(__DIR__).DS.'abc'.DS.'core'.DS.'ABC.php';
+require dirname(__DIR__) . DS . 'abc' . DS . 'core' . DS . 'ABC.php';
 
 ABC::env('MIN_PHP_VERSION', '8.1.0');
-if (version_compare(phpversion(), ABC::env('MIN_PHP_VERSION'), '<') == true) {
+if (version_compare(phpversion(), ABC::env('MIN_PHP_VERSION'), '<')) {
     die(
         ABC::env('MIN_PHP_VERSION')
-        .'+ Required for AbanteCart to work properly! Please contact your system administrator or host service provider.'
+        . '+ Required for AbanteCart to work properly! Please contact your system administrator or host service provider.'
     );
 }
 // sign of admin side for controllers run from dispatcher
@@ -42,7 +44,7 @@ $_GET['s'] = ABC::env('ADMIN_SECRET');
 ABC::env('IS_ADMIN', true);
 $app = new ABC();
 $app->init();
-ob_start();
+
 $registry = Registry::getInstance();
 
 $step_result = null;
@@ -132,12 +134,8 @@ if ($mode == 'html') {
     $run_log_text = nl2br(implode("<br/>", $run_log));
 }
 
-ob_flush();
 if ($mode == 'ajax') {
     $registry->get('load')->library('json');
-    if (!headers_sent()) {
-        header('Content-Type: application/json;');
-    }
     if ($step_result === false) {
         //set response to null to prevent silent output
         $registry->set('response', null);
@@ -145,10 +143,11 @@ if ($mode == 'ajax') {
         $err = new AError('task run error');
         $err->toJSONResponse(
             'APP_ERROR_402',
-            ['error_text' => nl2br(implode("\n", $run_log))]
+            ['error_text' => implode("\n", $run_log)]
         );
         exit;
     }
+    ob_end_clean();
     echo AJson::encode($run_log);
     exit;
 } else {
