@@ -22,6 +22,7 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use abc\models\layout\CustomBlock;
 use H;
 
 /**
@@ -1496,9 +1497,8 @@ class ALayoutManager
                 $this->errors = 'Error: Can\'t save custom block, because block_id is empty!';
                 return false;
             }
-            $this->db->query("INSERT INTO ".$this->db->table_name("custom_blocks")." (block_id, date_added) 
-                                VALUES ( '".$block_id."', NOW())");
-            $custom_block_id = $this->db->getLastId();
+            $cb = CustomBlock::create(['block_id' => $block_id]);
+            $custom_block_id = $cb->custom_block_id;
 
             $this->language->replaceDescriptions('block_descriptions',
                 ['custom_block_id' => (int)$custom_block_id],

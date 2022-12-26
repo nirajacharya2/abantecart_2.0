@@ -2743,11 +2743,12 @@ class Product extends BaseModel
         $filter['keyword'] = trim($filter['keyword']);
         $filter['language_id'] = (int)$filter['language_id'] ?: static::$current_language_id;
 
-        $filter['store_id'] = (int)$filter['store_id'];
         if (!isset($filter['store_id'])) {
             $filter['store_id'] = ABC::env('IS_ADMIN') === true
                 ? (int)Registry::session()->data['current_store_id']
                 : (int)Registry::config()->get('config_store_id');
+        } else {
+            $filter['store_id'] = (int)$filter['store_id'];
         }
 
         $db = Registry::db();

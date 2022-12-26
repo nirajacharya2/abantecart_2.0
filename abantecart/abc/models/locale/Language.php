@@ -20,6 +20,7 @@
 
 namespace abc\models\locale;
 
+use abc\extensions\banner_manager\models\BannerDescription;
 use abc\models\BaseModel;
 use abc\models\catalog\CategoryDescription;
 use abc\models\catalog\DownloadDescription;
@@ -33,7 +34,6 @@ use abc\models\catalog\ResourceDescription;
 use abc\models\catalog\StockStatus;
 use abc\models\catalog\UrlAlias;
 use abc\models\content\ContentDescription;
-use abc\models\layout\BannerDescription;
 use abc\models\layout\BlockDescription;
 use abc\models\layout\PageDescription;
 use abc\models\order\CouponDescription;
@@ -139,7 +139,7 @@ class Language extends BaseModel
 
     protected $casts = [
         'sort_order' => 'int',
-        'status' => 'int',
+        'status'     => 'int',
     ];
 
     protected $fillable = [
@@ -164,28 +164,28 @@ class Language extends BaseModel
             ],
 
             'messages' => [
-                'integer' => [
-                    'language_key' => 'error_language_id',
+                'integer'  => [
+                    'language_key'   => 'error_language_id',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'language id must be integer!',
-                    'section' => 'admin'
+                    'default_text'   => 'language id must be integer!',
+                    'section'        => 'admin'
                 ],
                 'required' => [
-                    'language_key' => 'error_language_id',
+                    'language_key'   => 'error_language_id',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'language id required!',
-                    'section' => 'admin'
+                    'default_text'   => 'language id required!',
+                    'section'        => 'admin'
                 ],
-                'min' => [
-                    'language_key' => 'error_language_id',
+                'min'      => [
+                    'language_key'   => 'error_language_id',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'language id must be more 1!',
-                    'section' => 'admin'
+                    'default_text'   => 'language id must be more 1!',
+                    'section'        => 'admin'
                 ],
             ],
         ],
-        'name' => [
-            'checks' => [
+        'name'        => [
+            'checks'   => [
                 'string',
                 'required',
                 'sometimes',
@@ -193,165 +193,165 @@ class Language extends BaseModel
                 'max:32'
             ],
             'messages' => [
-                'min' => [
-                    'language_key' => 'error_name',
+                'min'      => [
+                    'language_key'   => 'error_name',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'Name must be more 2 characters',
-                    'section' => 'admin'
+                    'default_text'   => 'Name must be more 2 characters',
+                    'section'        => 'admin'
                 ],
-                'max' => [
-                    'language_key' => 'error_name',
+                'max'      => [
+                    'language_key'   => 'error_name',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'Name must be no more than 32 characters',
-                    'section' => 'admin'
+                    'default_text'   => 'Name must be no more than 32 characters',
+                    'section'        => 'admin'
                 ],
                 'required' => [
-                    'language_key' => 'error_name',
+                    'language_key'   => 'error_name',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'name required!',
-                    'section' => 'admin'
+                    'default_text'   => 'name required!',
+                    'section'        => 'admin'
                 ],
-                'string' => [
-                    'language_key' => 'error_name',
+                'string'   => [
+                    'language_key'   => 'error_name',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'name must be string!',
-                    'section' => 'admin'
+                    'default_text'   => 'name must be string!',
+                    'section'        => 'admin'
                 ],
             ]
         ],
-        'code' => [
-            'checks' => [
+        'code'        => [
+            'checks'   => [
                 'string',
                 'required',
                 'sometimes',
                 'max:2'
             ],
             'messages' => [
-                'max' => [
-                    'language_key' => 'error_code',
+                'max'      => [
+                    'language_key'   => 'error_code',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'Language Code must be at least 2 characters!',
-                    'section' => 'admin'
+                    'default_text'   => 'Language Code must be at least 2 characters!',
+                    'section'        => 'admin'
                 ],
-                'string' => [
-                    'language_key' => 'error_code',
+                'string'   => [
+                    'language_key'   => 'error_code',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'Language Code must be string!',
-                    'section' => 'admin'
+                    'default_text'   => 'Language Code must be string!',
+                    'section'        => 'admin'
                 ],
                 'required' => [
-                    'language_key' => 'error_code',
+                    'language_key'   => 'error_code',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'Language Code required!',
-                    'section' => 'admin'
+                    'default_text'   => 'Language Code required!',
+                    'section'        => 'admin'
                 ]
             ]
         ],
-        'locale' => [
-            'checks' => [
+        'locale'      => [
+            'checks'   => [
                 'string',
                 'required',
                 'sometimes',
                 'max:255'
             ],
             'messages' => [
-                'max' => [
-                    'language_key' => 'error_locale',
+                'max'      => [
+                    'language_key'   => 'error_locale',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'Locale must be at least 255 characters!',
-                    'section' => 'admin'
+                    'default_text'   => 'Locale must be at least 255 characters!',
+                    'section'        => 'admin'
                 ],
-                'string' => [
-                    'language_key' => 'error_locale',
+                'string'   => [
+                    'language_key'   => 'error_locale',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'Locale Code must be string!',
-                    'section' => 'admin'
+                    'default_text'   => 'Locale Code must be string!',
+                    'section'        => 'admin'
                 ],
                 'required' => [
-                    'language_key' => 'error_locale',
+                    'language_key'   => 'error_locale',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'Locale required!',
-                    'section' => 'admin'
+                    'default_text'   => 'Locale required!',
+                    'section'        => 'admin'
                 ]
             ]
         ],
-        'image' => [
-            'checks' => [
+        'image'       => [
+            'checks'   => [
                 'string',
                 'min:2',
                 'max:64'
             ],
             'messages' => [
-                'max' => [
-                    'language_key' => 'error_image',
+                'max'    => [
+                    'language_key'   => 'error_image',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'Image must be at least 64 characters!',
-                    'section' => 'admin'
+                    'default_text'   => 'Image must be at least 64 characters!',
+                    'section'        => 'admin'
                 ],
                 'string' => [
-                    'language_key' => 'error_image',
+                    'language_key'   => 'error_image',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'Image Code must be string!',
-                    'section' => 'admin'
+                    'default_text'   => 'Image Code must be string!',
+                    'section'        => 'admin'
                 ],
-                'min' => [
-                    'language_key' => 'error_image',
+                'min'    => [
+                    'language_key'   => 'error_image',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'Image must be more 2 characters!',
-                    'section' => 'admin'
+                    'default_text'   => 'Image must be more 2 characters!',
+                    'section'        => 'admin'
                 ]
             ]
         ],
-        'directory' => [
-            'checks' => [
+        'directory'   => [
+            'checks'   => [
                 'string',
                 'sometimes',
                 'required',
             ],
             'messages' => [
-                'string' => [
-                    'language_key' => 'error_directory',
+                'string'   => [
+                    'language_key'   => 'error_directory',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'directory must be string!',
-                    'section' => 'admin'
+                    'default_text'   => 'directory must be string!',
+                    'section'        => 'admin'
                 ],
                 'required' => [
-                    'language_key' => 'error_directory',
+                    'language_key'   => 'error_directory',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'directory required!',
-                    'section' => 'admin'
+                    'default_text'   => 'directory required!',
+                    'section'        => 'admin'
                 ]
             ]
         ],
-        'filename' => [
-            'checks' => [
+        'filename'    => [
+            'checks'   => [
                 'string',
                 'min:2',
                 'max:64'
             ],
             'messages' => [
-                'max' => [
-                    'language_key' => 'error_filename',
+                'max'    => [
+                    'language_key'   => 'error_filename',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'filename must be at least 64 characters!',
-                    'section' => 'admin'
+                    'default_text'   => 'filename must be at least 64 characters!',
+                    'section'        => 'admin'
                 ],
                 'string' => [
-                    'language_key' => 'error_filename',
+                    'language_key'   => 'error_filename',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'filename Code must be string!',
-                    'section' => 'admin'
+                    'default_text'   => 'filename Code must be string!',
+                    'section'        => 'admin'
                 ],
-                'min' => [
-                    'language_key' => 'error_filename',
+                'min'    => [
+                    'language_key'   => 'error_filename',
                     'language_block' => 'localisation/language',
-                    'default_text' => 'filename must be more 2 characters!',
-                    'section' => 'admin'
+                    'default_text'   => 'filename must be more 2 characters!',
+                    'section'        => 'admin'
                 ]
             ]
         ],
-        'sort_order' => [
-            'checks' => [
+        'sort_order'  => [
+            'checks'   => [
                 'integer',
                 'sometimes'
             ],
@@ -359,8 +359,8 @@ class Language extends BaseModel
                 '*' => ['default_text' => 'sort_order is not integer']
             ],
         ],
-        'status' => [
-            'checks' => [
+        'status'      => [
+            'checks'   => [
                 'integer'
             ],
             'messages' => [
@@ -368,11 +368,6 @@ class Language extends BaseModel
             ],
         ]
     ];
-
-    public function banner_descriptions()
-    {
-        return $this->hasMany(BannerDescription::class, 'language_id');
-    }
 
     public function block_descriptions()
     {

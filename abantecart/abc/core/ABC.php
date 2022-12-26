@@ -552,6 +552,7 @@ class ABC extends ABCBase
 
     public function init()
     {
+        /** @see ./init/app.php */
         require dirname(getcwd()) . DS
             . 'abc' . DS
             . 'core' . DS
