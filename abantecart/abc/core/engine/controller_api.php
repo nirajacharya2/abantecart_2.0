@@ -128,4 +128,14 @@ class AControllerAPI extends AController
         return null;
     }
 
+    public function mapErrorsAsArray($errors): array {
+        $result = [];
+        foreach ($errors as $key=> $value) {
+            $result[] = [
+                'id'=> $key,
+                'description' => $value
+            ];
+        }
+        return $result;
+    }
 }

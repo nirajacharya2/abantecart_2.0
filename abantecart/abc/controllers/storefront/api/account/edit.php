@@ -93,6 +93,7 @@ class ControllerApiAccountEdit extends ASecureControllerAPI
             $this->data['error_code'] = 0;
             //Update controller data
             $this->extensions->hk_UpdateData($this, __FUNCTION__);
+            $this->data['errors'] = $this->mapErrorsAsArray($this->data['errors']);
             $this->rest->setResponseData($this->data);
             $this->rest->sendResponse(400);
         }
