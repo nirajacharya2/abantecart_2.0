@@ -77,12 +77,13 @@ class ControllerApiAccountEdit extends ASecureControllerAPI
         if ($request_data['email']) {
             $request_data['email_confirmation'] = $request_data['email'];
         }
-        $this->v_error = $this->customer::validateRegistrationData($request_data);
-        if (!$this->v_error) {
+        $this->data['errors'] = array_merge( $this->data['errors'] ?? [], $this->customer::validateRegistrationData($request_data) ?? []);
+        if (count($this->data['errors']) === 0) {
             $request_data['newsletter'] = 1;
             $this->customer->model()->update($request_data);
             $this->data['status'] = 1;
             $this->data['success'] = $this->language->get('text_success');
+            unset($this->data['errors']);
 
             //Update controller data
             $this->extensions->hk_UpdateData($this, __FUNCTION__);
@@ -90,8 +91,6 @@ class ControllerApiAccountEdit extends ASecureControllerAPI
             $this->rest->sendResponse(200);
         } else {
             $this->data['error_code'] = 0;
-            $this->data['errors'] = $this->v_error;
-
             //Update controller data
             $this->extensions->hk_UpdateData($this, __FUNCTION__);
             $this->rest->setResponseData($this->data);
