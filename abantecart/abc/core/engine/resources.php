@@ -153,7 +153,7 @@ class AResource
         return $this->file_types;
     }
 
-    public function withProtocol(string $url): string
+    public function withProtocol(?string $url = ''): string
     {
         if (str_starts_with($url, 'http://') || str_starts_with($url, 'https://')) {
             return $url;
@@ -389,7 +389,7 @@ class AResource
         if (!is_file($origin_path) || !$resource_id) {
             //missing original resource. oops
             $this->load->model('tool/image');
-            return $this->model_tool_image->resize($resourceInfo['default_icon'], $width, $height);
+            return $this->model_tool_image->resize($resourceInfo['default_icon'], $width, $height) ?: '';
         } else {
             //Build thumbnails path similar to resource library path
             $sub_path = 'thumbnails' . DS
@@ -406,7 +406,7 @@ class AResource
             ) {
                 $warning = new AWarning('Resize image error. File: ' . $origin_path);
                 $warning->toLog()->toDebug();
-                return null;
+                return '';
             }
             //do retina version
             if ($this->config->get('config_retina_enable')) {

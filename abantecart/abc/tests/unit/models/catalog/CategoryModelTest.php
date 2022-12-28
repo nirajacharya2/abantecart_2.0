@@ -83,7 +83,7 @@ class CategoryModelTest extends ATestCase
 
     public function testGetTotalProductsOfCategory()
     {
-        $count = Category::getTotalProductsByCategoryId(40, 0);
+        $count = Category::getTotalActiveProductsByCategoryId(40, 0);
         $this->assertEquals(4, $count);
     }
 

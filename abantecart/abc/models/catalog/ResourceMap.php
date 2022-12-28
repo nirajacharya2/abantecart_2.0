@@ -39,8 +39,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class ResourceMap extends BaseModel
 {
-    use SoftDeletes;
-
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'resource_id',
@@ -49,8 +47,6 @@ class ResourceMap extends BaseModel
     ];
 
     protected $table = 'resource_map';
-    public $timestamps = false;
-
     protected $casts = [
         'resource_id'   => 'int',
         'object_id'     => 'int',
@@ -61,6 +57,9 @@ class ResourceMap extends BaseModel
     ];
 
     protected $fillable = [
+        'resource_id',
+        'object_id',
+        'object_name',
         'default',
         'sort_order',
         'date_added',

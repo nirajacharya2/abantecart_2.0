@@ -1259,7 +1259,7 @@ class ControllerPagesSaleOrder extends AController
                 $data = [
                     'order_id'        => $this->request->get['order_id'],
                     'order_status_id' => $post['order_status_id'],
-                    'notify'          => ($post['notify'] ? true : false),
+                    'notify'          => (bool)$post['notify'],
                     'comment'         => $post['comment'],
                 ];
                 $oHistory = new OrderHistory($data);
@@ -1267,7 +1267,7 @@ class ControllerPagesSaleOrder extends AController
                 $this->db->commit();
                 $this->session->data['success'] = $this->language->get('text_success');
                 H::event('admin\SendOrderStatusNotifyEmail', [new ABaseEvent($data)]);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->session->data['error'] = H::getAppErrorText();
                 $this->db->rollback();
             }
@@ -1590,14 +1590,10 @@ class ControllerPagesSaleOrder extends AController
         $this->extensions->hk_ValidateData($this, $data);
 
         if ($this->error) {
-            Registry::log()->write(var_export($this->error, true));
+            Registry::log()->error(var_export($this->error, true));
         }
 
-        if (!$this->error) {
-            return true;
-        } else {
-            return false;
-        }
+        return (!$this->error);
     }
 
     protected function validateDownloadsForm()
@@ -1606,13 +1602,9 @@ class ControllerPagesSaleOrder extends AController
             $this->error['warning'] = $this->language->get('error_permission');
         }
 
-        $this->extensions->hk_ValidateData($this);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__);
 
-        if (!$this->error) {
-            return true;
-        } else {
-            return false;
-        }
+        return (!$this->error);
     }
 
     protected function _initTabs($active)
@@ -1996,13 +1988,13 @@ class ControllerPagesSaleOrder extends AController
                 $error_text = $e->getMessages();
                 if (!$error_text) {
                     $error_text = 'App Error. See error log for details';
-                    $this->log->write($e->getTraceAsString());
+                    $this->log->error($e->getTraceAsString());
                 }
                 $this->data['error_warning'] = $error_text;
             } catch (Exception $e) {
                 $this->db->rollback();
-                $error_text = 'App Error. '.$e->getMessage();
-                $this->log->write($e->getTraceAsString());
+                $error_text = 'App Error. ' . $e->getMessage();
+                $this->log->error($e->getTraceAsString());
                 $this->data['error_warning'] = $error_text;
             }
         }
@@ -2138,7 +2130,7 @@ class ControllerPagesSaleOrder extends AController
 
         // get products list
         $cart_products = $checkout->getCart()->getProducts();
-        $product_ids = aray_map('intval',array_column($cart_products,'product_id'));
+        $product_ids = array_map('intval', array_column($cart_products, 'product_id'));
 
         $resource = new AResource('image');
         $thumbnails = $resource->getMainThumbList(
@@ -2320,7 +2312,7 @@ class ControllerPagesSaleOrder extends AController
                 $this->html->getSecureURL('extension/extensions/payment')
             );
         }
-        $this->extensions->hk_ValidateData($this, [__FUNCTION__]);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $customer_id);
     }
 
     public function addProduct()

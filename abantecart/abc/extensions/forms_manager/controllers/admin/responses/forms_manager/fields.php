@@ -106,13 +106,9 @@ class ControllerResponsesFormsManagerFields extends AController
             $this->error['field_name'] = sprintf( $this->language->get( 'error_field_name_exists' ), $data['field_name'] );
         }
 
-        $this->extensions->hk_ValidateData( $this );
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $data);
 
-        if ( ! $this->error ) {
-            return true;
-        } else {
-            return false;
-        }
+        return (!$this->error);
     }
 
     public function remove_field()

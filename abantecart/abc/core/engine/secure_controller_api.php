@@ -24,6 +24,15 @@ class ASecureControllerAPI extends AControllerAPI
 {
     public function main()
     {
+        if ($this->config->get('config_maintenance')) {
+            $this->rest->setResponseData([
+                'error_code'=> 503,
+                'error_text'=>'Maintenance mode'
+            ]);
+            $this->rest->sendResponse( 503 );
+            return null;
+        }
+
         if (!$this->isLoggedIn()) {
             $this->rest->setResponseData([
                 'error_code'  => 401,

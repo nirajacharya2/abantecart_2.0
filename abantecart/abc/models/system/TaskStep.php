@@ -19,6 +19,8 @@
 namespace abc\models\system;
 
 use abc\models\BaseModel;
+use abc\models\casts\Json;
+use abc\models\casts\Serialized;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -53,6 +55,7 @@ class TaskStep extends BaseModel
         'last_result'        => 'int',
         'max_execution_time' => 'int',
         'last_time_run'      => 'datetime',
+        'settings'           => Serialized::class,
         'date_added'         => 'datetime',
         'date_modified'      => 'datetime'
     ];

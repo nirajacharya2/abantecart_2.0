@@ -27,7 +27,6 @@ use abc\core\lib\AResourceManager;
 use abc\models\BaseModel;
 use abc\models\QueryBuilder;
 use abc\models\system\Setting;
-use Carbon\Carbon;
 use Dyrynda\Database\Support\GeneratesUuid;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Exception;
@@ -358,13 +357,7 @@ class Manufacturer extends BaseModel
     {
         $db = Registry::db();
         $storeId = $params['store_id'] ?? (int) Registry::config()->get('config_store_id');
-        $cacheKey = 'manufacturers.'.md5(implode('', $params));
-        $cache = Registry::cache()->get($cacheKey);
         $manTable = $db->table_name('manufacturers');
-
-        if ($cache !== null) {
-            return $cache;
-        }
 
         $query = self::selectRaw(Registry::db()->raw_sql_row_count().' '.$manTable.'.*')
                      ->leftJoin(
@@ -426,20 +419,19 @@ class Manufacturer extends BaseModel
             if ($params['limit'] < 1) {
                 $params['limit'] = 20;
             }
-            $query->offset((int) $params['start'])->limit((int) $params['limit']);
+            $query->offset((int)$params['start'])->limit((int)$params['limit']);
         }
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
 
-        $cache = $query->get();
+        $output = $query->useCache('manufacturer')->get();
 
         //add total number of rows into each row
         $totalNumRows = $db->sql_get_row_count();
-        for ($i = 0; $i < $cache->count(); $i++) {
-            $cache[$i]['total_num_rows'] = $totalNumRows;
+        for ($i = 0; $i < $output->count(); $i++) {
+            $output[$i]['total_num_rows'] = $totalNumRows;
         }
-        Registry::cache()->put($cacheKey, $cache);
-        return $cache;
+        return $output;
     }
 
     /**

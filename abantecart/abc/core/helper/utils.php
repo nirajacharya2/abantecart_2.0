@@ -1162,9 +1162,11 @@ class AHelperUtils extends AHelper
      *
      * @return string
      */
-    public static function getMimeType($filename)
+    public static function getMimeType(string $filename): string
     {
-        $filename = (string)$filename;
+        if (!$filename) {
+            return false;
+        }
         $mime_types = [
             'txt'  => 'text/plain',
             'htm'  => 'text/html',

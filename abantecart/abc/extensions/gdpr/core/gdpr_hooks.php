@@ -274,14 +274,15 @@ $("#gdpr_erase")
             ]
         );
 
-        $that->view->addHookVar('customer_attributes',
-            '<div class="form-group">
-        <div class="col-md-12">
-            <label class="col-md-6 mt20 mb40 pull-left">
-                '.$text_agree.'&nbsp;<a href="'.$text_agree_href.
-            '" onclick="openModalRemote(\'#privacyPolicyModal\',\''.$text_agree_href.'\'); return false;">
-                <b>'.$text_agree_href_text.'</b></a>
-                '.$agree_chk.'
-            </label></div></div>');
+        $that->view->addHookVar(
+            'customer_attributes',
+            '<div class="gdpr-container form-group">
+            <div class="col-md-12">
+                ' . $agree_chk . '
+                <label class="col-md-6 mt20 mb40 pull-left">
+                    ' . $text_agree . '&nbsp;<a href="' . $text_agree_href .
+            '" onclick="openModalRemote(\'#privacyPolicyModal\',\'' . $text_agree_href . '\'); return false;">
+                    <b>' . $text_agree_href_text . '</b></a>
+                </label></div></div>');
     }
 }

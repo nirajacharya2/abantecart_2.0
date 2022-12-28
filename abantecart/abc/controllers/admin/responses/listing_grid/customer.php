@@ -608,7 +608,7 @@ class ControllerResponsesListingGridCustomer extends AController
             $this->error = $this->language->get('error_disabled_customer');
         }
 
-        $this->extensions->hk_ValidateData($this, [__FUNCTION__]);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $customer_info);
 
         return $this->error;
     }

@@ -35,7 +35,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property Collection $block_descriptions
  * @property Collection $custom_lists
  *
- * @package abc\models
+ * @method static CustomBlock find(int $custom_block_id)
+ * @method static CustomBlock create(array $attributes)
+ *
  */
 class CustomBlock extends BaseModel
 {
@@ -53,6 +55,7 @@ class CustomBlock extends BaseModel
     ];
 
     protected $fillable = [
+        'block_id',
         'date_added',
         'date_modified',
     ];

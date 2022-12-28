@@ -36,7 +36,6 @@ use ReflectionException;
 class ControllerPagesAccountLogin extends AController
 {
     public $error = [];
-    public $data = [];
 
     public function main()
     {
@@ -279,49 +278,41 @@ class ControllerPagesAccountLogin extends AController
      */
     private function _validate($loginname, $password)
     {
-
+        $customerInfo = [];
         if ($this->customer->login($loginname, $password) !== true) {
+            //if email as login not allowed - seek by login
+            $searchBy = $this->config->get('prevent_email_as_login') ? 'loginname' : 'email';
+            $customerInfo = Customer::search(
+                [
+                    'filter' =>
+                        [
+                            'search_operator' => 'equal',
+                            $searchBy         => $loginname,
+                        ],
+                ]
+            )->first()?->toArray();
+            $customerId = $customerInfo['customer_id'];
+
             if ($this->config->get('config_customer_email_activation')) {
                 //check if account is not confirmed in the email.
-                $customer_info = Customer::search(
-                    [
-                        'filter' =>
-                            [
-                                'search_operator'                                                      => 'equal',
-                                //if email as login not allowed - seek by login
-                                ($this->config->get('prevent_email_as_login') ? 'loginname' : 'email') => $loginname,
-                            ],
-                    ]
-                );
-
-                if ($customer_info) {
-                    /** @var Collection $customer_info */
-                    $customer_info = $customer_info->first();
-                    if ($customer_info) {
-                        $customer_info = $customer_info->toArray();
-                    }
-                }
-
-                if ($customer_info
-                    && !$customer_info['status']
-                    && isset($customer_info['data']['email_activation'])
-                    && $customer_info['data']['email_activation']) {
+                if ($customerInfo
+                    && !$customerInfo['status']
+                    && isset($customerInfo['data']['email_activation'])
+                    && $customerInfo['data']['email_activation']) {
                     //show link for resend activation code to email
-                    /**
-                     * @var AEncryption $enc
-                     */
+                    /** @var AEncryption $enc */
                     $enc = ABC::getObjectByAlias('AEncryption', [$this->config->get('encryption_key')]);
-                    $rid = $enc->encrypt($customer_info['customer_id'].'::'.$customer_info['data']['email_activation']);
+                    $rid = $enc->encrypt($customerInfo['customer_id'] . '::' . $customerInfo['data']['email_activation']);
                     $this->error['message'] .= sprintf($this->language->get('text_resend_activation_email'),
-                        "\n".$this->html->getSecureURL('account/create/resend', '&rid='.$rid)
+                        "\n" . $this->html->getSecureURL('account/create/resend', '&rid=' . $rid)
                     );
 
                     return false;
                 }
             }
             $this->error['message'] .= $this->language->get('error_login');
-
         } else {
+            $customerId = $this->customer->getId();
             $address = [];
             $addressModel = Address::find($this->customer->getAddressId());
             if ($addressModel) {
@@ -337,12 +328,7 @@ class ControllerPagesAccountLogin extends AController
             }
         }
 
-        $this->extensions->hk_ValidateData($this);
-
-        if (!$this->error) {
-            return true;
-        } else {
-            return false;
-        }
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, func_get_args() + ['customer_id' => $customerId]);
+        return (!$this->error);
     }
 }

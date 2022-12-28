@@ -1,26 +1,29 @@
-<h5 class="sidebartitle"><?php echo $text_short_stats; ?></h5>    
+<h5 class="sidebartitle">
+    <?php echo $text_short_stats; ?></h5>
 <ul>
+    <?php if (abc\core\engine\Registry::config()->get('watch_online_customers')) { ?>
+        <li>
+            <div class="icon"><i class="fa fa-users fa-2x fa-fw"></i></div>
+            <div class="stats_info">
+                <span class="text-muted"><?php echo $text_online_now; ?></span>
+                <h4>
+                    <?php echo $text_online_registered; ?>: <?php echo $online_registered; ?>
+                    </br>
+                    <?php echo $text_online_new; ?>: <?php echo $online_new; ?>
+                </h4>
+            </div>
+        </li>
+    <?php } ?>
     <li>
-        <div class="icon"><i class="fa fa-users fa-2x fa-fw"></i></div>   
-        <div class="stats_info">
-            <span class="text-muted"><?php echo $text_online_now; ?></span>
-            <h4>
-            	<?php echo $text_online_registered; ?>: <?php echo $online_registered; ?>
-            	</br>	
-            	<?php echo $text_online_new; ?>: <?php echo $online_new; ?>
-            </h4>
-        </div>
-    </li>
-    <li>
-		<div class="icon"><i class="fa fa-credit-card fa-2x fa-fw"></i></div>   
+        <div class="icon"><i class="fa fa-credit-card fa-2x fa-fw"></i></div>
         <div class="stats_info">
             <span class="text-muted"><?php echo $text_today_orders; ?></span>
             <h4><?php echo $today_order_count; ?></h4>
         </div>
-          
+
     </li>
     <li>
-    	<div class="icon"><i class="fa fa-money fa-2x fa-fw"></i></div> 
+        <div class="icon"><i class="fa fa-money fa-2x fa-fw"></i></div>
         <div class="stats_info">
             <span class="text-muted"><?php echo $text_today_sales; ?></span>
             <h4><?php echo $today_sales_amount; ?></h4>

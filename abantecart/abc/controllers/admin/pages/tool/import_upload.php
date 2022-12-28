@@ -182,7 +182,7 @@ class ControllerPagesToolImportUpload extends AController
             $this->errors['error'] = $this->language->get('error_empty_request');
         }
 
-        $this->extensions->hk_ValidateData($this, [__FUNCTION__]);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__);
         if ($this->errors) {
             $this->session->data['error'] = $this->errors['error'];
             return false;

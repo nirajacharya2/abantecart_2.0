@@ -289,7 +289,7 @@ class ControllerResponsesListingGridZone extends AController
                 }
                 break;
         }
-        $this->extensions->hk_ValidateData($this, [__FUNCTION__, $field, $value]);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $field, $value);
         return $this->data['error'];
     }
 
@@ -315,7 +315,7 @@ class ControllerResponsesListingGridZone extends AController
             $this->data['error'] = sprintf($this->language->get('error_zone_to_location'), $zone_to_location_total);
         }
 
-        $this->extensions->hk_ValidateData($this, [__FUNCTION__, $zone_id]);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $zone_id);
         return $this->data['error'];
     }
 

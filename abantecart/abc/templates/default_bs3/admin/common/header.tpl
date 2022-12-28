@@ -174,7 +174,6 @@ if ($logged){ ?>
                 <li>
                     <div class="btn-group">
                         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                            <img src="<?php echo $avatar; ?>" alt="<?php echo $username; ?>"/>
                             <span class="hidden-xs"><?php echo $username; ?></span>
                             <span class="caret"></span>
                         </button>

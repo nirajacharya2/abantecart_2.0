@@ -255,7 +255,7 @@ class ControllerResponsesListingGridTaxClass extends AController
                 break;
         }
 
-        $this->extensions->hk_ValidateData($this, [__FUNCTION__, $field, $value]);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $field, $value);
         return $this->data['error'];
     }
 
@@ -269,7 +269,7 @@ class ControllerResponsesListingGridTaxClass extends AController
             $this->data['error'] = sprintf($this->language->get('error_product'), $product_total);
         }
 
-        $this->extensions->hk_ValidateData($this, [__FUNCTION__, $tax_class_id]);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $tax_class_id);
         return $this->data['error'];
     }
 

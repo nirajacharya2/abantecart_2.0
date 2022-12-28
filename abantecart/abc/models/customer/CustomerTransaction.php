@@ -57,6 +57,8 @@ class CustomerTransaction extends BaseModel
 {
     use SoftDeletes;
 
+    public $restrictUpdate = true;
+
     protected $primaryKey = 'customer_transaction_id';
 
     protected $mainClassName = Customer::class;
@@ -236,19 +238,19 @@ class CustomerTransaction extends BaseModel
      */
     public function save(array $options = [])
     {
-        if ($this->exists) {
+        if ($this->exists && $this->restrictUpdate) {
             //you cannot to update transaction!
             //All records must be incremental!
             //INSERTS ONLY!
             $dbg = debug_backtrace();
             $debug = '';
-            foreach($dbg as $k=>$d){
-                $debug .= '#'.$k.' '.$d['file'].":".$d['line']."\n";
+            foreach ($dbg as $k => $d) {
+                $debug .= '#' . $k . ' ' . $d['file'] . ":" . $d['line'] . "\n";
             }
-            Registry::log()->write(
-                "Customer ".$this->customer_id." attempts to update transaction # ".$this->customer_transaction_id
-                .". Action is prohibited. "
-                ."\n Input Data: ".var_export($this->getAttributes(), true)."backtrace: \n".$debug
+            Registry::log()->error(
+                "Customer " . $this->customer_id . " attempts to update transaction # " . $this->customer_transaction_id
+                . ". Action is prohibited. "
+                . "\n Input Data: " . var_export($this->getAttributes(), true) . "backtrace: \n" . $debug
             );
             return true;
         }

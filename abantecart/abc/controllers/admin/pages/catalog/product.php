@@ -421,16 +421,16 @@ class ControllerPagesCatalogProduct extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->document->setTitle($this->language->get('heading_title'));
-        if ($this->request->is_POST() && $this->validateForm()) {
+        if ($this->request->is_POST() && $this->validateForm($this->request->post)) {
             try {
                 $product_data = $this->prepareData($this->request->post);
                 $product = Product::createProduct($product_data);
                 $this->data['product_id'] = $product->product_id;
                 $this->extensions->hk_ProcessData($this, 'product_insert');
                 $this->session->data['success'] = $this->language->get('text_success');
-                abc_redirect($this->html->getSecureURL('catalog/product/update', '&product_id='.$product->product_id));
+                abc_redirect($this->html->getSecureURL('catalog/product/update', '&product_id=' . $product->product_id));
             } catch (\Exception $e) {
-                $this->log->error($e->getMessage()."\n".$e->getTraceAsString());
+                $this->log->error($e->getMessage() . "\n" . $e->getTraceAsString());
             }
         }
 
@@ -460,14 +460,14 @@ class ControllerPagesCatalogProduct extends AController
             unset($this->session->data['success']);
         }
 
-        if ($this->request->is_POST() && $this->validateForm()) {
+        if ($this->request->is_POST() && $this->validateForm($this->request->post)) {
             $product_data = $this->prepareData($this->request->post);
-            $product_id = $this->data['product_id'] = (int) $this->request->get['product_id'];
+            $product_id = $this->data['product_id'] = (int)$this->request->get['product_id'];
             Product::updateProduct($product_id, $product_data);
 
             $this->extensions->hk_ProcessData($this, 'product_update');
             $this->session->data['success'] = $this->language->get('text_success');
-            abc_redirect($this->html->getSecureURL('catalog/product/update', '&product_id='.$product_id));
+            abc_redirect($this->html->getSecureURL('catalog/product/update', '&product_id=' . $product_id));
         }
 
         // if (isset($this->data['oldForm']) && $this->data['oldForm'] === true) {
@@ -1402,36 +1402,36 @@ class ControllerPagesCatalogProduct extends AController
         $this->processTemplate($tpl);
     }
 
-    protected function validateForm()
+    protected function validateForm($data)
     {
         if (!$this->user->canModify('catalog/product')) {
             $this->error['warning'] = $this->language->get_error('error_permission');
         }
-        $len = mb_strlen($this->request->post['name']);
+        $len = mb_strlen($data['name']);
         if ($len < 1 || $len > 255) {
             $this->error['name'] = $this->language->get_error('error_name');
         }
 
-        if (mb_strlen($this->request->post['model']) > 64) {
+        if (mb_strlen($data['model']) > 64) {
             $this->error['model'] = $this->language->get_error('error_model');
         }
 
         if (($error_text = $this->html->isSEOkeywordExists(
-                'product_id='.$this->request->get['product_id'],
-                $this->request->post['keyword'])
+            'product_id=' . $this->request->get['product_id'],
+            $data['keyword'])
             )
         ) {
             $this->error['keyword'] = $error_text;
         }
 
         foreach (['length', 'width', 'height', 'weight'] as $name) {
-            $v = abs(H::preformatFloat($this->request->post[$name], $this->language->get('decimal_point')));
+            $v = abs(H::preformatFloat($data[$name], $this->language->get('decimal_point')));
             if ($v >= 1000) {
                 $this->error[$name] = $this->language->get('error_measure_value');
             }
         }
 
-        $this->extensions->hk_ValidateData($this, __FUNCTION__);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $data);
 
         if (!$this->error) {
             return true;

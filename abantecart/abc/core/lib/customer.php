@@ -221,11 +221,10 @@ class ACustomer extends ALibBase
         } elseif ($this->isUnauthCustomer()) {
             $customer_id = $this->isUnauthCustomer();
         }
-        $model = $this->load->model('tool/online_now', 'storefront');
-        /**
-         * @var ModelToolOnlineNow $model ;
-         */
-        if (!ABC::env('IS_ADMIN')) {
+
+        if (Registry::config()->get('watch_online_customers') && !ABC::env('IS_ADMIN')) {
+            /** @var ModelToolOnlineNow $model */
+            $model = $this->load->model('tool/online_now', 'storefront');
             $model->setOnline($ip, $customer_id, $url, $referer);
         }
         //call hooks
@@ -1288,7 +1287,7 @@ class ACustomer extends ALibBase
             }
         }
 
-        Registry::extensions()->hk_ValidateData( Registry::customer(), [ __METHOD__ ] );
+        Registry::extensions()->hk_ValidateData(Registry::customer(), __METHOD__, $data);
         return static::$errors;
     }
 

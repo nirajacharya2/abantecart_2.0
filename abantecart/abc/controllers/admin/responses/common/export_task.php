@@ -57,11 +57,11 @@ class ControllerResponsesCommonExportTask extends AController
             $task_details = $this->addTask();
 
             if (is_bool($task_details)) {
-                $error = new AError("Create export error: \n ".implode(' ', $this->errors));
-                $error->toJSONResponse(
+                $error = new AError("Create export error: \n Result: " . var_export($task_details, true) . " \n" . implode("\n", $this->errors));
+                $error->toLog()->toJSONResponse(
                     'APP_ERROR_402',
                     [
-                        'error_text'  => implode(' ', $this->errors),
+                        'error_text'  => 'Result: ' . var_export($task_details, true) . '  ' . implode("\n", $this->errors),
                         'reset_value' => true,
                     ]
                 );
@@ -72,8 +72,8 @@ class ControllerResponsesCommonExportTask extends AController
                 $this->data['output']['task_details'] = $task_details;
             }
         } else {
-            $error = new AError(implode('<br>', $this->errors));
-            $error->toJSONResponse(
+            $error = new AError('Invalid task Data: ' . implode('<br>', $this->errors));
+            $error->toLog()->toJSONResponse(
                 'VALIDATION_ERROR_406',
                 [
                     'error_text'  => implode('<br>', $this->errors),
@@ -115,8 +115,9 @@ class ControllerResponsesCommonExportTask extends AController
             } else {
                 $this->errors[] = $response['error_text'] ?? '';
             }
-        } catch (Exception $exception) {
-            Registry::log()->write($exception->getMessage());
+        } catch (Exception|\Error $e) {
+            $this->errors[] = $e->getMessage();
+            Registry::log()->error($e->getMessage());
         }
 
         if ($itemsCount === 0) {
@@ -141,6 +142,7 @@ class ControllerResponsesCommonExportTask extends AController
             ]
         );
         if (!$task_id) {
+            $this->errors[] = 'unexpected error during adding of task';
             $this->errors = array_merge($this->errors, $tm->errors);
             return false;
         }
@@ -154,10 +156,10 @@ class ControllerResponsesCommonExportTask extends AController
                     'task_id'            => $task_id,
                     'sort_order'         => 1,
                     'status'             => 1,
-                    'last_time_run'      => '0000-00-00 00:00:00',
-                    'last_result'        => '0',
+                    'last_time_run'      => null,
+                    'last_result'        => 0,
                     'max_execution_time' => $timePerItem * $limit,
-                    'controller'         => $this->exportTaskController.'/export',
+                    'controller'         => $this->exportTaskController . '/export',
                     'settings'           => [
                         'start'   => $i * $limit - $limit,
                         'limit'   => $limit,

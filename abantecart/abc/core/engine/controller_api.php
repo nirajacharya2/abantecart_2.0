@@ -73,6 +73,14 @@ class AControllerAPI extends AController
 
     public function main()
     {
+        if ($this->config->get('config_maintenance')) {
+            $this->rest->setResponseData([
+                'error_code'=> 503,
+                'error_text'=>'Maintenance mode'
+            ]);
+            $this->rest->sendResponse( 503 );
+            return null;
+        }
         //call methods based on REST re	quest type
         switch ( $this->rest->getRequestMethod() ) {
             case 'get':
@@ -120,4 +128,14 @@ class AControllerAPI extends AController
         return null;
     }
 
+    public function mapErrorsAsArray($errors): array {
+        $result = [];
+        foreach ($errors as $key=> $value) {
+            $result[] = [
+                'id'=> $key,
+                'description' => $value
+            ];
+        }
+        return $result;
+    }
 }

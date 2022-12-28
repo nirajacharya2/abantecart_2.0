@@ -148,7 +148,7 @@ class ControllerApiProductCategory extends AControllerAPI
             ENT_QUOTES,
             ABC::env('APP_CHARSET')
         );
-        $category_info['total_products'] = Category::getTotalProductsByCategoryId($category_id,$storeId);
+        $category_info['total_products'] = Category::getTotalActiveProductsByCategoryId($category_id, $storeId);
         $category_info['total_subcategories'] = Category::getTotalCategoriesByCategoryId($category_id);
         if ($category_info['total_products']) {
             $category_info['subcategories'] = $this->getCategories($category_id, $languageId, $storeId);

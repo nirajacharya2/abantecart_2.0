@@ -33,13 +33,13 @@ class ModelToolImage extends Model{
      * @param null $alias - alias filename for saving
      * @param string $mode - can be url or file.
      *
-     * @return null|string - string is URL or abs file path
+     * @return string|false - string is URL or abs file path
      * @throws \ReflectionException
      */
     public function resize($filename, $width = 0, $height = 0, $alias = null, $mode = 'url')
     {
         if (!is_file(ABC::env('DIR_IMAGES').$filename) && !is_file(ABC::env('DIR_RESOURCES').'image/'.$filename)) {
-            return null;
+            return false;
         }
 
         $orig_image_filepath = is_file(ABC::env('DIR_IMAGES').$filename) ? ABC::env('DIR_IMAGES').$filename : '';
@@ -63,12 +63,13 @@ class ModelToolImage extends Model{
 
         if ($this->config->get('config_retina_enable')) {
             //retina variant
-            $new_image2x =
-                'thumbnails/'.substr($alias, 0, strrpos($alias, '.')).'-'.$width.'x'.$height.'@2x.'.$extension;
+            $new_image2x = 'thumbnails/' . substr($alias, 0, strrpos($alias, '.'))
+                . '-' . $width . 'x' . $height . '@2x.'
+                . $extension;
             if (!H::check_resize_image($orig_image_filepath, $new_image2x, $width * 2, $height * 2,
                 $this->config->get('config_image_quality'))) {
-                $err = new AWarning('Resize image error. File: '.$orig_image_filepath
-                    .'. Try to increase memory limit for PHP or decrease image size.');
+                $err = new AWarning('Resize image error. File: ' . $orig_image_filepath
+                    . '. Try to increase memory limit for PHP or decrease image size.');
                 $err->toLog()->toDebug();
             }
         }
