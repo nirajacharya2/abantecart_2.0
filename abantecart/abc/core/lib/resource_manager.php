@@ -269,8 +269,6 @@ class AResourceManager extends AResource
 
         $rl = ResourceLibrary::find($resource_id);
         $rl->descriptions()->where('language_id', $data['language_id'])->update($data);
-        $this->deleteThumbnail($resource_id);
-
         $this->cache->flush('resources');
 
         return true;
