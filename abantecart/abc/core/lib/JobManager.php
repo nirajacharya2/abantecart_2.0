@@ -20,6 +20,7 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use abc\core\lib\contracts\JobManagerInterface;
 use H;
 
 
