@@ -868,7 +868,7 @@ class Customer extends BaseModel
                 $aliasC . ".password = " . $enc->getRawSqlHash(
                     ABC::env('DB_CURRENT_DRIVER'),
                     'customers',
-                    $db->escape($filter['password'])
+                    $filter['password']
                 )
             );
         }
