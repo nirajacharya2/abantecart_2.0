@@ -27,7 +27,8 @@
         '#<?php echo $id;?>',
         function (e) {
             $(e.target).removeData("bs.modal");
-            $(e.target).find(".modal-content").empty();
+            var content = $(e.target).find(".modal-content");
+            content.find('.modal-body, .modal-header').empty();
             <?php
             echo $js_onclose; ?>
         }
