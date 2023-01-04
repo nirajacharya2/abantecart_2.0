@@ -18,6 +18,7 @@
 
 namespace abc\models\content;
 
+use abc\core\engine\Registry;
 use abc\models\BaseModel;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Collection;
@@ -57,6 +58,72 @@ class Content extends BaseModel
         'status',
     ];
 
+    public static function getList($data=[])
+    {
+        $result = [
+            'items' => [],
+            'total' => 0,
+        ];
+
+        $db = Registry::db();
+
+        $arSelect = [
+            $db->raw('SQL_CALC_FOUND_ROWS '.$db->table_name('contents').'.id'),
+            'contents.parent_content_id',
+            'contents.status',
+            'cd.title',
+            'cd.content',
+            'cd.date_added',
+            'cd.date_modified',
+        ];
+
+        $query = self::select($arSelect);
+        $query->leftJoin(
+            'contents as b',
+            'b.content_id',
+            '=',
+            'contents.parent_content_id'
+        );
+        $query->Join(
+            'content_descriptions as cd',
+            'cd.content_id',
+            '=',
+            'content_descriptions.content_id'
+        );
+
+        if (H::has_value($data['sort'])) {
+            $query = $query->orderBy($data['sort'], H::has_value($data['order']) ? $data['order'] : 'asc');
+        }
+
+        if (H::has_value($data['start'])) {
+            $query = $query->offset((int)$data['start']);
+        }
+
+        if (H::has_value($data['limit'])) {
+            $query = $query->limit((int)$data['limit'] ? (int)$data['limit'] : 20);
+        }
+
+        if (H::has_value($data['filter']['name'])) {
+            $query = $query->where('cd.title', 'like', '%'.$data['filter']['name'].'%');
+        }
+
+        if (H::has_value($data['filter']['id'])) {
+            $query = $query->where('contents.content_id', $data['filter']['id']);
+        }
+
+        if (H::has_value($data['filter']['status'])) {
+            $query = $query->where('contents.status', $data['filter']['status']);
+        }
+
+        $resultSet = $query->get();
+
+        if ($resultSet) {
+            $result['items'] = $resultSet->toArray();
+            $result['total'] = $db->sql_get_row_count();
+        }
+
+        return $result;
+    }
     /**
      * @return HasOne
      */
