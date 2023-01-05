@@ -63,6 +63,8 @@ class ControllerApiAccountLogin extends AControllerAPI
         if (trim($request['token'])) {
             //this is the request to authorized
             if ($this->customer->isLoggedWithToken($request['token'])) {
+                #update last_login date
+                $this->customer->setLastLogin($this->customer->getId());
                 $this->rest->setResponseData([
                     'status'  => 1,
                     'success' => 'authorized',
