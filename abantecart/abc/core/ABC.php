@@ -337,7 +337,11 @@ class ABC extends ABCBase
                 //TODO: add check for existing value.
                 // If string - do not make it an array by second write!
                 // To replicate just set env value via array twice
-                static::$env = array_merge_recursive(static::$env, $name);
+                foreach ($name as $k => $v) {
+                    if (!array_key_exists($k, static::$env) || $override) {
+                        static::$env[$k] = $v;
+                    }
+                }
                 return true;
             } else {
                 //when set one value

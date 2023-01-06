@@ -256,6 +256,7 @@ class ACustomer extends ALibBase
         }
 
         /** @var Collection $customer_data */
+        /** @see  Customer::getCustomers() */
         $customer_data = Customer::search(['filter' => $filter])->first();
         if ($customer_data) {
             $this->customerInit($customer_data->toArray());

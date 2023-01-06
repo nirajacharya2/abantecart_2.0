@@ -2100,8 +2100,18 @@ class AHelperUtils extends AHelper
      *
      * @return bool
      */
-    public static function isAssocArray($array){
-       $keys = array_keys($array);
-       return $keys !== array_keys($keys);
+    public static function isAssocArray($array)
+    {
+        $keys = array_keys($array);
+        return $keys !== array_keys($keys);
+    }
+
+    public static function insert2ArrayAfter(array $array, string $itemKey, $itemValue, string|int $positionAfter = null)
+    {
+        $positionAfter = $positionAfter ?? array_key_last($array);
+        $pos = array_search($positionAfter, array_keys($array)) + 1;
+        return array_slice($array, 0, $pos, true) +
+            [$itemKey => $itemValue] +
+            array_slice($array, $pos, count($array) - $pos, true);
     }
 }
