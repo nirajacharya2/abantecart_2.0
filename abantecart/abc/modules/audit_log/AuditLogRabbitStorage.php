@@ -13,6 +13,7 @@ use Elasticsearch\ClientBuilder;
 use H;
 use http\Exception;
 use PhpAmqpLib\Channel\AMQPChannel;
+use PhpAmqpLib\Connection\AMQPSSLConnection;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;
@@ -66,9 +67,13 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
             'password' => $this->conf['PASSWORD']
         ];
         if (isset($this->conf['PROTOCOL']) && strtolower($this->conf['PROTOCOL']) === 'amqps') {
-            $params['ssl_protocol'] = ['capath' => '/etc/ssl/certs'];
+            $params['ssl_options'] = [
+                'dsn' => 'amqps:'
+            ];
+            $this->conn = new AMQPSSLConnection(...$params);
+        } else {
+            $this->conn = new AMQPStreamConnection(...$params);
         }
-        $this->conn = new AMQPStreamConnection(...$params);
         $this->channel = $this->conn->channel();
 
         $this->channel->exchange_declare('exch_main', 'direct', false, true, false);
