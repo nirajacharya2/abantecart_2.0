@@ -903,13 +903,18 @@ var formOnExit = function(){
         }
         $btn.attr('data-loading-text',spinner);
         $btn.on('click', function (event) {
+            let frm = $(this).parents('form');
+            //prevent spinner for forms with invalid fields (see native browser field validation + form attribute "novalidate")
+            if (frm.find(':invalid')) {
+                return;
+            }
             //chrome submit fix
             //If we detect child was clicked, and not the actual button, stop the propagation and trigger the "click" event on the button.
-            var $target = $( event.target );
-            if ( !$target.is("button") ) {
-               event.stopPropagation();
-               $target.closest("button").click();
-               return;
+            var $target = $(event.target);
+            if (!$target.is("button")) {
+                event.stopPropagation();
+                $target.closest("button").click();
+                return;
             }
             $(this).button('loading');
         });

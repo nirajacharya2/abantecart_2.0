@@ -86,7 +86,7 @@ use stdClass;
  * @property \Illuminate\Database\Eloquent\Collection $customer_transactions
  * @property \Illuminate\Database\Eloquent\Collection $orders
  *
- * @method static Customer find(int $customer_id) Customer
+ * @method static Customer|Collection find(int|array $customer_id) Customer
  * @method static Customer select(mixed $select = '*') Builder
  * @package abc\models
  */

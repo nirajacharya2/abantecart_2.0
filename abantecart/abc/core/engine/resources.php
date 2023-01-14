@@ -795,7 +795,7 @@ class AResource
      * @since 1.2.7
      *
      */
-    public function getMainThumbList($object_name, $object_ids = [], $width = 0, $height = 0, $noimage = true)
+    public function getMainThumbList($object_name, $object_ids = [], $width = 0, $height = 0, $noimage = true, $titles = [])
     {
         $width = (int)$width;
         $height = (int)$height;
@@ -871,11 +871,11 @@ class AResource
 
             $origin = $row['resource_path'] ? 'internal' : 'external';
             $output[$object_id] = [
-                'origin' => $origin,
-                'title' => $row['title'],
+                'origin'      => $origin,
+                'title'       => $titles[$object_id] ?: $row['title'],
                 'description' => $row['description'],
-                'width' => $width,
-                'height' => $height,
+                'width'       => $width,
+                'height'      => $height,
             ];
             //for external resources
             if ($origin == 'external') {
@@ -883,12 +883,13 @@ class AResource
             } //for internal resources
             else {
                 $thumb_url = $this->getResizedImageURL($row, $width, $height);
+                $alt = addslashes($titles[$object_id] ?: $row['title']);
                 $output[$object_id]['thumb_html'] = $this->html->buildResourceImage(
                     [
-                        'url' => $thumb_url,
-                        'width' => $width,
+                        'url'    => $thumb_url,
+                        'width'  => $width,
                         'height' => $height,
-                        'attr' => 'alt="' . addslashes($row['title']) . '"',
+                        'attr'   => 'alt="' . $alt . '" title="' . $alt . '"',
                     ]
                 );
                 $output[$object_id]['thumb_url'] = $this->withProtocol($thumb_url);
@@ -903,20 +904,20 @@ class AResource
                 //when need to show default image
                 if ($noimage) {
                     $thumb_url = $this->getResizedImageURL(['resource_id' => 0], $width, $height);
-
+                    $alt = addslashes($titles[$object_id]);
                     $output[$object_id] = [
-                        'origin' => 'internal',
-                        'title' => '',
+                        'origin'      => 'internal',
+                        'title'       => '',
                         'description' => '',
-                        'width' => $width,
-                        'height' => $height,
-                        'thumb_url' => $this->withProtocol($thumb_url),
-                        'thumb_html' => $this->html->buildResourceImage(
+                        'width'       => $width,
+                        'height'      => $height,
+                        'thumb_url'   => $this->withProtocol($thumb_url),
+                        'thumb_html'  => $this->html->buildResourceImage(
                             [
-                                'url' => $thumb_url,
-                                'width' => $width,
+                                'url'    => $thumb_url,
+                                'width'  => $width,
                                 'height' => $height,
-                                'attr' => 'alt=""',
+                                'attr'   => 'alt="' . $alt . '" title="' . $alt . '"',
                             ]
                         ),
                     ];
