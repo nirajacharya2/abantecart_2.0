@@ -5,10 +5,32 @@ namespace abc\core\lib;
 
 class BaseIncentiveBonus
 {
+    protected $incentiveInfo = [];
+    protected $matchedConditions = [];
     protected string $key;
     protected string $section;
 
     protected array $data = [];
+
+    /**
+     * We should to store incentive details for probable usage inside Conditions and bonuses,
+     * such as date range, number of usage etc.
+     * @param array $info
+     * @return void
+     */
+    public function setIncentiveInfo(array $info)
+    {
+        $this->incentiveInfo = $info;
+    }
+
+    /**
+     * @param array|null $matches
+     * @return void
+     */
+    public function setMatchedConditions(?array $matches = [])
+    {
+        $this->matchedConditions = $matches;
+    }
 
     public function getKey(): string
     {
