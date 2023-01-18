@@ -47,6 +47,16 @@ class BaseIncentiveCondition
         return [];
     }
 
+    /**
+     * @param CheckoutBase|array $checkout
+     * @param array|null $params
+     * @return bool
+     */
+    public function check(CheckoutBase|array $checkout, ?array $params = []): bool
+    {
+        return false;
+    }
+
     public function matchedItems()
     {
         return $this->data['matchedItems'];
