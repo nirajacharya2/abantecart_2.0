@@ -42,6 +42,7 @@ use abc\core\lib\AResponse;
 use abc\core\lib\ASession;
 use abc\core\lib\ATax;
 use abc\core\lib\AUser;
+use abc\core\lib\CheckOut;
 use abc\core\lib\CSRFToken;
 use abc\models\admin\ModelLocalisationCountry;
 use abc\models\admin\ModelLocalisationLanguageDefinitions;
@@ -72,6 +73,7 @@ use abc\models\admin\ModelToolOnlineNow;
  * @method static ADownload download()
  * @method static AbcCache cache()
  * @method static AOrderStatus order_status()
+ * @method static CheckOut checkout()
  * @method static AMessage messages()
  */
 final class Registry

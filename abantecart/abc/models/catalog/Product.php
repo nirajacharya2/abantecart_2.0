@@ -106,7 +106,7 @@ use ReflectionException;
  * @property Review $reviews
  * @property int $product_type_id
  *
- * @method static Product find(int $product_id) Product
+ * @method static Product|Collection find(int|array $product_id) Product
  * @method static Product select(mixed $select) Builder
  * @method static Collection search(array $filterParams) - see getProducts() method
  * @method static WithFinalPrice(int $customer_group_id, Carbon|string $toDate = null) - adds "final_price" column into selected fields

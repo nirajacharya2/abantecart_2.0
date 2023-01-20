@@ -23,6 +23,7 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
+use abc\core\engine\Registry;
 use abc\core\lib\ACurrency;
 use abc\core\lib\AException;
 use abc\core\lib\APromotion;
@@ -103,7 +104,6 @@ class ControllerResponsesProductProduct extends AController
                     $filter['subsql_filter'] = 'date_available<=NOW()';
                 }
                 $products = $this->model_catalog_product->getProducts($filter);
-
                 if (!$get['no_image']) {
                     $productIds = array_map('intval', array_column($products, 'product_id'));
                     $resource = new AResource('image');
@@ -111,7 +111,9 @@ class ControllerResponsesProductProduct extends AController
                         'products',
                         $productIds,
                         $this->config->get('config_image_grid_width'),
-                        $this->config->get('config_image_grid_height')
+                        $this->config->get('config_image_grid_height'),
+                        true,
+                        array_column($products, 'name', 'product_id')
                     );
                 }
 
