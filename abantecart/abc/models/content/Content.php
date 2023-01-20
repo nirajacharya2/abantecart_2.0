@@ -24,6 +24,7 @@ use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use H;
 
 /**
  * Class Content
@@ -68,7 +69,7 @@ class Content extends BaseModel
         $db = Registry::db();
 
         $arSelect = [
-            $db->raw('SQL_CALC_FOUND_ROWS '.$db->table_name('contents').'.id'),
+            $db->raw('SQL_CALC_FOUND_ROWS '.$db->table_name('contents').'.content_id'),
             'contents.parent_content_id',
             'contents.status',
             'cd.title',
@@ -88,7 +89,7 @@ class Content extends BaseModel
             'content_descriptions as cd',
             'cd.content_id',
             '=',
-            'content_descriptions.content_id'
+            'contents.content_id'
         );
 
         if (H::has_value($data['sort'])) {
@@ -111,6 +112,10 @@ class Content extends BaseModel
             $query = $query->where('contents.content_id', $data['filter']['id']);
         }
 
+        if (H::has_value($data['filter']['parent_id'])) {
+            $query = $query->where('contents.parent_content_id', $data['filter']['parent_id']);
+        }
+
         if (H::has_value($data['filter']['status'])) {
             $query = $query->where('contents.status', $data['filter']['status']);
         }
@@ -121,7 +126,6 @@ class Content extends BaseModel
             $result['items'] = $resultSet->toArray();
             $result['total'] = $db->sql_get_row_count();
         }
-
         return $result;
     }
     /**
