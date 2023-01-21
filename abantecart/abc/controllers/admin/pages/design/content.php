@@ -222,9 +222,7 @@ class ControllerPagesDesignContent extends AController
         if ($content_id) {
             $this->data['tabs']['form'] = [
                 'text'       => $this->language->get('tab_form'),
-                'href'       => $content_id
-                    ? $this->html->getSecureURL('design/content/update', '&content_id=' . $content_id)
-                    : '#',
+                'href'       => $this->html->getSecureURL('design/content/update', '&content_id=' . $content_id),
                 'active'     => $active == 'form',
                 'sort_order' => 0,
             ];
@@ -268,9 +266,6 @@ class ControllerPagesDesignContent extends AController
         $content_info = [];
         if ($content_id) {
             $content_info = (array)Content::getContent($content_id)?->toArray();
-            \abc\core\engine\Registry::log()->write(
-                'Debug: content_id:' . $content_id . ' info: ' . var_export($content_info, true)
-            );
         }
 
         $this->document->initBreadcrumb(

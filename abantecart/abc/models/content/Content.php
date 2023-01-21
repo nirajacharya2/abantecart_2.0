@@ -341,6 +341,10 @@ class Content extends BaseModel
             }
             $db->table('contents_to_stores')->insert($contentToStore);
 
+            Registry::log()->write(
+                'content to store: ' . var_Export($contentToStore, true)
+            );
+
             //allow to extend this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $content, func_get_args());
             if ($data['keyword']) {
