@@ -105,7 +105,7 @@ class ControllerPagesDesignContent extends AController
         $grid_settings['colModel'] = [
             [
                 'name'  => 'title',
-                'index' => 'name',
+                'index' => 'keyword',
                 'width' => 250,
                 'align' => 'left',
             ],

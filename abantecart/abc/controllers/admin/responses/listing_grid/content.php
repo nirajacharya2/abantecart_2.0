@@ -51,12 +51,13 @@ class ControllerResponsesListingGridContent extends AController
 
         if (isset($this->request->post['_search']) && $this->request->post['_search'] == 'true') {
             $searchData = AJson::decode(htmlspecialchars_decode($this->request->post['filters']), true);
-            $allowedFields = array_merge(['name'], (array)$this->data['allowed_fields']);
+            $allowedFields = array_merge(['keyword'], (array)$this->data['allowed_fields']);
             foreach ($searchData['rules'] as $rule) {
                 if (!in_array($rule['field'], $allowedFields)) {
                     continue;
                 }
                 $this->data['search_parameters']['filter'][$rule['field']] = $rule['data'];
+                unset($this->data['search_parameters']['filter']['parent_id']);
             }
         }
 
