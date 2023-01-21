@@ -496,16 +496,26 @@ class ControllerPagesDesignContent extends AController
 
         $options = Store::orderBy('name')->get()?->pluck('name', 'store_id')->toArray();
 
-        $this->data['form']['fields']['store'] = $form->getFieldHtml(
-            [
-                'type'      => 'checkboxgroup',
-                'name'      => 'store_id[]',
-                'value'     => $this->data['stores'] ?: key($options),
-                'options'   => $options,
-                'scrollbox' => true,
-                'style'     => 'chosen',
-            ]
-        );
+        if (count($options) > 1) {
+            $this->data['form']['fields']['store'] = $form->getFieldHtml(
+                [
+                    'type'      => 'checkboxgroup',
+                    'name'      => 'stores[]',
+                    'value'     => $this->data['stores'] ?: key($options),
+                    'options'   => $options,
+                    'scrollbox' => true,
+                    'style'     => 'chosen',
+                ]
+            );
+        } else {
+            $this->data['form']['fields']['store'] = $form->getFieldHtml(
+                [
+                    'type'  => 'hidden',
+                    'name'  => 'stores[]',
+                    'value' => 0
+                ]
+            );
+        }
 
         $this->data['form']['fields']['sort_order'] = $form->getFieldHtml(
             [
@@ -541,6 +551,7 @@ class ControllerPagesDesignContent extends AController
         $inData['language_id'] = $this->language->getContentLanguageID();
         $inData['sort_order'] = (int)$inData['sort_order'];
         $inData['parent_id'] = $inData['parent_id'] ?: '';
+        $inData['stores'] = !is_array($inData['stores']) ? [0 => 0] : $inData['stores'];
         return $inData;
     }
 

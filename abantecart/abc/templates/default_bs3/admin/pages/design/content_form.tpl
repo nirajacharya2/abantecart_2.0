@@ -21,16 +21,20 @@
 	<div class="panel-body panel-body-nopadding tab-content col-xs-12">
 		<label class="h4 heading"><?php echo $form_title; ?></label>
 		<?php foreach ($form['fields'] as $name => $field) {
-		//Logic to calculate fields width
-		$widthcasses = "col-sm-7";
-		if (is_int(stripos($field->style, 'large-field'))){
-			$widthcasses = "col-sm-7";
-		} else if (is_int(stripos($field->style, 'medium-field')) || is_int(stripos($field->style, 'date'))){
-			$widthcasses = "col-sm-5";
-		} else if (is_int(stripos($field->style, 'small-field')) || is_int(stripos($field->style, 'btn_switch'))){
-			$widthcasses = "col-sm-3";
-		} else if (is_int(stripos($field->style, 'tiny-field'))){
-			$widthcasses = "col-sm-2";
+        if ($field->type == 'hidden') {
+            echo $field;
+            continue;
+        }
+        //Logic to calculate fields width
+        $widthcasses = "col-sm-7";
+        if (is_int(stripos($field->style, 'large-field'))) {
+            $widthcasses = "col-sm-7";
+        } else if (is_int(stripos($field->style, 'medium-field')) || is_int(stripos($field->style, 'date'))) {
+            $widthcasses = "col-sm-5";
+        } else if (is_int(stripos($field->style, 'small-field')) || is_int(stripos($field->style, 'btn_switch'))) {
+            $widthcasses = "col-sm-3";
+        } else if (is_int(stripos($field->style, 'tiny-field'))) {
+            $widthcasses = "col-sm-2";
 		}
 		$widthcasses .= " col-xs-12";
 		?>

@@ -333,17 +333,13 @@ class Content extends BaseModel
             $content->descriptions()->save($description);
 
             $contentToStore = [];
-            foreach ($data['stores'] as $store_id) {
+            foreach ((array)$data['stores'] as $store_id) {
                 $contentToStore[] = [
                     'content_id' => $contentId,
-                    'store_id'   => $store_id,
+                    'store_id'   => (int)$store_id,
                 ];
             }
             $db->table('contents_to_stores')->insert($contentToStore);
-
-            Registry::log()->write(
-                'content to store: ' . var_Export($contentToStore, true)
-            );
 
             //allow to extend this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $content, func_get_args());
@@ -441,7 +437,13 @@ class Content extends BaseModel
             $params['filter']['status'] = 1;
             $params['filter']['store_id'] = (int)Registry::config()->get('config_store_id');
         }
+        $output = static::getContents($params)?->first();
 
-        return static::getContents($params)?->first();
+        if (ABC::env('IS_ADMIN') === true && $output) {
+            $output->stores = Registry::db()->table('contents_to_stores')
+                ->where('content_id', '=', $contentId)
+                ->get()?->pluck('store_id')->toArray();
+        }
+        return $output;
     }
 }
