@@ -268,6 +268,9 @@ class ControllerPagesDesignContent extends AController
         $content_info = [];
         if ($content_id) {
             $content_info = (array)Content::getContent($content_id)?->toArray();
+            \abc\core\engine\Registry::log()->write(
+                'Debug: content_id:' . $content_id . ' info: ' . var_export($content_info, true)
+            );
         }
 
         $this->document->initBreadcrumb(
