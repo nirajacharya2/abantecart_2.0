@@ -271,12 +271,6 @@ class Content extends BaseModel
         $query->useCache('content');
         $output = $query->get();
 
-        //add total number of rows into each row
-        $totalNumRows = $db->sql_get_row_count();
-        for ($i = 0; $i < $output->count(); $i++) {
-            $output[$i]['total_num_rows'] = $totalNumRows;
-        }
-
         return $output;
     }
 
