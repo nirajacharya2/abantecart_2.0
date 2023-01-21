@@ -900,40 +900,46 @@ ADD COLUMN `id` INT NOT NULL AUTO_INCREMENT FIRST,
 ADD INDEX `ac_global_attributes_type_descriptions_fk_2_idx` (`language_id` ASC);
 ALTER TABLE `ac_global_attributes_type_descriptions`
 ADD CONSTRAINT `ac_global_attributes_type_descriptions_fk_1`
-  FOREIGN KEY (`attribute_type_id`)
-  REFERENCES `ac_global_attributes_types` (`attribute_type_id`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE,
+    FOREIGN KEY (`attribute_type_id`)
+        REFERENCES `ac_global_attributes_types` (`attribute_type_id`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
 ADD CONSTRAINT `ac_global_attributes_type_descriptions_fk_2`
-  FOREIGN KEY (`language_id`)
-  REFERENCES `ac_languages` (`language_id`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE;
+    FOREIGN KEY (`language_id`)
+        REFERENCES `ac_languages` (`language_id`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE;
 
-ALTER TABLE `ac_contents`
-CHANGE COLUMN `parent_content_id` `parent_content_id` INT(11) NULL DEFAULT NULL ,
-ADD COLUMN `hide_title` INT(1) NULL DEFAULT '0',
-DROP PRIMARY KEY,
-ADD INDEX `ac_contents_fk_1_idx` (`parent_content_id` ASC);
-
-UPDATE `ac_contents` SET `parent_content_id` = NULL WHERE `parent_content_id` = '0';
-
-ALTER TABLE `ac_contents`
-ADD CONSTRAINT `ac_contents_fk_1`
-  FOREIGN KEY (`parent_content_id`)
-  REFERENCES `ac_contents` (`content_id`)
-  ON DELETE SET NULL
-  ON UPDATE CASCADE;
+update `ac_content_descriptions`
+SET name = title
+WHERE COALESCE(name, '') = '';
+alter table `ac_contents`
+    modify content_id int null;
+alter table `ac_contents`
+    drop foreign key `ac_contents_fk_1`;
+drop index content_id on `ac_contents`;
+drop index stage_id on `ac_contents`;
+drop index `ac_contents_fk_1_idx` on `ac_contents`;
+alter table `ac_contents`
+    change parent_content_id parent_id int null;
+alter table `ac_contents`
+    add constraint `ac_contents_pk` primary key (content_id);
+alter table `ac_contents`
+    modify content_id int auto_increment;
+alter table `ac_contents`
+    add constraint `ac_contents_tims_contents_content_id_fk`
+        foreign key (parent_id) references `ac_contents` (content_id)
+            on update cascade on delete set null;
 
 
 ALTER TABLE `ac_global_attributes_groups_descriptions`
-ADD INDEX `ac_global_attributes_groups_descriptions_fk_2_idx` (`language_id` ASC);
+    ADD INDEX `ac_global_attributes_groups_descriptions_fk_2_idx` (`language_id` ASC);
 ALTER TABLE `ac_global_attributes_groups_descriptions`
-ADD CONSTRAINT `ac_global_attributes_groups_descriptions_fk_1`
-  FOREIGN KEY (`attribute_group_id`)
-  REFERENCES `ac_global_attributes_groups` (`attribute_group_id`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE,
+    ADD CONSTRAINT `ac_global_attributes_groups_descriptions_fk_1`
+        FOREIGN KEY (`attribute_group_id`)
+            REFERENCES `ac_global_attributes_groups` (`attribute_group_id`)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE,
 ADD CONSTRAINT `ac_global_attributes_groups_descriptions_fk_2`
   FOREIGN KEY (`language_id`)
   REFERENCES `ac_languages` (`language_id`)

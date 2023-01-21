@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -23,18 +23,17 @@ namespace abc\controllers\storefront;
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
 use abc\core\lib\CheckOut;
+use abc\models\content\Content;
 
 /**
  * Class ControllerPagesCheckoutGuestStep3
  *
  * @package abc\controllers\storefront
- * @property \abc\models\storefront\ModelCatalogContent $model_catalog_content
  * @property Checkout $checkout
  */
 class ControllerPagesCheckoutGuestStep3 extends AController
 {
-    private $error = [];
-    public $data = [];
+    public $error = [];
 
     public function main()
     {
@@ -49,7 +48,7 @@ class ControllerPagesCheckoutGuestStep3 extends AController
         $gs2_rt = 'checkout/guest_step_2';
         $gs3_rt = 'checkout/guest_step_3';
 
-        if ($this->config->get('embed_mode') == true) {
+        if ($this->config->get('embed_mode')) {
             $cart_rt = 'r/checkout/cart/embed';
         }
 
@@ -102,41 +101,41 @@ class ControllerPagesCheckoutGuestStep3 extends AController
 
         $this->document->addBreadcrumb(
             [
-            'href'      => $this->html->getHomeURL(),
-            'text'      => $this->language->get('text_home'),
-            'separator' => false,
+                'href'      => $this->html->getHomeURL(),
+                'text'      => $this->language->get('text_home'),
+                'separator' => false,
             ]
         );
 
         $this->document->addBreadcrumb(
             [
-            'href'      => $this->html->getSecureURL($cart_rt),
-            'text'      => $this->language->get('text_basket'),
-            'separator' => $this->language->get('text_separator'),
+                'href'      => $this->html->getSecureURL($cart_rt),
+                'text'      => $this->language->get('text_basket'),
+                'separator' => $this->language->get('text_separator'),
             ]
         );
 
         $this->document->addBreadcrumb(
             [
-            'href'      => $this->html->getSecureURL($gs1_rt),
-            'text'      => $this->language->get('text_guest_step_1'),
-            'separator' => $this->language->get('text_separator'),
+                'href'      => $this->html->getSecureURL($gs1_rt),
+                'text'      => $this->language->get('text_guest_step_1'),
+                'separator' => $this->language->get('text_separator'),
             ]
         );
 
         $this->document->addBreadcrumb(
             [
-            'href'      => $this->html->getSecureURL($gs2_rt),
-            'text'      => $this->language->get('text_guest_step_2'),
-            'separator' => $this->language->get('text_separator'),
+                'href'      => $this->html->getSecureURL($gs2_rt),
+                'text'      => $this->language->get('text_guest_step_2'),
+                'separator' => $this->language->get('text_separator'),
             ]
         );
 
         $this->document->addBreadcrumb(
             [
-            'href'      => $this->html->getSecureURL($gs3_rt),
-            'text'      => $this->language->get('text_confirm'),
-            'separator' => $this->language->get('text_separator'),
+                'href'      => $this->html->getSecureURL($gs3_rt),
+                'text'      => $this->language->get('text_confirm'),
+                'separator' => $this->language->get('text_separator'),
             ]
         );
 
@@ -149,8 +148,8 @@ class ControllerPagesCheckoutGuestStep3 extends AController
         if ($this->cart->hasShipping()) {
             $shipping_address = $this->checkout->getShippingAddress();
             $this->data['shipping_address'] = $this->customer->getFormattedAddress(
-                                                                $shipping_address,
-                                                                $shipping_address['address_format']
+                $shipping_address,
+                $shipping_address['address_format']
             );
             $shipping_method = $this->checkout->getShipping();
             if (isset($shipping_method['title'])) {
@@ -162,7 +161,6 @@ class ControllerPagesCheckoutGuestStep3 extends AController
             $this->data['shipping_address'] = '';
         }
 
-
         $this->data['checkout_shipping'] = $this->html->getSecureURL($gs2_rt);
         $this->data['checkout_shipping_edit'] = $this->html->getSecureURL($gs2_rt, '&mode=edit', true);
         $this->data['checkout_shipping_address'] = $this->html->getSecureURL($gs1_rt);
@@ -172,8 +170,8 @@ class ControllerPagesCheckoutGuestStep3 extends AController
 
         if ($payment_address) {
             $this->data['payment_address'] = $this->customer->getFormattedAddress(
-                                                                    $payment_address,
-                                                                    $payment_address['address_format']
+                $payment_address,
+                $payment_address['address_format']
             );
         } else {
             $this->data['payment_address'] = '';
@@ -181,7 +179,7 @@ class ControllerPagesCheckoutGuestStep3 extends AController
 
         if ($payment_method['id'] != 'no_payment_required') {
             $this->data['payment_method'] = $payment_method['title'];
-            $this->addChild('responses/extension/'.$payment_method['id'], 'payment');
+            $this->addChild('responses/extension/' . $payment_method['id'], 'payment');
         } else {
             $this->data['payment_method'] = '';
             $this->addChild('responses/checkout/no_payment', 'payment');
@@ -194,10 +192,7 @@ class ControllerPagesCheckoutGuestStep3 extends AController
 
         $this->loadModel('tool/seo_url');
 
-        $product_ids = [];
-        foreach ($this->data['products'] as $result) {
-            $product_ids[] = (int)$result['product_id'];
-        }
+        $product_ids = array_column($this->data['products'], 'product_id');
 
         //Format product data specific for confirmation page
         $resource = new AResource('image');
@@ -208,17 +203,17 @@ class ControllerPagesCheckoutGuestStep3 extends AController
             $this->config->get('config_image_cart_height')
         );
 
-        $mSizes = array(
+        $mSizes = [
             'main'  =>
-                array(
-                    'width' => $this->config->get('config_image_cart_width'),
+                [
+                    'width'  => $this->config->get('config_image_cart_width'),
                     'height' => $this->config->get('config_image_cart_height')
-                ),
-            'thumb' => array(
-                'width' =>  $this->config->get('config_image_cart_width'),
+                ],
+            'thumb' => [
+                'width'  => $this->config->get('config_image_cart_width'),
                 'height' => $this->config->get('config_image_cart_height')
-            ),
-        );
+            ],
+        ];
 
         foreach ($this->data['products'] as $product) {
             if (isset($product['option']) && !empty($product['option'])) {
@@ -241,8 +236,8 @@ class ControllerPagesCheckoutGuestStep3 extends AController
                 $thumbnail = $thumbnails[$product_id];
             }
             $tax = $this->tax->calcTotalTaxAmount(
-                                    $this->data['products'][$i]['total'],
-                                    $this->data['products'][$i]['tax_class_id']
+                $this->data['products'][$i]['total'],
+                $this->data['products'][$i]['tax_class_id']
             );
             $price = $this->data['products'][$i]['price'];
             $quantity = $this->data['products'][$i]['quantity'];
@@ -253,19 +248,19 @@ class ControllerPagesCheckoutGuestStep3 extends AController
                     'tax'   => $this->currency->format($tax),
                     'price' => $this->currency->format($price),
                     'total' => $this->currency->format_total($price, $quantity),
-                    'href'  => $this->html->getSEOURL('product/product', '&product_id='.$product_id, true),
-                ]);
+                    'href'  => $this->html->getSEOURL('product/product', '&product_id=' . $product_id, true),
+                ]
+            );
         }
 
         if ($this->config->get('config_checkout_id')) {
-            $this->loadModel('catalog/content');
-            $content_info = $this->model_catalog_content->getContent($this->config->get('config_checkout_id'));
+            $content_info = Content::getContent($this->config->get('config_checkout_id'))?->toArray();
             if ($content_info) {
                 $this->data['text_accept_agree'] = $this->language->get('text_accept_agree');
                 $this->data['text_accept_agree_href'] = $this->html->getURL(
-                                                            'r/content/content/loadInfo',
-                                                            '&content_id='.$this->config->get('config_checkout_id'),
-                                                            true
+                    'r/content/content/loadInfo',
+                    '&content_id=' . $this->config->get('config_checkout_id'),
+                    true
                 );
                 $this->data['text_accept_agree_href_link'] = $content_info['title'];
             } else {

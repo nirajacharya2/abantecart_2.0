@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,18 +22,12 @@ namespace abc\controllers\storefront;
 
 use abc\core\engine\AControllerAPI;
 use abc\core\lib\APromotion;
+use abc\models\content\Content;
 use abc\models\customer\Address;
 
-/**
- * Class ControllerApiCheckoutPayment
- *
- * @package abc\controllers\storefront
- * @property \abc\models\storefront\ModelCatalogContent $model_catalog_content
- */
 class ControllerApiCheckoutPayment extends AControllerAPI
 {
     public $error = [];
-    public $data = [];
 
     public function post()
     {
@@ -43,12 +37,12 @@ class ControllerApiCheckoutPayment extends AControllerAPI
 
         if (!$this->customer->isLoggedWithToken($request['token'])) {
             $this->rest->sendResponse(401, ['error' => 'Not logged in or Login attempt failed!']);
-            return null;
+            return;
         }
 
         if ($request['mode'] != 'select' && $request['mode'] != 'list') {
             $this->rest->sendResponse(400, ['error' => 'Incorrect request mode!']);
-            return null;
+            return;
         }
 
         //load language from main section
@@ -63,25 +57,25 @@ class ControllerApiCheckoutPayment extends AControllerAPI
         if (!$this->cart->hasProducts()) {
             //No products in the cart.
             $this->rest->sendResponse(200, ['status' => 2, 'error' => 'Nothing in the cart!']);
-            return null;
+            return;
         }
         if (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout')) {
             //No stock for products in the cart if tracked.
             $this->rest->sendResponse(200, ['status' => 3, 'error' => 'No stock for product!']);
-            return null;
+            return;
         }
 
         if ($this->cart->hasShipping()) {
             if (!isset($this->session->data['shipping_address_id']) || !$this->session->data['shipping_address_id']) {
                 //Problem. Missing shipping address
                 $this->rest->sendResponse(200, ['status' => 4, 'error' => 'Missing shipping address!']);
-                return null;
+                return;
             }
 
             if (!isset($this->session->data['shipping_method'])) {
                 //Problem. Missing shipping address
                 $this->rest->sendResponse(200, ['status' => 5, 'error' => 'Missing shipping method!']);
-                return null;
+                return;
             }
         } else {
             unset($this->session->data['shipping_address_id']);
@@ -105,7 +99,7 @@ class ControllerApiCheckoutPayment extends AControllerAPI
         if (!$this->session->data['payment_address_id']) {
             //Problem. Missing shipping address
             $this->rest->sendResponse(200, ['status' => 6, 'error' => 'Missing billing address!']);
-            return null;
+            return;
         }
 
         $payment_address = [];
@@ -116,7 +110,7 @@ class ControllerApiCheckoutPayment extends AControllerAPI
         if (!$payment_address) {
             //Problem. Missing shipping address
             $this->rest->sendResponse(500, ['status' => 6, 'error' => 'Inaccessible billing address!']);
-            return null;
+            return;
         }
         if (!$this->cart->hasShipping() || $this->config->get('config_tax_customer')) {
             $this->tax->setZone($payment_address['country_id'], $payment_address['zone_id']);
@@ -146,7 +140,7 @@ class ControllerApiCheckoutPayment extends AControllerAPI
             $this->extensions->hk_ProcessData($this);
 
             $this->rest->sendResponse(200, ['status' => 1, 'payment_select' => 'success']);
-            return null;
+            return;
         }
 
         //build data for return
@@ -157,22 +151,22 @@ class ControllerApiCheckoutPayment extends AControllerAPI
             $this->data['error_warning'] = $this->error['warning'];
         }
         $this->data['success'] = $this->session->data['success'];
-        $this->data['coupon'] = isset($request['coupon']) ? $request['coupon'] : $this->session->data['coupon'];
-        $this->data['address'] =
-            $this->customer->getFormattedAddress($payment_address, $payment_address['address_format']);
+        $this->data['coupon'] = $request['coupon'] ?? $this->session->data['coupon'];
+        $this->data['address'] = $this->customer->getFormattedAddress(
+            $payment_address,
+            $payment_address['address_format']
+        );
+
         $this->data['payment_methods'] = $this->session->data['payment_methods'];
         if ($this->data['payment_methods']) {
-            $this->data['payment_method'] = isset($request['payment_method'])
-                ? $request['payment_method']
-                : $this->session->data['payment_method']['id'];
+            $this->data['payment_method'] = $request['payment_method'] ?? $this->session->data['payment_method']['id'];
         } else {
             $this->data['payment_methods'] = [];
         }
-        $this->data['comment'] = isset($request['comment']) ? $request['comment'] : $this->session->data['comment'];
+        $this->data['comment'] = $request['comment'] ?? $this->session->data['comment'];
 
         if ($this->config->get('config_checkout_id')) {
-            $this->loadModel('catalog/content');
-            $content_info = $this->model_catalog_content->getContent($this->config->get('config_checkout_id'));
+            $content_info = Content::getContent($this->config->get('config_checkout_id'))?->toArray();
             if ($content_info) {
                 $this->data['text_agree'] = sprintf($this->language->get('text_agree'), '', $content_info['title']);
             } else {
@@ -203,10 +197,7 @@ class ControllerApiCheckoutPayment extends AControllerAPI
         }
 
         if ($this->config->get('config_checkout_id')) {
-            $this->loadModel('catalog/content');
-
-            $content_info = $this->model_catalog_content->getContent($this->config->get('config_checkout_id'));
-
+            $content_info = Content::getContent($this->config->get('config_checkout_id'))?->toArray();
             if ($content_info) {
                 if (!isset($request['agree'])) {
                     $this->error['warning'] = sprintf($this->language->get('error_agree'), $content_info['title']);
@@ -216,8 +207,8 @@ class ControllerApiCheckoutPayment extends AControllerAPI
         }
 
         //validate post data
-        $this->extensions->hk_ValidateData($this);
-        return $this->error ? false : true;
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $request);
+        return !$this->error;
     }
 
     public function validateCoupon($coupon)
@@ -228,6 +219,6 @@ class ControllerApiCheckoutPayment extends AControllerAPI
             $this->error['warning'] = $this->language->get('error_coupon');
         }
 
-        return $this->error ? false : true;
+        return !$this->error;
     }
 }

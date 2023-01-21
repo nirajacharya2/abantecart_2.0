@@ -68,7 +68,7 @@ use stdClass;
  * @method static QueryBuilder|Builder withTrashed()
  * @method static OrmModel|static updateOrCreate(array $attributes = [], array $values = [])
  * @method static OrmModel|static firstOrCreate(array $attributes = [], array $values = [])
- * @method static QueryBuilder create(array $values) BaseModel
+ * @method static static create(array $values)
  * @method static QueryBuilder active() QueryBuilder
  * @method static QueryBuilder join(string $table, \Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
  * @method static QueryBuilder leftJoin(string $table, \Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder

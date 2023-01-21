@@ -6,7 +6,6 @@ use abc\core\lib\AExtensionManager;
 $registry = Registry::getInstance();
 $lib_list = [
     'layout_manager',
-    'content_manager',
     'package_manager',
     'form_manager',
     'extension_manager',

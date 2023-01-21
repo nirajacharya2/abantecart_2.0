@@ -10471,39 +10471,45 @@ INSERT INTO `ac_page_descriptions` (`page_id`, `language_id`, `name`, `title`, `
 (2, 1, 'Home Page', '', '', '', '', '', now() ),
 (3, 1, 'Checkout Pages', '', '', '', '', '', now() ),
 (4, 1, 'Login Page', '', '', '', '', '', now() ),
-(5, 1, 'Default Product Page', '', '', '', '', '', now() ),
-(10, 1, 'Maintenance Page', '', '', '', '', '', now() ),
-(11, 1, 'Customer Account Pages', '', '', '', '', '', now() ),
-(12, 1, 'Cart Page', '', '', '', '', '', now() ),
-(13, 1, 'Product Listing Page', '', '', '', '', '', now() );
+(5, 1, 'Default Product Page', '', '', '', '', '', now()),
+(10, 1, 'Maintenance Page', '', '', '', '', '', now()),
+(11, 1, 'Customer Account Pages', '', '', '', '', '', now()),
+(12, 1, 'Cart Page', '', '', '', '', '', now()),
+(13, 1, 'Product Listing Page', '', '', '', '', '', now());
 
 --
 -- DDL for table `contents`
 --
 
-CREATE TABLE `ac_contents` (
-  `content_id` int(11) NOT NULL AUTO_INCREMENT,
-  `parent_content_id` int(11) NULL DEFAULT NULL,
-  `sort_order` int(3) NOT NULL DEFAULT '0',
-  `status` int(1) NOT NULL DEFAULT '0',
-  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
-  `date_deleted` timestamp NULL,
-  `stage_id` INT(6) NULL,
-  `hide_title` INT(1) NULL,
-  KEY `content_id_idx` (`content_id`),
-  INDEX `stage_idx` (`stage_id` ASC)
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+CREATE TABLE `ac_contents`
+(
+    content_id    int(11) auto_increment primary key,
+    parent_id     int(11)                               null,
+    sort_order    int(3)    default 0                   not null,
+    status        int(1)    default 0                   not null,
+    date_added    timestamp default current_timestamp() null,
+    date_modified timestamp default current_timestamp() null on update current_timestamp(),
+    date_deleted  timestamp                             null,
+    stage_id      int(6)                                null,
+    hide_title    int(1)                                null,
+    constraint `ac_contents_tims_contents_content_id_fk`
+        foreign key (parent_id) references `ac_contents` (content_id)
+            on update cascade on delete set null
+)
+    ENGINE = INNODB
+    DEFAULT CHARSET = utf8
+    COLLATE = utf8_general_ci
+    AUTO_INCREMENT = 1;
 
 --
 -- Dumping data for table `contents`
 --
 
-INSERT INTO `ac_contents` (`content_id`, `sort_order`, `status`) VALUES
-(1, 1, 1),
-(2, 2, 1),
-(3, 3, 1),
-(4, 4, 1);
+INSERT INTO `ac_contents` (`content_id`, `sort_order`, `status`)
+VALUES (1, 1, 1),
+       (2, 2, 1),
+       (3, 3, 1),
+       (4, 4, 1);
 
 --
 -- DDL for table `content_descriptions`
@@ -13707,16 +13713,6 @@ ADD CONSTRAINT `ac_global_attributes_type_descriptions_fk_2`
   FOREIGN KEY (`language_id`)
   REFERENCES `ac_languages` (`language_id`)
   ON DELETE CASCADE
-  ON UPDATE CASCADE;
-
-ALTER TABLE `ac_contents`
-ADD INDEX `ac_contents_fk_1_idx` (`parent_content_id` ASC);
-
-ALTER TABLE `ac_contents`
-ADD CONSTRAINT `ac_contents_fk_1`
-  FOREIGN KEY (`parent_content_id`)
-  REFERENCES `ac_contents` (`content_id`)
-  ON DELETE SET NULL
   ON UPDATE CASCADE;
 
 ALTER TABLE `ac_global_attributes_groups_descriptions`

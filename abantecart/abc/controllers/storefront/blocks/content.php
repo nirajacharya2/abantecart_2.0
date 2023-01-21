@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,17 +21,14 @@
 namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
+use abc\core\lib\AException;
+use abc\models\content\Content;
+use Psr\SimpleCache\InvalidArgumentException;
 
 class ControllerBlocksContent extends AController
 {
-    public $data = [];
-
     public function main()
     {
-
-        if ($this->html_cache()) {
-            return;
-        }
 
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
@@ -61,10 +58,8 @@ class ControllerBlocksContent extends AController
         $this->data['cart'] = $this->html->getSecureURL('checkout/cart');
         $this->data['checkout'] = $this->html->getSecureURL('checkout/shipping');
 
-        //build dynamic content (pages) links
-        $this->loadModel('catalog/content');
-
-        $this->data['contents'] = $this->_buildTree($this->model_catalog_content->getContents());
+        $allContents = (array)Content::getContents(['filter' => ['status' => 1]])?->toArray();
+        $this->data['contents'] = $this->_buildTree($allContents);
         $this->data['contact'] = $this->html->getURL('content/contact');
         $this->data['sitemap'] = $this->html->getNonSecureURL('content/sitemap');
 
@@ -78,27 +73,25 @@ class ControllerBlocksContent extends AController
 
     /**
      * Recursive function for building tree of content.
-     * Note that same content can have two parents!
      *
-     * @param $all_contents array with all contents. it contain element with key
-     *            parent_content_id that is array  - all parent ids
+     * @param array $all_contents
      * @param int $parent_id
      * @param int $level
      *
      * @return array
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException|AException
      */
-    private function _buildTree($all_contents, $parent_id = 0, $level = 0)
+    protected function _buildTree($all_contents, $parent_id = 0, $level = 0)
     {
         $output = [];
         foreach ($all_contents as $content) {
-            if ($content['parent_content_id'] == $parent_id) {
+            if ($content['parent_id'] == $parent_id) {
                 $output[] = [
-                    'id'    => $content['parent_content_id'].'_'.$content['content_id'],
-                    'title' => str_repeat('&nbsp;&nbsp;', $level).$content['title'],
+                    'id'    => $content['content_id'],
+                    'title' => str_repeat('&nbsp;&nbsp;', $level) . $content['title'],
                     'href'  => $this->html->getSEOURL(
                         'content/content',
-                        '&content_id='.$content['content_id'],
+                        '&content_id=' . $content['content_id'],
                         '&encode'
                     ),
                     'level' => $level,

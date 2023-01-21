@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,10 +22,35 @@ namespace abc\core\engine;
 
 use abc\core\ABC;
 use abc\core\view\AView;
-use abc\core\lib\{
-    AConfig, AWarning
+use abc\core\lib\{AbcCache,
+    ACart,
+    AConfig,
+    ACurrency,
+    ACustomer,
+    ADataEncryption,
+    ADB,
+    ADocument,
+    ADownload,
+    AException,
+    AExtensionManager,
+    AIMManager,
+    ALanguageManager,
+    ALog,
+    AMessage,
+    AOrderStatus,
+    ARequest,
+    AResponse,
+    ASession,
+    ATax,
+    AUser,
+    AWarning,
+    Checkout,
+    CheckoutBase,
+    CSRFToken
 };
 use H;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 /**
  * @property array $data
@@ -65,38 +90,38 @@ use H;
  * @property \abc\models\storefront\ModelCheckoutExtension $model_checkout_extension
  * @property \abc\models\admin\ModelToolTableRelationships $model_tool_table_relationships
  * @property \abc\models\admin\ModelToolBackup $model_tools_backup
- * @property \abc\models\admin\ModelCatalogContent | \abc\models\storefront\ModelCatalogContent $model_catalog_content
  * @property \abc\models\admin\ModelToolDatasetsManager $model_tool_datasets_manager
- * @property \abc\core\lib\AConfig $config
- * @property \abc\core\lib\ADB $db
- * @property \abc\core\lib\AbcCache $cache
- * @property \abc\core\lib\ALanguageManager $language
- * @property AResource $resource
- * @property \abc\core\engine\ALoader $load
- * @property \abc\core\engine\ARouter $router
- * @property AHtml $html
- * @property \abc\core\lib\ARequest $request
- * @property \abc\core\lib\AResponse $response
- * @property \abc\core\lib\ASession $session
- * @property ExtensionsApi $extensions
- * @property \abc\core\lib\AExtensionManager $extension_manager
- * @property ALayout $layout
- * @property \abc\core\lib\ACurrency $currency
- * @property \abc\core\lib\ACart $cart
- * @property \abc\core\lib\ATax $tax
- * @property \abc\core\lib\AUser $user
- * @property \abc\core\lib\ALog $log
- * @property \abc\core\lib\AMessage $messages
- * @property \abc\core\lib\ACustomer $customer
- * @property \abc\core\lib\ADocument $document
- * @property ADispatcher $dispatcher
- * @property \abc\core\lib\ADataEncryption $dcrypt
  * @property \abc\models\admin\ModelToolFileUploads $model_tool_file_uploads
- * @property \abc\core\lib\ADownload $download
- * @property \abc\core\lib\AOrderStatus $order_status
- * @property \abc\core\lib\AIMManager $im
- * @property \abc\core\lib\CSRFToken $csrftoken
- * @property \abc\core\lib\Checkout | \abc\core\lib\CheckoutBase $checkout
+ *
+ * @property AConfig $config
+ * @property ADB $db
+ * @property AbcCache $cache
+ * @property ALanguageManager $language
+ * @property AResource $resource
+ * @property ALoader $load
+ * @property ARouter $router
+ * @property AHtml $html
+ * @property ARequest $request
+ * @property AResponse $response
+ * @property ASession $session
+ * @property ExtensionsApi $extensions
+ * @property AExtensionManager $extension_manager
+ * @property ALayout $layout
+ * @property ACurrency $currency
+ * @property ACart $cart
+ * @property ATax $tax
+ * @property AUser $user
+ * @property ALog $log
+ * @property AMessage $messages
+ * @property ACustomer $customer
+ * @property ADocument $document
+ * @property ADispatcher $dispatcher
+ * @property ADataEncryption $dcrypt
+ * @property ADownload $download
+ * @property AOrderStatus $order_status
+ * @property AIMManager $im
+ * @property CSRFToken $csrftoken
+ * @property Checkout | CheckoutBase $checkout
  */
 abstract class AController
 {
@@ -126,13 +151,13 @@ abstract class AController
     protected $html_cache_key;
 
     /**
-     * @param \abc\core\engine\Registry $registry
+     * @param Registry $registry
      * @param int $instance_id
      * @param string $controller
      * @param string|AController $parent_controller
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \abc\core\lib\AException
+     * @throws InvalidArgumentException
+     * @throws AException
      */
     public function __construct($registry, $instance_id, $controller, $parent_controller = '')
     {
@@ -183,8 +208,10 @@ abstract class AController
     /**
      * Function to enable caching for this page/block
      *
-     * @return true/false
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @return true|false
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function html_cache()
     {
@@ -397,6 +424,9 @@ abstract class AController
 
     /**
      * @param string $template
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function processTemplate($template = '')
     {

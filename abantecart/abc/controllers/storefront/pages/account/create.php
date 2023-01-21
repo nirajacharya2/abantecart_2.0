@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2022 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -24,17 +24,12 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\lib\AEncryption;
+use abc\core\lib\AMailIM;
+use abc\models\content\Content;
 use abc\models\customer\Customer;
-use abc\models\storefront\ModelCatalogContent;
 use abc\modules\events\ABaseEvent;
 use H;
 
-/**
- * Class ControllerPagesAccountCreate
- *
- * @package abc\controllers\storefront
- * @property ModelCatalogContent $model_catalog_content
- */
 class ControllerPagesAccountCreate extends AController
 {
     public $errors = [];
@@ -61,8 +56,8 @@ class ControllerPagesAccountCreate extends AController
 
             if ($this->csrftoken->isTokenValid()) {
                 $this->errors = array_merge(
-                                    $this->errors,
-                                    $this->customer::validateRegistrationData($request_data)
+                    $this->errors,
+                    $this->customer::validateRegistrationData($request_data)
                 );
             } else {
                 $this->errors['warning'] = $this->language->get('error_unknown');
@@ -133,23 +128,29 @@ class ControllerPagesAccountCreate extends AController
             }
         }
 
-        $this->document->initBreadcrumb([
-            'href'      => $this->html->getHomeURL(),
-            'text'      => $this->language->get('text_home'),
-            'separator' => false,
-        ]);
+        $this->document->initBreadcrumb(
+            [
+                'href'      => $this->html->getHomeURL(),
+                'text'      => $this->language->get('text_home'),
+                'separator' => false,
+            ]
+        );
 
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('account/account'),
-            'text'      => $this->language->get('text_account'),
-            'separator' => $this->language->get('text_separator'),
-        ]);
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('account/account'),
+                'text'      => $this->language->get('text_account'),
+                'separator' => $this->language->get('text_separator'),
+            ]
+        );
 
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('account/create'),
-            'text'      => $this->language->get('text_create'),
-            'separator' => $this->language->get('text_separator'),
-        ]);
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('account/create'),
+                'text'      => $this->language->get('text_create'),
+                'separator' => $this->language->get('text_separator'),
+            ]
+        );
 
         if ($this->config->get('prevent_email_as_login')) {
             $this->data['noemaillogin'] = true;
@@ -216,14 +217,14 @@ class ControllerPagesAccountCreate extends AController
         if ($im_drivers) {
             foreach ($im_drivers as $protocol => $driver_obj) {
                 /**
-                 * @var \abc\core\lib\AMailIM $driver_obj
+                 * @var AMailIM $driver_obj
                  */
                 if (!is_object($driver_obj) || $protocol == 'email') {
                     continue;
                 }
                 $fld = $driver_obj->getURIField($form, $this->request->post[$protocol]);
                 $this->data['form']['fields']['general'][$protocol] = $fld;
-                $this->data['entry_'.$protocol] = $fld->label_text;
+                $this->data['entry_' . $protocol] = $fld->label_text;
             }
         }
 
@@ -233,28 +234,32 @@ class ControllerPagesAccountCreate extends AController
                 'name'     => 'company',
                 'value'    => $this->request->post['company'],
                 'required' => false,
-            ]);
+            ]
+        );
         $this->data['form']['fields']['address']['address_1'] = $form->getFieldHtml(
             [
                 'type'     => 'input',
                 'name'     => 'address_1',
                 'value'    => $this->request->post['address_1'],
                 'required' => true,
-            ]);
+            ]
+        );
         $this->data['form']['fields']['address']['address_2'] = $form->getFieldHtml(
             [
                 'type'     => 'input',
                 'name'     => 'address_2',
                 'value'    => $this->request->post['address_2'],
                 'required' => false,
-            ]);
+            ]
+        );
         $this->data['form']['fields']['address']['city'] = $form->getFieldHtml(
             [
                 'type'     => 'input',
                 'name'     => 'city',
                 'value'    => $this->request->post['city'],
                 'required' => true,
-            ]);
+            ]
+        );
 
         $this->data['entry_zone_id'] = $this->language->get('entry_zone');
         $this->view->assign('zone_id', $this->request->post['zone_id'], 'FALSE');
@@ -263,7 +268,8 @@ class ControllerPagesAccountCreate extends AController
                 'type'     => 'selectbox',
                 'name'     => 'zone_id',
                 'required' => true,
-            ]);
+            ]
+        );
 
         $this->data['form']['fields']['address']['postcode'] = $form->getFieldHtml(
             [
@@ -271,7 +277,8 @@ class ControllerPagesAccountCreate extends AController
                 'name'     => 'postcode',
                 'value'    => $this->request->post['postcode'],
                 'required' => true,
-            ]);
+            ]
+        );
 
         $this->loadModel('localisation/country');
         $countries = $this->model_localisation_country->getCountries();
@@ -298,14 +305,16 @@ class ControllerPagesAccountCreate extends AController
                 'name'     => 'password',
                 'value'    => $this->request->post['password'],
                 'required' => true,
-            ]);
+            ]
+        );
         $this->data['form']['fields']['password']['password_confirmation'] = $form->getFieldHtml(
             [
                 'type'     => 'password',
                 'name'     => 'password_confirmation',
                 'value'    => $this->request->post['password_confirmation'],
                 'required' => true,
-            ]);
+            ]
+        );
 
         $this->data['form']['fields']['newsletter']['newsletter'] = $form->getFieldHtml(
             [
@@ -318,7 +327,8 @@ class ControllerPagesAccountCreate extends AController
                     '1' => $this->language->get('text_yes'),
                     '0' => $this->language->get('text_no'),
                 ],
-            ]);
+            ]
+        );
 
         //If captcha enabled, validate
         if ($this->config->get('config_account_create_captcha')) {
@@ -347,7 +357,8 @@ class ControllerPagesAccountCreate extends AController
                 'name'    => 'agree',
                 'value'   => 1,
                 'checked' => $agree,
-            ]);
+            ]
+        );
 
         $this->data['form']['continue'] = $form->getFieldHtml(
             [
@@ -376,14 +387,13 @@ class ControllerPagesAccountCreate extends AController
         $this->data['newsletter'] = $this->request->post['newsletter'];
 
         if ($this->config->get('config_account_id')) {
-
-            $this->loadModel('catalog/content');
-            $content_info = $this->model_catalog_content->getContent($this->config->get('config_account_id'));
-
+            $content_info = Content::getContent($this->config->get('config_account_id'))?->toArray();
             if ($content_info) {
                 $text_agree = $this->language->get('text_agree');
-                $this->data['text_agree_href'] = $this->html->getURL('r/content/content/loadInfo',
-                    '&content_id=' . $this->config->get('config_account_id'));
+                $this->data['text_agree_href'] = $this->html->getURL(
+                    'r/content/content/loadInfo',
+                    '&content_id=' . $this->config->get('config_account_id')
+                );
                 $this->data['text_agree_href_text'] = $content_info['title'];
             } else {
                 $text_agree = '';

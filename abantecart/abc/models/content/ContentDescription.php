@@ -15,6 +15,7 @@
  * versions in the future. If you wish to customize AbanteCart for your
  * needs please refer to http://www.abantecart.com for more information.
  */
+
 namespace abc\models\content;
 
 use abc\models\BaseModel;
@@ -55,12 +56,108 @@ class ContentDescription extends BaseModel
     ];
 
     protected $fillable = [
+        'content_id',
+        'language_id',
         'name',
         'title',
         'description',
-        'content',
-        'date_added',
-        'date_modified',
+        'meta_keywords',
+        'meta_description',
+        'content'
+    ];
+
+    protected $rules = [
+
+        'content_id'       => [
+            'checks'   => [
+                'integer',
+                'required',
+                'sometimes'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Content ID is not Integer!'],
+            ],
+        ],
+        'language_id'      => [
+            'checks'   => [
+                'integer',
+                'required'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Language ID is not Integer!'],
+            ],
+        ],
+        'name'             => [
+            'checks'   => [
+                'required',
+                'sometimes',
+                'string',
+                'max:255',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a string between 1 abd 255 characters!',
+                ],
+            ],
+        ],
+        'title'            => [
+            'checks'   => [
+                'string',
+                'max:255',
+                'required',
+                'sometimes',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a string between 1 abd 255 characters!',
+                ],
+            ],
+        ],
+        'description'      => [
+            'checks'   => [
+                'string',
+                'max:255',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a string between 1 abd 255 characters!',
+                ],
+            ],
+        ],
+        'meta_keywords'    => [
+            'checks'   => [
+                'string',
+                'max:255',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a string less than 255 characters!',
+                ],
+            ],
+        ],
+        'meta_description' => [
+            'checks'   => [
+                'string',
+                'max:255',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute must be a string less than 255 characters!',
+                ],
+            ],
+        ],
+        'content'          => [
+            'checks'   => [
+                'required',
+                'sometimes',
+                'string',
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => ':attribute is required!',
+                ],
+            ],
+        ],
     ];
 
     public function content()

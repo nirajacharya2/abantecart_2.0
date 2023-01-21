@@ -881,6 +881,7 @@ class Category extends BaseModel
             }
             //allow to extend this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $category, func_get_args());
+            UrlAlias::setCurrentLanguageID(static::$current_language_id);
             if ($data['keywords']) {
                 UrlAlias::replaceKeywords($data['keywords'], $category->getKeyName(), $category->getKey());
             } elseif ($data['keyword']) {

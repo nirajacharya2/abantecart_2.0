@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2022 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -31,11 +31,11 @@ use abc\models\admin\ModelLocalisationStockStatus;
 use abc\models\admin\ModelLocalisationWeightClass;
 use abc\models\admin\ModelSaleCustomerGroup;
 use abc\models\admin\ModelSettingSetting;
+use abc\models\content\Content;
 use abc\models\locale\Currency;
 use abc\models\locale\LengthClassDescription;
 use abc\models\locale\WeightClassDescription;
 use abc\models\order\OrderStatus;
-use abc\models\system\TaxClass;
 use abc\models\system\TaxClassDescription;
 use Exception;
 use H;
@@ -307,7 +307,7 @@ class AConfigManager
 
         }
         $this->data['output'] = ['error' => $error, 'validated' => $fields];
-        $this->extensions->hk_ValidateData($this, [$group, $fields,$store_id]);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, [$group, $fields, $store_id]);
         return $this->data['output'];
     }
 
@@ -765,22 +765,22 @@ class AConfigManager
 
         $order_statuses = [];
         $results = OrderStatus::with('description')
-                              ->where('display_status', '=', '1')
-                              ->get()
-                              ->toArray();
+            ->where('display_status', '=', '1')
+            ->get()
+            ->toArray();
         foreach ($results as $item) {
             $order_statuses[$item['order_status_id']] = $item['description']['name'];
         }
 
-        $cntmnr = new AContentManager();
-        $results = $cntmnr->getContents();
-        $contents = ['' => $this->language->get('text_none')];
-        foreach ($results as $item) {
-            if (!$item['status']) {
-                continue;
-            }
-            $contents[$item['content_id']] = $item['title'];
-        }
+        $contents = ['' => $this->language->get('text_none')]
+            +
+            (array)Content::getContents(
+                [
+                    'filter' => [
+                        'status' => 1
+                    ]
+                ]
+            )?->pluck('name', 'content_id')->toArray();
 
         $fields['tax'] = $form->getFieldHtml($props[] = [
             'type'  => 'checkbox',

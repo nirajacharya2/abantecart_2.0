@@ -1,27 +1,16 @@
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
-<?php if ($tabs){ ?>
-	<ul class="nav nav-tabs nav-justified nav-profile">
-		<?php
-		foreach ($tabs as $tab){
-			?>
-			<li <?php echo($tab['active'] ? 'class="active"' : '') ?>>
-				<a href="<?php echo $tab['href'] ? $tab['href'] : 'Javascript:void(0);'; ?>"><span><?php echo $tab['text']; ?></span></a>
-			</li>
-		<?php } ?>
-		<?php echo $this->getHookVar('extension_tabs'); ?>
-	</ul>
-<?php } ?>
+<?php echo $tabs; ?>
 
 <div id="content" class="panel panel-default">
-	<div class="panel-heading col-xs-12">
-		<div class="primary_content_actions pull-left">
-			<?php if ($insert){ ?>
-				<div class="btn-group mr10 toolbar">
-					<a class="actionitem btn btn-primary lock-on-click tooltips" href="<?php echo $insert; ?>"
-					   title="<?php echo $button_add; ?>">
-						<i class="fa fa-plus fa-fw"></i>
-					</a>
+    <div class="panel-heading col-xs-12">
+        <div class="primary_content_actions pull-left">
+            <?php if ($insert) { ?>
+                <div class="btn-group mr10 toolbar">
+                    <a class="actionitem btn btn-primary lock-on-click tooltips" href="<?php echo $insert; ?>"
+                       title="<?php echo $button_add; ?>">
+                        <i class="fa fa-plus fa-fw"></i>
+                    </a>
 				</div>
 			<?php } ?>
 		</div>
@@ -59,23 +48,7 @@
 				</span>
 				<?php } ?>
 				<?php
-				if ($name == 'sort_order'){ ?>
-					<ul class="list-unstyled">
-						<?php
-						foreach ($field as $s){ ?>
-							<li class="col-sm-12 col-xs-12">
-								<div class="row">
-									<label class="col-sm-3 control-label"><?php echo $s['label']; ?>:</label>
-
-									<div class="col-sm-3"><?php echo $s['field'] ?></div>
-								</div>
-							</li>
-						<?php } ?>
-					</ul>
-					<?php
-				} else{
 					echo $field;
-				}
 				?>
 			</div>
 			<?php if (!empty($error[$name])){ ?>
@@ -108,53 +81,12 @@
 <?php echo $resources_scripts; ?>
 <script type="text/javascript">
 	$(document).ready(function () {
-
 		$('#contentFrm_generate_seo_keyword').click(function () {
 			var seo_name = $('#contentFrm_title').val().replace('%', '');
 			$.get('<?php echo $generate_seo_url;?>&seo_name=' + seo_name, function (data) {
 				$('#contentFrm_keyword').val(data).change();
 			});
 			return false;
-		});
-		var sort_order_clone = $('#field_sort_order').find('li').first().clone();
-
-
-		$('#contentFrm_parent_content_id').change(function () {
-			var old_values = {};
-			var that = this;
-			var old_keys = $('#field_sort_order').find('input[name^=sort_order]').map(function () {
-				return this.name.replace('sort_order[', '').replace(']', '')
-			}).get();
-			var old_vals = $('#field_sort_order').find('input[name^=sort_order]').map(function () {
-				return this.value;
-			}).get();
-			for (var k in old_keys) {
-				var name = old_keys[k];
-				old_values[name] = old_vals[k];
-			}
-
-			var values = $(that).val();
-			var html = '';
-
-			$('#field_sort_order').find('ul').html('');
-			for (var k in values) {
-				var temp_clone = sort_order_clone;
-				temp_clone.find('input').attr('name', 'sort_order\[' + values[k] + '\]').attr('id', 'contentFrm_sort_order\[' + values[k] + '\]');
-
-				if (old_values[values[k]]) {
-					temp_clone.find('input').attr('value', old_values[values[k]].replace(/[^0-9]/g, ''));
-				}
-
-				temp_clone.find('label').first().html($(this).find('option:selected[value=' + values[k] + ']').text() + ':');
-
-				$('#field_sort_order').find('ul').append('<li>' + temp_clone.html() + '</li');
-
-			}
-			$('#field_sort_order').find('input').aform({triggerChanged: true, showButtons: 'false'}).change();
-		});
-
-		$('#field_sort_order').find('input[name^=sort_order]').keyup(function () {
-			$(this).val($(this).val().replace(/[^0-9]/g, ''));
 		});
 	});
 </script>

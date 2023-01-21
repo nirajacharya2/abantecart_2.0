@@ -25,14 +25,13 @@ use abc\core\engine\AForm;
 use abc\core\lib\APromotion;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\lib\CheckOut;
+use abc\models\content\Content;
 use abc\models\customer\Address;
-use abc\models\storefront\ModelCatalogContent;
 
 /**
  * Class ControllerPagesCheckoutPayment
  *
  * @package abc\controllers\storefront
- * @property ModelCatalogContent $model_catalog_content
  * @property  Checkout $checkout
  */
 class ControllerPagesCheckoutPayment extends AController
@@ -377,8 +376,7 @@ class ControllerPagesCheckoutPayment extends AController
             ]);
 
         if ($this->config->get('config_checkout_id')) {
-            $this->loadModel('catalog/content');
-            $content_info = $this->model_catalog_content->getContent($this->config->get('config_checkout_id'));
+            $content_info = Content::getContent($this->config->get('config_checkout_id'))?->toArray();
             if ($content_info) {
                 $this->data['text_agree'] = $this->language->get('text_agree');
                 $this->data['text_agree_href'] = $this->html->getURL(
@@ -399,7 +397,7 @@ class ControllerPagesCheckoutPayment extends AController
                 'type'    => 'checkbox',
                 'name'    => 'agree',
                 'value'   => '1',
-                'checked' => ($this->request->post['agree'] ? true : false),
+                'checked' => (bool)$this->request->post['agree'],
             ]);
         }
 
@@ -504,10 +502,7 @@ class ControllerPagesCheckoutPayment extends AController
         }
 
         if ($this->config->get('config_checkout_id')) {
-            $this->loadModel('catalog/content');
-
-            $content_info = $this->model_catalog_content->getContent($this->config->get('config_checkout_id'));
-
+            $content_info = Content::getContent($this->config->get('config_checkout_id'))?->toArray();
             if ($content_info) {
                 if (!isset($this->request->post['agree'])) {
                     $this->error['warning'] = sprintf($this->language->get('error_agree'), $content_info['title']);
@@ -517,7 +512,7 @@ class ControllerPagesCheckoutPayment extends AController
         }
 
         //validate post data
-        $this->extensions->hk_ValidateData($this);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__);
 
         return (!$this->error);
     }
@@ -531,7 +526,7 @@ class ControllerPagesCheckoutPayment extends AController
         }
 
         //validate post data
-        $this->extensions->hk_ValidateData($this);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__);
 
         return (!$this->error);
     }

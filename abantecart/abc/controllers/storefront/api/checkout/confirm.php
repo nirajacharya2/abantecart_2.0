@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2022 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -26,12 +26,6 @@ use abc\core\lib\AJson;
 use abc\models\content\Content;
 use abc\models\customer\Address;
 
-/**
- * Class ControllerApiCheckoutConfirm
- *
- * @package abc\controllers\storefront
- * @property \abc\models\storefront\ModelCatalogContent $model_catalog_content
- */
 class ControllerApiCheckoutConfirm extends ASecureControllerAPI
 {
     public $error = [];
@@ -46,25 +40,25 @@ class ControllerApiCheckoutConfirm extends ASecureControllerAPI
         if (!$this->cart->hasProducts()) {
             //No products in the cart.
             $this->rest->sendResponse(400, ['status' => 2, 'error' => 'Nothing in the cart!']);
-            return null;
+            return;
         }
         if (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout')) {
             //No stock for products in the cart if tracked.
             $this->rest->sendResponse(400, ['status' => 3, 'error' => 'No stock for product!']);
-            return null;
+            return;
         }
 
         if ($this->cart->hasShipping()) {
             if (!isset($session['shipping_address_id']) || !$session['shipping_address_id']) {
                 //Problem. Missing shipping address
                 $this->rest->sendResponse(406, ['status' => 4, 'error' => 'Missing shipping address!']);
-                return null;
+                return;
             }
 
             if (!isset($session['shipping_method'])) {
                 //Problem. Missing shipping address
                 $this->rest->sendResponse(406, ['status' => 5, 'error' => 'Missing shipping method!']);
-                return null;
+                return;
             }
         } else {
             unset($this->session->data['shipping_address_id']);
@@ -76,12 +70,12 @@ class ControllerApiCheckoutConfirm extends ASecureControllerAPI
 
         if (!isset($session['payment_address_id']) || !$session['payment_address_id']) {
             $this->rest->sendResponse(406, ['status' => 6, 'error' => 'Missing payment (billing) address!']);
-            return null;
+            return;
         }
 
         if (!isset($session['payment_method'])) {
             $this->rest->sendResponse(406, ['status' => 5, 'error' => 'Missing payment (billing) method!']);
-            return null;
+            return;
         }
 
         //build order and pre-save
@@ -157,17 +151,12 @@ class ControllerApiCheckoutConfirm extends ASecureControllerAPI
                     'tax'   => $this->currency->format($tax),
                     'price' => $this->currency->format($price),
                     'total' => $this->currency->format_total($price, $quantity),
-                ]);
+                ]
+            );
         }
 
         if ($this->config->get('config_checkout_id')) {
-            $this->loadModel('catalog/content');
-            $contentInfo = Content::with('description')
-                ->active()
-                ->whereHas('stores', function ($query) {
-                    $query->where('store_id', '=', (int)$this->config->get('config_store_id'));
-                })->find($this->config->get('config_checkout_id'))
-                ?->toArray();
+            $contentInfo = Content::getContent($this->config->get('config_checkout_id'))?->toArray();
             if ($contentInfo) {
                 $this->data['text_accept_agree'] = sprintf(
                     $this->language->get('text_accept_agree'),
@@ -184,7 +173,7 @@ class ControllerApiCheckoutConfirm extends ASecureControllerAPI
         // Load selected payment required data from payment extension
         if ($this->session->data['payment_method']['id'] != 'no_payment_required') {
             $payment_controller = $this->dispatch(
-                'responses/extension/'.$this->session->data['payment_method']['id'].'/api'
+                'responses/extension/' . $this->session->data['payment_method']['id'] . '/api'
             );
         } else {
             $payment_controller = $this->dispatch('responses/checkout/no_payment/api');

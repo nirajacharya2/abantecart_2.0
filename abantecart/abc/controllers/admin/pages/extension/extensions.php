@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -25,17 +25,21 @@ use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\engine\ExtensionUtils;
 use abc\core\lib\ADebug;
+use abc\core\lib\AException;
 use abc\core\lib\AWarning;
+use abc\models\admin\ModelToolMPApi;
 use H;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
+use stdClass;
 
 /**
  * Class ControllerPagesExtensionExtensions
  *
- * @property \abc\models\admin\ModelToolMPApi $model_tool_mp_api
+ * @property ModelToolMPApi $model_tool_mp_api
  */
 class ControllerPagesExtensionExtensions extends AController
 {
-    public $data;
     public $error;
 
     public function main()
@@ -61,7 +65,7 @@ class ControllerPagesExtensionExtensions extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        //put extension_list for remote install into session to prevent multiple requests for grid
+        //put extension_list for remote installation into session to prevent multiple requests for grid
 
         //connection to marketplace
         $this->loadModel('tool/mp_api');
@@ -427,9 +431,14 @@ class ControllerPagesExtensionExtensions extends AController
                     // if options need to extract from db
                     $data['options'] = $item['options'];
                     if ($item['model_rt'] != '') {
-                        //force to load models even before extension is enabled
-                        $this->loadModel($item['model_rt'], 'force');
-                        $model = $this->{'model_'.str_replace("/", "_", $item['model_rt'])};
+                        if (class_exists($item['model_rt'])) {
+                            $model = new $item['model_rt'];
+                        } //old models usage. Remove it in the future
+                        else {
+                            //force to load models even before extension is enabled
+                            $this->loadModel($item['model_rt'], 'force');
+                            $model = $this->{'model_' . str_replace("/", "_", $item['model_rt'])};
+                        }
                         $method_name = $item['method'];
                         if (method_exists($model, $method_name)) {
                             $res = call_user_func([$model, $method_name]);
@@ -445,8 +454,8 @@ class ControllerPagesExtensionExtensions extends AController
                     if ($data['type'] == 'checkboxgroup' || $data['type'] == 'multiselectbox') {
                         #custom settings for multivalue
                         $data['scrollbox'] = 'true';
-                        if (substr($item['name'], -2) != '[]') {
-                            $data['name'] = $item['name']."[]";
+                        if (!str_ends_with($item['name'], '[]')) {
+                            $data['name'] = $item['name'] . "[]";
                         }
                         $data['style'] = "chosen";
                     }
@@ -457,9 +466,14 @@ class ControllerPagesExtensionExtensions extends AController
                     $data['options'] = $item['options'];
                     if (is_array($item['data_source']) && $item['data_source']) {
                         foreach ($item['data_source']['model_rt'] as $k => $model_rt) {
-                            //force to load models even before extension is enabled
-                            $this->loadModel($model_rt, 'force');
-                            $model = $this->{'model_'.str_replace("/", "_", $model_rt)};
+                            if (class_exists($model_rt)) {
+                                $model = new $model_rt;
+                            } //remove old models later
+                            else {
+                                //force to load models even before extension is enabled
+                                $this->loadModel($model_rt, 'force');
+                                $model = $this->{'model_' . str_replace("/", "_", $model_rt)};
+                            }
                             $method_name = $item['data_source']['method'][$k];
                             if (method_exists($model, $method_name)) {
                                 $data['options'][$method_name] = call_user_func([$model, $method_name]);
@@ -469,8 +483,13 @@ class ControllerPagesExtensionExtensions extends AController
                         //TODO: remove it in 2.0
                         if ($item['model_rt'] != '') {
                             //force to load models even before extension is enabled
-                            $this->loadModel($item['model_rt'], 'force');
-                            $model = $this->{'model_'.str_replace("/", "_", $item['model_rt'])};
+                            if (class_exists($item['model_rt'])) {
+                                $model = new $item['model_rt'];
+                            } //remove old models later
+                            else {
+                                $this->loadModel($item['model_rt'], 'force');
+                                $model = $this->{'model_' . str_replace("/", "_", $item['model_rt'])};
+                            }
                             $method_name = $item['method'];
                             if (method_exists($model, $method_name)) {
                                 $data['options'][$method_name] = call_user_func([$model, $method_name]);
@@ -677,7 +696,7 @@ class ControllerPagesExtensionExtensions extends AController
             $this->data['info'] = sprintf($this->language->get('text_update_available'),
                 $upd[$extension]['version'],
                 $this->html->getSecureURL('tool/package_installer',
-                    '&extension_key='.$upd[$extension]['installation_key']));
+                    '&extension_key=' . $upd[$extension]['installation_key']));
         }
 
         $missing_extensions = $this->extensions->getMissingExtensions();
@@ -687,19 +706,20 @@ class ControllerPagesExtensionExtensions extends AController
             abc_redirect($this->html->getSecureURL('extension/extensions'));
         }
 
-        $this->data['extension_info']['note'] =
-            $ext->getConfig('note') ? $this->html->convertLinks($this->language->get($extension.'_note')) : '';
-        /**
-         * @var \DOMDocument $config
-         */
+        $this->data['extension_info']['note'] = $ext->getConfig('note')
+            ? $this->html->convertLinks($this->language->get($extension . '_note'))
+            : '';
+        /** @var stdClass $config */
         $config = $ext->getConfig();
         if (!empty($config->preview->item)) {
             foreach ($config->preview->item as $item) {
-                if (!is_file(ABC::env('DIR_EXT').$extension.ABC::env('DIRNAME_IMAGES').(string)$item)) {
+                if (!is_file(ABC::env('DIR_EXT') . $extension . ABC::env('DIRNAME_IMAGES') . $item)) {
                     continue;
                 }
-                $this->data['extension_info']['preview'][] =
-                    ABC::env('HTTPS_EXT').$extension.ABC::env('DIRNAME_IMAGES').(string)$item;
+                $this->data['extension_info']['preview'][] = ABC::env('HTTPS_EXT')
+                    . $extension
+                    . ABC::env('DIRNAME_IMAGES')
+                    . $item;
             }
             //image gallery scripts and css for previews
             $this->document->addStyle([
@@ -799,12 +819,12 @@ class ControllerPagesExtensionExtensions extends AController
                                     'title'  => $this->language->get('text_edit'),
                                 ]
                             );
-                            if (!(boolean)$item['required']) {
+                            if (!(bool)$item['required']) {
                                 $actions['uninstall'] = $this->html->buildElement(
                                     [
                                         'type'   => 'button',
                                         'href'   => $this->html->getSecureURL('extension/extensions/uninstall',
-                                            '&extension='.$id),
+                                            '&extension=' . $id),
                                         'target' => '_blank',
                                         'style'  => 'btn_uninstall',
                                         'icon'   => 'fa fa-times',
@@ -867,11 +887,11 @@ class ControllerPagesExtensionExtensions extends AController
         if (H::has_value((string)$config->custom_settings_template)) {
             //build path to template directory.
             $dir_template = ABC::env('DIR_APP_EXTENSIONS')
-                .$extension.DS
-                .ABC::env('DIRNAME_TEMPLATES')
-                .$this->config->get('admin_template').DS
-                .ABC::env('DIRNAME_ADMIN')
-                .(string)$config->custom_settings_template;
+                . $extension . DS
+                . ABC::env('DIRNAME_TEMPLATES')
+                . $this->config->get('admin_template') . DS
+                . ABC::env('DIRNAME_ADMIN')
+                . $config->custom_settings_template;
             //validate template and report issue
             if (!file_exists($dir_template)) {
                 $warning = new AWarning(sprintf($this->language->get('error_could_not_load_override'), $dir_template,
@@ -907,9 +927,9 @@ class ControllerPagesExtensionExtensions extends AController
      * @param int $store_id
      *
      * @return bool
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
+     * @throws InvalidArgumentException
      */
     protected function _validateSettings($extension, $store_id)
     {
@@ -927,7 +947,7 @@ class ControllerPagesExtensionExtensions extends AController
                 } else {
                     $this->error['warning'] = [];
                     foreach ($validate['errors'] as $field_id => $error_text) {
-                        $error = $error_text ? $error_text : $this->language->get($field_id.'_validation_error');
+                        $error = $error_text ?: $this->language->get($field_id . '_validation_error');
                         $this->error['warning'][] = $error;
                     }
                     $this->error['warning'] = implode('<br>', $this->error['warning']);
@@ -935,9 +955,9 @@ class ControllerPagesExtensionExtensions extends AController
             }
         }
 
-        $this->extensions->hk_ValidateData($this);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, func_get_args());
 
-        return $this->error ? false : true;
+        return !$this->error;
     }
 
     public function install()

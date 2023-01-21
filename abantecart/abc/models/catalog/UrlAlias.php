@@ -129,6 +129,11 @@ class UrlAlias extends BaseModel
         self::setKeyword($keyword, 'manufacturer_id', $manufacturerId);
     }
 
+    public static function setContentKeyword(string $keyword, int $contentId)
+    {
+        self::setKeyword($keyword, 'content_id', $contentId);
+    }
+
     /**
      * @param array $data - ['language_id' => 1, 'keyword' => 'some-keyword']
      * @param string $name - 'product_id', 'category_id' etc
@@ -136,7 +141,7 @@ class UrlAlias extends BaseModel
      *
      * @throws Exception
      */
-    public static function replaceKeywords( $data, $name, $id)
+    public static function replaceKeywords($data, $name, $id)
     {
         $data = (array)$data;
         $id = (int)$id;

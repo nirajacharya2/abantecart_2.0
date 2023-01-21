@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -24,18 +24,17 @@ use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\lib\APromotion;
 use abc\core\lib\CheckOut;
+use abc\models\content\Content;
 
 /**
  * Class ControllerPagesCheckoutGuestStep2
  *
  * @package abc\controllers\storefront
- * @property \abc\models\storefront\ModelCatalogContent $model_catalog_content
  * @property Checkout $checkout
  */
 class ControllerPagesCheckoutGuestStep2 extends AController
 {
     public $error = [];
-    public $data = [];
 
     public function main()
     {
@@ -45,12 +44,12 @@ class ControllerPagesCheckoutGuestStep2 extends AController
 
         //is this an embed mode
         $cart_rt = 'checkout/cart';
-        if ($this->config->get('embed_mode') == true) {
+        if ($this->config->get('embed_mode')) {
             $cart_rt = 'r/checkout/cart/embed';
         }
 
         if (!$this->cart->hasProducts()
-            ||  (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout'))
+            || (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout'))
         ) {
             abc_redirect($this->html->getSecureURL($cart_rt));
         }
@@ -96,7 +95,7 @@ class ControllerPagesCheckoutGuestStep2 extends AController
                         $this->extensions->hk_ProcessData($this, 'reset_coupon');
                         abc_redirect($this->html->getSecureURL('checkout/guest_step_3'));
                     } else {
-                        if ($this->validateCoupon()) {
+                        if ($this->validateCoupon($this->request->post)) {
                             $this->session->data['coupon'] = $this->request->post['coupon'];
                             $this->session->data['success'] = $this->language->get('text_success');
 
@@ -113,7 +112,7 @@ class ControllerPagesCheckoutGuestStep2 extends AController
                     }
                 }
 
-                if (!isset($this->request->post['coupon']) && $this->validate()) {
+                if (!isset($this->request->post['coupon']) && $this->validate($this->request->post)) {
                     if (isset($this->request->post['shipping_method'])) {
                         $shipping = explode('.', $this->request->post['shipping_method']);
                         $this->session->data['shipping_method'] =
@@ -157,12 +156,12 @@ class ControllerPagesCheckoutGuestStep2 extends AController
             $shipping_method_name = key($shipping_methods);
             #Check config if we allowed to set this shipping and skip the step
             $ext_config = $this->model_checkout_extension->getSettings($shipping_method_name);
-            if ($ext_config[$shipping_method_name."_autoselect"]) {
+            if ($ext_config[$shipping_method_name . "_autoselect"]) {
                 //take first quote. This needs to be accounted for if configure shipping to be autoselected
                 if (sizeof($shipping_methods[$shipping_method_name]['quote']) == 1) {
                     $this->session->data['shipping_method'] = current(
-                                                                $shipping_methods[$shipping_method_name]['quote']
-                                                              );
+                        $shipping_methods[$shipping_method_name]['quote']
+                    );
                     $skip_step = true;
                 }
             }
@@ -177,7 +176,7 @@ class ControllerPagesCheckoutGuestStep2 extends AController
         if ($skip_step && $this->request->get['mode'] != 'edit') {
             if (count($payment_methods) == 1) {
                 $shipping_method_name = key($payment_methods);
-                if ($payment_methods[$shipping_method_name]['settings'][$shipping_method_name."_autoselect"]) {
+                if ($payment_methods[$shipping_method_name]['settings'][$shipping_method_name . "_autoselect"]) {
                     $this->session->data['payment_method'] = $payment_methods[$shipping_method_name];
                     abc_redirect($this->html->getSecureURL('checkout/guest_step_3'));
                 }
@@ -232,8 +231,9 @@ class ControllerPagesCheckoutGuestStep2 extends AController
             unset($this->session->data['success']);
         }
 
-        $action = $this->html->getSecureURL('checkout/guest_step_2',
-            ($this->request->get['mode'] ? '&mode='.$this->request->get['mode'] : ''), true);
+        $action = $this->html->getSecureURL(
+            'checkout/guest_step_2',
+            ($this->request->get['mode'] ? '&mode=' . $this->request->get['mode'] : ''), true);
 
         if ($this->config->get('coupon_status')) {
             $this->data['coupon_status'] = $this->config->get('coupon_status');
@@ -268,8 +268,8 @@ class ControllerPagesCheckoutGuestStep2 extends AController
 
         $this->data['shipping_methods'] = $this->session->data['shipping_methods'] ?: [];
         $shipping = isset($this->request->post['shipping_method'])
-                    ? $this->request->post['shipping_method']
-                    : $this->session->data['shipping_method']['id'];
+            ? $this->request->post['shipping_method']
+            : $this->session->data['shipping_method']['id'];
 
         if ($this->data['shipping_methods']) {
             foreach ($this->data['shipping_methods'] as $k => $v) {
@@ -281,7 +281,7 @@ class ControllerPagesCheckoutGuestStep2 extends AController
                                 'id'      => $val['id'],
                                 'name'    => 'shipping_method',
                                 'options' => [$val['id'] => ''],
-                                'value'   => ($shipping == $val['id'] ? true : false),
+                                'value'   => $shipping == $val['id'],
                             ]);
                     }
                 }
@@ -298,7 +298,7 @@ class ControllerPagesCheckoutGuestStep2 extends AController
                 foreach ($shipping_methods as $shipping_method_name => $method_val) {
                     #Check config of selected shipping method and see if we have accepted payments restriction
                     $ship_ext_config = $this->model_checkout_extension->getSettings($shipping_method_name);
-                    $accept_payment_ids = $ship_ext_config[$shipping_method_name."_accept_payments"];
+                    $accept_payment_ids = $ship_ext_config[$shipping_method_name . "_accept_payments"];
                     if (is_array($accept_payment_ids) && count($accept_payment_ids)) {
                         #filter only allowed payment methods
                         $ac_payments = [];
@@ -312,9 +312,9 @@ class ControllerPagesCheckoutGuestStep2 extends AController
                     }
                     foreach ($ac_payments as $key => $value) {
                         $selected = false;
-                        if ($payment == $value['id']){
+                        if ($payment == $value['id']) {
                             $selected = true;
-                        } elseif ( $this->config->get($key."_autoselect") ){
+                        } elseif ($this->config->get($key . "_autoselect")) {
                             $selected = true;
                         }
 
@@ -336,7 +336,7 @@ class ControllerPagesCheckoutGuestStep2 extends AController
                     $selected = false;
                     if ($payment == $value['id']) {
                         $selected = true;
-                    } elseif ($this->config->get($key."_autoselect")) {
+                    } elseif ($this->config->get($key . "_autoselect")) {
                         $selected = true;
                     }
 
@@ -366,13 +366,12 @@ class ControllerPagesCheckoutGuestStep2 extends AController
             ]);
 
         if ($this->config->get('config_checkout_id')) {
-            $this->loadModel('catalog/content');
-            $content_info = $this->model_catalog_content->getContent($this->config->get('config_checkout_id'));
+            $content_info = Content::getContent($this->config->get('config_checkout_id'))?->toArray();
             if ($content_info) {
                 $this->data['text_agree'] = $this->language->get('text_agree');
                 $this->data['text_agree_href'] = $this->html->getURL(
-                                                    'r/content/content/loadInfo',
-                                                    '&content_id='.$this->config->get('config_checkout_id')
+                    'r/content/content/loadInfo',
+                    '&content_id=' . $this->config->get('config_checkout_id')
                 );
                 $this->data['text_agree_href_text'] = $content_info['title'];
             } else {
@@ -388,7 +387,7 @@ class ControllerPagesCheckoutGuestStep2 extends AController
                     'type'    => 'checkbox',
                     'name'    => 'agree',
                     'value'   => '1',
-                    'checked' => ($this->request->post['agree'] ? true : false),
+                    'checked' => (bool)$this->request->post['agree'],
                 ]);
         }
 
@@ -417,14 +416,14 @@ class ControllerPagesCheckoutGuestStep2 extends AController
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
-    public function validate()
+    public function validate($post)
     {
         if ($this->cart->hasShipping()) {
-            if (!isset($this->request->post['shipping_method']) || !$this->request->post['shipping_method']) {
+            if (!isset($post['shipping_method']) || !$post['shipping_method']) {
                 $this->error['warning'] = $this->language->get('error_shipping');
                 return false;
             } else {
-                $shipping = explode('.', $this->request->post['shipping_method']);
+                $shipping = explode('.', $post['shipping_method']);
 
                 if (!isset($this->session->data['shipping_methods'][$shipping[0]]['quote'][$shipping[1]])) {
                     $this->error['warning'] = $this->language->get('error_shipping');
@@ -433,55 +432,41 @@ class ControllerPagesCheckoutGuestStep2 extends AController
             }
         }
         if ($this->cart->getFinalTotal()) {
-            if (!isset($this->request->post['payment_method'])) {
+            if (!isset($post['payment_method'])) {
                 $this->error['warning'] = $this->language->get('error_payment');
                 return false;
             } else {
-                if (!isset($this->session->data['payment_methods'][$this->request->post['payment_method']])) {
+                if (!isset($this->session->data['payment_methods'][$post['payment_method']])) {
                     $this->error['warning'] = $this->language->get('error_payment');
                     return false;
                 }
             }
         }
         if ($this->config->get('config_checkout_id')) {
-            $this->loadModel('catalog/content');
-
-            $content_info = $this->model_catalog_content->getContent($this->config->get('config_checkout_id'));
-
+            $content_info = Content::getContent($this->config->get('config_checkout_id'))?->toArray();
             if ($content_info) {
-                if (!isset($this->request->post['agree'])) {
+                if (!isset($post['agree'])) {
                     $this->error['warning'] = sprintf($this->language->get('error_agree'), $content_info['title']);
                     return false;
                 }
             }
         }
 
-        //validate post data
-        $this->extensions->hk_ValidateData($this);
-
-        if (!$this->error) {
-            return true;
-        } else {
-            return false;
-        }
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $post);
+        return (!$this->error);
     }
 
-    protected function validateCoupon()
+    protected function validateCoupon($post)
     {
 
         $this->loadLanguage('checkout/payment');
         $promotion = new APromotion();
-        $coupon = $promotion->getCouponData($this->request->post['coupon']);
+        $coupon = $promotion->getCouponData($post['coupon']);
         if (!$coupon) {
             $this->error['warning'] = $this->language->get('error_coupon');
         }
 
-        $this->extensions->hk_ValidateData($this);
-
-        if (!$this->error) {
-            return true;
-        } else {
-            return false;
-        }
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $post);
+        return (!$this->error);
     }
 }
