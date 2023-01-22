@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -17,53 +17,49 @@
    versions in the future. If you wish to customize AbanteCart for your
    needs please refer to http://www.AbanteCart.com for more information.
 ------------------------------------------------------------------------------*/
-if ( ! class_exists( 'abc\core\ABC' ) ) {
-    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
-}
-include_once( 'core/custom_block_hook.php' );
-$controllers = array(
-    'storefront' => array(
+
+require_once('core/custom_block_hook.php');
+$controllers = [
+    'storefront' => [
         'responses/extension/banner_manager',
         'blocks/banner_block',
-    ),
-    'admin'      => array(
+    ],
+    'admin'      => [
         'pages/extension/banner_manager',
         'responses/listing_grid/banner_manager',
         'pages/extension/banner_manager_stat',
         'responses/listing_grid/banner_manager_stat',
         'responses/extension/banner_manager_chart',
-    ),
-);
+    ],
+];
 
-$models = array(
-    'storefront' => array( 'extension/banner_manager' ),
-    'admin'      => array( 'extension/banner_manager' ),
-);
+$models = [
+    'storefront' => ['extension/banner_manager'],
+    'admin'      => ['extension/banner_manager'],
+];
 
-$languages = array(
-    'storefront' => array(
+$languages = [
+    'storefront' => [
         'banner_manager/banner_manager',
-    ),
-    'admin'      => array(
+    ],
+    'admin'      => [
         'banner_manager/banner_manager',
-    ),
-);
+    ],
+];
 
-$templates = array(
-    'storefront' => array(
+$templates = [
+    'storefront' => [
         'blocks/banner_block.tpl',
         'blocks/banner_block_content.tpl',
         'blocks/banner_block_header.tpl',
         'blocks/banner_block/one_by_one_slider_banner_block.tpl',
         'blocks/banner_block/flex_slider_banner_block.tpl',
-
-    ),
-    'admin'      => array(
+    ],
+    'admin'      => [
         'pages/extension/banner_manager.tpl',
         'pages/extension/banner_manager_form.tpl',
-        'responses/extension/banner_listing.tpl',
         'pages/extension/banner_manager_stat.tpl',
         'pages/extension/banner_manager_stat_details.tpl',
         'pages/extension/banner_manager_block_form.tpl',
-    ),
-);
+    ],
+];

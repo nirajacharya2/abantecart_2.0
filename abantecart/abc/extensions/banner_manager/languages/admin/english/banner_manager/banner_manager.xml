@@ -1,35 +1,37 @@
 <?xml version="1.0"?>
 <definitions>
-	<definition>
-		<key>banner_manager_name</key>
-		<value><![CDATA[Banner Manager]]></value>
-	</definition>
-	<definition>
-		<key>banner_manager_note</key>
-		<value><![CDATA[
-		To manage banners follow menu <b>Design -> Banner Manager</b> after extension is enabled <br>
-		To see banner statistic follow <b>Reports -> Banner Statistic</b> after extension is enabled and banners created
-		]]></value>
-	</definition>
-	<definition>
-		<key>banner_manager_list</key>
-		<value><![CDATA[Banner List]]></value>
-	</definition>
-	<definition>
-		<key>banner_manager_name_stat</key>
-		<value><![CDATA[Banner Statistic]]></value>
-	</definition>
-	<definition>
-		<key>column_banner_id</key>
-		<value><![CDATA[ Id ]]></value>
-	</definition>
-	<definition>
-		<key>column_banner_name</key>
-		<value><![CDATA[ Name ]]></value>
-	</definition>
-	<definition>
-		<key>column_banner_group</key>
-		<value><![CDATA[ Group ]]></value>
+    <definition>
+        <key>banner_manager_name</key>
+        <value><![CDATA[Banner Manager]]></value>
+    </definition>
+    <definition>
+        <key>banner_manager_note</key>
+        <value><![CDATA[ To manage banners follow menu <a href="#admin#rt=extension/banner_manager">Design -> Banner Manager</a> after extension is enabled <br>
+		To see banner statistic follow <a href="#admin#rt=extension/banner_manager_stat">Reports -> Banner Statistic</a> after extension is enabled and banners created]]></value>
+    </definition>
+    <definition>
+        <key>banner_manager_disable_statistic</key>
+        <value><![CDATA[Disable statistic?<span class="help">Do not collect banner statistic</span>]]></value>
+    </definition>
+    <definition>
+        <key>banner_manager_list</key>
+        <value><![CDATA[Banner List]]></value>
+    </definition>
+    <definition>
+        <key>banner_manager_name_stat</key>
+        <value><![CDATA[Banner Statistic]]></value>
+    </definition>
+    <definition>
+        <key>column_banner_id</key>
+        <value><![CDATA[ Id ]]></value>
+    </definition>
+    <definition>
+        <key>column_banner_name</key>
+        <value><![CDATA[ Name ]]></value>
+    </definition>
+    <definition>
+        <key>column_banner_group</key>
+        <value><![CDATA[ Group ]]></value>
 	</definition>
 	<definition>
 		<key>column_banner_type</key>
@@ -172,15 +174,19 @@
 		<value><![CDATA[ count ]]></value>
 	</definition>
 	<definition>
-		<key>text_banners</key>
-		<value><![CDATA[ Banners ]]></value>
-	</definition>
-	<definition>
-		<key>text_delete_statistic</key>
-		<value><![CDATA[ Delete Statistic ]]></value>
-	</definition>
-	<definition>
-		<key>text_delete_success</key>
-		<value><![CDATA[ Statistic have been successfully deleted! ]]></value>
-	</definition>
+        <key>text_banners</key>
+        <value><![CDATA[ Banners ]]></value>
+    </definition>
+    <definition>
+        <key>text_delete_statistic</key>
+        <value><![CDATA[ Delete Statistic ]]></value>
+    </definition>
+    <definition>
+        <key>text_delete_success</key>
+        <value><![CDATA[ Statistic have been successfully deleted! ]]></value>
+    </definition>
+    <definition>
+        <key>please_select_option</key>
+        <value><![CDATA[ -- Please select -- ]]></value>
+    </definition>
 </definitions>

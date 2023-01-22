@@ -930,7 +930,7 @@ alter table `ac_contents`
     add constraint `ac_contents_tims_contents_content_id_fk`
         foreign key (parent_id) references `ac_contents` (content_id)
             on update cascade on delete set null;
-
+# CHECK rows inside contents_to_stores!!!!
 
 ALTER TABLE `ac_global_attributes_groups_descriptions`
     ADD INDEX `ac_global_attributes_groups_descriptions_fk_2_idx` (`language_id` ASC);

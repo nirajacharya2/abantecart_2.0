@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,16 +22,16 @@ namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
 use abc\extensions\banner_manager\models\admin\extension\ModelExtensionBannerManager;
+use abc\extensions\banner_manager\models\Banner;
+use abc\extensions\banner_manager\models\BannerDescription;
+use abc\extensions\banner_manager\models\BannerStat;
 
 /**
  * Class ControllerPagesExtensionBannerManagerStat
  *
- * @property ModelExtensionBannerManager $model_extension_banner_manager
  */
 class ControllerPagesExtensionBannerManagerStat extends AController
 {
-    public $data = [];
-
     public function main()
     {
         //init controller data
@@ -49,11 +49,8 @@ class ControllerPagesExtensionBannerManagerStat extends AController
         );
 
         $grid_settings = [
-            //id of grid
             'table_id'       => 'banner_stat_grid',
-            // url to load data from
             'url'            => $this->html->getSecureURL('listing_grid/banner_manager_stat'),
-            // default sort column
             'sortname'       => 'date_end',
             'columns_search' => false,
             'multiselect'    => 'false',
@@ -75,56 +72,55 @@ class ControllerPagesExtensionBannerManagerStat extends AController
 
         $grid_settings['colModel'] = [
             [
-                'name'     => 'name',
-                'index'    => 'name',
-                'width'    => 250,
-                'align'    => 'left',
-                'sortable' => false,
+                'name'  => 'name',
+                'index' => 'name',
+                'width' => 250,
+                'align' => 'left',
             ],
             [
-                'name'     => 'group_name',
-                'index'    => 'banner_group_name',
-                'width'    => 160,
-                'align'    => 'left',
-                'sortable' => false,
+                'name'  => 'group_name',
+                'index' => 'banner_group_name',
+                'width' => 160,
+                'align' => 'left',
             ],
             [
-                'name'     => 'clicked',
-                'index'    => 'clicked',
-                'width'    => 40,
-                'align'    => 'center',
-                'sortable' => false,
+                'name'  => 'clicked',
+                'index' => 'clicked',
+                'width' => 40,
+                'align' => 'center',
             ],
             [
-                'name'     => 'viewed',
-                'index'    => 'viewed',
-                'width'    => 120,
-                'align'    => 'center',
-                'sortable' => false,
+                'name'  => 'viewed',
+                'index' => 'viewed',
+                'width' => 120,
+                'align' => 'center',
             ],
             [
-                'name'     => 'percent',
-                'index'    => 'percent',
-                'width'    => 60,
-                'align'    => 'center',
-                'sortable' => false,
+                'name'  => 'percents',
+                'index' => 'percents',
+                'width' => 60,
+                'align' => 'center',
             ],
         ];
 
         $grid = $this->dispatch('common/listing_grid', [$grid_settings]);
         $this->view->assign('listing_grid', $grid->dispatchGetOutput());
 
-        $this->document->initBreadcrumb([
-            'href'      => $this->html->getSecureURL('index/home'),
-            'text'      => $this->language->get('text_home'),
-            'separator' => false,
-        ]);
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('extension/banner_manager_stat'),
-            'text'      => $this->language->get('banner_manager_name_stat'),
-            'separator' => ' :: ',
-            'current'   => true,
-        ]);
+        $this->document->initBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('index/home'),
+                'text'      => $this->language->get('text_home'),
+                'separator' => false,
+            ]
+        );
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('extension/banner_manager_stat'),
+                'text'      => $this->language->get('banner_manager_name_stat'),
+                'separator' => ' :: ',
+                'current'   => true,
+            ]
+        );
 
         $this->view->assign('success', $this->session->data['success']);
         if (isset($this->session->data['success'])) {
@@ -147,15 +143,15 @@ class ControllerPagesExtensionBannerManagerStat extends AController
         $this->loadLanguage('banner_manager/banner_manager');
         $this->document->setTitle($this->language->get('banner_manager_name_stat'));
 
-        $banner_id = (int)$this->request->get['banner_id'];
+        $bannerId = (int)$this->request->get['banner_id'];
 
         $this->data['delete_button'] = $this->html->buildElement(
             [
                 'type'  => 'button',
                 'title' => $this->language->get('text_delete_statistic'),
                 'href'  => $this->html->getSecureURL(
-                                                    'extension/banner_manager_stat/delete',
-                                                    '&delete=1&banner_id='.$banner_id
+                    'extension/banner_manager_stat/delete',
+                    '&delete=1&banner_id=' . $bannerId
                 ),
             ]
         );
@@ -176,38 +172,33 @@ class ControllerPagesExtensionBannerManagerStat extends AController
             ]
         );
 
-        $this->loadModel('extension/banner_manager');
-        $info = $this->model_extension_banner_manager->getBanner($banner_id);
+        /** @var BannerDescription $bannerDesc */
+        $bannerDesc = BannerDescription::where('banner_id', '=', $bannerId)
+            ->where('language_id', '=', $this->language->getContentLanguageID())
+            ->first();
 
-        $this->data['heading_title'] = $this->language->get('banner_manager_name_stat').':  '.$info['name'];
+        $this->data['heading_title'] = $this->language->get('banner_manager_name_stat') . ':  ' . $bannerDesc->name;
 
         $this->document->addBreadcrumb(
             [
-                'href'      => $this->html->getSecureURL(
-                    'extension/banner_manager_stat',
-                    '&banner_id='.$banner_id
-                ),
+                'href'      => $this->html->getSecureURL('extension/banner_manager_stat', '&banner_id=' . $bannerId),
                 'text'      => $this->data['heading_title'],
                 'separator' => ' :: ',
                 'current'   => true,
-            ]);
-        $this->data['chart_url'] = $this->html->getSecureURL(
-            'extension/banner_manager_chart',
-            '&banner_id='.$banner_id
+            ]
         );
-
-        $options = [
-            'day'   => $this->language->get('text_day'),
-            'week'  => $this->language->get('text_week'),
-            'month' => $this->language->get('text_month'),
-            'year'  => $this->language->get('text_year'),
-        ];
+        $this->data['chart_url'] = $this->html->getSecureURL('extension/banner_manager_chart', '&banner_id=' . $bannerId);
 
         $this->data['select_range'] = $this->html->buildElement(
             [
                 'type'    => 'selectbox',
                 'name'    => 'range',
-                'options' => $options,
+                'options' => [
+                    'day'   => $this->language->get('text_day'),
+                    'week'  => $this->language->get('text_week'),
+                    'month' => $this->language->get('text_month'),
+                    'year'  => $this->language->get('text_year'),
+                ],
                 'value'   => 'day',
             ]
         );
@@ -225,7 +216,6 @@ class ControllerPagesExtensionBannerManagerStat extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->loadModel('extension/banner_manager');
         $this->loadLanguage('banner_manager/banner_manager');
 
         //prevent random click
@@ -233,8 +223,12 @@ class ControllerPagesExtensionBannerManagerStat extends AController
             abc_redirect($this->html->getSecureURL('extension/banner_manager_stat'));
         }
 
-        $banner_id = (int)$this->request->get['banner_id'];
-        $this->model_extension_banner_manager->deleteStatistic($banner_id);
+        $bannerId = (int)$this->request->get['banner_id'];
+        if ($bannerId) {
+            BannerStat::where('banner_id', '=', $bannerId)->delete();
+        } else {
+            BannerStat::query()->delete();
+        }
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,67 +21,57 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
-use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
-use abc\extensions\banner_manager\models\admin\extension\ModelExtensionBannerManager;
+use abc\extensions\banner_manager\models\BannerStat;
 use stdClass;
 
-/**
- * Class ControllerResponsesListingGridBannerManagerStat
- *
- * @package abc\controllers\admin
- * @property ModelExtensionBannerManager $model_extension_banner_manager
- */
 class ControllerResponsesListingGridBannerManagerStat extends AController
 {
     public function main()
     {
+        $this->loadLanguage('banner_manager/banner_manager');
+        $page = (int)$this->request->post['page'] ?: 1;
+        $limit = $this->request->post['rows'];
+        $sort = $this->request->post['sidx'];
+        $order = $this->request->post['sord'];
+
+        $this->data['banner_stat_search_parameters'] = [
+            'language_id' => $this->language->getContentLanguageID(),
+            'start'       => ($page - 1) * $limit,
+            'limit'       => $limit,
+            'sort'        => $sort,
+            'order'       => $order
+        ];
+
         //init controller data
-        $this->extensions->hk_InitData( $this, __FUNCTION__ );
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->loadLanguage( 'banner_manager/banner_manager' );
-        $this->loadModel( 'extension/banner_manager' );
-
-        $filter_params = ['name', 'banner_group_name', 'type', 'cnt'];
-        $filter_grid = new AFilter( [
-            'method'                   => 'post',
-            'grid_filter_params'       => $filter_params,
-            'additional_filter_string' => '',
-        ]);
-
-        $total = $this->model_extension_banner_manager->getBannersStat( $filter_grid->getFilterData(), 'total_only' );
-        if ( $total > 0 ) {
-            $total_pages = ceil( $total / 10 );
-        } else {
-            $total_pages = 0;
-        }
+        $results = (array)BannerStat::getStatistic($this->data['banner_stat_search_parameters'])?->toArray();
+        $total = (int)$results[0]['total_num_rows'];
+        $total_pages = $total > 0 ? ceil($total / $limit) : 0;
 
         $response = new stdClass();
         $response->page = $this->request->post['page'];
         $response->total = $total_pages;
         $response->records = $total;
 
-        $results = $this->model_extension_banner_manager->getBannersStat( $filter_grid->getFilterData() );
-
         $i = 0;
-        foreach ( $results as $result ) {
-
+        foreach ($results as $result) {
             $response->rows[$i]['id'] = $result['banner_id'];
             $response->rows[$i]['cell'] = [
                 $result['name'],
                 $result['banner_group_name'],
                 $result['clicked'],
                 $result['viewed'],
-                $result['percent'],
+                $result['percents'],
             ];
             $i++;
         }
 
         //update controller data
-        $this->extensions->hk_UpdateData( $this, __FUNCTION__ );
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-        $this->load->library( 'json' );
-        $this->response->setOutput( AJson::encode( $response ) );
+        $this->load->library('json');
+        $this->response->setOutput(AJson::encode($response));
     }
-
 }
