@@ -913,6 +913,12 @@ ADD CONSTRAINT `ac_global_attributes_type_descriptions_fk_2`
 update `ac_content_descriptions`
 SET name = title
 WHERE COALESCE(name, '') = '';
+
+alter table `ac_content_descriptions`
+    add constraint `ac_content_descriptions_fk`
+        foreign key (content_id) references `ac_contents` (content_id)
+            on update cascade on delete cascade;
+
 alter table `ac_contents`
     modify content_id int null;
 alter table `ac_contents`

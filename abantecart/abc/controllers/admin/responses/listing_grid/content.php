@@ -24,7 +24,9 @@ use abc\core\engine\AController;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AJson;
+use abc\core\lib\ALayoutManager;
 use abc\models\content\Content;
+use abc\models\content\ContentDescription;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 use stdClass;
@@ -157,6 +159,9 @@ class ControllerResponsesListingGridContent extends AController
                             return;
                         }
                         Content::where('content_id', '=', $content_id)?->delete();
+                        ContentDescription::where('content_id', '=', $content_id)?->delete();
+                        $layout = new ALayoutManager();
+                        $layout->deletePageLayout('pages/content/content', 'content_id', $content_id);
                     }
                 }
                 break;

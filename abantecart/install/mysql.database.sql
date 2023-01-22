@@ -10515,20 +10515,23 @@ VALUES (1, 1, 1),
 -- DDL for table `content_descriptions`
 --
 CREATE TABLE `ac_content_descriptions` (
-  `content_id` int(11) NOT NULL DEFAULT '0',
-  `language_id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL COMMENT 'translatable',
-  `title` varchar(255) NOT NULL COMMENT 'translatable',
-  `description` varchar(255) NOT NULL DEFAULT '' COMMENT 'translatable',
-  `meta_keywords` varchar(255) NOT NULL DEFAULT '',
-  `meta_description` varchar(255) NOT NULL DEFAULT '',
-  `content` longtext NOT NULL COMMENT 'translatable', -- Contain the page details if custom content
-  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `date_deleted` timestamp NULL,
-  `stage_id` INT(6) NULL,
-  PRIMARY KEY (`content_id`,`language_id`),
-  INDEX `stage_idx` (`stage_id` ASC)
+                                           `content_id`       int(11)      NOT NULL DEFAULT '0',
+                                           `language_id`      int(11)      NOT NULL,
+                                           `name`             varchar(255) NOT NULL COMMENT 'translatable',
+                                           `title`            varchar(255) NOT NULL COMMENT 'translatable',
+                                           `description`      varchar(255) NOT NULL DEFAULT '' COMMENT 'translatable',
+                                           `meta_keywords`    varchar(255) NOT NULL DEFAULT '',
+                                           `meta_description` varchar(255) NOT NULL DEFAULT '',
+                                           `content`          longtext     NOT NULL COMMENT 'translatable', -- Contain the page details if custom content
+                                           `date_added`       timestamp    NULL     DEFAULT CURRENT_TIMESTAMP,
+                                           `date_modified`    timestamp    NULL     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                           `date_deleted`     timestamp    NULL,
+                                           `stage_id`         INT(6)       NULL,
+                                           constraint `ac_content_descriptions_fk`
+                                               foreign key (content_id) references `ac_contents` (content_id)
+                                                   on update cascade on delete cascade,
+                                           PRIMARY KEY (`content_id`, `language_id`),
+                                           INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 INSERT INTO `ac_content_descriptions` (`content_id`, `language_id`, `name`, `title`, `description`, `content`, `date_added`)
