@@ -257,6 +257,7 @@ class Content extends BaseModel
             $sorting = "asc";
         }
 
+        $query->distinct();
         $query->orderByRaw($orderBy . " " . $sorting);
 
         //pagination
