@@ -664,9 +664,9 @@ class ControllerPagesDesignContent extends AController
 
         // get templates
         $this->data['templates'] = [];
-        $directories = glob(ABC::env('DIR_STOREFRONT') . 'view/*', GLOB_ONLYDIR);
+        $directories = glob(ABC::env('DIR_TEMPLATES') . '*' . DS . ABC::env('DIRNAME_STORE'), GLOB_ONLYDIR);
         foreach ($directories as $directory) {
-            $this->data['templates'][] = basename($directory);
+            $this->data['templates'][] = basename(dirname($directory));
         }
         $enabled_templates = $this->extensions->getExtensionsList(
             [
@@ -772,7 +772,7 @@ class ControllerPagesDesignContent extends AController
             $post_data = $this->request->post;
             $tmpl_id = $post_data['tmpl_id'];
             $layout = new ALayoutManager();
-            $pages = $layout->getPages($page_controller, $page_key_param, $content_id);
+            $pages = $layout->getPages($page_controller, $page_key_param, $content_id, $tmpl_id);
             if (count($pages)) {
                 $page_id = $pages[0]['page_id'];
                 $layout_id = $pages[0]['layout_id'];
