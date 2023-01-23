@@ -24,6 +24,8 @@ use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\models\layout\CustomBlock;
 use H;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 /**
  * @property \abc\core\lib\AbcCache $cache
@@ -85,7 +87,7 @@ class ALayoutManager
      * @param string $layout_id
      *
      * @throws AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function __construct($tmpl_id = '', $page_id = '', $layout_id = '')
     {
@@ -264,7 +266,7 @@ class ALayoutManager
      *
      * @return array
      * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getLayouts($layout_type = '')
     {
@@ -359,7 +361,7 @@ class ALayoutManager
      *
      * @return array
      * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function getAllLayoutBlocks($layout_id = 0)
     {
@@ -399,7 +401,7 @@ class ALayoutManager
     /**
      * @return array
      * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getAllBlocks()
     {
@@ -635,7 +637,7 @@ class ALayoutManager
     /**
      * @return array
      * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getLayoutBlocks()
     {
@@ -669,7 +671,7 @@ class ALayoutManager
      * @return array
      * @throws AException
      * @throws \ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function buildChildrenBlocks($blocks, $total_blocks)
     {
@@ -913,7 +915,7 @@ class ALayoutManager
      *
      * @return bool
      * @throws AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function clonePageLayout($src_layout_id, $dest_layout_id = '', $layout_name = '')
     {
@@ -996,6 +998,49 @@ class ALayoutManager
         if ($pages) {
             foreach ($pages as $page) {
                 $this->deletePageLayoutByID($page['page_id'], $page['layout_id']);
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Function to delete all pages and layouts linked to the page
+     *
+     * @param $controller , $key_param, $key_value (all required)
+     * @param $key_param
+     * @param $key_value
+     *
+     * @return bool
+     * @throws AException
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
+     */
+    public function deleteAllPagesLayouts($controller, $key_param, $key_value)
+    {
+        if (empty($controller) || empty($key_param) || empty($key_value)) {
+            return false;
+        }
+        $templates = [];
+        $directories = glob(ABC::env('DIR_TEMPLATES') . '*' . DS . ABC::env('DIRNAME_STORE'), GLOB_ONLYDIR);
+        foreach ($directories as $directory) {
+            $templates[] = basename(dirname($directory));
+        }
+        $enabled_templates = $this->extensions->getExtensionsList(
+            [
+                'filter' => 'template',
+                'status' => 1,
+            ]
+        );
+        foreach ($enabled_templates->rows as $template) {
+            $templates[] = $template['key'];
+        }
+        foreach ($templates as $templateId) {
+            $pages = $this->getPages($controller, $key_param, $key_value, $templateId);
+            if ($pages) {
+                foreach ($pages as $page) {
+                    $this->deletePageLayoutByID($page['page_id'], $page['layout_id']);
+                }
             }
         }
 
@@ -1525,7 +1570,7 @@ class ALayoutManager
      *
      * @return array
      * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getBlockDescriptions($custom_block_id = 0)
     {
@@ -1561,7 +1606,7 @@ class ALayoutManager
      *
      * @return string
      * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getCustomBlockName($custom_block_id, $language_id = 0)
     {
@@ -1704,7 +1749,7 @@ class ALayoutManager
      *
      * @return bool
      * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function cloneTemplateLayouts($new_template)
     {
@@ -1752,7 +1797,7 @@ class ALayoutManager
      *
      * @return bool
      * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function cloneLayoutBlocks($source_layout_id, $new_layout_id)
     {
