@@ -40,7 +40,11 @@ class ControllerPagesDesignContent extends AController
         parent::__construct($registry, $instance_id, $controller, $parent_controller);
         $c = new Content();
         $cd = new ContentDescription();
-        $this->fields = array_merge($c->getFillable(), $cd->getFillable(), ['stores', 'content_id']);
+        $this->fields = array_merge(
+            $c->getFillable(),
+            $cd->getFillable(),
+            ['stores', 'content_id', 'keyword']
+        );
         unset($c, $cd);
     }
 
@@ -265,6 +269,7 @@ class ControllerPagesDesignContent extends AController
         $this->data['language_id'] = $this->config->get('storefront_language_id');
         $content_info = [];
         if ($content_id) {
+            Content::setCurrentLanguageID($this->data['language_id']);
             $content_info = (array)Content::getContent($content_id)?->toArray();
         }
 

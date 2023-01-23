@@ -20,6 +20,7 @@ namespace abc\models\content;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use abc\core\lib\ALayoutManager;
 use abc\models\BaseModel;
 use abc\models\catalog\UrlAlias;
 use Exception;
@@ -27,6 +28,7 @@ use H;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\JoinClause;
+use Psr\SimpleCache\InvalidArgumentException;
 
 /**
  * Class Content
@@ -128,7 +130,7 @@ class Content extends BaseModel
 
     /**
      * @param $params
-     * @return array|\Illuminate\Support\Collection
+     * @return \Illuminate\Support\Collection
      */
     public static function getContents($params = [])
     {
@@ -161,7 +163,8 @@ class Content extends BaseModel
             $db->raw('SQL_CALC_FOUND_ROWS ' . $db->table_name('contents') . '.content_id'),
             'content_descriptions.*',
             'contents.*',
-            'pb.name as parent_name'
+            'pb.name as parent_name',
+            'url_aliases.keyword'
         ];
 
         $query = self::select($arSelect);
@@ -189,6 +192,19 @@ class Content extends BaseModel
                 /** @var JoinClause $join */
                 $join->on('contents_to_stores.content_id', '=', 'contents.content_id')
                     ->where('contents_to_stores.store_id', '=', $filter['store_id']);
+            }
+        );
+        $query->join(
+            'url_aliases',
+            function ($join) use ($params, $db) {
+                /** @var JoinClause $join */
+                $join->on(
+                    'url_aliases.language_id', '=', 'content_descriptions.language_id')
+                    ->whereRaw(
+                        $db->table_name('url_aliases') . ".query "
+                        . "="
+                        . " CONCAT('content_id=', " . $db->table_name('contents') . ".content_id)"
+                    );
             }
         );
 
@@ -356,6 +372,7 @@ class Content extends BaseModel
     public static function editContent(int $contentId, array $data)
     {
         $language = Registry::language();
+        $languageId = $data['language_id'] ?: static::$current_language_id;
         $db = Registry::db();
 
         $db->beginTransaction();
@@ -381,7 +398,7 @@ class Content extends BaseModel
             if (count($update)) {
                 $language->replaceDescriptions('content_descriptions',
                     ['content_id' => $contentId],
-                    [$language->getContentLanguageID() => $update]);
+                    [$languageId => $update]);
             }
 
             $contentToStore = [];
@@ -404,6 +421,12 @@ class Content extends BaseModel
             $db->table('contents_to_stores')
                 ->insert($contentToStore);
 
+
+            if (isset($data['keyword'])) {
+                UrlAlias::setCurrentLanguageID($languageId);
+                UrlAlias::setContentKeyword(($data['keyword']), $contentId);
+            }
+
             $db->commit();
         } catch (\Exception $e) {
             $db->rollback();
@@ -414,6 +437,25 @@ class Content extends BaseModel
         Registry::cache()->flush('content');
         return true;
     }
+
+
+    /**
+     * @return bool|null
+     * @throws InvalidArgumentException
+     */
+    public function delete()
+    {
+        ContentDescription::where('content_id', '=', $this->getKey())?->delete();
+        try {
+            $lm = new ALayoutManager();
+            $lm->deleteAllPagesLayouts('pages/content/content', 'content_id', $this->getKey());
+        } catch (Exception $e) {
+        }
+
+        UrlAlias::where('query', '=', 'content_id=' . $this->getKey())->delete();
+        return parent::delete();
+    }
+
 
     /**
      * @param int $contentId

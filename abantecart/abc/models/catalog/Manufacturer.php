@@ -28,11 +28,9 @@ use abc\models\BaseModel;
 use abc\models\QueryBuilder;
 use abc\models\system\Setting;
 use Dyrynda\Database\Support\GeneratesUuid;
-use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Exception;
 use H;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 
@@ -52,7 +50,7 @@ use ReflectionException;
  */
 class Manufacturer extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes, GeneratesUuid;
+    use GeneratesUuid;
 
     protected $cascadeDeletes = ['stores'];
 
@@ -90,10 +88,6 @@ class Manufacturer extends BaseModel
         $db = Registry::db();
         $manufacturer = new Manufacturer($data);
         $manufacturer->save();
-
-        if (!$manufacturer) {
-            return false;
-        }
 
         $manufacturerId = $manufacturer->getKey();
 
@@ -312,24 +306,13 @@ class Manufacturer extends BaseModel
         if (!(int)$manufacturer_id) {
             return false;
         }
-        $manufacturer = self::withTrashed()->find((int)$manufacturer_id);
-
-        if ($manufacturer) {
-            $manufacturer->delete();
-        }
+        $manufacturer = self::find((int)$manufacturer_id);
+        $manufacturer?->delete();
 
         Registry::db()->table('manufacturers_to_stores')
             ->where('manufacturer_id', '=', (int)$manufacturer_id)
             ->delete();
 
-        Registry::db()->table('url_aliases')
-            ->where('query', '=', 'manufacturer_id='.(int)$manufacturer_id)
-            ->delete();
-
-        try {
-            $lm = new ALayoutManager();
-            $lm->deletePageLayout('pages/product/manufacturer', 'manufacturer_id', (int)$manufacturer_id);
-        } catch (Exception $e) { }
 
         //delete resources
         try {
@@ -347,21 +330,38 @@ class Manufacturer extends BaseModel
                     $rm->deleteResource($r['resource_id']);
                 }
             }
-        } catch (Exception $e) { }
+        } catch (Exception $e) {
+        }
 
         Registry::cache()->flush('manufacturer');
         return true;
     }
 
+    /**
+     * @return bool|null
+     * @throws InvalidArgumentException
+     */
+    public function delete()
+    {
+        try {
+            $lm = new ALayoutManager();
+            $lm->deleteAllPagesLayouts('pages/product/manufacturer', 'manufacturer_id', $this->getKey());
+        } catch (Exception $e) {
+        }
+
+        UrlAlias::where('query', '=', 'manufacturer_id=' . $this->getKey())->delete();
+        return parent::delete();
+    }
+
     public function getManufacturers($params = [])
     {
         $db = Registry::db();
-        $storeId = $params['store_id'] ?? (int) Registry::config()->get('config_store_id');
+        $storeId = $params['store_id'] ?? (int)Registry::config()->get('config_store_id');
         $manTable = $db->table_name('manufacturers');
 
-        $query = self::selectRaw(Registry::db()->raw_sql_row_count().' '.$manTable.'.*')
-                     ->leftJoin(
-                         'manufacturers_to_stores',
+        $query = self::selectRaw(Registry::db()->raw_sql_row_count() . ' ' . $manTable . '.*')
+            ->leftJoin(
+                'manufacturers_to_stores',
                          'manufacturers_to_stores.manufacturer_id',
                          '=',
                          'manufacturers.manufacturer_id'
@@ -450,5 +450,4 @@ class Manufacturer extends BaseModel
         $sql .= ") as product_count";
         $builder->selectRaw($sql);
     }
-
 }

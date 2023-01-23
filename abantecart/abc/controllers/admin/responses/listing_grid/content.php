@@ -159,9 +159,6 @@ class ControllerResponsesListingGridContent extends AController
                             return;
                         }
                         Content::where('content_id', '=', $content_id)?->delete();
-                        ContentDescription::where('content_id', '=', $content_id)?->delete();
-                        $layout = new ALayoutManager();
-                        $layout->deleteAllPagesLayouts('pages/content/content', 'content_id', $content_id);
                     }
                 }
                 break;
@@ -170,7 +167,9 @@ class ControllerResponsesListingGridContent extends AController
                 if (!empty($ids)) {
                     $fields = array_keys($this->request->post);
                     foreach ($ids as $id) {
-                        $upd = [];
+                        $upd = [
+                            'language_id' => $this->language->getContentLanguageID()
+                        ];
                         foreach ($fields as $key) {
                             if (isset($this->request->post[$key][$id])) {
                                 $upd[$key] = $this->request->post[$key][$id];
