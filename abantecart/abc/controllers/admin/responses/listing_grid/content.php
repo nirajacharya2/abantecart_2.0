@@ -161,7 +161,7 @@ class ControllerResponsesListingGridContent extends AController
                         Content::where('content_id', '=', $content_id)?->delete();
                         ContentDescription::where('content_id', '=', $content_id)?->delete();
                         $layout = new ALayoutManager();
-                        $layout->deletePageLayout('pages/content/content', 'content_id', $content_id);
+                        $layout->deleteAllPagesLayouts('pages/content/content', 'content_id', $content_id);
                     }
                 }
                 break;
