@@ -135,10 +135,10 @@ class Content extends BaseModel
     public static function getContents($params = [])
     {
         $params['language_id'] = $params['language_id'] ?: static::$current_language_id;
-        $params['sort'] = $params['sort'] ?? 'contents.sort_order';
-        $params['order'] = $params['order'] ?? 'ASC';
+        $params['sort'] = $params['sort'] ?: 'contents.sort_order';
+        $params['order'] = $params['order'] ?: 'ASC';
         $params['start'] = max($params['start'], 0);
-        $params['limit'] = $params['limit'] >= 1 ? $params['limit'] : 20;
+        $params['limit'] = abs($params['limit']) ?: 200;
 
         $db = Registry::db();
         $b_table = $db->table_name('contents');
@@ -277,18 +277,13 @@ class Content extends BaseModel
         $query->orderByRaw($orderBy . " " . $sorting);
 
         //pagination
-        if (isset($params['start']) || isset($params['limit'])) {
+        if (isset($params['start'])) {
             $params['start'] = max(0, $params['start']);
-            if ($params['limit'] < 1) {
-                $params['limit'] = 20;
-            }
             $query->offset((int)$params['start'])->limit((int)$params['limit']);
         }
 
         $query->useCache('content');
-        $output = $query->get();
-
-        return $output;
+        return $query->get();
     }
 
     /**
@@ -483,4 +478,26 @@ class Content extends BaseModel
         }
         return $output;
     }
+
+    public static function getTree(int $parentId = 0, int $level = 0)
+    {
+        $searchParams = [
+            'limit'  => 10000,
+            'filter' => [
+                'parent_id' => $parentId
+            ],
+            'sort'   => 'name'
+        ];
+
+        $all = static::getContents($searchParams)?->toArray();
+        $output = [];
+        foreach ($all as $item) {
+            $item['name'] = str_repeat("&nbsp;&nbsp;&nbsp;", $level) . $item['name'];
+            $output[] = $item;
+            $output = array_merge($output, static::getTree($item['content_id'], $level + 1));
+        }
+
+        return $output;
+    }
+
 }

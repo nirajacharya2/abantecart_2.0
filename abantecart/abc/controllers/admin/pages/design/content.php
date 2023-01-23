@@ -399,20 +399,7 @@ class ControllerPagesDesignContent extends AController
             ]
         );
 
-        $options = (array)Content::select(['contents.*', 'content_descriptions.name'])
-            ->join(
-                'content_descriptions',
-                'content_descriptions.content_id',
-                '=',
-                'contents.content_id'
-            )
-            ->where('content_descriptions.language_id', '=', $this->language->getContentLanguageID())
-            ->where('contents.content_id', '<>', $content_id)
-            ->orderBy('content_descriptions.name')
-            ->get()?->pluck('name', 'content_id')
-            ->toArray();
-
-        $options = ['' => '-------'] + $options;
+        $options = ['' => '-------'] + array_column(Content::getTree(), 'name', 'content_id');
 
         $this->data['form']['fields']['parent_id'] = $form->getFieldHtml(
             [
