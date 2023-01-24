@@ -194,7 +194,7 @@ class Content extends BaseModel
                     ->where('contents_to_stores.store_id', '=', $filter['store_id']);
             }
         );
-        $query->join(
+        $query->leftJoin(
             'url_aliases',
             function ($join) use ($params, $db) {
                 /** @var JoinClause $join */
