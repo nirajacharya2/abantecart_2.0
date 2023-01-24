@@ -5,7 +5,8 @@ namespace abc\core\lib;
 
 class BaseIncentiveCondition
 {
-    protected $incentiveInfo = [];
+    protected string $relatedTo;
+    protected array $incentiveInfo = [];
     protected string $key;
     protected string $section;
 
@@ -30,6 +31,11 @@ class BaseIncentiveCondition
     public function getSection(): string
     {
         return $this->section;
+    }
+
+    public function getRelatedTo(): string
+    {
+        return $this->relatedTo;
     }
 
     public function getSubFormLabel(): string

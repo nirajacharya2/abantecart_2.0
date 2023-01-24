@@ -40,10 +40,10 @@ class ModelSaleCoupon extends Model
     public function addCoupon($data)
     {
         $data['date_start'] = $data['date_start']
-            ? Carbon::parse($data['date_start'])->startOfDay()->toDateString()
+            ? Carbon::parse($data['date_start'])->startOfDay()->toDateTimeString()
             : null;
         $data['date_end'] = $data['date_end']
-            ? Carbon::parse($data['date_end'])->endOfDay()->toDateString()
+            ? Carbon::parse($data['date_end'])->endOfDay()->toDateTimeString()
             : null;
 
         $coupon = Coupon::create($data);
