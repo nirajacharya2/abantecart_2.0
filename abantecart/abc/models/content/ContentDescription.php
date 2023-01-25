@@ -19,6 +19,7 @@
 namespace abc\models\content;
 
 use abc\models\BaseModel;
+use abc\models\casts\Html;
 use abc\models\locale\Language;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -51,6 +52,8 @@ class ContentDescription extends BaseModel
     protected $casts = [
         'content_id'    => 'int',
         'language_id'   => 'int',
+        'description'   => Html::class,
+        'content'       => Html::class,
         'date_added'    => 'datetime',
         'date_modified' => 'datetime'
     ];
