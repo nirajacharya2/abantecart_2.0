@@ -41,6 +41,22 @@ class ControllerResponsesListingGridCategory extends AController
 {
     public function main()
     {
+        $page = (int)$this->request->post['page'] ?: 1;
+        $limit = $this->request->post['rows'];
+        $sort = $this->request->post['sidx'];
+        $order = $this->request->post['sord'];
+
+        $this->data['search_parameters'] = [
+            'filter'      => [
+                'parent_id' => 0
+            ],
+            'language_id' => $this->language->getContentLanguageID(),
+            'start'       => ($page - 1) * $limit,
+            'limit'       => $limit,
+            'sort'        => $sort,
+            'order'       => $order
+        ];
+
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -49,48 +65,32 @@ class ControllerResponsesListingGridCategory extends AController
         $this->loadModel('tool/image');
 
         //Prepare filter config
-        $grid_filter_params = array_merge(['name'], (array)$this->data['grid_filter_params']);
+        $grid_filter_params = array_merge(['keyword'], (array)$this->data['grid_filter_params']);
         $filter = new AFilter(['method' => 'post', 'grid_filter_params' => $grid_filter_params]);
-        $filter_data = $filter->getFilterData();
         if (isset($this->request->post['_search']) && $this->request->post['_search'] == 'true') {
             $searchData = AJson::decode(htmlspecialchars_decode($this->request->post['filters']), true);
-            $allowedFields = array_merge(['name'], (array)$this->data['allowed_fields']);
+            $this->data['search_parameters']['filter']['search_operator'] = 'like';
+            $allowedFields = array_merge(['keyword'], (array)$this->data['allowed_fields']);
             foreach ($searchData['rules'] as $rule) {
                 if (!in_array($rule['field'], $allowedFields)) {
                     continue;
                 }
-                $filter_data[$rule['field']] = $rule['data'];
+                $this->data['search_parameters']['filter'][$rule['field']] = $rule['data'];
+                unset($this->data['search_parameters']['filter']['parent_id']);
             }
         }
-        //Add custom params
-        //set parent to null to make search work by all category tree
 
-        $filter_data['parent_id'] = (int)$this->request->get['parent_id'];
-        //NOTE: search by all categories when parent_id not set or zero (top level)
-
-        if ($filter_data['subsql_filter']) {
-            $filter_data['parent_id'] = ($filter_data['parent_id'] == 'null' || $filter_data['parent_id'] < 1)
-                ? null
-                : $filter_data['parent_id'];
-        }
-        if ($filter_data['parent_id'] === null || $filter_data['parent_id'] === 'null') {
-            unset($filter_data['parent_id']);
-        }
         $new_level = 0;
         //get all leave categories
         $leaf_nodes = Category::getLeafCategories();
         if ($this->request->post['nodeid']) {
-            $sort = $filter_data['sort'];
-            $order = $filter_data['order'];
             //reset filter to get only parent category
-            $filter_data = [];
-            $filter_data['sort'] = $sort;
-            $filter_data['order'] = $order;
-            $filter_data['parent_id'] = (integer)$this->request->post['nodeid'];
-            $new_level = (integer)$this->request->post["n_level"] + 1;
+            $this->data['search_parameters'] = [];
+            $this->data['search_parameters']['filter']['parent_id'] = (int)$this->request->post['nodeid'];
+            $new_level = (int)$this->request->post["n_level"] + 1;
         }
 
-        $results = Category::getCategoriesData($filter_data)->toArray();
+        $results = Category::getCategoriesData($this->data['search_parameters'])->toArray();
         $total = $results[0]['total_num_rows'];
         $response = new stdClass();
         $response->page = $filter->getParam('page');
@@ -173,8 +173,10 @@ class ControllerResponsesListingGridCategory extends AController
                     : ''),
                 'action',
                 $new_level,
-                ($filter_data['parent_id'] ?: null),
-                $result['category_id'] == $leaf_nodes[$result['category_id']],
+                ($this->data['search_parameters']['filter']['parent_id'] ?: null),
+                //tree arrow
+                ($result['category_id'] == $leaf_nodes[$result['category_id']]
+                    || $this->data['search_parameters']['filter']['parent_id'] === null),
                 false,
             ];
             $i++;
@@ -357,11 +359,14 @@ class ControllerResponsesListingGridCategory extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
         if (isset($this->request->post['term'])) {
-            $filter = [
-                'limit' => 20,
-                'name'  => $this->request->post['term']
+            $params = [
+                'limit'  => 20,
+                'filter' => [
+                    'search_operator' => 'like',
+                    'keyword'         => $this->request->post['term']
+                ]
             ];
-            $results = Category::getCategoriesData($filter);
+            $results = Category::getCategoriesData($params);
             //build thumbnails list
             $category_ids = [];
             foreach ($results as $category) {

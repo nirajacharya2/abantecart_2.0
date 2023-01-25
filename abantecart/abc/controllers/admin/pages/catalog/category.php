@@ -25,6 +25,7 @@ use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\lib\ALayoutManager;
 use abc\models\catalog\Category;
+use abc\models\catalog\CategoryDescription;
 use H;
 
 /**
@@ -33,14 +34,20 @@ use H;
 class ControllerPagesCatalogCategory extends AController
 {
     public $error = [];
-    public $fields = [
-        'category_description',
-        'status',
-        'parent_id',
-        'category_store',
-        'keyword',
-        'sort_order',
-    ];
+    public $fields = [];
+
+    public function __construct($registry, $instance_id, $controller, $parent_controller = '')
+    {
+        parent::__construct($registry, $instance_id, $controller, $parent_controller);
+        $c = new Category();
+        $cd = new CategoryDescription();
+        $this->fields = array_merge(
+            $c->getFillable(),
+            $cd->getFillable(),
+            ['category_store', 'keyword', 'category_description']
+        );
+        unset($c, $cd);
+    }
 
     public function main()
     {
@@ -161,7 +168,7 @@ class ControllerPagesCatalogCategory extends AController
             ],
             [
                 'name'  => 'name',
-                'index' => 'name',
+                'index' => 'keyword',
                 'width' => 310,
                 'align' => 'left',
             ],
@@ -426,13 +433,7 @@ class ControllerPagesCatalogCategory extends AController
         }
 
         foreach ($this->fields as $f) {
-            if (isset ($this->request->post [$f])) {
-                $this->data [$f] = $this->request->post [$f];
-            } elseif (isset($category_info) && isset($category_info[$f])) {
-                $this->data[$f] = $category_info[$f];
-            } else {
-                $this->data[$f] = '';
-            }
+            $this->data[$f] = $this->request->post [$f] ?? $category_info[$f] ?? '';
         }
 
         if (isset($this->request->post['category_description'])) {

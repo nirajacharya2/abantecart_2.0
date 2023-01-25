@@ -115,7 +115,7 @@ class ControllerResponsesListingGridContent extends AController
                 'action',
                 $new_level,
                 $this->data['search_parameters']['filter']['parent_id'],
-                ($result['content_id'] == $leaf_nodes[$id]),
+                ($result['content_id'] == $leaf_nodes[$id] || $this->data['search_parameters']['filter']['parent_id'] === null),
                 false,
             ];
             $i++;

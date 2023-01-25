@@ -158,18 +158,24 @@ class Cache extends BaseCommand
             //loop by all content pages
             $contents = Content::getContents([]);
             foreach ($contents as $content) {
-                $seo_url = $registry->get('html')->getSEOURL('content/content', '&content_id='.$content['content_id']);
+                $seo_url = $registry->get('html')->getSEOURL('content/content', '&content_id=' . $content['content_id']);
                 //loop for all variants
                 $this->touchUrl($seo_url);
                 $this->results['contents']++;
             }
 
             //loop by all categories of store
-            $categories = Category::getCategoriesData(['store_id' => $store['store_id']]);
+            $categories = Category::getCategoriesData(
+                [
+                    'filter' => [
+                        'store_id' => $store['store_id']
+                    ]
+                ]
+            );
             foreach ($categories as $category) {
                 $seo_url = $registry->get('html')->getSEOURL(
                     'product/category',
-                    '&category_id='.$category['category_id']
+                    '&category_id=' . $category['category_id']
                 );
                 //loop for all variants
                 $this->touchUrl($seo_url);

@@ -669,21 +669,32 @@ class Category extends BaseModel
      */
     public static function getCategoriesData($params)
     {
+
+        $language_id = $params['language_id'] = ($params['language_id'] ?: static::$current_language_id);
+        $params['sort'] = $params['sort'] ?: 'contents.sort_order';
+        $params['order'] = $params['order'] ?: 'ASC';
+        $params['start'] = max($params['start'], 0);
+        $params['limit'] = isset($params['limit']) ? abs($params['limit']) : null;
+        $filter = (array)$params['filter'];
+
+        $store_id = (int)$filter['store_id'] ?: (int)Registry::config()->get('config_store_id');
+
         $db = Registry::db();
-        $language_id = (int)$params['language_id'] ?: static::$current_language_id;
-        $store_id = (int)$params['store_id'] ?: (int)Registry::config()->get('config_store_id');
 
         $arSelect = [];
         if (ABC::env('IS_ADMIN')) {
             $arSelect[] = 'category_descriptions.name as basename';
         }
         $query = self::selectRaw(Registry::db()->raw_sql_row_count() . ' ' . $db->table_name('categories') . '.*')
-            ->addSelect($arSelect);
-        $query->leftJoin('category_descriptions', function ($join) use ($language_id) {
-            /** @var JoinClause $join */
-            $join->on('category_descriptions.category_id', '=', 'categories.category_id')
-                ->where('category_descriptions.language_id', '=', $language_id);
-        })
+            ->addSelect($arSelect)
+            ->leftJoin(
+                'category_descriptions',
+                function ($join) use ($language_id) {
+                    /** @var JoinClause $join */
+                    $join->on('category_descriptions.category_id', '=', 'categories.category_id')
+                        ->where('category_descriptions.language_id', '=', $language_id);
+                }
+            )
             ->join(
                 'categories_to_stores',
                 function ($join) use ($store_id) {
@@ -693,63 +704,63 @@ class Category extends BaseModel
                 }
             );
 
-        $params['parent_id'] = (isset($params['parent_id']) && (int)$params['parent_id'] > 0)
-            ? (int)$params['parent_id'] : null;
-
-        if ($params['parent_id']) {
-            $query->where('categories.parent_id', '=', $params['parent_id']);
-        } else {
-            $query->whereNull('categories.parent_id');
+        if (isset($filter['parent_id'])) {
+            if ($filter['parent_id'] > 0) {
+                $query->where('categories.parent_id', '=', $filter['parent_id']);
+            } else {
+                $query->whereNull('categories.parent_id');
+            }
         }
 
-        if (H::has_value($params['status'])) {
-            $query->where('categories.status', '=', (int)$params['status']);
+
+        if (isset($filter['status'])) {
+            $query->where('categories.status', '=', (int)$filter['status']);
         }
         //include ids set
-        if (H::has_value($params['include'])) {
-            $filter['include'] = array_map('intval', (array)$params['include']);
+        if (isset($filter['include'])) {
+            $filter['include'] = array_map('intval', (array)$filter['include']);
             $query->whereIn('categories.category_id', $filter['include']);
         }
         //exclude already selected in chosen element
-        if (H::has_value($params['exclude'])) {
-            $filter['exclude'] = array_map('intval', (array)$params['exclude']);
+        if (isset($filter['exclude'])) {
+            $filter['exclude'] = array_map('intval', (array)$filter['exclude']);
             $query->whereNotIn('categories.category_id', $filter['exclude']);
         }
 
-        if (H::has_value($params['name'])) {
-            $query->where(function ($query) use ($params) {
+        if (isset($filter['keyword'])) {
+            $query->where(function ($query) use ($filter) {
                 /** @var QueryBuilder $query */
-                if ($params['search_operator'] == 'equal') {
+                if ($filter['search_operator'] != 'like') {
                     $query->orWhere(
                         'category_descriptions.name',
                         '=',
-                        mb_strtolower($params['name'])
-                    );
-                    $query->orWhere(
-                        'category_descriptions.description',
-                        '=',
-                        mb_strtolower($params['name'])
-                    );
-                    $query->orWhere(
-                        'category_descriptions.meta_keywords',
-                        '=',
-                        mb_strtolower($params['name'])
-                    );
+                        mb_strtolower($filter['keyword'])
+                    )
+                        ->orWhere(
+                            'category_descriptions.description',
+                            '=',
+                            mb_strtolower($filter['keyword'])
+                        )
+                        ->orWhere(
+                            'category_descriptions.meta_keywords',
+                            '=',
+                            mb_strtolower($filter['keyword'])
+                        );
                 } else {
                     $query->orWhere(
                         'category_descriptions.name',
                         'like',
-                        "%" . mb_strtolower($params['name']) . "%"
+                        "%" . mb_strtolower($filter['keyword']) . "%"
                     );
                     $query->orWhere(
                         'category_descriptions.description',
                         'like',
-                        "%" . mb_strtolower($params['name']) . "%"
+                        "%" . mb_strtolower($filter['keyword']) . "%"
                     );
                     $query->orWhere(
                         'category_descriptions.meta_keywords',
                         'like',
-                        "%" . mb_strtolower($params['name']) . "%"
+                        "%" . mb_strtolower($filter['keyword']) . "%"
                     );
                 }
             });
@@ -791,11 +802,7 @@ class Category extends BaseModel
             }
         }
 
-        if (isset($params['start']) || isset($params['limit'])) {
-            if ($params['start'] < 0) {
-                $params['start'] = 0;
-            }
-
+        if (isset($params['limit'])) {
             if ($params['limit'] < 1) {
                 $params['limit'] = 20;
             }
@@ -806,17 +813,17 @@ class Category extends BaseModel
 
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
-        $result_rows = $query->get();
+        $items = $query->useCache('category')->get();
         $total_num_rows = Registry::db()->sql_get_row_count();
-        foreach ($result_rows as &$result) {
-            $result['total_num_rows'] = $total_num_rows;
+        foreach ($items as &$item) {
+            $item['total_num_rows'] = $total_num_rows;
             if ($params['basename']) {
-                $result->name = $result->basename;
+                $item->name = $item->basename;
             } else {
-                $result->name = static::getPath($result->category_id, 'name');
+                $item->name = static::getPath($item->category_id, 'name');
             }
         }
-        return $result_rows;
+        return $items;
     }
 
     /**

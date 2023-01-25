@@ -22,6 +22,8 @@ use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\ALayoutManager;
 use abc\models\BaseModel;
+use abc\models\casts\Html;
+use abc\models\casts\Json;
 use abc\models\catalog\UrlAlias;
 use Exception;
 use H;
@@ -233,11 +235,6 @@ class Content extends BaseModel
 
                     $subQuery->orWhere('content_descriptions.name', 'like', '%' . $keyWord . '%');
                     $subQuery->orWhere('content_descriptions.title', 'like', '%' . $keyWord . '%');
-                    $subQuery->orWhere('content_descriptions.description', 'like', '%' . $keyWord . '%');
-                    $subQuery->orWhere('content_descriptions.meta_keywords', 'like', '%' . $keyWord . '%');
-                    $subQuery->orWhere('content_descriptions.meta_description', 'like', '%' . $keyWord . '%');
-                    $subQuery->orWhere('content_descriptions.content', 'like', '%' . $keyWord . '%');
-
                     //allow to extend search criteria
                     $hookParams = $params;
                     $hookParams['subquery_keyword'] = true;
@@ -282,8 +279,24 @@ class Content extends BaseModel
             $query->offset((int)$params['start'])->limit((int)$params['limit']);
         }
 
-        $query->useCache('content');
-        return $query->get();
+        $output = $query->useCache('content')->get();
+
+
+        //add total number of rows into each row
+        $totalNumRows = $db->sql_get_row_count();
+        $cd = new ContentDescription();
+        $casts = $cd->getCasts();
+        foreach ($output as &$item) {
+            foreach ($item as $name => &$value) {
+                if (isset($casts[$name]) && class_exists($casts[$name])) {
+                    /** @var Html|Json $castable */
+                    $castable = new $casts[$name];
+                    $value = $castable->get($cd, $name, $value, []);
+                }
+            }
+            $item->total_num_rows = $totalNumRows;
+        }
+        return $output;
     }
 
     /**

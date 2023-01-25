@@ -271,13 +271,21 @@ class ControllerResponsesCommonDoEmbed extends AController
             }
         } else {
             if (!sizeof($categoryIds)) {
-                $options = Category::getCategoriesData(['parent_id' => 0]);
+                $options = Category::getCategoriesData(
+                    [
+                        'filter' => [
+                            'parent_id' => 0
+                        ]
+                    ]
+                );
                 $categoryIds = array_column($options->toArray(), 'category_id');
             } else {
                 $categoryIds = array_map('intval', $categoryIds);
                 $options = Category::getCategoriesData(
                     [
-                        'include' => $categoryIds
+                        'filter' => [
+                            'include' => $categoryIds
+                        ]
                     ]
                 )->toArray();
             }
