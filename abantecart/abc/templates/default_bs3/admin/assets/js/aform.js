@@ -793,14 +793,14 @@
             } else if (elem.is(":radio")) {
                 if (elem.hasClass('star')) {
                     doRating(elem);
-                }else{
+                } else {
                     doRadio(elem);
                 }
-            } else if (elem.is(":text, :password, input[type='email'], input[type='tel']")) {
+            } else if (elem.is(":text, :password, input[type='email'], input[type='tel'], input[type='number']")) {
                 if (elem.is(":password") && $(elem).is('[name$="_confirmation"]')) {
                     ;
                 } else if (elem.is(":password") && elem.hasClass('passwordset_element')) {
-                    doPasswordset(elem);                    
+                    doPasswordset(elem);
                 } else {
                     doInput(elem);
                 }
