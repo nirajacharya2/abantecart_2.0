@@ -676,7 +676,7 @@
             //if empty and we have select, need to pass blank value
             if (!$data) {
                 $wrapper.find('select').each(function () {
-                    $data += $(this).attr('name')+'=\'\'&';
+                    $data += $(this).attr('name') + '=&';
                 });
             }
 
