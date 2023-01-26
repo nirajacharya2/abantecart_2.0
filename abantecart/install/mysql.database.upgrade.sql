@@ -2096,8 +2096,8 @@ ALTER TABLE `ac_order_options`
   ADD INDEX `ac_order_options_idx_2` (`product_option_id` ASC);
 
 ALTER TABLE `ac_order_totals`
-  ADD COLUMN `data` LONGTEXT NULL
-  AFTER `value`;
+  ADD COLUMN `data` MEDIUMTEXT NULL
+      AFTER `value`;
 
 ALTER TABLE `ac_categories`
 ADD COLUMN `path` VARCHAR(255) NOT NULL DEFAULT '' AFTER `parent_id`;
