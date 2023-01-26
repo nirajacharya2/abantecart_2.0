@@ -883,7 +883,11 @@ class AResource
             } //for internal resources
             else {
                 $thumb_url = $this->getResizedImageURL($row, $width, $height);
-                $alt = addslashes($titles[$object_id] ?: $row['title']);
+                $alt = htmlspecialchars(
+                    $titles[$object_id] ?: $row['title'],
+                    ENT_QUOTES,
+                    ABC::env('APP_CHARSET')
+                );
                 $output[$object_id]['thumb_html'] = $this->html->buildResourceImage(
                     [
                         'url'    => $thumb_url,
@@ -904,11 +908,15 @@ class AResource
                 //when need to show default image
                 if ($noimage) {
                     $thumb_url = $this->getResizedImageURL(['resource_id' => 0], $width, $height);
-                    $alt = addslashes($titles[$object_id]);
+                    $alt = htmlspecialchars(
+                        $titles[$object_id],
+                        ENT_QUOTES,
+                        ABC::env('APP_CHARSET')
+                    );
                     $output[$object_id] = [
                         'origin'      => 'internal',
-                        'title'       => '',
-                        'description' => '',
+                        'title'       => $alt,
+                        'description' => $alt,
                         'width'       => $width,
                         'height'      => $height,
                         'thumb_url'   => $this->withProtocol($thumb_url),
