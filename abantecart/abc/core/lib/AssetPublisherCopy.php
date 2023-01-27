@@ -153,11 +153,7 @@ class AssetPublisherCopy implements AssetPublisherDriverInterface
                     if (!$result) {
                         $this->errors[] = __CLASS__ . ': Cannot backup live directory '
                             . $live_dir . ' to ' . $backup_dir . ' before publishing';
-                        //debug details
-                        $this->errors[] = 'Is directory ' . $live_dir . ' readable? : ' . var_export(is_readable($live_dir), true);
-                        $this->errors[] = 'Is directory ' . dirname($backup_dir) . ' writable? : ' . var_export(is_writable(dirname($backup_dir)), true);
-
-                        //return false;
+                        return false;
                     }
                 }
 
