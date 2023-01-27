@@ -1,18 +1,32 @@
 <?php
-
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2023 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
 namespace abc\controllers\admin;
 
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\core\lib\BaseReportInterface;
+use abc\core\lib\contracts\BaseReportInterface;
+use Exception;
 use ReflectionClass;
 use ReflectionMethod;
 
 class ControllerPagesReportReports extends AController
 {
-    public $data = array();
-
     public function main()
     {
         //init controller data
@@ -41,7 +55,6 @@ class ControllerPagesReportReports extends AController
         } else {
             $this->data['error_warning'] = $this->error;
         }
-        $this->data['success'] = $this->success;
 
         $this->view->batchAssign($this->data);
 
@@ -113,9 +126,7 @@ class ControllerPagesReportReports extends AController
                     $reflectionMethod = new ReflectionMethod($className, 'getName');
                     $arReports[$alias] = $reflectionMethod->invoke($obj);
                 }
-            } catch (\ReflectionException $e) {
-                $this->log->error($e->getMessage());
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->log->error($e->getMessage());
             }
         }
@@ -222,7 +233,7 @@ class ControllerPagesReportReports extends AController
 
                 $this->view->assign('grid_url', $gridSettings['url']);
                 $this->view->assign('export_csv_url',
-                    $this->html->getSecureURL('r/listing_grid/reports/exportCSV', '&report='.$post['reports']));
+                    $this->html->getSecureURL('r/listing_grid/reports/exportCSV', '&report=' . $post['reports']));
                 $this->view->assign('table_id', $gridSettings['table_id']);
 
                 $this->processTemplate('pages/report/reports_show.tpl');
@@ -230,7 +241,7 @@ class ControllerPagesReportReports extends AController
                 //update controller data
                 $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->session->data['error'] = $e->getMessage();
                 $this->log->error($e->getMessage());
                 abc_redirect($this->html->getSecureURL('report/reports'));
