@@ -157,7 +157,7 @@ class AssetPublisherCopy implements AssetPublisherDriverInterface
                             . $live_dir . ' to ' . $backup_dir . ' before publishing';
                         return false;
                     } else {
-                        $result = $fileSystem->deleteDirectory($live_dir);
+                        $result = $fileSystem->copyDirectory($live_dir);
                         if (!$result) {
                             $this->errors[] = __CLASS__ . ': Cannot delete live directory ' . $live_dir . ' after backup';
                             return false;
@@ -174,15 +174,16 @@ class AssetPublisherCopy implements AssetPublisherDriverInterface
                     }
                 }
                 //try to move to production
-                if (!@rename($new_temp_dir, $live_dir)) {
+                if (!$fileSystem->copyDirectory($new_temp_dir, $live_dir)) {
                     $this->errors[] = __CLASS__ . ': Cannot rename temporary directory '
                         . $new_temp_dir . ' to live ' . $live_dir;
                     //revert old assets
-                    @rename($backup_dir, $live_dir);
+                    $fileSystem->copyDirectory($backup_dir, $live_dir);
                     return false;
                 } else {
                     //if all fine - clean old silently
-                    H::RemoveDirRecursively($backup_dir);
+                    $fileSystem->deleteDirectory($new_temp_dir);
+                    $fileSystem->deleteDirectory($backup_dir);
                 }
             }
         }
