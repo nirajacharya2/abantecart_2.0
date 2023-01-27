@@ -169,7 +169,9 @@ class AssetPublisherCopy implements AssetPublisherDriverInterface
                     }
                     //try to move to production
 
+                    $this->errors[] = "Live directory: " . $live_dir;
                     $this->errors[] = "content of live directory: " . var_export(glob($live_dir . '/*'), true);
+                    $this->errors[] = "Live directory is writable? : " . var_export(is_writable($live_dir), true);
 
                     if (!@rename($new_temp_dir, $live_dir)) {
                         $this->errors[] = __CLASS__ . ': Cannot rename temporary directory '
