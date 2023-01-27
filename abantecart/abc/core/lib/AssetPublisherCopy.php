@@ -151,6 +151,8 @@ class AssetPublisherCopy implements AssetPublisherDriverInterface
             if (!$this->errors) {
                 //if live assets presents - rename it
                 if (is_dir($live_dir)) {
+
+
                     $result = rename($live_dir, $old_temp_dir);
                 } else {
                     $result = true;
@@ -166,11 +168,15 @@ class AssetPublisherCopy implements AssetPublisherDriverInterface
                         }
                     }
                     //try to move to production
+
+                    $this->errors[] = "content of live directory: " . var_export(glob($live_dir . '/*'), true);
+
                     if (!@rename($new_temp_dir, $live_dir)) {
-                        $this->errors[] = __CLASS__.': Cannot rename temporary directory '
-                            .$new_temp_dir.' to live '.$live_dir;
+                        $this->errors[] = __CLASS__ . ': Cannot rename temporary directory '
+                            . $new_temp_dir . ' to live ' . $live_dir;
                         //revert old assets
                         @rename($old_temp_dir, $live_dir);
+                        throw new \Exception(implode("\n", $this->errors));
                         return false;
                     } else {
                         //if all fine - clean old silently
