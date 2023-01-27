@@ -146,7 +146,7 @@ class AssetPublisherCopy implements AssetPublisherDriverInterface
                 }
             }
 
-            //if all fine - rename of temporary directory
+            //if all fine - move of temporary directory
             if (!$this->errors) {
                 $fileSystem = new Filesystem();
                 //if live assets presents - backup it
@@ -165,7 +165,7 @@ class AssetPublisherCopy implements AssetPublisherDriverInterface
                     }
                 }
 
-                //check parent directory before rename
+                //check parent directory before move
                 $parent_dir = dirname($live_dir);
                 if (!is_dir($parent_dir)) {
                     $results = H::MakeNestedDirs($parent_dir);
@@ -175,17 +175,24 @@ class AssetPublisherCopy implements AssetPublisherDriverInterface
                 }
                 //try to move to production
                 if (!$fileSystem->copyDirectory($new_temp_dir, $live_dir)) {
-                    $this->errors[] = __CLASS__ . ': Cannot rename temporary directory '
+                    $this->errors[] = __CLASS__ . ': Cannot copy temporary directory '
                         . $new_temp_dir . ' to live ' . $live_dir;
                     //revert old assets
                     $fileSystem->copyDirectory($backup_dir, $live_dir);
                     return false;
                 } else {
                     //if all fine - clean old silently
-                    $fileSystem->deleteDirectory($new_temp_dir);
-                    $fileSystem->deleteDirectory($backup_dir);
+                    if ($fileSystem->deleteDirectory($new_temp_dir)) {
+                        $this->errors[] = __CLASS__ . ': Cannot remove temporary directory ' . $new_temp_dir;
+                    }
+                    if ($fileSystem->deleteDirectory($backup_dir)) {
+                        $this->errors[] = __CLASS__ . ': Cannot remove temporary backup directory ' . $backup_dir;
+                    }
                 }
             }
+        }
+        if ($this->errors) {
+            $commonResult = false;
         }
         return $commonResult;
     }
