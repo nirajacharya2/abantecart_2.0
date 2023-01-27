@@ -151,8 +151,6 @@ class AssetPublisherCopy implements AssetPublisherDriverInterface
             if (!$this->errors) {
                 //if live assets presents - rename it
                 if (is_dir($live_dir)) {
-
-
                     $result = rename($live_dir, $old_temp_dir);
                 } else {
                     $result = true;
@@ -168,15 +166,6 @@ class AssetPublisherCopy implements AssetPublisherDriverInterface
                         }
                     }
                     //try to move to production
-
-                    $this->errors[] = "Live directory: " . $live_dir;
-                    $this->errors[] = "content of live directory: " . var_export(glob($live_dir . '/*'), true);
-                    $this->errors[] = "Live directory is writable? : " . var_export(is_writable($live_dir), true);
-                    $this->errors[] = "content of public directory: " . var_export(glob('/opt/app/public/*'), true);
-                    $this->errors[] = "Public directory is writable? : " . var_export(is_writable('/opt/app/public'), true);
-                    $this->errors[] = "Public directory permissions: " . fileperms('/opt/app/public');
-                    $this->errors[] = "Public directory owner: " . fileowner('/opt/app/public');
-
                     if (!@rename($new_temp_dir, $live_dir)) {
                         $this->errors[] = __CLASS__ . ': Cannot rename temporary directory '
                             . $new_temp_dir . ' to live ' . $live_dir;
@@ -190,8 +179,17 @@ class AssetPublisherCopy implements AssetPublisherDriverInterface
                     }
                     //if all fine - remove old live directory
                 } else {
+
+                    $this->errors[] = "Live directory: " . $live_dir;
+                    $this->errors[] = "content of live directory: " . var_export(glob($live_dir . '/*'), true);
+                    $this->errors[] = "Live directory is writable? : " . var_export(is_writable($live_dir), true);
+                    $this->errors[] = "content of public directory: " . var_export(glob('/opt/app/public/*'), true);
+                    $this->errors[] = "Public directory is writable? : " . var_export(is_writable('/opt/app/public'), true);
+                    $this->errors[] = "Public directory permissions: " . fileperms('/opt/app/public');
+                    $this->errors[] = "Public directory owner: " . fileowner('/opt/app/public');
+
                     $commonResult = false;
-                    $this->errors[] = __CLASS__.': Cannot rename live directory '.$live_dir.' to '.$old_temp_dir;
+                    $this->errors[] = __CLASS__ . ': Cannot rename live directory ' . $live_dir . ' to ' . $old_temp_dir;
                 }
             }
         }
