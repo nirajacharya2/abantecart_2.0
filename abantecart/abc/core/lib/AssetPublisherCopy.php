@@ -182,10 +182,10 @@ class AssetPublisherCopy implements AssetPublisherDriverInterface
                     return false;
                 } else {
                     //if all fine - clean old silently
-                    if ($fileSystem->deleteDirectory($new_temp_dir)) {
+                    if (is_dir($new_temp_dir) && $fileSystem->deleteDirectory($new_temp_dir)) {
                         $this->errors[] = __CLASS__ . ': Cannot remove temporary directory ' . $new_temp_dir;
                     }
-                    if ($fileSystem->deleteDirectory($backup_dir)) {
+                    if (is_dir($backup_dir) && $fileSystem->deleteDirectory($backup_dir)) {
                         $this->errors[] = __CLASS__ . ': Cannot remove temporary backup directory ' . $backup_dir;
                     }
                 }
