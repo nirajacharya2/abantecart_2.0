@@ -23,6 +23,7 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\lib\contracts\AssetPublisherDriverInterface;
 use H;
+use Illuminate\Filesystem\Filesystem;
 
 class AssetPublisherCopy implements AssetPublisherDriverInterface
 {
@@ -147,13 +148,20 @@ class AssetPublisherCopy implements AssetPublisherDriverInterface
 
             //if all fine - rename of temporary directory
             if (!$this->errors) {
-                //if live assets presents - rename it
+                $fileSystem = new Filesystem();
+                //if live assets presents - backup it
                 if (is_dir($live_dir)) {
-                    $result = rename($live_dir, $backup_dir);
+                    $result = $fileSystem->copyDirectory($live_dir, $backup_dir);
                     if (!$result) {
                         $this->errors[] = __CLASS__ . ': Cannot backup live directory '
                             . $live_dir . ' to ' . $backup_dir . ' before publishing';
                         return false;
+                    } else {
+                        $result = $fileSystem->deleteDirectory($live_dir);
+                        if (!$result) {
+                            $this->errors[] = __CLASS__ . ': Cannot delete live directory ' . $live_dir . ' after backup';
+                            return false;
+                        }
                     }
                 }
 
