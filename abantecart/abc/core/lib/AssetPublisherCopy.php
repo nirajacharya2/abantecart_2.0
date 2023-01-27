@@ -157,7 +157,7 @@ class AssetPublisherCopy implements AssetPublisherDriverInterface
                         $this->errors[] = 'Is directory ' . $live_dir . ' readable? : ' . var_export(is_readable($live_dir), true);
                         $this->errors[] = 'Is directory ' . dirname($backup_dir) . ' writable? : ' . var_export(is_writable(dirname($backup_dir)), true);
 
-                        return false;
+                        //return false;
                     }
                 }
 
