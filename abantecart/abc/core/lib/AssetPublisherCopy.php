@@ -157,7 +157,7 @@ class AssetPublisherCopy implements AssetPublisherDriverInterface
                             . $live_dir . ' to ' . $backup_dir . ' before publishing';
                         return false;
                     } else {
-                        $result = $fileSystem->copyDirectory($live_dir);
+                        $result = $fileSystem->deleteDirectory($live_dir);
                         if (!$result) {
                             $this->errors[] = __CLASS__ . ': Cannot delete live directory ' . $live_dir . ' after backup';
                             return false;
