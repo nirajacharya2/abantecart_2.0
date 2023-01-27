@@ -29,6 +29,8 @@ use abc\core\lib\AssetPublisher;
  */
 class Publish extends BaseCommand
 {
+    public $errors = [];
+
     public function validate(string $action, array &$options)
     {
         $action = !$action ? 'all' : $action;
@@ -76,12 +78,12 @@ class Publish extends BaseCommand
         if (in_array($action, ['all', 'core', 'extensions', 'vendors'])) {
             $ap = new AssetPublisher();
             $result = $ap->publish($action, $options);
-            $errors = $ap->errors;
+            $this->errors = $ap->errors;
         } else {
-            $errors = ['Error: unknown public action!'];
+            $this->errors = ['Error: unknown public action!'];
         }
 
-        return $result ? true : $errors;
+        return $result ? true : $this->errors;
     }
 
     /**

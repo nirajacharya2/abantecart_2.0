@@ -124,14 +124,12 @@ class AssetPublisherCopy implements AssetPublisherDriverInterface
             }
 
             if (!is_writable($tmpDir)) {
-                $this->errors[] = __CLASS__
-                    .': Temporary directory '
-                    .$tmpDir.' is not writable for php!';
+                $this->errors[] = __CLASS__ . ': Temporary directory ' . $tmpDir . ' is not writable for php!';
                 return false;
             }
 
-            $new_temp_dir = $tmpDir.$uid_new;
-            $old_temp_dir = $tmpDir.$uid_old;
+            $new_temp_dir = $tmpDir . $uid_new;
+            $backup_dir = $tmpDir . $uid_old;
 
             //then copy all asset files of template to temporary directory
             foreach ($list as $rel_file) {
@@ -151,45 +149,36 @@ class AssetPublisherCopy implements AssetPublisherDriverInterface
             if (!$this->errors) {
                 //if live assets presents - rename it
                 if (is_dir($live_dir)) {
-                    $result = rename($live_dir, $old_temp_dir);
-                } else {
-                    $result = true;
+                    $result = rename($live_dir, $backup_dir);
+                    if (!$result) {
+                        $this->errors[] = __CLASS__ . ': Cannot backup live directory '
+                            . $live_dir . ' to ' . $backup_dir . ' before publishing';
+                        //debug details
+                        $this->errors[] = 'Is directory ' . $live_dir . ' readable? : ' . var_export(is_readable($live_dir), true);
+                        $this->errors[] = 'Is directory ' . dirname($backup_dir) . ' writable? : ' . var_export(is_writable(dirname($backup_dir)), true);
+
+                        return false;
+                    }
                 }
 
-                if ($result) {
-                    //check parent directory before rename
-                    $parent_dir = dirname($live_dir);
-                    if (!is_dir($parent_dir)) {
-                        $results = H::MakeNestedDirs($parent_dir);
-                        if (!$results['result']) {
-                            $this->errors[] = $results['message'];
-                        }
+                //check parent directory before rename
+                $parent_dir = dirname($live_dir);
+                if (!is_dir($parent_dir)) {
+                    $results = H::MakeNestedDirs($parent_dir);
+                    if (!$results['result']) {
+                        $this->errors[] = $results['message'];
                     }
-                    //try to move to production
-                    if (!@rename($new_temp_dir, $live_dir)) {
-                        $this->errors[] = __CLASS__ . ': Cannot rename temporary directory '
-                            . $new_temp_dir . ' to live ' . $live_dir;
-                        //revert old assets
-                        @rename($old_temp_dir, $live_dir);
-                        throw new \Exception(implode("\n", $this->errors));
-                        return false;
-                    } else {
-                        //if all fine - clean old silently
-                        H::RemoveDirRecursively($old_temp_dir);
-                    }
-                    //if all fine - remove old live directory
+                }
+                //try to move to production
+                if (!@rename($new_temp_dir, $live_dir)) {
+                    $this->errors[] = __CLASS__ . ': Cannot rename temporary directory '
+                        . $new_temp_dir . ' to live ' . $live_dir;
+                    //revert old assets
+                    @rename($backup_dir, $live_dir);
+                    return false;
                 } else {
-
-                    $this->errors[] = "Live directory: " . $live_dir;
-                    $this->errors[] = "content of live directory: " . var_export(glob($live_dir . '/*'), true);
-                    $this->errors[] = "Live directory is writable? : " . var_export(is_writable($live_dir), true);
-                    $this->errors[] = "content of public directory: " . var_export(glob('/opt/app/public/*'), true);
-                    $this->errors[] = "Public directory is writable? : " . var_export(is_writable('/opt/app/public'), true);
-                    $this->errors[] = "Public directory permissions: " . fileperms('/opt/app/public');
-                    $this->errors[] = "Public directory owner: " . fileowner('/opt/app/public');
-
-                    $commonResult = false;
-                    $this->errors[] = __CLASS__ . ': Cannot rename live directory ' . $live_dir . ' to ' . $old_temp_dir;
+                    //if all fine - clean old silently
+                    H::RemoveDirRecursively($backup_dir);
                 }
             }
         }

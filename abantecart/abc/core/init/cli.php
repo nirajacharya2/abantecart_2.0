@@ -277,6 +277,7 @@ function showResult($result)
         foreach ($result as $error) {
             showError($error);
         }
+        throw new \Exception(implode("\n", $result));
     }
 }
 
