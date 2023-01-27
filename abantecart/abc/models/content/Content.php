@@ -27,6 +27,7 @@ use abc\models\casts\Json;
 use abc\models\catalog\UrlAlias;
 use Exception;
 use H;
+use Illuminate\Contracts\Database\Eloquent\Castable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\JoinClause;
@@ -291,7 +292,9 @@ class Content extends BaseModel
                 if (isset($casts[$name]) && class_exists($casts[$name])) {
                     /** @var Html|Json $castable */
                     $castable = new $casts[$name];
-                    $value = $castable->get($cd, $name, $value, []);
+                    if ($castable instanceof Castable) {
+                        $value = $castable->get($cd, $name, $value, []);
+                    }
                 }
             }
             $item->total_num_rows = $totalNumRows;
