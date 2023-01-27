@@ -287,7 +287,7 @@ class Content extends BaseModel
         $cd = new ContentDescription();
         $casts = $cd->getCasts();
         foreach ($output as &$item) {
-            foreach ($item as $name => &$value) {
+            foreach ($item->attributes as $name => &$value) {
                 if (isset($casts[$name]) && class_exists($casts[$name])) {
                     /** @var Html|Json $castable */
                     $castable = new $casts[$name];
