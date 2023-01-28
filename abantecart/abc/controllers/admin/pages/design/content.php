@@ -40,11 +40,11 @@ class ControllerPagesDesignContent extends AController
         parent::__construct($registry, $instance_id, $controller, $parent_controller);
         $c = new Content();
         $cd = new ContentDescription();
-        $this->fields = array_merge(
+        $this->fields = array_unique(array_merge(
             $c->getFillable(),
             $cd->getFillable(),
             ['stores', 'content_id', 'keyword']
-        );
+        ));
         unset($c, $cd);
     }
 
@@ -203,7 +203,7 @@ class ControllerPagesDesignContent extends AController
                     $this->extensions->hk_ProcessData($this, __FUNCTION__, ['content_id' => $content_id]);
                     abc_redirect($this->html->getSecureURL('design/content/update', '&content_id=' . $content_id));
                 } else {
-                    $this->error[] = $this->language->get('error_application_error');
+                    $this->error['warning'] = $this->language->get('error_application_error');
                 }
             }
         }
@@ -542,7 +542,7 @@ class ControllerPagesDesignContent extends AController
     {
         $inData['language_id'] = $this->language->getContentLanguageID();
         $inData['sort_order'] = (int)$inData['sort_order'];
-        $inData['parent_id'] = $inData['parent_id'] ?: '';
+        $inData['parent_id'] = $inData['parent_id'] ?: null;
         $inData['stores'] = !is_array($inData['stores']) ? [0 => 0] : $inData['stores'];
         return $inData;
     }
@@ -806,5 +806,4 @@ class ControllerPagesDesignContent extends AController
         }
         abc_redirect($this->html->getSecureURL('design/content'));
     }
-
 }
