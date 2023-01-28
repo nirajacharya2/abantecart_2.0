@@ -2200,7 +2200,6 @@ class Product extends BaseModel
                 $languageId = static::$current_language_id;
                 $productTags = [];
                 foreach ($tags as $tag) {
-                    /** @var ProductTag $productTag */
                     $productTag = ProductTag::create([
                         'tag'         => trim($tag),
                         'product_id'  => $model->product_id,
@@ -2703,6 +2702,7 @@ class Product extends BaseModel
      *              - only_enabled - with status 1 and date_available less than current time
      *              - customer_group_id
      *              - keyword
+     *              - keyword_search_parameters - array( 'search_by' => [ .. list of column which use in search such as description, model, sku])
      *              - language_id
      *              - store_id
      *              - price_from
@@ -2734,8 +2734,6 @@ class Product extends BaseModel
         $filter['exclude'] = $filter['exclude'] ?? [];
         $filter['category_id'] = $filter['category_id'] ?? 0;
         $filter['manufacturer_id'] = $filter['manufacturer_id'] ?? 0;
-        $filter['description'] = $filter['description'] ?? false;
-        $filter['model'] = $filter['model'] ?? false;
 
         $filter['only_enabled'] = !isset($filter['only_enabled']) || (bool)$filter['only_enabled'];
         $filter['customer_group_id'] = $filter['customer_group_id']
@@ -2869,6 +2867,7 @@ class Product extends BaseModel
             $query->where(
                 function ($subQuery) use ($params, $tags, $db, $pt_table, $pd_table, $p_table) {
                     $filter = $params['filter'];
+                    $searchBy = (array)$filter['keyword_search_parameters']['search_by'] ?: [];
                     $keyWord = $db->escape(mb_strtolower($filter['keyword']));
                     $keyWordSpecialChars = $db->escape(mb_strtolower($filter['keyword']), true);
                     /** @var QueryBuilder $subQuery */
@@ -2885,15 +2884,24 @@ class Product extends BaseModel
                         'MATCH(' . $pd_table . '.name) AGAINST(? IN NATURAL LANGUAGE MODE)', [$keyWordSpecialChars]
                     );
 
-                    if ($filter['description']) {
+                    if (in_array('description', $searchBy)) {
                         $subQuery->orWhereRaw(
                             "LCASE(" . $pd_table . ".description) LIKE '%" . $keyWordSpecialChars . "%'"
                         );
                     }
-                    if ($filter['model']) {
+                    if (in_array('model', $searchBy)) {
                         $subQuery->orWhereRaw(
                             "LCASE(" . $p_table . ".model) LIKE '%" . $keyWordSpecialChars . "%'"
                         );
+                    }
+                    if (in_array('sku', $searchBy)) {
+                        $subQuery->orWhereRaw(
+                            "LCASE(" . $p_table . ".sku) LIKE '%" . $keyWordSpecialChars . "%'"
+                        );
+                    }
+
+                    if (is_numeric($filter['keyword'])) {
+                        $subQuery->orWhere('products.product_id', '=', (int)$filter['keyword']);
                     }
                     //allow to extend search criteria
                     $hookParams = $params;
