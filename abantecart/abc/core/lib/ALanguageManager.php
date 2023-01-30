@@ -23,6 +23,7 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\engine\ALanguage;
 use abc\core\engine\Registry;
+use abc\models\content\ContentDescription;
 use abc\Translator;
 use Exception;
 use H;
@@ -454,7 +455,7 @@ class ALanguageManager extends ALanguage
             foreach ($lang_data as $i => $v) {
                 $update_data[] = $i . " = '" . $this->db->escape($v) . "'";
             }
-
+            /** @var ContentDescription $modelClassName */
             $modelClassName = ABC::getFullClassName(Str::studly(Str::singular($table_name)));
             if (!$modelClassName) {
                 //remove it into the future!!!
@@ -462,7 +463,17 @@ class ALanguageManager extends ALanguage
                 $sql .= "SET " . implode(", ", $update_data) . " WHERE " . implode(" AND ", $update_index);
                 $this->db->query($sql);
             } else {
-                $modelClassName::where($index)->update($lang_data);
+                $id = null;
+                $modelObj = new $modelClassName();
+                $idName = $modelObj->getKey();
+                if ($idName) {
+                    $id = $modelClassName::where($index)->first()?->$idName;
+                }
+                if ($id) {
+                    $modelClassName::find($id)->update($lang_data);
+                } else {
+                    $modelClassName::where($index)->update($lang_data);
+                }
             }
         }
 
