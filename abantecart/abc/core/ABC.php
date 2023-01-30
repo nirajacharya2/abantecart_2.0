@@ -415,6 +415,39 @@ class ABC extends ABCBase
                 return static::$model_map[$class_alias];
             }
         }
+        //looking for models
+        if (class_exists("\abc\models\\" . $class_alias)) {
+            return "\abc\models\\" . $class_alias;
+        }
+        foreach (glob(dirname(getcwd()) . DS . 'abc' . DS . 'models' . DS . '*', GLOB_ONLYDIR) as $dir) {
+            if (in_array(basename($dir), ['admin', 'storefront'])) {
+                continue;
+            }
+            $path = '\abc\models\\' . basename($dir) . '\\' . $class_alias;
+            if (class_exists($path)) {
+                return $path;
+            }
+        }
+
+        $extDirs = glob(dirname(getcwd()) . DS . 'abc' . DS . 'extensions' . DS . '*' . DS . 'models');
+        foreach ($extDirs as $dir) {
+            $path = '\abc\extensions\\' . basename($dir) . '\models\\' . $class_alias;
+            if (class_exists($path)) {
+                return $path;
+            }
+        }
+        //if still not found model - looking into subdirectories
+        foreach ($extDirs as $extDir) {
+            foreach (glob($extDir . DS . '*', GLOB_ONLYDIR) as $dir) {
+                if (in_array(basename($dir), ['admin', 'storefront'])) {
+                    continue;
+                }
+                $path = '\abc\extensions\\' . basename(dirname($dir, 2)) . '\models\\' . basename($dir) . '\\' . $class_alias;
+                if (class_exists($path)) {
+                    return $path;
+                }
+            }
+        }
         return false;
     }
 

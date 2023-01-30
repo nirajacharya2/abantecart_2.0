@@ -26,6 +26,7 @@ use abc\core\engine\Registry;
 use abc\Translator;
 use Exception;
 use H;
+use Illuminate\Support\Str;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 
@@ -442,21 +443,27 @@ class ALanguageManager extends ALanguage
                 continue;
             }
             $update_index = [];
+            $index['language_id'] = $lang_id;
             foreach ($index as $i => $v) {
                 if (H::has_value($v)) {
-                    $update_index[] = $i." = '".$this->db->escape($v)."'";
+                    $update_index[] = $i . " = '" . $this->db->escape($v) . "'";
                 }
             }
-            $update_index[] = "language_id = '".$this->db->escape($lang_id)."'";
 
             $update_data = [];
             foreach ($lang_data as $i => $v) {
-                $update_data[] = $i." = '".$this->db->escape($v)."'";
+                $update_data[] = $i . " = '" . $this->db->escape($v) . "'";
             }
 
-            $sql = "UPDATE ".$this->db->table_name($table_name)." ";
-            $sql .= "SET ".implode(", ", $update_data)." WHERE ".implode(" AND ", $update_index);
-            $this->db->query($sql);
+            $modelClassName = ABC::getFullClassName(Str::studly(Str::singular($table_name)));
+            if (!$modelClassName) {
+                //remove it into the future!!!
+                $sql = "UPDATE " . $this->db->table_name($table_name) . " ";
+                $sql .= "SET " . implode(", ", $update_data) . " WHERE " . implode(" AND ", $update_index);
+                $this->db->query($sql);
+            } else {
+                $modelClassName::where($index)->update($lang_data);
+            }
         }
 
         return null;
