@@ -465,12 +465,12 @@ class ALanguageManager extends ALanguage
             } else {
                 $id = null;
                 $modelObj = new $modelClassName();
-                $idName = $modelObj->getKey();
+                $idName = $modelObj->getKeyName();
                 if ($idName) {
-                    $id = $modelClassName::where($index)->first()?->$idName;
+                    $id = $modelObj::where($index)->first()?->$idName;
                 }
                 if ($id) {
-                    $modelClassName::find($id)->update($lang_data);
+                    $modelObj::find($id)->update($lang_data);
                 } else {
                     $modelClassName::where($index)->update($lang_data);
                 }
