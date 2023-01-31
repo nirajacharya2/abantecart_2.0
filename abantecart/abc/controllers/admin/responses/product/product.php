@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2022 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -23,7 +23,6 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\core\engine\Registry;
 use abc\core\lib\ACurrency;
 use abc\core\lib\AException;
 use abc\core\lib\APromotion;
@@ -71,83 +70,95 @@ class ControllerResponsesProductProduct extends AController
             $get['exclude'] = (array)$get['exclude'];
             $exclude = array_merge($get['exclude'], $exclude);
         }
+
+        if (isset($post['coupon_product'])) {
+            $productIds = $post['coupon_product'];
+            $this->data['search_parameters'] = [
+                'filter' => [
+                    'include' => $productIds,
+                    'exclude' => $exclude
+                ]
+            ];
+        } elseif (isset($post['term'])) {
+            $this->data['search_parameters'] = [
+                'filter' => [
+                    'exclude'                   => $exclude,
+                    'keyword'                   => $this->request->post['term'],
+                    'keyword_search_parameters' => [
+                        'match'     => 'all',
+                        'search_by' => [
+                            'name',
+                            'sku',
+                            'description',
+                            'model'
+                        ]
+                    ]
+                ],
+                'limit'  => 40
+            ];
+            //in case when need to show only available products
+            if ($this->request->post['filter'] == 'enabled_only') {
+                $this->data['search_parameters']['filter']['only_enabled'] = true;
+            }
+        }
+
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
-        $this->loadModel('catalog/product');
         if (isset($post['coupon_product'])) {
-            $products = $post['coupon_product'];
-            foreach ($products as $product_id) {
-                $product_info = $this->model_catalog_product->getProduct($product_id);
-                if ($product_info) {
-                    $products_data[] = [
-                        'id'         => $product_info['product_id'],
-                        'name'       => $product_info['name'],
-                        'meta'       => $product_info['model'],
-                        'sort_order' => (int)$product_info['sort_order'],
-                    ];
-                }
-            }
-        } else {
-            if (isset($post['term'])) {
-                $filter = [
-                    'limit'               => 20,
-                    'content_language_id' => $this->language->getContentLanguageID(),
-                    'filter'              => [
-                        'keyword' => $post['term'],
-                        'match'   => 'all',
-                        'exclude' => ['product_id' => $exclude],
-                    ],
+            $products = Product::getProducts($this->data['search_parameters'])?->toArray();
+            foreach ($products as $product) {
+                $products_data[] = [
+                    'id'         => $product['product_id'],
+                    'name'       => $product['name'],
+                    'meta'       => $product['model'],
+                    'sort_order' => (int)$product['sort_order'],
                 ];
-                //in case when need to show only available products
-                if ($this->request->post['filter'] == 'enabled_only') {
-                    $filter['filter']['status'] = 1;
-                    $filter['subsql_filter'] = 'date_available<=NOW()';
+            }
+        } elseif (isset($post['term'])) {
+            $products = Product::getProducts($this->data['search_parameters'])?->toArray();
+            if (!$get['no_image']) {
+                $productIds = array_map('intval', array_column($products, 'product_id'));
+                $resource = new AResource('image');
+                $thumbnails = $resource->getMainThumbList(
+                    'products',
+                    $productIds,
+                    $this->config->get('config_image_grid_width'),
+                    $this->config->get('config_image_grid_height'),
+                    true,
+                    array_column($products, 'name', 'product_id')
+                );
+            }
+
+            foreach ($products as $k => $product_data) {
+                $thumbnail = !$get['no_image'] ? $thumbnails[$product_data['product_id']] : [];
+                if ($get['currency_code']) {
+                    $price = round(
+                        $this->currency->convert(
+                            $product_data['price'],
+                            $this->config->get('config_currency'),
+                            $get['currency_code']
+                        ),
+                        2
+                    );
+                } else {
+                    $price = $product_data['price'];
                 }
-                $products = $this->model_catalog_product->getProducts($filter);
+
+                $formatted_price = $this->currency->format(
+                    $product_data['price'],
+                    $get['currency_code'] ?: $this->config->get('config_currency')
+                );
+
+                $products_data[$k] = [
+                    'id'         => $product_data['product_id'],
+                    'name'       => $product_data['name'] . ' - ' . $formatted_price,
+                    'price'      => $price,
+                    'meta'       => $product_data['model'],
+                    'sort_order' => (int)$product_data['sort_order'],
+                ];
+
                 if (!$get['no_image']) {
-                    $productIds = array_map('intval', array_column($products, 'product_id'));
-                    $resource = new AResource('image');
-                    $thumbnails = $resource->getMainThumbList(
-                        'products',
-                        $productIds,
-                        $this->config->get('config_image_grid_width'),
-                        $this->config->get('config_image_grid_height'),
-                        true,
-                        array_column($products, 'name', 'product_id')
-                    );
-                }
-
-                foreach ($products as $k => $product_data) {
-                    $thumbnail = !$get['no_image'] ? $thumbnails[$product_data['product_id']] : [];
-                    if ($get['currency_code']) {
-                        $price = round(
-                            $this->currency->convert(
-                                $product_data['price'],
-                                $this->config->get('config_currency'),
-                                $get['currency_code']
-                            ),
-                            2
-                        );
-                    } else {
-                        $price = $product_data['price'];
-                    }
-
-                    $formatted_price = $this->currency->format(
-                        $product_data['price'],
-                        $get['currency_code'] ?: $this->config->get('config_currency')
-                    );
-
-                    $products_data[$k] = [
-                        'id'         => $product_data['product_id'],
-                        'name'       => $product_data['name'] . ' - ' . $formatted_price,
-                        'price'      => $price,
-                        'meta'       => $product_data['model'],
-                        'sort_order' => (int)$product_data['sort_order'],
-                    ];
-
-                    if (!$get['no_image']) {
-                        $products_data[$k]['image'] = $thumbnail['thumb_html'];
-                    }
+                    $products_data[$k]['image'] = $thumbnail['thumb_html'] . $products_data[$k]['name'];
                 }
             }
         }
@@ -180,10 +191,7 @@ class ControllerResponsesProductProduct extends AController
         }
 
         $this->loadLanguage('catalog/product');
-        $this->loadModel('catalog/product');
-
         $result = '';
-
         if ($this->request->is_POST()) {
             Product::updateProduct($this->request->get['product_id'], $this->request->post);
             $result = 'Saved!';

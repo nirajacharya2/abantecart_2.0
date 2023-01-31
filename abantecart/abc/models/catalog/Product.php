@@ -3114,14 +3114,14 @@ class Product extends BaseModel
                 )
                     ? $filter['keyword_search_parameters']['match'] : 'any';
 
-                $keyWord = mb_strtolower($filter['keyword']);
+                $keyWord = $db->escape(mb_strtolower($filter['keyword']));
                 //search by exact product_id
                 if (is_numeric($filter['keyword'])) {
                     $subQuery->orWhere('products.product_id', '=', (int)$filter['keyword']);
                 }
 
                 //search by tag
-                $words = array_map('mb_strtolower', array_filter(explode(' ', $filter['keyword'])));
+                $words = array_map('mb_strtolower', array_filter(explode(' ', $keyWord)));
                 if (sizeof($words) > 1) {
                     $subQuery->orWhereRaw("LOWER(" . $pt_table . ".tag) = '" . $keyWord . "'");
                 }
