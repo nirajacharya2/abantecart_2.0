@@ -56,7 +56,6 @@ class ControllerResponsesListingGridProduct extends AController
                     'match'     => 'all',
                     'search_by' => [
                         'name',
-                        'description',
                         'model',
                         'sku',
                         'supplier'

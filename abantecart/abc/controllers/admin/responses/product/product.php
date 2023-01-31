@@ -89,7 +89,6 @@ class ControllerResponsesProductProduct extends AController
                         'search_by' => [
                             'name',
                             'sku',
-                            'description',
                             'model'
                         ]
                     ]

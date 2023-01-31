@@ -1033,7 +1033,6 @@ class Product extends BaseModel
                     'match'     => 'all',
                     'search_by' => [
                         'name',
-                        'description',
                         'model',
                         'sku'
                     ]
@@ -3095,7 +3094,7 @@ class Product extends BaseModel
             function ($subQuery) use ($params, $db, $pt_table, $pd_table, $p_table) {
                 /** @var QueryBuilder $subQuery */
                 $filter = $params['filter'];
-                $searchBy = (array)$filter['keyword_search_parameters']['search_by'] ?: ['name', 'description', 'model', 'sku'];
+                $searchBy = (array)$filter['keyword_search_parameters']['search_by'] ?: ['name', 'model', 'sku'];
                 $attrProduct = (new static())->getFillable();
                 $attrDesc = (new ProductDescription())->getFillable();
                 $tableSearchBy = [];
