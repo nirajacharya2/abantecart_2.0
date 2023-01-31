@@ -429,7 +429,7 @@ class ABC extends ABCBase
             }
         }
 
-        $extDirs = glob(dirname(getcwd()) . DS . 'abc' . DS . 'extensions' . DS . '*' . DS . 'models');
+        $extDirs = glob(dirname(getcwd()) . DS . 'abc' . DS . 'extensions' . DS . '*' );
         foreach ($extDirs as $dir) {
             $path = '\abc\extensions\\' . basename($dir) . '\models\\' . $class_alias;
             if (class_exists($path)) {

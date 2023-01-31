@@ -2088,7 +2088,9 @@ class Product extends BaseModel
                 $update[$fieldName] = $product_data[$fieldName];
             }
         }
-        $product->description()->update($update);
+        $productDescriptionId = ProductDescription::where('product_id', '=', $product->product_id)
+            ->where('language_id', '=', Product::$current_language_id)->first()?->id;
+        ProductDescription::find($productDescriptionId)?->update($update);
 
         if (trim($product_data['keyword'])) {
             UrlAlias::setProductKeyword(

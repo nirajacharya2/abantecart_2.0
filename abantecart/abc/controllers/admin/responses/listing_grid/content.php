@@ -158,7 +158,7 @@ class ControllerResponsesListingGridContent extends AController
                             $this->response->setOutput($this->language->get('error_checkout'));
                             return;
                         }
-                        Content::where('content_id', '=', $content_id)?->delete();
+                        Content::find($content_id)?->delete();
                     }
                 }
                 break;
