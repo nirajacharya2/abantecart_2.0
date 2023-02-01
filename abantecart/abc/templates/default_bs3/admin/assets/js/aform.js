@@ -464,7 +464,7 @@
                 }
 
                 if ((String(value) != String(orgvalue) || $changed > 0)) {
-                    //mark filed chaneged
+                    //mark filed changed
                     $field.addClass(o.changedClass);
                     //build quick save button set
                     if (!$field.hasClass('no-quicksave')) {
@@ -614,6 +614,12 @@
                      }
                  }
              });
+
+            //check if element placed inside jqgrid and mark row as selected for batch update
+            let prnt = elem.parents('tr.jqgrow');
+            if (prnt && !prnt.hasClass('ui-state-highlight')) {
+                prnt.click();
+            }
 
             return false;
         }
