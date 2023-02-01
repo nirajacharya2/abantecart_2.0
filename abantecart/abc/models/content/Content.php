@@ -457,6 +457,8 @@ class Content extends BaseModel
     public function delete()
     {
         ContentDescription::where('content_id', '=', $this->getKey())?->delete();
+        //remove children too
+        Content::where('parent_id', '=', $this->getKey())?->delete();
         try {
             $lm = new ALayoutManager();
             $lm->deleteAllPagesLayouts('pages/content/content', 'content_id', $this->getKey());
