@@ -51,23 +51,24 @@
         $('#<?php echo $check_id ?>').html(<?php abc_js_echo($text['image']); ?>);
         $('#<?php echo $check_id ?>').append('<span class="hide_text"> <?php abc_js_echo($text['name']); ?></span>');
         <?php           }
+        }
+        } ?>
+        elm.chosen(
+            {
+                'width': '100%',
+                'white-space': 'nowrap',
+                'max_selected_options': <?php echo $extra['max_selected_options'] ?: 'null'; ?>,
+                'search_contains': true
             }
-            } ?>
-            elm.chosen(
-                {
-                    'width': '100%',
-                    'white-space': 'nowrap',
-                    'max_selected_options': <?php echo $extra['max_selected_options'] ?: 'null'; ?>
-                }
-            );
-            <?php if( $extra['max_selected_options']){ ?>
-            elm.chosen().change(
-                function () {
-                    let currVal = $(this).val();
-                    currVal = currVal === null ? [] : currVal;
-                    if (currVal.length === <?php echo (int)$extra['max_selected_options']; ?>) {
-                        $('#<?php echo $id?>_chosen li.search-field').hide();
-                    } else {
+        );
+        <?php if( $extra['max_selected_options']){ ?>
+        elm.chosen().change(
+            function () {
+                let currVal = $(this).val();
+                currVal = currVal === null ? [] : currVal;
+                if (currVal.length === <?php echo (int)$extra['max_selected_options']; ?>) {
+                    $('#<?php echo $id?>_chosen li.search-field').hide();
+                } else {
                         $('#<?php echo $id?>_chosen li.search-field').show();
                     }
                 });
