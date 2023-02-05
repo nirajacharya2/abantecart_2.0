@@ -594,7 +594,10 @@ class Customer extends BaseModel
 
     public function SetEmailAttribute($value)
     {
-        $this->attributes['email'] = mb_strtolower($value, ABC::env('APP_CHARSET'));
+        $this->attributes['email'] = mb_strtolower(trim($value), ABC::env('APP_CHARSET'));
+        if ($this->attributes['email'] && !Registry::config()->get('prevent_email_as_login')) {
+            $this->attributes['loginname'] = $this->attributes['email'];
+        }
     }
 
     public function setPasswordAttribute($password)
