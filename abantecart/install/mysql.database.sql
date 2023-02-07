@@ -10494,7 +10494,7 @@ CREATE TABLE `ac_contents`
     hide_title    int(1)                                null,
     constraint `ac_contents_tims_contents_content_id_fk`
         foreign key (parent_id) references `ac_contents` (content_id)
-            on update cascade on delete set null
+            on update cascade on delete cascade
 )
     ENGINE = INNODB
     DEFAULT CHARSET = utf8
@@ -10544,10 +10544,14 @@ VALUES
 --
 -- DDL for table `content_to_store`
 --
-CREATE TABLE `ac_contents_to_stores` (
-  `content_id` int(11) NOT NULL,
-  `store_id` int(11) NOT NULL,
-  PRIMARY KEY (`content_id`,`store_id`)
+CREATE TABLE `ac_contents_to_stores`
+(
+    `content_id` int(11) NOT NULL,
+    `store_id`   int(11) NOT NULL,
+    constraint `ac_content_2_stores_fk`
+        foreign key (content_id) references `ac_contents` (content_id)
+            on update cascade on delete cascade,
+    PRIMARY KEY (`content_id`, `store_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 

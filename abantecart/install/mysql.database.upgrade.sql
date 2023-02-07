@@ -935,7 +935,7 @@ alter table `ac_contents`
 alter table `ac_contents`
     add constraint `ac_contents_tims_contents_content_id_fk`
         foreign key (parent_id) references `ac_contents` (content_id)
-            on update cascade on delete set null;
+            on update cascade on delete cascade;
 # CHECK rows inside contents_to_stores!!!!
 
 ALTER TABLE `ac_global_attributes_groups_descriptions`

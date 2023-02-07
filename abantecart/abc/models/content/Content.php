@@ -29,6 +29,7 @@ use Exception;
 use H;
 use Illuminate\Contracts\Database\Eloquent\Castable;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\JoinClause;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -324,6 +325,14 @@ class Content extends BaseModel
         return $this->hasOne(Content::class, 'content_id', 'parent_id');
     }
 
+    /**
+     * @return HasMany
+     */
+    public function children()
+    {
+        return $this->hasMany(Content::class, 'parent_id', 'content_id');
+    }
+
     public function stores()
     {
         return $this->hasMany(ContentsToStore::class, 'content_id');
@@ -456,9 +465,6 @@ class Content extends BaseModel
      */
     public function delete()
     {
-        ContentDescription::where('content_id', '=', $this->getKey())?->delete();
-        //remove children too
-        Content::where('parent_id', '=', $this->getKey())?->delete();
         try {
             $lm = new ALayoutManager();
             $lm->deleteAllPagesLayouts('pages/content/content', 'content_id', $this->getKey());

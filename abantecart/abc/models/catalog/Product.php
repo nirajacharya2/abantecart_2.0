@@ -2990,7 +2990,7 @@ class Product extends BaseModel
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
         $output = $query->useCache('product')->get();
         //add total number of rows into each row
-        $totalNumRows = $db->sql_get_row_count();
+        $output->total = $totalNumRows = $db->sql_get_row_count();
         foreach ($output as &$item) {
             $item->total_num_rows = $totalNumRows;
         }
