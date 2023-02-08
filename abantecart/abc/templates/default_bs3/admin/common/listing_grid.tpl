@@ -270,10 +270,15 @@ echo $this->html->buildElement(
                 //add grid filter fields for saved state
                 var gridInfo = $.parseJSON($.cookie("grid_params"));
                 if (gridInfo && gridInfo.postData && gridInfo.postData.filters) {
-                    var $filters = $.parseJSON(gridInfo.postData.filters);
-                    $.each($filters.rules, function (index, value) {
-                        $('#gs_' + value.field).val(value.data);
-                    });
+                    try {
+                        var $filters = $.parseJSON(gridInfo.postData.filters);
+                        $.each($filters.rules, function (index, value) {
+                            $('#gs_' + value.field).val(value.data);
+                        });
+                    } catch (e) {
+                        console.log(e);
+                        console.log(gridInfo.postData.filters);
+                    }
                 }
 
                 var actions = '';
