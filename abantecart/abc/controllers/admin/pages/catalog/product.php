@@ -86,10 +86,8 @@ class ControllerPagesCatalogProduct extends AController
 
         $results = Category::getCategories(0, $this->session->data['current_store_id']);
 
-        $this->data['categories'] = array_merge(
-            ['' => $this->language->get('text_select_category')],
-            array_column($results, 'name', 'category_id')
-        );
+        $this->data['categories'] = ['' => $this->language->get('text_select_category')]
+            + array_column($results, 'name', 'category_id');
 
         $grid_settings = [
             'table_id'     => 'product_grid',
@@ -368,7 +366,7 @@ class ControllerPagesCatalogProduct extends AController
         );
 
         if ($this->request->get['category_id']) {
-            $search_params['category_id'] = $this->request->get['category_id'];
+            $search_params['category_id'] = (int)$this->request->get['category_id'];
         }
 
         $grid_search_form['fields']['category'] = $form->getFieldHtml(
