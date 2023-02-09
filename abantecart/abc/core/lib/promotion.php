@@ -126,13 +126,16 @@ class APromotion
     /**
      * @return array
      */
-    public function getBonusList()
+    public function getBonusList($section = 'both')
     {
         $output = [];
         foreach (ABC::env('incentive_bonuses') as $class) {
             try {
                 /** @var BaseIncentiveBonus $node */
                 $node = new $class();
+                if (!in_array($node->getSection(), ['both', $section])) {
+                    continue;
+                }
                 $output[$node->getKey()] = $node->getName();
             } catch (Exception $e) {
                 Registry::log()->error($e->getMessage());
