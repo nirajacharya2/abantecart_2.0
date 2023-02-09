@@ -83,17 +83,19 @@ class ControllerPagesCatalogProduct extends AController
             ]
         );
 
-        $this->data['categories'] = ['' => $this->language->get('text_select_category')];
+
         $results = Category::getCategories(0, $this->session->data['current_store_id']);
-        foreach ($results as $r) {
-            $this->data['categories'][$r['category_id']] = $r['name'];
-        }
+
+        $this->data['categories'] = array_merge(
+            ['' => $this->language->get('text_select_category')],
+            array_column($results, 'name', 'category_id')
+        );
 
         $grid_settings = [
             'table_id'     => 'product_grid',
             'url'          => $this->html->getSecureURL(
                 'listing_grid/product',
-                '&category='.(int) $this->request->get['category']
+                '&category_id=' . (int)$this->request->get['category_id']
             ),
             'editurl'      => $this->html->getSecureURL('listing_grid/product/update'),
             'update_field' => $this->html->getSecureURL('listing_grid/product/update_field'),

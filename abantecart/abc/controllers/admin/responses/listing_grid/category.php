@@ -126,7 +126,7 @@ class ControllerResponsesListingGridCategory extends AController
                     'type'  => 'button',
                     'name'  => 'view products',
                     'text'  => $text,
-                    'href'  => $this->html->getSecureURL('catalog/product', '&category=' . $result['category_id']),
+                    'href'  => $this->html->getSecureURL('catalog/product', '&category_id=' . $result['category_id']),
                     'title' => $title,
                 ]);
             }
