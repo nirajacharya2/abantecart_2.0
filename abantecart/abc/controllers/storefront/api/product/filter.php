@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -20,11 +20,16 @@
 
 namespace abc\controllers\storefront;
 
+use abc\core\ABC;
 use abc\core\engine\AControllerAPI;
 use abc\core\engine\AResource;
 use abc\core\lib\AFilter;
+use abc\models\storefront\ModelCatalogProduct;
 use stdClass;
 
+/**
+ * @property ModelCatalogProduct $model_catalog_product
+ */
 class ControllerApiProductFilter extends AControllerAPI
 {
     /**
@@ -202,13 +207,13 @@ class ControllerApiProductFilter extends AControllerAPI
         }
 
         $this->loadModel('catalog/product');
-        $filter_params = array('category_id', 'manufacturer_id', 'keyword', 'match', 'pfrom', 'pto');
-        $grid_filter_params = array('name', 'description', 'model', 'sku');
-        $filter_data = array(
+        $filter_params = ['category_id', 'manufacturer_id', 'keyword', 'match', 'pfrom', 'pto'];
+        $grid_filter_params = ['name', 'description', 'model', 'sku'];
+        $filter_data = [
             'method'             => 'get',
             'filter_params'      => $filter_params,
             'grid_filter_params' => $grid_filter_params,
-        );
+        ];
 
         $filter = new AFilter($filter_data);
         $filters = $filter->getFilterData();
@@ -217,7 +222,7 @@ class ControllerApiProductFilter extends AControllerAPI
         $keyword = $filter->getFilterParam('keyword');
 
         if (!$category_id && !$manufacturer_id && !$keyword) {
-            $this->rest->setResponseData(array('Error' => 'Missing one of required product filter parameters'));
+            $this->rest->setResponseData(['Error' => 'Missing one of required product filter parameters']);
             $this->rest->sendResponse(200);
             return null;
         }
@@ -248,7 +253,7 @@ class ControllerApiProductFilter extends AControllerAPI
         $response->sord = $filters['order'];
         $response->params = $filters;
 
-        $results = array();
+        $results = [];
         if ($keyword) {
             $results = $this->model_catalog_product->getProducts($filters);
         } elseif ($category_id) {
@@ -267,11 +272,7 @@ class ControllerApiProductFilter extends AControllerAPI
 
         $i = 0;
         if ($results) {
-
-            $product_ids = array();
-            foreach ($results as $result) {
-                $product_ids[] = (int)$result['product_id'];
-            }
+            $product_ids = array_column($results, 'product_id');
             $resource = new AResource('image');
             $thumbnails = $resource->getMainThumbList(
                 'products',
@@ -282,23 +283,23 @@ class ControllerApiProductFilter extends AControllerAPI
 
             foreach ($results as $result) {
                 $thumbnail = $thumbnails[$result['product_id']];
-
-                $response->rows[$i] = [
-                    'id'   => $result['product_id'],
-                    'cell' => [
-                        'thumb'         => $thumbnail['thumb_url'],
-                        'name'          => $result['name'],
-                        'description'   => $result['description'],
-                        'model'         => $result['model'],
-                        'price'         => $this->currency->convert(
-                            $result['final_price'],
-                            $this->config->get('config_currency'),
-                            $this->currency->getCode()
-                        ),
-                        'currency_code' => $this->currency->getCode(),
-                        'rating'        => $result['rating'],
-                    ],
-                ];
+                $response->rows[$i] =
+                    [
+                        'id'   => $result['product_id'],
+                        'cell' => [
+                            'thumb'         => $thumbnail['thumb_url'],
+                            'name'          => html_entity_decode($result['name'], ENT_QUOTES, ABC::env('APP_CHARSET')),
+                            'description'   => html_entity_decode($result['description'], ENT_QUOTES, ABC::env('APP_CHARSET')),
+                            'model'         => $result['model'],
+                            'price'         => $this->currency->convert(
+                                $result['final_price'],
+                                $this->config->get('config_currency'),
+                                $this->currency->getCode()
+                            ),
+                            'currency_code' => $this->currency->getCode(),
+                            'rating'        => $result['rating'],
+                        ]
+                    ];
                 $i++;
             }
         }
