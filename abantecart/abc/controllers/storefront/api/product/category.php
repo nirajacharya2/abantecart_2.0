@@ -128,7 +128,6 @@ class ControllerApiProductCategory extends AControllerAPI
     public function getCategoryDetails($category_id, $languageId, $storeId)
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
-        $this->loadModel('catalog/product');
         $this->loadModel('tool/image');
 
         $category_info = Category::getCategory($category_id, $storeId, 0, $languageId);

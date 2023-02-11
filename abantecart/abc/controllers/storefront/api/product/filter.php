@@ -253,6 +253,7 @@ class ControllerApiProductFilter extends AControllerAPI
         $response->sord = $filters['order'];
         $response->params = $filters;
 
+
         $results = [];
         if ($keyword) {
             $results = $this->model_catalog_product->getProducts($filters);

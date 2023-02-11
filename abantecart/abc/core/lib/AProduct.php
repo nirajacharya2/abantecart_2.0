@@ -2,19 +2,16 @@
 
 namespace abc\core\lib;
 
-use abc\core\ABC;
 use abc\core\engine\AHtml;
 use abc\core\engine\ALanguage;
 use abc\core\engine\AResource;
-use abc\core\engine\HtmlElementFactory;
-use abc\core\engine\Registry;
 use abc\models\catalog\Product;
 use abc\models\catalog\ProductOption;
 use abc\models\catalog\ProductOptionValue;
-use abc\models\catalog\ProductTag;
 use H;
 use Illuminate\Support\Collection;
 use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 class AProduct
 {
@@ -24,10 +21,14 @@ class AProduct
      * @param AConfig $config
      * @param ATax $tax
      * @param ACurrency $currency
+     * @param ALanguage $language
+     * @param ACustomer $customer
+     * @param ADownload $download
+     * @param AHtml $html
      * @return array|null
      * @throws AException
      * @throws InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     static function getProductDetails(
         int $productId,
@@ -66,7 +67,7 @@ class AProduct
         $discount = $promotion->getProductDiscount($productId);
 
         $decimal_place = (int)$currency->getCurrency()['decimal_place'];
-        $decimal_place = !$decimal_place ? 2 : $decimal_place;
+        $decimal_place = $decimal_place ?: 2;
 
         if ($discount) {
             $priceNum = $tax->calculate(
@@ -555,8 +556,8 @@ class AProduct
         $product->is_customer = false;
         if ($customer->isLogged() || $customer->isUnauthCustomer()) {
             $product->is_customer = true;
-            $whishlist = $customer->getWishList();
-            if ($whishlist[$productId]) {
+            $wishList = $customer->getWishList();
+            if ($wishList[$productId]) {
                 $product->in_wishlist = true;
             }
         }

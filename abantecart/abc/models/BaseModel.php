@@ -62,7 +62,7 @@ use stdClass;
  * @method static QueryBuilder|Builder whereIn(string $column, array $keys) QueryBuilder
  * @method static QueryBuilder select(string|array $select = '*', $bindings = []) QueryBuilder
  * @method static integer max(string $id) int
- * @method static QueryBuilder with(string ...$relations) QueryBuilder
+ * @method static QueryBuilder with(string|array ...$relations) QueryBuilder
  * @method static QueryBuilder selectRaw(string $sql, $bindings = []) QueryBuilder
  * @method static QueryBuilder distinct(array $columns) QueryBuilder
  * @method static QueryBuilder|Builder withTrashed()
