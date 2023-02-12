@@ -446,7 +446,7 @@ class ControllerResponsesListingGridBlocksGrid extends AController
 
                             break;
                         case 'custom_categories':
-                            $filter = ['include' => $ids];
+                            $filter = ['filter' => ['include' => $ids]];
                             $results = Category::getCategoriesData($filter);
 
                             $id_name = 'category_id';

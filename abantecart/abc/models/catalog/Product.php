@@ -40,12 +40,10 @@ use Carbon\Carbon;
 use Dyrynda\Database\Support\GeneratesUuid;
 use Exception;
 use H;
-use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -106,7 +104,7 @@ use ReflectionException;
  * @property Review $reviews
  * @property int $product_type_id
  *
- * @method static Product find(int $product_id) Product
+ * @method static Product|Collection find(int|array $product_id) Product
  * @method static Product select(mixed $select) Builder
  * @method static Collection search(array $filterParams) - see getProducts() method
  * @method static WithFinalPrice(int $customer_group_id, Carbon|string $toDate = null) - adds "final_price" column into selected fields
@@ -121,7 +119,7 @@ use ReflectionException;
  */
 class Product extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes, GeneratesUuid;
+    use GeneratesUuid;
 
     protected $cascadeDeletes = [
         'descriptions',
@@ -1030,8 +1028,15 @@ class Product extends BaseModel
         'filter' =>
             [
                 'keyword',
-                'description',
-                'model',
+                'keyword_search_parameters'
+                => [
+                    'match'     => 'all',
+                    'search_by' => [
+                        'name',
+                        'model',
+                        'sku'
+                    ]
+                ],
                 'only_enabled',
                 'category_id',
                 'customer_group_id',
@@ -2083,7 +2088,9 @@ class Product extends BaseModel
                 $update[$fieldName] = $product_data[$fieldName];
             }
         }
-        $product->description()->update($update);
+        $productDescriptionId = ProductDescription::where('product_id', '=', $product->product_id)
+            ->where('language_id', '=', Product::$current_language_id)->first()?->id;
+        ProductDescription::find($productDescriptionId)?->update($update);
 
         if (trim($product_data['keyword'])) {
             UrlAlias::setProductKeyword(
@@ -2200,7 +2207,6 @@ class Product extends BaseModel
                 $languageId = static::$current_language_id;
                 $productTags = [];
                 foreach ($tags as $tag) {
-                    /** @var ProductTag $productTag */
                     $productTag = ProductTag::create([
                         'tag'         => trim($tag),
                         'product_id'  => $model->product_id,
@@ -2551,8 +2557,7 @@ class Product extends BaseModel
      */
     public function delete()
     {
-        $delete = $this->forceDeleting ? 'forceDelete' : 'delete';
-        UrlAlias::where('query', '=', 'product_id=' . $this->getKey())->$delete();
+        UrlAlias::where('query', '=', 'product_id=' . $this->getKey())->delete();
         return parent::delete();
     }
 
@@ -2703,6 +2708,10 @@ class Product extends BaseModel
      *              - only_enabled - with status 1 and date_available less than current time
      *              - customer_group_id
      *              - keyword
+     *              - keyword_search_parameters - array(
+     * 'search_by' => [ .. list of column which use in search such as description, model, sku]
+     * 'match' => can be "any" (of words) or "all" or "exact"
+     * )
      *              - language_id
      *              - store_id
      *              - price_from
@@ -2734,8 +2743,6 @@ class Product extends BaseModel
         $filter['exclude'] = $filter['exclude'] ?? [];
         $filter['category_id'] = $filter['category_id'] ?? 0;
         $filter['manufacturer_id'] = $filter['manufacturer_id'] ?? 0;
-        $filter['description'] = $filter['description'] ?? false;
-        $filter['model'] = $filter['model'] ?? false;
 
         $filter['only_enabled'] = !isset($filter['only_enabled']) || (bool)$filter['only_enabled'];
         $filter['customer_group_id'] = $filter['customer_group_id']
@@ -2757,7 +2764,6 @@ class Product extends BaseModel
 
         //full table names
         $p_table = $db->table_name('products');
-        $pt_table = $db->table_name('product_tags');
         $pd_table = $db->table_name('product_descriptions');
         $pSpecialsTable = $db->table_name('product_specials');
 
@@ -2865,42 +2871,7 @@ class Product extends BaseModel
         }
 
         if ($filter['keyword']) {
-            $tags = array_map('trim', explode(' ', $filter['keyword']));
-            $query->where(
-                function ($subQuery) use ($params, $tags, $db, $pt_table, $pd_table, $p_table) {
-                    $filter = $params['filter'];
-                    $keyWord = $db->escape(mb_strtolower($filter['keyword']));
-                    $keyWordSpecialChars = $db->escape(mb_strtolower($filter['keyword']), true);
-                    /** @var QueryBuilder $subQuery */
-                    if (sizeof($tags) > 1) {
-                        $subQuery->orWhereRaw(
-                            "LCASE(" . $pt_table . ".tag) = '" . $keyWord . "'");
-                    }
-                    foreach ($tags as $tag) {
-                        $subQuery->orWhereRaw(
-                            "LCASE(" . $pt_table . ".tag) = '" . $db->escape(mb_strtolower($tag)) . "'"
-                        );
-                    }
-                    $subQuery->orWhereRaw(
-                        'MATCH(' . $pd_table . '.name) AGAINST(? IN NATURAL LANGUAGE MODE)', [$keyWordSpecialChars]
-                    );
-
-                    if ($filter['description']) {
-                        $subQuery->orWhereRaw(
-                            "LCASE(" . $pd_table . ".description) LIKE '%" . $keyWordSpecialChars . "%'"
-                        );
-                    }
-                    if ($filter['model']) {
-                        $subQuery->orWhereRaw(
-                            "LCASE(" . $p_table . ".model) LIKE '%" . $keyWordSpecialChars . "%'"
-                        );
-                    }
-                    //allow to extend search criteria
-                    $hookParams = $params;
-                    $hookParams['subquery_keyword'] = true;
-                    Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $subQuery, $hookParams);
-                }
-            );
+            self::scopeSearchByKeyword($query, $params);
         }
         if ($filter['category_id']) {
             if (is_array($filter['category_id'])) {
@@ -2919,6 +2890,10 @@ class Product extends BaseModel
                         ->whereIn('products_to_categories.category_id', $categoryIds);
                 }
             );
+        }
+
+        if (isset($filter['status'])) {
+            $query->where('products.status', '=', (int)$filter['status']);
         }
 
         if ($filter['manufacturer_id']) {
@@ -2947,17 +2922,32 @@ class Product extends BaseModel
                 );
             }
         }
+        if ($filter['cost_from'] || $filter['cost_to']) {
+            if ($finalPriceSql) {
+                $query->whereRaw(
+                    $finalPriceSql . ' BETWEEN ' . ((double)$filter['cost_from'] ?: 0.0) . ' AND ' . ((double)$filter['cost_to'] ?: 100000000)
+                );
+            } else {
+                $query->whereBetween(
+                    'cost',
+                    [
+                        (double)$filter['cost_from'] ?: 0.0,
+                        (double)$filter['cost_to'] ?: 100000000
+                    ]
+                );
+            }
+        }
 
         //show only enabled and available products for storefront!
         if (ABC::env('IS_ADMIN') !== true) {
             if ($filter['date']) {
                 if ($filter['date'] instanceof Carbon) {
-                    $now = $filter['date']->toIso8601String();
+                    $now = $filter['date']->toDateTimeString();
                 } else {
-                    $now = Carbon::parse($filter['date'])->toIso8601String();
+                    $now = Carbon::parse($filter['date'])->toDateTimeString();
                 }
             } else {
-                $now = Carbon::now()->toIso8601String();
+                $now = Carbon::now()->toDateTimeString();
             }
 
             $query->where('products.date_available', '<=', $now)
@@ -3000,9 +2990,9 @@ class Product extends BaseModel
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
         $output = $query->useCache('product')->get();
         //add total number of rows into each row
-        $totalNumRows = $db->sql_get_row_count();
-        for ($i = 0; $i < $output->count(); $i++) {
-            $output[$i]['total_num_rows'] = $totalNumRows;
+        $output->total = $totalNumRows = $db->sql_get_row_count();
+        foreach ($output as &$item) {
+            $item->total_num_rows = $totalNumRows;
         }
 
         return $output;
@@ -3014,7 +3004,7 @@ class Product extends BaseModel
      * @param int $limit
      * @param array $filter
      *
-     * @return array|Collection
+     * @return Collection
      */
     public static function getPopularProducts($limit = 0, $filter = [])
     {
@@ -3034,7 +3024,7 @@ class Product extends BaseModel
      * @param $limit
      * @param $filter
      *
-     * @return array|Collection
+     * @return Collection
      */
     public static function getLatestProducts($limit = 0, $filter = [])
     {
@@ -3053,7 +3043,7 @@ class Product extends BaseModel
     /**
      * @param array $data
      *
-     * @return array|Collection
+     * @return Collection
      *
      */
     public static function getProductSpecials($data = [])
@@ -3087,6 +3077,99 @@ class Product extends BaseModel
                     ['only_featured' => true]
                 ),
             ]
+        );
+    }
+
+    /**
+     * @param QueryBuilder $query
+     * @param array $params
+     * @return void
+     */
+    public static function scopeSearchByKeyword($query, $params)
+    {
+        $db = Registry::db();
+        $p_table = $db->table_name('products');
+        $pt_table = $db->table_name('product_tags');
+        $pd_table = $db->table_name('product_descriptions');
+
+        $query->where(
+            function ($subQuery) use ($params, $db, $pt_table, $pd_table, $p_table) {
+                /** @var QueryBuilder $subQuery */
+                $filter = $params['filter'];
+                $searchBy = (array)$filter['keyword_search_parameters']['search_by'] ?: ['name', 'model', 'sku'];
+                $attrProduct = (new static())->getFillable();
+                $attrDesc = (new ProductDescription())->getFillable();
+                $tableSearchBy = [];
+                foreach ($searchBy as $colName) {
+                    if (in_array($colName, $attrProduct)) {
+                        $tableSearchBy[$p_table][] = $colName;
+                    }
+                    if (in_array($colName, $attrDesc)) {
+                        $tableSearchBy[$pd_table][] = $colName;
+                    }
+                }
+
+                $match = in_array(
+                    $filter['keyword_search_parameters']['match'],
+                    ['any', 'all', 'exact']
+                )
+                    ? $filter['keyword_search_parameters']['match'] : 'any';
+
+                $keyWord = $db->escape(mb_strtolower($filter['keyword']));
+                //search by exact product_id
+                if (is_numeric($filter['keyword'])) {
+                    $subQuery->orWhere('products.product_id', '=', (int)$filter['keyword']);
+                }
+
+                //search by tag
+                $words = array_map('mb_strtolower', array_filter(explode(' ', $keyWord)));
+                if (sizeof($words) > 1) {
+                    $subQuery->orWhereRaw("LOWER(" . $pt_table . ".tag) = '" . $keyWord . "'");
+                }
+                foreach ($words as $word) {
+                    $subQuery->orWhereRaw("LOWER(" . $pt_table . ".tag) = '" . $word . "'");
+                }
+
+                if ($match == 'any') {
+                    foreach ($tableSearchBy as $tableName => $cols) {
+                        foreach ($cols as $column) {
+                            foreach ($words as $word) {
+                                $subQuery->orWhereRaw($tableName . "." . $column . " LIKE '%" . $word . "%'");
+                            }
+                        }
+                    }
+                } //if all words presents in the column
+                elseif ($match == 'all') {
+                    foreach ($tableSearchBy as $tableName => $cols) {
+                        $subQuery->orWhere(
+                            function ($subSubQuery) use ($words, $cols, $tableName) {
+                                foreach ($cols as $column) {
+                                    $subSubQuery->orWhere(
+                                        function ($colQuery) use ($words, $column, $tableName) {
+                                            foreach ($words as $word) {
+                                                $colQuery->whereRaw($tableName . "." . $column . " LIKE '%" . $word . "%'");
+                                            }
+                                        }
+                                    );
+                                }
+                            }
+                        );
+                    }
+                } elseif ($match == 'exact') {
+                    foreach ($tableSearchBy as $tableName => $cols) {
+                        $subQuery->orWhere(
+                            function ($subSubQuery) use ($keyWord, $cols, $tableName) {
+                                foreach ($cols as $column) {
+                                    $subSubQuery->orWhereRaw($tableName . "." . $column . " LIKE '%" . $keyWord . "%'");
+                                }
+                            }
+                        );
+                    }
+                }
+
+                //allow to extend search criteria
+                Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $subQuery, $params);
+            }
         );
     }
 }

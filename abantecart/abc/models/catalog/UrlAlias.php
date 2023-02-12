@@ -23,10 +23,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class UrlAlias extends BaseModel
 {
-    use SoftDeletes;
-
     protected $primaryKey = 'url_alias_id';
-    public $timestamps = false;
 
     protected $casts = [
         'language_id' => 'int',
@@ -100,7 +97,7 @@ class UrlAlias extends BaseModel
                 ['query' => $objectKeyName."=".$objectId],
                 [static::$current_language_id => ['keyword' => $keyword]]);
         } else {
-            self::where('query', '=', $objectKeyName."=".$objectId)
+            static::where('query', '=', $objectKeyName . "=" . $objectId)
                 ->where('language_id', '=', static::$current_language_id)
                 ->delete();
         }
@@ -129,6 +126,11 @@ class UrlAlias extends BaseModel
         self::setKeyword($keyword, 'manufacturer_id', $manufacturerId);
     }
 
+    public static function setContentKeyword(string $keyword, int $contentId)
+    {
+        self::setKeyword($keyword, 'content_id', $contentId);
+    }
+
     /**
      * @param array $data - ['language_id' => 1, 'keyword' => 'some-keyword']
      * @param string $name - 'product_id', 'category_id' etc
@@ -136,18 +138,16 @@ class UrlAlias extends BaseModel
      *
      * @throws Exception
      */
-    public static function replaceKeywords( $data, $name, $id)
+    public static function replaceKeywords($data, $name, $id)
     {
         $data = (array)$data;
         $id = (int)$id;
         $name = (string)$name;
 
-        $query = $name.'='.$id;
-        $urlAlias = new UrlAlias();
-        $urlAlias->where('query', '=', $query)->forceDelete();
-        unset($urlAlias);
+        $query = $name . '=' . $id;
+        static::where('query', '=', $query)->delete();
 
-        foreach ((array)$data as $keyword) {
+        foreach ($data as $keyword) {
             $urlAlias = new UrlAlias();
             $urlAlias->query = $query;
             $urlAlias->language_id = (int)$keyword['language_id'];

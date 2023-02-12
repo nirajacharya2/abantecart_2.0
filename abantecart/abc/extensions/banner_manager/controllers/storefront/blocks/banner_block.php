@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2021 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,42 +22,37 @@ namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
-use abc\core\lib\AException;
-use abc\extensions\banner_manager\models\storefront\extension\ModelExtensionBannerManager;
-use Psr\SimpleCache\InvalidArgumentException;
-use ReflectionException;
+use abc\extensions\banner_manager\models\Banner;
+use abc\models\layout\CustomList;
+use H;
 
 /**
  * Class ControllerBlocksBannerBlock
  *
- * @property ModelExtensionBannerManager $model_extension_banner_manager
  */
 class ControllerBlocksBannerBlock extends AController
 {
-
     public function main($instance_id = 0, $custom_block_id = 0)
     {
-
-        //load JS to register clicks before html-cache
-        $this->document->addScriptBottom($this->view->templateResource('assets/js/banner_manager.js'));
-
-        if ($this->html_cache()) {
-            return;
+        //load JS to register clicks
+        if (!$this->config->get('banner_manager_disable_statistic')) {
+            $this->document->addScriptBottom($this->view->templateResource('assets/js/banner_manager.js'));
         }
 
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $block_data = $this->getBlockContent($instance_id, $custom_block_id);
-        $this->view->assign('block_framed', $block_data['block_framed']);
-        $this->view->assign('content', $block_data['content']);
-        $this->view->assign('heading_title', $block_data['title']);
+        $blockData = $this->getBlockContent($instance_id, $custom_block_id);
+        $this->view->assign('block_framed', $blockData['block_framed']);
+
+        $this->view->assign('content', $blockData['content']);
+        $this->view->assign('heading_title', $blockData['title']);
         $this->view->assign('stat_url', $this->html->getURL('r/extension/banner_manager'));
 
-        if ($block_data['content']) {
+        if ($blockData['content']) {
             // need to set wrapper for non products listing blocks
-            if ($this->view->isTemplateExists($block_data['block_wrapper'])) {
-                $this->view->setTemplate($block_data['block_wrapper']);
+            if ($this->view->isTemplateExists($blockData['block_wrapper'])) {
+                $this->view->setTemplate($blockData['block_wrapper']);
             }
             $this->processTemplate();
         }
@@ -71,39 +66,54 @@ class ControllerBlocksBannerBlock extends AController
             $block_info = $this->layout->getBlockDetails($instance_id);
             $custom_block_id = $block_info['custom_block_id'];
         }
-        $descriptions = $this->layout->getBlockDescriptions($custom_block_id);
-        if ($descriptions[$this->config->get('storefront_language_id')]) {
-            $key = $this->config->get('storefront_language_id');
-        } else {
-            $key = $descriptions ? key($descriptions) : null;
+
+        $blockDesc = $this->layout->getBlockDescriptions($custom_block_id);
+
+        $languageId = $this->config->get('storefront_language_id');
+        $languageId = !isset($blockDesc[$languageId]) ? key($blockDesc) : $languageId;
+
+        $content = $blockDesc[$languageId]['content'];
+        $content = H::is_serialized($content) ? unserialize($content) : (array)$content;
+        if ($content) {
+            $params['filter']['banner_group_name'] = $content['banner_group_name'];
         }
 
-        $this->loadModel('extension/banner_manager');
-        $results = $this->model_extension_banner_manager->getBanners($custom_block_id);
+        $params = [
+            'language_id' => $languageId,
+            'store_id'    => $this->config->get('config_store_id'),
+        ];
+
+        $params['filter']['include'] = CustomList::where('data_type', '=', 'banner_id')
+            ->where('custom_block_id', '=', $custom_block_id)
+            ->get()?->pluck('id')->toArray();
+
+        $results = Banner::getBanners($params)?->toArray();
+
         $banners = [];
         if ($results) {
             $rl = new AResource('image');
-            foreach ($results as $row) {
+            foreach ($results as $k => $row) {
+                $banners[$k] = $row;
                 if ($row['banner_type'] == 1) { // if graphic type
-                    $row['images'] = $rl->getResourceAllObjects('banners', $row['banner_id']);
+                    $banners[$k]['images'] = $rl->getResourceAllObjects('banners', $row['banner_id']);
                     //add click registration wrapper to each URL
                     //NOTE: You can remove below line to use tracking javascript instead. Javascript tracks HTML banner clicks
-                    $row['target_url'] = $this->html->getURL(
+                    $banners[$k]['original_url'] = $row['target_url'];
+                    $banners[$k]['target_url'] = $this->html->getURL(
                         'r/extension/banner_manager/click',
-                        '&banner_id='.$row['banner_id'],
+                        '&banner_id=' . $row['banner_id'],
                         true
                     );
                 } else {
-                    $row['description'] = html_entity_decode($row['description']);
+                    $banners[$k]['description'] = html_entity_decode($row['description']);
                 }
-                $banners[] = $row;
             }
         }
         return [
-            'title'         => ($key ? $descriptions[$key]['title'] : ''),
+            'title'         => $blockDesc[$languageId]['title'] ?: '',
             'content'       => $banners,
-            'block_wrapper' => ($key ? $descriptions[$key]['block_wrapper'] : 0),
-            'block_framed'  => ($key ? (int) $descriptions[$key]['block_framed'] : 0),
+            'block_wrapper' => $blockDesc[$languageId]['block_wrapper'] ?: 0,
+            'block_framed'  => (int)$blockDesc[$languageId]['block_framed']
         ];
     }
 }

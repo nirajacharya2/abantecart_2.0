@@ -77,7 +77,7 @@ class ControllerPagesDesignLayout extends AController
 
         // get templates
         $layout_data['templates'] = [];
-        $directories = glob(ABC::env('DIR_TEMPLATES').DS.'*'.DS.ABC::env('DIRNAME_STORE'), GLOB_ONLYDIR);
+        $directories = glob(ABC::env('DIR_TEMPLATES') . '*' . DS . ABC::env('DIRNAME_STORE'), GLOB_ONLYDIR);
         foreach ($directories as $directory) {
             $layout_data['templates'][] = basename(dirname($directory));
         }

@@ -2106,7 +2106,14 @@ class AHelperUtils extends AHelper
         return $keys !== array_keys($keys);
     }
 
-    public static function insert2ArrayAfter(array $array, string $itemKey, $itemValue, string|int $positionAfter = null)
+    /**
+     * @param array $array - source array
+     * @param string $itemKey - new key name
+     * @param mixed $itemValue - value
+     * @param string|int|null $positionAfter - paste after key
+     * @return array
+     */
+    public static function insert2ArrayAfter(array $array, string $itemKey, $itemValue, string|int $positionAfter = null): array
     {
         $positionAfter = $positionAfter ?? array_key_last($array);
         $pos = array_search($positionAfter, array_keys($array)) + 1;

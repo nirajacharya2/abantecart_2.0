@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -24,13 +24,13 @@ use abc\controllers\admin\ControllerPagesToolCache;
 use abc\core\engine\Registry;
 use abc\core\lib\AConfig;
 use abc\core\lib\AConnect;
-use abc\core\lib\AContentManager;
 use abc\core\lib\ACurrency;
 use abc\core\lib\ALanguageManager;
 use abc\models\admin\ModelSettingStore;
 use abc\models\admin\ModelToolInstallUpgradeHistory;
 use abc\models\catalog\Category;
 use abc\models\catalog\Product;
+use abc\models\content\Content;
 
 /**
  * Class Cache
@@ -156,21 +156,26 @@ class Cache extends BaseCommand
             ABC::env('HTTP_SERVER', $store_url, true);
 
             //loop by all content pages
-            $cm = new AContentManager();
-            $contents = $cm->getContents([], 'default', $store['store_id']);
+            $contents = Content::getContents([]);
             foreach ($contents as $content) {
-                $seo_url = $registry->get('html')->getSEOURL('content/content', '&content_id='.$content['content_id']);
+                $seo_url = $registry->get('html')->getSEOURL('content/content', '&content_id=' . $content['content_id']);
                 //loop for all variants
                 $this->touchUrl($seo_url);
                 $this->results['contents']++;
             }
 
             //loop by all categories of store
-            $categories = Category::getCategoriesData(['store_id' => $store['store_id']]);
+            $categories = Category::getCategoriesData(
+                [
+                    'filter' => [
+                        'store_id' => $store['store_id']
+                    ]
+                ]
+            );
             foreach ($categories as $category) {
                 $seo_url = $registry->get('html')->getSEOURL(
                     'product/category',
-                    '&category_id='.$category['category_id']
+                    '&category_id=' . $category['category_id']
                 );
                 //loop for all variants
                 $this->touchUrl($seo_url);

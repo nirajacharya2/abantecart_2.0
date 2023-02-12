@@ -9802,21 +9802,21 @@ ON `ac_order_options` (`order_id`, `order_product_id`, `product_option_value_id`
 -- DDL for table `order_totals`
 --
 
-CREATE TABLE `ac_order_totals` (
-  `order_total_id` INT(11)                              NOT NULL AUTO_INCREMENT,
-  `order_id`       int(11)                              NOT NULL,
-  `title`          varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `text`           varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `value`          decimal(15,4)                        NOT NULL DEFAULT '0.0000',
-  `data`           LONGTEXT                             NULL,
-  `sort_order`     int(3)                               NOT NULL,
-  `type`           varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
-  `key`            varchar(128)                         NOT NULL DEFAULT '',
-  `date_added`     timestamp                            NULL DEFAULT CURRENT_TIMESTAMP,
-  `date_modified`  timestamp                            NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `date_deleted`   timestamp                            NULL,
-  PRIMARY KEY (`order_total_id`,`order_id`),
-  KEY `idx_orders_total_orders_id` (`order_id`)
+CREATE TABLE `ac_order_totals`(
+                                  `order_total_id` INT(11)                              NOT NULL AUTO_INCREMENT,
+                                  `order_id`       int(11)                              NOT NULL,
+                                  `title`          varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+                                  `text`           varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+                                  `value`          decimal(15, 4)                       NOT NULL DEFAULT '0.0000',
+                                  `data`           MEDIUMTEXT                           NULL,
+                                  `sort_order`     int(3)                               NOT NULL,
+                                  `type`           varchar(255) COLLATE utf8_general_ci NOT NULL DEFAULT '',
+                                  `key`            varchar(128)                         NOT NULL DEFAULT '',
+                                  `date_added`     timestamp                            NULL     DEFAULT CURRENT_TIMESTAMP,
+                                  `date_modified`  timestamp                            NULL     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                  `date_deleted`   timestamp                            NULL,
+                                  PRIMARY KEY (`order_total_id`, `order_id`),
+                                  KEY `idx_orders_total_orders_id` (`order_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 --
@@ -10471,58 +10471,67 @@ INSERT INTO `ac_page_descriptions` (`page_id`, `language_id`, `name`, `title`, `
 (2, 1, 'Home Page', '', '', '', '', '', now() ),
 (3, 1, 'Checkout Pages', '', '', '', '', '', now() ),
 (4, 1, 'Login Page', '', '', '', '', '', now() ),
-(5, 1, 'Default Product Page', '', '', '', '', '', now() ),
-(10, 1, 'Maintenance Page', '', '', '', '', '', now() ),
-(11, 1, 'Customer Account Pages', '', '', '', '', '', now() ),
-(12, 1, 'Cart Page', '', '', '', '', '', now() ),
-(13, 1, 'Product Listing Page', '', '', '', '', '', now() );
+(5, 1, 'Default Product Page', '', '', '', '', '', now()),
+(10, 1, 'Maintenance Page', '', '', '', '', '', now()),
+(11, 1, 'Customer Account Pages', '', '', '', '', '', now()),
+(12, 1, 'Cart Page', '', '', '', '', '', now()),
+(13, 1, 'Product Listing Page', '', '', '', '', '', now());
 
 --
 -- DDL for table `contents`
 --
 
-CREATE TABLE `ac_contents` (
-  `content_id` int(11) NOT NULL AUTO_INCREMENT,
-  `parent_content_id` int(11) NULL DEFAULT NULL,
-  `sort_order` int(3) NOT NULL DEFAULT '0',
-  `status` int(1) NOT NULL DEFAULT '0',
-  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
-  `date_deleted` timestamp NULL,
-  `stage_id` INT(6) NULL,
-  `hide_title` INT(1) NULL,
-  KEY `content_id_idx` (`content_id`),
-  INDEX `stage_idx` (`stage_id` ASC)
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+CREATE TABLE `ac_contents`
+(
+    content_id    int(11) auto_increment primary key,
+    parent_id     int(11)                               null,
+    sort_order    int(3)    default 0                   not null,
+    status        int(1)    default 0                   not null,
+    date_added    timestamp default current_timestamp() null,
+    date_modified timestamp default current_timestamp() null on update current_timestamp(),
+    date_deleted  timestamp                             null,
+    stage_id      int(6)                                null,
+    hide_title    int(1)                                null,
+    constraint `ac_contents_tims_contents_content_id_fk`
+        foreign key (parent_id) references `ac_contents` (content_id)
+            on update cascade on delete cascade
+)
+    ENGINE = INNODB
+    DEFAULT CHARSET = utf8
+    COLLATE = utf8_general_ci
+    AUTO_INCREMENT = 1;
 
 --
 -- Dumping data for table `contents`
 --
 
-INSERT INTO `ac_contents` (`content_id`, `sort_order`, `status`) VALUES
-(1, 1, 1),
-(2, 2, 1),
-(3, 3, 1),
-(4, 4, 1);
+INSERT INTO `ac_contents` (`content_id`, `sort_order`, `status`)
+VALUES (1, 1, 1),
+       (2, 2, 1),
+       (3, 3, 1),
+       (4, 4, 1);
 
 --
 -- DDL for table `content_descriptions`
 --
 CREATE TABLE `ac_content_descriptions` (
-  `content_id` int(11) NOT NULL DEFAULT '0',
-  `language_id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL COMMENT 'translatable',
-  `title` varchar(255) NOT NULL COMMENT 'translatable',
-  `description` varchar(255) NOT NULL DEFAULT '' COMMENT 'translatable',
-  `meta_keywords` varchar(255) NOT NULL DEFAULT '',
-  `meta_description` varchar(255) NOT NULL DEFAULT '',
-  `content` longtext NOT NULL COMMENT 'translatable', -- Contain the page details if custom content
-  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `date_deleted` timestamp NULL,
-  `stage_id` INT(6) NULL,
-  PRIMARY KEY (`content_id`,`language_id`),
-  INDEX `stage_idx` (`stage_id` ASC)
+                                           `content_id`       int(11)      NOT NULL DEFAULT '0',
+                                           `language_id`      int(11)      NOT NULL,
+                                           `name`             varchar(255) NOT NULL COMMENT 'translatable',
+                                           `title`            varchar(255) NOT NULL COMMENT 'translatable',
+                                           `description`      varchar(255) NOT NULL DEFAULT '' COMMENT 'translatable',
+                                           `meta_keywords`    varchar(255) NOT NULL DEFAULT '',
+                                           `meta_description` varchar(255) NOT NULL DEFAULT '',
+                                           `content`          longtext     NOT NULL COMMENT 'translatable', -- Contain the page details if custom content
+                                           `date_added`       timestamp    NULL     DEFAULT CURRENT_TIMESTAMP,
+                                           `date_modified`    timestamp    NULL     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                           `date_deleted`     timestamp    NULL,
+                                           `stage_id`         INT(6)       NULL,
+                                           constraint `ac_content_descriptions_fk`
+                                               foreign key (content_id) references `ac_contents` (content_id)
+                                                   on update cascade on delete cascade,
+                                           PRIMARY KEY (`content_id`, `language_id`),
+                                           INDEX `stage_idx` (`stage_id` ASC)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 INSERT INTO `ac_content_descriptions` (`content_id`, `language_id`, `name`, `title`, `description`, `content`, `date_added`)
@@ -10535,10 +10544,14 @@ VALUES
 --
 -- DDL for table `content_to_store`
 --
-CREATE TABLE `ac_contents_to_stores` (
-  `content_id` int(11) NOT NULL,
-  `store_id` int(11) NOT NULL,
-  PRIMARY KEY (`content_id`,`store_id`)
+CREATE TABLE `ac_contents_to_stores`
+(
+    `content_id` int(11) NOT NULL,
+    `store_id`   int(11) NOT NULL,
+    constraint `ac_content_2_stores_fk`
+        foreign key (content_id) references `ac_contents` (content_id)
+            on update cascade on delete cascade,
+    PRIMARY KEY (`content_id`, `store_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
@@ -13707,16 +13720,6 @@ ADD CONSTRAINT `ac_global_attributes_type_descriptions_fk_2`
   FOREIGN KEY (`language_id`)
   REFERENCES `ac_languages` (`language_id`)
   ON DELETE CASCADE
-  ON UPDATE CASCADE;
-
-ALTER TABLE `ac_contents`
-ADD INDEX `ac_contents_fk_1_idx` (`parent_content_id` ASC);
-
-ALTER TABLE `ac_contents`
-ADD CONSTRAINT `ac_contents_fk_1`
-  FOREIGN KEY (`parent_content_id`)
-  REFERENCES `ac_contents` (`content_id`)
-  ON DELETE SET NULL
   ON UPDATE CASCADE;
 
 ALTER TABLE `ac_global_attributes_groups_descriptions`

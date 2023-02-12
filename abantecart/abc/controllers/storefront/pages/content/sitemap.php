@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,19 +22,10 @@ namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
 use abc\models\catalog\Category;
+use abc\models\content\Content;
 
 class ControllerPagesContentSitemap extends AController
 {
-    /**
-     * Check if HTML Cache is enabled for the method
-     *
-     * @return array - array of data keys to be used for cache key building
-     */
-    public static function main_cache_keys()
-    {
-        return [];
-    }
-
     public function main()
     {
 
@@ -45,17 +36,21 @@ class ControllerPagesContentSitemap extends AController
 
         $this->document->resetBreadcrumbs();
 
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getHomeURL(),
-            'text'      => $this->language->get('text_home'),
-            'separator' => false,
-        ]);
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getHomeURL(),
+                'text'      => $this->language->get('text_home'),
+                'separator' => false,
+            ]
+        );
 
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getNonSecureURL('content/sitemap'),
-            'text'      => $this->language->get('heading_title'),
-            'separator' => $this->language->get('text_separator'),
-        ]);
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getNonSecureURL('content/sitemap'),
+                'text'      => $this->language->get('heading_title'),
+                'separator' => $this->language->get('text_separator'),
+            ]
+        );
 
         $this->loadModel('tool/seo_url');
 
@@ -73,9 +68,8 @@ class ControllerPagesContentSitemap extends AController
         $this->view->assign('search', $this->html->getNonSecureURL('product/search'));
         $this->view->assign('contact', $this->html->getSecureURL('content/contact'));
 
-        $this->loadModel('catalog/content');
-        $content_pages = $this->model_catalog_content->getContents();
-        $this->view->assign('contents', $this->_buildContentTree($content_pages));
+        $allContents = (array)Content::getContents(['filter' => ['status' => 1]])?->toArray();
+        $this->view->assign('contents', $this->_buildContentTree($allContents));
 
         $this->processTemplate('pages/content/sitemap.tpl');
 
@@ -97,11 +91,11 @@ class ControllerPagesContentSitemap extends AController
             if (!$current_path) {
                 $new_path = $result['category_id'];
             } else {
-                $new_path = $current_path.'_'.$result['category_id'];
+                $new_path = $current_path . '_' . $result['category_id'];
             }
 
-            $output .= '<li class="list-group-item"><a href="'.$this->html->getSEOURL('product/category',
-                    '&path='.$new_path, true).'">'.$result['name'].'</a>';
+            $output .= '<li class="list-group-item"><a href="' . $this->html->getSEOURL('product/category',
+                    '&path=' . $new_path, true) . '">' . $result['name'] . '</a>';
             $output .= $this->_buildCategoriesTree($result['category_id'], $new_path);
             $output .= '</li>';
         }
@@ -119,13 +113,13 @@ class ControllerPagesContentSitemap extends AController
         }
 
         foreach ($contents as $content) {
-            if ($content['parent_content_id'] != $parent_id) {
+            if ($content['parent_id'] != $parent_id) {
                 continue;
             }
 
             $output[] = [
-                'title' => str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;', $deep).$content['title'],
-                'href'  => $this->html->getSEOURL('content/content', '&content_id='.$content['content_id'], true),
+                'title' => str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;', $deep) . $content['title'],
+                'href'  => $this->html->getSEOURL('content/content', '&content_id=' . $content['content_id'], true),
             ];
             $output = array_merge($output, $this->_buildContentTree($contents, $content['content_id'], ($deep + 1)));
         }

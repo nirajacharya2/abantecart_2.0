@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2022 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -24,7 +24,6 @@ use abc\core\engine\AController;
 use abc\core\engine\AResource;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
-use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
 use abc\models\admin\ModelCatalogProduct;
 use abc\models\catalog\Product;
@@ -46,56 +45,68 @@ class ControllerResponsesListingGridProduct extends AController
 {
     public function main()
     {
+        $page = (int)$this->request->post['page'] ?: 1;
+        $limit = $this->request->post['rows'];
+        $sort = $this->request->post['sidx'];
+        $order = $this->request->post['sord'];
+
+        $this->data['search_parameters'] = [
+            'filter'      => [
+                'keyword_search_parameters' => [
+                    'match'     => 'all',
+                    'search_by' => [
+                        'name',
+                        'model',
+                        'sku',
+                        'supplier'
+                    ]
+                ]
+            ],
+            'language_id' => $this->language->getContentLanguageID(),
+            'start'       => ($page - 1) * $limit,
+            'limit'       => $limit,
+            'sort'        => $sort,
+            'order'       => $order
+        ];
+
+        $get = $this->request->get;
+        if (isset($get['keyword'])) {
+            $this->data['search_parameters']['filter']['keyword'] = (string)$get['keyword'];
+        }
+        if (isset($get['price_from'])) {
+            $this->data['search_parameters']['filter']['price_from'] = (float)$get['price_from'];
+        }
+        if (isset($get['price_to'])) {
+            $this->data['search_parameters']['filter']['price_to'] = (float)$get['price_to'];
+        }
+        if (isset($get['category_id']) && $get['category_id'] > 0) {
+            $this->data['search_parameters']['filter']['category_id'] = (int)$get['category_id'];
+        }
+        if (isset($get['match'])) {
+            $this->data['search_parameters']['filter']['keyword_search_parameters']['match'] = $get['match'];
+        }
+        if (isset($get['status']) && $get['status'] !== '') {
+            $this->data['search_parameters']['filter']['status'] = (int)$get['status'];
+        }
+
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('catalog/product');
-        $this->loadModel('catalog/product');
         $this->loadModel('tool/image');
 
-        //Clean up parameters if needed
-        if (isset($this->request->get['keyword'])
-            && $this->request->get['keyword'] == $this->language->get('filter_product')
-        ) {
-            unset($this->request->get['keyword']);
-        }
-
-        if (isset($this->request->get['pfrom']) && $this->request->get['pfrom'] == 0) {
-            unset($this->request->get['pfrom']);
-        }
-
-        if (isset($this->request->get['pto'])
-            && $this->request->get['pto'] == $this->language->get('filter_price_max')
-        ) {
-            unset($this->request->get['pto']);
-        }
-
-        //Prepare filter config
-        $filter_params = [
-            'category',
-            'status',
-            'keyword',
-            'match',
-            'pfrom',
-            'pto'
-        ];
-        $grid_filter_params = ['name', 'sort_order', 'model'];
-
-        $filter_form = new AFilter(['method' => 'get', 'filter_params' => $filter_params]);
-        $filter_grid = new AFilter(['method' => 'post', 'grid_filter_params' => $grid_filter_params]);
-        $data = array_merge($filter_form->getFilterData(), $filter_grid->getFilterData());
-
-        $results = $this->model_catalog_product->getProducts($data);
+        $results = Product::getProducts($this->data['search_parameters']);
 
         $total = $results[0]['total_num_rows'];
+        $total_pages = $total > 0 ? ceil($total / $limit) : 0;
         $response = new stdClass();
-        $response->page = $filter_grid->getParam('page');
-        $response->total = $filter_grid->calcTotalPages($total);
+        $response->page = $page;
+        $response->total = $total_pages;
         $response->records = $total;
-        $response->userdata = new stdClass();
+        $response->userdata = (object)[''];
         $response->userdata->classes = [];
 
-        $product_ids = array_map('intval', array_column($results, 'product_id'));
+        $product_ids = $results?->pluck('product_id')->toArray();
 
         $resource = new AResource('image');
         $thumbnails = $resource->getMainThumbList(
@@ -153,7 +164,6 @@ class ControllerResponsesListingGridProduct extends AController
         $this->data['response'] = $response;
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
-        $this->load->library('json');
         $this->response->setOutput(AJson::encode($this->data['response']));
     }
 

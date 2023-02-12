@@ -1,25 +1,15 @@
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
-<?php if ($tabs) { ?>
-	<ul class="nav nav-tabs nav-justified nav-profile">
-		<?php
-		foreach($tabs as $tab){?>
-		<li <?php echo ($tab['active'] ? 'class="active"' : '') ?>>
-			<a href="<?php echo $tab['href'] ? $tab['href'] : 'Javascript:void(0);'; ?>"><span><?php echo $tab['text']; ?></span></a>
-		</li>
-		<?php } ?>
-		<?php echo $this->getHookVar('extension_tabs'); ?>
-	</ul>
-<?php } ?>
+<?php echo $tabs; ?>
 
 <?php
 $template_list = '';
 foreach ($templates as $template) {
-  $item_class = '';
-  if ($tmpl_id == $template) {
-    $item_class = ' class="disabled"';
-  }
-  $template_list .= '<li' . $item_class . '><a href="' . $page_url . '&tmpl_id=' . $template . '">' . $template . '</a></li>';
+    $item_class = '';
+    if ($tmpl_id == $template) {
+        $item_class = ' class="disabled"';
+    }
+    $template_list .= '<li' . $item_class . '><a href="' . $page_url . '&tmpl_id=' . $template . '">' . $template . '</a></li>';
 }
 
 ?>

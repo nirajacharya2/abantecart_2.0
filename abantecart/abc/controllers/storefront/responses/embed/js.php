@@ -283,10 +283,14 @@ class ControllerResponsesEmbedJS extends AController
             return null;
         }
 
-        $categories = Category::getCategoriesData([
-            'include'    => $categoryIds,
-            'status'     => 1
-        ]);
+        $categories = Category::getCategoriesData(
+            [
+                'filter' => [
+                    'include' => $categoryIds,
+                    'status'  => 1
+                ]
+            ]
+        );
 
         //can not locate categories? get out
         if (!$categories) {

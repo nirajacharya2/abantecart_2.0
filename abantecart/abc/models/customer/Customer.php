@@ -86,7 +86,7 @@ use stdClass;
  * @property \Illuminate\Database\Eloquent\Collection $customer_transactions
  * @property \Illuminate\Database\Eloquent\Collection $orders
  *
- * @method static Customer find(int $customer_id) Customer
+ * @method static Customer|Collection find(int|array $customer_id) Customer
  * @method static Customer select(mixed $select = '*') Builder
  * @package abc\models
  */
@@ -594,7 +594,10 @@ class Customer extends BaseModel
 
     public function SetEmailAttribute($value)
     {
-        $this->attributes['email'] = mb_strtolower($value, ABC::env('APP_CHARSET'));
+        $this->attributes['email'] = mb_strtolower(trim($value), ABC::env('APP_CHARSET'));
+        if ($this->attributes['email'] && !Registry::config()->get('prevent_email_as_login')) {
+            $this->attributes['loginname'] = $this->attributes['email'];
+        }
     }
 
     public function setPasswordAttribute($password)

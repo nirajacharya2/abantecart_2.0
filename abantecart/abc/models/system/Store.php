@@ -27,6 +27,7 @@ use abc\models\customer\Customer;
 use abc\models\order\Order;
 use abc\models\user\UserNotification;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -102,12 +103,22 @@ class Store extends BaseModel
         return $this->hasMany(StoreDescription::class, 'store_id');
     }
 
+    /**
+     * @return HasOne
+     */
+    public function description()
+    {
+        return $this->hasOne(StoreDescription::class, 'store_id', 'store_id')
+            ->where('language_id', '=', static::$current_language_id);
+    }
+
     public function user_notifications()
     {
         return $this->hasMany(UserNotification::class, 'store_id');
     }
 
-    public static function isDefaultStore(){
+    public static function isDefaultStore()
+    {
         $store_settings = Setting::getStoreSettings((int)Registry::session()->data['current_store_id']);
         return (Registry::config()->get('config_url') == $store_settings->config_url);
     }

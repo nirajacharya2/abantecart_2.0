@@ -88,6 +88,16 @@ class ControllerPagesProductSearch extends AController
             }
         }
 
+        $searchBy = [];
+        if ($request['description']) {
+            $searchBy[] = 'description';
+        }
+        if ($request['model']) {
+            $searchBy[] = 'model';
+        }
+        if ($request['sku']) {
+            $searchBy[] = 'sku';
+        }
         $this->data['search_parameters'] =
             [
                 'with_final_price'    => true,
@@ -97,12 +107,13 @@ class ControllerPagesProductSearch extends AController
                 'with_stock_info'     => true,
                 'with_option_count'   => true,
                 'filter'              => [
-                    'keyword'     => $request['keyword'],
-                    'category_id' => $category_id,
-                    'model'       => $request['model'],
-                    'description' => $request['description'],
-                    'price_from'  => $request['price_from'],
-                    'price_to'    => $request['price_to'],
+                    'keyword'                   => $request['keyword'],
+                    'keyword_search_parameters' => [
+                        'search_by' => $searchBy,
+                    ],
+                    'category_id'               => $category_id,
+                    'price_from'                => $request['price_from'],
+                    'price_to'                  => $request['price_to'],
                 ],
                 'sort'                => $sort,
                 'order'               => $order,

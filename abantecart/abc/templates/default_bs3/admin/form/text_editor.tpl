@@ -26,27 +26,27 @@ $wrapper_id = \H::randomWord(6);
 		    <?php } ?>
 	
 			<?php if ($multilingual){ ?>
-			    <span class="multilingual"><i class="fa fa-flag"></i></span>
-			<?php } ?>
+                <span class="multilingual"><i class="fa fa-flag"></i></span>
+            <?php } ?>
 	
 	        </span>
-			<?php } ?>
-		
-			<a title="<?php abc_js_echo($button_add_media); ?>"
-				data-original-title="<?php abc_js_echo($button_add_media); ?>"
-                href="#"
-                class="btn btn-primary tooltips add_media">
-				<i class="fa fa-file-picture-o fa-fw"></i> <?php echo $button_add_media; ?>
-			</a>
-		</div>
+            <?php } ?>
 
-	</div>
-	<!-- Tab panes -->
-	<div class="tab-content">
-		<div role="tabpanel" class="tab-pane active" id="text_<?php echo $wrapper_id; ?>">
-			<div class="zennable">
-			
-			<div class="toolbar text-editor-toolbar">
+            <a title="<?php abc_js_echo($button_add_media); ?>"
+               data-original-title="<?php abc_js_echo($button_add_media); ?>"
+               href="#"
+               class="btn btn-primary tooltips add_media">
+                <i class="fa fa-image fa-fw"></i> <?php echo $button_add_media; ?>
+            </a>
+        </div>
+
+    </div>
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="text_<?php echo $wrapper_id; ?>">
+            <div class="zennable">
+
+                <div class="toolbar text-editor-toolbar">
 				<div class="primary_content_actions">
 					<div class="btn-group">
 						<a href="#" class="btn btn-default btn-xs tooltips qt_cnt qt_cnt_strong" data-original-title="Paragraph">p</a>

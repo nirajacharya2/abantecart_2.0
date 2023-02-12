@@ -23,6 +23,7 @@ use abc\core\engine\AForm;
 use abc\core\engine\Extension;
 use abc\core\engine\Registry;
 use abc\core\view\AView;
+use abc\models\content\Content;
 use abc\models\customer\Customer;
 use H;
 
@@ -33,8 +34,7 @@ class ExtensionGdpr extends Extension
     {
         $that = $this->baseObject;
         $that->view->batchAssign($that->language->getASet('gdpr/gdpr'));
-        $that->loadModel('catalog/content');
-        $content_info = $that->model_catalog_content->getContent($that->config->get('config_account_id'));
+        $content_info = Content::getContent($that->config->get('config_account_id'))?->toArray();
         $gdpr_expiration_days = $that->config->get('gdpr_expiration_days');
 
         $agree_href = $content_info
@@ -77,11 +77,11 @@ class ExtensionGdpr extends Extension
             ]
         ));
         $customer_id = $that->customer->getId();
-        $customer_info = Customer::getCustomer($customer_id);;
+        $customer_info = Customer::getCustomer($customer_id);
         $data = $customer_info['data'];
         if (isset($data['gdpr'])
             && isset($data['gdpr']['erasure_requested'])
-            && $data['gdpr']['erasure_requested'] == true
+            && $data['gdpr']['erasure_requested']
             && H::dateISO2Int($data['gdpr']['request_date'])
         ) {
             $btn_text = sprintf(
@@ -123,8 +123,7 @@ class ExtensionGdpr extends Extension
         $that = $this->baseObject;
         $that->loadLanguage('account/create');
         $that->loadLanguage('gdpr/gdpr');
-        $that->loadModel('catalog/content');
-        $content_info = $that->model_catalog_content->getContent($that->config->get('config_account_id'));
+        $content_info = Content::getContent($that->config->get('config_account_id'))?->toArray();
         if ($content_info){
             $text_agree_href = $that->html->getURL(
                 'r/content/content/loadInfo',
@@ -179,7 +178,7 @@ class ExtensionGdpr extends Extension
         }
 
         $that = $this->baseObject;
-        if (substr($that->view->getData('loginname'), 0, 7) == 'erased_') {
+        if (str_starts_with($that->view->getData('loginname'), 'erased_')) {
             return null;
         }
 
@@ -246,14 +245,13 @@ $("#gdpr_erase")
 
     public function onControllerPagesAccountEdit_InitData() {
         if (ABC::env('IS_ADMIN')) {
-            return true;
+            return;
         }
         $that = $this->baseObject;
         $that->loadLanguage('account/create');
         $that->loadLanguage('account/edit');
         $that->loadLanguage('gdpr/gdpr');
-        $that->loadModel('catalog/content');
-        $content_info = $that->model_catalog_content->getContent($that->config->get('config_account_id'));
+        $content_info = Content::getContent($that->config->get('config_account_id'))?->toArray();
         if ($content_info){
             $text_agree_href = $that->html->getURL(
                 'r/content/content/loadInfo',

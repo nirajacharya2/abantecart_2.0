@@ -45,29 +45,35 @@
 									echo '<dl class="dl-horizontal"><dt></dt><dd>' . $v . '</dd></dl>';
 								}
 
-							}
-						}
-					}
-				}
-			}
+                            }
+                        }
+                    }
+                }
+            }
 
-		}
+        }
 
-		?>
-		</div>
-		<div class="form-group">
-		   <?php echo $description; ?>
-		</div>
-		
-  	</div>
-  	
-	<div class="panel-footer col-xs-12">
-		<div class="center">
-		<?php if($allow_edit) { ?>
-			<a class="btn btn-primary lock-on-click" href="<?php echo $block_edit; ?>" target="_new">
-			<i class="fa fa-edit fa-fw"></i> <?php echo $text_edit; ?>
-			</a>
-		<?php } ?>
+        ?>
+        </div>
+        <?php
+        if ($description) { ?>
+            <div class="form-group">
+                <dl class="dl-horizontal">
+                    <dt><?php echo $this->language->t('text_description', 'Description'); ?></dt>
+                    <dd><?php echo $description; ?></dd>
+                </dl>
+            </div>
+        <?php } ?>
+
+    </div>
+
+      <div class="panel-footer col-xs-12">
+          <div class="center">
+              <?php if ($allow_edit) { ?>
+                  <a class="btn btn-primary lock-on-click" href="<?php echo $block_edit; ?>" target="_new">
+                      <i class="fa fa-edit fa-fw"></i> <?php echo $text_edit; ?>
+                  </a>
+              <?php } ?>
 
 			<button class="btn btn-default" data-dismiss="modal">
 				<i class="fa fa-times fa-fw"></i> <?php echo $text_close; ?>

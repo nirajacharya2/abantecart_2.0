@@ -432,11 +432,11 @@ class CheckoutBase extends ALibBase
     }
 
     /**
-     * @return array
+     * @return string
      */
     public function getShippingKey()
     {
-        return (array)$this->data['shipping_method']['id'];
+        return $this->data['shipping_method']['id'];
     }
 
     /**

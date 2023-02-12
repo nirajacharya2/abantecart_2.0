@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -23,12 +23,12 @@ use abc\core\engine\ALanguage;
 use abc\core\engine\ALoader;
 use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
+use abc\models\content\Content;
 use abc\models\customer\Address;
 use abc\models\customer\Customer;
 use abc\models\customer\CustomerGroup;
 use abc\models\customer\CustomerNotification;
 use abc\models\customer\CustomerTransaction;
-use abc\models\storefront\ModelCatalogContent;
 use abc\models\storefront\ModelToolOnlineNow;
 use abc\modules\events\ABaseEvent;
 use Exception;
@@ -339,6 +339,7 @@ class ACustomer extends ALibBase
         $this->address_id = (int)$data['address_id'];
         //if customer have no default address - take first
         if($this->customer_id && !$this->address_id){
+            /** @var Address $address */
             $address = Address::where('customer_id','=', $this->customer_id)->first();
             if($address){
                 $this->address_id = $address->address_id;
@@ -762,7 +763,7 @@ class ACustomer extends ALibBase
     /**
      * Merge cart from session and cart from database content
      *
-     * @param array - cart from database
+     * @param array $cart - cart from database
      *
      * @void
      */
@@ -823,11 +824,9 @@ class ACustomer extends ALibBase
             return false;
         }
         $keys = array_keys($cart_data);
-        if (is_array($keys) && !empty($keys)) {
-            foreach ($keys as $k) {
-                if (is_int(strpos($k, 'store_'))) {
-                    return true;
-                }
+        foreach ($keys as $k) {
+            if (is_int(strpos($k, 'store_'))) {
+                return true;
             }
         }
 
@@ -929,7 +928,7 @@ class ACustomer extends ALibBase
      * @param array $data - amount, order_id, transaction_type, description, comments, creator
      *
      * @return bool
-     * @throws Exception|ValidationException
+     * @throws Exception
      * @throws InvalidArgumentException
      */
     protected function recordTransaction($data)
@@ -952,7 +951,7 @@ class ACustomer extends ALibBase
         } catch (ValidationException $e) {
             $errors = [];
             H::SimplifyValidationErrors($transaction->errors()['validation'], $errors);
-            Registry::log()->write(var_export($errors, true));
+            Registry::log()->error(var_export($errors, true));
             return false;
         }
 
@@ -1045,9 +1044,6 @@ class ACustomer extends ALibBase
             }
 
             $db->commit();
-        } catch (ValidationException $e) {
-            $db->rollback();
-            throw $e;
         } catch (Exception $e) {
             $db->rollback();
             throw new AException(__CLASS__.': '.$e->getMessage(), 0, __FILE__);
@@ -1258,11 +1254,7 @@ class ACustomer extends ALibBase
         }
 
         if (!$isLogged && $config->get('config_account_id')) {
-            /** @var ModelCatalogContent $mdl
-            TODO: replace it in the future */
-            $mdl = Registry::load()->model('catalog/content');
-            $content_info = $mdl->getContent($config->get('config_account_id'));
-
+            $content_info = Content::getContent($config->get('config_account_id'))?->toArray();
             if ($content_info) {
                 if (!isset($data['agree'])) {
                     static::$errors['warning'] = sprintf($language->get('error_agree'), $content_info['title']);
@@ -1359,7 +1351,7 @@ class ACustomer extends ALibBase
             }
         }
 
-        Registry::extensions()->hk_ValidateData( Registry::customer(), [ __METHOD__ ] );
+        Registry::extensions()->hk_ValidateData(Registry::customer(), __FUNCTION__, $data);
         return static::$errors;
     }
 }

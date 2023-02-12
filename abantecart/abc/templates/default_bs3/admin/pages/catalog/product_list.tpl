@@ -21,38 +21,37 @@
 						  name="<?php echo $search_form['form_open']->name; ?>" class="form-inline" role="form">
 						<?php
 						foreach ($search_form['fields'] as $f) { ?>
-							<div class="form-group">
-								<?php if($search_form['entry_'.$f->name]){?>
-										<div class="input-group input-group-sm">
-											<?php echo $search_form['entry_'.$f->name];?>
-										</div>
-								<?php } ?>
-								<div class="input-group input-group-sm">
-									<?php echo $f; ?>
-								</div>
-							</div>
-						<?php } ?>
-						<div class="form-group">
-							<button type="submit" class="btn btn-xs btn-primary tooltips" title="<?php echo $button_filter; ?>">
-									<?php echo $search_form['submit']->text ?>
-							</button>
-							<button type="reset" class="btn btn-xs btn-default tooltips" title="<?php echo $button_reset; ?>">
+                            <div class="form-group">
+                                <?php if ($search_form['entry_' . $f->name]) { ?>
+                                    <div class="input-group">
+                                        <?php echo $search_form['entry_' . $f->name]; ?>
+                                    </div>
+                                <?php } ?>
+                                <div class="input-group " <?php echo($f->name == 'category_id' ? 'style="width:250px;"' : '') ?>>
+                                    <?php echo $f; ?>
+                                </div>
+                            </div>
+                        <?php } ?>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary tooltips"
+                                    title="<?php echo $button_filter; ?>">
+                                <?php echo $search_form['submit']->text ?>
+                            </button>
+                            <button type="reset" class="btn btn-default tooltips" title="<?php echo $button_reset; ?>">
                                 <i class="fa fa-sync"></i>
-							</button>
-						</div>
-					</form>
-				<?php
-				}
-				?>
-			</div>
-		</div>
+                            </button>
+                        </div>
+                    </form>
+                <?php } ?>
+            </div>
+        </div>
 
-		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>	
-	</div>
+        <?php include($tpl_common_dir . 'content_buttons.tpl'); ?>
+    </div>
 
-	<div class="panel-body panel-body-nopadding tab-content col-xs-12">
-		<?php echo $listing_grid; ?>
-	</div>
+    <div class="panel-body panel-body-nopadding tab-content col-xs-12">
+        <?php echo $listing_grid; ?>
+    </div>
 
 </div>
 

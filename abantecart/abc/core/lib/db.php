@@ -311,7 +311,7 @@ class ADB
      */
     public function getLastId()
     {
-        return (int)$this->orm::connection($this->conName)->getPdo()->lastInsertId();
+        return (int)$this->orm::connection($this->conName)->getReadPdo()->lastInsertId();
     }
 
     /**

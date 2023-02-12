@@ -83,17 +83,17 @@ class ControllerPagesCatalogProduct extends AController
             ]
         );
 
-        $this->data['categories'] = ['' => $this->language->get('text_select_category')];
+
         $results = Category::getCategories(0, $this->session->data['current_store_id']);
-        foreach ($results as $r) {
-            $this->data['categories'][$r['category_id']] = $r['name'];
-        }
+
+        $this->data['categories'] = ['' => $this->language->get('text_select_category')]
+            + array_column($results, 'name', 'category_id');
 
         $grid_settings = [
             'table_id'     => 'product_grid',
             'url'          => $this->html->getSecureURL(
                 'listing_grid/product',
-                '&category='.(int) $this->request->get['category']
+                '&category_id=' . (int)$this->request->get['category_id']
             ),
             'editurl'      => $this->html->getSecureURL('listing_grid/product/update'),
             'update_field' => $this->html->getSecureURL('listing_grid/product/update_field'),
@@ -233,16 +233,18 @@ class ControllerPagesCatalogProduct extends AController
                 'search'   => false,
             ],
             [
-                'name'  => 'name',
-                'index' => 'name',
-                'align' => 'center',
-                'width' => 200,
+                'name'   => 'name',
+                'index'  => 'name',
+                'align'  => 'center',
+                'width'  => 200,
+                'search' => false,
             ],
             [
-                'name'  => 'model',
-                'index' => 'model',
-                'align' => 'center',
-                'width' => 120,
+                'name'   => 'model',
+                'index'  => 'model',
+                'align'  => 'center',
+                'width'  => 120,
+                'search' => false,
             ],
             [
                 'name'   => 'price',
@@ -325,15 +327,15 @@ class ControllerPagesCatalogProduct extends AController
                 'name'    => 'match',
                 'value'   => $search_params['match'],
                 'options' => [
-                    'any'   => $this->language->get(
-                        'filter_any_word'
-                    ),
                     'all'   => $this->language->get(
                         'filter_all_words'
                     ),
                     'exact' => $this->language->get(
                         'filter_exact_match'
                     ),
+                    'any'   => $this->language->get(
+                        'filter_any_word'
+                    )
                 ],
             ]
         );
@@ -343,8 +345,8 @@ class ControllerPagesCatalogProduct extends AController
         $grid_search_form['fields']['pfrom'] = $form->getFieldHtml(
             [
                 'type'        => 'input',
-                'name'        => 'pfrom',
-                'value'       => $search_params['pfrom'],
+                'name'        => 'price_from',
+                'value'       => $search_params['price_from'],
                 'placeholder' => $this->language->get(
                     'filter_price_min'
                 ),
@@ -354,8 +356,8 @@ class ControllerPagesCatalogProduct extends AController
         $grid_search_form['fields']['pto'] = $form->getFieldHtml(
             [
                 'type'        => 'input',
-                'name'        => 'pto',
-                'value'       => $search_params['pto'],
+                'name'        => 'price_to',
+                'value'       => $search_params['price_to'],
                 'placeholder' => $this->language->get(
                     'filter_price_max'
                 ),
@@ -363,17 +365,17 @@ class ControllerPagesCatalogProduct extends AController
             ]
         );
 
-        if ($this->request->get['category']) {
-            $search_params['category'] = $this->request->get['category'];
+        if ($this->request->get['category_id']) {
+            $search_params['category_id'] = (int)$this->request->get['category_id'];
         }
 
         $grid_search_form['fields']['category'] = $form->getFieldHtml(
             [
                 'type'        => 'selectbox',
-                'name'        => 'category',
+                'name'        => 'category_id',
                 'options'     => $this->data['categories'],
                 'style'       => 'chosen',
-                'value'       => $search_params['category'],
+                'value'       => $search_params['category_id'],
                 'placeholder' => $this->language->get('text_select_category'),
             ]
         );
@@ -386,8 +388,9 @@ class ControllerPagesCatalogProduct extends AController
                     'text_select_status'
                 ),
                 'options'     => [
-                    1 => $this->language->get('text_enabled'),
-                    0 => $this->language->get('text_disabled'),
+                    '' => $this->language->get('text_select_status'),
+                    1  => $this->language->get('text_enabled'),
+                    0  => $this->language->get('text_disabled'),
                 ],
             ]
         );

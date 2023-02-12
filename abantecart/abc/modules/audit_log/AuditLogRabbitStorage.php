@@ -13,6 +13,7 @@ use Elasticsearch\ClientBuilder;
 use H;
 use http\Exception;
 use PhpAmqpLib\Channel\AMQPChannel;
+use PhpAmqpLib\Connection\AMQPSSLConnection;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;
@@ -50,24 +51,47 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         $this->connect();
     }
 
-    public function __destruct() {
+    public function __destruct()
+    {
         $this->disconnect();
     }
 
 
-    protected function connect() {
+    protected function connect()
+    {
         $this->conf = ABC::env('RABBIT_MQ');
-        $this->conn = new AMQPStreamConnection($this->conf['HOST'], $this->conf['PORT'], $this->conf['USER'], $this->conf['PASSWORD']);
+        $params = [
+            'host' => $this->conf['HOST'],
+            'port' => $this->conf['PORT'],
+            'user' => $this->conf['USER'],
+            'password' => $this->conf['PASSWORD']
+        ];
+        if (isset($this->conf['PROTOCOL']) && strtolower($this->conf['PROTOCOL']) === 'amqps') {
+            $params['ssl_options'] = [
+                'dsn' => 'amqps:'
+            ];
+            $this->conn = new AMQPSSLConnection(...$params);
+        } else {
+            $this->conn = new AMQPStreamConnection(...$params);
+        }
         $this->channel = $this->conn->channel();
 
         $this->channel->exchange_declare('exch_main', 'direct', false, true, false);
         $this->channel->exchange_declare('exch_backup', 'fanout', false, true, false);
 
-        $this->channel->queue_declare('audit_log', false, true, false, false, false, new AMQPTable([
-            'x-dead-letter-exchange' => 'exch_backup',
-            'x-message-ttl'          => 15000,
-            //'x-expires'              => 16000,
-        ]));
+        $this->channel->queue_declare(
+            'audit_log',
+            false,
+            true,
+            false,
+            false,
+            false,
+            new AMQPTable([
+                'x-dead-letter-exchange' => 'exch_backup',
+                'x-message-ttl' => 15000,
+                //'x-expires'              => 16000,
+            ])
+        );
 
         $this->channel->queue_declare('audit_log_backup', false, true, false, false, false, new AMQPTable([]));
 
@@ -94,7 +118,7 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
     {
         $domain = ABC::env('AUDIT_LOG_API')['DOMAIN'];
         $data = [
-            'data'   => $data,
+            'data' => $data,
             'domain' => $domain ?: 'audit-log-index',
         ];
 
@@ -105,15 +129,16 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
             $msg = new AMQPMessage(json_encode($data));
             $this->channel->basic_publish($msg, '', $this->conf['QUEUE']);
         } catch (\Exception $exception) {
-            if (!file_exists(ABC::env('DIR_SYSTEM').'rabbitmq')) {
-                if (!mkdir($concurrentDirectory = ABC::env('DIR_SYSTEM').'rabbitmq', 0775, true) && !is_dir($concurrentDirectory)) {
+            if (!file_exists(ABC::env('DIR_SYSTEM') . 'rabbitmq')) {
+                if (!mkdir($concurrentDirectory = ABC::env('DIR_SYSTEM') . 'rabbitmq', 0775, true) && !is_dir(
+                        $concurrentDirectory
+                    )) {
                     throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
                 }
             }
             $this->log->write($exception->getMessage());
-            $backupFile = ABC::env('DIR_SYSTEM').'rabbitmq/rabbit_data.bak';
-            file_put_contents($backupFile, json_encode($data).PHP_EOL, FILE_APPEND);
-
+            $backupFile = ABC::env('DIR_SYSTEM') . 'rabbitmq/rabbit_data.bak';
+            file_put_contents($backupFile, json_encode($data) . PHP_EOL, FILE_APPEND);
         }
     }
 
@@ -162,11 +187,11 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
     protected function prepareRequest($request)
     {
         $allowSortBy = [
-            'date_added'           => 'request.timestamp',
-            'event'                => 'entity.group',
-            'main_auditable_id'    => 'entity.id',
+            'date_added' => 'request.timestamp',
+            'event' => 'entity.group',
+            'main_auditable_id' => 'entity.id',
             'main_auditable_model' => 'entity.name',
-            'user_name'            => 'actor.name',
+            'user_name' => 'actor.name',
         ];
         $filter = [];
         if (is_array($request['filter'])) {
@@ -218,10 +243,10 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         }
 
         $result = [
-            'limit'  => (int)$request['rowsPerPage'],
+            'limit' => (int)$request['rowsPerPage'],
             'offset' => ((int)$request['rowsPerPage'] * (int)$request['page'] - (int)$request['rowsPerPage']) > 0 ? (int)$request['rowsPerPage'] * (int)$request['page'] - (int)$request['rowsPerPage'] : 0,
-            'sort'   => $allowSortBy[$request['sortBy']] ?: '',
-            'order'  => $request['sortDesc'] == 'true' ? 'DESC' : 'ASC',
+            'sort' => $allowSortBy[$request['sortBy']] ?: '',
+            'order' => $request['sortDesc'] == 'true' ? 'DESC' : 'ASC',
         ];
         if (!empty($request['date_from'])) {
             $result['dateFrom'] = $request['date_from'];
@@ -247,15 +272,18 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         $result = [];
         foreach ($events as $event) {
             $result[] = [
-                'id'                   => $event['_id'],
-                'user_name'            => $event['actor']['name'],
-                'alias_name'           => '',
+                'id' => $event['_id'],
+                'user_name' => $event['actor']['name'],
+                'alias_name' => '',
                 'main_auditable_model' => $event['entity']['name'],
-                'main_auditable_id'    => $event['entity']['id'],
-                'description'          => $event['description'],
-                'ip'                   => $event['request']['ip'],
-                'event'                => $event['entity']['group'],
-                'date_added'           => date(Registry::language()->get('date_format_long'), strtotime($event['request']['timestamp'])),
+                'main_auditable_id' => $event['entity']['id'],
+                'description' => $event['description'],
+                'ip' => $event['request']['ip'],
+                'event' => $event['entity']['group'],
+                'date_added' => date(
+                    Registry::language()->get('date_format_long'),
+                    strtotime($event['request']['timestamp'])
+                ),
             ];
         }
         return $result;
@@ -299,9 +327,9 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
             foreach ($event['changes'] as $change) {
                 $result[] = [
                     'auditable_model' => $change['groupName'],
-                    'field_name'      => $change['name'],
-                    'old_value'       => $change['oldValue'],
-                    'new_value'       => $change['newValue'],
+                    'field_name' => $change['name'],
+                    'old_value' => $change['oldValue'],
+                    'new_value' => $change['newValue'],
                 ];
             }
         }

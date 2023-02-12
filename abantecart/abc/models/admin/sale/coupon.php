@@ -22,6 +22,8 @@ namespace abc\models\admin;
 
 use abc\core\engine\Model;
 use abc\core\lib\AFilter;
+use abc\models\order\Coupon;
+use Carbon\Carbon;
 use H;
 
 /**
@@ -37,34 +39,15 @@ class ModelSaleCoupon extends Model
      */
     public function addCoupon($data)
     {
-        if (H::has_value($data['date_start'])) {
-            $data['date_start'] = "DATE('".$data['date_start']."')";
+        $data['date_start'] = $data['date_start']
+            ? Carbon::parse($data['date_start'])->startOfDay()->toDateTimeString()
+            : null;
+        $data['date_end'] = $data['date_end']
+            ? Carbon::parse($data['date_end'])->endOfDay()->toDateTimeString()
+            : null;
 
-        } else {
-            $data['date_start'] = "NULL";
-        }
-
-        if (H::has_value($data['date_end'])) {
-            $data['date_end'] = "DATE('".$data['date_end']."')";
-        } else {
-            $data['date_end'] = "NULL";
-        }
-
-        $this->db->query("INSERT INTO ".$this->db->table_name("coupons")." 
-                            SET code = '".$this->db->escape($data['code'])."',
-                                discount = '".(float)$data['discount']."',
-                                type = '".$this->db->escape($data['type'])."',
-                                total = '".(float)$data['total']."',
-                                logged = '".(int)$data['logged']."',
-                                shipping = '".(int)$data['shipping']."',
-                                date_start = ".$data['date_start'].",
-                                date_end = ".$data['date_end'].",
-                                uses_total = '".(int)$data['uses_total']."',
-                                uses_customer = '".(int)$data['uses_customer']."',
-                                status = '".(int)$data['status']."',
-                                date_added = NOW()");
-
-        $coupon_id = $this->db->getLastId();
+        $coupon = Coupon::create($data);
+        $coupon_id = $coupon->coupon_id;
 
         foreach ($data['coupon_description'] as $language_id => $value) {
             $this->language->replaceDescriptions('coupon_descriptions',

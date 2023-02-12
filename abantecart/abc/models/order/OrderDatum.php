@@ -92,11 +92,6 @@ class OrderDatum extends BaseModel
         ],
     ];
 
-    public function setDataAttribute($value)
-    {
-        $this->attributes['data'] = serialize($value);
-    }
-
     public function order()
     {
         return $this->belongsTo(Order::class, 'order_id');

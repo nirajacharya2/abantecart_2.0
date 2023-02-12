@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -20,60 +20,70 @@
 
 namespace abc\core\extension;
 
-use abc\core\engine\AHtml;
-use abc\core\engine\ALanguage;
+use abc\controllers\admin\ControllerPagesDesignBlocks;
+use abc\controllers\admin\ControllerResponsesCommonTabs;
 use abc\core\engine\Extension;
 use abc\core\engine\Registry;
 use abc\core\lib\ALayoutManager;
-use abc\core\lib\ARequest;
+use abc\models\catalog\ResourceMap;
 
-/**
- * Class ExtensionBannerManager
- *
- * @package abc\core\extension
- * @property ALanguage $language
- * @property ARequest $request
- * @property AHtml $html
- */
 class ExtensionBannerManager extends Extension
 {
-    private $registry;
 
-    public function __construct()
+    public function onControllerResponsesCommonResourceLibrary_InitData()
     {
-        $this->registry = Registry::getInstance();
+        $this->baseObject->loadLanguage('banner_manager/banner_manager');
     }
 
-    public function __get( $key )
+    public function onControllerResponsesCommonResourceLibrary_UpdateData()
     {
-        return $this->registry->get( $key );
+        if ($this->baseObject_method == 'main') {
+            $resource = &$this->baseObject->data['resource'];
+            $result = $this->_getResourceBanners($resource['resource_id'], $resource['language_id']);
+            if ($result) {
+                $key = Registry::language()->get('text_banners');
+                $key = $key ?: 'banners';
+                $resource['resource_objects'][$key] = $result;
+            }
+        }
     }
 
-    private function _getResourceBanners( $resource_id, $language_id = 0 )
+    protected function _getResourceBanners(int $resource_id, ?int $language_id = 0)
     {
 
-        if ( ! $language_id ) {
-            $language_id = $this->registry->get( 'language' )->getContentLanguageID();
+        if (!$language_id) {
+            $language_id = Registry::language()->getContentLanguageID();
         }
 
-        $sql = "SELECT rm.object_id, 'banners' AS object_name, bd.name
-                FROM ".$this->registry->get( 'db' )->table_name( "resource_map" )." rm
-                LEFT JOIN ".$this->registry->get( 'db' )->table_name( "banner_descriptions" )." bd 
-                    ON ( rm.object_id = bd.banner_id AND bd.language_id = '".(int)$language_id."')
-                WHERE rm.resource_id = '".(int)$resource_id."'
-                    AND rm.object_name = 'banners'";
-        $query = $this->registry->get( 'db' )->query( $sql );
-        $resource_objects = $query->rows;
+        $resourceObjects = ResourceMap::where('resource_map.resource_id', '=', $resource_id)
+            ->where('resource_map.object_name', '=', 'banners')
+            ->select(['resource_map.object_id', 'banner_descriptions.name'])
+            ->selectRaw("'banners' AS object_name")
+            ->leftJoin(
+                'banner_descriptions',
+                function ($join) use ($language_id) {
+                    $join->on(
+                        'resource_map.object_id',
+                        '=',
+                        'banner_descriptions.banner_id'
+                    )->where(
+                        'banner_descriptions.language_id',
+                        '=',
+                        $language_id
+                    );
+                }
+            )->get()
+            ?->toArray();
 
         $result = [];
-        foreach ( $resource_objects as $row ) {
+        foreach ($resourceObjects as $row) {
             $result[] = [
                 'object_id'   => $row['object_id'],
                 'object_name' => $row['object_name'],
                 'name'        => $row['name'],
-                'url'         => $this->registry->get( 'html' )->getSecureURL(
-                                                    'extension/banner_manager/edit',
-                                                    '&banner_id='.$row['object_id']
+                'url'         => Registry::html()->getSecureURL(
+                    'extension/banner_manager/edit',
+                    '&banner_id=' . $row['object_id']
                 ),
             ];
         }
@@ -81,21 +91,31 @@ class ExtensionBannerManager extends Extension
         return $result;
     }
 
-    public function onControllerResponsesCommonResourceLibrary_InitData()
+    public function onControllerPagesDesignBlocks_InitData()
     {
-        $this->baseObject->loadLanguage( 'banner_manager/banner_manager' );
-    }
-
-    public function onControllerResponsesCommonResourceLibrary_UpdateData()
-    {
-        if ( $this->baseObject_method == 'main' ) {
-            $resource = &$this->baseObject->data['resource'];
-            $result = $this->_getResourceBanners( $resource['resource_id'], $resource['language_id'] );
-            if ( $result ) {
-                $key = $this->registry->get( 'language' )->get( 'text_banners' );
-                $key = ! $key ? 'banners' : $key;
-                $resource['resource_objects'][$key] = $result;
+        /** @var ControllerPagesDesignBlocks $that */
+        $that = $this->baseObject;
+        if ($this->baseObject_method !== 'edit') {
+            return;
+        }
+        $that->loadLanguage('banner_manager/banner_manager');
+        $lm = new ALayoutManager();
+        $blocks = $lm->getAllBlocks();
+        $block_txt_id = '';
+        foreach ($blocks as $block) {
+            if ($block['custom_block_id'] == (int)$that->request->get['custom_block_id']) {
+                $block_txt_id = $block['block_txt_id'];
+                break;
             }
+        }
+
+        if ($block_txt_id == 'banner_block') {
+            abc_redirect(
+                $that->html->getSecureURL(
+                    'extension/banner_manager/edit_block',
+                    '&custom_block_id=' . (int)$that->request->get['custom_block_id']
+                )
+            );
         }
     }
 
@@ -103,69 +123,42 @@ class ExtensionBannerManager extends Extension
     {
         $method_name = $this->baseObject_method;
         $that = $this->baseObject;
-        if ( $method_name != 'main' ) {
-            return null;
+        if ($method_name != 'main') {
+            return;
         }
         $lm = new ALayoutManager();
-        $block = $lm->getBlockByTxtId( 'banner_block' );
+        $block = $lm->getBlockByTxtId('banner_block');
         $block_id = $block['block_id'];
 
-        $inserts = $that->view->getData( 'inserts' );
+        $inserts = $that->view->getData('inserts');
         $inserts[] = [
-            'text' => $that->language->get( 'text_banner_block' ),
-            'href' => $that->html->getSecureURL(
-                'extension/banner_manager/insert_block',
-                '&block_id='.$block_id
-            ),
+            'text' => $that->language->get('text_banner_block', 'banner_manager/banner_manager'),
+            'href' => $that->html->getSecureURL('extension/banner_manager/insert_block', '&block_id=' . $block_id),
         ];
-        $that->view->assign( 'inserts', $inserts );
-    }
-
-    public function onControllerPagesDesignBlocks_InitData()
-    {
-
-        $this->baseObject->loadLanguage( 'banner_manager/banner_manager' );
-        $method_name = $this->baseObject_method;
-        if ( $method_name == 'edit' ) {
-            $lm = new ALayoutManager();
-            $blocks = $lm->getAllBlocks();
-            $block_txt_id = '';
-            foreach ( $blocks as $block ) {
-                if ( $block['custom_block_id'] == (int)$this->request->get['custom_block_id'] ) {
-                    $block_txt_id = $block['block_txt_id'];
-                    break;
-                }
-            }
-
-            if ( $block_txt_id == 'banner_block' ) {
-                abc_redirect(
-                    $this->html->getSecureURL(
-                        'extension/banner_manager/edit_block',
-                        '&custom_block_id='.(int)$this->request->get['custom_block_id']
-                    )
-                );
-            }
-        }
+        $that->view->assign('inserts', $inserts);
     }
 
     public function onControllerResponsesCommonTabs_InitData()
     {
-        if ( $this->baseObject->parent_controller == 'design/blocks' ) {
-            $that = $this->baseObject;
+        /** @var ControllerResponsesCommonTabs $that */
+        $that = $this->baseObject;
+
+        if ($that->group == 'block' && !$that->request->get['custom_block_id']) {
             $lm = new ALayoutManager();
-            $that->loadLanguage( 'banner_manager/banner_manager' );
-            $that->loadLanguage( 'design/blocks' );
-            $block = $lm->getBlockByTxtId( 'banner_block' );
+            $that->loadLanguage('banner_manager/banner_manager');
+            $that->loadLanguage('design/blocks');
+            $block = $lm->getBlockByTxtId('banner_block');
             $block_id = $block['block_id'];
             $that->data['tabs'][] = [
                 'name'       => $block_id,
-                'text'       => $that->language->get( 'text_banner_block' ),
-                'href'       => $that->html->getSecureURL( 'extension/banner_manager/insert_block',
-                    '&block_id='.$block_id ),
-                'active'     => ( $block_id == $that->request->get['block_id'] ? true : false ),
+                'text'       => $that->language->get('text_banner_block'),
+                'href'       => $that->html->getSecureURL(
+                    'extension/banner_manager/insert_block',
+                    '&block_id=' . $block_id
+                ),
+                'active'     => $block_id == $that->request->get['block_id'],
                 'sort_order' => 3,
             ];
         }
     }
-
 }

@@ -464,7 +464,7 @@
                 }
 
                 if ((String(value) != String(orgvalue) || $changed > 0)) {
-                    //mark filed chaneged
+                    //mark filed changed
                     $field.addClass(o.changedClass);
                     //build quick save button set
                     if (!$field.hasClass('no-quicksave')) {
@@ -615,6 +615,12 @@
                  }
              });
 
+            //check if element placed inside jqgrid and mark row as selected for batch update
+            let prnt = elem.parents('tr.jqgrow');
+            if (prnt && !prnt.hasClass('ui-state-highlight')) {
+                prnt.click();
+            }
+
             return false;
         }
 
@@ -676,7 +682,7 @@
             //if empty and we have select, need to pass blank value
             if (!$data) {
                 $wrapper.find('select').each(function () {
-                    $data += $(this).attr('name')+'=\'\'&';
+                    $data += $(this).attr('name') + '=&';
                 });
             }
 
@@ -793,14 +799,14 @@
             } else if (elem.is(":radio")) {
                 if (elem.hasClass('star')) {
                     doRating(elem);
-                }else{
+                } else {
                     doRadio(elem);
                 }
-            } else if (elem.is(":text, :password, input[type='email'], input[type='tel']")) {
+            } else if (elem.is(":text, :password, input[type='email'], input[type='tel'], input[type='number']")) {
                 if (elem.is(":password") && $(elem).is('[name$="_confirmation"]')) {
                     ;
                 } else if (elem.is(":password") && elem.hasClass('passwordset_element')) {
-                    doPasswordset(elem);                    
+                    doPasswordset(elem);
                 } else {
                     doInput(elem);
                 }
@@ -903,13 +909,18 @@ var formOnExit = function(){
         }
         $btn.attr('data-loading-text',spinner);
         $btn.on('click', function (event) {
+            let frm = $(this).parents('form');
+            //prevent spinner for forms with invalid fields (see native browser field validation + form attribute "novalidate")
+            if (frm.find(':invalid')) {
+                return;
+            }
             //chrome submit fix
             //If we detect child was clicked, and not the actual button, stop the propagation and trigger the "click" event on the button.
-            var $target = $( event.target );
-            if ( !$target.is("button") ) {
-               event.stopPropagation();
-               $target.closest("button").click();
-               return;
+            var $target = $(event.target);
+            if (!$target.is("button")) {
+                event.stopPropagation();
+                $target.closest("button").click();
+                return;
             }
             $(this).button('loading');
         });

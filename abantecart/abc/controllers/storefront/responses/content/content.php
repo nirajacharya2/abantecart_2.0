@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -20,16 +20,8 @@
 namespace abc\controllers\storefront;
 use abc\core\engine\AController;
 use abc\core\lib\AException;
+use abc\models\content\Content;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
-/**
- * Class ControllerResponsesContentContent
- * @package abc\controllers\storefront
- * @property \abc\models\storefront\ModelCatalogContent $model_catalog_content
- */
 class ControllerResponsesContentContent extends AController {
 
 	public function main() {
@@ -51,8 +43,6 @@ class ControllerResponsesContentContent extends AController {
 
         //init controller data
         $this->extensions->hk_InitData($this,__FUNCTION__);
-
-		$this->loadModel('catalog/content');
 		if (isset($this->request->get['content_id'])) {
 			$content_id = $this->request->get['content_id'];
 		} else {
@@ -61,10 +51,9 @@ class ControllerResponsesContentContent extends AController {
 			} else {
 				$content_id = $this->config->get('config_checkout_id');
 			}
-		}      
-		$content_info = $this->model_catalog_content->getContent($content_id);
-
-		$this->view->assign('title', $content_info['title'] );
+		}
+        $content_info = Content::getContent($content_id)?->toArray();
+        $this->view->assign('title', $content_info['title']);
 		$this->view->assign('description', html_entity_decode($content_info['description']) );
 		$this->view->assign('content', html_entity_decode($content_info['content']) );
 

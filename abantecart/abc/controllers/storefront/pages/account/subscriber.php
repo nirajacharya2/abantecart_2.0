@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,22 +22,15 @@ namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
+use abc\models\content\Content;
 use abc\models\customer\Customer;
 
-/**
- * Class ControllerPagesAccountSubscriber
- *
- * @package abc\controllers\storefront
- * @property \abc\models\storefront\ModelCatalogContent $model_catalog_content
- */
 class ControllerPagesAccountSubscriber extends AController
 {
-    private $error = [];
-    public $data;
+    public $error = [];
 
     public function main()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -70,9 +63,6 @@ class ControllerPagesAccountSubscriber extends AController
             }
 
             if (!$this->error) {
-                /**
-                 * @var Customer $customer
-                 */
                 $customer = $this->customer::createCustomer($request_data);
                 $this->data['customer_id'] = $customer->customer_id;
                 $this->data['customer_model'] = $customer;
@@ -81,32 +71,40 @@ class ControllerPagesAccountSubscriber extends AController
             }
         }
 
-        $this->document->initBreadcrumb([
-            'href'      => $this->html->getHomeURL(),
-            'text'      => $this->language->get('text_home'),
-            'separator' => false,
-        ]);
+        $this->document->initBreadcrumb(
+            [
+                'href'      => $this->html->getHomeURL(),
+                'text'      => $this->language->get('text_home'),
+                'separator' => false,
+            ]
+        );
 
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('account/account'),
-            'text'      => $this->language->get('text_account'),
-            'separator' => $this->language->get('text_separator'),
-        ]);
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('account/account'),
+                'text'      => $this->language->get('text_account'),
+                'separator' => $this->language->get('text_separator'),
+            ]
+        );
 
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('account/subscriber'),
-            'text'      => $this->language->get('text_create'),
-            'separator' => $this->language->get('text_separator'),
-        ]);
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('account/subscriber'),
+                'text'      => $this->language->get('text_create'),
+                'separator' => $this->language->get('text_separator'),
+            ]
+        );
 
         if ($this->request->get['success']) {
             $this->data['success'] = $this->language->get('text_success_subscribe');
-            $this->data['continue'] = $this->html->buildButton([
-                'name' => 'continue',
-                'href' => $this->html->getHomeURL(),
-                'text' => $this->language->get('button_continue'),
-                'icon' => 'fa fa-arrow-right',
-            ]);
+            $this->data['continue'] = $this->html->buildButton(
+                [
+                    'name' => 'continue',
+                    'href' => $this->html->getHomeURL(),
+                    'text' => $this->language->get('button_continue'),
+                    'icon' => 'fa fa-arrow-right',
+                ]
+            );
             $this->data['text_subscribe_register'] = $this->language->get('text_success_subscribe_heading');
         } else {
             if ($this->config->get('prevent_email_as_login')) {
@@ -193,15 +191,12 @@ class ControllerPagesAccountSubscriber extends AController
             $this->data['error_captcha'] = $this->error['captcha'];
 
             if ($this->config->get('config_account_id')) {
-
-                $this->loadModel('catalog/content');
-                $content_info = $this->model_catalog_content->getContent($this->config->get('config_account_id'));
-
+                $content_info = Content::getContent($this->config->get('config_account_id'))?->toArray();
                 if ($content_info) {
                     $text_agree = $this->language->get('text_agree');
                     $this->data['text_agree_href'] = $this->html->getURL(
                         'r/content/content/loadInfo',
-                        '&content_id='.$this->config->get('config_account_id')
+                        '&content_id=' . $this->config->get('config_account_id')
                     );
                     $this->data['text_agree_href_text'] = $content_info['title'];
                 } else {
@@ -213,9 +208,9 @@ class ControllerPagesAccountSubscriber extends AController
             $this->data['text_agree'] = $text_agree;
 
             $text_account_already = sprintf(
-                                            $this->language->get('text_account_already'),
-                                            $this->html->getSecureURL('account/login')
-                                        );
+                $this->language->get('text_account_already'),
+                $this->html->getSecureURL('account/login')
+            );
             $this->data['text_account_already'] = $text_account_already;
 
         }

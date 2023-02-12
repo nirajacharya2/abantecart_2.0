@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -25,14 +25,12 @@ use abc\core\engine\AControllerAPI;
 use abc\core\lib\APromotion;
 use abc\core\engine\AResource;
 use abc\models\catalog\Product;
-use Illuminate\Support\Collection;
+use stdClass;
 
 /**
  * Class ControllerApiProductProduct
  *
  * @package abc\controllers\storefront
- * @property \abc\models\storefront\ModelCatalogProduct $model_catalog_product
- * @property \abc\models\storefront\ModelCatalogReview $model_catalog_review
  *
  */
 class ControllerApiProductProduct extends AControllerAPI
@@ -103,7 +101,6 @@ class ControllerApiProductProduct extends AControllerAPI
     public function get()
     {
         //TODO: Add support store_id and language_id
-        //TODO: Remove old models usage.
         //TODO: Change Error response to standart
         //TODO: How to get price for customer? Discounts?
         //TODO: Change options and options values to array of objects (NO id's as key)
@@ -135,8 +132,13 @@ class ControllerApiProductProduct extends AControllerAPI
         }
 
         //Load all the data from the model
-        /** @var Product|Collection $product */
-        $product = Product::with('description', 'options.description')->with('tags')->find($product_id);
+        /** @var Product|stdClass $product */
+        $product = Product::select('*');
+        if ($this->config->get('enable_reviews')) {
+            $product->WithAvgRating();
+        }
+        $product = $product->with('description', 'options.description', 'tags')
+            ->find($product_id);
 
         if (!$product) {
             $this->rest->setResponseData([
@@ -146,6 +148,13 @@ class ControllerApiProductProduct extends AControllerAPI
             $this->rest->sendResponse(404);
             return null;
         }
+
+        $product->update(
+            [
+                'count' => $this->db->raw('count+1')
+            ]
+        );
+
         //load resource library
         $resource = new AResource('image');
         $thumbnail = $resource->getMainThumb('products',
@@ -176,12 +185,9 @@ class ControllerApiProductProduct extends AControllerAPI
                         $this->config->get('config_tax')
                     )
                 );
-                /**
-                 * @var APromotion $promotion
-                 */
+                /** @var APromotion $promotion */
                 $promotion = ABC::getObjectByAlias('APromotion');
                 $special = $promotion->getProductSpecial($product_id);
-
                 if ($special) {
                     $product_price = $special;
                     $product->special = $this->currency->format(
@@ -222,11 +228,9 @@ class ControllerApiProductProduct extends AControllerAPI
         if ($product->quantity <= 0) {
             $product->stock = $product->stock_status;
         } else {
-            if ($this->config->get('config_stock_display')) {
-                $product->stock = $product->quantity;
-            } else {
-                $product->stock = $this->language->get('text_instock');
-            }
+            $product->stock = $this->config->get('config_stock_display')
+                ? $product->quantity
+                : $this->language->get('text_instock');
         }
         //hide quantity
         unset($product->quantity);
@@ -235,29 +239,19 @@ class ControllerApiProductProduct extends AControllerAPI
             $product->minimum = 1;
         }
 
-        $product->description = html_entity_decode(
-            $product->description,
-            ENT_QUOTES,
-            ABC::env('APP_CHARSET')
-        );
-
-        $this->loadModel('catalog/review');
-        if ($this->config->get('enable_reviews')) {
-            $average = $this->model_catalog_review->getAverageRating($product_id);
-            $product->text_stars = sprintf($this->language->get('text_stars'), $average);
-            $product->stars = sprintf($this->language->get('text_stars'), $average);
-            $product->average_rating = $average;
+        foreach (['description', 'name'] as $name) {
+            $product->{$name} = html_entity_decode($product->{$name}, ENT_QUOTES, ABC::env('APP_CHARSET'));
         }
-        $product->update(
-            [
-                'count' => $this->db->raw('count+1')
-            ]
-        );
+
+        if ($this->config->get('enable_reviews')) {
+            $product->text_stars = sprintf($this->language->get('text_stars'), $product->rating);
+            $product->stars = sprintf($this->language->get('text_stars'), $product->rating);
+            $product->average_rating = $product->rating;
+        }
 
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
         $this->rest->setResponseData($product->toArray());
         $this->rest->sendResponse(200);
     }
-
 }

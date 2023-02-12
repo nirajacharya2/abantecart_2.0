@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2022 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -23,9 +23,11 @@ use abc\core\ABC;
 use abc\core\engine\AHook;
 use abc\core\engine\AHtml;
 use abc\core\engine\ALanguage;
+use abc\core\engine\ALayout;
 use abc\core\engine\ALoader;
 use abc\core\lib\Abac;
 use abc\core\lib\AbcCache;
+use abc\core\lib\ADB;
 use abc\core\lib\ADebug;
 use abc\core\lib\ACart;
 use abc\core\lib\AConfig;
@@ -94,16 +96,18 @@ if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
 
 $dir_app = ABC::env('DIR_APP');
 $dir_public = ABC::env('DIR_PUBLIC');
+//NOTE: these values fills only when env does not contain that array keys.
+//You can define these keys inside main config.php first to override default paths.
 ABC::env(
     [
-        'DIR_VENDOR'         => $dir_app.'vendor'.DS,
-        'DIR_APP_EXTENSIONS' => $dir_app.'extensions'.DS,
-        'DIR_SYSTEM'         => $dir_app.'system'.DS,
-        'DIR_CORE'           => $dir_app.'core'.DS,
-        'DIR_LIB'            => $dir_app.'core'.DS.'lib'.DS,
-        'DIR_MODELS'         => $dir_app.'models'.DS,
-        'DIR_MODULES'        => $dir_app.'modules'.DS,
-        'DIR_WORKERS'        => $dir_app.'modules'.DS.'workers'.DS,
+        'DIR_VENDOR'         => $dir_app . 'vendor' . DS,
+        'DIR_APP_EXTENSIONS' => $dir_app . 'extensions' . DS,
+        'DIR_SYSTEM'         => $dir_app . 'system' . DS,
+        'DIR_CORE'           => $dir_app . 'core' . DS,
+        'DIR_LIB'            => $dir_app . 'core' . DS . 'lib' . DS,
+        'DIR_MODELS'         => $dir_app . 'models' . DS,
+        'DIR_MODULES'        => $dir_app . 'modules' . DS,
+        'DIR_WORKERS'        => $dir_app . 'modules' . DS . 'workers' . DS,
         'DIR_DOWNLOADS'      => $dir_app.'downloads'.DS,
         'DIR_CONFIG'         => $dir_app.'config'.DS,
         'DIR_LOGS'           => $dir_app.'system'.DS.'logs'.DS,
@@ -254,8 +258,7 @@ ABC::env(
 );
 
 //load base libraries
-require_once dirname(getcwd())
-.DS.'abc'.DS.'core'.DS.'init'.DS.'base.php';
+require_once dirname(getcwd()) . DS . 'abc' . DS . 'core' . DS . 'init' . DS . 'base.php';
 
 // Registry
 $registry = Registry::getInstance();
@@ -283,7 +286,7 @@ registerClass(
     'db',
     'ADB',
     [$db_config[ABC::env('DB_CURRENT_DRIVER')]],
-    '\abc\core\lib\ADB',
+    ADB::class,
     [$db_config[ABC::env('DB_CURRENT_DRIVER')]]
 );
 
@@ -414,7 +417,7 @@ if (!$is_valid) {
 }
 
 if (!$is_valid) {
-    $error = new AError ('Template '.$template.' is not found - roll back to default');
+    $error = new AError ('Template ' . var_export($template, true) . ' is not found - roll back to default');
     $error->toLog()->toDebug();
     $template = 'default';
 }
@@ -442,7 +445,7 @@ registerClass(
     'layout',
     'ALayout',
     [$registry, $template],
-    "\abc\core\\engine\ALayout",
+    ALayout::class,
     [$registry, $template]
 );
 
@@ -496,7 +499,7 @@ if (!ABC::env('IS_ADMIN')) { // storefront load
         'checkout',
         'Checkout',
         [$registry, $checkout_data],
-        '\abc\core\lib\Checkout',
+        CheckOut::class,
         [$registry, $checkout_data]
     );
 } else {
