@@ -144,6 +144,11 @@ class ControllerApiCatalogProduct extends AControllerAPI
                         new ABaseEvent($product->toArray(), ['products'])
                     );
                 } else {
+
+                    $this->log->write(
+                        var_Export($product, true)
+                    );
+
                     $product = false;
                 }
             }
