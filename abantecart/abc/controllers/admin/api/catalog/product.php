@@ -144,11 +144,6 @@ class ControllerApiCatalogProduct extends AControllerAPI
                         new ABaseEvent($product->toArray(), ['products'])
                     );
                 } else {
-
-                    $this->log->write(
-                        var_Export($product, true)
-                    );
-
                     $product = false;
                 }
             }
@@ -197,6 +192,10 @@ class ControllerApiCatalogProduct extends AControllerAPI
     private function createProduct($data)
     {
         if (!$data['descriptions'] || !current($data['descriptions'])['name']) {
+            $this->log->write(
+                'INCORRECT PRODUCT DATA: ' .
+                var_export($data, true)
+            );
             return false;
         }
 
