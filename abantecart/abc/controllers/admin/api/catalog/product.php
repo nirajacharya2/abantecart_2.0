@@ -126,14 +126,8 @@ class ControllerApiCatalogProduct extends AControllerAPI
                     $this->rest->sendResponse(200);
                     return;
                 }
-                $this->log->write(
-                    get_class($product) . ': ' . var_export($request, true)
-                );
-                $product = $this->updateProduct($product, $request);
 
-                $this->log->write(
-                    'POST PROCESS: ' . var_export($product, true)
-                );
+                $product = $this->updateProduct($product, $request);
                 if (is_object($product)) {
                     H::event(
                         'abc\controllers\admin\api\catalog\product@update',
@@ -143,7 +137,13 @@ class ControllerApiCatalogProduct extends AControllerAPI
                     $product = false;
                 }
             } else {
+                $this->log->write(
+                    'INDATA: ' . var_export($request, true)
+                );
                 $product = $this->createProduct($request);
+                $this->log->write(
+                    'POST PROCESS: ' . var_export($product, true)
+                );
                 if (is_object($product)) {
                     H::event(
                         'abc\controllers\admin\api\catalog\product@create',
@@ -153,13 +153,9 @@ class ControllerApiCatalogProduct extends AControllerAPI
                     $product = false;
                 }
             }
-        } catch (PDOException $e) {
+        } catch (\Exception $e) {
             $trace = $e->getTraceAsString();
-            $this->log->error($e->getMessage() ."\n". $trace);
-            $this->rest->setResponseData(['Error' => $e->getMessage()]);
-            $this->rest->sendResponse(200);
-            return;
-        } catch (AException $e) {
+            $this->log->error($e->getMessage() . "\n" . $trace);
             $this->rest->setResponseData(['Error' => $e->getMessage()]);
             $this->rest->sendResponse(200);
             return;
