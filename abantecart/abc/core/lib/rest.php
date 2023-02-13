@@ -105,10 +105,7 @@ class ARest
                 $this->request['params'] = $_GET;
                 break;
             case 'post':
-                $this->request['params'] = $_GET;
-                if ($_POST) {
-                    $this->request['params'] = array_merge($this->request['params'], $_POST);
-                }
+                $this->request['params'] = $_REQUEST;
                 if ($_FILES) {
                     $this->request['params'] = array_merge($this->request['params'], $_FILES);
                 }
