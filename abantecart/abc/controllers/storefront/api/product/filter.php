@@ -24,6 +24,7 @@ use abc\core\ABC;
 use abc\core\engine\AControllerAPI;
 use abc\core\engine\AResource;
 use abc\core\lib\AFilter;
+use abc\models\catalog\Product;
 use abc\models\storefront\ModelCatalogProduct;
 use stdClass;
 
@@ -191,8 +192,16 @@ class ControllerApiProductFilter extends AControllerAPI
     public function get()
     {
         //TODO: Add support store_id and language_id, maybe currency
-        //TODO: Remove old models usage.
         //TODO: Change Error response to standart
+        $this->data['search_parameters'] = [
+            'with_all' => true,
+            'filter'   => [
+                'keyword_search_parameters' => [
+                    'search_by' => ['name', 'model', 'sku'],
+                    'match'     => 'all'
+                ]
+            ]
+        ];
 
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
@@ -206,70 +215,64 @@ class ControllerApiProductFilter extends AControllerAPI
             return;
         }
 
-        $this->loadModel('catalog/product');
-        $filter_params = ['category_id', 'manufacturer_id', 'keyword', 'match', 'pfrom', 'pto'];
-        $grid_filter_params = ['name', 'description', 'model', 'sku'];
-        $filter_data = [
-            'method'             => 'get',
-            'filter_params'      => $filter_params,
-            'grid_filter_params' => $grid_filter_params,
-        ];
+        $requestParams = $this->rest->getRequestParams();
 
-        $filter = new AFilter($filter_data);
-        $filters = $filter->getFilterData();
-        $category_id = $filter->getFilterParam('category_id');
-        $manufacturer_id = $filter->getFilterParam('manufacturer_id');
-        $keyword = $filter->getFilterParam('keyword');
-
-        if (!$category_id && !$manufacturer_id && !$keyword) {
-            $this->rest->setResponseData(['Error' => 'Missing one of required product filter parameters']);
-            $this->rest->sendResponse(200);
-            return null;
+        if (!$requestParams) {
+            $this->rest->setResponseData(
+                [
+                    'error_code' => 406,
+                    'error_text' => 'Missing one of required product filter parameters'
+                ]
+            );
+            $this->rest->sendResponse(406);
+            return;
         }
+
+        $this->data['search_parameters']['filter']['store_id'] = $requestParams['store_id']
+            ?? $this->config->get('config_store_id');
+        $this->data['search_parameters']['filter']['language_id'] = $requestParams['language_id']
+            ?? $this->language->getLanguageID();
+
+        $this->data['search_parameters']['filter']['keyword'] = $requestParams['keyword'];
+
+        if ($requestParams['match']) {
+            $this->data['search_parameters']['filter']['keyword_search_parameters']['match'] = $requestParams['match'];
+        }
+
+        if ($requestParams['category_id']) {
+            $this->data['search_parameters']['filter']['category_id'] = [$requestParams['category_id']];
+        }
+        if ($requestParams['manufacturer_id']) {
+            $this->data['search_parameters']['filter']['manufacturer_id'] = $requestParams['manufacturer_id'];
+        }
+
+        $this->data['search_parameters']['filter']['price_from'] = $requestParams['price_from'] ?? $requestParams['pFrom'];
+        $this->data['search_parameters']['filter']['price_to'] = $requestParams['price_to'] ?? $requestParams['pTo'];
+
+        $this->data['search_parameters']['sort'] = $requestParams['sort'];
+        $this->data['search_parameters']['order'] = $requestParams['order'];
+        $this->data['search_parameters']['start'] = $requestParams['start'];
+        $this->data['search_parameters']['limit'] = $requestParams['limit'];
+
+        $products = Product::getProducts($this->data['search_parameters']);
+
+        $total = $products->total;
 
         //get total
-        $total = 0;
-        if ($keyword) {
-            $total = $this->model_catalog_product->getTotalProducts($filters);
-        } elseif ($category_id) {
-            $total = $this->model_catalog_product->getTotalProductsByCategoryId($category_id);
-        } elseif ($manufacturer_id) {
-            $total = $this->model_catalog_product->getTotalProductsByManufacturerId($manufacturer_id);
-        }
-
-        if ($total > 0) {
-            $total_pages = ceil($total / $filter->getParam('rows'));
-        } else {
-            $total_pages = 0;
-        }
+        $total_pages = $total ? ceil($total / $products->count()) : 0;
 
         //Preserved jqGrid JSON interface
         $response = new stdClass();
-        $response->page = $filter->getParam('page');
+        $response->page = $requestParams['page'] ?: 1;
         $response->total = $total_pages;
         $response->records = $total;
-        $response->limit = $filters['limit'];
-        $response->sidx = $filters['sort'];
-        $response->sord = $filters['order'];
-        $response->params = $filters;
+        $response->limit = $requestParams['limit'];
+        $response->sort = $requestParams['sort'];
+        $response->order = $requestParams['order'];
+        $response->params = $this->data['search_parameters'];
 
 
-        $results = [];
-        if ($keyword) {
-            $results = $this->model_catalog_product->getProducts($filters);
-        } elseif ($category_id) {
-            $results = $this->model_catalog_product->getProductsByCategoryId($category_id,
-                $filters['sort'],
-                $filters['order'],
-                $filters['start'],
-                $filters['limit']);
-        } elseif ($manufacturer_id) {
-            $results = $this->model_catalog_product->getProductsByManufacturerId($manufacturer_id,
-                $filters['sort'],
-                $filters['order'],
-                $filters['start'],
-                $filters['limit']);
-        }
+        $results = $products->toArray();
 
         $i = 0;
         if ($results) {
@@ -287,19 +290,21 @@ class ControllerApiProductFilter extends AControllerAPI
                 $response->rows[$i] =
                     [
                         'id'   => $result['product_id'],
-                        'cell' => [
-                            'thumb'         => $thumbnail['thumb_url'],
-                            'name'          => html_entity_decode($result['name'], ENT_QUOTES, ABC::env('APP_CHARSET')),
-                            'description'   => html_entity_decode($result['description'], ENT_QUOTES, ABC::env('APP_CHARSET')),
-                            'model'         => $result['model'],
-                            'price'         => $this->currency->convert(
-                                $result['final_price'],
-                                $this->config->get('config_currency'),
-                                $this->currency->getCode()
-                            ),
-                            'currency_code' => $this->currency->getCode(),
-                            'rating'        => $result['rating'],
-                        ]
+                        'cell' => array_merge(
+                            $result,
+                            [
+                                'thumb'         => $thumbnail['thumb_url'],
+                                'name'          => html_entity_decode($result['name'], ENT_QUOTES, ABC::env('APP_CHARSET')),
+                                'description'   => html_entity_decode($result['description'], ENT_QUOTES, ABC::env('APP_CHARSET')),
+                                'model'         => $result['model'],
+                                'price'         => $this->currency->convert(
+                                    $result['final_price'],
+                                    $this->config->get('config_currency'),
+                                    $this->currency->getCode()
+                                ),
+                                'currency_code' => $this->currency->getCode(),
+                            ]
+                        )
                     ];
                 $i++;
             }

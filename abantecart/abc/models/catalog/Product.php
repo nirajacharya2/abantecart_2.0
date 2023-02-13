@@ -49,6 +49,7 @@ use Illuminate\Support\Collection;
 use Psr\SimpleCache\InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
 use ReflectionException;
+use stdClass;
 
 /**
  * Class Product
@@ -2727,7 +2728,7 @@ class Product extends BaseModel
      *              - with_rating
      *              - with_stock_info
      *
-     * @return Collection
+     * @return Collection|stdClass
      */
     public static function getProducts(array $params = [])
     {

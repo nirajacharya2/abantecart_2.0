@@ -120,7 +120,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
                 if ($product === null) {
                     $this->rest->setResponseData(
                         [
-                            'Error' => "Product with ".$updateBy.": ".$request[$updateBy]." does not exist"
+                            'Error' => "Product with " . $updateBy . ": " . $request[$updateBy] . " does not exist"
                         ]
                     );
                     $this->rest->sendResponse(200);
@@ -147,13 +147,9 @@ class ControllerApiCatalogProduct extends AControllerAPI
                     $product = false;
                 }
             }
-        } catch (PDOException $e) {
+        } catch (\Exception $e) {
             $trace = $e->getTraceAsString();
-            $this->log->error($e->getMessage() ."\n". $trace);
-            $this->rest->setResponseData(['Error' => $e->getMessage()]);
-            $this->rest->sendResponse(200);
-            return;
-        } catch (AException $e) {
+            $this->log->error($e->getMessage() . "\n" . $trace);
             $this->rest->setResponseData(['Error' => $e->getMessage()]);
             $this->rest->sendResponse(200);
             return;
