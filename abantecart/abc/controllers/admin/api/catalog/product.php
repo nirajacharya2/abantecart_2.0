@@ -120,14 +120,20 @@ class ControllerApiCatalogProduct extends AControllerAPI
                 if ($product === null) {
                     $this->rest->setResponseData(
                         [
-                            'Error' => "Product with ".$updateBy.": ".$request[$updateBy]." does not exist"
+                            'Error' => "Product with " . $updateBy . ": " . $request[$updateBy] . " does not exist"
                         ]
                     );
                     $this->rest->sendResponse(200);
                     return;
                 }
-
+                $this->log->write(
+                    get_class($product) . ': ' . var_export($request, true)
+                );
                 $product = $this->updateProduct($product, $request);
+
+                $this->log->write(
+                    'POST PROCESS: ' . var_export($product, true)
+                );
                 if (is_object($product)) {
                     H::event(
                         'abc\controllers\admin\api\catalog\product@update',
