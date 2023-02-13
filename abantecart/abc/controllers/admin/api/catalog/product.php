@@ -46,7 +46,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $request = $this->rest->getRequestParams();
-        $this->log->write(var_export($request, true));
+
         $this->data['request'] = $request;
 
         $getBy = null;
@@ -97,7 +97,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request = $this->rest->getRequestParams();
-
+        $this->log->write(var_export($request, true));
         if(!$request){
             return;
         }
