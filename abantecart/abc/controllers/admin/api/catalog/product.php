@@ -137,13 +137,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
                     $product = false;
                 }
             } else {
-                $this->log->write(
-                    'INDATA: ' . var_export($request, true)
-                );
                 $product = $this->createProduct($request);
-                $this->log->write(
-                    'POST PROCESS: ' . var_export($product, true)
-                );
                 if (is_object($product)) {
                     H::event(
                         'abc\controllers\admin\api\catalog\product@create',
