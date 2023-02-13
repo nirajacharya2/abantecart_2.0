@@ -105,7 +105,10 @@ class ARest
                 $this->request['params'] = $_GET;
                 break;
             case 'post':
-                $this->request['params'] = array_merge((array)$_GET, (array)$_POST, (array)$_FILES);
+                $this->request['params'] = array_merge($_GET, $_POST);
+                if ($_FILES) {
+                    $this->request['params'] = array_merge($this->request['params'], $_FILES);
+                }
                 break;
             case 'put':
                 parse_str(file_get_contents('php://input'), $this->request['params']);

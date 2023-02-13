@@ -97,7 +97,6 @@ class ControllerApiCatalogProduct extends AControllerAPI
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request = $this->rest->getRequestParams();
-        $this->log->write(var_export($request, true));
         if(!$request){
             return;
         }
@@ -193,10 +192,6 @@ class ControllerApiCatalogProduct extends AControllerAPI
     private function createProduct($data)
     {
         if (!$data['descriptions'] || !current($data['descriptions'])['name']) {
-            $this->log->write(
-                'INCORRECT PRODUCT DATA: ' .
-                var_export($data, true)
-            );
             return false;
         }
 
