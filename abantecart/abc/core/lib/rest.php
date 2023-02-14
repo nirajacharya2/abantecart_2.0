@@ -120,6 +120,11 @@ class ARest
         array_walk_recursive($this->request, 'trim');
     }
 
+    public function clearRequestParams()
+    {
+        $this->request['params'] = null;
+    }
+
     /*
     * Adding to the response array
     */
