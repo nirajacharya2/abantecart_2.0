@@ -156,7 +156,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
         }
 
         if ($product === false) {
-            $this->rest->setResponseData(['Error' => "Product was not created. Please fill required fields."]);
+            $this->rest->setResponseData(['Error' => "Product was not " . ($updateBy ? 'updated' : 'created') . ". Incomplete Data."]);
             $this->rest->sendResponse(200);
             return;
         }
