@@ -1021,7 +1021,7 @@ function do_seqAjax(ajaxes, attempts_count){
 						$.xhrPool.splice(i, 1);
 					}
 					if( text_status!='abort' ) {
-						do_ajax();
+						setTimeout(do_ajax, 2000);
 					}
 				}
 			});

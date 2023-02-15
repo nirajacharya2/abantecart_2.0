@@ -46,6 +46,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $request = $this->rest->getRequestParams();
+
         $this->data['request'] = $request;
 
         $getBy = null;
@@ -96,7 +97,6 @@ class ControllerApiCatalogProduct extends AControllerAPI
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request = $this->rest->getRequestParams();
-
         if(!$request){
             return;
         }
@@ -123,7 +123,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
                             'Error' => "Product with " . $updateBy . ": " . $request[$updateBy] . " does not exist"
                         ]
                     );
-                    $this->rest->sendResponse(200);
+                    $this->rest->sendResponse(406);
                     return;
                 }
 
@@ -151,23 +151,23 @@ class ControllerApiCatalogProduct extends AControllerAPI
             $trace = $e->getTraceAsString();
             $this->log->error($e->getMessage() . "\n" . $trace);
             $this->rest->setResponseData(['Error' => $e->getMessage()]);
-            $this->rest->sendResponse(200);
+            $this->rest->sendResponse(500);
             return;
         }
 
         if ($product === false) {
-            $this->rest->setResponseData(['Error' => "Product was not created. Please fill required fields."]);
-            $this->rest->sendResponse(200);
+            $this->rest->setResponseData(['Error' => "Product was not " . ($updateBy ? 'updated' : 'created') . ". Incomplete Data."]);
+            $this->rest->sendResponse(406);
             return;
         }
         if ($product->errors()) {
             $this->rest->setResponseData($product->errors());
-            $this->rest->sendResponse(200);
+            $this->rest->sendResponse(406);
             return;
         }
         if (!$product_id = $product->getKey()) {
             $this->rest->setResponseData(['Error' => "Product was not created"]);
-            $this->rest->sendResponse(200);
+            $this->rest->sendResponse(406);
             return;
         }
 
@@ -209,7 +209,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
 
         if (!$product->getKey()) {
             $this->rest->setResponseData(['Error' => "Product cannot be created"]);
-            $this->rest->sendResponse(200);
+            $this->rest->sendResponse(406);
             return null;
         }
 

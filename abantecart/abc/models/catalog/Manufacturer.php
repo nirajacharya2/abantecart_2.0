@@ -44,7 +44,7 @@ use ReflectionException;
  *
  * @property Collection $manufacturers_to_stores
  *
- * @method static Manufacturer find(int $customer_id) Manufacturer
+ * @method static Manufacturer find(int $manufacturer_id) Manufacturer
  * @method static WithProductCount(bool $only_enabled = true) - adds "product_count" column into selected fields
  * @package abc\models
  */
