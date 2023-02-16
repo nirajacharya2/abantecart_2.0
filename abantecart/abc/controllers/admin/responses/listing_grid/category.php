@@ -48,7 +48,7 @@ class ControllerResponsesListingGridCategory extends AController
 
         $this->data['search_parameters'] = [
             'filter'      => [
-                'parent_id' => 0
+                'parent_id' => (int)$this->request->get['parent_id']
             ],
             'language_id' => $this->language->getContentLanguageID(),
             'start'       => ($page - 1) * $limit,

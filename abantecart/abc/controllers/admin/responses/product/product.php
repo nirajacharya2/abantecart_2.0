@@ -1983,7 +1983,7 @@ class ControllerResponsesProductProduct extends AController
             [
                 'type' => 'button',
                 'name' => 'submit',
-                'text' => $order_product_id ? $this->language->get('button_save') : $this->language->get('button_add'),
+                'text' => $order_product_id ? $this->language->get('text_apply') : $this->language->get('button_add'),
             ]
         );
         $this->data['form']['cancel'] = $form->getFieldHtml(

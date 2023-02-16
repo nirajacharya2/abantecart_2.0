@@ -81,14 +81,14 @@ class ControllerPagesCatalogCategory extends AController
 
         $grid_settings = [
             'table_id'         => 'category_grid',
-            'url'              => $this->html->getSecureURL('listing_grid/category'),
+            'url'              => $this->html->getSecureURL('listing_grid/category', '&parent_id=' . $this->request->get['parent_id']),
             'editurl'          => $this->html->getSecureURL('listing_grid/category/update'),
             'update_field'     => $this->html->getSecureURL('listing_grid/category/update_field'),
             'sortname'         => 'sort_order',
             'sortorder'        => 'asc',
             'drag_sort_column' => 'sort_order',
             'actions'          => [
-                'edit'   => [
+                'edit' => [
                     'text'     => $this->language->get('text_edit'),
                     'href'     => $this->html->getSecureURL('catalog/category/update', '&category_id=%ID%'),
                     'children' => array_merge(

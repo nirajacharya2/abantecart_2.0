@@ -231,7 +231,7 @@ class Category extends BaseModel
      */
     public function products()
     {
-        return $this->belongsToMany(Product::class, 'products_to_categories', 'product_id', 'category_id');
+        return $this->belongsToMany(Product::class, 'products_to_categories', 'category_id', 'product_id');
     }
 
     /**
