@@ -73,7 +73,7 @@
             <div class="col-sm-6 col-sm-offset-3 center">
 
                 <button class="btn btn-primary lock-on-click">
-                    <i class="fa fa-save"></i> <?php echo $form['submit']->text; ?>
+                    <i class="fa fa-check"></i> <?php echo $form['submit']->text; ?>
                 </button>
                 &nbsp;
                 <a class="btn btn-default" data-dismiss="modal" href="<?php echo $cancel; ?>">
