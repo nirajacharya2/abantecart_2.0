@@ -7,6 +7,8 @@ use abc\core\engine\Registry;
 use abc\core\lib\AException;
 use abc\models\catalog\Category;
 use abc\models\catalog\ResourceLibrary;
+use Error;
+use Exception;
 use PDOException;
 
 class ControllerApiCatalogCategory extends AControllerAPI
@@ -119,8 +121,8 @@ class ControllerApiCatalogCategory extends AControllerAPI
                 }
             }
             Registry::cache()->flush();
-        } catch (\Exception $e) {
-            $this->rest->setResponseData(['Error' => 'Create Error: '.$e->getMessage()]);
+        } catch (\Exception|Error $e) {
+            $this->rest->setResponseData(['Error' => 'Create Error: ' . $e->getMessage()]);
             $this->rest->sendResponse(200);
             return;
         }
@@ -206,14 +208,9 @@ class ControllerApiCatalogCategory extends AControllerAPI
                     $category->save();
                 }
             }
-        } catch (PDOException $e) {
+        } catch (Exception|Error $e) {
             $trace = $e->getTraceAsString();
-            $this->log->error($e->getMessage());
-            $this->log->error($trace);
-            $this->rest->setResponseData(['Error' => $e->getMessage()]);
-            $this->rest->sendResponse(200);
-            return;
-        } catch (AException $e) {
+            $this->log->error('Error: ' . $e->getMessage() . "\n" . $trace);
             $this->rest->setResponseData(['Error' => $e->getMessage()]);
             $this->rest->sendResponse(200);
             return;

@@ -126,7 +126,6 @@ class ControllerApiCatalogProduct extends AControllerAPI
                     $this->rest->sendResponse(406);
                     return;
                 }
-
                 $product = $this->updateProduct($product, $request);
                 if (is_object($product)) {
                     H::event(
@@ -147,14 +146,13 @@ class ControllerApiCatalogProduct extends AControllerAPI
                     $product = false;
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception|\Error $e) {
             $trace = $e->getTraceAsString();
-            $this->log->error($e->getMessage() . "\n" . $trace);
+            $this->log->error('Error: ' . $e->getMessage() . "\n" . $trace);
             $this->rest->setResponseData(['Error' => $e->getMessage()]);
             $this->rest->sendResponse(500);
             return;
         }
-
         if ($product === false) {
             $this->rest->setResponseData(['Error' => "Product was not " . ($updateBy ? 'updated' : 'created') . ". Incomplete Data."]);
             $this->rest->sendResponse(406);

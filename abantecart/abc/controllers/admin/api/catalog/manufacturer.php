@@ -6,6 +6,8 @@ use abc\core\engine\AControllerAPI;
 use abc\core\engine\Registry;
 use abc\models\catalog\Manufacturer;
 use abc\models\catalog\ResourceLibrary;
+use Error;
+use Exception;
 
 class ControllerApiCatalogManufacturer extends AControllerAPI
 {
@@ -99,10 +101,10 @@ class ControllerApiCatalogManufacturer extends AControllerAPI
                         $this->language->getContentLanguageID());
                 }
             }
-        } catch (\Exception $e) {
-            $this->rest->setResponseData(['Error' => 'Create Error: '.$e->getMessage()]);
+        } catch (Exception|Error $e) {
+            $this->rest->setResponseData(['Error' => 'Create Error: ' . $e->getMessage()]);
             $this->rest->sendResponse(200);
-            return null;
+            return;
         }
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
@@ -164,14 +166,10 @@ class ControllerApiCatalogManufacturer extends AControllerAPI
                         $this->language->getContentLanguageID());
                 }
             }
-        } catch (\PDOException $e) {
+        } catch (Exception|Error $e) {
             $trace = $e->getTraceAsString();
             $this->log->error($e->getMessage());
             $this->log->error($trace);
-            $this->rest->setResponseData(['Error' => $e->getMessage()]);
-            $this->rest->sendResponse(200);
-            return null;
-        } catch (\Exception $e) {
             $this->rest->setResponseData(['Error' => $e->getMessage()]);
             $this->rest->sendResponse(200);
             return null;
@@ -180,8 +178,8 @@ class ControllerApiCatalogManufacturer extends AControllerAPI
         Registry::cache()->flush();
 
         $this->data['result'] = [
-            'status'      => $updateBy ? 'updated' : 'created',
-            'manufacturer_id' => $manufacturer->manufacturer_id,
+            'status'          => $updateBy ? 'updated' : 'created',
+            'manufacturer_id' => $manufacturer?->manufacturer_id,
         ];
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
