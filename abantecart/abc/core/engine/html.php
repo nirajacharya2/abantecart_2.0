@@ -2188,6 +2188,7 @@ class ResourceImageHtmlElement extends HtmlElement
  * @property bool $required
  * @property string $dateformat
  * @property string $highlight
+ * @property string $placeholder
  * @property array $extra
  */
 class DateHtmlElement extends HtmlElement
@@ -2226,18 +2227,19 @@ class DateHtmlElement extends HtmlElement
         $this->element_id = preg_replace('/[\[+\]]/', '_', $this->element_id);
         $this->view->batchAssign(
             [
-                'name'       => $this->name,
-                'id'         => $this->element_id,
-                'type'       => 'text',
-                'value'      => str_replace('"', '&quot;', $this->value),
-                'default'    => $this->default,
+                'name'        => $this->name,
+                'id'          => $this->element_id,
+                'type'        => 'text',
+                'value'       => str_replace('"', '&quot;', $this->value),
+                'default'     => $this->default,
                 //TODO: remove deprecated attribute aform_field_type
-                'attr'       => 'aform_field_type="date" ' . $this->attr . ' data-aform-field-type="captcha"',
-                'required'   => $this->required,
-                'style'      => $this->style,
-                'dateformat' => $this->dateformat ?: H::format4Datepicker($this->language->get('date_format_short')),
-                'highlight'  => $this->highlight,
-                'extra'      => $this->extra
+                'attr'        => 'aform_field_type="date" ' . $this->attr . ' data-aform-field-type="captcha"',
+                'required'    => $this->required,
+                'style'       => $this->style,
+                'dateformat'  => $this->dateformat ?: H::format4Datepicker($this->language->get('date_format_short')),
+                'highlight'   => $this->highlight,
+                'extra'       => $this->extra,
+                'placeholder' => $this->placeholder
             ]
         );
         if (!empty($this->help_url)) {
