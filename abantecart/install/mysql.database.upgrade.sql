@@ -111,25 +111,43 @@ ALTER TABLE `ac_global_attributes_groups_descriptions` ENGINE=INNODB;
 ALTER TABLE `ac_global_attributes_types` ENGINE=INNODB;
 ALTER TABLE `ac_global_attributes_type_descriptions` ENGINE=INNODB;
 ALTER TABLE `ac_extension_dependencies` ENGINE=INNODB;
-ALTER TABLE `ac_encryption_keys` ENGINE=INNODB;
-ALTER TABLE `ac_tasks` ENGINE=INNODB;
-ALTER TABLE `ac_task_details` ENGINE=INNODB;
-ALTER TABLE `ac_task_steps` ENGINE=INNODB;
+ALTER TABLE `ac_encryption_keys`
+    ENGINE =INNODB;
+ALTER TABLE `ac_tasks`
+    ENGINE =INNODB;
+ALTER TABLE `ac_task_details`
+    ENGINE =INNODB;
+ALTER TABLE `ac_task_steps`
+    ENGINE =INNODB;
 
-UPDATE `ac_orders` SET `customer_id` = NULL WHERE `customer_id` = 0;
+UPDATE `ac_orders`
+SET `customer_id` = NULL
+WHERE `customer_id` = 0;
 
 
 
-ALTER TABLE `ac_orders` CHANGE COLUMN `coupon_id` `coupon_id` int(11) DEFAULT NULL;
-UPDATE `ac_orders` SET `coupon_id` = NULL WHERE `coupon_id` = 0;
+ALTER TABLE `ac_orders`
+    CHANGE COLUMN `coupon_id` `coupon_id` int(11) DEFAULT NULL;
+ALTER TABLE `ac_orders`
+    modify shipping_company varchar(64) null;
+ALTER TABLE `ac_orders`
+    modify payment_company varchar(64) null;
 
-ALTER TABLE `ac_tax_rates` CHANGE COLUMN `zone_id` `zone_id` int(11) DEFAULT NULL;
-UPDATE `ac_tax_rates` SET `zone_id` = NULL WHERE `zone_id` = 0;
+
+UPDATE `ac_orders`
+SET `coupon_id` = NULL
+WHERE `coupon_id` = 0;
+
+ALTER TABLE `ac_tax_rates`
+    CHANGE COLUMN `zone_id` `zone_id` int(11) DEFAULT NULL;
+UPDATE `ac_tax_rates`
+SET `zone_id` = NULL
+WHERE `zone_id` = 0;
 
 
 ALTER TABLE `ac_category_descriptions`
-  ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+    ADD COLUMN `date_added`    timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+    ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   ADD COLUMN `date_deleted` timestamp NULL,
   ADD COLUMN `stage_id` INT(6) NULL,
   ADD COLUMN `id` INT NOT NULL AUTO_INCREMENT FIRST,

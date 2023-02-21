@@ -384,7 +384,7 @@ class Order extends BaseModel
         'shipping_company'        => [
             'checks'   => [
                 'string',
-                'max:32',
+                'max:64',
             ],
             'messages' => [
                 '*' => [
@@ -538,7 +538,7 @@ class Order extends BaseModel
         'payment_company'        => [
             'checks'   => [
                 'string',
-                'max:32',
+                'max:64',
             ],
             'messages' => [
                 '*' => [
