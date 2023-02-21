@@ -211,7 +211,7 @@ class AOrder extends ALibBase
                 $order_info['shipping_zone'] = (string)$shipping_address['zone'];
                 $order_info['shipping_zone_id'] = $shipping_address['zone_id'];
                 $order_info['shipping_country'] = (string)$shipping_address['country'];
-                $order_info['shipping_country_id'] = $shipping_address['country_id'];
+                $order_info['shipping_country_id'] = (int)$shipping_address['country_id'];
                 $order_info['shipping_address_format'] = (string)$shipping_address['address_format'];
             } else {
                 $order_info['shipping_firstname'] = '';
@@ -255,7 +255,7 @@ class AOrder extends ALibBase
             $order_info['payment_zone'] = (string)$payment_address['zone'];
             $order_info['payment_zone_id'] = $payment_address['zone_id'];
             $order_info['payment_country'] = (string)$payment_address['country'];
-            $order_info['payment_country_id'] = $payment_address['country_id'];
+            $order_info['payment_country_id'] = (int)$payment_address['country_id'];
             $order_info['payment_address_format'] = (string)$payment_address['address_format'];
         } else {
             if (isset($inData['guest'])) {
@@ -289,7 +289,7 @@ class AOrder extends ALibBase
                         $order_info['shipping_zone'] = (string)$inData['guest']['shipping']['zone'];
                         $order_info['shipping_zone_id'] = $inData['guest']['shipping']['zone_id'];
                         $order_info['shipping_country'] = (string)$inData['guest']['shipping']['country'];
-                        $order_info['shipping_country_id'] = $inData['guest']['shipping']['country_id'];
+                        $order_info['shipping_country_id'] = (int)$inData['guest']['shipping']['country_id'];
                         $order_info['shipping_address_format'] = (string)$inData['guest']['shipping']['address_format'];
                     } else {
                         $order_info['shipping_firstname'] = (string)$inData['guest']['firstname'];
@@ -302,7 +302,7 @@ class AOrder extends ALibBase
                         $order_info['shipping_zone'] = (string)$inData['guest']['zone'];
                         $order_info['shipping_zone_id'] = $inData['guest']['zone_id'];
                         $order_info['shipping_country'] = (string)$inData['guest']['country'];
-                        $order_info['shipping_country_id'] = $inData['guest']['country_id'];
+                        $order_info['shipping_country_id'] = (int)$inData['guest']['country_id'];
                         $order_info['shipping_address_format'] = (string)$inData['guest']['address_format'];
                     }
                 } else {
@@ -330,7 +330,7 @@ class AOrder extends ALibBase
                 $order_info['payment_zone'] = (string)$inData['guest']['zone'];
                 $order_info['payment_zone_id'] = $inData['guest']['zone_id'];
                 $order_info['payment_country'] = (string)$inData['guest']['country'];
-                $order_info['payment_country_id'] = $inData['guest']['country_id'];
+                $order_info['payment_country_id'] = (int)$inData['guest']['country_id'];
                 $order_info['payment_address_format'] = (string)$inData['guest']['address_format'];
             } else {
                 return [];
