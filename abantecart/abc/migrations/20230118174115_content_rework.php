@@ -20,11 +20,12 @@ class ContentRework extends AbstractMigration
         $sql = "update tims_content_descriptions SET name = title WHERE COALESCE(name,'') = '';";
         $this->query($sql);
 
+        $sql = "alter table tims_contents  drop foreign key tims_contents_fk_1;";
+        $this->query($sql);
+
         $sql = "alter table tims_contents modify content_id int null;";
         $this->query($sql);
 
-        $sql = "alter table tims_contents  drop foreign key tims_contents_fk_1;";
-        $this->query($sql);
         $sql = "drop index content_id on tims_contents;";
         $this->query($sql);
         $sql = "drop index stage_id on tims_contents;";
