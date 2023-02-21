@@ -9303,7 +9303,7 @@ CREATE TABLE `ac_orders` (
   `store_id`                int(11)       NOT NULL DEFAULT '0',
   `store_name`              varchar(64)   NOT NULL,
   `store_url`               varchar(255)  NOT NULL,
-  -- ????? Need to update code to read NULL for guests.
+    -- ????? Need to update code to read NULL for guests.
   `customer_id`             int(11)                DEFAULT NULL,
   `customer_group_id`       int(11)       NOT NULL DEFAULT '0',
   `firstname`               varchar(32)   NOT NULL DEFAULT '',
@@ -9313,7 +9313,7 @@ CREATE TABLE `ac_orders` (
   `email`                   varchar(96)   NOT NULL DEFAULT '',
   `shipping_firstname`      varchar(32)   NOT NULL,
   `shipping_lastname`       varchar(32)   NOT NULL DEFAULT '',
-  `shipping_company`        varchar(32)   NOT NULL,
+  `shipping_company`        varchar(64)   NOT NULL,
   `shipping_address_1`      varchar(128)  NOT NULL,
   `shipping_address_2`      varchar(128)  NOT NULL,
   `shipping_city`           varchar(128)  NOT NULL,
@@ -9327,7 +9327,7 @@ CREATE TABLE `ac_orders` (
   `shipping_method_key`     varchar(128)  NOT NULL DEFAULT '',
   `payment_firstname`       varchar(32)   NOT NULL DEFAULT '',
   `payment_lastname`        varchar(32)   NOT NULL DEFAULT '',
-  `payment_company`         varchar(32)   NOT NULL,
+  `payment_company`         varchar(64)   NOT NULL,
   `payment_address_1`       varchar(128)  NOT NULL,
   `payment_address_2`       varchar(128)  NOT NULL,
   `payment_city`            varchar(128)  NOT NULL,
