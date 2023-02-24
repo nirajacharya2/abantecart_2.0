@@ -57,7 +57,7 @@ class BaseIncentiveBonus
         return [];
     }
 
-    public function getBonus(CheckoutBase $checkout, ?array $params): float|int
+    public function getBonus(CheckoutBase|array|null $checkout, ?array $params): float|int
     {
         return 0.0;
     }
