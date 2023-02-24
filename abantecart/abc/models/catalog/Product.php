@@ -2907,6 +2907,12 @@ class Product extends BaseModel
         if ((array)$filter['exclude']) {
             $query->whereNotIn('products.product_id', (array)$filter['exclude']);
         }
+        if ((array)$filter['include_sku']) {
+            $query->whereIn('products.sku', (array)$filter['include_sku']);
+        }
+        if ((array)$filter['exclude_sku']) {
+            $query->whereNotIn('products.sku', (array)$filter['exclude_sku']);
+        }
 
         if ($filter['price_from'] || $filter['price_to']) {
             if ($finalPriceSql) {
