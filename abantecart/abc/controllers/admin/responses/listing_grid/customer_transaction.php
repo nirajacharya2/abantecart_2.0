@@ -347,12 +347,12 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
                 'type'  => 'input',
                 'name'  => 'debit',
                 'value' => $info['debit'],
-                'attr'  => ($readonly ? 'disabled="disabled"' : '').' maxlength="16"',
+                'attr'  => ($readonly ? 'disabled="disabled"' : '') . ' maxlength="16"',
             ]
         );
 
-        $types = CustomerTransaction::getTransactionTypes();
-        $options = array_column($types->toArray(), 'transaction_type', 'transaction_type');
+        $types = CustomerTransaction::getTransactionTypes()?->toArray();
+        $options = array_column($types, 'transaction_type', 'transaction_type');
         $options[''] = $this->language->get('text_option_other_type');
 
         $this->data['form']['fields']['transaction_type'] = $form->getFieldHtml(
