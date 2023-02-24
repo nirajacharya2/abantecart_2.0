@@ -5,7 +5,10 @@
        data-orgvalue="<?php echo $value; ?>"
     <?php echo $attr; ?>
        class="form-control adate <?php echo $style; ?>"
-       placeholder="<?php echo $placeholder ?>"/>
+       placeholder="<?php echo $placeholder ?>"
+    <?php if ($required) {
+        echo 'required';
+    } ?>/>
 
 <?php if ($required || $help_url) { ?>
     <span class="input-group-addon">
