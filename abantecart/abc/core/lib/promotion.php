@@ -108,18 +108,19 @@ class APromotion
      */
     public function getConditionList($section = 'storefront')
     {
-        $output = [];
+        $indx = $output = [];
         foreach (ABC::env('incentive_conditions') as $class) {
             try {
                 /** @var BaseIncentiveCondition $node */
                 $node = new $class();
                 if (in_array($node->getSection(), ['both', $section])) {
-                    $output[$node->getKey()] = $node->getName();
+                    $indx[] = $output[$node->getKey()] = $node->getName();
                 }
             } catch (Exception $e) {
                 Registry::log()->error($e->getMessage());
             }
         }
+        array_multisort($indx, SORT_STRING, $output);
         return $output;
     }
 
@@ -128,7 +129,7 @@ class APromotion
      */
     public function getBonusList($section = 'both')
     {
-        $output = [];
+        $indx = $output = [];
         foreach (ABC::env('incentive_bonuses') as $class) {
             try {
                 /** @var BaseIncentiveBonus $node */
@@ -136,12 +137,12 @@ class APromotion
                 if (!in_array($node->getSection(), ['both', $section])) {
                     continue;
                 }
-                $output[$node->getKey()] = $node->getName();
+                $indx[] = $output[$node->getKey()] = $node->getName();
             } catch (Exception $e) {
                 Registry::log()->error($e->getMessage());
             }
         }
-
+        array_multisort($indx, SORT_STRING, $output);
         return $output;
     }
 
