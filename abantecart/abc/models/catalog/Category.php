@@ -379,7 +379,7 @@ class Category extends BaseModel
                 ->where('category_descriptions.language_id', '=', static::$current_language_id)
                 ->orderBy('category_descriptions.name');
         }
-        $categories = $query->get()->toArray();
+        $categories = $query->useCache('category')->get()->toArray();
 
         $category_info = current($categories);
 
@@ -509,7 +509,7 @@ class Category extends BaseModel
 
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
-        $categories = $query->get();
+        $categories = $query->useCache('category')->get();
 
         foreach ($categories as $category) {
             if (ABC::env('IS_ADMIN')) {
@@ -610,7 +610,7 @@ class Category extends BaseModel
 
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
-        $categories = $query->get();
+        $categories = $query->useCache('category')->get();
         $output = [];
         foreach ($categories as $category) {
             $output[] = $category->category_id;
@@ -656,7 +656,7 @@ class Category extends BaseModel
 
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
-        return $query->get()->count();
+        return $query->useCache('category')->get()->count();
     }
 
     /**
@@ -1156,6 +1156,7 @@ class Category extends BaseModel
                         ->where('sss.key', '=', 'config_ssl_url');
                 }
             )->where('category_id', '=', (int)$category_id)
+            ->useCache('category')
             ->get();
         if ($storeInfo) {
             return json_decode($storeInfo, true);
@@ -1199,7 +1200,7 @@ class Category extends BaseModel
 
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
-        return $query->get()?->toArray();
+        return $query->useCache('category')->get()?->toArray();
     }
 
     /**
