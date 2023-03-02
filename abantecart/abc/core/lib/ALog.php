@@ -86,7 +86,9 @@ final class ALog
         if (!is_file($this->app_filename)) {
             $tmp = fopen($this->app_filename, 'a');
             chmod($this->app_filename, 0664);
-            fclose($tmp);
+            if (is_resource($tmp)) {
+                fclose($tmp);
+            }
         }
 
         if (is_file($this->app_filename) && !is_writable($this->app_filename)) {
