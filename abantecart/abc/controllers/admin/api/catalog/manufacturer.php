@@ -132,19 +132,27 @@ class ControllerApiCatalogManufacturer extends AControllerAPI
             }
 
             if ($updateBy) {
+                /** @var Manufacturer $manufacturer */
                 $manufacturer = Manufacturer::where($updateBy, $request[$updateBy])->first();
                 if ($manufacturer === null) {
                     $this->rest->setResponseData(
-                        ['Error' => "manufacturer with {$updateBy}: {$request[$updateBy]} does not exist"]
+                        ['Error' => "manufacturer with " . $updateBy . ": " . $request[$updateBy] . " does not exist"]
                     );
-                    $this->rest->sendResponse(200);
-                    return null;
+                    $this->rest->sendResponse(406);
+                    return;
                 }
 
-                (new Manufacturer())->editManufacturer($manufacturer->manufacturer_id, $request);
+                $result = Manufacturer::editManufacturer($manufacturer->manufacturer_id, $request);
+                if (!$result) {
+                    $this->rest->setResponseData(
+                        ['Error' => "Cannot to update manufacturer with " . $updateBy . ": " . $request[$updateBy] . "(ID " . $manufacturer->manufacturer_id . ")"]
+                    );
+                    $this->rest->sendResponse(503);
+                    return;
+                }
 
                 if ($this->data['fillable'] && is_array($this->data['fillable'])) {
-                    foreach ($this->data['fillable'] as $fillable){
+                    foreach ($this->data['fillable'] as $fillable) {
                         if (!isset($request[$fillable])) {
                             continue;
                         }
@@ -171,7 +179,7 @@ class ControllerApiCatalogManufacturer extends AControllerAPI
             $this->log->error($e->getMessage());
             $this->log->error($trace);
             $this->rest->setResponseData(['Error' => $e->getMessage()]);
-            $this->rest->sendResponse(200);
+            $this->rest->sendResponse(503);
             return null;
         }
 
@@ -192,31 +200,33 @@ class ControllerApiCatalogManufacturer extends AControllerAPI
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
+        $request = $this->rest->getRequestParams();
+        $this->data['request'] = $request;
+
+        //are we updating
+        $deleteBy = null;
+        if (isset($request['manufacturer_id']) && $request['manufacturer_id']) {
+            $deleteBy = 'manufacturer_id';
+        }
+        if (isset($request['delete_by']) && $request['delete_by']) {
+            $deleteBy = $request['delete_by'];
+        }
+
         try {
-            $request = $this->rest->getRequestParams();
-            $this->data['request'] = $request;
-
-            //are we updating
-            $deleteBy = null;
-            if (isset($request['manufacturer_id']) && $request['manufacturer_id']) {
-                $deleteBy = 'manufacturer_id';
-            }
-            if (isset($request['delete_by']) && $request['delete_by']) {
-                $deleteBy = $request['delete_by'];
-            }
-
             if ($deleteBy) {
-                Manufacturer::withTrashed()->where($deleteBy, $request[$deleteBy])
-                    ->forceDelete();
+                Manufacturer::where($deleteBy, $request[$deleteBy])->delete();
                 Registry::cache()->flush();
             } else {
                 $this->rest->setResponseData(['Error' => 'Not correct request, manufacturer_id not found']);
-                $this->rest->sendResponse(200);
-                return null;
+                $this->rest->sendResponse(404);
+                return;
             }
 
-        } catch (\Exception $e) {
-
+        } catch (\Exception|Error $e) {
+            Registry::log()->error($e->getMessage());
+            $this->rest->setResponseData(['Error' => 'Cannot to delete manufacturer with ' . $deleteBy . "=" . $request[$deleteBy]]);
+            $this->rest->sendResponse(404);
+            return;
         }
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
@@ -224,5 +234,4 @@ class ControllerApiCatalogManufacturer extends AControllerAPI
         $this->rest->setResponseData($this->data['result']);
         $this->rest->sendResponse(200);
     }
-
 }
