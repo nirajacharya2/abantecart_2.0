@@ -22,6 +22,7 @@ namespace abc\models\catalog;
 use abc\models\BaseModel;
 use abc\models\casts\Html;
 use abc\models\locale\Language;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -35,8 +36,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $meta_description
  * @property string $description
  * @property string $blurb
- * @property string $date_modified
- * @property string $date_added
+ * @property Carbon $date_modified
+ * @property Carbon $date_added
  *
  * @property Product $product
  * @property Language $language
@@ -45,8 +46,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class ProductDescription extends BaseModel
 {
-    use SoftDeletes;
-
     protected $primaryKey = 'id';
 
     protected $mainClassName = Product::class;

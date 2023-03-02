@@ -433,7 +433,6 @@ class Category extends BaseModel
                         ON (' . $p2cAlias . '.product_id = ' . $pAlias . '.product_id)
                     WHERE ' . $pAlias . '.status = 1 
                             AND COALESCE(' . $pAlias . '.date_available, NOW()) <= NOW()
-                            AND ' . $pAlias . '.date_deleted IS NULL
                             AND ' . $p2cAlias . '.category_id IN (' . implode(", ", $childrenIDs) . ')
                     ) as active_products_count'
             )->selectRaw(
@@ -442,7 +441,6 @@ class Category extends BaseModel
                     INNER JOIN ' . $p2cAlias . '
                         ON (' . $p2cAlias . '.product_id = ' . $pAlias . '.product_id)
                     WHERE ' . $p2cAlias . '.category_id IN (' . implode(", ", $childrenIDs) . ')
-                        AND ' . $pAlias . '.date_deleted IS NULL
                     ) as total_products_count'
             );
 

@@ -149,7 +149,8 @@ class Product extends BaseModel
 
     protected $hidden = ['pivot'];
 
-    protected $touches = ['categories'];
+    /** @see Product::boot() categories touching! */
+    protected $touches = ['stores'];
     /**
      * @var array
      */
@@ -225,7 +226,6 @@ class Product extends BaseModel
         'settings',
         'date_deleted',
     ];
-
     protected $rules = [
         /** @see validate() */
         'product_id' => [
@@ -587,7 +587,6 @@ class Product extends BaseModel
             ],
         ],
     ];
-
     protected $fields = [
         'product_type_id'   => [
             'cast'       => 'int',
@@ -989,28 +988,11 @@ class Product extends BaseModel
         ],
 
     ];
-
-    /**
-     * @var array
-     */
     protected $images = [];
-
-    /**
-     * seo-keywords
-     *
-     * @var array
-     */
+    /** seo-keywords */
     protected $keywords = [];
-
-    /**
-     * @var
-     */
     protected $thumbURL;
 
-    /**
-     * Auditing properties
-     *
-     */
     public static $auditExcludes = ['sku'];
     /**
      * @var string
@@ -1052,6 +1034,21 @@ class Product extends BaseModel
         'start',
         'limit',
     ];
+
+    public static function boot()
+    {
+        parent::boot();
+        static::updated(
+            function ($product) {
+                $product->categories->each(
+                    function ($category) {
+                        $category->setUpdatedAt($category->freshTimestamp());
+                        $category->save(); /// Will trigger updated on the category model
+                    }
+                );
+            }
+        );
+    }
 
     /**
      * @param mixed $value
@@ -1841,7 +1838,9 @@ class Product extends BaseModel
         $output = $productArray;
         unset($output['description'], $output['keyword']);
 
-        $output = array_merge($output, $productArray['description']);
+        if ($productArray['description']) {
+            $output = array_merge($output, $productArray['description']);
+        }
         $keywords = $product->keywords();
         $output['keyword'] = $keywords[static::$current_language_id]['keyword'];
         $output['has_track_options'] = $product->hasTrackOptions();
@@ -2227,6 +2226,7 @@ class Product extends BaseModel
                 }
             }
         }
+        $product->touch();
         return true;
     }
 
