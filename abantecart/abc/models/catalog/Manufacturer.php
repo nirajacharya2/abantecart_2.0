@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -28,6 +28,7 @@ use abc\models\BaseModel;
 use abc\models\QueryBuilder;
 use abc\models\system\Setting;
 use Dyrynda\Database\Support\GeneratesUuid;
+use Error;
 use Exception;
 use H;
 use Illuminate\Database\Eloquent\Collection;
@@ -121,32 +122,45 @@ class Manufacturer extends BaseModel
     /**
      * @param $manufacturerId
      * @param $data
-     *
+     * @return Manufacturer|false
      */
-    public function editManufacturer($manufacturerId, $data)
+    public static function editManufacturer($manufacturerId, $data)
     {
-        self::find($manufacturerId)->update($data);
-        $manufacturerToStore = [];
-        if (isset($data['manufacturer_store'])) {
-            Registry::db()->table('manufacturers_to_stores')
-                ->where('manufacturer_id', '=', (int)$manufacturerId)
-                ->delete();
+        $db = Registry::db();
+        $db->beginTransaction();
+        try {
+            $manufacturer = self::find($manufacturerId);
+            $manufacturer->update($data);
+            $manufacturerToStore = [];
+            if (isset($data['manufacturer_store'])) {
+                $db->table('manufacturers_to_stores')
+                    ->where('manufacturer_id', '=', (int)$manufacturerId)
+                    ->delete();
 
-            foreach ($data['manufacturer_store'] as $store_id) {
-                $manufacturerToStore[] = [
-                    'manufacturer_id' => $manufacturerId,
-                    'store_id'        => (int)$store_id,
-                ];
+                foreach ($data['manufacturer_store'] as $store_id) {
+                    $manufacturerToStore[] = [
+                        'manufacturer_id' => $manufacturerId,
+                        'store_id'        => (int)$store_id,
+                    ];
+                }
             }
+
+            if ($manufacturerToStore) {
+                $db->table('manufacturers_to_stores')->insert($manufacturerToStore);
+            }
+
+            if ($data['keyword'] || $data['name']) {
+                UrlAlias::setManufacturerKeyword($data['keyword'] ?: $data['name'], $manufacturerId);
+            }
+
+            Registry::cache()->flush('manufacturer');
+            $db->commit();
+            return $manufacturer;
+        } catch (Exception|Error $e) {
+            Registry::log()->error($e->getMessage());
+            $db->rollback();
+            return false;
         }
-
-        Registry::db()->table('manufacturers_to_stores')->insert($manufacturerToStore);
-
-        if ($data['keyword'] || $data['name']) {
-            UrlAlias::setManufacturerKeyword($data['keyword'] ?: $data['name'], $manufacturerId);
-        }
-
-        Registry::cache()->flush('manufacturer');
     }
 
     /**
