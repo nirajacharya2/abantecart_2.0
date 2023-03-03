@@ -59,33 +59,35 @@
 		<div class="alert alert-info"><?php echo sprintf($text_records_to_be_loaded, $request_count); ?></div>
 		<?php } ?>
 
-		<table class="table table-striped table-bordered import-table">
-			<thead>
-				<td class="col-md-3"><b><?php echo $text_import_file_col; ?></b></td>
-				<td class="col-md-3"><b><?php echo $text_import_file_data; ?></b></td>
-				<td class="col-md-4">
-					<div class="form-group">
-						<div class="input-group">
-							<select class="form-control" name="table" <?php if($import_ready) echo " disabled "; ?>>
-								<option value=""><?php echo $text_destination_col; ?></option>
-								<?php
-								if(is_array($tables)) {
-								foreach($tables as $tname => $tcols) {
-								?>
-								<option value="<?php echo $tname ?>" <?php if($tname == $map['table']) echo " selected "; ?>>
-								&nbsp;&nbsp;<?php echo $tname ?>
-								</option>
-								<?php
-									}
-								}
-								?>
-							</select>
-						</div>
-					</div>
-				</td>
-				<td class="col-md-2"><b><?php echo $text_import_update_on; ?></b></td>
-			</thead>
-	<?php	foreach($cols as $i => $col) { ?>
+        <table class="table table-striped table-bordered import-table">
+            <thead>
+            <tr>
+                <td class="col-md-3"><b><?php echo $text_import_file_col; ?></b></td>
+                <td class="col-md-3"><b><?php echo $text_import_file_data; ?></b></td>
+                <td class="col-md-4">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <select class="form-control" name="table" <?php if($import_ready) echo " disabled "; ?>>
+                                <option value=""><?php echo $text_destination_col; ?></option>
+                                <?php
+                                if(is_array($tables)) {
+                                    foreach($tables as $tname => $tcols) {
+                                        ?>
+                                        <option value="<?php echo $tname ?>" <?php if($tname == $map['table']) echo " selected "; ?>>
+                                            &nbsp;&nbsp;<?php echo $tname ?>
+                                        </option>
+                                        <?php
+                                    }
+                                }
+                                ?>
+                            </select>
+                        </div>
+                    </div>
+                </td>
+                <td class="col-md-2"><b><?php echo $text_import_update_on; ?></b></td>
+            </tr>
+            </thead>
+            <?php	foreach($cols as $i => $col) { ?>
 			<tr>
 				<td class="col-md-3">
 					<?php echo $col ?>
@@ -107,30 +109,32 @@
 										}
                                         //see if we can match columns based on the name
 										$col_name = trim(preg_replace('/[0-9]+/', '', $col));
-										if(	strtolower($col_name) == $cname
-											|| strtolower(preg_replace('/\s+/', '.', $col_name)) == $cname
-											|| strtolower($col_name) == $det['alias']
-										) {
-											$selected = 'selected';
-										}
-										$sel_title = $det["title"];
-										if($det["required"]) {
-											$sel_title = "{$sel_title} *required";
-										}
-										echo "<option value=\"$cname\" data-mvalue=\"{$det["multivalue"]}\" data-split=\"{$det["split"]}\" data-update=\"{$det["update"]}\" $selected>{$sel_title}</option>";
-									}
-									?>
-								</select>
-							</div>
-						</div>
-						<div class="form-group field_splitter hidden">
-							<div class="input-group">
-								<label class="control-label"><?php echo $text_import_split; ?></label>
-								<input type="text" size="5" name="split_col[<?php echo $i ?>]" value="<?php echo $map['split_col'][$i]; ?>"  disabled="disabled">
-							</div>
-						</div>
-					</div>
-					<?php } ?>
+                                        if (strtolower($col_name) == $cname
+                                            || strtolower(preg_replace('/\s+/', '.', $col_name)) == $cname
+                                            || strtolower($col_name) == $det['alias']
+                                        ) {
+                                            $selected = 'selected';
+                                        }
+                                        $sel_title = $det["title"];
+                                        if ($det["required"]) {
+                                            $sel_title = "{$sel_title} *required";
+                                        }
+                                        echo '<option value="' . $cname . '" data-mvalue="' . $det["multivalue"]
+                                            . '" data-split="' . $det["split"] . '" data-splitter="' . $det["splitter"] . '" data-update="' . $det["update"] . '" ' . $selected . '>' . $sel_title . '</option>';
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group field_splitter hidden">
+                            <div class="input-group">
+                                <label class="control-label"><?php echo $text_import_split; ?></label>
+                                <input type="text" size="5" name="split_col[<?php echo $i ?>]"
+                                       value="<?php echo $map['split_col'][$i]; ?>" disabled="disabled">
+                            </div>
+                        </div>
+                    </div>
+                    <?php } ?>
 				</td>
 				<td class="col-md-2 update-field">
 					<div class="form-group field_updater hidden">
@@ -171,8 +175,8 @@
 				<?php echo $button_back ?>
 			</a>
 			<?php } else { ?>
-			<button class="btn btn-primary lock-on-click"
-                <i class="fa fa-paper-plane fa-fw"></i> <?php echo $form['submit']->text; ?>
+                <button class="btn btn-primary lock-on-click">
+                    <i class="fa fa-paper-plane fa-fw"></i> <?php echo $form['submit']->text; ?>
 			</button>
 			<a href="#" class="btn btn-default export_map" data-toggle="modal" data-target="#load_map_modal">
 				<i class="fa fa-code fa-fw"></i> <?php echo $text_load_map; ?>
@@ -286,8 +290,13 @@
 		var $split = $elm.parents('.field_selector').find('.field_splitter');
 		if ($selected.data('split') == '1') {
 			<?php if(!$import_ready) { ?>
-				$split.find('input').removeAttr('disabled');
-			<?php } ?>
+            $split.find('input').removeAttr('disabled');
+            let inputSplit = $split.find('input');
+            inputSplit.removeAttr('disabled');
+            if ($selected.data('splitter').length > 0 && inputSplit.val().length == 0) {
+                inputSplit.val($selected.data('splitter'));
+            }
+            <?php } ?>
 			$split.removeClass('hidden');
 		} else {
 			<?php if(!$import_ready) { ?>
