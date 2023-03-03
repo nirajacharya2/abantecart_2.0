@@ -450,8 +450,8 @@ class Category extends BaseModel
         return [
             'path'                  => static::getPath($category_id, 'id'),
             'children'              => $children,
-            'active_products_count' => (int)$category_info->active_products_count,
-            'total_products_count'  => (int)$category_info->total_products_count,
+            'active_products_count' => $category_info->active_products_count,
+            'total_products_count'  => $category_info->total_products_count,
         ];
     }
 
@@ -669,7 +669,9 @@ class Category extends BaseModel
     {
 
         $language_id = $params['language_id'] = ($params['language_id'] ?: static::$current_language_id);
-        $params['sort'] = $params['sort'] ?: 'contents.sort_order';
+        $params['sort'] = $params['sort'] ?: 'name';
+        $params['sort'] = $params['sort'] == 'keyword' ? 'name' : $params['sort'];
+
         $params['order'] = $params['order'] ?: 'ASC';
         $params['start'] = max($params['start'], 0);
         $params['limit'] = isset($params['limit']) ? abs($params['limit']) : null;
@@ -778,7 +780,7 @@ class Category extends BaseModel
             $sortBy = 'categories.sort_order';
         }
 
-        if (isset($params['order']) && ($params['order'] == 'DESC')) {
+        if (isset($params['order']) && (strtoupper($params['order']) == 'DESC')) {
             $desc = true;
         }
 
