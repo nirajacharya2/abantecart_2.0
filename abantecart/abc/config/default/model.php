@@ -10,6 +10,7 @@ use abc\models\order\Order;
 use abc\models\user\User;
 use abc\modules\listeners\ModelAuditListener;
 use abc\modules\listeners\ModelCategoryListener;
+use abc\modules\scopes\CategoryModelScope;
 
 return [
     /** events for ORM Models
@@ -58,16 +59,22 @@ return [
     //see eloquent documentation for details
     //you can extends base model with this array
     'INITIALIZE'       => [
-            Product::class => [
-                //merge with model properties
-                'properties' => [
-                                    'fillable' => [],
-                                    'guarded'  => []
-                ],
-                //add scopes with array of scope class full names
-                'scopes'     => [
-                    //SomeFullScopeClassName  myScope::class,
-                ]
+        Product::class  => [
+            //merge with model properties
+            'properties' => [
+                'fillable' => [],
+                'guarded'  => []
+            ],
+            //add scopes with array of scope class full names
+            'scopes'     => [
+                //SomeFullScopeClassName  myScope::class,
             ]
+        ],
+        Category::class => [
+            'scopes' => [
+                // disabling of empty categories on storefront side only
+                CategoryModelScope::class
+            ]
+        ]
     ]
 ];

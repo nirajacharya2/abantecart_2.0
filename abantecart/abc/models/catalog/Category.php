@@ -379,7 +379,7 @@ class Category extends BaseModel
                 ->where('category_descriptions.language_id', '=', static::$current_language_id)
                 ->orderBy('category_descriptions.name');
         }
-        $categories = $query->get()->toArray();
+        $categories = $query->useCache('category')->get()->toArray();
 
         $category_info = current($categories);
 
@@ -433,7 +433,6 @@ class Category extends BaseModel
                         ON (' . $p2cAlias . '.product_id = ' . $pAlias . '.product_id)
                     WHERE ' . $pAlias . '.status = 1 
                             AND COALESCE(' . $pAlias . '.date_available, NOW()) <= NOW()
-                            AND ' . $pAlias . '.date_deleted IS NULL
                             AND ' . $p2cAlias . '.category_id IN (' . implode(", ", $childrenIDs) . ')
                     ) as active_products_count'
             )->selectRaw(
@@ -442,7 +441,6 @@ class Category extends BaseModel
                     INNER JOIN ' . $p2cAlias . '
                         ON (' . $p2cAlias . '.product_id = ' . $pAlias . '.product_id)
                     WHERE ' . $p2cAlias . '.category_id IN (' . implode(", ", $childrenIDs) . ')
-                        AND ' . $pAlias . '.date_deleted IS NULL
                     ) as total_products_count'
             );
 
@@ -452,8 +450,8 @@ class Category extends BaseModel
         return [
             'path'                  => static::getPath($category_id, 'id'),
             'children'              => $children,
-            'active_products_count' => (int)$category_info->active_products_count,
-            'total_products_count'  => (int)$category_info->total_products_count,
+            'active_products_count' => $category_info->active_products_count,
+            'total_products_count'  => $category_info->total_products_count,
         ];
     }
 
@@ -509,7 +507,7 @@ class Category extends BaseModel
 
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
-        $categories = $query->get();
+        $categories = $query->useCache('category')->get();
 
         foreach ($categories as $category) {
             if (ABC::env('IS_ADMIN')) {
@@ -610,7 +608,7 @@ class Category extends BaseModel
 
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
-        $categories = $query->get();
+        $categories = $query->useCache('category')->get();
         $output = [];
         foreach ($categories as $category) {
             $output[] = $category->category_id;
@@ -656,7 +654,7 @@ class Category extends BaseModel
 
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
-        return $query->get()->count();
+        return $query->useCache('category')->get()->count();
     }
 
     /**
@@ -671,7 +669,9 @@ class Category extends BaseModel
     {
 
         $language_id = $params['language_id'] = ($params['language_id'] ?: static::$current_language_id);
-        $params['sort'] = $params['sort'] ?: 'contents.sort_order';
+        $params['sort'] = $params['sort'] ?: 'name';
+        $params['sort'] = $params['sort'] == 'keyword' ? 'name' : $params['sort'];
+
         $params['order'] = $params['order'] ?: 'ASC';
         $params['start'] = max($params['start'], 0);
         $params['limit'] = isset($params['limit']) ? abs($params['limit']) : null;
@@ -780,7 +780,7 @@ class Category extends BaseModel
             $sortBy = 'categories.sort_order';
         }
 
-        if (isset($params['order']) && ($params['order'] == 'DESC')) {
+        if (isset($params['order']) && (strtoupper($params['order']) == 'DESC')) {
             $desc = true;
         }
 
@@ -1156,6 +1156,7 @@ class Category extends BaseModel
                         ->where('sss.key', '=', 'config_ssl_url');
                 }
             )->where('category_id', '=', (int)$category_id)
+            ->useCache('category')
             ->get();
         if ($storeInfo) {
             return json_decode($storeInfo, true);
@@ -1199,7 +1200,7 @@ class Category extends BaseModel
 
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
-        return $query->get()?->toArray();
+        return $query->useCache('category')->get()?->toArray();
     }
 
     /**
