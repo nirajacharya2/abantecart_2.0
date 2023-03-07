@@ -115,6 +115,7 @@ use stdClass;
  * @method static WithOptionCount(bool $only_enabled = true) - adds "option_count" column into selected fields
  * @method static WithAvgRating(bool $only_enabled = true) - adds "rating" column into selected fields
  * @method static WithStockInfo() - adds "stock_tracking" and quantity in the stock columns into selected fields
+ * @method static WithCategoryIds() - adds comma separated "category_ids" columns into selected fields
  *
  * @package abc\models
  */
@@ -1210,6 +1211,19 @@ class Product extends BaseModel
                 FROM " . $db->table_name("product_option_values") . " pov
                 WHERE pov.product_id = " . $db->table_name('products') . ".product_id 
                 GROUP BY pov.product_id) as quantity ";
+        $builder->selectRaw($sql);
+    }
+
+    /**
+     * @param QueryBuilder $builder
+     */
+    public static function scopeWithCategoryIds($builder)
+    {
+        $db = Registry::db();
+        $sql = "(SELECT GROUP_CONCAT(p2c.category_id)
+                FROM " . $db->table_name("products_to_categories") . " p2c
+                WHERE p2c.product_id = " . $db->table_name('products') . ".product_id
+                GROUP BY p2c.product_id) as category_ids";
         $builder->selectRaw($sql);
     }
 
@@ -2877,6 +2891,7 @@ class Product extends BaseModel
         if ($filter['category_id']) {
             if (is_array($filter['category_id'])) {
                 $categoryIds = $filter['category_id'];
+                $query->WithCategoryIds();
             } else {
                 $mode = $filter['only_enabled'] ? 'active_only' : '';
                 $categoryIds = Category::getChildrenIDs($filter['category_id'], $mode);
