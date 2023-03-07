@@ -467,7 +467,7 @@ class Category extends BaseModel
      */
     public static function getCategories($parentId = 0, $storeId = null, $limit = 0, $languageId = null)
     {
-        $languageId = $languageId !== null ? $languageId : static::$current_language_id;
+        $languageId = $languageId ?? static::$current_language_id;
 
         $category_data = [];
 
@@ -511,7 +511,7 @@ class Category extends BaseModel
 
         foreach ($categories as $category) {
             if (ABC::env('IS_ADMIN')) {
-                $category->name = static::getPath($category->category_id);
+                $category->name = $category->path;
             }
             $category_data[] = $category->toArray();
             $category_data = array_merge($category_data, static::getCategories($category->category_id, $storeId, $limit, $languageId));
@@ -612,21 +612,25 @@ class Category extends BaseModel
         $output = [];
         foreach ($categories as $category) {
             $output[] = $category->category_id;
-            $output = array_merge($output, static::getChildrenIDs($category->category_id));
+            $output = array_merge(
+                $output,
+                static::getChildrenIDs($category->category_id, $mode)
+            );
         }
 
         return $output;
     }
 
     /**
+     * @param int|null $storeId
      * @return array
-     * @throws ReflectionException
      * @throws AException
      * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
-    public static function getAllCategories()
+    public static function getAllCategories(?int $storeId = 0)
     {
-        return static::getCategories(-1);
+        return static::getCategories(-1, $storeId);
     }
 
     /**
@@ -814,7 +818,7 @@ class Category extends BaseModel
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
         $items = $query->useCache('category')->get();
-        $total_num_rows = Registry::db()->sql_get_row_count();
+        $items->total = $total_num_rows = Registry::db()->sql_get_row_count();
         foreach ($items as &$item) {
             $item['total_num_rows'] = $total_num_rows;
             if ($params['basename']) {
