@@ -212,7 +212,7 @@ class ControllerPagesSaleOrder extends AController
             ],
             [
                 'name'  => 'name',
-                'index' => 'name',
+                'index' => 'customer_name',
                 'width' => 90,
                 'align' => 'left',
             ],
