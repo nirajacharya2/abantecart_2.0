@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2021 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -24,6 +24,7 @@ use abc\core\engine\AController;
 use abc\core\engine\AResource;
 use abc\core\lib\AException;
 use abc\models\catalog\Category;
+use Psr\SimpleCache\InvalidArgumentException;
 
 class ControllerBlocksCategory extends AController
 {
@@ -35,8 +36,8 @@ class ControllerBlocksCategory extends AController
     public function __construct($registry, $instance_id, $controller, $parent_controller = '')
     {
         parent::__construct($registry, $instance_id, $controller, $parent_controller);
-        $this->data['empty_render_text'] =
-            'To view content of block you should be logged in and prices must be without taxes';
+        $this->data['empty_render_text'] = 'To view content of block you should be '
+            . 'logged in and prices must be without taxes';
     }
 
     public function main()
@@ -45,18 +46,6 @@ class ControllerBlocksCategory extends AController
 
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
-
-        //HTML cache only for non-customer
-        if (!$this->customer->isLogged() && !$this->customer->isUnauthCustomer()) {
-            $allowed_cache_keys = ['path'];
-            $cache_val = ['path' => $request['path']];
-            $this->buildHTMLCacheKey($allowed_cache_keys, $cache_val);
-            //disable cache when login display price setting is off or enabled showing of prices with taxes
-            if (($this->config->get('config_customer_price') && !$this->config->get('config_tax'))
-                && $this->html_cache()) {
-                return null;
-            }
-        }
 
         $this->view->assign('heading_title', $this->language->get('heading_title', 'blocks/category'));
 
@@ -68,9 +57,9 @@ class ControllerBlocksCategory extends AController
         $this->view->assign('path', $request['path']);
 
         //load main level categories
-        $all_categories = Category::getAllCategories();
+        $this->data['all_categories'] = Category::getAllCategories();
         //build thumbnails list
-        $category_ids = array_column($all_categories, 'category_id');
+        $category_ids = array_column($this->data['all_categories'], 'category_id');
         $resource = new AResource('image');
         $this->thumbnails = $category_ids
             ? $resource->getMainThumbList(
@@ -81,8 +70,10 @@ class ControllerBlocksCategory extends AController
             )
             : [];
 
+        //add ability to filter categories from hooks
+        $this->extensions->hk_ProcessData($this, __FUNCTION__);
         //Build category tree
-        $this->buildCategoryTree($all_categories);
+        $this->buildCategoryTree($this->data['all_categories']);
         $categories = $this->buildNestedCategoryList();
         $this->view->assign('categories', $categories);
 
@@ -103,7 +94,7 @@ class ControllerBlocksCategory extends AController
      * @param int $parent_id
      *
      * @return array
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      * @throws AException
      */
     protected function buildCategoryTree($all_categories = [], $parent_id = 0)
@@ -132,15 +123,15 @@ class ControllerBlocksCategory extends AController
             //place result into memory for future usage (for menu. see below)
             $this->data['all_categories'] = $output;
             // cut list and expand only selected tree branch
-            $cutted_tree = [];
+            $truncatedTree = [];
             foreach ($output as $category) {
                 if ($category['parent_id'] != 0 && !in_array($this->selected_root_id, $category['parents'])) {
                     continue;
                 }
-                $category['href'] = $this->html->getSEOURL('product/category', '&path='.$category['path'], '&encode');
-                $cutted_tree[] = $category;
+                $category['href'] = $this->html->getSEOURL('product/category', '&path=' . $category['path'], '&encode');
+                $truncatedTree[] = $category;
             }
-            return $cutted_tree;
+            return $truncatedTree;
         } else {
             return $output;
         }
@@ -152,21 +143,23 @@ class ControllerBlocksCategory extends AController
      * @param int $parent_id
      *
      * @return array
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      * @throws AException
      */
     protected function buildNestedCategoryList($parent_id = 0)
     {
         $output = [];
         foreach ($this->data['all_categories'] as $category) {
-            if ($category['parent_id'] != $parent_id) {
+            if ($category['parent_id'] != $parent_id
+                || !$category['active_products_count']
+            ) {
                 continue;
             }
             $category['children'] = $this->buildNestedCategoryList($category['category_id']);
             $thumbnail = $this->thumbnails[$category['category_id']];
             $category['thumb'] = $thumbnail['thumb_url'];
             $category['product_count'] = $category['active_products_count'];
-            $category['href'] = $this->html->getSEOURL('product/category', '&path='.$category['path'], '&encode');
+            $category['href'] = $this->html->getSEOURL('product/category', '&path=' . $category['path'], '&encode');
             //mark current category
             if (in_array($category['category_id'], $this->path)) {
                 $category['current'] = true;
