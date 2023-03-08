@@ -511,7 +511,7 @@ class Category extends BaseModel
 
         foreach ($categories as $category) {
             if (ABC::env('IS_ADMIN')) {
-                $category->name = $category->path;
+                $category->name = static::getPath($category->category_id);
             }
             $category_data[] = $category->toArray();
             $category_data = array_merge($category_data, static::getCategories($category->category_id, $storeId, $limit, $languageId));
