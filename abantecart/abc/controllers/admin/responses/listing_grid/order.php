@@ -117,7 +117,6 @@ class ControllerResponsesListingGridOrder extends AController
         foreach ($results->toArray() as $item) {
             $statuses[(string)$item['order_status_id']] = $item['description']['name'];
         }
-        $this->log->write('eeeeeeeeee' . var_export($data, true));
         /** @see Order::getOrders() */
         $results = Order::search($data);
         $total = $results[0]['total_num_rows'];
