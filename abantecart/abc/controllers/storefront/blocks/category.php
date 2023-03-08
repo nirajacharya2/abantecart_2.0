@@ -57,9 +57,9 @@ class ControllerBlocksCategory extends AController
         $this->view->assign('path', $request['path']);
 
         //load main level categories
-        $this->data['all_categories'] = Category::getAllCategories();
+        $this->data['all_category_list'] = Category::getAllCategories();
         //build thumbnails list
-        $category_ids = array_column($this->data['all_categories'], 'category_id');
+        $category_ids = array_column($this->data['all_category_list'], 'category_id');
         $resource = new AResource('image');
         $this->thumbnails = $category_ids
             ? $resource->getMainThumbList(
@@ -73,7 +73,7 @@ class ControllerBlocksCategory extends AController
         //add ability to filter categories from hooks
         $this->extensions->hk_ProcessData($this, __FUNCTION__);
         //Build category tree
-        $this->buildCategoryTree($this->data['all_categories']);
+        $this->buildCategoryTree($this->data['all_category_list']);
         $categories = $this->buildNestedCategoryList();
         $this->view->assign('categories', $categories);
 
@@ -119,13 +119,13 @@ class ControllerBlocksCategory extends AController
             )
             );
         }
-        if ($parent_id == 0) {
+        if (!$parent_id) {
             //place result into memory for future usage (for menu. see below)
             $this->data['all_categories'] = $output;
             // cut list and expand only selected tree branch
             $truncatedTree = [];
             foreach ($output as $category) {
-                if ($category['parent_id'] != 0 && !in_array($this->selected_root_id, $category['parents'])) {
+                if ($category['parent_id'] && !in_array($this->selected_root_id, $category['parents'])) {
                     continue;
                 }
                 $category['href'] = $this->html->getSEOURL('product/category', '&path=' . $category['path'], '&encode');

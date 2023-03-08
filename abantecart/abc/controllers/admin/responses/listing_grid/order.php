@@ -51,12 +51,12 @@ class ControllerResponsesListingGridOrder extends AController
 
         // process jGrid search parameter
         $allowedFields = array_merge(
-            ['name', 'order_id', 'date_added', 'total', 'date_end', 'date_start'],
-            (array) $this->data['allowed_fields']
+            ['customer_name', 'order_id', 'date_added', 'total', 'date_end', 'date_start'],
+            (array)$this->data['allowed_fields']
         );
         $allowedSortFields = array_merge(
-            ['customer_id', 'order_id', 'name', 'status', 'date_added', 'total'],
-            (array) $this->data['allowed_sort_fields']
+            ['customer_name', 'customer_id', 'order_id', 'status', 'date_added', 'total'],
+            (array)$this->data['allowed_sort_fields']
         );
 
         $allowedDirection = ['asc', 'desc'];
@@ -86,8 +86,14 @@ class ControllerResponsesListingGridOrder extends AController
         if (H::has_value($this->request->get['customer_id'])) {
             $data['filter']['customer_id'] = $this->request->get['customer_id'];
         }
+        if (H::has_value($this->request->get['customer_id'])) {
+            $data['filter']['customer_name'] = $this->request->get['customer_name'];
+        }
         if (H::has_value($this->request->get['product_id'])) {
             $data['filter']['product_id'] = $this->request->get['product_id'];
+        }
+        if (H::has_value($this->request->get['product_name'])) {
+            $data['filter']['product_name'] = $this->request->get['product_name'];
         }
 
         if (isset($this->request->post['_search']) && $this->request->post['_search'] == 'true') {
@@ -105,13 +111,13 @@ class ControllerResponsesListingGridOrder extends AController
         }
 
         $results = OrderStatus::with('description')
-                              ->where('display_status', '=', '1')
-                              ->get();
+            ->where('display_status', '=', '1')
+            ->get();
         $statuses = [];
         foreach ($results->toArray() as $item) {
-            $statuses[(string) $item['order_status_id']] = $item['description']['name'];
+            $statuses[(string)$item['order_status_id']] = $item['description']['name'];
         }
-
+        /** @see Order::getOrders() */
         $results = Order::search($data);
         $total = $results[0]['total_num_rows'];
         if ($total > 0) {
