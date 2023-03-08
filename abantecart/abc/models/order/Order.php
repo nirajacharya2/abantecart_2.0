@@ -1614,14 +1614,24 @@ class Order extends BaseModel
             }
         }
 
-        if (H::has_value($filter['product_id'])) {
+        if (H::has_value($filter['product_id']) || H::has_value($filter['product_name'])) {
             $query->leftJoin(
                 'order_products',
                 'orders.order_id',
                 '=',
                 'order_products.order_id'
             );
-            $query->where('order_products.product_id', '=', $filter['product_id']);
+            if ($filter['product_id']) {
+                if (is_array($filter['product_id'])) {
+                    $query->whereIn('order_products.product_id', $filter['product_id']);
+                } else {
+                    $query->where('order_products.product_id', '=', $filter['product_id']);
+                }
+            }
+
+            if ($filter['product_name']) {
+                $query->where('order_products.name', 'like', '%' . $filter['product_name'] . '%');
+            }
         }
 
         if (H::has_value($inputData['filter']['coupon_id'])) {
@@ -1672,16 +1682,14 @@ class Order extends BaseModel
                 $compare = substr($filter['total'], 0, 2);
                 $filter['total'] = substr($filter['total'], 2, strlen($filter['total']));
                 $filter['total'] = trim($filter['total']);
-            } else {
-                if (in_array(substr($filter['total'], 0, 1), ['>', '<', '='])) {
-                    $compare = substr($filter['total'], 0, 1);
-                    $filter['total'] = substr(
-                        $filter['total'],
-                        1,
-                        strlen($filter['total'])
-                    );
-                    $filter['total'] = trim($filter['total']);
-                }
+            } else if (in_array(substr($filter['total'], 0, 1), ['>', '<', '='])) {
+                $compare = substr($filter['total'], 0, 1);
+                $filter['total'] = substr(
+                    $filter['total'],
+                    1,
+                    strlen($filter['total'])
+                );
+                $filter['total'] = trim($filter['total']);
             }
 
             $filter['total'] = (float)$filter['total'];
@@ -1733,11 +1741,11 @@ class Order extends BaseModel
         }
 
         $sort_data = [
-            'order_id'   => 'orders.order_id',
-            'name'       => 'name',
-            'status'     => 'status',
-            'date_added' => 'orders.date_added',
-            'total'      => 'orders.total',
+            'order_id'      => 'orders.order_id',
+            'customer_name' => "name",
+            'status'        => 'status',
+            'date_added'    => 'orders.date_added',
+            'total'         => 'orders.total',
         ];
 
         // NOTE: Performance slowdown might be noticed or larger search results
