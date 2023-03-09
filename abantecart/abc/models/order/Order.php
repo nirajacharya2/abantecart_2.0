@@ -1630,6 +1630,7 @@ class Order extends BaseModel
             }
 
             if ($filter['product_name']) {
+                $filter['product_name'] = str_replace('  ', ' ', trim($filter['product_name']));
                 $query->where('order_products.name', 'like', '%' . $filter['product_name'] . '%');
             }
         }
