@@ -1215,9 +1215,6 @@ class ACustomer extends ALibBase
         $language->load('account/create');
 
         $customer_id = $data['customer_id'] ? (int)$data['customer_id'] : null;
-        if($data['password']) {
-            $data['password'] = htmlspecialchars_decode($data['password']);
-        }
 
         //If captcha enabled, validate
         if ( $config->get( 'config_account_create_captcha' ) && !$isLogged) {
