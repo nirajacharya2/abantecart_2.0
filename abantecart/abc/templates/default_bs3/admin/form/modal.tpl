@@ -31,6 +31,8 @@
             content.find('.modal-body, .modal-header').empty();
             <?php
             echo $js_onclose; ?>
+            // hide all tooltips
+            $('.tooltip.in').removeClass('in');
         }
     );
 
@@ -56,8 +58,12 @@ $('#<?php echo $id;?>').on('shown.bs.modal', function (e) {
     <?php echo $js_onshow; ?>
 });
 $('#<?php echo $id;?>').on("hidden.bs.modal", function (e) {
+    // hide all tooltips
+    $('.tooltip.in').removeClass('in');
     <?php echo $js_onclose; ?>
 	});
 
 <?php } ?>
+
+
 </script>
