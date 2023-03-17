@@ -27,7 +27,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property int $order_id
  * @property int $type_id
- * @property string $data
+ * @property array|string $data
  * @property Carbon $date_added
  * @property Carbon $date_modified
  *

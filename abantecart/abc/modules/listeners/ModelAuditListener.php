@@ -33,7 +33,6 @@ class ModelAuditListener
      */
     public function handle($eventAlias, $params)
     {
-
         $relationName = '';
         $ids = [];
         $morphAttributes = [];
@@ -51,7 +50,7 @@ class ModelAuditListener
         }
 
         if (self::DEBUG_TO_LOG === true) {
-            $this->registry->get('log')->write('Start Handle Event: '.$eventAlias);
+            $this->registry->get('log')->write('Start Handle Event: ' . $eventAlias);
         }
 
         /**
@@ -78,7 +77,7 @@ class ModelAuditListener
 
             foreach ($eventsList as $alias) {
                 if (is_int(stripos($eventAlias, $alias))) {
-                    $eventAlias = 'eloquent.'.$alias;
+                    $eventAlias = 'eloquent.' . $alias;
                     break;
                 }
             }
@@ -94,12 +93,12 @@ class ModelAuditListener
                     if ($result === false) {
                         return false;
                     }
-                    $messages .= $result['message']."\n";
+                    $messages .= $result['message'] . "\n";
                 }
 
                 //when all models handled return result
                 return [
-                    'result'  => true,
+                    'result' => true,
                     'message' => $messages,
                 ];
             } else {
@@ -127,7 +126,7 @@ class ModelAuditListener
         ) {
             return $this->output(
                 false,
-                'ModelAuditListener: Argument 1 not instance of base model '.BaseModel::class
+                'ModelAuditListener: Argument 1 not instance of base model ' . BaseModel::class
             );
         }
 
@@ -137,14 +136,14 @@ class ModelAuditListener
         if (!$modelObject::$auditingEnabled) {
             return $this->output(
                 true,
-                'ModelAuditListener: Auditing of model '.$modelClassName.' is disabled.'
+                'ModelAuditListener: Auditing of model ' . $modelClassName . ' is disabled.'
             );
         }
         // check is event allowed by model-class
         $event_name = '';
         $allowedEvents = (array)$modelObject::$auditEvents;
         foreach ($allowedEvents as $ev) {
-            if (is_int(strpos($eventAlias, 'eloquent.'.$ev))) {
+            if (is_int(strpos($eventAlias, 'eloquent.' . $ev))) {
                 $event_name = $ev;
                 break;
             }
@@ -152,11 +151,10 @@ class ModelAuditListener
 
         //skip empty or "retrieved" event as useless
         if (!$event_name || $event_name == 'retrieved') {
-
             return $this->output(
                 true,
                 'ModelAuditListener: Auditing of model '
-                .$modelClassName.' on event "'.$eventAlias.'" not found.'
+                . $modelClassName . ' on event "' . $eventAlias . '" not found.'
             );
         }
         //get changed
@@ -175,7 +173,7 @@ class ModelAuditListener
         if ((!$newData && !$oldData) || array_keys($newData) == [$modelObject->getUpdatedAtColumn()]) {
             return $this->output(
                 true,
-                'ModelAuditListener: Nothing to audit of model '.$modelClassName.'.'
+                'ModelAuditListener: Nothing to audit of model ' . $modelClassName . '.'
             );
         }
 
@@ -183,7 +181,7 @@ class ModelAuditListener
         if ($event_name == 'saving' && !$oldData) {
             return $this->output(
                 false,
-                'ModelAuditListener: Skipped "'.$event_name.'" event before inserting for '.$modelClassName.'.'
+                'ModelAuditListener: Skipped "' . $event_name . '" event before inserting for ' . $modelClassName . '.'
             );
         }
         //Skip saved event after inserts and updates
@@ -197,7 +195,7 @@ class ModelAuditListener
         if ($event_name == 'updating' && (!$newData || !$oldData)) {
             return $this->output(
                 false,
-                'ModelAuditListener: Skipped "updating" event with empty data set for '.$modelClassName.'.'
+                'ModelAuditListener: Skipped "updating" event with empty data set for ' . $modelClassName . '.'
             );
         }
 
@@ -215,7 +213,7 @@ class ModelAuditListener
         if ($user->getActoronbehalf() > 0) {
             $actorOnBehalf = User::find($user->getActoronbehalf());
         }
-        $user_name = $user->getUserName().($actorOnBehalf ? '('.$actorOnBehalf->username.')' : '');
+        $user_name = $user->getUserName() . ($actorOnBehalf ? '(' . $actorOnBehalf->username . ')' : '');
 
         //get primary key value
         $auditable_id = $modelObject->getKey();
@@ -240,8 +238,8 @@ class ModelAuditListener
 
         $userData = [
             'group' => $user_type,
-            'id'    => $user_id,
-            'name'  => $user_name,
+            'id' => $user_id,
+            'name' => $user_name,
         ];
 
         $auditableModelId = AuditEvent::getModelIdByName($auditable_model);
@@ -284,14 +282,13 @@ class ModelAuditListener
                 && in_array('updating', $allowedEvents)
             )
         ) {
-
             return $this->output(
                 false,
-                'Skipped "'.$event_name.'" of model '.$modelClassName.' to prevent duplication of data');
+                'Skipped "' . $event_name . '" of model ' . $modelClassName . ' to prevent duplication of data'
+            );
         }
 
         foreach ($newData as $colName => $newValue) {
-
             if (is_array($newValue)) {
                 foreach ($newValue as $cName => $nValue) {
                     if ((string)$oldData[$colName][$cName] === (string)$nValue) {
@@ -300,45 +297,45 @@ class ModelAuditListener
                     $eventDescription[] = [
                         'auditable_model_id' => $auditableModelId,
                         'auditable_model_name' => $auditable_model,
-                        'auditable_id'       => $auditable_id ?: 0,
-                        'field_name'         => $cName,
-                        'old_value'          => $oldData[$colName][$cName],
-                        'new_value'          => $nValue,
+                        'auditable_id' => $auditable_id ?: 0,
+                        'field_name' => $cName,
+                        'old_value' => $oldData[$colName][$cName],
+                        'new_value' => $nValue,
                     ];
                 }
             } else {
                 if ((string)$oldData[$colName] === (string)$newValue) {
-                    $this->output(true, 'DATA SKIPPED: '.$colName." because values are equal.");
+                    $this->output(true, 'DATA SKIPPED: ' . $colName . " because values are equal.");
                     continue;
                 }
                 $eventDescription[] = [
                     'auditable_model_id' => $auditableModelId,
                     'auditable_model_name' => $auditable_model,
-                    'auditable_id'       => $auditable_id ?: 0,
-                    'field_name'         => $colName,
-                    'old_value'          => $oldData[$colName],
-                    'new_value'          => $newValue,
+                    'auditable_id' => $auditable_id ?: 0,
+                    'field_name' => $colName,
+                    'old_value' => $oldData[$colName],
+                    'new_value' => $newValue,
                 ];
             }
         }
 
         $data = [
-            'id'      => $request_id,
-            'actor'   => $userData,
-            'app'     => [
-                'name'    => 'Abantecart',
-                'server'  => '',
+            'id' => $request_id,
+            'actor' => $userData,
+            'app' => [
+                'name' => 'Abantecart',
+                'server' => '',
                 'version' => '2.0',
-                'build'   => ABC::env('BUILD_ID') ?: '',
-                'stage'   => ABC::$stage_name,
+                'build' => ABC::env('BUILD_ID') ?: '',
+                'stage' => ABC::$stage_name,
             ],
-            'entity'  => [
-                'name'  => $main_auditable_model,
-                'id'    => $main_auditable_id,
+            'entity' => [
+                'name' => $main_auditable_model,
+                'id' => $main_auditable_id,
                 'group' => $event_name,
             ],
             'request' => [
-                'ip'        => $user->getUserIp(),
+                'ip' => $user->getUserIp(),
                 'timestamp' => date('Y-m-d\TH:i:s.v\Z'),
             ],
             'changes' => [],
@@ -346,11 +343,11 @@ class ModelAuditListener
 
         foreach ($eventDescription as $item) {
             $data['changes'][] = [
-                'name'      => $item['field_name'],
-                'groupId'   => $item['auditable_id'],
+                'name' => $item['field_name'],
+                'groupId' => $item['auditable_id'],
                 'groupName' => $item['auditable_model_name'],
-                'oldValue'  => $item['old_value'],
-                'newValue'  => $item['new_value'],
+                'oldValue' => is_string($item['old_value']) ? $item['old_value'] : var_export($item['old_value'], true),
+                'newValue' => is_string($item['new_value']) ? $item['new_value'] : var_export($item['new_value'], true),
             ];
         }
 
@@ -370,12 +367,12 @@ class ModelAuditListener
         try {
             $auditLogStorage->write($data);
         } catch (\Exception $e) {
-            $error_message = __CLASS__.": Auditing of ".$modelClassName." failed.";
+            $error_message = __CLASS__ . ": Auditing of " . $modelClassName . " failed.";
             Registry::log()->write(
                 $error_message
-                ."\n"
-                .$e->getMessage()
-                ."\n".
+                . "\n"
+                . $e->getMessage()
+                . "\n" .
                 $event_name
             );
 
@@ -389,15 +386,15 @@ class ModelAuditListener
         return $this->output(
             true,
             'ModelAuditListener: Auditing of model '
-            .$modelClassName.' on event "'.$eventAlias.'" ('.$auditable_model.':'.$auditable_id.') '
-            .'has been finished successfully.'
+            . $modelClassName . ' on event "' . $eventAlias . '" (' . $auditable_model . ':' . $auditable_id . ') '
+            . 'has been finished successfully.'
         );
     }
 
     protected function output($result, $message)
     {
         $output = [
-            'result'  => $result,
+            'result' => $result,
             'message' => $message,
         ];
 
