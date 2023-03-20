@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,21 +21,29 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
+use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
+use abc\models\layout\Block;
+use abc\models\layout\BlockLayout;
 use abc\models\layout\CustomBlock;
+use abc\models\layout\Layout;
+use abc\models\layout\Page;
+use abc\models\layout\PageDescription;
+use Exception;
 use H;
+use Illuminate\Database\Query\JoinClause;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 
 /**
- * @property \abc\core\lib\AbcCache $cache
+ * @property AbcCache $cache
  * @property ASession $session
  * @property ADB $db
  * @property AConfig $config
  * @property ALog $log
  * @property AMessage $message
- * @property \abc\core\lib\ALanguageManager $language
- * @property \abc\core\engine\ExtensionsApi $extensions
+ * @property ALanguageManager $language
+ * @property ExtensionsApi $extensions
  */
 class ALayoutManager
 {
@@ -44,7 +52,7 @@ class ALayoutManager
     protected $page = [];
     protected $layouts = [];
     protected $blocks = [];
-    protected $all_blocks = [];
+    protected $allBlocks = [];
     //Layout placeholder parent blocks present in any template
     protected $main_placeholders = [
         'header',
@@ -56,11 +64,11 @@ class ALayoutManager
         'footer_top',
         'footer',
     ];
-    protected $tmpl_id;
-    protected $layout_id;
-    protected $active_layout = [];
-    protected $page_id;
-    protected $custom_blocks = [];
+    protected $templateTextId;
+    protected $layoutId;
+    protected $activeLayout = [];
+    protected $pageId;
+    protected $customBlocks = [];
     public $errors = 0;
 
     const LAYOUT_TYPE_DEFAULT = 0;
@@ -82,96 +90,86 @@ class ALayoutManager
      *  NOTES: Object can be constructed with specific template, page or layout id provided
      * Possible to create an object with no specifics to access layout methods.
      *
-     * @param string $tmpl_id
-     * @param string $page_id
-     * @param string $layout_id
+     * @param string|null $templateTextId
+     * @param int|null $pageId
+     * @param int|null $layoutId
      *
      * @throws AException
      * @throws InvalidArgumentException
      */
-    public function __construct($tmpl_id = '', $page_id = '', $layout_id = '')
+    public function __construct(?string $templateTextId = '', ?int $pageId = 0, ?int $layoutId = 0)
     {
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
             throw new AException ('Error: permission denied to change page layout', AC_ERR_LOAD);
         }
 
         $this->registry = Registry::getInstance();
-
-        $this->tmpl_id = !empty ($tmpl_id) ? $tmpl_id : $this->config->get('config_storefront_template');
+        $this->templateTextId = $templateTextId ?: $this->config->get('config_storefront_template');
 
         //do check for existence of storefront template in case when $tmpl_id not set
-        if (empty($tmpl_id)) {
+        if (!$templateTextId) {
             //check is template an extension
             $template = $this->config->get('config_storefront_template');
-            $dir = $template.ABC::env('DIRNAME_STORE').ABC::env('DIRNAME_TEMPLATES').$template;
+            $dir = $template . ABC::env('DIRNAME_STORE') . ABC::env('DIRNAME_TEMPLATES') . $template;
             $enabled_extensions = $this->extensions->getEnabledExtensions();
 
-            if (in_array($template, $enabled_extensions) && is_dir(ABC::env('DIR_APP_EXTENSIONS').$dir)) {
-                $is_valid = true;
-            } else {
-                $is_valid = false;
-            }
+            $isValid = (in_array($template, $enabled_extensions) && is_dir(ABC::env('DIR_APP_EXTENSIONS') . $dir));
 
             //check if this is template from core
-            if (!$is_valid && is_dir(ABC::env('DIR_TEMPLATES').$template.DS.ABC::env('DIRNAME_STORE'))) {
-                $is_valid = true;
+            if (!$isValid && is_dir(ABC::env('DIR_TEMPLATES') . $template . DS . ABC::env('DIRNAME_STORE'))) {
+                $isValid = true;
             }
-
-            if (!$is_valid) {
-                $this->tmpl_id = 'default';
-            } else {
-                $this->tmpl_id = $template;
-            }
+            $this->templateTextId = $isValid ? $template : 'default';
         } else {
-            $this->tmpl_id = $tmpl_id;
+            $this->templateTextId = $templateTextId;
         }
 
         //load all pages specific to set template. No cross template page/layouts
         $this->pages = $this->getPages();
         //set current page for this object instance
-        $this->setCurrentPage($page_id, $layout_id);
-        $this->page_id = $this->page['page_id'];
+        $this->setCurrentPage($pageId, $layoutId);
+        $this->pageId = $this->page['page_id'];
 
         //preload all layouts for this page and template
         //NOTE: layout_type: 0 Default, 1 Active layout, 2 draft layout, 3 template layout
         $this->layouts = (array)$this->getLayouts();
         //locate layout for the page instance. If not specified for this instance fist active layout is used
         foreach ($this->layouts as $layout) {
-            if (!empty ($layout_id)) {
-                if ($layout ['layout_id'] == $layout_id) {
-                    $this->active_layout = $layout;
+            if ($layoutId) {
+                if ($layout ['layout_id'] == $layoutId) {
+                    $this->activeLayout = $layout;
                     break;
                 }
             } else {
                 if ($layout ['layout_type'] == 1) {
-                    $this->active_layout = $layout;
+                    $this->activeLayout = $layout;
                     break;
                 }
             }
         }
 
         //if not layout set, use default (layout_type=0) layout
-        if (count($this->active_layout) == 0) {
-            $this->active_layout = $this->getLayouts(0);
-            if (count($this->active_layout) == 0) {
-                $message_text =
-                    'No template layout found for page_id/controller '.$this->page_id.'::'.$this->page ['controller']
-                    .'!';
-                $message_text .= ' Requested data: template: '.$tmpl_id.', page_id: '.$page_id.', layout_id: '
-                    .$layout_id;
-                $message_text .= '  '.H::genExecTrace('full');
-                throw new AException ($message_text, AC_ERR_LOAD_LAYOUT);
+        if (count($this->activeLayout) == 0) {
+            $this->activeLayout = $this->getLayouts(0);
+            if (count($this->activeLayout) == 0) {
+                $messageText = 'No template layout found for page_id/controller '
+                    . $this->pageId . '::' . $this->page ['controller'] . '!';
+                $messageText .= ' Requested data: template: ' . $templateTextId
+                    . ', page_id: ' . $pageId
+                    . ', layout_id: ' . $layoutId;
+                $messageText .= '  ' . H::genExecTrace('full');
+                throw new AException ($messageText, AC_ERR_LOAD_LAYOUT);
             }
         }
 
-        $this->layout_id = $this->active_layout['layout_id'];
+        $this->layoutId = $this->activeLayout['layout_id'];
 
-        ADebug::variable('Template id', $this->tmpl_id);
-        ADebug::variable('Page id', $this->page_id);
-        ADebug::variable('Layout id', $this->layout_id);
+        ADebug::variable('Template id', $this->templateTextId);
+        ADebug::variable('Page id', $this->pageId);
+        ADebug::variable('Layout id', $this->layoutId);
 
         // Get blocks
-        $this->all_blocks = $this->getAllBlocks();
+        $this->allBlocks = $this->getAllBlocks();
         $this->blocks = $this->getAllLayoutBlocks();
     }
 
@@ -186,74 +184,74 @@ class ALayoutManager
     }
 
     /**
-     * @param string $key
-     * @param mixed $value
-     */
-    public function __set($key, $value)
-    {
-        $this->registry->set($key, $value);
-    }
-
-    /**
      * Select pages on specified parameters linked to layout and template.
      * Note: returns an array of matching pages.
      *
-     * @param string $controller
-     * @param string $key_param
-     * @param string $key_value
-     * @param string $template_id
+     * @param string|null $controller
+     * @param string|null $keyParameter
+     * @param string|null $keyValue
+     * @param string|null $templateTextId
      *
      * @return array
-     * @throws \Exception
      */
-    public function getPages($controller = '', $key_param = '', $key_value = '', $template_id = '')
+    public function getPages(
+        ?string $controller = '',
+        ?string $keyParameter = '',
+        ?string $keyValue = '',
+        ?string $templateTextId = ''
+    )
     {
-        if (!$template_id) {
-            $template_id = $this->tmpl_id;
+        if (!$templateTextId) {
+            $templateTextId = $this->templateTextId;
         }
 
-        $language_id = $this->language->getContentLanguageID();
-        $where = "WHERE l.template_id = '".$this->db->escape($template_id)."' ";
-        if (!empty($controller)) {
-            $where .= " AND p.controller = '".$this->db->escape($controller)."' ";
+        $languageId = Registry::language()->getContentLanguageID();
+        $pdTable = Registry::db()->table_name('page_descriptions');
 
-            if (!empty ($key_param)) {
-                $where .= empty ($key_param) ? "" : "AND p.key_param = '".$this->db->escape($key_param)."' ";
-                $where .= empty ($key_value) ? "" : "AND p.key_value = '".$this->db->escape($key_value)."' ";
+        $query = Page::select('pages.*')
+            ->addSelect('page_descriptions.*')
+            ->addSelect('layouts.name')
+            ->selectRaw(
+                "CASE WHEN " . Registry::db()->table_name('layouts') . ".layout_type = 2 "
+                . "THEN CONCAT(" . $pdTable . ".name,' (draft)') "
+                . "ELSE " . $pdTable . ".name END AS `name`,")
+            ->leftJoin(
+                'page_descriptions',
+                function ($join) use ($languageId) {
+                    /** @var JoinClause $join */
+                    $join->on(
+                        'page_descriptions.page_id',
+                        '=',
+                        'pages.page_id'
+                    )->where(
+                        'page_descriptions.language_id',
+                        '=',
+                        $languageId
+                    );
+                })
+            ->leftJoin("pages_layouts", "pages_layouts.page_id", "=", "pages.page_id")
+            ->leftJoin("layouts", "layouts.layout_id", "=", "pages_layouts.layout_id");
+
+        if ($templateTextId) {
+            $query->where('layouts.template_id', '=', $templateTextId);
+        }
+        if ($controller) {
+            $query->where('pages.controller', '=', $controller);
+            if ($keyParameter) {
+                $query->where('pages.key_param', '=', $keyParameter);
+                if ($keyValue) {
+                    $query->where('pages.key_value', '=', $keyValue);
+                }
             }
         }
+        $query->orderBy('pages.page_id');
+        $pages = $query->useCache('layout')->get()?->toArray();
 
-        $sql = " SELECT p.page_id,
-                        p.controller,
-                        p.key_param,
-                        p.key_value,
-                        p.date_added,
-                        p.date_modified,
-                        CASE WHEN l.layout_type = 2 THEN CONCAT(pd.name,' (draft)') ELSE pd.name END AS `name`,
-                        pd.title,
-                        pd.seo_url,
-                        pd.keywords,
-                        pd.description,
-                        pd.content,
-                        pl.layout_id,
-                        l.layout_name
-                FROM ".$this->db->table_name("pages")." p "."
-                LEFT JOIN ".$this->db->table_name("page_descriptions")." pd 
-                    ON (p.page_id = pd.page_id AND pd.language_id = '".(int)$language_id."' )
-                LEFT JOIN ".$this->db->table_name("pages_layouts")." pl 
-                    ON pl.page_id = p.page_id
-                LEFT JOIN ".$this->db->table_name("layouts")." l 
-                    ON l.layout_id = pl.layout_id "
-            .$where
-            ." ORDER BY p.page_id ASC";
-
-        $query = $this->db->query($sql);
-        $pages = $query->rows;
         //process pages and tag restricted layout/pages
         //restricted layouts are the once without key_param and key_value
-        foreach ($pages as $count => $page) {
-            if (!H::has_value($page['key_param']) && !H::has_value($page['key_value'])) {
-                $pages[$count]['restricted'] = true;
+        foreach ($pages as &$page) {
+            if (!$page['key_param'] && !$page['key_value']) {
+                $page['restricted'] = true;
             }
         }
         return $pages;
@@ -262,81 +260,42 @@ class ALayoutManager
     /**
      * get available layouts for layout instance and layout types provided
      *
-     * @param string $layout_type
+     * @param int|null $layoutType - 0 Default, 1 Active layout, 2 draft layout, 3 template layout
      *
      * @return array
-     * @throws \Exception
-     * @throws InvalidArgumentException
      */
-    public function getLayouts($layout_type = '')
+    public function getLayouts(?int $layoutType = 0)
     {
-        $store_id = (int)$this->config->get('config_store_id');
-        $cache_key =
-            'layout.a.layouts.'.$this->tmpl_id.'.'.$this->page_id.(!empty ($layout_type) ? '.'.$layout_type : '');
-        if (( string )$layout_type == '0') {
-            $cache_key = 'layout.a.default.'.$this->tmpl_id;
+        $query = Layout::select('layouts.*');
+        if ($layoutType) {
+            $query->join('pages_layouts', 'pages_layouts.layout_id', '=', 'layouts.layout_id');
+            $query->where('pages_layouts.page_id', '=', $this->pageId);
         }
-        $cache_key .= '.store_'.$store_id;
-        $layouts = $this->cache->get($cache_key);
-        if ($layouts !== null) {
-            // return cached layouts
-            return $layouts;
+        $query->where('layouts.template_id', '=', $this->templateTextId);
+        if ($layoutType) {
+            $query->where('layouts.layout_type', '=', $layoutType);
         }
-
-        $where = 'WHERE template_id = "'.$this->db->escape($this->tmpl_id).'" ';
-        $join = '';
-
-        if (( string )$layout_type != '0') {
-            $where .= "AND pl.page_id = '".( int )$this->page_id."' ";
-            $join = "LEFT JOIN ".$this->db->table_name("pages_layouts")." as pl ON (l.layout_id = pl.layout_id) ";
-        }
-        if (!empty ($layout_type)) {
-            $where .= empty ($layout_type) ? "" : "AND layout_type = '".( int )$layout_type."' ";
-        }
-
-        $sql = "SELECT "
-            ."l.layout_id as layout_id, "
-            ."l.template_id as template_id, "
-            ."l.layout_type as layout_type, "
-            ."l.layout_name as layout_name, "
-            ."l.date_added as date_added, "
-            ."l.date_modified as date_modified "
-            ."FROM ".$this->db->table_name("layouts")." as l "
-            .$join
-            .$where
-            ." ORDER BY "."l.layout_id ASC";
-
-        $query = $this->db->query($sql);
-
-        if (( string )$layout_type == '0') {
-            $layouts = $query->row;
-        } else {
-            $layouts = $query->rows;
-        }
-
-        $this->cache->put($cache_key, $layouts);
-
-        return $layouts;
+        $query->orderBy('layouts.layout_id');
+        return $query->useCache('layout')->get()?->toArray();
     }
 
     /**
      * Run logic to detect page ID and layout ID for given parameters
      * This will detect if requested page already has layout or return default otherwise.
      *
-     * @param string $controller
-     * @param string $key_param
-     * @param string $key_value
+     * @param string|null $controller
+     * @param string|null $keyParameter
+     * @param string|null $keyValue
      *
      * @return array
-     * @throws \Exception
      */
-    public function getPageLayoutIDs($controller = '', $key_param = '', $key_value = '')
+    public function getPageLayoutIDs(?string $controller = '', ?string $keyParameter = '', ?string $keyValue = '')
     {
         $ret_arr = [];
         if (!H::has_value($controller)) {
             return $ret_arr;
         }
-        $pages = $this->getPages($controller, $key_param, $key_value);
+        $pages = $this->getPages($controller, $keyParameter, $keyValue);
         //check if we got most specific page/layout
         if (count($pages) && H::has_value($pages[0]['page_id'])) {
             $ret_arr['page_id'] = $pages[0]['page_id'];
@@ -357,50 +316,33 @@ class ALayoutManager
     }
 
     /**
-     * @param int $layout_id
+     * @param int|null $layoutId
      *
      * @return array
-     * @throws \Exception
-     * @throws InvalidArgumentException
      */
-    protected function getAllLayoutBlocks($layout_id = 0)
+    protected function getAllLayoutBlocks(?int $layoutId = 0)
     {
-        $store_id = (int)$this->config->get('config_store_id');
-        $layout_id = !$layout_id ? $this->layout_id : $layout_id;
-
-        $cache_key = 'layout.a.blocks.'.$layout_id.'.store_'.$store_id;
-        $blocks = $this->cache->get($cache_key);
-        if ($blocks !== null) {
-            // return cached blocks
-            return $blocks;
+        $layoutId = $layoutId ?: $this->layoutId;
+        if (!$layoutId) {
+            return [];
         }
 
-        $sql = "SELECT bl.instance_id AS instance_id,
-                       bl.layout_id AS layout_id,
-                       b.block_id AS block_id,
-                       bl.custom_block_id AS custom_block_id,
-                       bl.parent_instance_id AS parent_instance_id,
-                       bl.position AS position,
-                       bl.status AS status,
-                       b.block_txt_id AS block_txt_id,
-                       b.controller AS controller
-                FROM ".$this->db->table_name("blocks")." AS b
-                LEFT JOIN ".$this->db->table_name("block_layouts")." AS bl 
-                    ON (bl.block_id = b.block_id)
-                WHERE bl.layout_id = '".$layout_id."'
-                ORDER BY bl.parent_instance_id ASC, bl.position ASC";
-
-        $query = $this->db->query($sql);
-        $blocks = $query->rows;
-
-        $this->cache->put($cache_key, $blocks);
-
-        return $blocks;
+        $query = Block::select('block_layouts.*')
+            ->addSelect('blocks.*')
+            ->leftJoin(
+                'block_layouts',
+                'block_layouts.block_id',
+                '=',
+                'blocks.block_id'
+            )->where('block_layouts.layout_id', '=', $layoutId)
+            ->orderBy('block_layouts.parent_instance_id')
+            ->orderBy('block_layouts.position');
+        return $query->useCache('layout')->get()?->toArray();
     }
 
     /**
      * @return array
-     * @throws \Exception
+     * @throws Exception
      * @throws InvalidArgumentException
      */
     public function getAllBlocks()
@@ -448,7 +390,7 @@ class ALayoutManager
      * @param string $mode
      *
      * @return array|int
-     * @throws \Exception
+     * @throws Exception
      */
     public function getBlocksList($data = [], $mode = '')
     {
@@ -519,7 +461,7 @@ class ALayoutManager
      */
     public function getTemplateId()
     {
-        return $this->tmpl_id;
+        return $this->templateTextId;
     }
 
     /**
@@ -561,7 +503,7 @@ class ALayoutManager
      */
     public function getActiveLayout()
     {
-        return $this->active_layout;
+        return $this->activeLayout;
     }
 
     /**
@@ -587,7 +529,7 @@ class ALayoutManager
      */
     public function getBlockByTxtId($block_txt_id)
     {
-        foreach ($this->all_blocks as $block) {
+        foreach ($this->allBlocks as $block) {
             if ($block ['block_txt_id'] == $block_txt_id) {
                 return $block;
             }
@@ -601,7 +543,7 @@ class ALayoutManager
      * @param int $parent_block_id
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getBlockChildren($parent_instance_id, $parent_block_id)
     {
@@ -624,7 +566,7 @@ class ALayoutManager
     {
         $blocks = [];
 
-        foreach ($this->all_blocks as $block) {
+        foreach ($this->allBlocks as $block) {
             // do not include main level blocks
             if (!in_array($block ['block_txt_id'], $this->main_placeholders)) {
                 $blocks [] = $block;
@@ -636,7 +578,7 @@ class ALayoutManager
 
     /**
      * @return array
-     * @throws \Exception
+     * @throws Exception
      * @throws InvalidArgumentException
      */
     public function getLayoutBlocks()
@@ -670,7 +612,7 @@ class ALayoutManager
      *
      * @return array
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws InvalidArgumentException
      */
     protected function buildChildrenBlocks($blocks, $total_blocks)
@@ -746,7 +688,7 @@ class ALayoutManager
      */
     public function getLayoutId()
     {
-        return $this->layout_id;
+        return $this->layoutId;
     }
 
     /**
@@ -798,18 +740,18 @@ class ALayoutManager
     public function savePageLayout($data)
     {
         $page = $this->page;
-        $layout = $this->active_layout;
+        $layout = $this->activeLayout;
         $new_layout = false;
 
         if ($layout ['layout_type'] == 0 && ($page ['controller'] != 'generic' || $data['controller'])) {
             $layout ['layout_name'] = $data ['layout_name'];
             $layout ['layout_type'] = self::LAYOUT_TYPE_ACTIVE;
-            $this->layout_id = $this->saveLayout($layout);
+            $this->layoutId = $this->saveLayout($layout);
             $new_layout = true;
 
-            $this->db->query("INSERT INTO ".$this->db->table_name("pages_layouts")." 
+            $this->db->query("INSERT INTO " . $this->db->table_name("pages_layouts") . " 
                                 (layout_id,page_id)
-                                VALUES ('".( int )$this->layout_id."','".( int )$this->page_id."')");
+                                VALUES ('" . ( int )$this->layoutId . "','" . ( int )$this->pageId . "')");
         }
 
         foreach ($this->main_placeholders as $placeholder) {
@@ -819,19 +761,19 @@ class ALayoutManager
                 if (!empty ($data ['blocks'] [$block ['block_id']])) {
                     $block = array_merge($block, $data ['blocks'] [$block ['block_id']]);
                     if ($new_layout) {
-                        $block ['layout_id'] = $this->layout_id;
+                        $block ['layout_id'] = $this->layoutId;
                         $instance_id = $this->saveLayoutBlocks($block);
                     } else {
                         $instance_id = $this->saveLayoutBlocks($block, $block ['instance_id']);
                     }
 
                     if (isset ($data ['blocks'] [$block ['block_id']] ['children'])) {
-                        $this->deleteLayoutBlocks($this->layout_id, $instance_id);
+                        $this->deleteLayoutBlocks($this->layoutId, $instance_id);
 
                         foreach ($data ['blocks'] [$block ['block_id']] ['children'] as $key => $block_data) {
                             $child = [];
                             if (!empty ($block_data)) {
-                                $child ['layout_id'] = $this->layout_id;
+                                $child ['layout_id'] = $this->layoutId;
                                 list($child ['block_id'], $child ['custom_block_id']) =
                                     explode("_", $block_data['block_id']);
                                 $child ['parent_instance_id'] = $instance_id;
@@ -858,19 +800,19 @@ class ALayoutManager
      *
      * @param $data array
      *
-     * @return bool
-     * @throws \Exception
+     * @return int
+     * @throws Exception
      */
     public function savePageLayoutAsDraft($data)
     {
 
-        $layout = $this->active_layout;
+        $layout = $this->activeLayout;
         $layout ['layout_type'] = self::LAYOUT_TYPE_DRAFT;
 
         $new_layout_id = $this->saveLayout($layout);
 
-        $this->db->query("INSERT INTO ".$this->db->table_name("pages_layouts")." (layout_id,page_id)
-                            VALUES ('".(int)$new_layout_id."','".(int)$this->page_id."')");
+        $this->db->query("INSERT INTO " . $this->db->table_name("pages_layouts") . " (layout_id,page_id)
+                            VALUES ('" . (int)$new_layout_id . "','" . (int)$this->pageId . "')");
 
         foreach ($this->main_placeholders as $placeholder) {
             $block = $this->getLayoutBlockByTxtId($placeholder);
@@ -923,7 +865,7 @@ class ALayoutManager
             return false;
         }
 
-        $layout = $this->active_layout;
+        $layout = $this->activeLayout;
 
         //this is a new layout
         if (!$dest_layout_id) {
@@ -931,12 +873,12 @@ class ALayoutManager
                 $layout ['layout_name'] = $layout_name;
             }
             $layout ['layout_type'] = 1;
-            $this->layout_id = $this->saveLayout($layout);
-            $dest_layout_id = $this->layout_id;
+            $this->layoutId = $this->saveLayout($layout);
+            $dest_layout_id = $this->layoutId;
 
-            $this->db->query("INSERT INTO ".$this->db->table_name("pages_layouts")." 
+            $this->db->query("INSERT INTO " . $this->db->table_name("pages_layouts") . " 
                                 (layout_id,page_id)
-                              VALUES ('".( int )$this->layout_id."','".( int )$this->page_id."')");
+                              VALUES ('" . ( int )$this->layoutId . "','" . ( int )$this->pageId . "')");
         } else {
             #delete existing layout data if provided cannot delete
             # based on $this->layout_id (done on purpose for confirmation)
@@ -962,7 +904,7 @@ class ALayoutManager
      */
     public function deletePageLayoutByID($page_id, $layout_id)
     {
-        if (!H::has_value($page_id) || !H::has_value($layout_id)) {
+        if (!$page_id || !$layout_id) {
             return false;
         }
 
@@ -987,7 +929,7 @@ class ALayoutManager
      * @param $key_value
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function deletePageLayout($controller, $key_param, $key_value)
     {
@@ -1013,8 +955,8 @@ class ALayoutManager
      *
      * @return bool
      * @throws AException
-     * @throws ReflectionException
      * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function deleteAllPagesLayouts($controller, $key_param, $key_value)
     {
@@ -1052,51 +994,32 @@ class ALayoutManager
      * @param int $instance_id
      *
      * @return int
-     * @throws \Exception
+     * @throws Exception
      */
     public function saveLayoutBlocks($data, $instance_id = 0)
     {
-        $parent_instance_id = 'NULL';
+        $parent_instance_id = null;
         if (( int )$data ['parent_instance_id'] > 0) {
             $parent_instance_id = ( int )$data ['parent_instance_id'];
         }
 
-        $custom_block_id = 'NULL';
-        if (( int )$data ['custom_block_id'] > 0) {
-            $custom_block_id = ( int )$data ['custom_block_id'];
-        }
+        $custom_block_id = ( int )$data ['custom_block_id'] ?: null;
 
-        if (!$instance_id) {
-            $this->db->query("INSERT INTO ".$this->db->table_name("block_layouts")."\n 
-                                (layout_id,
-                                block_id,
-                                custom_block_id,
-                                parent_instance_id,
-                                position,
-                                status,
-                                date_added,
-                                date_modified)
-                                VALUES ('".(int)$data ['layout_id']."',
-                                        '".(int)$data ['block_id']."',
-                                        ".$custom_block_id.",
-                                        ".$parent_instance_id.",
-                                        '".(int)$data ['position']."',
-                                        '".(int)$data ['status']."',
-                                        NOW(),
-                                        NOW())");
+        $layoutInstance = BlockLayout::updateOrCreate(
+            [
+                'instance_id' => $instance_id ?: null
+            ],
+            [
+                'layout_id'          => $data ['layout_id'],
+                'block_id'           => $data ['block_id'],
+                'custom_block_id'    => $custom_block_id,
+                'parent_instance_id' => $parent_instance_id ?: null,
+                'position'           => (int)$data ['position'],
+                'status'             => (int)$data ['status']
+            ]
+        );
+        $instance_id = $layoutInstance->instance_id;
 
-            $instance_id = $this->db->getLastId();
-        } else {
-            $this->db->query("UPDATE ".$this->db->table_name("block_layouts")." \n
-                             SET layout_id = '".( int )$data ['layout_id']."',
-                                    block_id = '".( int )$data ['block_id']."',
-                                    custom_block_id = ".$custom_block_id.",
-                                    parent_instance_id = ".$parent_instance_id.",
-                                    position = '".( int )$data ['position']."',
-                                    status = '".( int )$data ['status']."',
-                                    date_modified = NOW()
-                             WHERE instance_id = '".( int )$instance_id."'");
-        }
 
         $this->cache->flush('layout');
 
@@ -1112,23 +1035,21 @@ class ALayoutManager
      * @return bool
      * @throws AException
      */
-    public function deleteLayoutBlocks($layout_id = 0, $parent_instance_id = 0)
+    public function deleteLayoutBlocks($layout_id = 0, $parent_instance_id = null)
     {
         if (!$parent_instance_id && !$layout_id) {
             throw new AException (
                 'Error: Cannot to delete layout block, parent_instance_id "'
-                .$parent_instance_id.'" and layout_id "'.$layout_id.
+                . $parent_instance_id . '" and layout_id "' . $layout_id .
                 '" does not exists.',
                 AC_ERR_LOAD
             );
-        } else {
-            $this->db->query("DELETE FROM ".$this->db->table_name("block_layouts")." 
-                                WHERE layout_id = '".( int )$layout_id."' 
-                                    AND parent_instance_id = '".( int )$parent_instance_id."'");
-
-            $this->cache->flush('layout');
         }
 
+        BlockLayout::where('layout_id', '=', (int)$layout_id)
+            ->where('parent_instance_id', '=', $parent_instance_id)
+            ->delete();
+        $this->cache->flush('layout');
         return true;
     }
 
@@ -1161,25 +1082,24 @@ class ALayoutManager
      * @param int $layout_id
      *
      * @return int
-     * @throws \Exception
+     * @throws Exception
      */
     public function saveLayout($data, $layout_id = 0)
     {
         if (!$layout_id) {
-            $this->db->query("INSERT INTO ".$this->db->table_name("layouts")."\n 
-                                (template_id,layout_name,layout_type,date_added,date_modified)
-                                VALUES ('".$this->db->escape($data ['template_id'])."',
-                                        '".$this->db->escape($data ['layout_name'])."',
-                                        '".( int )$data ['layout_type']."',
-                                        NOW(),
-                                        NOW())");
-            $layout_id = $this->db->getLastId();
+            $layoutObj = Layout::create(
+                [
+                    'template_id' => $data ['template_id'],
+                    'layout_name' => $data ['layout_name'],
+                    'layout_type' => $data ['layout_type']
+                ]
+            );
+            $layout_id = $layoutObj->layout_id;
         } else {
-            $this->db->query("UPDATE ".$this->db->table_name("layouts")." 
-                                SET template_id = '".( int )$data ['template_id']."',
-                                    layout_name = '".$this->db->escape($data ['layout_name'])."',
-                                    layout_type = '".( int )$data ['layout_type']."',
-                                    date_modified = NOW()
+            $this->db->query("UPDATE " . $this->db->table_name("layouts") . " 
+                                SET template_id = '" . ( int )$data ['template_id'] . "',
+                                    layout_name = '" . $this->db->escape($data ['layout_name']) . "',
+                                    layout_type = '" . ( int )$data ['layout_type'] . "'
                                 WHERE layout_id = '".( int )$layout_id."'");
         }
 
@@ -1192,7 +1112,7 @@ class ALayoutManager
      * @param $block_id int
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getBlockInfo($block_id)
     {
@@ -1216,15 +1136,15 @@ class ALayoutManager
                 l.layout_name,
                 l.template_id,
                 pl.page_id
-            FROM ".$this->db->table_name("blocks")." AS b
-            LEFT JOIN ".$this->db->table_name("block_layouts")." bl 
+            FROM " . $this->db->table_name("blocks") . " AS b
+            LEFT JOIN " . $this->db->table_name("block_layouts") . " bl 
                 ON bl.block_id=b.block_id
-            LEFT JOIN ".$this->db->table_name("layouts")." l 
+            LEFT JOIN " . $this->db->table_name("layouts") . " l 
                 ON l.layout_id = bl.layout_id
-            LEFT JOIN ".$this->db->table_name("pages_layouts")." pl 
+            LEFT JOIN " . $this->db->table_name("pages_layouts") . " pl 
                 ON pl.layout_id = l.layout_id
-            WHERE b.block_id='".$block_id."' ".$where." 
-            ORDER BY bl.layout_id ASC";
+            WHERE b.block_id='" . $block_id . "' " . $where . " 
+            ORDER BY bl.layout_id";
         $result = $this->db->query($sql);
         return $result->rows;
     }
@@ -1233,7 +1153,7 @@ class ALayoutManager
      * @param $block_id
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getBlockTemplates($block_id)
     {
@@ -1254,7 +1174,7 @@ class ALayoutManager
      * @param int $parent_block_id
      *
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     public function getBlockTemplate($block_id, $parent_block_id = 0)
     {
@@ -1278,41 +1198,26 @@ class ALayoutManager
      * @param int $page_id
      *
      * @return int
-     * @throws \Exception
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
-    public function savePage($data, $page_id = 0)
+    public function savePage($data, $page_id = null)
     {
-        if (!$page_id) {
-            $this->db->query("INSERT INTO ".$this->db->table_name("pages")." 
-                                (   parent_page_id,
-                                    controller,
-                                    key_param,
-                                    key_value,
-                                    date_added,
-                                    date_modified)
-                                VALUES (".(( int )$data ['parent_page_id'] ?: 'NULL').",
-                                        '".$this->db->escape($data ['controller'])."',
-                                        '".$this->db->escape($data ['key_param'])."',
-                                        '".$this->db->escape($data ['key_value'])."',
-                                        NOW(),
-                                        NOW())");
+        $page = Page::updateOrCreate(
+            [
+                'page_id' => $page_id
+            ],
+            [
+                'parent_page_id' => (int)$data ['parent_page_id'] ?: null,
+                'controller'     => $data ['controller'],
+                'key_param'      => $data ['key_param'],
+                'key_value'      => $data ['key_value']
+            ]
+        );
+        $page_id = $page->page_id;
+        PageDescription::where('page_id', '=', $page_id)->delete();
 
-            $page_id = $this->db->getLastId();
-
-        } else {
-            $this->db->query("UPDATE ".$this->db->table_name("pages")." 
-                                SET parent_page_id = ".(( int )$data ['parent_page_id'] ?: 'NULL').",
-                                    controller = '".$this->db->escape($data ['controller'])."',
-                                    key_param = '".$this->db->escape($data ['key_param'])."',
-                                    key_value = '".$this->db->escape($data ['key_value'])."',
-                                    date_modified = NOW()
-                                WHERE page_id = '".( int )$page_id."'");
-
-            // clear all page descriptions before write
-            $this->db->query("DELETE FROM ".$this->db->table_name("page_descriptions")." 
-                                WHERE page_id = '".( int )$page_id."'");
-
-        }
 
         // page description
         if ($data ['page_descriptions']) {
@@ -1358,17 +1263,13 @@ class ALayoutManager
         }
 
         if (!$block_id) {
-            $this->db->query("INSERT INTO ".$this->db->table_name("blocks")." 
-                                (block_txt_id,
-                                 controller,
-                                 date_added,
-                                 date_modified)
-                                VALUES ('".$this->db->escape($data ['block_txt_id'])."',
-                                        '".$this->db->escape($data ['controller'])."',
-                                        NOW(),
-                                        NOW())");
-
-            $block_id = $this->db->getLastId();
+            $block = Block::create(
+                [
+                    'block_txt_id' => $data ['block_txt_id'],
+                    'controller'   => $data ['controller']
+                ]
+            );
+            $block_id = $block->block_id;
 
             if (isset ($data ['templates'])) {
                 foreach ($data ['templates'] as $tmpl) {
@@ -1378,7 +1279,7 @@ class ALayoutManager
                         $tmpl['parent_block_id'] = $parent['block_id'];
                     }
 
-                    $this->db->query("INSERT INTO ".$this->db->table_name("block_templates")." 
+                    $this->db->query("INSERT INTO " . $this->db->table_name("block_templates") . " 
                                         (block_id, parent_block_id, template, date_added, date_modified)
                                         VALUES ('".( int )$block_id."',
                                                 '".( int )$tmpl ['parent_block_id']."',
@@ -1446,7 +1347,7 @@ class ALayoutManager
      * @param int $layout_id
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function editBlockStatus($status, $block_id = 0, $custom_block_id = 0, $layout_id = 0)
     {
@@ -1465,8 +1366,8 @@ class ALayoutManager
                     WHERE block_id = ".$block_id;
             $result = $this->db->query($sql);
             if ($result->num_rows) {
-                $this->log->write('Error: Cannot to change status for block_id: '.$block_id
-                    .'. It is base for custom blocks!');
+                $this->log->error('Error: Cannot to change status for block_id: ' . $block_id
+                    . '. It is base for custom blocks!');
                 return false;
             }
 
@@ -1493,7 +1394,9 @@ class ALayoutManager
      * @param array $description
      *
      * @return bool|int
-     * @throws \Exception
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function saveBlockDescription($block_id = 0, $custom_block_id = 0, $description = [])
     {
@@ -1502,9 +1405,9 @@ class ALayoutManager
         if (!$description['language_id']) {
             $description['language_id'] = $this->language->getContentLanguageID();
             $this->errors =
-                'Warning: block description does not provide language. Current language id '.$description['language_id']
-                .' is used!';
-            $this->log->write($this->errors);
+                'Warning: block description does not provide language. Current language id ' . $description['language_id']
+                . ' is used!';
+            $this->log->error($this->errors);
         }
         // if id is set - update only given data
         if ($custom_block_id) {
@@ -1569,7 +1472,7 @@ class ALayoutManager
      * @param int $custom_block_id
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      * @throws InvalidArgumentException
      */
     public function getBlockDescriptions($custom_block_id = 0)
@@ -1605,7 +1508,7 @@ class ALayoutManager
      * @param int $language_id
      *
      * @return string
-     * @throws \Exception
+     * @throws Exception
      * @throws InvalidArgumentException
      */
     public function getCustomBlockName($custom_block_id, $language_id = 0)
@@ -1616,7 +1519,7 @@ class ALayoutManager
         $language_id = (int)$language_id;
         $info = $this->getBlockDescriptions($custom_block_id);
         $block_name = $info[$language_id] ? $info[$language_id]['name'] : '';
-        $block_name = !$block_name ? $info[key($info)]['name'] : $block_name;
+        $block_name = $block_name ?: $info[key($info)]['name'];
 
         return $block_name;
     }
@@ -1628,7 +1531,7 @@ class ALayoutManager
      * @param int $custom_block_id
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getBlocksLayouts($block_id, $custom_block_id = 0)
     {
@@ -1656,7 +1559,7 @@ class ALayoutManager
      * @param int $custom_block_id
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function deleteCustomBlock($custom_block_id)
     {
@@ -1713,7 +1616,7 @@ class ALayoutManager
      * @param int $block_id
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function deleteBlock($block_txt_id = '', $block_id = 0)
     {
@@ -1748,7 +1651,7 @@ class ALayoutManager
      * @param $new_template
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      * @throws InvalidArgumentException
      */
     public function cloneTemplateLayouts($new_template)
@@ -1758,8 +1661,8 @@ class ALayoutManager
         }
 
         $sql = "SELECT * 
-                FROM ".$this->db->table_name("layouts")." 
-                WHERE template_id = '".$this->tmpl_id."' ";
+                FROM " . $this->db->table_name("layouts") . " 
+                WHERE template_id = '" . $this->templateTextId . "' ";
         $result = $this->db->query($sql);
         foreach ($result->rows as $layout) {
             //clone layout
@@ -1796,12 +1699,12 @@ class ALayoutManager
      * @param $new_layout_id
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      * @throws InvalidArgumentException
      */
-    public function cloneLayoutBlocks($source_layout_id, $new_layout_id)
+    public function cloneLayoutBlocks(int $source_layout_id, int $new_layout_id)
     {
-        if (!H::has_value($source_layout_id) || !H::has_value($new_layout_id)) {
+        if (!$source_layout_id || !$new_layout_id) {
             return false;
         }
 
@@ -1817,7 +1720,7 @@ class ALayoutManager
         }
         // insert child blocks
         foreach ($blocks as $block) {
-            if ($block['parent_instance_id'] != 0) {
+            if ($block['parent_instance_id']) {
                 $block['layout_id'] = $new_layout_id;
                 $block['parent_instance_id'] = $instance_map[$block['parent_instance_id']];
                 $this->saveLayoutBlocks($block);
@@ -1829,13 +1732,13 @@ class ALayoutManager
 
     /**
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function deleteTemplateLayouts()
     {
         $sql = "SELECT *
-                FROM ".$this->db->table_name("layouts")." 
-                WHERE template_id = '".$this->tmpl_id."' ";
+                FROM " . $this->db->table_name("layouts") . " 
+                WHERE template_id = '" . $this->templateTextId . "' ";
         $result = $this->db->query($sql);
         foreach ($result->rows as $layout) {
             $this->db->query("DELETE FROM ".$this->db->table_name("layouts")." 
@@ -1856,7 +1759,7 @@ class ALayoutManager
      * @param array $data
      *
      * @return bool
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws AException
      */
     public function loadXML($data)
@@ -1898,7 +1801,7 @@ class ALayoutManager
      * @param int|string $page_id
      * @param int|string $layout_id
      *
-     * @throws \Exception
+     * @throws Exception
      */
     protected function setCurrentPage($page_id = '', $layout_id = '')
     {
@@ -1948,7 +1851,7 @@ class ALayoutManager
      * @param object $xml_obj
      *
      * @return bool
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws AException
      */
     protected function processXML($xml_obj)
@@ -2025,8 +1928,9 @@ class ALayoutManager
             } elseif ($layout->action == 'insert') {
 
                 if ($layout_id) {
-                    $error_text = 'Layout XML load error: Cannot add new layout (layout name: "'.$layout->name
-                        .'") into database because it already exists.';
+                    $error_text = 'Layout XML load error: '
+                        . 'Cannot add new layout (layout name: "' . $layout->name . '") '
+                        . 'into database because it already exists.';
                     $error = new AError ($error_text);
                     $error->toLog()->toDebug();
                     $this->errors = 1;
@@ -2035,12 +1939,14 @@ class ALayoutManager
 
                 // check layout type
                 $layout_type = $this->_getIntLayoutTypeByText((string)$layout->type);
-                $sql = "INSERT INTO ".$this->db->table_name("layouts")." (template_id,layout_name,layout_type,date_added,date_modified)
-                        VALUES ('".$this->db->escape($layout->template_id)."',
-                                '".$this->db->escape($layout->name)."',
-                                '".$layout_type."',NOW(),NOW())";
-                $this->db->query($sql);
-                $layout_id = $this->db->getLastId();
+                $layoutObj = Layout::create(
+                    [
+                        'template_id' => $layout->template_id,
+                        'layout_name' => $layout->name,
+                        'layout_type' => $layout_type
+                    ]
+                );
+                $layout_id = $layoutObj->layout_id;
 
                 // write pages section
                 if ($layout->pages->page) {
@@ -2062,12 +1968,11 @@ class ALayoutManager
                 // check layout type
                 $layout_type = $this->_getIntLayoutTypeByText((string)$layout->type);
 
-                $sql = "UPDATE ".$this->db->table_name("layouts")." 
+                $sql = "UPDATE " . $this->db->table_name("layouts") . " 
                         SET 
-                            template_id = '".$this->db->escape($layout->template_id)."',
-                            layout_name = '".$this->db->escape($layout->name)."',
-                            layout_type = '".$layout_type."',
-                            date_added = NOW() 
+                            template_id = '" . $this->db->escape($layout->template_id) . "',
+                            layout_name = '" . $this->db->escape($layout->name) . "',
+                            layout_type = '" . $layout_type . "'
                         WHERE layout_id='".$layout_id."'";
                 $this->db->query($sql);
 
@@ -2105,7 +2010,9 @@ class ALayoutManager
      * @param object $page
      *
      * @return bool
-     * @throws \Exception
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     protected function _processPage($layout_id, $page)
     {
@@ -2130,15 +2037,18 @@ class ALayoutManager
                 $this->db->query($sql);
             }
         } else { // if page new
-            $sql = "INSERT INTO ".$this->db->table_name("pages")." (parent_page_id, controller, key_param, key_value, date_added)
-                    VALUES ('0',
-                            '".$this->db->escape($page->controller)."',
-                            '".$this->db->escape($page->key_param)."',
-                            '".$this->db->escape($page->key_value)."',NOW())";
-            $this->db->query($sql);
-            $page_id = $this->db->getLastId();
-            $sql = "INSERT INTO ".$this->db->table_name("pages_layouts")." (layout_id,page_id)
-                    VALUES ('".( int )$layout_id."','".( int )$page_id."')";
+
+            $page = Page::create(
+                [
+                    'controller' => $page->controller,
+                    'key_param'  => $page->key_param,
+                    'key_value'  => $page->key_value
+                ]
+            );
+            $page_id = $page->page_id;
+
+            $sql = "INSERT INTO " . $this->db->table_name("pages_layouts") . " (layout_id,page_id)
+                    VALUES ('" . ( int )$layout_id . "','" . ( int )$page_id . "')";
             $this->db->query($sql);
         }
 
@@ -2176,10 +2086,11 @@ class ALayoutManager
      * @param int $parent_instance_id
      *
      * @return bool
-     * @throws \ReflectionException
      * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
-    protected function _processBlock($layout, $block, $parent_instance_id = 0)
+    protected function _processBlock($layout, $block, $parent_instance_id = null)
     {
         $instance_id = null;
         $layout_id = (int)$layout->layout_id;
@@ -2232,55 +2143,56 @@ class ALayoutManager
                     $error->toLog()->toDebug();
                     $this->errors = 1;
                 } else {
-                    //if block does not exists - insert and get a new block_id
-                    $sql = "INSERT INTO ".$this->db->table_name("blocks")." (block_txt_id, controller, date_added) 
-                            VALUES ('".$this->db->escape($block->block_txt_id)."', '"
-                        .$this->db->escape($block->controller)."',NOW())";
+                    //if block does not exist - insert and get a new block_id
                     if (!$block->controller) {
                         $error_text =
-                            'Layout ('.$layout_name.') XML error: Missing controller for new block (block_txt_id: "'
-                            .$block->block_txt_id.'"). This block might not function properly!';
+                            'Layout (' . $layout_name . ') XML error: Missing controller for new block (block_txt_id: "'
+                            . $block->block_txt_id . '"). This block might not function properly!';
                         $error = new AError ($error_text);
                         $error->toLog()->toDebug();
                         $this->errors = 1;
                     }
-                    $this->db->query($sql);
-                    $block_id = $this->db->getLastId();
+
+                    $blockObj = Block::create(
+                        [
+                            'block_txt_id' => $block->block_txt_id,
+                            'controller'   => $block->controller
+                        ]
+                    );
+                    $block_id = $blockObj->block_id;
 
                     $position = (int)$block->position;
                     //if parent block exists add positioning
                     if ($parent_instance_id && !$position) {
                         $sql = "SELECT MAX(position) AS maxpos
-                                FROM ".$this->db->table_name("block_layouts")." 
-                                WHERE  parent_instance_id = ".( int )$parent_instance_id;
+                                FROM " . $this->db->table_name("block_layouts") . " 
+                                WHERE  parent_instance_id = " . ( int )$parent_instance_id;
                         $result = $this->db->query($sql);
                         $position = $result->row ['maxpos'] + 10;
                     }
-                    $position = !$position ? 10 : $position;
-                    $sql = "INSERT INTO ".$this->db->table_name("block_layouts")." 
-                            (layout_id,
-                            block_id,
-                            parent_instance_id,
-                            position,
-                            status,
-                            date_added)
-                        VALUES ('".( int )$layout_id."',
-                                '".( int )$block_id."',
-                                '".( int )$parent_instance_id."',
-                                '".( int )$position."',
-                                '". 1 ."',
-                                NOW())";
-                    $this->db->query($sql);
-                    $instance_id = $this->db->getLastId();
+                    $position = $position ?: 10;
+                    $layoutInstance = BlockLayout::create(
+                        [
+                            'layout_id'          => $layout_id,
+                            'block_id'           => $block_id,
+                            'parent_instance_id' => $parent_instance_id,
+                            'position'           => (int)$position,
+                            'status'             => 1
+                        ]
+                    );
+                    $instance_id = $layoutInstance->instance_id;
 
                     $sql = [];
                     //insert new block details
                     if ($block->block_descriptions->block_description) {
                         foreach ($block->block_descriptions->block_description as $block_description) {
-                            $language_id =
-                                $this->_getLanguageIdByName(mb_strtolower((string)$block_description->language,
-                                    ABC::env('APP_CHARSET')));
-                            //if loading language does not exists or installed, skip
+                            $language_id = $this->_getLanguageIdByName(
+                                mb_strtolower(
+                                    (string)$block_description->language,
+                                    ABC::env('APP_CHARSET')
+                                )
+                            );
+                            //if loading language does not exist or installed, skip
                             if ($language_id) {
                                 $this->language->replaceDescriptions('block_descriptions',
                                     [
@@ -2345,15 +2257,15 @@ class ALayoutManager
                                 $language_id =
                                     $this->_getLanguageIdByName(mb_strtolower((string)$block_description->language,
                                         ABC::env('APP_CHARSET')));
-                                //if loading language does not exists or installed, log error on update
+                                //if loading language does not exist or installed, log error on update
                                 if (!$language_id) {
                                     $error = "ALayout_manager Error. Unknown language for block descriptions.'."
-                                        ."(Block_id=".$block_id.", name=".(string)$block_description->name.", "
-                                        ."title=".(string)$block_description->title.", "
-                                        ."description=".(string)$block_description->description.", "
-                                        ."content=".(string)$block_description->content.", "
-                                        .")";
-                                    $this->log->write($error);
+                                        . "(Block_id=" . $block_id . ", name=" . (string)$block_description->name . ", "
+                                        . "title=" . (string)$block_description->title . ", "
+                                        . "description=" . (string)$block_description->description . ", "
+                                        . "content=" . (string)$block_description->content . ", "
+                                        . ")";
+                                    $this->log->error($error);
                                     $this->message->saveError('layout import error', $error);
                                     continue;
                                 }
@@ -2415,8 +2327,8 @@ class ALayoutManager
                             //log warning if try to update existing block with new controller or template
                             if ($block->templates || $block->controller) {
                                 $error_text =
-                                    'Layout ('.$layout_name.') XML warning: Block (block_txt_id: "'.$block->block_txt_id
-                                    .'") cannot be updated. This block is used by another template(s)! Will be linked to existing block';
+                                    'Layout (' . $layout_name . ') XML warning: Block (block_txt_id: "' . $block->block_txt_id
+                                    . '") cannot be updated. This block is used by another template(s)! Will be linked to existing block';
                                 $error = new AWarning ($error_text);
                                 $error->toLog()->toDebug();
                             }
@@ -2424,13 +2336,10 @@ class ALayoutManager
                     } // end of check for use
 
                     //Finally relate block with current layout
-                    $query = "  SELECT *
-                                FROM ".$this->db->table_name("block_layouts")." 
-                                WHERE layout_id = '".( int )$layout_id."'
-                                        AND block_id = '".( int )$block_id."'
-                                        AND parent_instance_id = '".( int )$parent_instance_id."'";
-                    $result = $this->db->query($query);
-                    $exists = $result->row ['instance_id'];
+                    $exists = (bool)BlockLayout::where('layout_id', '=', (int)$layout_id)
+                        ->where('block_id', '=', (int)$block_id)
+                        ->where('parent_instance_id', '=', $parent_instance_id)
+                        ->count();
 
                     $status = $block->status ? (int)$block->status : 1;
 
@@ -2439,27 +2348,23 @@ class ALayoutManager
                         // if parent block exists add positioning
                         if ($parent_instance_id && !$position) {
                             $sql = "SELECT MAX(position) AS maxpos
-                                    FROM ".$this->db->table_name("block_layouts")." 
-                                    WHERE  parent_instance_id = ".( int )$parent_instance_id;
+                                    FROM " . $this->db->table_name("block_layouts") . " 
+                                    WHERE  parent_instance_id = " . ( int )$parent_instance_id;
                             $result = $this->db->query($sql);
                             $position = $result->row ['maxpos'] + 10;
                         }
                         $position = !$position ? 10 : $position;
-                        $query = "INSERT INTO ".$this->db->table_name("block_layouts")." 
-                                        (layout_id,
-                                        block_id,
-                                        parent_instance_id,
-                                        position,
-                                        status,
-                                        date_added)
-                                  VALUES (  '".( int )$layout_id."',
-                                            '".( int )$block_id."',
-                                            '".( int )$parent_instance_id."',
-                                            '".(int)$position."',
-                                            '".$status."',
-                                            NOW())";
-                        $this->db->query($query);
-                        $instance_id = (int)$this->db->getLastId();
+
+                        $layoutInstance = BlockLayout::create(
+                            [
+                                'layout_id'          => $layout_id,
+                                'block_id'           => $block_id,
+                                'parent_instance_id' => $parent_instance_id,
+                                'position'           => (int)$position,
+                                'status'             => $status
+                            ]
+                        );
+                        $instance_id = $layoutInstance->instance_id;
                     }
                 } // end if block_id
             }
@@ -2481,14 +2386,16 @@ class ALayoutManager
      * @param int $parent_instance_id
      *
      * @return bool
-     * @throws \Exception
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
-    protected function _processCustomBlock($layout_id, $block, $parent_instance_id = 0)
+    protected function _processCustomBlock($layout_id, $block, $parent_instance_id = null)
     {
         //get block_id of custom block by block type(base block_txt_id)
         $sql = "SELECT block_id
-                FROM ".$this->db->table_name("blocks")." 
-                WHERE block_txt_id = '".$this->db->escape($block->type)."'";
+                FROM " . $this->db->table_name("blocks") . " 
+                WHERE block_txt_id = '" . $this->db->escape($block->type) . "'";
         $result = $this->db->query($sql);
         $block_id = ( int )$result->row ['block_id'];
 
@@ -2504,7 +2411,7 @@ class ALayoutManager
             return false;
         }
 
-        // get custom block by it's name and base block id
+        // get custom block by name and base block id
         $custom_block_info = $this->getBlocksList(
             [
                 'subsql_filter' => "bd.name = '".(string)$block->custom_block_txt_id
@@ -2525,18 +2432,19 @@ class ALayoutManager
         } else {
             // insert or update custom block
             // check is this block was already inserted in previous loop by xml tree
-            if (isset($this->custom_blocks[(string)$block->custom_block_txt_id])) {
-                $custom_block_id = $this->custom_blocks[(string)$block->custom_block_txt_id];
+            if (isset($this->customBlocks[(string)$block->custom_block_txt_id])) {
+                $custom_block_id = $this->customBlocks[(string)$block->custom_block_txt_id];
             } else {
                 if (!$custom_block_id) {
                     // if block is new
-                    $sql = "INSERT INTO ".$this->db->table_name("custom_blocks")." 
-                            (block_id, date_added)
-                            VALUES ('".$block_id."', NOW())";
-                    $this->db->query($sql);
-                    $custom_block_id = $this->db->getLastId();
+                    $customBlockObj = CustomBlock::create(
+                        [
+                            'block_id' => $block_id
+                        ]
+                    );
+                    $custom_block_id = $customBlockObj->custom_block_id;
                 }
-                $this->custom_blocks[(string)$block->custom_block_txt_id] = $custom_block_id;
+                $this->customBlocks[(string)$block->custom_block_txt_id] = $custom_block_id;
             }
 
             $parent_inst = [];
@@ -2556,34 +2464,28 @@ class ALayoutManager
                 //if no position provided increase by 10
                 if (!$position) {
                     $sql = "SELECT MAX(position) AS maxpos
-                            FROM ".$this->db->table_name("block_layouts")." 
-                            WHERE  parent_instance_id = ".(int)$par_inst;
+                            FROM " . $this->db->table_name("block_layouts") . " 
+                            WHERE  parent_instance_id = " . (int)$par_inst;
                     $result = $this->db->query($sql);
                     $position = $result->row ['maxpos'] + 10;
                 }
-                $sql = "INSERT INTO ".$this->db->table_name("block_layouts")." 
-                        (layout_id,
-                        block_id,
-                        custom_block_id,
-                        parent_instance_id,
-                        position,
-                        status,
-                        date_added)
-                        VALUES ('".( int )$layout_id."',
-                                '".( int )$block_id."',
-                                '".(int)$custom_block_id."',
-                                '".( int )$par_inst."',
-                                '".( int )$position."',
-                                '".$status."',
-                                NOW())";
-                $this->db->query($sql);
+                BlockLayout::create(
+                    [
+                        'layout_id'          => ( int )$layout_id,
+                        'block_id'           => ( int )$block_id,
+                        'custom_block_id'    => (int)$custom_block_id,
+                        'parent_instance_id' => ( int )$par_inst,
+                        'position'           => ( int )$position,
+                        'status'             => (int)$status
+                    ]
+                );
             }
 
             // insert custom block content
             if ($block->block_descriptions->block_description) {
                 foreach ($block->block_descriptions->block_description as $block_description) {
                     $language_id = $this->_getLanguageIdByName((string)$block_description->language);
-                    //if loading language does not exists or installed, skip
+                    //if loading language does not exist or installed, skip
                     if (!$language_id) {
                         continue;
                     }
@@ -2622,7 +2524,7 @@ class ALayoutManager
      * @param int $layout_id
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     protected function _deleteBlock($block, $layout_id)
     {
@@ -2671,7 +2573,7 @@ class ALayoutManager
      * @param int $layout_id
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     protected function _deleteCustomBlock($block, $layout_id)
     {
@@ -2725,7 +2627,7 @@ class ALayoutManager
      * @param string $language_name
      *
      * @return int
-     * @throws \Exception
+     * @throws Exception
      */
     protected function _getLanguageIdByName($language_name = '')
     {
@@ -2742,7 +2644,7 @@ class ALayoutManager
      * @param $block_txt_id
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     protected function _getInstanceIdByTxtId($layout_id, $block_txt_id)
     {
@@ -2773,22 +2675,12 @@ class ALayoutManager
     protected function _getIntLayoutTypeByText($text_type)
     {
         $text_type = ucfirst($text_type);
-        switch ($text_type) {
-            case 'Default':
-            case 'General':
-                return 0;
-                break;
-            case 'Active':
-                return 1;
-                break;
-            case 'Draft':
-                return 2;
-                break;
-            case 'Template':
-                return 3;
-                break;
-            default:
-                return 1;
-        }
+        return match ($text_type) {
+            'Default', 'General' => 0,
+            'Active' => 1,
+            'Draft' => 2,
+            'Template' => 3,
+            default => 1,
+        };
     }
 }
