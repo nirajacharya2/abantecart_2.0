@@ -66,6 +66,43 @@ class Page extends BaseModel
         'date_modified',
     ];
 
+    protected $rules = [
+        /** @see validate() */
+        'controller' => [
+            'checks'   => [
+                'string',
+                'required',
+                'sometimes'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Controller Route is empty!'],
+            ],
+        ],
+        'key_param'  => [
+            'checks'   => [
+                'string',
+                'max:40'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Key Parameter Length must be less than 40 characters'
+                ],
+            ],
+        ],
+        'key_value'  => [
+            'checks'   => [
+                'string',
+                'required_with:key_param',
+                'max:40'
+            ],
+            'messages' => [
+                '*' => [
+                    'default_text' => 'Key Parameter cannot be empty! key Value Length must be less than 40 characters'
+                ],
+            ],
+        ]
+    ];
+
     /**
      * @return HasOne
      */

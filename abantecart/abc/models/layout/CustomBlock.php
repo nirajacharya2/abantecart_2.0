@@ -41,12 +41,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class CustomBlock extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
-
-    protected $cascadeDeletes = ['descriptions', 'custom_lists'];
+    protected $cascadeDeletes = ['descriptions', 'custom_lists', 'block_layouts'];
     protected $primaryKey = 'custom_block_id';
-
-    public $timestamps = false;
 
     protected $casts = [
         'block_id'      => 'int',
@@ -55,9 +51,7 @@ class CustomBlock extends BaseModel
     ];
 
     protected $fillable = [
-        'block_id',
-        'date_added',
-        'date_modified',
+        'block_id'
     ];
 
     public function block()
@@ -73,5 +67,10 @@ class CustomBlock extends BaseModel
     public function custom_lists()
     {
         return $this->hasMany(CustomList::class, 'custom_block_id');
+    }
+
+    public function block_layouts()
+    {
+        return $this->hasMany(BlockLayout::class, 'custom_block_id');
     }
 }

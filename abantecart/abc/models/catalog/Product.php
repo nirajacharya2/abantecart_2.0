@@ -2308,6 +2308,11 @@ class Product extends BaseModel
         return $result;
     }
 
+    /**
+     * TODO: remove it!
+     * @deprecated
+     *
+     */
     public function getCatalogOnlyProducts(int $limit = null)
     {
         $db = Registry::db();

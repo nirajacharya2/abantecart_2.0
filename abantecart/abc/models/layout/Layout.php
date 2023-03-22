@@ -39,13 +39,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Layout extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
-
     protected $cascadeDeletes = ['pages_layouts', 'block_layouts'];
     protected $primaryKey = 'layout_id';
-    public $timestamps = false;
 
     protected $casts = [
+        'template_id'   => 'string',
+        'layout_name'   => 'string',
         'layout_type'   => 'int',
         'date_added'    => 'datetime',
         'date_modified' => 'datetime'
@@ -54,9 +53,7 @@ class Layout extends BaseModel
     protected $fillable = [
         'template_id',
         'layout_name',
-        'layout_type',
-        'date_added',
-        'date_modified',
+        'layout_type'
     ];
 
     public function pages_layouts()

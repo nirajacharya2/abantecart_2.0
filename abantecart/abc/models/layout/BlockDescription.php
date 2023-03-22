@@ -56,8 +56,6 @@ class BlockDescription extends BaseModel
         'language_id',
     ];
 
-    public $timestamps = false;
-
     protected $casts = [
         'custom_block_id' => 'int',
         'language_id'     => 'int',
@@ -72,9 +70,7 @@ class BlockDescription extends BaseModel
         'name',
         'title',
         'description',
-        'content',
-        'date_added',
-        'date_modified',
+        'content'
     ];
 
     public function custom_block()

@@ -47,6 +47,30 @@ class PagesLayout extends BaseModel
         'page_id'   => 'int',
     ];
 
+    protected $rules = [
+        /** @see validate() */
+        'layout_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'min:1'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Layout ID is empty!'],
+            ],
+        ],
+        'page_id'   => [
+            'checks'   => [
+                'integer',
+                'required',
+                'min:1'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Page ID is empty!'],
+            ],
+        ]
+    ];
+
     public function layout()
     {
         return $this->belongsTo(Layout::class, 'layout_id');
