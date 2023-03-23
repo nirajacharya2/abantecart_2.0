@@ -65,13 +65,15 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
     {
         $this->conf = ABC::env('RABBIT_MQ');
         $params = [
-            'host'                => $this->conf['HOST'],
-            'port'                => $this->conf['PORT'],
-            'user'                => $this->conf['USER'],
-            'password'            => $this->conf['PASSWORD'],
-            'keepalive'           => 60,
-            'heartbeat'           => 60,
-            'channel_rpc_timeout' => 60
+            'host'     => $this->conf['HOST'],
+            'port'     => $this->conf['PORT'],
+            'user'     => $this->conf['USER'],
+            'password' => $this->conf['PASSWORD'],
+            'options'  => [
+                'keepalive'           => 60,
+                'heartbeat'           => 60,
+                'channel_rpc_timeout' => 60
+            ]
         ];
         if (isset($this->conf['PROTOCOL']) && strtolower($this->conf['PROTOCOL']) === 'amqps') {
             $params['ssl_options'] = [
