@@ -50,12 +50,21 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
     {
         $this->log = Registry::log();
         $this->log->debug(__CLASS__ . ': Starting constructor: ');
-        $this->connect();
+        //try to use previously created connection
+        $registry = Registry::getInstance();
+        $this->conn = $registry->get('AMPQ-connection');
+        $this->channel = $registry->get('AMPQ-channel');
+        if (!$registry->get('AMPQ-connection')) {
+            $this->connect();
+        }
     }
 
     public function __destruct()
     {
         $this->disconnect();
+        $registry = Registry::getInstance();
+        $registry->set('AMPQ-connection', null);
+        $registry->set('AMPQ-channel', null);
     }
 
 
@@ -72,12 +81,14 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
             $params['ssl_options'] = [
                 'dsn' => 'amqps:'
             ];
-            $this->log->debug(__CLASS__ . ': Starting Connection AMQPS.');
+            $this->log->debug(__CLASS__ . ': Starting Connection AMQP.');
             $this->conn = new AMQPSSLConnection(...$params);
         } else {
-            $this->log->debug(__CLASS__ . ': Starting Connection AMQPS.');
+            $this->log->debug(__CLASS__ . ': Starting Connection AMQP.');
             $this->conn = new AMQPStreamConnection(...$params);
         }
+        $registry = Registry::getInstance();
+        $registry->set('AMPQ-connection', $this->conn);
         $this->log->debug(__CLASS__ . ': Creating channel.');
         $this->channel = $this->conn->channel();
 
@@ -103,6 +114,7 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         $this->channel->queue_bind('audit_log', 'exch_main');
         $this->channel->queue_bind('audit_log_backup', 'exch_backup');
         $this->log->debug(__CLASS__ . ': Connection created. ');
+        $registry->set('AMPQ-channel', $this->channel);
     }
 
     public function disconnect()
