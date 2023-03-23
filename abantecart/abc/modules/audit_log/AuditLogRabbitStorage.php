@@ -53,13 +53,6 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         $this->connect();
     }
 
-    public function __destruct()
-    {
-        $this->log->debug(__CLASS__ . ': DESTRUCTION ');
-        $this->disconnect();
-    }
-
-
     protected function connect()
     {
         $this->conf = ABC::env('RABBIT_MQ');
