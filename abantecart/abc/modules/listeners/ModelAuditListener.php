@@ -362,6 +362,7 @@ class ModelAuditListener
                     'Audit log storage not instance of AuditLogStorageInterface, please check classmap.php'
                 );
             }
+            Registry::getInstance()->set('AuditLogStorage', $auditLogStorage);
             $auditLogStorage->write($data);
         } catch (\Exception $e) {
             $error_message = __CLASS__ . ": Auditing of " . $modelClassName . " failed.";
