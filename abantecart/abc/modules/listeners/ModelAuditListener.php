@@ -343,32 +343,29 @@ class ModelAuditListener
 
         foreach ($eventDescription as $item) {
             $data['changes'][] = [
-                'name' => $item['field_name'],
-                'groupId' => $item['auditable_id'],
+                'name'      => $item['field_name'],
+                'groupId'   => $item['auditable_id'],
                 'groupName' => $item['auditable_model_name'],
-                'oldValue' => is_string($item['old_value']) ? $item['old_value'] : var_export($item['old_value'], true),
-                'newValue' => is_string($item['new_value']) ? $item['new_value'] : var_export($item['new_value'], true),
+                'oldValue'  => is_string($item['old_value']) ? $item['old_value'] : var_export($item['old_value'], true),
+                'newValue'  => is_string($item['new_value']) ? $item['new_value'] : var_export($item['new_value'], true),
             ];
         }
 
-        /**
-         *
-         * @var AuditLogStorageInterface $auditLogStorage
-         */
-        $auditLogStorage = ABC::getObjectByAlias('AuditLogStorage');
-
-        if (!($auditLogStorage instanceof AuditLogStorageInterface)) {
-            return $this->output(
-                false,
-                'Audit log storage not instance of AuditLogStorageInterface, please check classmap.php'
-            );
-        }
-
         try {
+            /** @var AuditLogStorageInterface $auditLogStorage */
+            $auditLogStorage = Registry::getInstance()->get('AuditLogStorage');
+            if (!$auditLogStorage) {
+                $auditLogStorage = ABC::getObjectByAlias('AuditLogStorage');
+            }
+            if (!($auditLogStorage instanceof AuditLogStorageInterface)) {
+                throw new \Exception(
+                    'Audit log storage not instance of AuditLogStorageInterface, please check classmap.php'
+                );
+            }
             $auditLogStorage->write($data);
         } catch (\Exception $e) {
             $error_message = __CLASS__ . ": Auditing of " . $modelClassName . " failed.";
-            Registry::log()->write(
+            Registry::log()->error(
                 $error_message
                 . "\n"
                 . $e->getMessage()
