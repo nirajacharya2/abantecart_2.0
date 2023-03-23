@@ -54,19 +54,12 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         $registry = Registry::getInstance();
         $this->conn = $registry->get('AMPQ-connection');
         $this->channel = $registry->get('AMPQ-channel');
-        if (!$registry->get('AMPQ-connection')) {
+        if (!$this->conn || !$this->conn->isConnected()
+            || !$this->channel || !$this->channel->is_open()
+        ) {
             $this->connect();
         }
     }
-
-    public function __destruct()
-    {
-        $this->disconnect();
-        $registry = Registry::getInstance();
-        $registry->set('AMPQ-connection', null);
-        $registry->set('AMPQ-channel', null);
-    }
-
 
     protected function connect()
     {
@@ -178,15 +171,15 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         try {
             $request = $this->prepareRequest($request);
             $events = $client->getEvents($api['DOMAIN'], $request);
-            $result = [
+            return [
                 'items' => $events['events'],
                 'total' => $events['total'],
             ];
-            return $result;
         } catch (Exception $exception) {
             $this->log->error($exception->getMessage());
         }
         $this->log->debug(__METHOD__ . ':  stop. ');
+        return [];
     }
 
     /**
@@ -324,7 +317,7 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
      *
      * @param array $request
      *
-     * @return mixed
+     * @return array
      */
     public function getEventDetail(array $request)
     {
@@ -343,6 +336,7 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
             $this->log->error($exception->getMessage());
         }
         $this->log->debug(__METHOD__ . ':  stop. ');
+        return [];
     }
 
     /**
