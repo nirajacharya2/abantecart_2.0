@@ -10,26 +10,22 @@ use abc\models\BaseModel;
 use abc\models\catalog\Product;
 use abc\models\system\AuditEvent;
 use abc\models\user\User;
+use Exception;
+use H;
+use Illuminate\Database\Eloquent\Collection;
 use ReflectionClass;
+use ReflectionException;
 
 class ModelAuditListener
 {
-
-    protected $registry;
-
-    const DEBUG_TO_LOG = false;
-
-    public function __construct()
-    {
-        $this->registry = Registry::getInstance();
-    }
+    static $DEBUG_TO_LOG = false;
 
     /**
      * @param string $eventAlias
      * @param        $params
      *
      * @return array | false
-     * @throws \Exception
+     * @throws Exception
      */
     public function handle($eventAlias, $params)
     {
@@ -49,8 +45,8 @@ class ModelAuditListener
             $morphAttributes = $params[3];
         }
 
-        if (self::DEBUG_TO_LOG === true) {
-            $this->registry->get('log')->write('Start Handle Event: ' . $eventAlias);
+        if (static::$DEBUG_TO_LOG === true) {
+            Registry::log()->debug('Start Handle Event: ' . $eventAlias);
         }
 
         /**
@@ -82,15 +78,12 @@ class ModelAuditListener
                 }
             }
 
-            if ($params[1] instanceof \Illuminate\Database\Eloquent\Collection) {
-                /**
-                 * @var \Illuminate\Database\Eloquent\Collection $collection
-                 */
+            if ($params[1] instanceof Collection) {
                 $collection = $params[1];
                 $messages = '';
                 foreach ($collection as $modelObject) {
                     $result = $this->handleModel($eventAlias, $modelObject);
-                    if ($result === false) {
+                    if ($result['result'] === false) {
                         return false;
                     }
                     $messages .= $result['message'] . "\n";
@@ -117,7 +110,7 @@ class ModelAuditListener
      * @param array $morphAttributes
      *
      * @return array
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     protected function handleModel($eventAlias, $modelObject, $relationName = '', $ids = [], $morphAttributes = [])
     {
@@ -141,7 +134,7 @@ class ModelAuditListener
         }
         // check is event allowed by model-class
         $event_name = '';
-        $allowedEvents = (array)$modelObject::$auditEvents;
+        $allowedEvents = $modelObject::$auditEvents;
         foreach ($allowedEvents as $ev) {
             if (is_int(strpos($eventAlias, 'eloquent.' . $ev))) {
                 $event_name = $ev;
@@ -163,8 +156,10 @@ class ModelAuditListener
 
         if ($modelObject::$auditExcludes) {
             foreach ($modelObject::$auditExcludes as $excludeColumnName) {
-                unset($newData[$excludeColumnName]);
-                unset($oldData[$excludeColumnName]);
+                unset(
+                    $newData[$excludeColumnName],
+                    $oldData[$excludeColumnName]
+                );
             }
         }
 
@@ -199,20 +194,14 @@ class ModelAuditListener
             );
         }
 
-        if ($this->registry->get('request')) {
-            $request_id = $this->registry->get('request')->getUniqueId();
-        } else {
-            $request_id = \H::genRequestId();
-        }
+        $request_id = Registry::request()?->getUniqueId() ?: H::genRequestId();
 
-        $session_id = session_id();
-
-        $user = new UserResolver($this->registry);
+        $user = new UserResolver(Registry::getInstance());
         $user_type = $user->getUserType();
         $user_id = $user->getUserId();
-        if ($user->getActoronbehalf() > 0) {
-            $actorOnBehalf = User::find($user->getActoronbehalf());
-        }
+        $actorOnBehalf = $user->getActoronbehalf()
+            ? User::find($user->getActoronbehalf())
+            : null;
         $user_name = $user->getUserName() . ($actorOnBehalf ? '(' . $actorOnBehalf->username . ')' : '');
 
         //get primary key value
@@ -342,33 +331,34 @@ class ModelAuditListener
         ];
 
         foreach ($eventDescription as $item) {
+            $oldValue = $this->preFormat($item['old_value']);
+            $newValue = $this->preFormat($item['new_value']);
+
             $data['changes'][] = [
-                'name' => $item['field_name'],
-                'groupId' => $item['auditable_id'],
+                'name'      => $item['field_name'],
+                'groupId'   => $item['auditable_id'],
                 'groupName' => $item['auditable_model_name'],
-                'oldValue' => is_string($item['old_value']) ? $item['old_value'] : var_export($item['old_value'], true),
-                'newValue' => is_string($item['new_value']) ? $item['new_value'] : var_export($item['new_value'], true),
+                'oldValue'  => $oldValue,
+                'newValue'  => $newValue,
             ];
         }
 
-        /**
-         *
-         * @var AuditLogStorageInterface $auditLogStorage
-         */
-        $auditLogStorage = ABC::getObjectByAlias('AuditLogStorage');
-
-        if (!($auditLogStorage instanceof AuditLogStorageInterface)) {
-            return $this->output(
-                false,
-                'Audit log storage not instance of AuditLogStorageInterface, please check classmap.php'
-            );
-        }
-
         try {
+            /** @var AuditLogStorageInterface $auditLogStorage */
+            $auditLogStorage = Registry::getInstance()->get('AuditLogStorage');
+            if (!$auditLogStorage) {
+                $auditLogStorage = ABC::getObjectByAlias('AuditLogStorage');
+            }
+            if (!($auditLogStorage instanceof AuditLogStorageInterface)) {
+                throw new Exception(
+                    'Audit log storage not instance of AuditLogStorageInterface, please check classmap.php'
+                );
+            }
+            Registry::getInstance()->set('AuditLogStorage', $auditLogStorage);
             $auditLogStorage->write($data);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error_message = __CLASS__ . ": Auditing of " . $modelClassName . " failed.";
-            Registry::log()->write(
+            Registry::log()->error(
                 $error_message
                 . "\n"
                 . $e->getMessage()
@@ -394,13 +384,27 @@ class ModelAuditListener
     protected function output($result, $message)
     {
         $output = [
-            'result' => $result,
+            'result'  => $result,
             'message' => $message,
         ];
 
-        if (self::DEBUG_TO_LOG === true) {
-            Registry::log()->write(var_export($output, true));
+        if (static::$DEBUG_TO_LOG === true) {
+            Registry::log()->error(var_export($output, true));
         }
         return $output;
+    }
+
+    protected function preFormat($value)
+    {
+        if (is_object($value)) {
+            if (method_exists($value, '__toString')) {
+                $value = (string)$value;
+            } else {
+                $value = var_export($value, true);
+            }
+        } elseif (is_array($value)) {
+            $value = var_export($value, true);
+        }
+        return $value;
     }
 }
