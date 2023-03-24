@@ -342,5 +342,4 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
 
         return $result;
     }
-
 }
