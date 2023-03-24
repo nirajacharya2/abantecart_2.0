@@ -49,20 +49,11 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
     public function __construct()
     {
         $this->log = Registry::log();
-        $this->log->debug(__CLASS__ . ': CONSTRUCTOR.');
         $this->connect();
     }
 
     protected function connect()
     {
-        $dd = '';
-        $dbg = debug_backtrace();
-        foreach ($dbg as $k => $d) {
-            $dd .= "#" . $k . " " . $d['file'] . ":" . $d['line'] . "\n";
-        }
-        $this->log->debug(__CLASS__ . ': Starting Connection AMQP.' . "\n" . $dd);
-
-
         $this->conf = ABC::env('RABBIT_MQ');
         $params = [
             'host'     => $this->conf['HOST'],
@@ -102,7 +93,6 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
     {
         $this->channel->close();
         $this->conn->close();
-        $this->log->debug(__CLASS__ . ': Connection Closed. ');
     }
 
     /**
