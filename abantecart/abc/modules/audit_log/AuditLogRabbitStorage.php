@@ -49,12 +49,20 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
     public function __construct()
     {
         $this->log = Registry::log();
-        $this->log->debug(__CLASS__ . ': Starting Connection AMQP.');
+        $this->log->debug(__CLASS__ . ': CONSTRUCTOR.');
         $this->connect();
     }
 
     protected function connect()
     {
+        $dd = '';
+        $dbg = debug_backtrace();
+        foreach ($dbg as $k => $d) {
+            $dd .= "#" . $k . " " . $d['file'] . ":" . $d['line'] . "\n";
+        }
+        $this->log->debug(__CLASS__ . ': Starting Connection AMQP.' . "\n" . $dd);
+
+
         $this->conf = ABC::env('RABBIT_MQ');
         $params = [
             'host'     => $this->conf['HOST'],
@@ -71,11 +79,8 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
             $this->conn = new AMQPStreamConnection(...$params);
         }
         $this->channel = $this->conn->channel();
-
         $this->channel->exchange_declare('exch_main', 'direct', false, true, false);
         $this->channel->exchange_declare('exch_backup', 'fanout', false, true, false);
-
-        $this->log->debug(__CLASS__ . ': queue_declare start. ');
         $this->channel->queue_declare(
             'audit_log',
             false,
@@ -89,16 +94,12 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
             ])
         );
         $this->channel->queue_declare('audit_log_backup', false, true, false, false, false, new AMQPTable([]));
-
-        $this->log->debug(__CLASS__ . ': queue_declare stop. ');
         $this->channel->queue_bind('audit_log', 'exch_main');
         $this->channel->queue_bind('audit_log_backup', 'exch_backup');
-        $this->log->debug(__CLASS__ . ': Connection created. ');
     }
 
     public function disconnect()
     {
-        $this->log->debug(__CLASS__ . ': Start to close connection. ');
         $this->channel->close();
         $this->conn->close();
         $this->log->debug(__CLASS__ . ': Connection Closed. ');
@@ -115,7 +116,6 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
      */
     public function write(array $data)
     {
-        $this->log->debug(__METHOD__ . ': Start writing data. ');
         $domain = ABC::env('AUDIT_LOG_API')['DOMAIN'];
         $data = [
             'data' => $data,
@@ -140,7 +140,6 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
             $backupFile = ABC::env('DIR_SYSTEM') . 'rabbitmq/rabbit_data.bak';
             file_put_contents($backupFile, json_encode($data) . PHP_EOL, FILE_APPEND);
         }
-        $this->log->debug(__METHOD__ . ': Stop writing data. ');
     }
 
     /**
@@ -150,7 +149,6 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
      */
     public function getEventsRaw(array $request)
     {
-        $this->log->debug(__METHOD__ . ':  start. ');
         $api = ABC::env('AUDIT_LOG_API');
         $conf = new AuditLogConfig($api['HOST']);
         $client = new AuditLogClient($conf);
@@ -164,7 +162,6 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         } catch (Exception $exception) {
             $this->log->error($exception->getMessage());
         }
-        $this->log->debug(__METHOD__ . ':  stop. ');
         return [];
     }
 
@@ -307,7 +304,6 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
      */
     public function getEventDetail(array $request)
     {
-        $this->log->debug(__METHOD__ . ':  start. ');
         $api = ABC::env('AUDIT_LOG_API');
         $conf = new AuditLogConfig($api['HOST']);
         $client = new AuditLogClient($conf);
@@ -321,7 +317,6 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         } catch (Exception $exception) {
             $this->log->error($exception->getMessage());
         }
-        $this->log->debug(__METHOD__ . ':  stop. ');
         return [];
     }
 
