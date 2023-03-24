@@ -1600,14 +1600,16 @@ class AConfigManager
         ]);
 
         $allCacheDrivers = Registry::cache()->getAvailableStores();
+        $currentCacheDriver = strtoupper(Registry::cache()->getCurrentStore());
+
         $cacheDrivers = [];
-        foreach ($allCacheDrivers as $driver_name => $drv) {
+        foreach ($allCacheDrivers as $driver_name) {
             $name = strtoupper($driver_name);
-            $cacheDrivers[$name] = $name;
+            if ($name != $currentCacheDriver) {
+                $cacheDrivers[$name] = $name;
+            }
         }
         sort($cacheDrivers, SORT_STRING);
-        $currentCacheDriver = strtoupper(Registry::cache()->getCurrentStore());
-        unset($cacheDrivers[$currentCacheDriver]);
 
         $fields['cache_enable'] = $form->getFieldHtml($props[] = [
                 'type'  => 'checkbox',
