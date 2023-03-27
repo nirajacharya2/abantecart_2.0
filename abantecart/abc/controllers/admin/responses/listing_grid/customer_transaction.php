@@ -121,7 +121,7 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
                     $result['date_added'],
                     $this->language->get('date_format_long')
                 ),
-                $result['user'],
+                $result['user'] ?: 'System',
                 $result['debit'],
                 $result['credit'],
                 $result['transaction_type'],
