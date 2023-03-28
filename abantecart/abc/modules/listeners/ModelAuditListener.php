@@ -202,7 +202,7 @@ class ModelAuditListener
         $actorOnBehalf = $user->getActoronbehalf()
             ? User::find($user->getActoronbehalf())
             : null;
-        $user_name = $user->getUserName() . ($actorOnBehalf ? '(' . $actorOnBehalf->username . ')' : '');
+        $user_name = $user->getUserName() . ($actorOnBehalf ? '(' . $actorOnBehalf->username . ')' : 'system');
 
         //get primary key value
         $auditable_id = $modelObject->getKey();
@@ -254,10 +254,8 @@ class ModelAuditListener
             }
         }
 
-        $eventDescription = [];
-
         //skip creating event if created will be fired.
-        // creating event do not save auditable_id into audit log table because key (ID) does not exists yet
+        // creating event do not save auditable_id into audit log table because key (ID) does not exist yet
         if (
             ($event_name == 'creating' && in_array('created', $allowedEvents))
             || //skip saving if creating presents to prevent duplication
@@ -277,69 +275,47 @@ class ModelAuditListener
             );
         }
 
-        foreach ($newData as $colName => $newValue) {
-            if (is_array($newValue)) {
-                foreach ($newValue as $cName => $nValue) {
-                    if ((string)$oldData[$colName][$cName] === (string)$nValue) {
-                        continue;
-                    }
-                    $eventDescription[] = [
-                        'auditable_model_id' => $auditableModelId,
-                        'auditable_model_name' => $auditable_model,
-                        'auditable_id' => $auditable_id ?: 0,
-                        'field_name' => $cName,
-                        'old_value' => $oldData[$colName][$cName],
-                        'new_value' => $nValue,
-                    ];
-                }
-            } else {
-                if ((string)$oldData[$colName] === (string)$newValue) {
-                    $this->output(true, 'DATA SKIPPED: ' . $colName . " because values are equal.");
-                    continue;
-                }
-                $eventDescription[] = [
-                    'auditable_model_id' => $auditableModelId,
-                    'auditable_model_name' => $auditable_model,
-                    'auditable_id' => $auditable_id ?: 0,
-                    'field_name' => $colName,
-                    'old_value' => $oldData[$colName],
-                    'new_value' => $newValue,
-                ];
-            }
-        }
-
-        $data = [
-            'id' => $request_id,
-            'actor' => $userData,
-            'app' => [
-                'name' => 'Abantecart',
-                'server' => '',
+        $storageData = [
+            'id'      => $request_id,
+            'actor'   => $userData,
+            'app'     => [
+                'name'    => 'Abantecart',
+                'server'  => '',
                 'version' => '2.0',
-                'build' => ABC::env('BUILD_ID') ?: '',
-                'stage' => ABC::$stage_name,
+                'build'   => ABC::env('BUILD_ID') ?: '',
+                'stage'   => ABC::$stage_name,
             ],
-            'entity' => [
-                'name' => $main_auditable_model,
-                'id' => $main_auditable_id,
+            'entity'  => [
+                'name'  => $main_auditable_model,
+                'id'    => $main_auditable_id,
                 'group' => $event_name,
             ],
             'request' => [
-                'ip' => $user->getUserIp(),
+                'ip'        => $user->getUserIp(),
                 'timestamp' => date('Y-m-d\TH:i:s.v\Z'),
             ],
             'changes' => [],
         ];
 
-        foreach ($eventDescription as $item) {
-            $oldValue = $this->preFormat($item['old_value']);
-            $newValue = $this->preFormat($item['new_value']);
+        foreach ($newData as $colName => $newValue) {
+            $newValue = $this->stringify($newValue);
+            $oldValue = $this->stringify($oldData[$colName]);
 
-            $data['changes'][] = [
-                'name'      => $item['field_name'],
-                'groupId'   => $item['auditable_id'],
-                'groupName' => $item['auditable_model_name'],
-                'oldValue'  => $oldValue,
-                'newValue'  => $newValue,
+            if ($oldValue === $newValue) {
+                //write to debug if needed
+                $this->output(
+                    true,
+                    'DATA SKIPPED: ' . $colName . " because values are equal."
+                );
+                continue;
+            }
+            $storageData['changes'][] = [
+                'auditable_model_id' => $auditableModelId,
+                'groupId'            => $auditable_id ?: 0,
+                'groupName'          => $auditable_model,
+                'name'               => $colName,
+                'oldValue'           => $oldValue,
+                'newValue'           => $newValue,
             ];
         }
 
@@ -355,15 +331,13 @@ class ModelAuditListener
                 );
             }
             Registry::getInstance()->set('AuditLogStorage', $auditLogStorage);
-            $auditLogStorage->write($data);
+            $auditLogStorage->write($storageData);
         } catch (Exception $e) {
             $error_message = __CLASS__ . ": Auditing of " . $modelClassName . " failed.";
             Registry::log()->error(
-                $error_message
-                . "\n"
-                . $e->getMessage()
-                . "\n" .
-                $event_name
+                $error_message . "\n"
+                . $e->getMessage() . "\n"
+                . $event_name
             );
 
             //TODO: need to check
@@ -389,12 +363,13 @@ class ModelAuditListener
         ];
 
         if (static::$DEBUG_TO_LOG === true) {
-            Registry::log()->error(var_export($output, true));
+            //see debug log file with current date in the name
+            Registry::log()->debug(var_export($output, true));
         }
         return $output;
     }
 
-    protected function preFormat($value)
+    protected function stringify($value)
     {
         if (is_object($value)) {
             if (method_exists($value, '__toString')) {
@@ -405,6 +380,6 @@ class ModelAuditListener
         } elseif (is_array($value)) {
             $value = var_export($value, true);
         }
-        return $value;
+        return (string)$value;
     }
 }
