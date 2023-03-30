@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -2380,7 +2380,7 @@ class Product extends BaseModel
             ->where(
                 [
                     'product_id' => $product_id,
-                    'group_id'   => 0,
+                    'group_id'   => null,
                 ]
             )->active()
             ->orderBy('sort_order');
@@ -2692,7 +2692,7 @@ class Product extends BaseModel
     public static function getProductOption($option_id)
     {
         $option = ProductOption::with('descriptions')
-            ->find($option_id)
+            ->useCache('product')->find($option_id)
             ?->toArray();
 
         $optionData = [];
@@ -2759,7 +2759,7 @@ class Product extends BaseModel
         $filter['category_id'] = $filter['category_id'] ?? 0;
         $filter['manufacturer_id'] = $filter['manufacturer_id'] ?? 0;
 
-        $filter['only_enabled'] = !isset($filter['only_enabled']) || (bool)$filter['only_enabled'];
+        $filter['only_enabled'] = (bool)$filter['only_enabled'];
         $filter['customer_group_id'] = $filter['customer_group_id']
             ?? Registry::config()?->get('config_customer_group_id');
         $filter['keyword'] = trim($filter['keyword']);
