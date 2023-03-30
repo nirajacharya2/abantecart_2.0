@@ -1070,7 +1070,7 @@ class Product extends BaseModel
         if (!($toDate instanceof Carbon)) {
             $inc = "NOW()";
         } else {
-            $inc = "'" . $toDate->toIso8601String() . "'";
+            $inc = "'" . $toDate->toDateTimeString() . "'";
         }
 
         $sql = " ( SELECT p2sp.price
@@ -1095,7 +1095,7 @@ class Product extends BaseModel
     {
         $sql = " ( SELECT COUNT(rw.review_id)
                      FROM " . Registry::db()->table_name("reviews") . " rw
-                     WHERE " . Registry::db()->table_name("products") . ".product_id = rw.product_id";
+                     WHERE " . Registry::db()->table_name("products") . ".product_id = rw.product_id ";
         if ($only_enabled) {
             $sql .= " AND status = 1 ";
         }
@@ -1129,7 +1129,7 @@ class Product extends BaseModel
         $db = Registry::db();
         $sql = " ( SELECT ROUND(AVG(rw.rating))
                  FROM " . $db->table_name("reviews") . " rw
-                 WHERE " . $db->table_name("products") . ".product_id = rw.product_id";
+                 WHERE " . $db->table_name("products") . ".product_id = rw.product_id ";
         if ($only_enabled) {
             $sql .= " AND status = 1 ";
         }
@@ -1147,12 +1147,12 @@ class Product extends BaseModel
         $db = Registry::db();
         if ($date) {
             if ($date instanceof Carbon) {
-                $now = $date->toIso8601String();
+                $now = $date->toDateTimeString();
             } else {
-                $now = Carbon::parse($date)->toIso8601String();
+                $now = Carbon::parse($date)->toDateTimeString();
             }
         } else {
-            $now = Carbon::now()->toIso8601String();
+            $now = Carbon::now()->toDateTimeString();
         }
 
         $sql = "(SELECT price
@@ -1176,12 +1176,12 @@ class Product extends BaseModel
         $db = Registry::db();
         if ($date) {
             if ($date instanceof Carbon) {
-                $now = $date->toIso8601String();
+                $now = $date->toDateTimeString();
             } else {
-                $now = Carbon::parse($date)->toIso8601String();
+                $now = Carbon::parse($date)->toDateTimeString();
             }
         } else {
-            $now = Carbon::now()->toIso8601String();
+            $now = Carbon::now()->toDateTimeString();
         }
 
         $sql = "(SELECT price
