@@ -3145,6 +3145,7 @@ class Product extends BaseModel
 
                 //search by tag
                 $words = array_map('mb_strtolower', array_filter(explode(' ', $keyWord)));
+                $words = array_map('htmlentities', $words);
                 if (sizeof($words) > 1) {
                     $subQuery->orWhereRaw("LOWER(" . $pt_table . ".tag) = '" . $keyWord . "'");
                 }
