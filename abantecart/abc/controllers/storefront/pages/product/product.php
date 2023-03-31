@@ -513,11 +513,9 @@ class ControllerPagesProductProduct extends AController
                 $opt_stock_message = '';
                 //if options has stock tracking and not allowed to be purchased out of stock
                 if ($option_value->subtract && !$product->stock_checkout) {
-                    if ($option_value->quantity <= 0) {
+                    if ($option_value->quantity <= 0 && !$this->config->get('config_stock_checkout')) {
                         //show out of stock message
-                        if (!$this->config->get('config_stock_checkout')) {
-                            $opt_stock_message = $this->language->get('text_out_of_stock');
-                        }
+                        $opt_stock_message = $this->language->get('text_out_of_stock');
                         $disabled_values[] = $option_value->product_option_value_id;
                     } else {
                         if ($this->config->get('config_stock_display')) {
