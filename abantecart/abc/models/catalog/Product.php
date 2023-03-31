@@ -2377,12 +2377,9 @@ class Product extends BaseModel
             return [];
         }
         $query = ProductOption::with('description', 'values', 'values.description')
-            ->where(
-                [
-                    'product_id' => $product_id,
-                    'group_id'   => null,
-                ]
-            )->active()
+            ->where('product_id', '=', $product_id)
+            ->whereRaw('COALESCE(group_id,0) = 0')
+            ->active()
             ->orderBy('sort_order');
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query);
