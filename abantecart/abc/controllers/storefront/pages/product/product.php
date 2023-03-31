@@ -515,7 +515,9 @@ class ControllerPagesProductProduct extends AController
                 if ($option_value->subtract && !$product->stock_checkout) {
                     if ($option_value->quantity <= 0) {
                         //show out of stock message
-                        $opt_stock_message = $this->language->get('text_out_of_stock');
+                        if (!$this->config->get('config_stock_checkout')) {
+                            $opt_stock_message = $this->language->get('text_out_of_stock');
+                        }
                         $disabled_values[] = $option_value->product_option_value_id;
                     } else {
                         if ($this->config->get('config_stock_display')) {
@@ -531,7 +533,7 @@ class ControllerPagesProductProduct extends AController
                             && $this->config->get('config_stock_display')
                             && $product->stock_status
                         ) {
-                            $opt_stock_message = "({$product->stock_status->name})";
+                            $opt_stock_message = "(" . $product->stock_status->name . ")";
                         }
                     }
                 }
