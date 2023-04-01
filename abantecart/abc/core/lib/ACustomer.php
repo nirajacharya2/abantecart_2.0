@@ -716,9 +716,13 @@ class ACustomer extends ALibBase
                                 if ($optionInfo['product_option_id'] != $optionId) {
                                     continue;
                                 }
-
-                                //if option waw disabled when customer absent
+                                //if option was disabled when customer absent
                                 if (!$optionInfo['status']) {
+                                    unset($val['options'][$optionId]);
+                                }
+                                //check if value id exists at all
+                                $valueIds = array_column($optionInfo['values'], 'product_option_value_id');
+                                if (!in_array($optionValueId, $valueIds)) {
                                     unset($val['options'][$optionId]);
                                 }
                             }
