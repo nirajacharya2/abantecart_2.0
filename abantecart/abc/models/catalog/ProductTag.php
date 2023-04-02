@@ -21,8 +21,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class ProductTag extends BaseModel
 {
-    use SoftDeletes;
-
     protected $primaryKey = 'id';
 
     protected $mainClassName = Product::class;
