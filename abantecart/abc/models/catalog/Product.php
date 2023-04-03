@@ -2240,7 +2240,7 @@ class Product extends BaseModel
                 }
             }
         }
-        $product->touch();
+        $model->touch();
         return true;
     }
 
