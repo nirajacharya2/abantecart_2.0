@@ -23,6 +23,7 @@ use abc\core\engine\ALanguage;
 use abc\core\engine\ALoader;
 use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
+use abc\models\catalog\Product;
 use abc\models\content\Content;
 use abc\models\customer\Address;
 use abc\models\customer\Customer;
@@ -45,94 +46,50 @@ use ReflectionException;
 class ACustomer extends ALibBase
 {
     static $errors = [];
-    /**
-     * @var int
-     */
+    /** @var int */
     protected $customer_id;
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $loginname;
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $firstname;
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $lastname;
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $email;
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $telephone;
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $fax;
-    /**
-     * @var int
-     */
+    /** @var int */
     protected $newsletter;
-    /**
-     * @var int
-     */
+    /** @var int */
     protected $customer_group_id;
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $customer_group_name;
-    /**
-     * @var bool
-     */
+    /** @var bool */
     protected $customer_tax_exempt;
-    /**
-     * @var int
-     */
+    /** @var int */
     protected $address_id;
-    /**
-     * @var int
-     */
+    /** @var int */
     protected $store_id;
-    /**
-     * @var AConfig
-     */
+    /** @var AConfig */
     protected $config;
-    /**
-     * @var AbcCache
-     */
+    /** @var AbcCache */
     protected $cache;
-    /**
-     * @var ADB
-     */
+    /** @var ADB */
     protected $db;
-    /**
-     * @var ALoader
-     */
+    /** @var ALoader */
     protected $load;
-    /**
-     * @var ARequest
-     */
+    /** @var ARequest */
     protected $request;
-    /**
-     * @var ASession
-     */
+    /** @var ASession */
     protected $session;
-    /**
-     * @var ADataEncryption
-     */
+    /** @var ADataEncryption */
     protected $dcrypt;
-    /**
-     * @var ExtensionsApi
-     */
+    /** @var ExtensionsApi */
     protected $extensions;
 
-    /**
-     * @var array (unauthenticated customer details)
-     */
+    /** @var array (unauthenticated customer details) */
     protected $unauth_customer = [];
 
     /**
@@ -199,7 +156,7 @@ class ACustomer extends ALibBase
                 setcookie('customer', '', time() - 3600, dirname($this->request->server['PHP_SELF']));
             }
             //check if unauthenticated customer cart content was found and merge with session
-            $saved_cart = $this->getCustomerCart();
+            $saved_cart = $this->getSavedCustomerCart();
             if (!empty($saved_cart) && count($saved_cart)) {
                 $this->mergeCustomerCart($saved_cart);
             }
@@ -263,16 +220,14 @@ class ACustomer extends ALibBase
 
             $this->session->data['customer_id'] = $this->customer_id;
             //load customer saved cart and merge with session cart before login
-            $cart = $this->getCustomerCart();
+            $cart = $this->getSavedCustomerCart();
             $this->mergeCustomerCart($cart);
 
             //save merged cart
             $this->saveCustomerCart();
 
             //set cookie for unauthenticated user (expire in 1 year)
-            /**
-             * @var AEncryption $encryption
-             */
+            /** @var AEncryption $encryption */
             $encryption = ABC::getObjectByAlias('AEncryption', [$config->get('encryption_key')]);
             $customer_data = $encryption->encrypt(serialize([
                 'first_name'  => $this->firstname,
@@ -291,7 +246,6 @@ class ACustomer extends ALibBase
             //set date of login
             $this->setLastLogin($this->customer_id);
             $this->extensions->hk_ProcessData($this, 'login_success', $customer_data);
-
             return true;
         } else {
             $this->extensions->hk_ProcessData($this, 'login_failed');
@@ -329,13 +283,10 @@ class ACustomer extends ALibBase
         $this->customer_group_id = (int)$data['customer_group_id'];
         //save it to use in APromotion class
         $this->session->data['customer_group_id'] = (int)$data['customer_group_id'];
-
         $this->customer_group_name = $data['customer_group_name'];
-
         $this->customer_tax_exempt = $data['tax_exempt'];
         //save this sign to use in ATax lib
         $this->session->data['customer_tax_exempt'] = $data['tax_exempt'];
-
         $this->address_id = (int)$data['address_id'];
         //if customer have no default address - take first
         if($this->customer_id && !$this->address_id){
@@ -368,7 +319,6 @@ class ACustomer extends ALibBase
         H::event(
             'abc\core\lib\customer@login',
             [new ABaseEvent($customer_id)]);
-
         return true;
     }
 
@@ -378,9 +328,11 @@ class ACustomer extends ALibBase
     public function logout()
     {
         $customer_id = $this->customer_id;
-        unset($this->session->data['customer_id']);
-        unset($this->session->data['customer_group_id']);
-        unset($this->session->data['customer_tax_exempt']);
+        unset(
+            $this->session->data['customer_id'],
+            $this->session->data['customer_group_id'],
+            $this->session->data['customer_tax_exempt']
+        );
 
         $this->customer_id = '';
         $this->loginname = '';
@@ -404,7 +356,7 @@ class ACustomer extends ALibBase
             H::event(
                 'abc\core\lib\customer@logout',
                 [new ABaseEvent($customer_id)]);
-        } catch (AException $e) {
+        } catch (Exception $e) {
         }
     }
 
@@ -485,11 +437,7 @@ class ACustomer extends ALibBase
      */
     public function isLoginnameAsEmail()
     {
-        if ($this->loginname == $this->email) {
-            return true;
-        } else {
-            return false;
-        }
+        return ($this->loginname == $this->email);
     }
 
     /**
@@ -616,7 +564,6 @@ class ACustomer extends ALibBase
         if (!$this->isLogged()) {
             return false;
         }
-
         return CustomerTransaction::getBalance($this->customer_id);
     }
 
@@ -626,7 +573,7 @@ class ACustomer extends ALibBase
      * @param array $data - amount, order_id, transaction_type, description, comments, creator
      *
      * @return bool
-     * @throws Exception|ValidationException
+     * @throws Exception
      * @throws InvalidArgumentException
      */
     public function debitTransaction($data)
@@ -715,7 +662,7 @@ class ACustomer extends ALibBase
      * @return array()
      * @throws Exception
      */
-    public function getCustomerCart()
+    public function getSavedCustomerCart()
     {
         $config = Registry::config();
         $store_id = (int)$config->get('config_store_id');
@@ -730,34 +677,66 @@ class ACustomer extends ALibBase
         $cart = [];
         $customer = $this->model();
         if($customer && $customer->status == 1){
-            $cart = $customer->cart;
+            $cart = $customer->cart['store_' . $store_id];
         }
 
         //clean products
         if ($cart) {
-            $cart_products = [];
+            $savedCartProductIds = [];
             foreach ($cart as $key => $val) {
                 $k = explode(':', $key);
-                $cart_products[] = (int)$k[0]; // <-product_id
+                $savedCartProductIds[] = (int)$k[0];
             }
 
-            $product_list = $this->db->table('products_to_stores')
-                        ->select('product_id')
-                        ->where('store_id', '=',$store_id)
-                        ->whereIn('product_id', $cart_products)
-                        ->get();
-            $products = [];
-            if($product_list->count()){
-                $products = array_column($product_list->toArray(),'product_id');
-            }
+            $productList = Product::getProducts(
+                [
+                    'filter' => [
+                        'store_id'     => $store_id,
+                        'include'      => $savedCartProductIds,
+                        'only_enabled' => true
+                    ]
+                ]
+            );
 
-            $diff = array_diff($cart_products, $products);
-            foreach ($diff as $p) {
-                unset($cart[$p]);
+            $productIds = $productList->pluck('product_id')->toArray();
+
+            foreach ($cart as $key => $val) {
+                $k = explode(':', $key);
+                $productId = (int)$k[0];
+                //if product was removed when customer absent
+                if (!in_array($productId, $productIds)) {
+                    unset($cart[$key]);
+                    continue;
+                }
+                if ($val['options']) {
+                    $productOptions = Product::getProductOptionsWithValues($productId);
+                    if ($productOptions) {
+                        foreach ((array)$val['options'] as $optionId => $optionValueId) {
+                            foreach ($productOptions as $optionInfo) {
+                                if ($optionInfo['product_option_id'] != $optionId) {
+                                    continue;
+                                }
+                                //if option was disabled when customer absent
+                                if (!$optionInfo['status']) {
+                                    unset($val['options'][$optionId]);
+                                }
+                                //check if value id exists at all
+                                $valueIds = array_column($optionInfo['values'], 'product_option_value_id');
+                                if (!in_array($optionValueId, $valueIds)) {
+                                    unset($val['options'][$optionId]);
+                                }
+                            }
+                        }
+                    } else {
+                        $val['options'] = [];
+                    }
+                    if (!$val['options']) {
+                        unset($cart[$key]);
+                    }
+                }
             }
         }
-
-        return $cart;
+        return ['store_' . $store_id => $cart];
     }
 
     /**
@@ -964,7 +943,6 @@ class ACustomer extends ALibBase
      *
      * @return Customer
      * @throws AException
-     * @throws ValidationException
      * @throws ReflectionException
      * @throws InvalidArgumentException
      */

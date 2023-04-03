@@ -54,7 +54,7 @@ class ControllerPagesProductProduct extends AController
     protected function init()
     {
         //is this an embed mode
-        if ($this->config->get('embed_mode') == true) {
+        if ($this->config->get('embed_mode')) {
             $this->routes['cart_rt'] = 'r/checkout/cart/embed';
         } else {
             $this->routes['cart_rt'] = 'checkout/cart';
@@ -87,10 +87,10 @@ class ControllerPagesProductProduct extends AController
 
         $this->document->resetBreadcrumbs();
         $this->document->addBreadcrumb([
-                                           'href'      => $this->html->getHomeURL(),
-                                           'text'      => $this->language->get('text_home'),
-                                           'separator' => false,
-                                       ]);
+            'href'      => $this->html->getHomeURL(),
+            'text'      => $this->language->get('text_home'),
+            'separator' => false,
+        ]);
 
         if ($this->config->get('config_require_customer_login') && !$this->customer->isLogged()) {
             abc_redirect($this->html->getSecureURL('account/login'));
@@ -105,18 +105,18 @@ class ControllerPagesProductProduct extends AController
                 if (!$path) {
                     $path = $path_id;
                 } else {
-                    $path .= '_'.$path_id;
+                    $path .= '_' . $path_id;
                 }
                 if ($category_info) {
                     $this->document->addBreadcrumb(
                         [
-                           'href'      => $this->html->getSEOURL(
-                               'product/category',
-                               '&path='.$path, '&encode'
-                           ),
-                           'text'      => $category_info['name'],
-                           'separator' => $this->language->get('text_separator'),
-                       ]
+                            'href'      => $this->html->getSEOURL(
+                                'product/category',
+                                '&path=' . $path, '&encode'
+                            ),
+                            'text'      => $category_info['name'],
+                            'separator' => $this->language->get('text_separator'),
+                        ]
                     );
                 }
             }
@@ -129,13 +129,13 @@ class ControllerPagesProductProduct extends AController
             if ($manufacturer_info) {
                 $this->document->addBreadcrumb(
                     [
-                       'href'      => $this->html->getSEOURL(
-                           'product/manufacturer',
-                           '&manufacturer_id='.$request['manufacturer_id'], '&encode'
-                       ),
-                       'text'      => $manufacturer_info['name'],
-                       'separator' => $this->language->get('text_separator'),
-                   ]
+                        'href'      => $this->html->getSEOURL(
+                            'product/manufacturer',
+                            '&manufacturer_id=' . $request['manufacturer_id'], '&encode'
+                        ),
+                        'text'      => $manufacturer_info['name'],
+                        'separator' => $this->language->get('text_separator'),
+                    ]
                 );
             }
         }
@@ -143,13 +143,13 @@ class ControllerPagesProductProduct extends AController
         if (isset($request['keyword'])) {
             $url = '';
             if (isset($request['category_id'])) {
-                $url .= '&category_id='.$request['category_id'];
+                $url .= '&category_id=' . $request['category_id'];
             }
             if (isset($request['description'])) {
-                $url .= '&description='.$request['description'];
+                $url .= '&description=' . $request['description'];
             }
             $this->document->addBreadcrumb([
-                'href'      => $this->html->getURL('product/search', '&keyword='.$request['keyword'].$url, '&encode'),
+                'href'      => $this->html->getURL('product/search', '&keyword=' . $request['keyword'] . $url, '&encode'),
                 'text'      => $this->language->get('text_search'),
                 'separator' => $this->language->get('text_separator'),
             ]);
@@ -159,9 +159,9 @@ class ControllerPagesProductProduct extends AController
         $key = [];
         if (H::has_value($request['key'])) {
             $key = explode(':', $request['key']);
-            $product_id = (int) $key[0];
+            $product_id = (int)$key[0];
         } elseif (H::has_value($request['product_id'])) {
-            $product_id = (int) $request['product_id'];
+            $product_id = (int)$request['product_id'];
         } else {
             $product_id = 0;
         }
@@ -169,7 +169,7 @@ class ControllerPagesProductProduct extends AController
         $urls = [
             'is_group_option' => $this->html->getURL(
                 'r/product/product/is_group_option',
-                '&product_id='.$product_id,
+                '&product_id=' . $product_id,
                 '&encode'
             ),
         ];
@@ -212,7 +212,7 @@ class ControllerPagesProductProduct extends AController
         }
 
         $this->document->addBreadcrumb([
-            'href'      => $this->html->getSEOURL('product/product', $url.'&product_id='.$product_id, '&encode'),
+            'href'      => $this->html->getSEOURL('product/product', $url . '&product_id=' . $product_id, '&encode'),
             'text'      => $product->description->name,
             'separator' => $this->language->get('text_separator'),
         ]);
@@ -228,23 +228,23 @@ class ControllerPagesProductProduct extends AController
         $this->data['text_maximum'] = sprintf($this->language->get('text_maximum'), $product->maximum);
         $this->data['option_resources_url'] = $this->html->getURL('r/product/product/get_option_resources');
         $this->data['calc_total_url'] = $this->html->getURL('r/product/product/calculateTotal');
-        $this->data['product_review_url'] = $this->html->getURL('product/review/review', '&product_id='.$product_id);
+        $this->data['product_review_url'] = $this->html->getURL('product/review/review', '&product_id=' . $product_id);
         $this->data['product_review_write_url'] = $this->html->getURL(
             'product/review/write',
-            '&product_id='.$product_id
+            '&product_id=' . $product_id
         );
         $this->data['product_wishlist_add_url'] = $this->html->getURL(
             'product/wishlist/add',
-            '&product_id='.$product_id
+            '&product_id=' . $product_id
         );
         $this->data['product_wishlist_remove_url'] = $this->html->getURL(
             'product/wishlist/remove',
-            '&product_id='.$product_id
+            '&product_id=' . $product_id
         );
         $this->data['captcha_url'] = $this->html->getURL('common/captcha');
         $this->data['update_view_count_url'] = $this->html->getURL(
             'common/view_count/product',
-            '&product_id='.$product_id
+            '&product_id=' . $product_id
         );
 
         $this->data['tab_review'] = sprintf(
@@ -333,7 +333,7 @@ class ControllerPagesProductProduct extends AController
         $decimal_place = !$decimal_place ? 2 : $decimal_place;
 
         if ($discount) {
-            $product_price = round((float) $discount, $decimal_place);
+            $product_price = round((float)$discount, $decimal_place);
             $this->data['price_num'] = $this->tax->calculate(
                 $discount,
                 $product->tax_class_id,
@@ -350,7 +350,7 @@ class ControllerPagesProductProduct extends AController
 
             $special = $promotion->getProductSpecial($product_id);
             if ($special) {
-                $product_price = round((float) $special, $decimal_place);
+                $product_price = round((float)$special, $decimal_place);
                 $this->data['special_num'] = $this->tax->calculate(
                     $special,
                     $product->tax_class_id,
@@ -426,7 +426,7 @@ class ControllerPagesProductProduct extends AController
             [
                 'type'  => 'hidden',
                 'name'  => 'redirect',
-                'value' => $this->html->getURL('product/product', $url.'&product_id='.$product_id, '&encode'),
+                'value' => $this->html->getURL('product/product', $url . '&product_id=' . $product_id, '&encode'),
             ]
         );
 
@@ -434,7 +434,7 @@ class ControllerPagesProductProduct extends AController
         $this->data['manufacturer'] = $product->manufacturer->name;
         $this->data['manufacturers'] = $this->html->getSEOURL(
             'product/manufacturer',
-            '&manufacturer_id='.$product->manufacturer_id,
+            '&manufacturer_id=' . $product->manufacturer_id,
             '&encode'
         );
         $this->data['description'] = html_entity_decode(
@@ -449,7 +449,7 @@ class ControllerPagesProductProduct extends AController
         if ($product->product_type_id) {
             $prodTypeSettings = Product::getProductTypeSettings($product_id);
             if ($prodTypeSettings && is_array($prodTypeSettings) && isset($prodTypeSettings['catalog_mode'])) {
-                $catalog_mode = (bool) $prodTypeSettings['catalog_mode'];
+                $catalog_mode = (bool)$prodTypeSettings['catalog_mode'];
             }
         }
         $this->data['catalog_mode'] = $catalog_mode;
@@ -482,6 +482,7 @@ class ControllerPagesProductProduct extends AController
         $htmlElements = HtmlElementFactory::getAvailableElements();
         foreach ($product_options as $option) {
             /** @var ProductOption $option */
+            $option_images = [];
             $values = [];
             $disabled_values = [];
             $name = $price = $attr = '';
@@ -512,15 +513,15 @@ class ControllerPagesProductProduct extends AController
                 $opt_stock_message = '';
                 //if options has stock tracking and not allowed to be purchased out of stock
                 if ($option_value->subtract && !$product->stock_checkout) {
-                    if ($option_value->quantity <= 0) {
+                    if ($option_value->quantity <= 0 && !$this->config->get('config_stock_checkout')) {
                         //show out of stock message
                         $opt_stock_message = $this->language->get('text_out_of_stock');
                         $disabled_values[] = $option_value->product_option_value_id;
                     } else {
                         if ($this->config->get('config_stock_display')) {
                             if ($option_value->quantity > 0) {
-                                $opt_stock_message = $option_value->quantity." ".$this->language->get('text_instock');
-                                $opt_stock_message = "({$opt_stock_message})";
+                                $opt_stock_message = $option_value->quantity . " " . $this->language->get('text_instock');
+                                $opt_stock_message = "(" . $opt_stock_message . ")";
                             }
                         }
                     }
@@ -530,43 +531,29 @@ class ControllerPagesProductProduct extends AController
                             && $this->config->get('config_stock_display')
                             && $product->stock_status
                         ) {
-                            $opt_stock_message = "({$product->stock_status->name})";
+                            $opt_stock_message = "(" . $product->stock_status->name . ")";
                         }
                     }
                 }
 
                 //Apply option price modifier
-                if ($option_value->prefix == '%') {
-                    $price = $this->tax->calculate(
-                        ($product_price * $option_value->price / 100),
-                        $product->tax_class_id,
-                        (bool)$this->config->get('config_tax')
-                    );
-                    if ($price != 0) {
-                        $price = $this->currency->format($price);
-                    } else {
-                        $price = '';
-                    }
-                } else {
-                    $price = $this->tax->calculate(
-                        $option_value->price,
-                        $product->tax_class_id,
-                        (bool)$this->config->get('config_tax')
-                    );
-                    if ($price != 0) {
-                        $price = $this->currency->format($price);
-                    } else {
-                        $price = '';
-                    }
-                }
+                $rawPrice = $option_value->prefix == '%'
+                    ? ($product_price * $option_value->price / 100)
+                    : $option_value->price;
+                $price = $this->tax->calculate(
+                    $rawPrice,
+                    $product->tax_class_id,
+                    (bool)$this->config->get('config_tax')
+                );
+                $price = $price ? $this->currency->format($price) : '';
 
                 $values[$option_value->product_option_value_id] = $option_value->description->name
-                    .' '
-                    .$price
-                    .' '
-                    .$opt_stock_message;
+                    . ' '
+                    . $price
+                    . ' '
+                    . $opt_stock_message;
 
-                //disable stock tracking for product if some of option have subtract
+                //disable stock tracking for product if one of options have sub-tract
                 if ($option_value->subtract) {
                     $this->data['product_info']['subtract'] = false;
                 }
@@ -578,7 +565,7 @@ class ControllerPagesProductProduct extends AController
                         $name .= ' ';
                     }
                     if ($price) {
-                        $default_value .= $price.' ';
+                        $default_value .= $price . ' ';
                         $name .= $price;
                     }
                     $option->required = false;
@@ -590,11 +577,11 @@ class ControllerPagesProductProduct extends AController
                 $value = '';
                 //add price to option name if it is not element with options
                 if (!in_array($option->element_type, $elements_with_options) && $option->element_type != 'B') {
-                    $option->description->name .= ' <small>'.$price.'</small>';
+                    $option->description->name .= ' <small>' . $price . '</small>';
                     if ($opt_stock_message) {
-                        $option['name'] .= '<br />'.$opt_stock_message;
+                        $option['name'] .= '<br />' . $opt_stock_message;
                     }
-                    $value = $default_value ? : $name;
+                    $value = $default_value ?: $name;
                 } else {
                     if ($option->element_type == 'B') {
                         $value = $name;
@@ -611,15 +598,15 @@ class ControllerPagesProductProduct extends AController
                     if ($value == '') {
                         $value = 1;
                     }
-                    $attr = key($option['option_value']);
+                    $attr = $option?->values?->first()?->product_option_value_id;
                 }
 
                 $option_data = [
                     'type'             => $htmlElements[$option->element_type]['type'],
                     'name'             => !in_array($option->element_type, HtmlElementFactory::getMultivalueElements())
-                        ? 'option['.$option->product_option_id.']'
-                        : 'option['.$option->product_option_id.'][]',
-                    'attr'             => ' data-attribute-value-id="'.$attr.'"',
+                        ? 'option[' . $option->product_option_id . ']'
+                        : 'option[' . $option->product_option_id . '][]',
+                    'attr'             => ' data-attribute-value-id="' . $attr . '"',
                     'value'            => $value,
                     'options'          => $values,
                     'disabled_options' => $disabled_values,
@@ -633,12 +620,13 @@ class ControllerPagesProductProduct extends AController
                     if (!in_array($value, ['0', '1'])) {
                         $option_data['label_text'] = $value;
                     }
-                    $option_data['checked'] = (bool) $preset_value;
+                    $option_data['checked'] = (bool)$preset_value;
                 }
 
                 $options[] = [
                     'name' => $option->description->name,
-                    'html' => $this->html->buildElement($option_data),  // not a string!!! it's object!
+                    // Note: this is object!
+                    'html' => $this->html->buildElement($option_data),
                 ];
 
                 // main product image
@@ -653,8 +641,13 @@ class ControllerPagesProductProduct extends AController
                     ],
                 ];
 
-                $option_images['main'] =
-                    $resource->getResourceAllObjects('product_option_value', $option_data['value'], $mSizes, 1, false);
+                $option_images['main'] = $resource->getResourceAllObjects(
+                    'product_option_value',
+                    $option_data['value'],
+                    $mSizes,
+                    1,
+                    false
+                );
                 if (!$option_images['main']) {
                     unset($option_images['main']);
                 }
@@ -714,7 +707,7 @@ class ControllerPagesProductProduct extends AController
                 $this->data['stock'] = '';
                 if ($this->config->get('config_stock_display') && $total_quantity > 0) {
                     //if not tracked - show nothing
-                    $this->data['stock'] = $total_quantity !== true ? $total_quantity.' ' : '';
+                    $this->data['stock'] = $total_quantity !== true ? $total_quantity . ' ' : '';
                 }
                 if ($total_quantity <= 0) {
                     $this->data['stock'] = $product->stock_status ? $product->stock_status->name : 'No stock';
@@ -726,10 +719,10 @@ class ControllerPagesProductProduct extends AController
             //check if we need to disable product for no stock
             if ($this->config->get('config_nostock_autodisable') && $total_quantity <= 0) {
                 //set available data
-                $pd_identifiers = "ID: ".$product_id;
+                $pd_identifiers = "ID: " . $product_id;
                 $pd_identifiers .= (empty($product->getAttribute('model')) ? ''
-                    : " Model: ".$product->getAttribute('model'));
-                $pd_identifiers .= (empty($product->sku) ? '' : " SKU: ".$product->sku);
+                    : " Model: " . $product->getAttribute('model'));
+                $pd_identifiers .= (empty($product->sku) ? '' : " SKU: " . $product->sku);
                 $message_ttl = sprintf($this->language->get('notice_out_of_stock_ttl'), $product->description->name);
                 $message_txt = sprintf(
                     $this->language->get('notice_out_of_stock_body'),
@@ -742,13 +735,13 @@ class ControllerPagesProductProduct extends AController
                 try {
                     $product->update(['status' => 0]);
                 } catch (Exception $e) {
-                    $this->log->error(__FILE__.":".__LINE__.": ".$e->getMessage());
+                    $this->log->error(__FILE__ . ":" . __LINE__ . ": " . $e->getMessage());
                 }
 
                 abc_redirect(
                     $this->html->getSEOURL(
                         'product/product',
-                        '&product_id='.$product_id,
+                        '&product_id=' . $product_id,
                         '&encode'
                     )
                 );
@@ -761,16 +754,17 @@ class ControllerPagesProductProduct extends AController
         }
 
         // main product image
-            $sizes = [
-                'main'  => [
-                    'width'  => $this->config->get('config_image_popup_width'),
-                    'height' => $this->config->get('config_image_popup_height'),
-                ],
-                'thumb' => [
-                    'width'  => $this->config->get('config_image_thumb_width'),
-                    'height' => $this->config->get('config_image_thumb_height'),
-                ],
-            ];
+        $sizes = [
+            'main'  => [
+                'width'  => $this->config->get('config_image_popup_width'),
+                'height' => $this->config->get('config_image_popup_height'),
+            ],
+            'thumb' => [
+                'width'  => $this->config->get('config_image_thumb_width'),
+                'height' => $this->config->get('config_image_thumb_height'),
+            ],
+        ];
+        //TODO: recheck this
         if (!$option_images['main']) {
             $this->data['image_main'] = $resource->getResourceAllObjects('products', $product_id, $sizes, 1, false);
             if ($this->data['image_main']) {
@@ -861,7 +855,7 @@ class ControllerPagesProductProduct extends AController
             if (count($related->options)) {
                 $add = $this->html->getSEOURL(
                     'product/product',
-                    '&product_id='.$related->product_id,
+                    '&product_id=' . $related->product_id,
                     '&encode'
                 );
             } else {
@@ -870,7 +864,7 @@ class ControllerPagesProductProduct extends AController
                 } else {
                     $add = $this->html->getSecureURL(
                         $this->routes['cart_rt'],
-                        '&product_id='.$related->product_id,
+                        '&product_id=' . $related->product_id,
                         '&encode');
                 }
             }
@@ -888,7 +882,7 @@ class ControllerPagesProductProduct extends AController
                 'image'         => $image,
                 'href'          => $this->html->getSEOURL(
                     'product/product',
-                    '&product_id='.$related->product_id,
+                    '&product_id=' . $related->product_id,
                     '&encode'
                 ),
                 'add'           => $add,
@@ -900,7 +894,7 @@ class ControllerPagesProductProduct extends AController
                 if ($tag->tag) {
                     $this->data['tags'][] = [
                         'tag'  => $tag->tag,
-                        'href' => $this->html->getURL('product/search', '&keyword='.$tag->tag, '&encode'),
+                        'href' => $this->html->getURL('product/search', '&keyword=' . $tag->tag, '&encode'),
                     ];
                 }
             }
@@ -924,7 +918,7 @@ class ControllerPagesProductProduct extends AController
                 foreach ($download_list as $download) {
                     $href = $this->html->getURL(
                         'account/download/startdownload',
-                        '&download_id='.$download['download_id']
+                        '&download_id=' . $download['download_id']
                     );
                     $download['attributes'] = $this->download->getDownloadAttributesValuesForCustomer(
                         $download['download_id']
@@ -933,7 +927,7 @@ class ControllerPagesProductProduct extends AController
                     $download['button'] = $form->getFieldHtml(
                         [
                             'type'  => 'button',
-                            'id'    => 'download_'.$download['download_id'],
+                            'id'    => 'download_' . $download['download_id'],
                             'href'  => $href,
                             'title' => $this->language->get('text_start_download'),
                             'text'  => $this->language->get('text_start_download'),
@@ -973,7 +967,7 @@ class ControllerPagesProductProduct extends AController
             [
                 'href'      => $this->html->getSEOURL(
                     'product/product',
-                    $url.'&product_id='.$product_id,
+                    $url . '&product_id=' . $product_id,
                     '&encode'
                 ),
                 'text'      => $this->language->get('text_error'),
@@ -1007,23 +1001,23 @@ class ControllerPagesProductProduct extends AController
         $request = $this->request->get;
         $url = '';
         if (isset($request['path'])) {
-            $url .= '&path='.$request['path'];
+            $url .= '&path=' . $request['path'];
         }
 
         if (isset($request['manufacturer_id'])) {
-            $url .= '&manufacturer_id='.$request['manufacturer_id'];
+            $url .= '&manufacturer_id=' . $request['manufacturer_id'];
         }
 
         if (isset($request['keyword'])) {
-            $url .= '&keyword='.$request['keyword'];
+            $url .= '&keyword=' . $request['keyword'];
         }
 
         if (isset($request['category_id'])) {
-            $url .= '&category_id='.$request['category_id'];
+            $url .= '&category_id=' . $request['category_id'];
         }
 
         if (isset($request['description'])) {
-            $url .= '&description='.$request['description'];
+            $url .= '&description=' . $request['description'];
         }
 
         return $url;
