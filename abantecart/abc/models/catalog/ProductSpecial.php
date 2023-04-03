@@ -44,8 +44,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class ProductSpecial extends BaseModel
 {
-    use SoftDeletes;
-
     protected $primaryKey = 'product_special_id';
     protected $mainClassName = Product::class;
     protected $mainClassKey = 'product_id';
