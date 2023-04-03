@@ -99,7 +99,7 @@ class ModelToolImportProcess extends Model
             [
                 'name'               => $task_name,
                 'starter'            => 1, //admin-side is starter
-                'created_by'         => $this->user->getId(), //get starter id
+                'created_by'         => Registry::user()->getId(), //get starter id
                 'status'             => $tm::STATUS_READY,
                 'start_time'         => date(
                     'Y-m-d H:i:s',
@@ -119,7 +119,7 @@ class ModelToolImportProcess extends Model
 
         $tm->updateTaskDetails($task_id,
             [
-                'created_by' => $this->user->getId(),
+                'created_by' => Registry::user()->getId(),
                 'settings'   => [
                     'import_data'      => $data,
                     'total_rows_count' => $total_rows_count,
@@ -190,11 +190,12 @@ class ModelToolImportProcess extends Model
      */
     public function process_products_record($task_id, $data, $settings)
     {
-        $this->db->beginTransaction();
+        $db = Registry::db();
+        $db->beginTransaction();
         try {
             $this->task_id = $task_id;
-            $language_id = $settings['language_id'] ?: $this->language->getContentLanguageID();
-            $store_id = (int)$settings['store_id'] ?: (int)$this->session->data['current_store_id'];
+            $language_id = $settings['language_id'] ?: Registry::language()->getContentLanguageID();
+            $store_id = (int)$settings['store_id'] ?: (int)Registry::session()->data['current_store_id'];
             $log_classname = ABC::getFullClassName('ALog');
             if ($log_classname) {
                 $this->imp_log = new $log_classname(
@@ -206,7 +207,6 @@ class ModelToolImportProcess extends Model
 
             $this->data['product_data'] = $data;
             $this->data['settings'] = $settings;
-
             $this->errors = [];
 
             //allow change list from hooks
@@ -226,12 +226,12 @@ class ModelToolImportProcess extends Model
                 }
             }
 
-            $this->db->commit();
+            $db->commit();
             //allow run additional actions from hooks
-            $this->extensions->hk_ProcessData($this, __FUNCTION__);
+            Registry::extensions()->hk_ProcessData($this, __FUNCTION__);
             return $result;
         } catch (Exception $e) {
-            $this->db->rollback();
+            $db->rollback();
             $this->toLog($e->getMessage());
             return false;
         }
@@ -250,8 +250,8 @@ class ModelToolImportProcess extends Model
     public function process_categories_record($task_id, $data, $settings)
     {
         $this->task_id = $task_id;
-        $language_id = $settings['language_id'] ?: $this->language->getContentLanguageID();
-        $store_id = $settings['store_id'] ?: $this->session->data['current_store_id'];
+        $language_id = $settings['language_id'] ?: Registry::language()->getContentLanguageID();
+        $store_id = $settings['store_id'] ?: Registry::session()->data['current_store_id'];
         $log_classname = ABC::getFullClassName('ALog');
         if ($log_classname) {
             $this->imp_log = new $log_classname(['app' => "categories_import_" . $task_id . ".txt"]);
@@ -272,8 +272,8 @@ class ModelToolImportProcess extends Model
     public function process_manufacturers_record($task_id, $data, $settings)
     {
         $this->task_id = $task_id;
-        $language_id = $settings['language_id'] ?: $this->language->getContentLanguageID();
-        $store_id = $settings['store_id'] ?: $this->session->data['current_store_id'];
+        $language_id = $settings['language_id'] ?: Registry::language()->getContentLanguageID();
+        $store_id = $settings['store_id'] ?: Registry::session()->data['current_store_id'];
         $log_classname = ABC::getFullClassName('ALog');
         if ($log_classname) {
             $this->imp_log = new $log_classname(
@@ -786,7 +786,7 @@ class ModelToolImportProcess extends Model
                 'product_option_value',
                 $optionValueId,
                 $data['name'],
-                $this->language->getContentLanguageID()
+                Registry::language()->getContentLanguageID()
             );
         }
         return $optionValueId;
@@ -820,7 +820,7 @@ class ModelToolImportProcess extends Model
             return true;
         }
 
-        $language_list = $this->language->getAvailableLanguages();
+        $language_list = Registry::language()->getAvailableLanguages();
         $rm = new AResourceManager();
         $rm->setType('image');
         //delete existing resources
@@ -901,7 +901,7 @@ class ModelToolImportProcess extends Model
                 $this->toLog("Map image resource : " . $image_basename . " " . $resource_id);
                 $rm->mapResource($object_txt_id, $object_id, $resource_id);
             } else {
-                $this->toLog("Error: Image resource can not be created. " . $this->db->error);
+                $this->toLog("Error: Image resource can not be created. " . Registry::db()->error);
             }
         }
 
@@ -1662,7 +1662,7 @@ class ModelToolImportProcess extends Model
             ],
         ];
         //allow change list from hooks
-        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+        Registry::extensions()->hk_UpdateData($this, __FUNCTION__);
 
         return $this->data['output'];
     }
