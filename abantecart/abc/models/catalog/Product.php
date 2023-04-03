@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -1070,7 +1070,7 @@ class Product extends BaseModel
         if (!($toDate instanceof Carbon)) {
             $inc = "NOW()";
         } else {
-            $inc = "'" . $toDate->toIso8601String() . "'";
+            $inc = "'" . $toDate->toDateTimeString() . "'";
         }
 
         $sql = " ( SELECT p2sp.price
@@ -1095,7 +1095,7 @@ class Product extends BaseModel
     {
         $sql = " ( SELECT COUNT(rw.review_id)
                      FROM " . Registry::db()->table_name("reviews") . " rw
-                     WHERE " . Registry::db()->table_name("products") . ".product_id = rw.product_id";
+                     WHERE " . Registry::db()->table_name("products") . ".product_id = rw.product_id ";
         if ($only_enabled) {
             $sql .= " AND status = 1 ";
         }
@@ -1129,7 +1129,7 @@ class Product extends BaseModel
         $db = Registry::db();
         $sql = " ( SELECT ROUND(AVG(rw.rating))
                  FROM " . $db->table_name("reviews") . " rw
-                 WHERE " . $db->table_name("products") . ".product_id = rw.product_id";
+                 WHERE " . $db->table_name("products") . ".product_id = rw.product_id ";
         if ($only_enabled) {
             $sql .= " AND status = 1 ";
         }
@@ -1147,12 +1147,12 @@ class Product extends BaseModel
         $db = Registry::db();
         if ($date) {
             if ($date instanceof Carbon) {
-                $now = $date->toIso8601String();
+                $now = $date->toDateTimeString();
             } else {
-                $now = Carbon::parse($date)->toIso8601String();
+                $now = Carbon::parse($date)->toDateTimeString();
             }
         } else {
-            $now = Carbon::now()->toIso8601String();
+            $now = Carbon::now()->toDateTimeString();
         }
 
         $sql = "(SELECT price
@@ -1176,12 +1176,12 @@ class Product extends BaseModel
         $db = Registry::db();
         if ($date) {
             if ($date instanceof Carbon) {
-                $now = $date->toIso8601String();
+                $now = $date->toDateTimeString();
             } else {
-                $now = Carbon::parse($date)->toIso8601String();
+                $now = Carbon::parse($date)->toDateTimeString();
             }
         } else {
-            $now = Carbon::now()->toIso8601String();
+            $now = Carbon::now()->toDateTimeString();
         }
 
         $sql = "(SELECT price
@@ -2240,7 +2240,7 @@ class Product extends BaseModel
                 }
             }
         }
-        $product->touch();
+        $model->touch();
         return true;
     }
 
@@ -2382,12 +2382,9 @@ class Product extends BaseModel
             return [];
         }
         $query = ProductOption::with('description', 'values', 'values.description')
-            ->where(
-                [
-                    'product_id' => $product_id,
-                    'group_id'   => 0,
-                ]
-            )->active()
+            ->where('product_id', '=', $product_id)
+            ->whereRaw('COALESCE(group_id,0) = 0')
+            ->active()
             ->orderBy('sort_order');
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query);
@@ -2697,7 +2694,7 @@ class Product extends BaseModel
     public static function getProductOption($option_id)
     {
         $option = ProductOption::with('descriptions')
-            ->find($option_id)
+            ->useCache('product')->find($option_id)
             ?->toArray();
 
         $optionData = [];
@@ -2764,7 +2761,7 @@ class Product extends BaseModel
         $filter['category_id'] = $filter['category_id'] ?? 0;
         $filter['manufacturer_id'] = $filter['manufacturer_id'] ?? 0;
 
-        $filter['only_enabled'] = !isset($filter['only_enabled']) || (bool)$filter['only_enabled'];
+        $filter['only_enabled'] = (bool)$filter['only_enabled'];
         $filter['customer_group_id'] = $filter['customer_group_id']
             ?? Registry::config()?->get('config_customer_group_id');
         $filter['keyword'] = trim($filter['keyword']);
@@ -3150,6 +3147,7 @@ class Product extends BaseModel
 
                 //search by tag
                 $words = array_map('mb_strtolower', array_filter(explode(' ', $keyWord)));
+                $words = array_map('htmlentities', $words);
                 if (sizeof($words) > 1) {
                     $subQuery->orWhereRaw("LOWER(" . $pt_table . ".tag) = '" . $keyWord . "'");
                 }

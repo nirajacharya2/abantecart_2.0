@@ -45,8 +45,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class ProductOptionValueDescription extends BaseModel
 {
-    use SoftDeletes;
-
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'product_option_value_id',

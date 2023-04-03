@@ -4,19 +4,20 @@ namespace abc\modules\audit_log;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use abc\core\lib\AException;
 use abc\core\lib\ALog;
 use abc\core\lib\contracts\AuditLogStorageInterface;
 use AuditLog\AuditLogClient;
 use AuditLog\AuditLogConfig;
-use Elasticsearch\Client;
-use Elasticsearch\ClientBuilder;
-use H;
-use http\Exception;
+use Exception;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPSSLConnection;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
+use RuntimeException;
 
 /**
  * Class AuditLogRabbitStorage
@@ -51,20 +52,14 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         $this->connect();
     }
 
-    public function __destruct()
-    {
-        $this->disconnect();
-    }
-
-
     protected function connect()
     {
         $this->conf = ABC::env('RABBIT_MQ');
         $params = [
-            'host' => $this->conf['HOST'],
-            'port' => $this->conf['PORT'],
-            'user' => $this->conf['USER'],
-            'password' => $this->conf['PASSWORD']
+            'host'     => $this->conf['HOST'],
+            'port'     => $this->conf['PORT'],
+            'user'     => $this->conf['USER'],
+            'password' => $this->conf['PASSWORD'],
         ];
         if (isset($this->conf['PROTOCOL']) && strtolower($this->conf['PROTOCOL']) === 'amqps') {
             $params['ssl_options'] = [
@@ -75,10 +70,8 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
             $this->conn = new AMQPStreamConnection(...$params);
         }
         $this->channel = $this->conn->channel();
-
         $this->channel->exchange_declare('exch_main', 'direct', false, true, false);
         $this->channel->exchange_declare('exch_backup', 'fanout', false, true, false);
-
         $this->channel->queue_declare(
             'audit_log',
             false,
@@ -88,13 +81,10 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
             false,
             new AMQPTable([
                 'x-dead-letter-exchange' => 'exch_backup',
-                'x-message-ttl' => 15000,
-                //'x-expires'              => 16000,
+                'x-message-ttl'          => 15000,
             ])
         );
-
         $this->channel->queue_declare('audit_log_backup', false, true, false, false, false, new AMQPTable([]));
-
         $this->channel->queue_bind('audit_log', 'exch_main');
         $this->channel->queue_bind('audit_log_backup', 'exch_backup');
     }
@@ -110,8 +100,8 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
      *
      * @param array $data
      *
-     * @return mixed|void
-     * @throws \Exception
+     * @return void
+     * @throws Exception
      *
      */
     public function write(array $data)
@@ -128,15 +118,15 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
             }
             $msg = new AMQPMessage(json_encode($data));
             $this->channel->basic_publish($msg, '', $this->conf['QUEUE']);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             if (!file_exists(ABC::env('DIR_SYSTEM') . 'rabbitmq')) {
-                if (!mkdir($concurrentDirectory = ABC::env('DIR_SYSTEM') . 'rabbitmq', 0775, true) && !is_dir(
-                        $concurrentDirectory
-                    )) {
-                    throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
+                if (!mkdir($concurrentDirectory = ABC::env('DIR_SYSTEM') . 'rabbitmq', 0775, true)
+                    && !is_dir($concurrentDirectory)
+                ) {
+                    throw new RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
                 }
             }
-            $this->log->write($exception->getMessage());
+            $this->log->error($exception->getMessage());
             $backupFile = ABC::env('DIR_SYSTEM') . 'rabbitmq/rabbit_data.bak';
             file_put_contents($backupFile, json_encode($data) . PHP_EOL, FILE_APPEND);
         }
@@ -155,20 +145,22 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         try {
             $request = $this->prepareRequest($request);
             $events = $client->getEvents($api['DOMAIN'], $request);
-            $result = [
+            return [
                 'items' => $events['events'],
                 'total' => $events['total'],
             ];
-            return $result;
         } catch (Exception $exception) {
-            $this->log->write($exception->getMessage());
+            $this->log->error($exception->getMessage());
         }
+        return [];
     }
 
     /**
      * @param array $request
      *
-     * @return array|mixed
+     * @return array
+     * @throws ReflectionException
+     * @throws AException|InvalidArgumentException
      */
     public function getEvents(array $request)
     {
@@ -196,9 +188,11 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         $filter = [];
         if (is_array($request['filter'])) {
             foreach ($request['filter'] as $item) {
-                $decodedItem = json_decode($item, true);
-                if ($decodedItem) {
-                    $item = $decodedItem;
+                if (is_string($item)) {
+                    $decodedItem = json_decode($item, true);
+                    if ($decodedItem) {
+                        $item = $decodedItem;
+                    }
                 }
                 if (isset($request['user_name']) && !empty($request['user_name'])) {
                     $item['actor.name'] = $request['user_name'];
@@ -243,10 +237,12 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         }
 
         $result = [
-            'limit' => (int)$request['rowsPerPage'],
-            'offset' => ((int)$request['rowsPerPage'] * (int)$request['page'] - (int)$request['rowsPerPage']) > 0 ? (int)$request['rowsPerPage'] * (int)$request['page'] - (int)$request['rowsPerPage'] : 0,
-            'sort' => $allowSortBy[$request['sortBy']] ?: '',
-            'order' => $request['sortDesc'] == 'true' ? 'DESC' : 'ASC',
+            'limit'  => (int)$request['rowsPerPage'],
+            'offset' => ((int)$request['rowsPerPage'] * (int)$request['page'] - (int)$request['rowsPerPage']) > 0
+                ? (int)$request['rowsPerPage'] * (int)$request['page'] - (int)$request['rowsPerPage']
+                : 0,
+            'sort'   => $allowSortBy[$request['sortBy']] ?: '',
+            'order'  => $request['sortDesc'] == 'true' ? 'DESC' : 'ASC',
         ];
         if (!empty($request['date_from'])) {
             $result['dateFrom'] = $request['date_from'];
@@ -264,8 +260,8 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
      * @param $events
      *
      * @return array
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws ReflectionException
+     * @throws AException|InvalidArgumentException
      */
     protected function prepareEvents($events)
     {
@@ -294,7 +290,7 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
      *
      * @param array $request
      *
-     * @return mixed
+     * @return array
      */
     public function getEventDetail(array $request)
     {
@@ -304,14 +300,14 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
         $filter = json_decode($request['filter'], true);
         try {
             $event = $client->getEventById($api['DOMAIN'], $filter['audit_event_id']);
-            $result = [
+            return [
                 'items' => $this->prepareEventDescriptionRows($event['events']),
                 'total' => $event['total'],
             ];
-            return $result;
         } catch (Exception $exception) {
-            $this->log->write($exception->getMessage());
+            $this->log->error($exception->getMessage());
         }
+        return [];
     }
 
     /**
@@ -336,5 +332,4 @@ class AuditLogRabbitStorage implements AuditLogStorageInterface
 
         return $result;
     }
-
 }

@@ -70,7 +70,7 @@ use stdClass;
  * @method static OrmModel|static firstOrCreate(array $attributes = [], array $values = [])
  * @method static static create(array $values)
  * @method static static insert(array $multiRowValues)
- * @method static QueryBuilder active() QueryBuilder
+ * @method static QueryBuilder active(string $tableName = '')
  * @method static QueryBuilder join(string $table, \Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
  * @method static QueryBuilder leftJoin(string $table, \Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
  * @method static QueryBuilder rightJoin(string $table, \Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
@@ -379,24 +379,26 @@ abstract class BaseModel extends OrmModel
      */
     public function hasPermission(string $operation, array $columns = ['*']): bool
     {
-        if ($columns[0] == '*') {
-            $this->affectedColumns = (array) $this->fillable + (array) $this->dates;
-        } else {
-            $this->affectedColumns = $columns;
-        }
-
-        /**
-         * @var Abac $abac
-         */
-        $abac = Registry::abac();
-        if (!$abac) {
-            return true;
-        }
-        $resourceObject = new stdClass();
-        $resourceObject->name = $this->policyObject;
-        $resourceObject->getColumns = $columns;
-
-        return $abac->hasPermission($this->policyGroup.'-'.$this->policyObject.'-'.$operation, $this);
+        //TODO: implement in the future
+        return true;
+//        if ($columns[0] == '*') {
+//            $this->affectedColumns = (array) $this->fillable + (array) $this->dates;
+//        } else {
+//            $this->affectedColumns = $columns;
+//        }
+//
+//        /**
+//         * @var Abac $abac
+//         */
+//        $abac = Registry::abac();
+//        if (!$abac) {
+//            return true;
+//        }
+//        $resourceObject = new stdClass();
+//        $resourceObject->name = $this->policyObject;
+//        $resourceObject->getColumns = $columns;
+//
+//        return $abac->hasPermission($this->policyGroup.'-'.$this->policyObject.'-'.$operation, $this);
     }
 
     /**

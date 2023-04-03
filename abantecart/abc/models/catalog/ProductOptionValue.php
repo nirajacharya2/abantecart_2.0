@@ -68,8 +68,6 @@ use ReflectionException;
  */
 class ProductOptionValue extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
-
     protected $cascadeDeletes = ['descriptions'];
     protected $mainClassName = Product::class;
     protected $mainClassKey = 'product_id';
@@ -350,13 +348,12 @@ class ProductOptionValue extends BaseModel
      */
     public static function getProductOptionValues($product_option_id)
     {
-
         $values = ProductOptionValue::where(
             [
                 'product_option_id' => $product_option_id,
             ]
         )->orderBy('sort_order')
-            ->get();
+            ->useCache('product')->get();
 
         $result = [];
         if ($values) {
@@ -387,7 +384,7 @@ class ProductOptionValue extends BaseModel
                     'group_id'                => 0,
                 ]
             )
-            ->first();
+            ->useCache('product')->first();
 
         if (!$option_value) {
             return [];
