@@ -712,6 +712,11 @@ class ACustomer extends ALibBase
                     $productOptions = Product::getProductOptionsWithValues($productId);
                     if ($productOptions) {
                         foreach ((array)$val['options'] as $optionId => $optionValueId) {
+                            //if option not exists
+                            if (!in_array($optionId, array_column($productOptions, 'product_option_id'))) {
+                                unset($val['options'][$optionId]);
+                                continue;
+                            }
                             foreach ($productOptions as $optionInfo) {
                                 if ($optionInfo['product_option_id'] != $optionId) {
                                     continue;
@@ -719,6 +724,7 @@ class ACustomer extends ALibBase
                                 //if option was disabled when customer absent
                                 if (!$optionInfo['status']) {
                                     unset($val['options'][$optionId]);
+                                    continue;
                                 }
                                 //check if value id exists at all
                                 $valueIds = array_column($optionInfo['values'], 'product_option_value_id');

@@ -63,8 +63,6 @@ use Psr\SimpleCache\InvalidArgumentException;
  */
 class ProductOption extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
-
     protected $cascadeDeletes = ['descriptions', 'values'];
 
     protected $mainClassName = Product::class;
