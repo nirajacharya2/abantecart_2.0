@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -19,11 +19,9 @@ namespace abc\models\layout;
 
 use abc\models\BaseModel;
 use Carbon\Carbon;
-use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Page
@@ -44,26 +42,19 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Page extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
-
     protected $cascadeDeletes = ['descriptions', 'forms', 'layouts'];
 
     protected $primaryKey = 'page_id';
-    public $timestamps = false;
 
     protected $casts = [
-        'parent_page_id' => 'int',
-        'date_added'     => 'datetime',
-        'date_modified'  => 'datetime'
+        'parent_page_id' => 'int'
     ];
 
     protected $fillable = [
         'parent_page_id',
         'controller',
         'key_param',
-        'key_value',
-        'date_added',
-        'date_modified',
+        'key_value'
     ];
 
     protected $rules = [

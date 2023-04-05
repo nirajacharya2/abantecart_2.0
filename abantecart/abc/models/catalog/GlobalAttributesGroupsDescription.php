@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -19,7 +19,6 @@ namespace abc\models\catalog;
 
 use abc\models\BaseModel;
 use abc\models\locale\Language;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class GlobalAttributesGroupsDescription
@@ -32,8 +31,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class GlobalAttributesGroupsDescription extends BaseModel
 {
-    use SoftDeletes;
-
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'attribute_group_id',

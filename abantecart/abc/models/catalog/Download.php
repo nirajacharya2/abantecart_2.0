@@ -37,12 +37,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Download extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
-
     protected $cascadeDeletes = ['attribute_values', 'descriptions'];
 
     protected $primaryKey = 'download_id';
-    public $timestamps = false;
 
     protected $casts = [
         'max_downloads'            => 'int',
@@ -50,9 +47,7 @@ class Download extends BaseModel
         'sort_order'               => 'int',
         'activate_order_status_id' => 'int',
         'shared'                   => 'int',
-        'status'                   => 'int',
-        'date_added'               => 'datetime',
-        'date_modified'            => 'datetime'
+        'status' => 'int'
     ];
 
     protected $fillable = [
@@ -64,9 +59,7 @@ class Download extends BaseModel
         'activate',
         'activate_order_status_id',
         'shared',
-        'status',
-        'date_added',
-        'date_modified',
+        'status'
     ];
 
     public function attribute_values()

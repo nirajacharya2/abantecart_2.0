@@ -33,12 +33,10 @@ use Carbon\Carbon;
 use Dyrynda\Database\Support\GeneratesUuid;
 use Error;
 use Exception;
-use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -68,7 +66,7 @@ use ReflectionException;
  */
 class Category extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes, GeneratesUuid;
+    use GeneratesUuid;
 
     protected $cascadeDeletes = [
         'descriptions',
