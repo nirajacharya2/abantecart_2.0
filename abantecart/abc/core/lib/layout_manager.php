@@ -32,6 +32,7 @@ use abc\models\layout\Layout;
 use abc\models\layout\Page;
 use abc\models\layout\PageDescription;
 use abc\models\layout\PagesLayout;
+use abc\modules\traits\LayoutTrait;
 use Exception;
 use H;
 use Illuminate\Database\Query\JoinClause;
@@ -51,6 +52,7 @@ use ReflectionException;
  */
 class ALayoutManager
 {
+    use LayoutTrait;
     protected $registry;
     protected $pages = [];
     protected $page = [];
@@ -136,7 +138,8 @@ class ALayoutManager
 
         //preload all layouts for this page and template
         //NOTE: layout_type: 0 Default, 1 Active layout, 2 draft layout, 3 template layout
-        $this->layouts = (array)$this->getLayouts();
+        $this->layouts = (array)$this->getLayouts($this->templateTextId, $this->pageId);
+
         //locate layout for the page instance. If not specified for this instance fist active layout is used
         foreach ($this->layouts as $layout) {
             if ($layoutId) {
@@ -153,9 +156,9 @@ class ALayoutManager
         }
 
         //if not layout set, use default (layout_type=0) layout
-        if (count($this->activeLayout) == 0) {
-            $this->activeLayout = $this->getLayouts();
-            if (count($this->activeLayout) == 0) {
+        if (!count($this->activeLayout)) {
+            $this->activeLayout = $this->getLayouts($this->templateTextId, $this->pageId, 0)[0];
+            if (!count($this->activeLayout)) {
                 $messageText = 'No template layout found for page_id/controller '
                     . $this->pageId . '::' . $this->page ['controller'] . '!';
                 $messageText .= ' Requested data: template: ' . $templateTextId
@@ -165,7 +168,6 @@ class ALayoutManager
                 throw new AException ($messageText, AC_ERR_LOAD_LAYOUT);
             }
         }
-
         $this->layoutId = $this->activeLayout['layout_id'];
 
         ADebug::variable('Template id', $this->templateTextId);
@@ -174,7 +176,7 @@ class ALayoutManager
 
         // Get blocks
         $this->allBlocks = $this->getAllBlocks();
-        $this->blocks = $this->getAllLayoutBlocks();
+        $this->blocks = $this->getAllLayoutBlocks($this->layoutId);
     }
 
     /**
@@ -210,15 +212,7 @@ class ALayoutManager
         }
 
         $languageId = Registry::language()->getContentLanguageID();
-        $pdTable = Registry::db()->table_name('page_descriptions');
-
-        $query = Page::select('pages.*')
-            ->addSelect('page_descriptions.*')
-            ->addSelect('layouts.name')
-            ->selectRaw(
-                "CASE WHEN " . Registry::db()->table_name('layouts') . ".layout_type = 2 "
-                . "THEN CONCAT(" . $pdTable . ".name,' (draft)') "
-                . "ELSE " . $pdTable . ".name END AS `name`,")
+        $query = Page::select(['pages.*', 'page_descriptions.*', 'layouts.layout_name'])
             ->leftJoin(
                 'page_descriptions',
                 function ($join) use ($languageId) {
@@ -248,39 +242,22 @@ class ALayoutManager
                 }
             }
         }
-        $query->orderBy('pages.page_id');
-        $pages = $query->useCache('layout')->get()?->toArray();
+
+        $pages = $query->orderBy('pages.page_id')
+            ->useCache('layout')
+            ->get()?->toArray();
 
         //process pages and tag restricted layout/pages
         //restricted layouts are the once without key_param and key_value
         foreach ($pages as &$page) {
+            if ($page['layout_type'] == 2) {
+                $page['name'] .= '(draft)';
+            }
             if (!$page['key_param'] && !$page['key_value']) {
                 $page['restricted'] = true;
             }
         }
         return $pages;
-    }
-
-    /**
-     * get available layouts for layout instance and layout types provided
-     *
-     * @param int|null $layoutType - 0 Default, 1 Active layout, 2 draft layout, 3 template layout
-     *
-     * @return array
-     */
-    public function getLayouts(?int $layoutType = 0)
-    {
-        $query = Layout::select('layouts.*');
-        if ($layoutType) {
-            $query->join('pages_layouts', 'pages_layouts.layout_id', '=', 'layouts.layout_id');
-            $query->where('pages_layouts.page_id', '=', $this->pageId);
-        }
-        $query->where('layouts.template_id', '=', $this->templateTextId);
-        if ($layoutType) {
-            $query->where('layouts.layout_type', '=', $layoutType);
-        }
-        $query->orderBy('layouts.layout_id');
-        return $query->useCache('layout')->get()?->toArray();
     }
 
     /**
@@ -317,49 +294,26 @@ class ALayoutManager
     }
 
     /**
-     * @param int|null $layoutId
-     *
-     * @return array
-     */
-    protected function getAllLayoutBlocks(?int $layoutId = 0)
-    {
-        $layoutId = $layoutId ?: $this->layoutId;
-        if (!$layoutId) {
-            return [];
-        }
-
-        $query = Block::select('block_layouts.*')
-            ->addSelect('blocks.*')
-            ->leftJoin(
-                'block_layouts',
-                'block_layouts.block_id',
-                '=',
-                'blocks.block_id'
-            )->where('block_layouts.layout_id', '=', $layoutId)
-            ->orderBy('block_layouts.parent_instance_id')
-            ->orderBy('block_layouts.position');
-        return $query->useCache('layout')->get()?->toArray();
-    }
-
-    /**
      * @return array
      * @throws Exception
-     * @throws InvalidArgumentException
      */
     public function getAllBlocks()
     {
-        $languageId = $this->language->getContentLanguageID();
-
-        $query = Block::select('blocks.*')
-            ->addSelect('block_templates.parent_block_id')
-            ->addSelect('block_templates.template')
-            ->addSelect('custom_blocks.custom_block_id')
+        $query = Block::select(
+            [
+                'blocks.*',
+                'block_templates.parent_block_id',
+                'block_templates.template',
+                'custom_blocks.custom_block_id'
+            ]
+        )
             ->leftJoin('block_templates', 'block_templates.block_id', '=', 'blocks.block_id')
             ->leftJoin('custom_blocks', 'custom_blocks.block_id', '=', 'blocks.block_id')
             ->orderBy('blocks.block_id');
         $output = $query->useCache('layout')->get()?->toArray();
 
         if ($output) {
+            $languageId = $this->language->getContentLanguageID();
             foreach ($output as &$block) {
                 if ($block['custom_block_id']) {
                     $block['block_name'] = $this->getCustomBlockName($block['custom_block_id'], $languageId);
@@ -418,7 +372,6 @@ class ALayoutManager
                 return $page;
             }
         }
-
         return [];
     }
 
@@ -472,13 +425,12 @@ class ALayoutManager
     {
         $blocks = [];
         foreach ($this->blocks as $block) {
-            if ((string)$block['parent_instance_id'] == (string)$parent_instance_id) {
+            if ($block['parent_instance_id'] == $parent_instance_id) {
                 //locate block template assigned based on parent block ID
                 $block['template'] = $this->getBlockTemplate($block['block_id'], $parent_block_id);
-                array_push($blocks, $block);
+                $blocks[] = $block;
             }
         }
-
         return $blocks;
     }
 
@@ -492,7 +444,7 @@ class ALayoutManager
         foreach ($this->allBlocks as $block) {
             // do not include main level blocks
             if (!in_array($block ['block_txt_id'], $this->main_placeholders)) {
-                $blocks [] = $block;
+                $blocks[] = $block;
             }
         }
 
@@ -1275,8 +1227,7 @@ class ALayoutManager
      */
     public function getBlockDescriptions(int $customBlockId)
     {
-        $result = BlockDescription::select('block_layouts.status')
-            ->addSelect('block_descriptions.*')
+        $result = BlockDescription::select(['block_layouts.status', 'block_descriptions.*'])
             ->leftJoin(
                 'block_layouts',
                 'block_layouts.custom_block_id',
@@ -1328,7 +1279,7 @@ class ALayoutManager
             Registry::log()->error(__FUNCTION__ . ": Cannot get block layouts! Block ID and Custom Block ID are empty.");
             return [];
         }
-        return Layout::select('layouts.*', 'page_layouts.page_id')
+        return Layout::select(['layouts.*', 'page_layouts.page_id'])
             ->join(
                 'block_layouts',
                 function ($join) use ($blockId, $customBlockId) {
@@ -1575,8 +1526,7 @@ class ALayoutManager
         } elseif ($page_id) {
             //we have page not related to any layout yet. need to pull differently
             $language_id = $this->language->getContentLanguageID();
-            $page = Page::select('page_description.*')
-                ->addSelect('pages.*')
+            $page = Page::select(['page_description.*', 'pages.*'])
                 ->where('page_id', '=', $page_id)
                 ->leftJoin(
                     'page_descriptions',
@@ -1631,7 +1581,7 @@ class ALayoutManager
             //check if layout with same name exists
             $layout_id = (int)Layout::where('layout_name', '=', $layout->name)
                 ->where('template_id', '=', $layout->template_id)
-                ->first('layout_id');
+                ->first()?->layout_id;
 
             if (!$layout_id && in_array($layout->action, ["", null, "update"])) {
                 $layout->action = 'insert';
@@ -2095,7 +2045,7 @@ class ALayoutManager
             ->join('custom_blocks', 'custom_blocks.block_id', '=', 'blocks.block_id')
             ->where('block_descriptions.name', '=', $blockName)
             ->where('custom_blocks.block_id', '=', $block_id)
-            ->first('custom_block_id');
+            ->first()?->custom_block_id;
 
         $action = (string)$block->action;
         $status = (int)$block->status ?: 1;
@@ -2233,7 +2183,7 @@ class ALayoutManager
             ->join('custom_blocks', 'custom_blocks.block_id', '=', 'blocks.block_id')
             ->where('block_descriptions.name', '=', $blockName)
             ->where('custom_blocks.block_id', '=', $blockId)
-            ->first('custom_block_id');
+            ->first()->custom_block_id;
 
         if (!$customBlockId) {
             // if we do not know about this custom block - break;
@@ -2270,7 +2220,7 @@ class ALayoutManager
         $language_name = mb_strtolower($language_name, ABC::env('APP_CHARSET'));
         return (int)Registry::db()->table('languages')
             ->whereRaw("LOWER(filename) = '" . Registry::db()->escape($language_name) . "'")
-            ->first('language_id');
+            ->first()->language_id;
     }
 
     /**
@@ -2289,7 +2239,7 @@ class ALayoutManager
         return BlockLayout::where('block_layouts.layout_id', '<>', $layoutId)
             ->join('blocks', 'blocks.block_id', '=', 'block_layouts.block_id')
             ->where('blocks.block_txt_id', '=', $blockTxtId)
-            ->first('block_layouts.instance_id');
+            ->first()->instance_id;
     }
 
     /**

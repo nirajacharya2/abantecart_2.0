@@ -153,8 +153,9 @@ class ControllerPagesDesignLayout extends AController
             unset($this->session->data['success']);
         }
 
-        $layoutform = $this->dispatch('common/page_layout', ['layout' => $layout]);
-        $layout_data['layoutform'] = $layoutform->dispatchGetOutput();
+        /** @see ControllerCommonPageLayout */
+        $layoutForm = $this->dispatch('common/page_layout', ['layout' => $layout]);
+        $layout_data['layoutform'] = $layoutForm->dispatchGetOutput();
 
         $this->view->batchAssign($layout_data);
         $this->processTemplate('pages/design/layout.tpl');

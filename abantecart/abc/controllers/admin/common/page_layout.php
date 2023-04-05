@@ -38,7 +38,7 @@ class ControllerCommonPageLayout extends AController
      * @throws ReflectionException
      * @throws AException
      */
-    public function main($layout)
+    public function main(ALayoutManager $layout)
     {
         // use to init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
@@ -46,7 +46,7 @@ class ControllerCommonPageLayout extends AController
         if (!$this->registry->has('layouts_manager_script')) {
             $this->document->addStyle(
                 [
-                    'href' => ABC::env('RDIR_ASSETS').'css/layouts-manager.css',
+                    'href' => ABC::env('RDIR_ASSETS') . 'css/layouts-manager.css',
                     'rel'  => 'stylesheet',
                 ]
             );
@@ -58,13 +58,11 @@ class ControllerCommonPageLayout extends AController
             $this->registry->set('layouts_manager_script', true);
         }
 
-        // set language used
-        $this->session->data['content_language_id'] = $this->config->get('storefront_language_id');
-
         // build layout data from passed layout object
         $this->installed_blocks = $layout->getInstalledBlocks();
 
         $layout_main_blocks = $layout->getLayoutBlocks();
+
         // Build Page Sections and Blocks
         $page_sections = $this->_buildPageSections($layout_main_blocks);
 
