@@ -44,26 +44,19 @@ trait LayoutTrait
 
         $query = Block::select(
             [
-                'block_layouts.instance_id',
-                'blocks.block_id',
-                'block_layouts.custom_block_id',
-                'block_layouts.parent_instance_id',
-                'block_layouts.position',
-                'blocks.block_txt_id',
-                'blocks.controller'
+                'blocks.*',
+                'block_layouts.*'
             ]
         )->join(
             'block_layouts',
             'block_layouts.block_id',
             '=',
             'blocks.block_id'
-        )
-            ->where('block_layouts.layout_id', '=', $layout_id);
+        )->where('block_layouts.layout_id', '=', $layout_id);
 
         if (ABC::env('IS_ADMIN') !== true) {
             $query->where('block_layouts.status', '=', 1);
         }
-
         return $query->orderBy('block_layouts.parent_instance_id')
             ->orderBy('block_layouts.position')
             ->useCache('layout')->get()?->toArray();

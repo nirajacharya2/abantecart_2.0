@@ -50,17 +50,17 @@ class ControllerPagesDesignLayout extends AController
             $settings = $this->model_setting_setting->getSetting('appearance', $store_id);
             $tmpl_id = $settings['config_storefront_template'];
         }
-        $page_id = $this->request->get['page_id'];
-        $layout_id = $this->request->get['layout_id'];
+        $page_id = (int)$this->request->get['page_id'];
+        $layout_id = (int)$this->request->get['layout_id'];
 
         //Note yet implemented
         if (isset($this->request->get['preview_id'])) {
             $preview_id = $this->request->get['preview_id'];
             $layout_data['preview_id'] = $preview_id;
             $layout_data['preview_url'] = ABC::env('HTTP_CATALOG')
-                .'?preview='.$preview_id
-                .'&layout_id='.$preview_id
-                .'&page_id='.$page_id;
+                . '?preview=' . $preview_id
+                . '&layout_id=' . $preview_id
+                . '&page_id=' . $page_id;
         }
 
         $layout = new ALayoutManager($tmpl_id, $page_id, $layout_id);
@@ -153,9 +153,8 @@ class ControllerPagesDesignLayout extends AController
             unset($this->session->data['success']);
         }
 
-        /** @see ControllerCommonPageLayout */
-        $layoutForm = $this->dispatch('common/page_layout', ['layout' => $layout]);
-        $layout_data['layoutform'] = $layoutForm->dispatchGetOutput();
+        $layoutform = $this->dispatch('common/page_layout', ['layout' => $layout]);
+        $layout_data['layoutform'] = $layoutform->dispatchGetOutput('common/page_layout');
 
         $this->view->batchAssign($layout_data);
         $this->processTemplate('pages/design/layout.tpl');

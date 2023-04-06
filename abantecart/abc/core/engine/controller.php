@@ -22,6 +22,41 @@ namespace abc\core\engine;
 
 use abc\core\ABC;
 use abc\core\view\AView;
+use abc\models\admin\ModelCatalogDownload;
+use abc\models\admin\ModelCatalogReview;
+use abc\models\admin\ModelLocalisationLanguage;
+use abc\models\admin\ModelLocalisationLanguageDefinitions;
+use abc\models\admin\ModelLocalisationLengthClass;
+use abc\models\admin\ModelLocalisationLocation;
+use abc\models\admin\ModelLocalisationStockStatus;
+use abc\models\admin\ModelLocalisationTaxClass;
+use abc\models\admin\ModelLocalisationWeightClass;
+use abc\models\admin\ModelLocalisationZone;
+use abc\models\admin\ModelReportPurchased;
+use abc\models\admin\ModelReportSale;
+use abc\models\admin\ModelReportViewed;
+use abc\models\admin\ModelSaleContact;
+use abc\models\admin\ModelSaleCoupon;
+use abc\models\admin\ModelSaleCustomerGroup;
+use abc\models\admin\ModelSettingExtension;
+use abc\models\admin\ModelSettingSetting;
+use abc\models\admin\ModelSettingStore;
+use abc\models\admin\ModelToolBackup;
+use abc\models\admin\ModelToolDatasetsManager;
+use abc\models\admin\ModelToolFileUploads;
+use abc\models\admin\ModelToolGlobalSearch;
+use abc\models\admin\ModelToolInstallUpgradeHistory;
+use abc\models\admin\ModelToolMessageManager;
+use abc\models\admin\ModelToolMigration;
+use abc\models\admin\ModelToolPackageInstaller;
+use abc\models\admin\ModelToolTableRelationships;
+use abc\models\admin\ModelToolUpdater;
+use abc\models\admin\ModelUserUser;
+use abc\models\admin\ModelUserUserGroup;
+use abc\models\storefront\ModelCheckoutExtension;
+use abc\models\storefront\ModelLocalisationCountry;
+use abc\models\storefront\ModelToolImage;
+use abc\models\storefront\ModelToolSeoUrl;
 use abc\core\lib\{AbcCache,
     ACart,
     AConfig,
@@ -55,43 +90,43 @@ use ReflectionException;
 /**
  * @property array $data
  * @property array $error
- * @property \abc\models\admin\ModelToolUpdater $model_tool_updater
- * @property \abc\models\admin\ModelSettingStore $model_setting_store
- * @property \abc\models\admin\ModelCatalogDownload $model_catalog_download
- * @property \abc\models\admin\ModelLocalisationStockStatus $model_localisation_stock_status
- * @property \abc\models\admin\ModelLocalisationTaxClass $model_localisation_tax_class
- * @property \abc\models\admin\ModelLocalisationWeightClass $model_localisation_weight_class
- * @property \abc\models\admin\ModelLocalisationLengthClass $model_localisation_length_class
- * @property \abc\models\admin\ModelToolImage | \abc\models\storefront\ModelToolImage $model_tool_image
- * @property \abc\models\admin\ModelSaleCustomerGroup $model_sale_customer_group
- * @property \abc\models\admin\ModelCatalogReview $model_catalog_review
- * @property \abc\models\admin\ModelSettingExtension $model_setting_extension
- * @property \abc\models\admin\ModelUserUserGroup $model_user_user_group
- * @property \abc\models\admin\ModelSettingSetting $model_setting_setting
- * @property \abc\models\admin\ModelUserUser $model_user_user
- * @property \abc\models\admin\ModelLocalisationCountry | \abc\models\storefront\ModelLocalisationCountry $model_localisation_country
- * @property \abc\models\admin\ModelLocalisationZone $model_localisation_zone
- * @property \abc\models\admin\ModelLocalisationLocation $model_localisation_location
- * @property \abc\models\admin\ModelLocalisationLanguage $model_localisation_language
- * @property \abc\models\admin\ModelLocalisationLanguageDefinitions $model_localisation_language_definitions
- * @property \abc\models\admin\ModelReportViewed $model_report_viewed
- * @property \abc\models\admin\ModelSaleCoupon $model_sale_coupon
- * @property \abc\models\admin\ModelSaleContact $model_sale_contact
- * @property \abc\models\admin\ModelToolBackup $model_tool_backup
- * @property \abc\models\admin\ModelToolGlobalSearch $model_tool_global_search
- * @property \abc\models\admin\ModelToolMigration $model_tool_migration
- * @property \abc\models\admin\ModelToolDatasetsManager $model_tool_dataset_manager
- * @property \abc\models\admin\ModelToolInstallUpgradeHistory $model_tool_install_upgrade_history
- * @property \abc\models\admin\ModelToolMessageManager $model_tool_message_manager
- * @property \abc\models\admin\ModelReportPurchased $model_report_purchased
- * @property \abc\models\admin\ModelReportSale $model_report_sale
- * @property \abc\models\admin\ModelToolPackageInstaller $model_tool_package_installer
- * @property \abc\models\storefront\ModelToolSeoUrl $model_tool_seo_url
- * @property \abc\models\storefront\ModelCheckoutExtension $model_checkout_extension
- * @property \abc\models\admin\ModelToolTableRelationships $model_tool_table_relationships
- * @property \abc\models\admin\ModelToolBackup $model_tools_backup
- * @property \abc\models\admin\ModelToolDatasetsManager $model_tool_datasets_manager
- * @property \abc\models\admin\ModelToolFileUploads $model_tool_file_uploads
+ * @property ModelToolUpdater $model_tool_updater
+ * @property ModelSettingStore $model_setting_store
+ * @property ModelCatalogDownload $model_catalog_download
+ * @property ModelLocalisationStockStatus $model_localisation_stock_status
+ * @property ModelLocalisationTaxClass $model_localisation_tax_class
+ * @property ModelLocalisationWeightClass $model_localisation_weight_class
+ * @property ModelLocalisationLengthClass $model_localisation_length_class
+ * @property ModelToolImage $model_tool_image
+ * @property ModelSaleCustomerGroup $model_sale_customer_group
+ * @property ModelCatalogReview $model_catalog_review
+ * @property ModelSettingExtension $model_setting_extension
+ * @property ModelUserUserGroup $model_user_user_group
+ * @property ModelSettingSetting $model_setting_setting
+ * @property ModelUserUser $model_user_user
+ * @property ModelLocalisationCountry $model_localisation_country
+ * @property ModelLocalisationZone $model_localisation_zone
+ * @property ModelLocalisationLocation $model_localisation_location
+ * @property ModelLocalisationLanguage $model_localisation_language
+ * @property ModelLocalisationLanguageDefinitions $model_localisation_language_definitions
+ * @property ModelReportViewed $model_report_viewed
+ * @property ModelSaleCoupon $model_sale_coupon
+ * @property ModelSaleContact $model_sale_contact
+ * @property ModelToolBackup $model_tool_backup
+ * @property ModelToolGlobalSearch $model_tool_global_search
+ * @property ModelToolMigration $model_tool_migration
+ * @property ModelToolDatasetsManager $model_tool_dataset_manager
+ * @property ModelToolInstallUpgradeHistory $model_tool_install_upgrade_history
+ * @property ModelToolMessageManager $model_tool_message_manager
+ * @property ModelReportPurchased $model_report_purchased
+ * @property ModelReportSale $model_report_sale
+ * @property ModelToolPackageInstaller $model_tool_package_installer
+ * @property ModelToolSeoUrl $model_tool_seo_url
+ * @property ModelCheckoutExtension $model_checkout_extension
+ * @property ModelToolTableRelationships $model_tool_table_relationships
+ * @property ModelToolBackup $model_tools_backup
+ * @property ModelToolDatasetsManager $model_tool_datasets_manager
+ * @property ModelToolFileUploads $model_tool_file_uploads
  *
  * @property AConfig $config
  * @property ADB $db
@@ -156,7 +191,6 @@ abstract class AController
      * @param string $controller
      * @param string|AController $parent_controller
      *
-     * @throws InvalidArgumentException
      * @throws AException
      */
     public function __construct($registry, $instance_id, $controller, $parent_controller = '')
@@ -283,7 +317,7 @@ abstract class AController
     {
         //check if requested controller allows HTML caching
         //use dispatcher to get class and details
-        $ds = new ADispatcher($controller, ["instance_id" => "0"]);
+        $ds = new ADispatcher($controller, ["instance_id" => 0]);
         $rt_class = $ds->getClass();
         $rt_file = $ds->getFile();
         $rt_method = $ds->getMethod();
@@ -293,8 +327,7 @@ abstract class AController
                 $static_method = $rt_method.'_cache_keys';
                 if (method_exists($rt_class, $static_method)) {
                     //finally get keys and build a cache key
-                    $cache_keys = call_user_func($rt_class.'::'.$static_method);
-                    return $cache_keys;
+                    return call_user_func($rt_class . '::' . $static_method);
                 }
             }
         }
@@ -390,7 +423,7 @@ abstract class AController
                 if ((int)$block['position'] % 10 == 0) {
                     $blocks[(int)($block['position'] / 10 - 1)] = $block['block_txt_id'].'_'.(int)$block['instance_id'];
                 } else {
-                    array_push($blocks, $block['block_txt_id'].'_'.$block['instance_id']);
+                    $blocks[] = $block['block_txt_id'] . '_' . $block['instance_id'];
                 }
             }
         }
@@ -416,10 +449,10 @@ abstract class AController
         $new_block['block_txt_id'] = $block_text_id;
         $new_block['template'] = $new_template;
         // This it to position element to the placeholder.
-        // If not set element will not be displayed in place holder.
+        // If not set element will not be displayed in placeholder.
         // To use manual inclusion to parent template ignore this parameter
         $new_block['position'] = $template_position;
-        array_push($this->children, $new_block);
+        $this->children[] = $new_block;
     }
 
     /**
@@ -431,13 +464,13 @@ abstract class AController
     public function processTemplate($template = '')
     {
         //is this an embed mode? Special templates needs to be loaded
-        if (is_object($this->registry->get('config')) && $this->registry->get('config')->get('embed_mode') == true) {
+        if (Registry::config()?->get('embed_mode')) {
             //get template if it was set earlier
             if (empty($template)) {
                 $template = $this->view->getTemplate();
             }
             //only substitute the template for page templates
-            if (substr($template, 0, 6) == 'pages/' && substr($template, 0, 6) != 'embed/') {
+            if (str_starts_with($template, 'pages/') && !str_starts_with($template, 'embed/')) {
                 //load special headers for embed as no page/layout needed
                 $this->addChild('responses/embed/head', 'head');
                 $this->addChild('responses/embed/footer', 'footer');
@@ -571,6 +604,9 @@ abstract class AController
      * @param string $sub_key
      *
      * @return null|string
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function gen_help_url($sub_key = '')
     {
@@ -582,8 +618,7 @@ abstract class AController
         } else {
             $main_key = str_replace('/', '_', $this->controller);
         }
-        $url = "http://docs.abantecart.com/tag/".$main_key;
-        return $url;
+        return "http://docs.abantecart.com/tag/" . $main_key;
     }
 
 }

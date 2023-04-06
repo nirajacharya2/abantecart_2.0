@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2021 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -25,6 +25,7 @@ use abc\core\engine\AController;
 use abc\core\lib\AException;
 use abc\core\lib\ALayoutManager;
 use Exception;
+use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 
 class ControllerCommonPageLayout extends AController
@@ -36,9 +37,9 @@ class ControllerCommonPageLayout extends AController
      *
      * @return void
      * @throws ReflectionException
-     * @throws AException
+     * @throws AException|InvalidArgumentException
      */
-    public function main(ALayoutManager $layout)
+    public function main($layout)
     {
         // use to init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
@@ -77,7 +78,7 @@ class ControllerCommonPageLayout extends AController
      * @param array $sections
      *
      * @return array
-     * @throws Exception
+     * @throws Exception|InvalidArgumentException
      */
     private function _buildPageSections($sections)
     {
@@ -111,12 +112,11 @@ class ControllerCommonPageLayout extends AController
      * @param array $section_blocks
      *
      * @return array
-     * @throws Exception
+     * @throws Exception|InvalidArgumentException
      */
     protected function _buildBlocks($section_id, $section_blocks)
     {
         $blocks = [];
-        $edit_url = '';
         $partialView = $this->view;
 
         if (empty($section_blocks)) {

@@ -255,11 +255,16 @@ class ALayout
      */
     public function getChildren($instance_id = null)
     {
-        $instance_id = $instance_id ?: null;
         $children = [];
+        //DO NOT SEEK CHILDREN WHEN instance_id NOT SET
+        //need to prevent lop of calls $dispatcher->getDispatchOutput($controller)
+        /** @see AController::children */
+        if (!isset($instance_id)) {
+            return [];
+        }
         // Look into all blocks and locate all children
         foreach ($this->blocks as $block) {
-            if ($block['parent_instance_id'] == $instance_id) {
+            if ((int)$block['parent_instance_id'] == $instance_id) {
                 $children[] = $block;
             }
         }
@@ -291,8 +296,8 @@ class ALayout
     public function addChildFirst($instance_id, $new_child, $block_txt_id, $template)
     {
         $new_block = [];
-        $new_block['parent_instance_id'] = $instance_id ?: null;
-        $new_block['instance_id'] = $block_txt_id . ((int)$instance_id);
+        $new_block['parent_instance_id'] = $instance_id;
+        $new_block['instance_id'] = $block_txt_id . $instance_id;
         $new_block['block_id'] = $block_txt_id;
         $new_block['controller'] = $new_child;
         $new_block['block_txt_id'] = $block_txt_id;
@@ -308,14 +313,14 @@ class ALayout
      */
     public function addChild($instance_id, $new_child, $block_txt_id, $template)
     {
-        $new_block = [];
-        $new_block['parent_instance_id'] = $instance_id ?: null;
-        $new_block['instance_id'] = $block_txt_id . ((int)$instance_id);
-        $new_block['block_id'] = $block_txt_id;
-        $new_block['controller'] = $new_child;
-        $new_block['block_txt_id'] = $block_txt_id;
-        $new_block['template'] = $template;
-        $this->blocks[] = $new_block;
+        $this->blocks[] = [
+            'parent_instance_id' => $instance_id,
+            'block_id'           => $block_txt_id,
+            'controller'         => $new_child,
+            'block_txt_id'       => $block_txt_id,
+            'template'           => $template,
+            'instance_id'        => $block_txt_id . $instance_id
+        ];
     }
 
     /**
@@ -355,7 +360,7 @@ class ALayout
         }
         if (!empty($block_id) && !empty($parent_block_id)) {
             $template = (string)BlockTemplate::where('block_id', '=', $block_id)
-                ->whereIn('parent_block_id', [$parent_block_id, null, 0])
+                ->whereIn('parent_block_id', [$parent_block_id, 0])
                 ->orderBy('parent_block_id', 'desc')
                 ->useCache('layout')->first()?->template;
         }

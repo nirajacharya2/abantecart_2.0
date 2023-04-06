@@ -59,7 +59,7 @@ final class AAPI
      */
     public function addPreDispatch($dispatch_rt)
     {
-        $this->pre_dispatch[] = new ADispatcher($dispatch_rt, ["instance_id" => "0"]);
+        $this->pre_dispatch[] = new ADispatcher($dispatch_rt, ["instance_id" => 0]);
     }
 
     /**
@@ -89,7 +89,7 @@ final class AAPI
             //Process main level controller
             //filter in case we have responses set already
             $dispatch_rt = preg_replace('/^(api)\//', '', $dispatch_rt);
-            $dispatch = new ADispatcher('api/'.$dispatch_rt, ["instance_id" => "0"]);
+            $dispatch = new ADispatcher('api/' . $dispatch_rt, ["instance_id" => 0]);
             $dispatch_rt = $dispatch->dispatch();
 
         }
