@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -20,9 +20,7 @@ namespace abc\models\layout;
 use abc\core\engine\Registry;
 use abc\models\BaseModel;
 use Carbon\Carbon;
-use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
 
 /**
@@ -46,9 +44,7 @@ class Block extends BaseModel
 
     protected $casts = [
         'block_text_id' => 'string',
-        'controller'    => 'string',
-        'date_added'    => 'datetime',
-        'date_modified' => 'datetime'
+        'controller' => 'string'
     ];
 
     protected $fillable = [
@@ -65,7 +61,7 @@ class Block extends BaseModel
                 'sometimes'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Layout ID is empty!'],
+                '*' => ['default_text' => 'Block Text ID is empty!'],
             ],
         ],
         'controller'    => [

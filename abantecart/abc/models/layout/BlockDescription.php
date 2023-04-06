@@ -59,9 +59,12 @@ class BlockDescription extends BaseModel
     protected $casts = [
         'custom_block_id' => 'int',
         'language_id'     => 'int',
+        'block_wrapper'   => 'string',
         'block_framed'    => 'bool',
-        'date_added'      => 'datetime',
-        'date_modified'   => 'datetime'
+        'name'            => 'string',
+        'title'           => 'string',
+        'description'     => 'string',
+        'content'         => 'string',
     ];
 
     protected $fillable = [
@@ -71,6 +74,46 @@ class BlockDescription extends BaseModel
         'title',
         'description',
         'content'
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'custom_block_id' => [
+            'checks'   => [
+                'int',
+                'required',
+                'sometimes'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Custom Block ID is empty!'],
+            ],
+        ],
+        'language_id'     => [
+            'checks'   => [
+                'int',
+                'required',
+                'sometimes'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Language ID is not integer!'],
+            ],
+        ],
+        'block_wrapper'   => [
+            'checks'   => [
+                'string'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Block Wrapper (Template Route) is empty!'],
+            ],
+        ],
+        'block_framed'    => [
+            'checks'   => [
+                'bool'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Block Wrapper (Template Route) is empty!'],
+            ],
+        ]
     ];
 
     public function custom_block()

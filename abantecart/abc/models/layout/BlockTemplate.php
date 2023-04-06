@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -35,21 +35,50 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class BlockTemplate extends BaseModel
 {
-    use SoftDeletes;
-
-    protected $primaryKey = 'block_id';
-    public $timestamps = false;
+    protected $primaryKeySet = ['block_id', 'parent_block_id'];
 
     protected $casts = [
+        'block_id'        => 'int',
         'parent_block_id' => 'int',
-        'date_added'      => 'datetime',
-        'date_modified'   => 'datetime'
+        'template'        => 'string'
     ];
 
     protected $fillable = [
-        'template',
-        'date_added',
-        'date_modified',
+        'block_id',
+        'parent_block_id',
+        'template'
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'block_id'        => [
+            'checks'   => [
+                'int',
+                'required',
+                'sometimes'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Block ID is empty!'],
+            ],
+        ],
+        'parent_block_id' => [
+            'checks'   => [
+                'int'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Parent Block ID is not integer!'],
+            ],
+        ],
+        'template'        => [
+            'checks'   => [
+                'string',
+                'required',
+                'sometimes'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Template Route is empty!'],
+            ],
+        ]
     ];
 
     public function block()
