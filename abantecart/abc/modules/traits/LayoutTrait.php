@@ -64,15 +64,15 @@ trait LayoutTrait
 
     /**
      * @param string $templateTextId
-     * @param int $pageId
+     * @param int|null $pageId
      * @param int|null $layoutType
      *
      * @return array
      */
-    public function getLayouts(string $templateTextId, int $pageId, ?int $layoutType = null)
+    public function getLayouts(string $templateTextId, ?int $pageId, ?int $layoutType = null)
     {
         //No page id, not need to be here
-        if (!$pageId || !$templateTextId) {
+        if (!$templateTextId) {
             return [];
         }
 
@@ -83,8 +83,12 @@ trait LayoutTrait
                 '=',
                 'layouts.layout_id'
             )
-            ->where('layouts.template_id', '=', $templateTextId)
-            ->where('pages_layouts.page_id', '=', $pageId);
+            ->where('layouts.template_id', '=', $templateTextId);
+
+        if ($pageId) {
+            $query->where('pages_layouts.page_id', '=', $pageId);
+        }
+
         if (isset($layoutType)) {
             $query->where('layouts.layout_type', '=', $layoutType);
         }

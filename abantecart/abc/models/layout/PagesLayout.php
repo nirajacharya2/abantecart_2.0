@@ -19,7 +19,6 @@ namespace abc\models\layout;
 
 use abc\models\BaseModel;
 
-
 /**
  * Class PagesLayout
  *
@@ -43,6 +42,10 @@ class PagesLayout extends BaseModel
     protected $casts = [
         'layout_id' => 'int',
         'page_id'   => 'int',
+    ];
+    protected $fillable = [
+        'layout_id',
+        'page_id',
     ];
 
     protected $rules = [

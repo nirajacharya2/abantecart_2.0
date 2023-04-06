@@ -766,8 +766,8 @@ class ControllerPagesDesignContent extends AController
             $layout = new ALayoutManager();
             $pages = $layout->getPages($page_controller, $page_key_param, $content_id, $tmpl_id);
             if (count($pages)) {
-                $page_id = $pages[0]['page_id'];
-                $layout_id = $pages[0]['layout_id'];
+                $page_id = (int)$pages[0]['page_id'];
+                $layout_id = (int)$pages[0]['layout_id'];
             } else {
                 // create new page record
                 $page_info = [
@@ -783,7 +783,7 @@ class ControllerPagesDesignContent extends AController
                     $page_info['page_descriptions'][$default_language_id]['name'] = $content_info['name'];
                 }
                 $page_id = $layout->savePage($page_info);
-                $layout_id = '';
+                $layout_id = null;
                 // need to generate layout name
                 $post_data['layout_name'] = 'Content: ' . $content_info['name'];
             }

@@ -21,7 +21,6 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
-use abc\core\engine\ExtensionsApi;
 use abc\core\engine\Registry;
 use abc\models\layout\Block;
 use abc\models\layout\BlockDescription;
@@ -41,19 +40,15 @@ use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 
 /**
- * @property AbcCache $cache
- * @property ASession $session
- * @property ADB $db
- * @property AConfig $config
- * @property ALog $log
- * @property AMessage $message
  * @property ALanguageManager $language
- * @property ExtensionsApi $extensions
  */
 class ALayoutManager
 {
     use LayoutTrait;
-    protected $registry;
+
+    protected $config;
+    protected $extensions;
+
     protected $pages = [];
     protected $page = [];
     protected $layouts = [];
@@ -101,15 +96,15 @@ class ALayoutManager
      * @param int|null $layoutId
      *
      * @throws AException
-     * @throws InvalidArgumentException
      */
     public function __construct(?string $templateTextId = '', ?int $pageId = 0, ?int $layoutId = 0)
     {
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
             throw new AException ('Error: permission denied to change page layout', AC_ERR_LOAD);
         }
+        $this->config = Registry::config();
+        $this->extensions = Registry::extensions();
 
-        $this->registry = Registry::getInstance();
         $this->templateTextId = $templateTextId ?: $this->config->get('config_storefront_template');
 
         //do check for existence of storefront template in case when $tmpl_id not set
@@ -138,7 +133,7 @@ class ALayoutManager
 
         //preload all layouts for this page and template
         //NOTE: layout_type: 0 Default, 1 Active layout, 2 draft layout, 3 template layout
-        $this->layouts = (array)$this->getLayouts($this->templateTextId, $this->pageId);
+        $this->layouts = $this->getLayouts($this->templateTextId, $this->pageId);
 
         //locate layout for the page instance. If not specified for this instance fist active layout is used
         foreach ($this->layouts as $layout) {
@@ -157,7 +152,11 @@ class ALayoutManager
 
         //if not layout set, use default (layout_type=0) layout
         if (!count($this->activeLayout)) {
-            $this->activeLayout = $this->getLayouts($this->templateTextId, $this->pageId, 0)[0];
+            $this->activeLayout = $this->getLayouts($this->templateTextId, null, 0)[0];
+            if (!$this->activeLayout) {
+                var_Dump($this->templateTextId, $this->pageId, 0, $this->activeLayout);
+                exit;
+            }
             if (!count($this->activeLayout)) {
                 $messageText = 'No template layout found for page_id/controller '
                     . $this->pageId . '::' . $this->page ['controller'] . '!';
@@ -177,16 +176,6 @@ class ALayoutManager
         // Get blocks
         $this->allBlocks = $this->getAllBlocks();
         $this->blocks = $this->getAllLayoutBlocks($this->layoutId);
-    }
-
-    /**
-     * @param string $key
-     *
-     * @return mixed
-     */
-    public function __get($key)
-    {
-        return $this->registry->get($key);
     }
 
     /**
@@ -212,7 +201,7 @@ class ALayoutManager
         }
 
         $languageId = Registry::language()->getContentLanguageID();
-        $query = Page::select(['pages.*', 'page_descriptions.*', 'layouts.layout_name'])
+        $query = Page::select(['pages.*', 'page_descriptions.*', 'layouts.*'])
             ->leftJoin(
                 'page_descriptions',
                 function ($join) use ($languageId) {
@@ -313,7 +302,7 @@ class ALayoutManager
         $output = $query->useCache('layout')->get()?->toArray();
 
         if ($output) {
-            $languageId = $this->language->getContentLanguageID();
+            $languageId = Registry::language()->getContentLanguageID();
             foreach ($output as &$block) {
                 if ($block['custom_block_id']) {
                     $block['block_name'] = $this->getCustomBlockName($block['custom_block_id'], $languageId);
@@ -462,20 +451,22 @@ class ALayoutManager
 
         foreach ($this->main_placeholders as $placeholder) {
             $block = $this->getLayoutBlockByTxtId($placeholder);
-            if (!empty($block)) {
-                $blocks[$block['block_id']] = $block;
-                $children = $this->getBlockChildren($block['instance_id'], $block['block_id']);
-                //process special case of fixed location for header and footer
-                if ($block['block_id'] == self::HEADER_MAIN
-                    || $block['block_id'] == self::FOOTER_MAIN
-                ) {
-                    //fill in blank locations if any
-                    if (count($children) < self::FIXED_POSITIONS) {
-                        $children = $this->buildChildrenBlocks($children, self::FIXED_POSITIONS);
-                    }
-                }
-                $blocks[$block['block_id']]['children'] = $children;
+            if (!$block) {
+                continue;
             }
+
+            $blocks[$block['block_id']] = $block;
+            $children = $this->getBlockChildren($block['instance_id'], $block['block_id']);
+            //process special case of fixed location for header and footer
+            if ($block['block_id'] == self::HEADER_MAIN
+                || $block['block_id'] == self::FOOTER_MAIN
+            ) {
+                //fill in blank locations if any
+                if (count($children) < self::FIXED_POSITIONS) {
+                    $children = $this->buildChildrenBlocks($children, self::FIXED_POSITIONS);
+                }
+            }
+            $blocks[$block['block_id']]['children'] = $children;
         }
 
         return $blocks;
@@ -494,7 +485,7 @@ class ALayoutManager
     {
         $select_boxes = [];
         $empty_block = [
-            'block_txt_id' => $this->language->get('text_none'),
+            'block_txt_id' => Registry::language()->get('text_none'),
         ];
         for ($x = 0; $x < $total_blocks; $x++) {
             $idx = $this->findBlockByPosition($blocks, ($x + 1) * 10);
@@ -618,9 +609,11 @@ class ALayoutManager
         $layout = $this->activeLayout;
         $new_layout = false;
 
-        if (!$layout['layout_type'] && ($page ['controller'] != 'generic' || $data['controller'])) {
+        if ((!$layout['layout_type'] || isset($data['new']))
+            && ($page['controller'] != 'generic' || $data['controller'])) {
             $layout['layout_name'] = $data ['layout_name'];
             $layout['layout_type'] = self::LAYOUT_TYPE_ACTIVE;
+
             $this->layoutId = $this->saveLayout($layout);
             $new_layout = true;
 
@@ -668,7 +661,7 @@ class ALayoutManager
             }
         }
 
-        $this->cache->flush('layout');
+        Registry::cache()->flush('layout');
 
         return true;
     }
@@ -723,7 +716,7 @@ class ALayoutManager
             }
         }
 
-        $this->cache->flush('layout');
+        Registry::cache()->flush('layout');
 
         return $new_layout_id;
     }
@@ -733,13 +726,12 @@ class ALayoutManager
      *
      * @param int $srcLayoutId
      * @param int|null $dstLayoutId
-     * @param int|null $layoutName
+     * @param string|null $layoutName
      *
      * @return bool
      * @throws AException
-     * @throws InvalidArgumentException
      */
-    public function clonePageLayout($srcLayoutId, ?int $dstLayoutId, ?int $layoutName)
+    public function clonePageLayout($srcLayoutId, ?int $dstLayoutId, ?string $layoutName)
     {
         if (!$srcLayoutId) {
             return false;
@@ -768,7 +760,7 @@ class ALayoutManager
         }
         #clone blocks from source layout
         $this->cloneLayoutBlocks($srcLayoutId, $dstLayoutId);
-        $this->cache->flush('layout');
+        Registry::cache()->flush('layout');
         return true;
     }
 
@@ -779,7 +771,7 @@ class ALayoutManager
      * @param int $layout_id
      *
      * @return bool
-     * @throws AException|Exception
+     * @throws Exception
      */
     public function deletePageLayoutByID($page_id, $layout_id)
     {
@@ -789,7 +781,7 @@ class ALayoutManager
         Page::find($page_id)?->delete();
         Layout::find($layout_id)?->delete();
         //$this->deleteAllLayoutBlocks($layout_id);
-        $this->cache->flush('layout');
+        Registry::cache()->flush('layout');
         return true;
     }
 
@@ -801,7 +793,7 @@ class ALayoutManager
      * @param string $key_value
      *
      * @return bool
-     * @throws AException
+     * @throws AException|Exception
      */
     public function deletePageLayout(string $controller, string $key_param, string $key_value)
     {
@@ -886,7 +878,7 @@ class ALayoutManager
             ]
         );
         $instance_id = $layoutInstance->instance_id;
-        $this->cache->flush('layout');
+        Registry::cache()->flush('layout');
         return $instance_id;
     }
 
@@ -903,7 +895,7 @@ class ALayoutManager
         BlockLayout::where('layout_id', '=', $layout_id)
             ->where('parent_instance_id', '=', $parent_instance_id)
             ->delete();
-        $this->cache->flush('layout');
+        Registry::cache()->flush('layout');
     }
 
     /**
@@ -922,7 +914,7 @@ class ALayoutManager
         }
 
         BlockLayout::where('layout_id', '=', $layout_id)?->delete();
-        $this->cache->flush('layout');
+        Registry::cache()->flush('layout');
     }
 
     /**
@@ -952,7 +944,7 @@ class ALayoutManager
             ]
         );
 
-        $this->cache->flush('layout');
+        Registry::cache()->flush('layout');
         return $layout->layout_id;
     }
 
@@ -1035,12 +1027,13 @@ class ALayoutManager
 
         // page description
         if ($data['page_descriptions']) {
+            $language = Registry::language();
             foreach ($data['page_descriptions'] as $language_id => $description) {
                 if (!(int)$language_id) {
                     continue;
                 }
 
-                $this->language->replaceDescriptions('page_descriptions',
+                $language->replaceDescriptions('page_descriptions',
                     ['page_id' => (int)$pageId],
                     [
                         (int)$language_id => [
@@ -1056,7 +1049,7 @@ class ALayoutManager
             }
         }
 
-        $this->cache->flush('layout');
+        Registry::cache()->flush('layout');
         return $pageId;
     }
 
@@ -1122,7 +1115,7 @@ class ALayoutManager
                 $this->saveBlockDescription($blockId, $blockDesc['block_description_id'], $blockDesc);
             }
         }
-        $this->cache->flush('layout');
+        Registry::cache()->flush('layout');
         return $blockId;
     }
 
@@ -1190,9 +1183,10 @@ class ALayoutManager
             Registry::log()->error(__FUNCTION__ . ": Cannot update block description! Description array is empty.");
             return false;
         }
+        $language = Registry::language();
 
         if (!$description['language_id']) {
-            $description['language_id'] = $this->language->getContentLanguageID();
+            $description['language_id'] = $language->getContentLanguageID();
             $this->errors = 'Warning: block description does not provide language. '
                 . 'Current language id ' . $description['language_id'] . ' is used!';
             Registry::log()->error($this->errors);
@@ -1210,12 +1204,12 @@ class ALayoutManager
             }
         }
         if ($update) {
-            $this->language->replaceDescriptions(
+            $language->replaceDescriptions(
                 'block_descriptions',
                 ['custom_block_id' => (int)$customBlockId],
                 [(int)$description['language_id'] => $update]);
         }
-        $this->cache->flush('layout');
+        Registry::cache()->flush('layout');
         return $customBlockId;
     }
 
@@ -1273,7 +1267,6 @@ class ALayoutManager
      */
     public function getBlocksLayouts(int $blockId, ?int $customBlockId = 0)
     {
-        $blockId = (int)$blockId;
         $customBlockId = (int)$customBlockId;
         if (!$blockId && !$customBlockId) {
             Registry::log()->error(__FUNCTION__ . ": Cannot get block layouts! Block ID and Custom Block ID are empty.");
@@ -1309,7 +1302,7 @@ class ALayoutManager
         }
         //TODO: check relations with layouts (descriptions, custom+list, block_layouts)
         $result = CustomBlock::find($customBlockId)?->delete();
-        $this->cache->flush('layout');
+        Registry::cache()->flush('layout');
         return $result;
     }
 
@@ -1333,7 +1326,7 @@ class ALayoutManager
             $query->where('parent_block_id', '=', $parentBlockId);
         }
         $query->delete();
-        $this->cache->flush('layout');
+        Registry::cache()->flush('layout');
     }
 
     /**
@@ -1357,7 +1350,7 @@ class ALayoutManager
         }
 
         Block::find($blockId)?->delete();
-        $this->cache->flush('layout');
+        Registry::cache()->flush('layout');
     }
 
     /**
@@ -1412,6 +1405,7 @@ class ALayoutManager
      * @param int $newLayoutId
      *
      * @return bool
+     * @throws AException
      */
     public function cloneLayoutBlocks(int $sourceLayoutId, int $newLayoutId)
     {
@@ -1451,7 +1445,7 @@ class ALayoutManager
         //TODO: check if all layouts was deleted with relations!
         Layout::where('template_id', '=', $this->templateTextId)
             ?->delete();
-        $this->cache->flush('layout');
+        Registry::cache()->flush('layout');
     }
 
     /**
@@ -1499,10 +1493,9 @@ class ALayoutManager
     }
 
     /**
-     * @param int $page_id
+     * @param int|null $page_id
      * @param int|null $layout_id
      *
-     * @throws Exception
      */
     protected function setCurrentPage(?int $page_id = 0, ?int $layout_id = 0)
     {
@@ -1514,20 +1507,11 @@ class ALayoutManager
                     return;
                 }
             }
-            return;
-        } elseif (!$page_id && !$layout_id) {
-            //set generic layout
-            foreach ($this->pages as $page) {
-                if ($page['controller'] == 'generic') {
-                    $this->page = $page;
-                    return;
-                }
-            }
         } elseif ($page_id) {
             //we have page not related to any layout yet. need to pull differently
-            $language_id = $this->language->getContentLanguageID();
-            $page = Page::select(['page_description.*', 'pages.*'])
-                ->where('page_id', '=', $page_id)
+            $language_id = Registry::language()->getContentLanguageID();
+            $page = Page::select(['page_descriptions.*', 'pages.*'])
+                ->where('pages.page_id', '=', $page_id)
                 ->leftJoin(
                     'page_descriptions',
                     function ($join) use ($language_id) {
@@ -1537,9 +1521,17 @@ class ALayoutManager
                             'pages.page_id'
                         )->where('page_descriptions.language_id', '=', $language_id);
                     })
-                ->useCache('layout')->get()?->toArray();
+                ->useCache('layout')->get()?->first()->toArray();
             $this->pages[] = $page;
             $this->page = $page;
+        } else {
+            //set generic layout
+            foreach ($this->pages as $page) {
+                if ($page['controller'] == 'generic') {
+                    $this->page = $page;
+                    return;
+                }
+            }
         }
     }
 
@@ -1726,6 +1718,7 @@ class ALayoutManager
         }
 
         if ($page->page_descriptions->page_description) {
+            $language = Registry::language();
             foreach ($page->page_descriptions->page_description as $pageDescription) {
                 $pageDescription->language = mb_strtolower($pageDescription->language, ABC::env('APP_CHARSET'));
                 $languageId = $this->_getLanguageIdByName(
@@ -1734,7 +1727,7 @@ class ALayoutManager
 
                 //if loading language does not exist or installed, skip
                 if ($languageId) {
-                    $this->language->replaceDescriptions(
+                    $language->replaceDescriptions(
                         'page_descriptions',
                         ['page_id' => (int)$pageId],
                         [
@@ -1758,7 +1751,7 @@ class ALayoutManager
     /**
      * @param object $layout
      * @param object $block
-     * @param int $parentInstanceId
+     * @param int|null $parentInstanceId
      *
      * @return bool
      * @throws AException
@@ -1850,17 +1843,18 @@ class ALayoutManager
 
                     //insert new block details
                     if ($block->block_descriptions->block_description) {
+                        $language = Registry::language();
                         foreach ($block->block_descriptions->block_description as $block_description) {
                             $language_id = $this->_getLanguageIdByName((string)$block_description->language);
                             //if loading language does not exist or installed, skip
                             if ($language_id) {
-                                $this->language->replaceDescriptions('block_descriptions',
+                                $language->replaceDescriptions('block_descriptions',
                                     [
                                         'instance_id' => $instanceId,
                                         'block_id'    => $block_id,
                                     ],
                                     [
-                                        (int)$language_id => [
+                                        $language_id => [
                                             'name'        => (string)$block_description->name,
                                             'title'       => (string)$block_description->title,
                                             'description' => (string)$block_description->description,
@@ -1905,21 +1899,22 @@ class ALayoutManager
 
                         // insert block's info
                         if ($block->block_descriptions->block_description) {
+                            $language = Registry::language();
                             foreach ($block->block_descriptions->block_description as $block_description) {
                                 $language_id = $this->_getLanguageIdByName((string)$block_description->language);
                                 //if loading language does not exist or installed, log error on update
                                 if (!$language_id) {
                                     $error = "ALayout_manager Error. Unknown language for block descriptions.'."
-                                        . "(Block_id=" . $block_id . ", name=" . (string)$block_description->name . ", "
-                                        . "title=" . (string)$block_description->title . ", "
-                                        . "description=" . (string)$block_description->description . ", "
-                                        . "content=" . (string)$block_description->content . ", "
+                                        . "(Block_id=" . $block_id . ", name=" . $block_description->name . ", "
+                                        . "title=" . $block_description->title . ", "
+                                        . "description=" . $block_description->description . ", "
+                                        . "content=" . $block_description->content . ", "
                                         . ")";
-                                    $this->log->error($error);
-                                    $this->message->saveError('layout import error', $error);
+                                    Registry::log()->error($error);
+                                    Registry::messages()->saveError('layout import error', $error);
                                     continue;
                                 }
-                                $this->language->replaceDescriptions(
+                                $language->replaceDescriptions(
                                     'block_descriptions',
                                     ['block_id' => $block_id],
                                     [
@@ -1972,8 +1967,8 @@ class ALayoutManager
                     } // end of check for use
 
                     //Finally relate block with current layout
-                    $exists = (bool)BlockLayout::where('layout_id', '=', (int)$layoutId)
-                        ->where('block_id', '=', (int)$block_id)
+                    $exists = (bool)BlockLayout::where('layout_id', '=', $layoutId)
+                        ->where('block_id', '=', $block_id)
                         ->where('parent_instance_id', '=', $parentInstanceId)
                         ->count();
 
