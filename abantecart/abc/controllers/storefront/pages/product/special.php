@@ -117,6 +117,7 @@ class ControllerPagesProductSpecial extends AController
             $sort = 'ps.price';
         }
 
+
         $promotion = new APromotion();
 
         $product_total = $promotion->getTotalProductSpecials();

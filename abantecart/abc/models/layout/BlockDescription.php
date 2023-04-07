@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -21,7 +21,6 @@ namespace abc\models\layout;
 use abc\models\BaseModel;
 use abc\models\locale\Language;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class BlockDescription
@@ -45,8 +44,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class BlockDescription extends BaseModel
 {
-    use SoftDeletes;
-
     /**
      * @var string
      */
@@ -56,14 +53,15 @@ class BlockDescription extends BaseModel
         'language_id',
     ];
 
-    public $timestamps = false;
-
     protected $casts = [
         'custom_block_id' => 'int',
         'language_id'     => 'int',
+        'block_wrapper'   => 'string',
         'block_framed'    => 'bool',
-        'date_added'      => 'datetime',
-        'date_modified'   => 'datetime'
+        'name'            => 'string',
+        'title'           => 'string',
+        'description'     => 'string',
+        'content'         => 'string',
     ];
 
     protected $fillable = [
@@ -72,9 +70,47 @@ class BlockDescription extends BaseModel
         'name',
         'title',
         'description',
-        'content',
-        'date_added',
-        'date_modified',
+        'content'
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'custom_block_id' => [
+            'checks'   => [
+                'int',
+                'required',
+                'sometimes'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Custom Block ID is empty!'],
+            ],
+        ],
+        'language_id'     => [
+            'checks'   => [
+                'int',
+                'required',
+                'sometimes'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Language ID is not integer!'],
+            ],
+        ],
+        'block_wrapper'   => [
+            'checks'   => [
+                'string'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Block Wrapper (Template Route) is empty!'],
+            ],
+        ],
+        'block_framed'    => [
+            'checks'   => [
+                'bool'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Block Wrapper (Template Route) is empty!'],
+            ],
+        ]
     ];
 
     public function custom_block()

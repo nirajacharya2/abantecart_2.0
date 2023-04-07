@@ -198,7 +198,7 @@ final class ADispatcher
             //reset to save controller output
             $responseObj->setOutput('');
 
-            $dispatch_pre = new ADispatcher($route, ["instance_id" => '']);
+            $dispatch_pre = new ADispatcher($route, ["instance_id" => null]);
             $dispatch_pre->dispatch();
             $result = $responseObj->getOutput();
 
@@ -277,7 +277,7 @@ final class ADispatcher
         if (class_exists($this->class)) {
             $controller = new $this->class(
                 $this->registry,
-                $this->args["instance_id"] ?? null,
+                $this->args["instance_id"],
                 $this->controller,
                 $parent_controller
             );
@@ -321,7 +321,7 @@ final class ADispatcher
                 $dispatch = call_user_func_array([$controller, $this->method], $args);
                 //Check if return is a dispatch and need to call new page
                 if ($dispatch && is_object($dispatch)) {
-                    if ($this->args["instance_id"] == 0) {
+                    if (!$this->args["instance_id"]) {
                         //If main controller come back for new dispatch
                         return $dispatch->getController() . '/' . $dispatch->getMethod();
                     } else {

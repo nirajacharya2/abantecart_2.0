@@ -53,7 +53,7 @@ class APage{
 	}
 
 	public function addPreDispatch($dispatch_rt){
-        $this->pre_dispatch[] = new ADispatcher($dispatch_rt, ["instance_id" => "0"]);
+        $this->pre_dispatch[] = new ADispatcher($dispatch_rt, ["instance_id" => 0]);
 	}
 
 	public function build($dispatch_rt){
@@ -96,7 +96,7 @@ class APage{
 				$dispatch_rt = "common/page";
 			}
 			//Do the magic
-            $dispatch = new ADispatcher($dispatch_rt, ["instance_id" => "0"]);
+            $dispatch = new ADispatcher($dispatch_rt, ["instance_id" => 0]);
             $dispatch_rt = $dispatch->dispatch();
 		}
 

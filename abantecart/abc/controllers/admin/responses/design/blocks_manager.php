@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2022 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -29,8 +29,6 @@ use H;
 
 class ControllerResponsesDesignBlocksManager extends AController
 {
-    public $data = [];
-
     public function main()
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
@@ -40,7 +38,6 @@ class ControllerResponsesDesignBlocksManager extends AController
         $installedBlocks = $layout->getInstalledBlocks();
 
         $availableBlocks = [];
-
         foreach ($installedBlocks as $block) {
             if ($block['parent_block_id'] == $section_id) {
                 $availableBlocks[] = [
@@ -60,7 +57,8 @@ class ControllerResponsesDesignBlocksManager extends AController
         $view->batchAssign($this->language->getASet());
         $view->assign('blocks', $availableBlocks);
         $view->assign('addBlock',
-            $this->html->getSecureURL('design/blocks_manager/addBlock', '&section_id=' . $section_id));
+            $this->html->getSecureURL('design/blocks_manager/addBlock', '&section_id=' . $section_id)
+        );
         $blocks = $view->fetch('responses/design/blocks_manager.tpl');
 
         //update controller data
@@ -128,8 +126,8 @@ class ControllerResponsesDesignBlocksManager extends AController
 
         //load specific template/page/layout
         $template = $this->request->get['template'];
-        $page_id = $this->request->get['page_id'];
-        $layout_id = $this->request->get['layout_id'];
+        $page_id = (int)$this->request->get['page_id'];
+        $layout_id = (int)$this->request->get['layout_id'];
         $lm = new ALayoutManager($template, $page_id, $layout_id);
 
         //accept 2 type of ids. Number based and custom [block]_[custom_block]
@@ -147,7 +145,7 @@ class ControllerResponsesDesignBlocksManager extends AController
                 $this->load->library('json');
                 $this->response->addJSONHeader();
                 $this->response->setOutput(AJson::encode(['error' => 'Incorrect Block ID']));
-                return null;
+                return;
             }
         }
 

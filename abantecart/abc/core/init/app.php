@@ -444,9 +444,9 @@ registerClass(
     $registry,
     'layout',
     'ALayout',
-    [$registry, $template],
+    [$template],
     ALayout::class,
-    [$registry, $template]
+    [$template]
 );
 
 // load download class

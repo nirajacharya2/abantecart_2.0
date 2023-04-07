@@ -56,7 +56,7 @@ final class ATypeResponse
      */
     public function addPreDispatch($dispatch_rt)
     {
-        $this->pre_dispatch[] = new ADispatcher($dispatch_rt, ["instance_id" => "0"]);
+        $this->pre_dispatch[] = new ADispatcher($dispatch_rt, ["instance_id" => 0]);
     }
 
     /**
@@ -86,7 +86,7 @@ final class ATypeResponse
             //Process main level controller
             //filter in case we have responses set already
             $dispatch_rt = preg_replace('/^(responses)\//', '', $dispatch_rt);
-            $dispatch = new ADispatcher('responses/'.$dispatch_rt, ["instance_id" => "0"]);
+            $dispatch = new ADispatcher('responses/' . $dispatch_rt, ["instance_id" => 0]);
             $dispatch_rt = $dispatch->dispatch();
         }
 

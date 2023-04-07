@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -29,7 +29,6 @@ use abc\models\system\Form;
  * @property Form $form
  * @property Page $page
  *
- * @package abc\models
  */
 class PagesForm extends BaseModel
 {
@@ -44,6 +43,30 @@ class PagesForm extends BaseModel
     protected $casts = [
         'page_id' => 'int',
         'form_id' => 'int',
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'page_id' => [
+            'checks'   => [
+                'int',
+                'required',
+                'sometimes'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Page ID is empty!'],
+            ]
+        ],
+        'form_id' => [
+            'checks'   => [
+                'int',
+                'required',
+                'sometimes'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Form ID is empty!'],
+            ]
+        ],
     ];
 
     public function form()

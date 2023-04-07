@@ -1288,8 +1288,8 @@ class ModelCatalogProduct extends Model
         $pages = $lm->getPages('pages/product/product', 'product_id', (int)$product_id);
         if (count($pages) && H::has_value($pages[0]['page_id'])) {
             $tmpl_id = $this->config->get('config_storefront_template');
-            $src_layout_id = $pages[0]['layout_id'];
-            $src_page_id = $pages[0]['page_id'];
+            $src_layout_id = (int)$pages[0]['layout_id'];
+            $src_page_id = (int)$pages[0]['page_id'];
             //create instance for source layout
             $lm = new ALayoutManager($tmpl_id, $src_page_id, $src_layout_id);
             //create new page
@@ -1314,7 +1314,7 @@ class ModelCatalogProduct extends Model
             $default_language_id = $this->language->getDefaultLanguageID();
             $layout_name = 'Product: '.$product_info[$default_language_id]['name'];
             //create instance for new layout
-            $lm = new ALayoutManager($tmpl_id, $new_page_id, '');
+            $lm = new ALayoutManager($tmpl_id, $new_page_id, null);
 
             return $lm->clonePageLayout($src_layout_id, '', $layout_name);
         }

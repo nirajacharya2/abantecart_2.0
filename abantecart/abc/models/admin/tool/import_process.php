@@ -591,7 +591,9 @@ class ModelToolImportProcess extends Model
         }
 
         //delete existing options and values.
-        $product->options?->delete();
+        if ($product->options->count()) {
+            $product->options?->delete();
+        }
 
         //add new options for each option
         foreach ($data as $dataRow) {
@@ -615,7 +617,7 @@ class ModelToolImportProcess extends Model
                                 . $db->escape(mb_strtolower($dataRow['name'])) . "'");
                     }
                 )->where('product_options.product_id', '=', $productId)
-                ->useCache('product')->first('product_option_id');
+                ->useCache('product')->first()->product_option_id;
 
             $optionData = [
                 'option_name'        => $dataRow['name'],
@@ -972,7 +974,7 @@ class ModelToolImportProcess extends Model
         } elseif ($searchBy == 'sku') {
             $query->whereRaw("LOWER(" . $db->table_name('products') . "." . $searchBy . ") = '" . $db->escape(mb_strtolower($needle)) . "'");
         }
-        return $query->useCache('product')->first('product_id');
+        return $query->useCache('product')->first()->product_id;
     }
 
     /**

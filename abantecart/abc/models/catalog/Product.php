@@ -2240,7 +2240,7 @@ class Product extends BaseModel
                 }
             }
         }
-        $product->touch();
+        $model->touch();
         return true;
     }
 
@@ -2308,6 +2308,11 @@ class Product extends BaseModel
         return $result;
     }
 
+    /**
+     * TODO: remove it!
+     * @deprecated
+     *
+     */
     public function getCatalogOnlyProducts(int $limit = null)
     {
         $db = Registry::db();
