@@ -643,8 +643,8 @@ class ControllerPagesDesignContent extends AController
         $layout = new ALayoutManager();
         //get existing page layout or generic
         $page_layout = $layout->getPageLayoutIDs($page_controller, $page_key_param, $content_id);
-        $page_id = $page_layout['page_id'];
-        $layout_id = $page_layout['layout_id'];
+        $page_id = (int)$page_layout['page_id'];
+        $layout_id = (int)$page_layout['layout_id'];
         $tmpl_id = $this->request->get['tmpl_id'] ?? $this->config->get('config_storefront_template');
         $params = [
             'content_id' => $content_id,

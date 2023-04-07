@@ -153,8 +153,8 @@ class ControllerPagesDesignLayout extends AController
             unset($this->session->data['success']);
         }
 
-        $layoutform = $this->dispatch('common/page_layout', ['layout' => $layout]);
-        $layout_data['layoutform'] = $layoutform->dispatchGetOutput('common/page_layout');
+        $layoutForm = $this->dispatch('common/page_layout', ['layout' => $layout]);
+        $layout_data['layoutform'] = $layoutForm->dispatchGetOutput('common/page_layout');
 
         $this->view->batchAssign($layout_data);
         $this->processTemplate('pages/design/layout.tpl');
@@ -171,10 +171,10 @@ class ControllerPagesDesignLayout extends AController
 
         if ($this->request->is_POST()) {
             $tmpl_id = $this->request->post['tmpl_id'];
-            $page_id = $this->request->post['page_id'];
-            $layout_id = $this->request->post['layout_id'];
+            $page_id = (int)$this->request->post['page_id'];
+            $layout_id = (int)$this->request->post['layout_id'];
 
-            $url = '&'.$this->html->buildURI(
+            $url = '&' . $this->html->buildURI(
                     [
                         'tmpl_id'   => $tmpl_id,
                         'page_id'   => $page_id,
@@ -203,8 +203,8 @@ class ControllerPagesDesignLayout extends AController
 
         if ($this->request->is_POST()) {
             $tmpl_id = $this->request->post['tmpl_id'];
-            $page_id = $this->request->post['page_id'];
-            $layout_id = $this->request->post['layout_id'];
+            $page_id = (int)$this->request->post['page_id'];
+            $layout_id = (int)$this->request->post['layout_id'];
             $section = $this->request->post['section'];
             $block = $this->request->post['block'];
             $parentBlock = $this->request->post['parentBlock'];
@@ -248,8 +248,8 @@ class ControllerPagesDesignLayout extends AController
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
         $tmpl_id = $this->request->get['tmpl_id'] ?? null;
-        $page_id = $this->request->get['page_id'];
-        $layout_id = $this->request->get['layout_id'];
+        $page_id = (int)$this->request->get['page_id'];
+        $layout_id = (int)$this->request->get['layout_id'];
 
         $success = false;
         if (($this->request->is_GET() && $this->request->get['confirmed_delete'] == 'yes')) {

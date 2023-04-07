@@ -115,8 +115,8 @@ class ControllerPagesCatalogProductLayout extends AController
         $layout = new ALayoutManager();
         //get existing page layout or generic
         $page_layout = $layout->getPageLayoutIDs($page_controller, $page_key_param, $product_id);
-        $page_id = $page_layout['page_id'];
-        $layout_id = $page_layout['layout_id'];
+        $page_id = (int)$page_layout['page_id'];
+        $layout_id = (int)$page_layout['layout_id'];
         if (isset($this->request->get['tmpl_id'])) {
             $tmpl_id = $this->request->get['tmpl_id'];
         } else {
@@ -124,9 +124,9 @@ class ControllerPagesCatalogProductLayout extends AController
         }
         $params = [
             'product_id' => $product_id,
-            'page_id' => $page_id,
-            'layout_id' => $layout_id,
-            'tmpl_id' => $tmpl_id,
+            'page_id'    => $page_id,
+            'layout_id'  => $layout_id,
+            'tmpl_id'    => $tmpl_id,
         ];
         $url = '&' . $this->html->buildURI($params);
 

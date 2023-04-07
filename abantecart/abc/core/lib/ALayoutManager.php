@@ -1890,7 +1890,7 @@ class ALayoutManager
                     //update non-restricted blocks and blocks for current template only.
                     //this will update blocks that present only in this template
                     $total = BlockLayout::where('block_layouts.block_id', '=', $block_id)
-                        ->leftJoin('layouts', 'layouts.layout_id', '=', 'block_layouts.layouts_id')
+                        ->leftJoin('layouts', 'layouts.layout_id', '=', 'block_layouts.layout_id')
                         ->where('layouts.template_id', '<>', $layout->template_id)
                         ->count();
 
@@ -2037,7 +2037,7 @@ class ALayoutManager
         // get custom block by name and base block id
         $blockName = (string)$block->custom_block_txt_id;
         $customBlockId = (int)BlockDescription::select('custom_blocks.custom_block_id')
-            ->join('custom_blocks', 'custom_blocks.block_id', '=', 'blocks.block_id')
+            ->join('custom_blocks', 'custom_blocks.custom_block_id', '=', 'block_descriptions.custom_block_id')
             ->where('block_descriptions.name', '=', $blockName)
             ->where('custom_blocks.block_id', '=', $block_id)
             ->first()?->custom_block_id;
