@@ -37,7 +37,8 @@ echo $tabs; ?>
             } ?>">
                 <label class="control-label col-sm-3 col-xs-12"
                        for="<?php echo $field->element_id; ?>"><?php echo $form['text'][$name]; ?></label>
-                <div class="input-group afield <?php echo $widthClasses; ?> <?php echo($name == 'description' ? 'ml_ckeditor' : '') ?>">
+                <div
+                    class="input-group afield <?php echo $widthClasses; ?> <?php echo($name == 'description' ? 'ml_ckeditor' : '') ?>">
                     <?php echo $field; ?>
                 </div>
                 <?php if (!empty($error[$name])) { ?>
