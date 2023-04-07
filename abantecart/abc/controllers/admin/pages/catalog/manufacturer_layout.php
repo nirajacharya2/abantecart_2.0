@@ -113,8 +113,8 @@ class ControllerPagesCatalogManufacturerLayout extends AController
         $layout = new ALayoutManager();
         //get existing page layout or generic
         $page_layout = $layout->getPageLayoutIDs($page_controller, $page_key_param, $manufacturer_id);
-        $page_id = $page_layout['page_id'];
-        $layout_id = $page_layout['layout_id'];
+        $page_id = (int)$page_layout['page_id'];
+        $layout_id = (int)$page_layout['layout_id'];
         if (isset($this->request->get['tmpl_id'])) {
             $tmpl_id = $this->request->get['tmpl_id'];
         } else {
@@ -258,7 +258,7 @@ class ControllerPagesCatalogManufacturerLayout extends AController
                 }
             }
             $page_id = $layout->savePage($page_info);
-            $layout_id = '';
+            $layout_id = null;
 
             // need to generate layout name
             $post_data['layout_name'] = 'Manufacturer: '.$manufacturer_info['name'];

@@ -40,8 +40,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class CategoryDescription extends BaseModel
 {
-    use SoftDeletes;
-
     protected $mainClassName = Category::class;
     protected $mainClassKey = 'category_id';
 

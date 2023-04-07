@@ -23,6 +23,7 @@ namespace abc\core\lib;
 use abc\core\ABC;
 use abc\core\engine\ALoader;
 use abc\core\engine\Registry;
+use abc\models\catalog\Product;
 use abc\models\catalog\ProductDiscount;
 use abc\models\catalog\ProductSpecial;
 use abc\models\order\Coupon;
@@ -45,6 +46,10 @@ class APromotion
     protected $config;
     /** @var ACart */
     protected $cart;
+    /** @var ADB */
+    protected $db;
+    /** ACache */
+    protected $cache;
     /** @var ACustomer */
     protected $customer;
     /** @var int */
@@ -63,6 +68,8 @@ class APromotion
         $this->customer = $customer ?: Registry::customer();
         $this->cart = $cart ?: Registry::cart();
         $this->config = Registry::config();
+        $this->cache = Registry::cache();
+        $this->db = Registry::db();
 
         //set customer group
         $this->customer_group_id = $this->customer?->isLogged()
@@ -229,7 +236,6 @@ class APromotion
             ->orderBy('price')
             ->useCache('product')
             ->first();
-
         return (float)$result->price;
     }
 
@@ -297,11 +303,8 @@ class APromotion
     }
 
     /**
-     * @param int $product_id
-     *
+     * @param $productId
      * @return null|float
-     * @throws AException|Exception
-     * @throws InvalidArgumentException
      */
     public function getProductSpecial($productId)
     {
@@ -425,7 +428,7 @@ class APromotion
      * @param array $data
      *
      * @return array
-     * @throws AException|Exception
+     * @throws Exception
      * @throws InvalidArgumentException
      */
     public function getSpecialProducts($data = [])
@@ -655,12 +658,10 @@ class APromotion
         } else {
             $result = $this->_apply_promotions($total_data, $total);
         }
-
         return $result;
     }
 
     //adding native promotions
-
     /**
      * @param array $total_data
      * @param array $total

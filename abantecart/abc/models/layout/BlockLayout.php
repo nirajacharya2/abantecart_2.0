@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -40,7 +40,6 @@ class BlockLayout extends BaseModel
 {
 
     protected $primaryKey = 'instance_id';
-    public $timestamps = false;
 
     protected $casts = [
         'layout_id'          => 'int',
@@ -48,9 +47,7 @@ class BlockLayout extends BaseModel
         'custom_block_id'    => 'int',
         'parent_instance_id' => 'int',
         'position'           => 'int',
-        'status'             => 'int',
-        'date_added'         => 'datetime',
-        'date_modified'      => 'datetime'
+        'status'             => 'boolean'
     ];
 
     protected $fillable = [
@@ -59,9 +56,62 @@ class BlockLayout extends BaseModel
         'custom_block_id',
         'parent_instance_id',
         'position',
-        'status',
-        'date_added',
-        'date_modified',
+        'status'
+    ];
+    protected $rules = [
+        /** @see validate() */
+        'layout_id'          => [
+            'checks'   => [
+                'int',
+                'required',
+                'sometimes'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Layout ID is empty!'],
+            ],
+        ],
+        'block_id'           => [
+            'checks'   => [
+                'int',
+                'required',
+                'sometimes'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Block ID is empty!'],
+            ],
+        ],
+        'custom_block_id'    => [
+            'checks'   => [
+                'int',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Custom Block ID is empty!'],
+            ],
+        ],
+        'parent_instance_id' => [
+            'checks'   => [
+                'int',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Parent Instance ID is empty!'],
+            ],
+        ],
+        'position'           => [
+            'checks'   => [
+                'int',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Position is not integer!'],
+            ],
+        ],
+        'status'             => [
+            'checks'   => [
+                'bool',
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Status is not integer!'],
+            ],
+        ],
     ];
 
     public function children()

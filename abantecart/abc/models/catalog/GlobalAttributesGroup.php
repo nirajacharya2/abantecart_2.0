@@ -33,8 +33,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class GlobalAttributesGroup extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
-
     protected $cascadeDeletes = ['descriptions'];
     protected $primaryKey = 'attribute_group_id';
     public $timestamps = false;

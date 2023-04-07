@@ -44,8 +44,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class GlobalAttribute extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
-
     protected $cascadeDeletes = ['descriptions', 'value_descriptions', 'values'];
 
     protected $primaryKey = 'attribute_id';

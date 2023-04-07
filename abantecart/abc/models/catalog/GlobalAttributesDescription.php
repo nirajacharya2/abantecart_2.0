@@ -37,8 +37,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class GlobalAttributesDescription extends BaseModel
 {
-    use SoftDeletes;
-
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'attribute_id',

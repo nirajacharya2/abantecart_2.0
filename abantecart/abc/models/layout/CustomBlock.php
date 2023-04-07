@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -19,9 +19,7 @@ namespace abc\models\layout;
 
 use abc\models\BaseModel;
 use Carbon\Carbon;
-use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class CustomBlock
@@ -41,23 +39,28 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class CustomBlock extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
-
-    protected $cascadeDeletes = ['descriptions', 'custom_lists'];
+    protected $cascadeDeletes = ['descriptions', 'custom_lists', 'block_layouts'];
     protected $primaryKey = 'custom_block_id';
 
-    public $timestamps = false;
-
     protected $casts = [
-        'block_id'      => 'int',
-        'date_added'    => 'datetime',
-        'date_modified' => 'datetime'
+        'block_id' => 'int'
     ];
 
     protected $fillable = [
-        'block_id',
-        'date_added',
-        'date_modified',
+        'block_id'
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'block_id' => [
+            'checks'   => [
+                'int',
+                'required'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Block ID is empty!'],
+            ],
+        ]
     ];
 
     public function block()
@@ -73,5 +76,10 @@ class CustomBlock extends BaseModel
     public function custom_lists()
     {
         return $this->hasMany(CustomList::class, 'custom_block_id');
+    }
+
+    public function block_layouts()
+    {
+        return $this->hasMany(BlockLayout::class, 'custom_block_id');
     }
 }

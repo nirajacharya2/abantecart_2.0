@@ -68,8 +68,6 @@ use ReflectionException;
  */
 class ProductOptionValue extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
-
     protected $cascadeDeletes = ['descriptions'];
     protected $mainClassName = Product::class;
     protected $mainClassKey = 'product_id';

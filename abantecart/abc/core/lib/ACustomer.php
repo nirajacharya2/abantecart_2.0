@@ -709,27 +709,25 @@ class ACustomer extends ALibBase
                     continue;
                 }
                 if ($val['options']) {
-Registry::log()->debug('ProductId: ' . $productId);
                     $productOptions = Product::getProductOptionsWithValues($productId);
-                    Registry::log()->debug('Product Options: ' . var_export($productOptions, true));
                     if ($productOptions) {
                         foreach ((array)$val['options'] as $optionId => $optionValueId) {
+                            //if option not exists
+                            if (!in_array($optionId, array_column($productOptions, 'product_option_id'))) {
+                                unset($val['options'][$optionId]);
+                                continue;
+                            }
                             foreach ($productOptions as $optionInfo) {
                                 if ($optionInfo['product_option_id'] != $optionId) {
-                                    Registry::log()->debug('Product Option continue: ' . $optionInfo['product_option_id'] . ' vs ' . $optionId);
                                     continue;
                                 }
                                 //if option was disabled when customer absent
                                 if (!$optionInfo['status']) {
                                     unset($val['options'][$optionId]);
-                                    Registry::log()->debug('Product Option Disabled: ' . $optionId);
                                     continue;
                                 }
                                 //check if value id exists at all
                                 $valueIds = array_column($optionInfo['values'], 'product_option_value_id');
-
-                                Registry::log()->debug('Product Option values: ' . var_export($valueIds, true));
-                                Registry::log()->debug('Product Option values: ' . var_export($optionValueId, true));
                                 if (!in_array($optionValueId, $valueIds)) {
                                     unset($val['options'][$optionId]);
                                 }
