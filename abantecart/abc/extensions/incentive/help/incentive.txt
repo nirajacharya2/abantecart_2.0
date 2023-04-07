@@ -1,0 +1,12 @@
+﻿This manual is to help you configure extension Incentives
+<br/><br/>
+
+1. Enable extension and choose where incentives will apply (in the cart or checkout process)
+<br/>
+2. Go to menu Extensions -> Order Totals and enable Incentive Total
+<br/>
+3. Go to menu Sales → Incentives and create new.
+<br/>
+4. After creating you can set conditions of incentive and bonuses.
+<br/>
+5. To check how it works go to storefront and look at subtotal block on the cart/checkout page.

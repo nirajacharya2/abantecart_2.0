@@ -1,0 +1,13 @@
+
+#incentiveFrm_bonuses0products_chosen input {
+    width: 170px;
+}
+
+#bonuses_list > div, #conditions_list > div {
+    padding: 20px;
+    border-radius: 5px;
+}
+
+#bonuses_list > div:hover, #conditions_list > div:hover {
+    background-color: #f3f1f1;
+}

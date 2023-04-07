@@ -32,6 +32,15 @@ use H;
  */
 class ControllerBlocksBannerBlock extends AController
 {
+
+    public function __construct($registry, $instance_id, $controller, $parent_controller = '')
+    {
+        parent::__construct($registry, $instance_id, $controller, $parent_controller);
+        $this->data['search_parameters'] = [
+            'store_id' => $this->config->get('config_store_id'),
+        ];
+    }
+
     public function main($instance_id = 0, $custom_block_id = 0)
     {
         //load JS to register clicks
@@ -39,20 +48,21 @@ class ControllerBlocksBannerBlock extends AController
             $this->document->addScriptBottom($this->view->templateResource('assets/js/banner_manager.js'));
         }
 
+        $this->data['block_data'] = $this->getBlockContent($instance_id, $custom_block_id);
+
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $blockData = $this->getBlockContent($instance_id, $custom_block_id);
-        $this->view->assign('block_framed', $blockData['block_framed']);
+        $this->view->assign('block_framed', $this->data['block_data']['block_framed']);
 
-        $this->view->assign('content', $blockData['content']);
-        $this->view->assign('heading_title', $blockData['title']);
+        $this->view->assign('content', $this->data['block_data']['content']);
+        $this->view->assign('heading_title', $this->data['block_data']['title']);
         $this->view->assign('stat_url', $this->html->getURL('r/extension/banner_manager'));
 
-        if ($blockData['content']) {
+        if ($this->data['block_data']['content']) {
             // need to set wrapper for non products listing blocks
-            if ($this->view->isTemplateExists($blockData['block_wrapper'])) {
-                $this->view->setTemplate($blockData['block_wrapper']);
+            if ($this->view->isTemplateExists($this->data['block_data']['block_wrapper'])) {
+                $this->view->setTemplate($this->data['block_data']['block_wrapper']);
             }
             $this->processTemplate();
         }
@@ -72,23 +82,21 @@ class ControllerBlocksBannerBlock extends AController
         $languageId = $this->config->get('storefront_language_id');
         $languageId = !isset($blockDesc[$languageId]) ? key($blockDesc) : $languageId;
 
+        $this->data['search_parameters']['language_id'] = $languageId;
+
+
         $content = $blockDesc[$languageId]['content'];
         $content = H::is_serialized($content) ? unserialize($content) : (array)$content;
+
         if ($content) {
-            $params['filter']['banner_group_name'] = $content['banner_group_name'];
+            $this->data['search_parameters']['filter']['banner_group_name'] = $content['banner_group_name'];
         }
 
-        $params = [
-            'language_id' => $languageId,
-            'store_id'    => $this->config->get('config_store_id'),
-        ];
-
-        $params['filter']['include'] = CustomList::where('data_type', '=', 'banner_id')
+        $this->data['search_parameters']['filter']['include'] = CustomList::where('data_type', '=', 'banner_id')
             ->where('custom_block_id', '=', $custom_block_id)
             ->get()?->pluck('id')->toArray();
 
-        $results = Banner::getBanners($params)?->toArray();
-
+        $results = Banner::getBanners($this->data['search_parameters'])?->toArray();
         $banners = [];
         if ($results) {
             $rl = new AResource('image');
@@ -109,6 +117,8 @@ class ControllerBlocksBannerBlock extends AController
                 }
             }
         }
+
+
         return [
             'title'         => $blockDesc[$languageId]['title'] ?: '',
             'content'       => $banners,

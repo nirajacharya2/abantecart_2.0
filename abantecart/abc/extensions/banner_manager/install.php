@@ -43,14 +43,15 @@ $db_schema->create( 'banners', function ( Blueprint $table ) {
     $table->timestamp( 'date_modified' )->default( $this->db->CurrentTimeStamp() );
 } );
 $db_schema->create( 'banner_descriptions', function ( Blueprint $table ) {
-    $table->integer( 'banner_id' );
-    $table->integer( 'language_id' );
-    $table->string( 'name' );
-    $table->text( 'description' );
-    $table->text( 'meta' );
-    $table->timestamp( 'date_added' );
-    $table->timestamp( 'date_modified' )->default( $this->db->CurrentTimeStamp() );
-    $table->primary( [ 'banner_id', 'language_id' ] );
+    $table->increments('id');
+    $table->integer('banner_id');
+    $table->integer('language_id');
+    $table->string('name');
+    $table->text('description');
+    $table->text('meta');
+    $table->timestamp('date_added');
+    $table->timestamp('date_modified')->default($this->db->CurrentTimeStamp());
+    $table->primary(['banner_id', 'language_id']);
 } );
 $db_schema->create( 'banner_stat', function ( Blueprint $table ) {
     $table->integer('banner_id');
