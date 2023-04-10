@@ -32,8 +32,6 @@ if (!class_exists('abc\core\ABC') || !ABC::env('IS_ADMIN')) {
 
 class ControllerPagesCatalogProductLayout extends AController
 {
-    public $data = [];
-
     public function main()
     {
         $page_controller = 'pages/product/product';
@@ -112,21 +110,18 @@ class ControllerPagesCatalogProductLayout extends AController
 
         $this->addChild('pages/catalog/product_summary', 'summary_form', 'pages/catalog/product_summary.tpl');
 
-        $layout = new ALayoutManager();
+        $templateTextId = $this->request->get['tmpl_id'] ?? $this->config->get('config_storefront_template');
+        $layout = new ALayoutManager($templateTextId);
         //get existing page layout or generic
         $page_layout = $layout->getPageLayoutIDs($page_controller, $page_key_param, $product_id);
         $page_id = (int)$page_layout['page_id'];
         $layout_id = (int)$page_layout['layout_id'];
-        if (isset($this->request->get['tmpl_id'])) {
-            $tmpl_id = $this->request->get['tmpl_id'];
-        } else {
-            $tmpl_id = $this->config->get('config_storefront_template');
-        }
+
         $params = [
             'product_id' => $product_id,
             'page_id'    => $page_id,
             'layout_id'  => $layout_id,
-            'tmpl_id'    => $tmpl_id,
+            'tmpl_id'    => $templateTextId,
         ];
         $url = '&' . $this->html->buildURI($params);
 
@@ -164,8 +159,8 @@ class ControllerPagesCatalogProductLayout extends AController
             $this->data[$name] = $value;
             $this->data['hidden_fields'] .= $form->getFieldHtml(
                 [
-                    'type' => 'hidden',
-                    'name' => $name,
+                    'type'  => 'hidden',
+                    'name'  => $name,
                     'value' => $value
                 ]);
         }
@@ -174,10 +169,10 @@ class ControllerPagesCatalogProductLayout extends AController
         $this->data['current_url'] = $this->html->getSecureURL('catalog/product_layout', $url);
 
         // insert external form of layout
-        $layout = new ALayoutManager($tmpl_id, $page_id, $layout_id);
+        $layout = new ALayoutManager($templateTextId, $page_id, $layout_id);
 
-        $layoutform = $this->dispatch('common/page_layout', [$layout]);
-        $this->data['layoutform'] = $layoutform->dispatchGetOutput();
+        $layoutForm = $this->dispatch('common/page_layout', [$layout]);
+        $this->data['layoutform'] = $layoutForm->dispatchGetOutput();
 
         //build pages and available layouts for cloning
         $this->data['pages'] = $layout->getAllPages();
@@ -239,7 +234,7 @@ class ControllerPagesCatalogProductLayout extends AController
         // need to know if unique page existing
         $post = $this->request->post;
         $tmpl_id = $post['tmpl_id'];
-        $lm = new ALayoutManager();
+        $lm = new ALayoutManager($tmpl_id);
         $pages = $lm->getPages($page_controller, $page_key_param, $product_id);
         if (count($pages)) {
             $page_id = (int)$pages[0]['page_id'];
@@ -283,8 +278,6 @@ class ControllerPagesCatalogProductLayout extends AController
                 $this->session->data['success'] = $this->language->get('text_success_layout');
             }
         }
-
         abc_redirect($this->html->getSecureURL('catalog/product_layout', '&product_id=' . $product_id));
     }
-
 }
