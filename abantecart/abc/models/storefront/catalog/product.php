@@ -1003,107 +1003,107 @@ class ModelCatalogProduct extends Model
         return $product_data;
     }
 
-    /**
-     * @param $options
-     *
-     * @return array
-     * @throws Exception
-     * @throws InvalidArgumentException
-     */
-    public function getBestSellerProducts($options)
-    {
-        $limit = (int)$options['limit'];
-        $order = $options['order'];
-        $start = (int)$options['start'];
-        $sort = $options['sort'];
-        $total = $options['total'];
-
-        $language_id = (int)$this->config->get('storefront_language_id');
-        $store_id = (int)$this->config->get('config_store_id');
-        $filters = $this->getProductFilters();
-        $cache_key = 'product.bestseller.'
-            .'.store_'.$store_id
-            .'_lang_'.$language_id
-            .'_'.md5($filters.$limit.$order.$start.$sort.$total);
-
-        $product_data = $this->cache->get($cache_key);
-        if ($product_data === null) {
-            $product_data = [];
-
-            $sql = "SELECT op.product_id, SUM(op.quantity) AS total
-                    FROM ".$this->db->table_name("order_products")." op
-                    LEFT JOIN `".$this->db->table_name("orders")."` o 
-                        ON (op.order_id = o.order_id)
-                    LEFT JOIN ".$this->db->table_name("products")." p 
-                        ON p.product_id = op.product_id
-                    WHERE o.order_status_id > '0' AND ".$filters."
-                    GROUP BY op.product_id
-                    ORDER BY total DESC";
-            $query = $this->db->query($sql);
-
-            if ($query->num_rows) {
-                $products = array_column($query->rows, 'product_id');
-
-                if ($products) {
-                    $sql = "SELECT pd.*, ss.name AS stock, p.*
-                            FROM ".$this->db->table_name("products")." p
-                            LEFT JOIN ".$this->db->table_name("product_descriptions")." pd
-                                ON (p.product_id = pd.product_id AND pd.language_id = '".$language_id."')
-                            LEFT JOIN ".$this->db->table_name("products_to_stores")." p2s
-                                ON (p.product_id = p2s.product_id)
-                            LEFT JOIN ".$this->db->table_name("stock_statuses")." ss
-                                ON (p.stock_status_id = ss.stock_status_id AND ss.language_id = '".$language_id."')
-                            WHERE p.product_id IN (".implode(', ', $products).")
-                                AND ".$filters."
-                                AND p2s.store_id = '".$store_id."'";
-
-                    $sort_data = [
-                        'pd.name',
-                        'p.sort_order',
-                        'p.price',
-                        'rating',
-                        'date_modified',
-                    ];
-
-                    if (in_array($sort, $sort_data)) {
-                        if ($sort == 'pd.name') {
-                            $sql .= " ORDER BY LCASE(".$sort.")";
-                        } else {
-                            $sql .= " ORDER BY ".$this->db->escape($sort);
-                        }
-                    } else {
-                        $sql .= " ORDER BY p.sort_order";
-                    }
-
-                    if ($order == 'DESC') {
-                        $sql .= " DESC";
-                    } else {
-                        $sql .= " ASC";
-                    }
-
-                    if ($start < 0) {
-                        $start = 0;
-                    }
-                    if ((int)$limit) {
-                        $sql .= " LIMIT ".(int)$start.",".(int)$limit;
-                    }
-
-                    $product_query = $this->db->query($sql);
-
-                    if ($product_query->num_rows) {
-                        $product_data = [];
-                        foreach ($product_query->rows as $result) {
-                            $product_data[$result['product_id']] = $result;
-                        }
-                    }
-                }
-            }
-
-            $this->cache->put($cache_key, $product_data);
-        }
-
-        return $product_data;
-    }
+//    /**
+//     * @param $options
+//     *
+//     * @return array
+//     * @throws Exception
+//     * @throws InvalidArgumentException
+//     */
+//    public function getBestSellerProducts($options)
+//    {
+//        $limit = (int)$options['limit'];
+//        $order = $options['order'];
+//        $start = (int)$options['start'];
+//        $sort = $options['sort'];
+//        $total = $options['total'];
+//
+//        $language_id = (int)$this->config->get('storefront_language_id');
+//        $store_id = (int)$this->config->get('config_store_id');
+//        $filters = $this->getProductFilters();
+//        $cache_key = 'product.bestseller.'
+//            .'.store_'.$store_id
+//            .'_lang_'.$language_id
+//            .'_'.md5($filters.$limit.$order.$start.$sort.$total);
+//
+//        $product_data = $this->cache->get($cache_key);
+//        if ($product_data === null) {
+//            $product_data = [];
+//
+//            $sql = "SELECT op.product_id, SUM(op.quantity) AS total
+//                    FROM ".$this->db->table_name("order_products")." op
+//                    LEFT JOIN `".$this->db->table_name("orders")."` o
+//                        ON (op.order_id = o.order_id)
+//                    LEFT JOIN ".$this->db->table_name("products")." p
+//                        ON p.product_id = op.product_id
+//                    WHERE o.order_status_id > '0' AND ".$filters."
+//                    GROUP BY op.product_id
+//                    ORDER BY total DESC";
+//            $query = $this->db->query($sql);
+//
+//            if ($query->num_rows) {
+//                $products = array_column($query->rows, 'product_id');
+//
+//                if ($products) {
+//                    $sql = "SELECT pd.*, ss.name AS stock, p.*
+//                            FROM ".$this->db->table_name("products")." p
+//                            LEFT JOIN ".$this->db->table_name("product_descriptions")." pd
+//                                ON (p.product_id = pd.product_id AND pd.language_id = '".$language_id."')
+//                            LEFT JOIN ".$this->db->table_name("products_to_stores")." p2s
+//                                ON (p.product_id = p2s.product_id)
+//                            LEFT JOIN ".$this->db->table_name("stock_statuses")." ss
+//                                ON (p.stock_status_id = ss.stock_status_id AND ss.language_id = '".$language_id."')
+//                            WHERE p.product_id IN (".implode(', ', $products).")
+//                                AND ".$filters."
+//                                AND p2s.store_id = '".$store_id."'";
+//
+//                    $sort_data = [
+//                        'pd.name',
+//                        'p.sort_order',
+//                        'p.price',
+//                        'rating',
+//                        'date_modified',
+//                    ];
+//
+//                    if (in_array($sort, $sort_data)) {
+//                        if ($sort == 'pd.name') {
+//                            $sql .= " ORDER BY LCASE(".$sort.")";
+//                        } else {
+//                            $sql .= " ORDER BY ".$this->db->escape($sort);
+//                        }
+//                    } else {
+//                        $sql .= " ORDER BY p.sort_order";
+//                    }
+//
+//                    if ($order == 'DESC') {
+//                        $sql .= " DESC";
+//                    } else {
+//                        $sql .= " ASC";
+//                    }
+//
+//                    if ($start < 0) {
+//                        $start = 0;
+//                    }
+//                    if ((int)$limit) {
+//                        $sql .= " LIMIT ".(int)$start.",".(int)$limit;
+//                    }
+//
+//                    $product_query = $this->db->query($sql);
+//
+//                    if ($product_query->num_rows) {
+//                        $product_data = [];
+//                        foreach ($product_query->rows as $result) {
+//                            $product_data[$result['product_id']] = $result;
+//                        }
+//                    }
+//                }
+//            }
+//
+//            $this->cache->put($cache_key, $product_data);
+//        }
+//
+//        return $product_data;
+//    }
 
     /**
      * Update view count. Do not update modification date. See lat
