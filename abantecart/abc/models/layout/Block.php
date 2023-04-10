@@ -92,7 +92,13 @@ class Block extends BaseModel
      */
     public static function getBlocks($params)
     {
-        $languageId = (int)$params['language_id'] ?: static::$current_language_id;
+        $params['language_id'] = (int)$params['language_id'] ?: static::$current_language_id;
+        $params['sort'] = $params['sort'] ?: 'blocks.date_added';
+        $params['order'] = $params['order'] ?: 'ASC';
+        $params['start'] = max($params['start'], 0);
+        $params['limit'] = abs($params['limit']) ?: 200;
+        $filter = (array)$params['filter'];
+
         $db = Registry::db();
         $query = Block::selectRaw(
             $db->raw_sql_row_count() . ' ' . $db->table_name("block_descriptions") . '.*'
@@ -104,12 +110,18 @@ class Block extends BaseModel
             ->leftJoin('custom_blocks', 'custom_blocks.block_id', '=', 'blocks.block_id')
             ->leftJoin(
                 'block_descriptions',
-                function ($join) use ($languageId) {
+                function ($join) use ($params) {
                     /** @var JoinClause $join */
-                    $join->on('block_descriptions.block_id', '=', 'blocks.block_id')
-                        ->where('block_descriptions.language_id', '=', $languageId);
+                    $join->on('block_descriptions.custom_block_id', '=', 'custom_blocks.custom_block_id')
+                        ->where('block_descriptions.language_id', '=', $params['language_id']);
                 }
             );
+        if ($filter['block_txt_id']) {
+            $query->where('blocks.block_txt_id', 'like', '%' . $filter['block_txt_id'] . '%');
+        }
+        if ($filter['name']) {
+            $query->where('block_descriptions.name', 'like', '%' . $filter['name'] . '%');
+        }
 
         $sortData = [
             'block_id'     => 'blocks.block_id',
@@ -130,16 +142,9 @@ class Block extends BaseModel
             $desc = true;
         }
 
-        $query->orderBy($sortBy, $desc ? 'desc' : 'asc');
-
-        if (isset($params['limit'])) {
-            if ($params['limit'] < 1) {
-                $params['limit'] = 20;
-            }
-
-            $query->limit($params['limit'])
-                ->offset($params['start']);
-        }
+        $query->orderBy($sortBy, $desc ? 'desc' : 'asc')
+            ->limit($params['limit'])
+            ->offset($params['start']);
 
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static(), __FUNCTION__, $query, $params);

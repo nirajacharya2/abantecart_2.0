@@ -31,33 +31,49 @@ use abc\core\lib\AListingManager;
 use abc\core\lib\AResourceManager;
 use abc\core\view\AView;
 use abc\models\catalog\Category;
+use abc\models\layout\Block;
 use stdClass;
 
 class ControllerResponsesListingGridBlocksGrid extends AController
 {
     public function main()
     {
+        $this->loadLanguage('design/blocks');
+
+        $page = (int)$this->request->post['page'] ?: 1;
+        $limit = $this->request->post['rows'];
+        $sort = $this->request->post['sidx'];
+        $order = $this->request->post['sord'];
+
+        $this->data['search_parameters'] = [
+            'filter'      => [],
+            'language_id' => $this->language->getContentLanguageID(),
+            'start'       => ($page - 1) * $limit,
+            'limit'       => $limit,
+            'sort'        => $sort,
+            'order'       => $order
+        ];
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->loadLanguage('design/blocks');
-
-        $page = $this->request->post['page']; // get the requested page
-        if ((int) $page < 0) {
-            $page = 0;
+        if (isset($this->request->post['_search']) && $this->request->post['_search'] == 'true') {
+            $searchData = AJson::decode(htmlspecialchars_decode($this->request->post['filters']), true);
+            $allowedFields = array_merge(['block_txt_id', 'name'], (array)$this->data['allowed_fields']);
+            foreach ($searchData['rules'] as $rule) {
+                if (!in_array($rule['field'], $allowedFields)) {
+                    continue;
+                }
+                $this->data['search_parameters']['filter'][$rule['field']] = $rule['data'];
+            }
         }
-        $limit = $this->request->post['rows']; // get how many rows we want to have into the grid
 
-        //process custom search form
-        $grid_filter_params = array_merge(['block_txt_id', 'name'], (array) $this->data['grid_filter_params']);
-        $custom_block_types =
-            array_merge(['html_block', 'listing_block'], (array) $this->data['custom_block_types']);
+        $custom_block_types = array_merge(
+            ['html_block', 'listing_block'],
+            (array)$this->data['custom_block_types']
+        );
 
-        $filter_grid = new AFilter(['method' => 'post', 'grid_filter_params' => $grid_filter_params]);
-
-        $layout = new ALayoutManager();
-        $total = $layout->getBlocksList($filter_grid->getFilterData(), 'total_only');
-        $blocks = $layout->getBlocksList($filter_grid->getFilterData());
+        $blocks = Block::getBlocks($this->data['search_parameters']);
+        $total = $blocks->total;
 
         $tmp = [];
         // prepare block list (delete template duplicates)
@@ -66,16 +82,11 @@ class ControllerResponsesListingGridBlocksGrid extends AController
             if (!$block['custom_block_id'] && in_array($block['block_txt_id'], $custom_block_types)) {
                 continue;
             }
-            $tmp[$block['block_id'].'_'.$block['custom_block_id']] = $block;
+            $tmp[$block['block_id'] . '_' . $block['custom_block_id']] = $block;
         }
         $blocks = $tmp;
 
-        if ($total > 0) {
-            $total_pages = ceil($total / $limit);
-        } else {
-            $total_pages = 0;
-        }
-
+        $total_pages = $total ? ceil($total / $limit) : 0;
         $response = new stdClass();
         $response->page = $page;
         $response->total = $total_pages;
@@ -84,8 +95,10 @@ class ControllerResponsesListingGridBlocksGrid extends AController
 
         $i = 0;
         foreach ($blocks as $result) {
-            $response->rows[$i]['id'] =
-                $result['custom_block_id'] ? $result['block_id'].'_'.$result['custom_block_id'] : $result['block_id'];
+            $response->rows[$i]['id'] = $result['custom_block_id']
+                ? $result['block_id'] . '_' . $result['custom_block_id']
+                : $result['block_id'];
+
             $id = $response->rows[$i]['id'];
 
             if (!$result['custom_block_id']) {
@@ -93,17 +106,20 @@ class ControllerResponsesListingGridBlocksGrid extends AController
             }
 
             $response->rows[$i]['cell'] = [
-                $result['custom_block_id'] ? $result['block_id'].'_'.$result['custom_block_id'] : $result['block_id'],
+                $result['custom_block_id'] ? $result['block_id'] . '_' . $result['custom_block_id'] : $result['block_id'],
                 $result['block_txt_id'],
-                $result['block_name'],
+                $result['name'],
                 (isset($result['status']) ?
-                    $this->html->buildCheckbox([
-                                                   'name'  => 'status['.$id.']',
-                                                   'value' => $result['status'],
-                                                   'style' => 'btn_switch',
-                                                   'attr'  => 'readonly="true"',
-                                               ]) : ''),
-                $result['block_date_added'],
+                    (string)$this->html->buildElement(
+                        [
+                            'type'  => 'checkbox',
+                            'name'  => 'status[' . $id . ']',
+                            'value' => $result['status'],
+                            'style' => 'btn_switch',
+                            'attr'  => 'readonly="true"',
+                        ]
+                    ) : ''),
+                $result['date_added']->toDatetimeString(),
             ];
             $i++;
         }
