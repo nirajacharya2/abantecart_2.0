@@ -512,14 +512,14 @@ class ControllerPagesToolFormsManager extends AController
 
         $lm = new ALayoutManager();
         $block = $lm->getBlockByTxtId('custom_form_block');
-        $this->data['block_id'] = $block['block_id'];
+        $this->data['block_id'] = (int)$block['block_id'];
 
         if ($this->request->is_POST() && $this->validateBlockForm($this->request->post)) {
             if (isset($this->session->data['layout_params'])) {
                 $layout = new ALayoutManager(
-                    $this->session->data['layout_params']['tmpl_id'],
-                    $this->session->data['layout_params']['page_id'],
-                    $this->session->data['layout_params']['layout_id']
+                    $this->session->data['layout_params']['tmpl_id'] ?: null,
+                    $this->session->data['layout_params']['page_id'] ?: null,
+                    $this->session->data['layout_params']['layout_id'] ?: null
                 );
                 $blocks = $layout->getLayoutBlocks();
                 $parent_instance_id = '';
@@ -540,21 +540,21 @@ class ControllerPagesToolFormsManager extends AController
                 } else {
                     $position = 0;
                 }
-                $savedata = $this->session->data['layout_params'];
-                $savedata['parent_instance_id'] = $parent_instance_id;
-                $savedata['position'] = $position + 10;
-                $savedata['status'] = 1;
+                $saveData = $this->session->data['layout_params'];
+                $saveData['parent_instance_id'] = $parent_instance_id;
+                $saveData['position'] = $position + 10;
+                $saveData['status'] = 1;
             } else {
                 $layout = new ALayoutManager();
             }
 
             $content = isset($this->request->post['form_id'])
                 ? serialize(['form_id' => $this->request->post['form_id']])
-                : [];
+                : null;
 
             $custom_block_id = $layout->saveBlockDescription(
                 $this->data['block_id'],
-                0,
+                null,
                 [
                     'name'          => $this->request->post['block_name'],
                     'title'         => $this->request->post['block_title'],
@@ -566,19 +566,24 @@ class ControllerPagesToolFormsManager extends AController
                 ]
             );
 
-            $layout->editBlockStatus((int)$this->request->post['block_status'], $this->data['block_id'],
-                $custom_block_id);
+            $layout->editBlockStatus(
+                (int)$this->request->post['block_status'],
+                $this->data['block_id'],
+                $custom_block_id
+            );
 
             // save custom_block in layout
             if (isset($this->session->data['layout_params'])) {
-                $savedata['custom_block_id'] = $custom_block_id;
-                $savedata['block_id'] = $this->data['block_id'];
-                $layout->saveLayoutBlocks($savedata);
+                $saveData['custom_block_id'] = $custom_block_id;
+                $saveData['block_id'] = $this->data['block_id'];
+                $layout->saveLayoutBlocks($saveData);
                 unset($this->session->data['layout_params']);
             }
             // save list if it is custom
-            $this->request->post['selected'] =
-                json_decode(html_entity_decode($this->request->post['selected'][0]), true);
+            $this->request->post['selected'] = json_decode(
+                html_entity_decode($this->request->post['selected'][0]),
+                true
+            );
             if ($this->request->post['selected']) {
                 $listing_manager = new AListingManager($custom_block_id);
 
@@ -634,7 +639,7 @@ class ControllerPagesToolFormsManager extends AController
 
         $lm = new ALayoutManager();
         $block = $lm->getBlockByTxtId('custom_form_block');
-        $this->data['block_id'] = $block['block_id'];
+        $this->data['block_id'] = (int)$block['block_id'];
         $custom_block_id = (int)$this->request->get['custom_block_id'];
         if (!$custom_block_id) {
             abc_redirect($this->html->getSecureURL('tool/forms_manager/insert_block'));
@@ -972,8 +977,6 @@ class ControllerPagesToolFormsManager extends AController
         }
 
         $this->extensions->hk_ValidateData($this, __FUNCTION__, $data);
-
         return (!$this->error);
     }
-
 }

@@ -9,7 +9,7 @@
 	
 		<div class="form-group">
 		<?php
-		$layouts = array();
+		$layouts = [];
 		if ($block_info) {
 			$tmp = '';
 			foreach ($block_info as $row) {
@@ -19,16 +19,15 @@
 				} else {
 					$tmp = $row['template_id'] . '-' . $row['page_id'] . '-' . $row['layout_id'];
 				}
-				$row['templates'] = explode(',', $row['templates']);
 				unset($row['layout_id'], $row['layout_name'], $row['page_id'], $row['template_id'], $row['store_id']);
 				$info = $row;
 			}	
 
 			foreach($blocks_layouts as $row){
-				$info['layouts'][] = '<a target="_blank" href="' . $this->html->getSecureURL('design/layout', '&tmpl_id=' . $row['template_id'] . '&page_id=' . $row['page_id'] . '&layout_id=' . $row['layout_id']) . '">' . $row['layout_name'] . '</a>';
+                $info['layouts'][] = '<a target="_blank" href="' . $this->html->getSecureURL('design/layout', '&tmpl_id=' . $row['template_id'] . '&page_id=' . $row['page_id'] . '&layout_id=' . $row['layout_id']) . '">' . $row['layout_name'] . ' - ' . $row['template_id'] . '</a>';
 			}
 			if(!$info['layouts']){
-				$layouts = array($text_none);
+                $layouts = [$text_none];
 			}
 
 			foreach ($info as $key => $item) {

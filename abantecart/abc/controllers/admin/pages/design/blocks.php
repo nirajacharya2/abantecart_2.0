@@ -117,8 +117,8 @@ class ControllerPagesDesignBlocks extends AController
                 'search' => false,
             ],
             [
-                'name'   => 'block_date_added',
-                'index'  => 'block_date_added',
+                'name'   => 'date_added',
+                'index'  => 'date_added',
                 'align'  => 'center',
                 'width'  => 100,
                 'search' => false,
@@ -328,9 +328,9 @@ class ControllerPagesDesignBlocks extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $this->document->setTitle($this->language->get('heading_title'));
 
-        if (is_int(strpos($this->request->get['custom_block_id'], '_'))) {
+        if (str_contains($this->request->get['custom_block_id'], '_')) {
             $t = explode('_', $this->request->get['custom_block_id']);
-            $custom_block_id = $t[1];
+            $custom_block_id = (int)$t[1];
         } else {
             $custom_block_id = (int)$this->request->get['custom_block_id'];
         }
@@ -412,7 +412,7 @@ class ControllerPagesDesignBlocks extends AController
                     'block_framed'  => (int)$this->request->post['block_framed'],
                     'language_id'   => $this->session->data['content_language_id'],
                 ]);
-            $layout->editBlockStatus((int)$this->request->post['block_status'], 0, $custom_block_id);
+            $layout->editBlockStatus((int)$this->request->post['block_status'], (int)$block_info['block_id'], $custom_block_id);
             $this->session->data ['success'] = $this->language->get('text_success');
             abc_redirect($this->html->getSecureURL('design/blocks/edit', '&custom_block_id=' . $custom_block_id));
         }
