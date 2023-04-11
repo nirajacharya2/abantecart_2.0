@@ -19,8 +19,10 @@ namespace abc\models\layout;
 
 use abc\core\engine\Registry;
 use abc\models\BaseModel;
+use abc\models\QueryBuilder;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\JoinClause;
 
 /**
@@ -153,19 +155,21 @@ class Block extends BaseModel
         return $items;
     }
 
+    /**
+     * @param int $blockId
+     * @return QueryBuilder|Model|object|null
+     */
     public static function getBlockInfo(int $blockId)
     {
-        return Block::select('page_layouts.page_id')
-            ->addSelect('layouts.*')
-            ->addSelect('blocks.*')
-            ->selectRaw(
-                "(SELECT group_concat(template SEPARATOR ',')
+        return Block::select(
+            ['pages_layouts.page_id', 'layouts.*', 'blocks.*']
+        )->selectRaw(
+            "(SELECT group_concat(template)
                  FROM " . Registry::db()->table_name("block_templates") . " 
                  WHERE block_id='" . $blockId . "') AS templates"
-            )
-            ->leftJoin("block_layouts", "block_layouts.block_id", "=", "blocks.block_id")
+        )->leftJoin("block_layouts", "block_layouts.block_id", "=", "blocks.block_id")
             ->leftJoin("layouts", "layouts.layout_id", "=", "block_layouts.layout_id")
-            ->leftJoin("pages_layouts", "pages_layouts.layout_id", "=", "pages.layout_id")
+            ->leftJoin("pages_layouts", "pages_layouts.layout_id", "=", "layouts.layout_id")
             ->where('blocks.block_id', '=', $blockId)
             ->orderBy('block_layouts.layout_id')
             ->useCache('layout')

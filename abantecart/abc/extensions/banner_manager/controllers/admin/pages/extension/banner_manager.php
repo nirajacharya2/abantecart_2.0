@@ -655,7 +655,7 @@ class ControllerPagesExtensionBannerManager extends AController
 
         $lm = new ALayoutManager();
         $block = $lm->getBlockByTxtId('banner_block');
-        $this->data['block_id'] = $block['block_id'];
+        $this->data['block_id'] = (int)$block['block_id'];
         unset($lm);
 
         if ($this->request->is_POST() && $this->validateBlockForm($this->request->post)) {
@@ -761,7 +761,7 @@ class ControllerPagesExtensionBannerManager extends AController
 
         $lm = new ALayoutManager();
         $block = $lm->getBlockByTxtId('banner_block');
-        $this->data['block_id'] = $block['block_id'];
+        $this->data['block_id'] = (int)$block['block_id'];
         $custom_block_id = (int)$this->request->get['custom_block_id'];
         if (!$custom_block_id) {
             abc_redirect($this->html->getSecureURL('extension/banner_manager/insert_block'));

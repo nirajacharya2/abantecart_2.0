@@ -54,11 +54,7 @@ class QueryBuilder extends Builder
         if (!$this->cacheStatus) {
             return parent::runSelect();
         }
-
-        $ttl = (int)ABC::env('CACHE')['stores'][$cache::$currentStore]['ttl'];
-        if (!$ttl) {
-            $ttl = 5;
-        }
+        $ttl = (int)ABC::env('CACHE')['stores'][$cache::$currentStore]['ttl'] ?: 5;
         $output = $cache->remember(
             $this->getCacheKey(),
             $ttl,

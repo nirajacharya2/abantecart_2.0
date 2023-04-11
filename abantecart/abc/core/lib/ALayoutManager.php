@@ -31,9 +31,11 @@ use abc\models\layout\Layout;
 use abc\models\layout\Page;
 use abc\models\layout\PageDescription;
 use abc\models\layout\PagesLayout;
+use abc\models\QueryBuilder;
 use abc\modules\traits\LayoutTrait;
 use Exception;
 use H;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -950,9 +952,7 @@ class ALayoutManager
 
     /**
      * @param int $blockId
-     *
-     * @return array
-     * @throws Exception
+     * @return QueryBuilder|array|Model|object|null
      */
     public function getBlockInfo(int $blockId)
     {
@@ -963,7 +963,7 @@ class ALayoutManager
         //Note: Cannot restrict select block based on page_id and layout_id.
         // Some pages, might use default layout and have no pages_layouts entry
         // Use OR to select all options and order by layout_id
-        return Block::getBlockInfo($blockId)?->toArray();
+        return Block::getBlockInfo($blockId);
     }
 
     /**
@@ -1160,7 +1160,9 @@ class ALayoutManager
             $query->where('layout_id', '=', $layoutId);
         }
 
-        return $query->update(['status', '=', $status]);
+        $query->update(['status' => $status]);
+        Registry::cache()->flush('layout');
+        return true;
     }
 
     /**
@@ -1221,17 +1223,15 @@ class ALayoutManager
      */
     public function getBlockDescriptions(int $customBlockId)
     {
-        $result = BlockDescription::select(['block_layouts.status', 'block_descriptions.*'])
-            ->leftJoin(
-                'block_layouts',
-                'block_layouts.custom_block_id',
-                '=',
-                'block_descriptions.custom_block_id')
+        $result = BlockDescription::select('block_descriptions.*')
+            ->selectRaw(
+                "(SELECT MAX(status) 
+                 FROM " . Registry::db()->table_name('block_layouts') . " 
+                 WHERE custom_block_id=" . $customBlockId . ") as status")
             ->where('block_descriptions.custom_block_id', '=', $customBlockId)
             ->useCache('layout')->get();
         $output = [];
-        foreach ((array)$result->toArray() as $row) {
-            $row['status'] = (int)$row['status'];
+        foreach ((array)$result?->toArray() as $row) {
             $output[$row['language_id']] = $row;
         }
         return $output;
@@ -1272,7 +1272,7 @@ class ALayoutManager
             Registry::log()->error(__FUNCTION__ . ": Cannot get block layouts! Block ID and Custom Block ID are empty.");
             return [];
         }
-        return Layout::select(['layouts.*', 'page_layouts.page_id'])
+        return Layout::select(['layouts.*', 'pages_layouts.page_id'])
             ->join(
                 'block_layouts',
                 function ($join) use ($blockId, $customBlockId) {
@@ -1284,7 +1284,7 @@ class ALayoutManager
                     }
                 }
             )
-            ->leftJoin('page_layouts', 'page_layouts.layout_id', '=', 'layouts.layout_id')
+            ->leftJoin('pages_layouts', 'pages_layouts.layout_id', '=', 'layouts.layout_id')
             ->distinct()
             ->useCache('layout')->get();
     }

@@ -26,6 +26,7 @@ use abc\core\lib\AJson;
 use abc\core\lib\ALayoutManager;
 use abc\core\view\AView;
 use H;
+use Illuminate\Support\Carbon;
 
 class ControllerResponsesDesignBlocksManager extends AController
 {
@@ -118,7 +119,6 @@ class ControllerResponsesDesignBlocksManager extends AController
 
     public function block_info()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -149,10 +149,19 @@ class ControllerResponsesDesignBlocksManager extends AController
             }
         }
 
-        $info = $lm->getBlockInfo((int)$block_id);
+        $info = (array)$lm->getBlockInfo((int)$block_id)?->toArray();
+
         foreach ($info as &$i) {
-            $i['block_date_added'] = H::dateISO2Display($i['block_date_added'],
-                $this->language->get('date_format_short') . ' ' . $this->language->get('time_format'));
+            $i['block_date_added'] = Carbon::parse($i['date_added'])
+                ->format($this->language->get('date_format_short') . ' ' . $this->language->get('time_format'));
+            unset(
+                $i['date_added'],
+                $i['date_modified'],
+                $i['date_deleted'],
+                $i['stage_id'],
+                $i['layout_type']
+            );
+            $i['templates'] = $i['templates'] ? array_unique(explode(",", $i['templates'])) : [];
         }
         //expect only 1 block details per layout
         $this->data = array_merge($info[0], $this->data);
@@ -186,9 +195,7 @@ class ControllerResponsesDesignBlocksManager extends AController
             $aLang = new ALanguage($this->registry, $this->language->getContentLanguageCode(), 0);
             $aLang->load($this->data['controller'], 'silent');
             //get title silently
-            $this->data['title'] = $aLang->get('heading_title', '', true);
-            $this->data['title'] =
-                $this->data['title'] == 'heading_title' ? $this->data['block_txt_id'] : $this->data['title'];
+            $this->data['title'] = $aLang->t('heading_title', $this->data['block_txt_id']);
         }
 
         $this->data['blocks_layouts'] = $lm->getBlocksLayouts($block_id, $custom_block_id);
@@ -230,5 +237,4 @@ class ControllerResponsesDesignBlocksManager extends AController
         $this->load->library('json');
         $this->response->setOutput(AJson::encode($response));
     }
-
 }
