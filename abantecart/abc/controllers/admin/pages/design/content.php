@@ -88,8 +88,31 @@ class ControllerPagesDesignContent extends AController
             'columns_search'   => true,
             'actions'          => [
                 'edit'   => [
-                    'text' => $this->language->get('text_edit'),
-                    'href' => $this->html->getSecureURL('design/content/update', '&content_id=%ID%'),
+                    'text'     => $this->language->get('text_edit'),
+                    'href'     => $this->html->getSecureURL('design/content/update', '&content_id=%ID%'),
+                    'children' => array_merge(
+                        [
+                            'general' => [
+                                'text' => $this->language->get(
+                                    'tab_general'
+                                ),
+                                'href' => $this->html->getSecureURL(
+                                    'design/content/update',
+                                    '&content_id=%ID%'
+                                ),
+                            ],
+                            'layout'  => [
+                                'text' => $this->language->get(
+                                    'tab_layout'
+                                ),
+                                'href' => $this->html->getSecureURL(
+                                    'design/content/edit_layout',
+                                    '&content_id=%ID%'
+                                ),
+                            ],
+                        ],
+                        (array)$this->data['grid_edit_expand']
+                    ),
                 ],
                 'delete' => [
                     'text' => $this->language->get('button_delete'),
