@@ -325,6 +325,13 @@ class ModelAuditListener
             if (!$auditLogStorage) {
                 $auditLogStorage = ABC::getObjectByAlias('AuditLogStorage');
             }
+            if (!$auditLogStorage) {
+                return $this->output(
+                    false,
+                    'Unknown Audit log storage, please check classmap.php'
+                );
+            }
+
             if (!($auditLogStorage instanceof AuditLogStorageInterface)) {
                 throw new Exception(
                     'Audit log storage not instance of AuditLogStorageInterface, please check classmap.php'
