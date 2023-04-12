@@ -107,7 +107,6 @@ class CustomerCountry extends BaseIncentiveCondition implements IncentiveConditi
             }
             $value = $address['country_id'];
         }
-
         $result = $this->runComparison($value, $params['value'], $params['operator']);
         if ($result) {
             $this->data['matchedItems'] = $value;

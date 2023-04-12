@@ -26,6 +26,7 @@ use abc\core\engine\Registry;
 use abc\core\lib\AException;
 use abc\core\lib\BaseIncentiveCondition;
 use abc\extensions\incentive\models\IncentiveApplied;
+use abc\models\customer\Address;
 use abc\models\customer\Customer;
 use abc\models\locale\Country;
 use Exception;
@@ -124,9 +125,17 @@ trait IncentiveTrait
                     $country = Country::where('iso_code_2', '=', $record['country'])->first();
                     $isoCode3 = $country->iso_code_3;
                 } else {
-                    $isoCode3 = $record['country'];
+                    /** @var Customer|stdClass $customer */
+                    $customer = Customer::find($record['customer_id']);
+                    if ($customer) {
+                        $address = Address::find($customer->address_id);
+                        $isoCode3 = $address->country_id;
+                    } else {
+                        $isoCode3 = $record['country'];
+                    }
                 }
-                $result = $conditionObj->check(['value' => $isoCode3], $condition);
+                $checkout = array_merge($record, ['value' => $isoCode3]);
+                $result = $conditionObj->check($checkout, $condition);
                 break;
             case 'account_codes':
                 $result = $conditionObj->check(['value' => $record['account_code']], $condition);
