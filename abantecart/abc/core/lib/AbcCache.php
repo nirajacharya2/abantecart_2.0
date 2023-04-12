@@ -359,6 +359,7 @@ class AbcCache
             return null;
         }
 
+        /** @var \Illuminate\Cache\Repository $storage */
         $storage = $this->getStorage($store);
         $ttl = $ttl ?? static::$storeConfig['ttl'];
         return $storage->remember($key, $ttl, $callback);

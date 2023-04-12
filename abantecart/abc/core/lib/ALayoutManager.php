@@ -31,6 +31,7 @@ use abc\models\layout\Layout;
 use abc\models\layout\Page;
 use abc\models\layout\PageDescription;
 use abc\models\layout\PagesLayout;
+use abc\models\locale\Language;
 use abc\models\QueryBuilder;
 use abc\modules\traits\LayoutTrait;
 use Exception;
@@ -48,8 +49,7 @@ class ALayoutManager
 {
     use LayoutTrait;
 
-    protected $config;
-    protected $extensions;
+    public $errors = 0;
 
     protected $pages = [];
     protected $page = [];
@@ -72,7 +72,7 @@ class ALayoutManager
     protected $activeLayout = [];
     protected $pageId;
     protected $customBlocks = [];
-    public $errors = 0;
+
 
     const LAYOUT_TYPE_DEFAULT = 0;
     const LAYOUT_TYPE_ACTIVE = 1;
@@ -104,17 +104,16 @@ class ALayoutManager
         if (!ABC::env('IS_ADMIN')) { // forbid for non admin calls
             throw new AException ('Error: permission denied to change page layout', AC_ERR_LOAD);
         }
-        $this->config = Registry::config();
-        $this->extensions = Registry::extensions();
 
-        $this->templateTextId = $templateTextId ?: $this->config->get('config_storefront_template');
+        $defaultTemplate = Registry::config()->get('config_storefront_template');
+        $this->templateTextId = $templateTextId ?: $defaultTemplate;
 
         //do check for existence of storefront template in case when $tmpl_id not set
         if (!$templateTextId) {
             //check is template an extension
-            $template = $this->config->get('config_storefront_template');
+            $template = $defaultTemplate;
             $dir = $template . ABC::env('DIRNAME_STORE') . ABC::env('DIRNAME_TEMPLATES') . $template;
-            $enabled_extensions = $this->extensions->getEnabledExtensions();
+            $enabled_extensions = Registry::extensions()->getEnabledExtensions();
 
             $isValid = (in_array($template, $enabled_extensions) && is_dir(ABC::env('DIR_APP_EXTENSIONS') . $dir));
 
@@ -233,7 +232,6 @@ class ALayoutManager
                 }
             }
         }
-
         $pages = $query->orderBy('pages.page_id')
             ->useCache('layout')
             ->get()?->toArray();
@@ -782,7 +780,6 @@ class ALayoutManager
         }
         Page::find($page_id)?->delete();
         Layout::find($layout_id)?->delete();
-        //$this->deleteAllLayoutBlocks($layout_id);
         Registry::cache()->flush('layout');
         return true;
     }
@@ -834,7 +831,7 @@ class ALayoutManager
         foreach ($directories as $directory) {
             $templates[] = basename(dirname($directory));
         }
-        $enabled_templates = $this->extensions->getExtensionsList(
+        $enabled_templates = Registry::extensions()->getExtensionsList(
             [
                 'filter' => 'template',
                 'status' => 1,
@@ -993,7 +990,6 @@ class ALayoutManager
         if (!$block_id) {
             return '';
         }
-
         return (string)BlockTemplate::where('block_id', '=', $block_id)
             ->whereIn('parent_block_id', [$parent_block_id, null, 0])
             ->useCache('layout')
@@ -1370,7 +1366,9 @@ class ALayoutManager
             );
         }
 
-        $layouts = Layout::where('template_id', '=', $this->templateTextId)->get();
+        $layouts = Layout::where('template_id', '=', $this->templateTextId)
+            ->useCache('layout')
+            ->get();
 
         foreach ($layouts as $layout) {
             //clone layout
@@ -1380,7 +1378,9 @@ class ALayoutManager
                 'layout_type' => $layout['layout_type'],
             ];
             $layout_id = $this->saveLayout($newLayout);
-            $pages = PagesLayout::where('layout_id', '=', $layout->layout_id)->get();
+            $pages = PagesLayout::where('layout_id', '=', $layout->layout_id)
+                ->useCache('layout')
+                ->get();
             foreach ($pages as $page) {
                 PagesLayout::create(
                     [
@@ -1521,7 +1521,7 @@ class ALayoutManager
                             'pages.page_id'
                         )->where('page_descriptions.language_id', '=', $language_id);
                     })
-                ->useCache('layout')->get()?->first()->toArray();
+                ->useCache('layout')->first()?->toArray();
             $this->pages[] = $page;
             $this->page = $page;
         } else {
@@ -1573,6 +1573,7 @@ class ALayoutManager
             //check if layout with same name exists
             $layout_id = (int)Layout::where('layout_name', '=', $layout->name)
                 ->where('template_id', '=', $layout->template_id)
+                ->useCache('layout')
                 ->first()?->layout_id;
 
             if (!$layout_id && in_array($layout->action, ["", null, "update"])) {
@@ -2040,6 +2041,7 @@ class ALayoutManager
             ->join('custom_blocks', 'custom_blocks.custom_block_id', '=', 'block_descriptions.custom_block_id')
             ->where('block_descriptions.name', '=', $blockName)
             ->where('custom_blocks.block_id', '=', $block_id)
+            ->useCache('layout')
             ->first()?->custom_block_id;
 
         $action = (string)$block->action;
@@ -2178,6 +2180,7 @@ class ALayoutManager
             ->join('custom_blocks', 'custom_blocks.block_id', '=', 'blocks.block_id')
             ->where('block_descriptions.name', '=', $blockName)
             ->where('custom_blocks.block_id', '=', $blockId)
+            ->useCache('layout')
             ->first()->custom_block_id;
 
         if (!$customBlockId) {
@@ -2186,9 +2189,6 @@ class ALayoutManager
         }
 
         //Delete block and unlink from layout
-
-
-        // CustomBlock::find($customBlockId)?->delete();
         BlockLayout::where('block_id', '=', $blockId)
             ->where('layout_id', '=', $layoutId)
             ->where('custom_block_id', '=', $customBlockId)
@@ -2205,16 +2205,15 @@ class ALayoutManager
     }
 
     /**
-     * @param string $language_name
+     * @param string $languageName
      *
      * @return int
      * @throws Exception
      */
-    protected function _getLanguageIdByName($language_name = '')
+    protected function _getLanguageIdByName($languageName = '')
     {
-        $language_name = mb_strtolower($language_name, ABC::env('APP_CHARSET'));
-        return (int)Registry::db()->table('languages')
-            ->whereRaw("LOWER(filename) = '" . Registry::db()->escape($language_name) . "'")
+        return (int)Language::where("filename", "like", $languageName)
+            ->useCache('localization')
             ->first()->language_id;
     }
 
@@ -2226,7 +2225,6 @@ class ALayoutManager
      */
     protected function _getInstanceIdByTxtId(int $layoutId, string $blockTxtId)
     {
-
         if (!$layoutId || !$blockTxtId) {
             return false;
         }
@@ -2234,6 +2232,7 @@ class ALayoutManager
         return BlockLayout::where('block_layouts.layout_id', '<>', $layoutId)
             ->join('blocks', 'blocks.block_id', '=', 'block_layouts.block_id')
             ->where('blocks.block_txt_id', '=', $blockTxtId)
+            ->useCache('layout')
             ->first()->instance_id;
     }
 

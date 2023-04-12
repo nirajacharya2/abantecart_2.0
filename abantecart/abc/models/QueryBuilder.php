@@ -36,9 +36,7 @@ class QueryBuilder extends Builder
      */
     protected function getCacheKey()
     {
-        return json_encode([
-            $this->toSql() => $this->getBindings(),
-        ]);
+        return 'sql_' . md5($this->toSql() . '~' . var_export($this->getBindings(), true));
     }
 
     /**
@@ -54,14 +52,13 @@ class QueryBuilder extends Builder
         if (!$this->cacheStatus) {
             return parent::runSelect();
         }
-        $ttl = (int)ABC::env('CACHE')['stores'][$cache::$currentStore]['ttl'] ?: 5;
+        $ttl = (int)ABC::env('CACHE')['stores'][$cache::$currentStore]['ttl'] ?: 777;
         $output = $cache->remember(
-            $this->getCacheKey(),
+            $cache->tags($this->cacheTags)->taggedItemKey($this->getCacheKey()),
             $ttl,
             function () {
                 return parent::runSelect();
-            },
-            $this->cacheStore
+            }
         );
 
         $this->cacheStatus = false;
@@ -130,9 +127,8 @@ class QueryBuilder extends Builder
             return $this;
         }
 
-        $this->cacheTags = $tags ? : [];
+        $this->cacheTags = $tags ?: [];
         $this->cacheTags = is_string($this->cacheTags) ? [$this->cacheTags] : $this->cacheTags;
-
         $this->cacheStore = $store ? : Registry::cache()->getCurrentStore();
         $this->cacheStatus = true;
         return $this;

@@ -192,9 +192,6 @@ class ControllerPagesToolCache extends AController
                             $this->loadModel('tool/install_upgrade_history');
                             $this->model_tool_install_upgrade_history->deleteData();
                             break;
-                        case 'html_cache':
-                            $this->cache->flush('html_cache');
-                            break;
                         default:
                             $this->cache->flush($group);
                             foreach ($languages as $lang) {
@@ -209,7 +206,7 @@ class ControllerPagesToolCache extends AController
         } else {
             if ($this->request->get_or_post('clear_all') == 'all') {
                 //delete entire cache
-                $this->cache->flush('*');
+                $this->cache->flush();
                 $this->session->data['success'] = $this->language->get('text_success');
             }
         }
