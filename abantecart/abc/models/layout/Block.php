@@ -102,9 +102,11 @@ class Block extends BaseModel
         $filter = (array)$params['filter'];
 
         $db = Registry::db();
+        $coalesce = "COALESCE(" . $db->table_name('custom_blocks') . ".date_added, " . $db->table_name('blocks') . ".date_added)";
         $query = Block::selectRaw(
             $db->raw_sql_row_count() . ' ' . $db->table_name("block_descriptions") . '.*'
         )->addSelect('blocks.*')
+            ->selectRaw($coalesce . ' as date_added')
             ->selectRaw(
                 "(SELECT MAX(status) AS status "
                 . "FROM " . $db->table_name("block_layouts") . " bl "
@@ -125,26 +127,27 @@ class Block extends BaseModel
             $query->where('block_descriptions.name', 'like', '%' . $filter['name'] . '%');
         }
 
-        $sortData = [
-            'block_id'     => 'blocks.block_id',
+        $sortRawData = [
+            'block_id'     => $db->table_name('blocks') . ".block_id",
             'name'         => 'name',
-            'block_txt_id' => 'blocks.block_txt_id',
+            'block_txt_id' => $db->table_name('blocks') . ".block_txt_id",
             'status'       => 'status',
+            'date_added'   => $coalesce
         ];
 
-        $desc = false;
+        $desc = '';
 
-        if (isset($params['sort']) && in_array($params['sort'], array_keys($sortData))) {
-            $sortBy = $sortData[$params['sort']];
+        if (isset($params['sort']) && in_array($params['sort'], array_keys($sortRawData))) {
+            $sortBy = $sortRawData[$params['sort']];
         } else {
-            $sortBy = 'blocks.date_added';
+            $sortBy = $coalesce;
         }
 
         if (isset($params['order']) && (strtoupper($params['order']) == 'DESC')) {
-            $desc = true;
+            $desc = 'desc';
         }
 
-        $query->orderBy($sortBy, $desc ? 'desc' : 'asc')
+        $query->orderByRaw($sortBy . ' ' . $desc ?: 'asc')
             ->limit($params['limit'])
             ->offset($params['start']);
 
