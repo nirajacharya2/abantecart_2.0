@@ -197,11 +197,20 @@ class ModelTotalIncentiveTotal extends Model
         }
 
         if (abs($discount)) {
+            $currency = $this->currency->getCurrency();
+            $decPlace = (int)$currency['decimal_place'] ?: 1;
+
+            if (abs($discount) < "0." . str_repeat('0', ($decPlace - 1)) . '1') {
+                $formatted = '';
+            } else {
+                $formatted = ' - ' . $this->currency->format($discount);
+            }
+
             $this->total_data[] = [
                 'id'         => 'incentive',
-                'title'      => $incentives_name . ':',
-                'text'       => ' - ' . $this->currency->format($discount),
-                'value'      => -$discount,
+                'title'      => $formatted ? $incentives_name . ':' : '',
+                'text'       => $formatted,
+                'value'      => $formatted ? (-$discount) : 0.0,
                 'sort_order' => (int)$this->config->get('incentive_total_sort_order'),
                 'total_type' => $this->config->get('incentive_total_total_type'),
             ];

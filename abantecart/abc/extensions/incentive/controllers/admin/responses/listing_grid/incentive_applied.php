@@ -93,7 +93,7 @@ class ControllerResponsesListingGridIncentiveApplied extends AController
                     $result['customer_name'],
                     $result['name'],
                     $this->currency->format($result['bonus_amount']),
-                    $result['date_added'],
+                    $result['date_added']->toDatetimeString(),
                     (string)$this->html->buildElement(
                         [
                             'type'  => 'button',
