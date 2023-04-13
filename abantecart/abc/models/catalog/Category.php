@@ -676,7 +676,7 @@ class Category extends BaseModel
 
         $params['order'] = $params['order'] ?: 'ASC';
         $params['start'] = max($params['start'], 0);
-        $params['limit'] = isset($params['limit']) ? abs($params['limit']) : null;
+        $params['limit'] = isset($params['limit']) ? abs((int)$params['limit']) : null;
         $filter = (array)$params['filter'];
 
         $store_id = (int)$filter['store_id'] ?: (int)Registry::config()->get('config_store_id');
