@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -25,7 +25,7 @@ use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\lib\AMail;
-use abc\extensions\forms_manager\models\storefront\tools\ModelToolFormsManager;
+use abc\extensions\forms_manager\models\storefront\tool\ModelToolFormsManager;
 use abc\models\user\User;
 use H;
 
@@ -36,28 +36,25 @@ use H;
  */
 class ControllerPagesFormsManagerDefaultEmail extends AController
 {
-
-    public $data = [];
-
     public function main()
     {
+        /** @var ModelToolFormsManager $mdl */
+        $mdl = $this->loadModel('tool/forms_manager');
+        $this->loadLanguage('forms_manager/forms_manager');
+        $this->loadLanguage('forms_manager/default_email');
 
-        $this->loadModel( 'tool/forms_manager' );
-        $this->loadLanguage( 'forms_manager/forms_manager' );
-        $this->loadLanguage( 'forms_manager/default_email' );
-
-        if ( $this->request->is_POST() ) {
+        if ($this->request->is_POST()) {
 
             $path = $_SERVER['HTTP_REFERER'];
 
-            if ( ! isset( $this->request->get['form_id'] ) ) {
-                abc_redirect( $path );
+            if (!isset($this->request->get['form_id'])) {
+                abc_redirect($path);
                 exit;
             }
 
             $form_id = $this->request->get['form_id'];
-            $form_data = $this->model_tool_forms_manager->getForm( $form_id );
-            $form = new AForm( $form_data['form_name'] );
+            $form_data = $mdl->getForm($form_id);
+            $form = new AForm($form_data['form_name']);
             $form->loadFromDb( $form_data['form_name'] );
             $errors = $form->validateFormData( $this->request->post );
 
@@ -100,10 +97,10 @@ class ControllerPagesFormsManagerDefaultEmail extends AController
 
                 $msg = $this->config->get( 'store_name' )."\r\n".$this->config->get( 'config_url' )."\r\n";
 
-                $fields = $this->model_tool_forms_manager->getFields( $form_id );
+                $fields = $mdl->getFields($form_id);
 
                 foreach ( $fields as $field ) {
-                    // skip files and captchas
+                    // skip files and captcha
                     if ( in_array( $field['element_type'], ['K', 'J', 'U']) ) {
                         continue;
                     }

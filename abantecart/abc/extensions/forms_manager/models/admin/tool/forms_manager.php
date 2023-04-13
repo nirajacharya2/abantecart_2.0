@@ -32,13 +32,12 @@ class ModelToolFormsManager extends Model
     {
 
         if ( $form_id ) {
-            $q
-                = 'SELECT f.*, fd.language_id, fd.description
-                FROM '.$this->db->table_name( 'forms' ).' f
-                LEFT JOIN '.$this->db->table_name( 'form_descriptions' ).' fd
+            $q = 'SELECT f.*, fd.language_id, fd.description
+                FROM ' . $this->db->table_name('forms') . ' f
+                LEFT JOIN ' . $this->db->table_name('form_descriptions') . ' fd
                 ON f.form_id = fd.form_id
-                WHERE f.form_id = "'.(int)$form_id.'"
-                AND fd.language_id = "'.(int)$this->session->data['content_language_id'].'"';
+                WHERE f.form_id = "' . (int)$form_id . '"
+                AND fd.language_id = "' . (int)$this->session->data['content_language_id'] . '"';
 
             $results = $this->db->query( $q );
 
@@ -62,9 +61,15 @@ class ModelToolFormsManager extends Model
             $filter = ( isset( $data['filter'] ) ? $data['filter'] : []);
 
             if ( $mode == 'total_only' ) {
-                $sql = "SELECT COUNT(*) AS total FROM ".$this->db->table_name( "forms" )." f LEFT JOIN ".$this->db->table_name( "form_descriptions" )." fd ON (f.form_id = fd.form_id)";
+                $sql = "SELECT COUNT(*) AS total 
+                        FROM " . $this->db->table_name("forms") . " f 
+                        LEFT JOIN " . $this->db->table_name("form_descriptions") . " fd 
+                            ON (f.form_id = fd.form_id)";
             } else {
-                $sql = "SELECT * FROM ".$this->db->table_name( "forms" )." f LEFT JOIN ".$this->db->table_name( "form_descriptions" )." fd ON (f.form_id = fd.form_id)";
+                $sql = "SELECT * 
+                        FROM " . $this->db->table_name("forms") . " f 
+                        LEFT JOIN " . $this->db->table_name("form_descriptions") . " fd 
+                        ON (f.form_id = fd.form_id)";
             }
 
             $sql .= " WHERE fd.language_id = '".$language_id."'";
@@ -155,13 +160,15 @@ class ModelToolFormsManager extends Model
             $form_data = $this->cache->get( $cache_key );
 
             if ( $form_data === null ) {
-                $query = $this->db->query( "SELECT *
-                                            FROM ".$this->db->table_name( "forms" )." f
-                                            LEFT JOIN ".$this->db->table_name( "form_descriptions" )." fd ON (f.form_id = fd.form_id)
-                                            WHERE fd.language_id = '".$language_id."'
-                                            ORDER BY f.form_name ASC" );
+                $query = $this->db->query(
+                    "SELECT *
+                    FROM " . $this->db->table_name("forms") . " f
+                    LEFT JOIN " . $this->db->table_name("form_descriptions") . " fd ON (f.form_id = fd.form_id)
+                    WHERE fd.language_id = '" . $language_id . "'
+                    ORDER BY f.form_name ASC"
+                );
                 $form_data = $query->rows;
-                $this->cache->put( $cache_key, $form_data );
+                $this->cache->put($cache_key, $form_data);
             }
 
             return $form_data;
@@ -177,9 +184,13 @@ class ModelToolFormsManager extends Model
     {
         $form_description_data = [];
 
-        $query = $this->db->query( "SELECT * FROM ".$this->db->table_name( "form_descriptions" )." WHERE form_id = '".(int)$form_id."'" );
+        $query = $this->db->query(
+            "SELECT * 
+            FROM " . $this->db->table_name("form_descriptions") . " 
+            WHERE form_id = '" . (int)$form_id . "'"
+        );
 
-        foreach ( $query->rows as $result ) {
+        foreach ($query->rows as $result) {
             $form_description_data[$result['language_id']] = [
                 'form_name'        => $result['name'],
                 'meta_keywords'    => $result['meta_keywords'],

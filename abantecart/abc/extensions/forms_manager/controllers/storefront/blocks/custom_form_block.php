@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -23,18 +23,9 @@ namespace abc\controllers\storefront;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\extensions\forms_manager\models\storefront\tools\ModelToolFormsManager;
-
-/**
- * Class ControllerBlocksCustomFormBlock
- *
- * @property ModelToolFormsManager $model_tool_forms_manager
- */
+use abc\extensions\forms_manager\models\storefront\tool\ModelToolFormsManager;
 class ControllerBlocksCustomFormBlock extends AController
 {
-
-    public $data = [];
-    protected $validators = '';
     protected $validated_types;
 
     public function main($instance_id = 0)
@@ -95,8 +86,9 @@ class ControllerBlocksCustomFormBlock extends AController
             $content = ['form_id' => null];
         }
 
-        $this->loadModel('tool/forms_manager');
-        $form_data = $this->model_tool_forms_manager->getForm($content['form_id']);
+        /** @var ModelToolFormsManager $mdl */
+        $mdl = $this->loadModel('tool/forms_manager');
+        $form_data = $mdl->getForm($content['form_id']);
 
         if (empty($form_data)) {
             return [];
@@ -115,14 +107,11 @@ class ControllerBlocksCustomFormBlock extends AController
             unset($this->session->data['custom_form_'.$content['form_id']]['errors']);
         }
 
-        $output = [
+        return [
             'title'         => ($key ? $descriptions[$key]['title'] : ''),
             'content'       => $form->getFormHtml(),
             'block_wrapper' => ($key ? $descriptions[$key]['block_wrapper'] : 0),
-            'block_framed'  => ($key ? (int) $descriptions[$key]['block_framed'] : 0),
+            'block_framed'  => ($key ? (int)$descriptions[$key]['block_framed'] : 0),
         ];
-
-        return $output;
     }
-
 }
