@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -20,6 +20,8 @@ namespace abc\models;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use abc\core\lib\AbcCache;
+use Illuminate\Cache\RedisTaggedCache;
 use Illuminate\Database\Query\Builder;
 
 class QueryBuilder extends Builder
@@ -34,9 +36,12 @@ class QueryBuilder extends Builder
      *
      * @return string
      */
-    protected function getCacheKey()
+    protected function getCacheKey(AbcCache $cache)
     {
-        return 'sql_' . md5($this->toSql() . '~' . var_export($this->getBindings(), true));
+        $key = 'sql_' . md5($this->toSql() . '~' . var_export($this->getBindings(), true));
+        /** @var RedisTaggedCache $repository */
+        $repository = $cache->tags($this->cacheTags);
+        return method_exists($repository, 'taggedItemKey') ? $repository->taggedItemKey($key) : $key;
     }
 
     /**
@@ -48,14 +53,14 @@ class QueryBuilder extends Builder
     protected function runSelect()
     {
         $cache = Registry::cache();
-
-        if (!$this->cacheStatus) {
+        if (!$this->cacheStatus || !$cache instanceof AbcCache) {
             return parent::runSelect();
         }
-        $ttl = (int)ABC::env('CACHE')['stores'][$cache::$currentStore]['ttl'] ?: 777;
+
         $output = $cache->remember(
-            $cache->tags($this->cacheTags)->taggedItemKey($this->getCacheKey()),
-            $ttl,
+            $this->getCacheKey($cache),
+            //ttl
+            (int)ABC::env('CACHE')['stores'][$cache::$currentStore]['ttl'] ?: 777,
             function () {
                 return parent::runSelect();
             }
