@@ -98,7 +98,7 @@ class Block extends BaseModel
         $params['sort'] = $params['sort'] ?: 'blocks.date_added';
         $params['order'] = $params['order'] ?: 'ASC';
         $params['start'] = max($params['start'], 0);
-        $params['limit'] = abs($params['limit']) ?: 200;
+        $params['limit'] = abs((int)$params['limit']) ?: 200;
         $filter = (array)$params['filter'];
 
         $db = Registry::db();

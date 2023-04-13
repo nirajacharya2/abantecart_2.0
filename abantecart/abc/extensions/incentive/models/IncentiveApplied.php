@@ -162,7 +162,7 @@ class IncentiveApplied extends BaseModel
         $params['sort'] = $params['sort'] ?? 'incentive_applied.date_added';
         $params['order'] = $params['order'] ?? 'DESC';
         $params['start'] = max($params['start'], 0);
-        $params['limit'] = abs($params['limit']) ?: 20;
+        $params['limit'] = abs((int)$params['limit']) ?: 20;
         $filter = (array)$params['filter'];
 
         //override to use prepared version of filter inside hooks
