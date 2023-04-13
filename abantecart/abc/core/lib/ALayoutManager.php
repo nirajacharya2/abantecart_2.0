@@ -288,6 +288,8 @@ class ALayoutManager
      */
     public function getAllBlocks()
     {
+        $languageId = Registry::language()->getContentLanguageID();
+        $db = Registry::db();
         $query = Block::select(
             [
                 'blocks.*',
@@ -295,21 +297,18 @@ class ALayoutManager
                 'block_templates.template',
                 'custom_blocks.custom_block_id'
             ]
-        )
-            ->leftJoin('block_templates', 'block_templates.block_id', '=', 'blocks.block_id')
+        )->selectRaw(
+            "COALESCE(" . $db->table_name('block_descriptions') . ".name, "
+            . $db->table_name('blocks') . ".block_txt_id) as block_name"
+        )->leftJoin('block_templates', 'block_templates.block_id', '=', 'blocks.block_id')
             ->leftJoin('custom_blocks', 'custom_blocks.block_id', '=', 'blocks.block_id')
-            ->orderBy('blocks.block_id');
-        $output = $query->useCache('layout')->get()?->toArray();
-
-        if ($output) {
-            $languageId = Registry::language()->getContentLanguageID();
-            foreach ($output as &$block) {
-                if ($block['custom_block_id']) {
-                    $block['block_name'] = $this->getCustomBlockName($block['custom_block_id'], $languageId);
+            ->leftJoin('block_descriptions',
+                function ($join) use ($languageId) {
+                    $join->on('block_descriptions.custom_block_id', '=', 'custom_blocks.custom_block_id')
+                        ->where('block_descriptions.language_id', '=', $languageId);
                 }
-            }
-        }
-        return $output;
+            )->orderBy('blocks.block_id');
+        return $query->useCache('layout')->get()?->toArray();
     }
 
     /**
@@ -1293,10 +1292,11 @@ class ALayoutManager
      */
     public function deleteCustomBlock($customBlockId)
     {
-        if (!(int)$customBlockId) {
+        if (!(int)$customBlockId
+            || BlockLayout::where('custom_block_id', '=', $customBlockId)->count()
+        ) {
             return false;
         }
-        //TODO: check relations with layouts (descriptions, custom+list, block_layouts)
         $result = CustomBlock::find($customBlockId)?->delete();
         Registry::cache()->flush('layout');
         return $result;

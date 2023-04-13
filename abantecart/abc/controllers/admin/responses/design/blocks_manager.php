@@ -22,6 +22,7 @@ namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
 use abc\core\engine\ALanguage;
+use abc\core\engine\Registry;
 use abc\core\lib\AJson;
 use abc\core\lib\ALayoutManager;
 use abc\core\view\AView;
@@ -38,20 +39,16 @@ class ControllerResponsesDesignBlocksManager extends AController
         $layout = new ALayoutManager();
         $installedBlocks = $layout->getInstalledBlocks();
 
-        $availableBlocks = [];
+        $availableBlocks = $idx = [];
         foreach ($installedBlocks as $block) {
             if ($block['parent_block_id'] == $section_id) {
-                $availableBlocks[] = [
-                    'id'              => $block['block_id'] . '_' . $block['custom_block_id'],
-                    'block_id'        => $block['block_id'],
-                    'block_txt_id'    => $block['block_txt_id'],
-                    'block_name'      => $block['block_name'],
-                    'custom_block_id' => $block['custom_block_id'],
-                    'controller'      => $block['controller'],
-                    'template'        => $block['template'],
-                ];
+                $block['id'] = $block['block_id'] . '_' . $block['custom_block_id'];
+                $availableBlocks[] = $block;
+                $idx[] = $block['block_name'];
             }
         }
+        //resort by block name
+        array_multisort($idx, SORT_STRING, $availableBlocks);
 
         $view = new AView($this->registry, 0);
         $this->loadLanguage('design/blocks');
