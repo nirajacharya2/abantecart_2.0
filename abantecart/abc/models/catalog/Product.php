@@ -2293,9 +2293,13 @@ class Product extends BaseModel
         $registry = Registry::getInstance();
         $store_id = $registry->get('config')->get('config_store_id');
 
-        $settings = Setting::where('store_id', $store_id)
-            ->where('group', 'object_type')
-            ->where('group_id', $product->product_type_id)
+        $settings = Setting::where(
+            [
+                'store_id' => $store_id,
+                'group'    => 'object_type',
+                'group_id' => $product->product_type_id
+            ]
+        )->useCache('settings')
             ->get();
 
         if (!$settings) {
@@ -2407,8 +2411,6 @@ class Product extends BaseModel
     {
         $db = Registry::db();
         $aliasOP = $db->table_name('order_products');
-
-        /** @var QueryBuilder $query */
         $query = OrderProduct::select('order_products.product_id')
             ->selectRaw('SUM(' . $aliasOP . '.quantity) as qnt')
             ->leftJoin(

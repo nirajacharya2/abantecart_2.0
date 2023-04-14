@@ -351,7 +351,9 @@ class Address extends BaseModel
             $country = null;
             /** @var Country $country */
             if ($row['country_id']) {
-                $country = Country::with('description')->find($row['country_id']);
+                $country = Country::with('description')
+                    ->useCache('localization')
+                    ->find($row['country_id']);
             }
             if ($country) {
                 $country_name = $country->description->name;
@@ -368,7 +370,9 @@ class Address extends BaseModel
             $zone = null;
             /** @var Zone $zone */
             if ($row['zone_id']) {
-                $zone = Zone::with('description')->find($row['zone_id']);
+                $zone = Zone::with('description')
+                    ->useCache('localization')
+                    ->find($row['zone_id']);
             }
             if ($zone) {
                 $zone_name = $zone->description->name;
