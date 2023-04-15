@@ -13,6 +13,10 @@ class OrderTotalsDataColumnExpand extends AbstractMigration
 
     public function up()
     {
+        $table = $this->table('order_totals');
+        if (!$table->hasColumn('data')) {
+            $table->addColumn('data', 'text', ['limit' => 1500, 'after' => 'value'])->update();
+        }
         $tableAdapter = new Phinx\Db\Adapter\TablePrefixAdapter($this->getAdapter());
         $full_table_name = $tableAdapter->getAdapterTableName('order_totals');
         $sql = "ALTER TABLE `" . $full_table_name . "` MODIFY `data` MEDIUMTEXT";

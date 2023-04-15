@@ -69,7 +69,7 @@ class ALayout
         //for Maintenance mode
         if (Registry::config()->get('config_maintenance')) {
             $aUser = ABC::getObjectByAlias('AUser', [Registry::getInstance()]);
-            $this->registry->set('user', $aUser);
+            Registry::getInstance()->set('user', $aUser);
             if (!$aUser->isLogged()) {
                 $controller = 'pages/index/maintenance';
             }
