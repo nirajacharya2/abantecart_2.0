@@ -20,6 +20,7 @@
 
 namespace abc\controllers\admin;
 
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
 use abc\models\order\Order;
@@ -56,30 +57,32 @@ class ControllerPagesCatalogProductSummary extends AController
         $this->data['product']['image'] = $thumbnail;
         $this->data['product']['preview'] = $this->html->getCatalogURL(
             'product/product',
-            '&product_id='.$product_info['product_id']
+            '&product_id=' . $product_info['product_id']
         );
 
-        $this->data['auditLog'] = $this->html->buildElement(
-            [
-                'type'  => 'button',
-                'text'  => $this->language->get('text_audit_log'),
-                'href'  => $this->html->getSecureURL(
-                    'tool/audit_log',
-                    '&modal_mode=1'
-                    .'&auditable_type=Product'
-                    .'&auditable_id='.$this->request->get['product_id']
-                ),
-                //quick view port URL
-                'vhref' => $this->html->getSecureURL(
-                    'r/common/viewport/modal',
-                    '&viewport_rt=tool/audit_log'
-                    .'&modal_mode=1'
-                    .'&auditable_type=Product'
-                    .'&auditable_id='.$this->request->get['product_id']
-                ),
-            ]
-        );
-
+        //if auditLog storage not found - disable menu item
+        if ($this->registry->get('AuditLogStorage') || ABC::getObjectByAlias('AuditLogStorage')) {
+            $this->data['auditLog'] = $this->html->buildElement(
+                [
+                    'type'  => 'button',
+                    'text'  => $this->language->get('text_audit_log'),
+                    'href'  => $this->html->getSecureURL(
+                        'tool/audit_log',
+                        '&modal_mode=1'
+                        . '&auditable_type=Product'
+                        . '&auditable_id=' . $this->request->get['product_id']
+                    ),
+                    //quick view port URL
+                    'vhref' => $this->html->getSecureURL(
+                        'r/common/viewport/modal',
+                        '&viewport_rt=tool/audit_log'
+                        . '&modal_mode=1'
+                        . '&auditable_type=Product'
+                        . '&auditable_id=' . $this->request->get['product_id']
+                    ),
+                ]
+            );
+        }
         $this->data['product']['orders'] = Order::search(
             [
                 'filter' => [
@@ -91,7 +94,7 @@ class ControllerPagesCatalogProductSummary extends AController
 
         $this->data['product']['orders_url'] = $this->html->getSecureURL(
             'sale/order',
-            '&product_id='.$product_info['product_id']);
+            '&product_id='. $product_info['product_id']);
 
         $this->view->assign('help_url', $this->gen_help_url('product_summary'));
         $this->view->batchAssign($this->data);
