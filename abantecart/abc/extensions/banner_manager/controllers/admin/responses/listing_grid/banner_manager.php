@@ -27,11 +27,27 @@ use abc\core\lib\AJson;
 use abc\core\engine\AResource;
 use abc\core\view\AView;
 use abc\extensions\banner_manager\models\Banner;
+use abc\extensions\banner_manager\models\BannerDescription;
+use abc\extensions\banner_manager\models\BannerStat;
 use H;
 use stdClass;
 
 class ControllerResponsesListingGridBannerManager extends AController
 {
+    public $fields = [];
+
+    public function __construct($registry, $instance_id, $controller, $parent_controller = '')
+    {
+        parent::__construct($registry, $instance_id, $controller, $parent_controller);
+        $c = new Banner();
+        $cd = new BannerDescription();
+        $this->fields = array_merge(
+            $c->getFillable(),
+            $cd->getFillable()
+        );
+        unset($c, $cd);
+    }
+
     public function main()
     {
         $this->loadLanguage('banner_manager/banner_manager');
@@ -39,8 +55,21 @@ class ControllerResponsesListingGridBannerManager extends AController
         $limit = $this->request->post['rows'];
         $sort = $this->request->post['sidx'];
         $order = $this->request->post['sord'];
-
+        $filterData = [
+            'search_operator' => 'like'
+        ];
+        if (isset($this->request->post['_search']) && $this->request->post['_search'] == 'true') {
+            $searchData = AJson::decode(htmlspecialchars_decode($this->request->post['filters']), true);
+            $allowedFields = array_merge(['banner_id', 'keyword', 'banner_group_name', 'status', 'banner_type'], (array)$this->data['allowed_fields']);
+            foreach ($searchData['rules'] as $rule) {
+                if (!in_array($rule['field'], $allowedFields)) {
+                    continue;
+                }
+                $filterData[$rule['field']] = $rule['data'];
+            }
+        }
         $this->data['banner_search_parameters'] = [
+            'filter'      => $filterData,
             'language_id' => $this->language->getContentLanguageID(),
             'start'       => ($page - 1) * $limit,
             'limit'       => $limit,
@@ -51,9 +80,11 @@ class ControllerResponsesListingGridBannerManager extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $results = (array)Banner::getBanners($this->data['banner_search_parameters'])?->toArray();
+        $results = Banner::getBanners($this->data['banner_search_parameters']);
+        //put into public property to have access from hooks
+        $this->data['results'] = $results;
 
-        $total = (int)$results[0]['total_num_rows'];
+        $total = $results->total;
         $total_pages = $total > 0 ? ceil($total / $limit) : 0;
 
         $response = new stdClass();
@@ -61,7 +92,7 @@ class ControllerResponsesListingGridBannerManager extends AController
         $response->total = $total_pages;
         $response->records = $total;
 
-        $ids = array_map('intval', array_column($results, 'banner_id'));
+        $ids = $results->pluck('banner_id')->toArray();
 
         $resource = new AResource('image');
         $thumbnails = $resource->getMainThumbList(
@@ -71,7 +102,7 @@ class ControllerResponsesListingGridBannerManager extends AController
             $this->config->get('config_image_grid_height')
         );
 
-        foreach ($results as $i => $result) {
+        foreach ($results->toArray() as $i => $result) {
             $response->rows[$i]['id'] = $result['banner_id'];
             $thumbnail = $thumbnails[$result['banner_id']]['thumb_html'];
             //check if banner is active based on dates and update status
@@ -104,17 +135,16 @@ class ControllerResponsesListingGridBannerManager extends AController
                 $result['date_modified'],
             ];
         }
-
+        $this->data['response'] = $response;
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
         $this->load->library('json');
-        $this->response->setOutput(AJson::encode($response));
+        $this->response->setOutput(AJson::encode($this->data['response']));
     }
 
     public function update_field()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -131,25 +161,52 @@ class ControllerResponsesListingGridBannerManager extends AController
             }
 
             //request sent from edit form. ID in url
+            $banner_id = (int)$this->request->get['banner_id'];
             foreach ($this->request->post as $field => $value) {
                 if ($field == 'banner_group_name') {
                     $tmp = [];
-                    if (isset($value[0]) && !in_array($value[0], ['0', 'new'])) {
+                    if ($value[0] && !in_array($value[0], ['0', 'new'])) {
                         $tmp = ['banner_group_name' => trim($value[0])];
                     }
-                    if (isset($value[1])) {
+                    if ($value[1]) {
                         $tmp = ['banner_group_name' => trim($value[1])];
+                    }
+                    if (!$tmp) {
+                        $error = new AError('');
+                        $error->toJSONResponse('VALIDATION_ERROR_406',
+                            [
+                                'error_text'  => $this->language->t(
+                                    'banner_manager_error_group_name',
+                                    'Banner group name is empty!'
+                                ),
+                                'reset_value' => false,
+                            ]
+                        );
+                        return;
                     }
                     $id = (int)$this->request->get['banner_id'];
                     Banner::editBanner($id, $tmp);
-                } elseif (is_array($value)) {
+                } elseif (is_array($value) && !in_array($field, $this->fields)) {
                     foreach ($value as $id => $val) {
                         $tmp[$field] = (int)$val;
                         Banner::editBanner($id, $tmp);
                     }
                 } else {
-                    if ((int)$this->request->get['banner_id']) {
-                        Banner::editBanner($this->request->get['banner_id'], [$field => $value]);
+                    if (is_array($value)) {
+                        $value = $banner_id ? array_filter($value) : $value;
+                        if (!$banner_id) {
+                            $banner_id = key($value);
+                            $value = current($value);
+                        }
+                    } else {
+                        $value = $value ? trim($value) : $value;
+                    }
+                    $value = is_array($value) ? array_filter($value) : ($value ? trim($value) : $value);
+                    if ($field == 'sort_order') {
+                        $value = (int)$value;
+                    }
+                    if ($banner_id) {
+                        Banner::editBanner($banner_id, [$field => $value]);
                     }
                 }
             }
@@ -187,7 +244,9 @@ class ControllerResponsesListingGridBannerManager extends AController
             case 'del':
                 $ids = explode(',', $this->request->post['id']);
                 if ($ids) {
-                    Banner::find($ids)?->delete();
+                    Banner::whereIn('banner_id', $ids)?->delete();
+                    BannerDescription::whereIn('banner_id', $ids)?->delete();
+                    BannerStat::whereIn('banner_id', $ids)?->delete();
                 }
                 break;
             case 'save':
@@ -231,8 +290,8 @@ class ControllerResponsesListingGridBannerManager extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $results = (array)Banner::getBanners($this->data['banner_search_parameters'])?->toArray();
-        $total = (int)$results[0]['total_num_rows'];
+        $results = Banner::getBanners($this->data['banner_search_parameters']);
+        $total = $results->total;
         $total_pages = $total > 0 ? ceil($total / $limit) : 0;
 
 
@@ -251,7 +310,7 @@ class ControllerResponsesListingGridBannerManager extends AController
         $response->records = $total;
 
         $ids = [];
-        foreach ($results as $result) {
+        foreach ($results->toArray() as $result) {
             if ($result['banner_type'] == 1) {
                 $ids[] = (int)$result['banner_id'];
             }
@@ -314,8 +373,9 @@ class ControllerResponsesListingGridBannerManager extends AController
             'language_id' => $this->language->getContentLanguageID(),
             'limit'       => 20,
             'filter'      => [
-                'keyword' => $this->request->post['term'],
-                'exclude' => (array)$this->request->post['exclude']
+                'search_operator' => 'like',
+                'keyword'         => $this->request->post['term'],
+                'exclude'         => (array)$this->request->post['exclude']
             ]
         ];
 
@@ -327,8 +387,8 @@ class ControllerResponsesListingGridBannerManager extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $banners = (array)Banner::getBanners($this->data['banner_search_parameters'])?->toArray();
-        $ids = array_map('intval', array_column($banners, 'banner_id'));
+        $banners = Banner::getBanners($this->data['banner_search_parameters']);
+        $ids = $banners?->pluck('banner_id')?->toArray();
 
         $resource = new AResource('image');
         $thumbnails = $resource->getMainThumbList(
@@ -339,7 +399,7 @@ class ControllerResponsesListingGridBannerManager extends AController
             false
         );
 
-        foreach ($banners as $banner) {
+        foreach ($banners->toArray() as $banner) {
             $thumbnail = $thumbnails[$banner['banner_id']];
             $icon = $thumbnail['thumb_html'] ?: '<i class="fa fa-quote-right fa-4x"></i>&nbsp;';
             $status = $banner['status'];

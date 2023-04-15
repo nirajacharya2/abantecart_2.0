@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -20,8 +20,6 @@ namespace abc\models\customer;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
-use abc\core\lib\ADataEncryption;
-use abc\core\lib\ADB;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AException;
 use abc\models\BaseModel;
@@ -34,14 +32,12 @@ use abc\models\system\Store;
 use Carbon\Carbon;
 use Exception;
 use H;
-use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Validation\Rule;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -86,14 +82,12 @@ use stdClass;
  * @property \Illuminate\Database\Eloquent\Collection $customer_transactions
  * @property \Illuminate\Database\Eloquent\Collection $orders
  *
- * @method static Customer|Collection find(int|array $customer_id) Customer
- * @method static Customer select(mixed $select = '*') Builder
+ * @method static Customer|Collection find(int|array $customer_id)
+ * @method static Customer select(mixed $select = '*')
  * @package abc\models
  */
 class Customer extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
-
     const SUBSCRIBERS_GROUP_NAME = 'Newsletter Subscribers';
     protected $cascadeDeletes = ['addresses', 'notifications', 'transactions'];
 
@@ -115,8 +109,6 @@ class Customer extends BaseModel
         'cart'              => Serialized::class,
         'data'              => Serialized::class,
         'wishlist'          => Serialized::class,
-        'date_added'        => 'datetime',
-        'date_modified'     => 'datetime',
         'last_login'        => 'datetime',
         'settings'          => Serialized::class,
     ];
@@ -158,7 +150,6 @@ class Customer extends BaseModel
         "stage_id",
         "last_login",
         "settings",
-        "date_deleted",
     ];
 
     protected $rules = [
@@ -622,7 +613,6 @@ class Customer extends BaseModel
     /**
      * @param array $options
      *
-     * @return bool
      * @throws AException
      */
     public function save(array $options = [])
@@ -649,13 +639,11 @@ class Customer extends BaseModel
         }
 
         $this->fill($data);
-        $result = parent::save($options);
+        parent::save($options);
         if (isset($data['newsletter']) && $inserting) {
             //enable notification setting for newsletter via email
             $this->saveCustomerNotificationSettings(['newsletter' => ['email' => (int)$data['newsletter']]]);
         }
-
-        return $result;
     }
 
     /**
@@ -1007,7 +995,7 @@ class Customer extends BaseModel
             //allow to extend this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $inputData);
             /** @var stdClass $result */
-            $result = $query->first();
+            $result = $query->useCache('customer')->first();
             return (int)$result->total;
         }
 
@@ -1269,5 +1257,4 @@ class Customer extends BaseModel
         $this->update($upd);
         return true;
     }
-
 }

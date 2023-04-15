@@ -2240,7 +2240,7 @@ class Product extends BaseModel
                 }
             }
         }
-        $product->touch();
+        $model->touch();
         return true;
     }
 
@@ -2293,9 +2293,13 @@ class Product extends BaseModel
         $registry = Registry::getInstance();
         $store_id = $registry->get('config')->get('config_store_id');
 
-        $settings = Setting::where('store_id', $store_id)
-            ->where('group', 'object_type')
-            ->where('group_id', $product->product_type_id)
+        $settings = Setting::where(
+            [
+                'store_id' => $store_id,
+                'group'    => 'object_type',
+                'group_id' => $product->product_type_id
+            ]
+        )->useCache('settings')
             ->get();
 
         if (!$settings) {
@@ -2308,6 +2312,11 @@ class Product extends BaseModel
         return $result;
     }
 
+    /**
+     * TODO: remove it!
+     * @deprecated
+     *
+     */
     public function getCatalogOnlyProducts(int $limit = null)
     {
         $db = Registry::db();
@@ -2402,25 +2411,28 @@ class Product extends BaseModel
     {
         $db = Registry::db();
         $aliasOP = $db->table_name('order_products');
-
-        /** @var QueryBuilder $query */
-        $query = OrderProduct::select(['order_products.product_id']);
-        $query->leftJoin(
-            'orders',
-            'order_products.order_id',
-            '=',
-            'orders.order_id'
-        )
+        $query = OrderProduct::select('order_products.product_id')
+            ->selectRaw('SUM(' . $aliasOP . '.quantity) as qnt')
             ->leftJoin(
+                'orders',
+                'order_products.order_id',
+                '=',
+                'orders.order_id'
+            )->leftJoin(
                 'products',
                 'order_products.product_id',
                 '=',
                 'products.product_id'
-            )
-            ->where('orders.order_status_id', '>', 0)
-            ->where('order_products.product_id', '>', 0)
-            ->groupBy('order_products.product_id')
-            ->orderBy($db->raw('SUM(' . $aliasOP . '.quantity) '), 'DESC');
+            )->where('orders.order_status_id', '>', 0)
+            ->where('order_products.product_id', '>', 0);
+        if (ABC::env('IS_ADMIN') !== true) {
+            //show only enabled and available products for storefront!
+            $query->where('products.date_available', '<=', Carbon::now()->toDateTimeString())
+                ->active('products');
+        }
+        $query->groupBy('order_products.product_id')
+            ->orderBy('qnt', 'desc')
+            ->limit($data['limit'] ?: 20);
 
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $data);
@@ -2430,92 +2442,29 @@ class Product extends BaseModel
     /**
      * @param array $data
      *
-     * @return array
+     * @return Collection|stdClass
      */
     public static function getBestSellerProducts(array $data)
     {
         $limit = (int)$data['limit'] ?: 20;
-        $order = $data['order'];
         $start = (int)$data['start'];
-        $sort = $data['sort'];
-        $db = Registry::db();
-        $config = Registry::config();
-
-        $language_id = (int)$config->get('storefront_language_id');
-        $store_id = (int)$config->get('config_store_id');
-
-        $aliasP = $db->table_name('products');
-        $aliasPD = $db->table_name('product_descriptions');
-        $aliasSS = $db->table_name('stock_statuses');
-
-        $select = [
-            $db->raw($aliasSS . '.name as stock'),
-            'products.*',
-        ];
 
         $bestSellerIds = self::getBestSellerProductIds($data);
-
-        $query = self::selectRaw($db->raw_sql_row_count() . " " . $aliasPD . ".*")
-            ->addSelect($select)
-            ->leftJoin('product_descriptions', function ($subQuery) use ($language_id) {
-                /** @var JoinClause $subQuery */
-                $subQuery->on(
-                    'products.product_id',
-                    '=',
-                    'product_descriptions.product_id'
-                )
-                    ->where('product_descriptions.language_id', '=', $language_id);
-            })
-            ->leftJoin(
-                'products_to_stores',
-                'products.product_id',
-                '=',
-                'products_to_stores.product_id'
-            )
-            ->leftJoin('stock_statuses', function ($subQuery) use ($language_id) {
-                /** @var JoinClause $subQuery */
-                $subQuery->on(
-                    'products.stock_status_id',
-                    '=',
-                    'stock_statuses.stock_status_id'
-                )
-                    ->where('stock_statuses.language_id', '=', $language_id);
-            })
-            ->whereIn('products.product_id', $bestSellerIds)
-            ->whereRaw($aliasP . '.date_available<=NOW()')
-            ->where('products.status', '=', 1)
-            ->where('products_to_stores.store_id', '=', $store_id);
-
-        $sort_data = [
-            'pd.name'       => 'product_descriptions.name',
-            'p.sort_order'  => 'products.sort_order',
-            'p.price'       => 'products.price',
-            'rating'        => 'rating',
-            'date_modified' => 'products.date_modified',
+        $searchParams = [
+            'initiator'    => __METHOD__,
+            'filter'       => [
+                'include'     => $bestSellerIds,
+                'language_id' => $data['language_id'] ?: Registry::language()->getContentLanguageID(),
+                'store_id'    => $data['store_id'] ?? (int)Registry::config()->get('config_store_id')
+            ],
+            'start'        => $start,
+            'limit'        => $limit,
+            //NOTE: sorting by giver product_ids sequence (see $bestSellerIds var)
+            'sort'         => 'include',
+            'only_enabled' => true,
+            'with_all'     => true
         ];
-
-        if (!array_key_exists($sort, $sort_data)) {
-            $sort = 'p.sort_order';
-        }
-        if (!$order) {
-            $order = 'ASC';
-        }
-        if ($sort === 'pd.name') {
-            $query = $query->orderByRaw('LCASE(' . $aliasPD . '.name)', $order);
-        } else {
-            $query = $query->orderBy($sort_data[$sort], $order);
-        }
-
-        if ($start < 0) {
-            $start = 0;
-        }
-        if ($limit) {
-            $query = $query->offset($start)->limit($limit);
-        }
-
-        //allow to extend this method from extensions
-        Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $data);
-        return $query->useCache('product')->get()?->toArray();
+        return Product::getProducts($searchParams);
     }
 
     /**
@@ -2744,8 +2693,7 @@ class Product extends BaseModel
     public static function getProducts(array $params = [])
     {
         $finalPriceSql = '';
-
-        $params['sort'] = $params['sort'] ?? 'products.sort_order';
+        $params['sort'] = $params['sort'] ?: 'sort_order';
         $params['order'] = $params['order'] ?? 'ASC';
         $params['start'] = max($params['start'], 0);
         $params['limit'] = $params['limit'] >= 1 ? $params['limit'] : 20;
@@ -2775,12 +2723,12 @@ class Product extends BaseModel
         $params['filter'] = $filter;
 
         //full table names
-        $p_table = $db->table_name('products');
-        $pd_table = $db->table_name('product_descriptions');
+        $productTable = $db->table_name('products');
+        $pDescTable = $db->table_name('product_descriptions');
         $pSpecialsTable = $db->table_name('product_specials');
 
         /** @var Product|QueryBuilder $query */
-        $query = self::selectRaw(Registry::db()->raw_sql_row_count() . ' ' . $p_table . '.*');
+        $query = self::selectRaw(Registry::db()->raw_sql_row_count() . ' ' . $productTable . '.*');
         if ($params['with_final_price'] || $params['with_all']) {
             /** @see Product::scopeWithFinalPrice() */
             $finalPriceSql = $query->WithFinalPrice($filter['customer_group_id']);
@@ -2977,21 +2925,24 @@ class Product extends BaseModel
 
         //NOTE: order by must be raw sql string
         $sort_data = [
-            'name'          => "LCASE(" . $pd_table . ".name)",
-            'sort_order'    => $p_table . ".sort_order",
+            'name'          => "LCASE(" . $pDescTable . ".name)",
+            'sort_order'    => $productTable . ".sort_order",
             'price'         => "final_price",
             'special'       => "final_price",
             'rating'        => "rating",
-            'date_modified' => $p_table . ".date_modified",
+            'date_modified' => $productTable . ".date_modified",
             'review'        => "review",
-            'viewed'        => $p_table . ".viewed",
+            'viewed'        => $productTable . ".viewed",
+            'include'       => $filter['include']
+                ? "FIELD(" . $productTable . ".product_id, " . implode(",", $filter['include']) . ")"
+                : $productTable . ".sort_order"
         ];
 
         $orderBy = $sort_data[$params['sort']] ?: 'name';
         if (isset($params['order']) && (strtoupper($params['order']) == 'DESC')) {
             $sorting = "desc";
         } else {
-            $sorting = "asc";
+            $sorting = $params['sort'] != 'include' ? "asc" : "";
         }
 
         $query->orderByRaw($orderBy . " " . $sorting);

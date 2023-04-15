@@ -26,6 +26,7 @@ use abc\core\engine\AForm;
 use abc\extensions\banner_manager\models\Banner;
 use abc\extensions\banner_manager\models\BannerDescription;
 use abc\modules\traits\BlockTabsTrait;
+use Carbon\Carbon;
 use H;
 use abc\core\engine\AResource;
 use abc\core\lib\ALayoutManager;
@@ -115,7 +116,7 @@ class ControllerPagesExtensionBannerManager extends AController
             ],
             [
                 'name'  => 'banner_name',
-                'index' => 'name',
+                'index' => 'keyword',
                 'width' => 110,
                 'align' => 'left',
             ],
@@ -400,12 +401,16 @@ class ControllerPagesExtensionBannerManager extends AController
 
         //check if banner is active based on dates and update status
         $now = time();
-        if (H::dateISO2Int($this->data['start_date']) > $now) {
-            $this->data['status'] = 0;
-        }
-        $stop = H::dateISO2Int($this->data['end_date']);
 
-        if ($stop > 0 && $stop < $now) {
+        $start = $this->data['start_date']
+            ? H::dateISO2Int($this->data['start_date'])
+            : ($now - 86400);
+
+        $stop = $this->data['end_date']
+            ? H::dateISO2Int($this->data['end_date'])
+            : ($now + 86400);
+
+        if ($start > $now || $stop < $now) {
             $this->data['status'] = 0;
         }
 
@@ -431,7 +436,7 @@ class ControllerPagesExtensionBannerManager extends AController
         $this->data['form']['text']['name'] = $this->language->get('entry_banner_name');
 
         $groups = [
-                '0'   => $this->language->get('text_select'),
+                ''    => $this->language->get('text_select'),
                 'new' => $this->language->get('text_add_new_group')
             ] +
             Banner::select('banner_group_name')
@@ -453,7 +458,6 @@ class ControllerPagesExtensionBannerManager extends AController
                 'options'  => $groups,
                 'value'    => $value,
                 'required' => true,
-                'style'    => 'no-save',
             ]
         );
 
@@ -462,10 +466,9 @@ class ControllerPagesExtensionBannerManager extends AController
             [
                 'type'        => 'input',
                 'name'        => 'banner_group_name[1]',
-                'value'       => (!in_array($this->data['banner_group_name'][1], $groups)
+                'value' => (!in_array($this->data['banner_group_name'][1], array_keys($groups))
                     ? $this->data['banner_group_name'][1] : ''),
                 'placeholder' => $this->language->get('text_put_new_group'),
-                'style'       => 'no-save',
             ]
         );
         $this->data['new_group_hint'] = $this->language->get('text_put_new_group');
@@ -631,7 +634,7 @@ class ControllerPagesExtensionBannerManager extends AController
             $inData['end_date'] = H::dateDisplay2ISO($inData['end_date']);
         }
 
-        if (in_array($inData['banner_group_name'][0], ['0', 'new']) && $inData['banner_group_name'][1]) {
+        if (in_array($inData['banner_group_name'][0], ['', 'new'])) {
             $inData['banner_group_name'] = mb_ereg_replace('/^[0-9A-Za-z\ \. _\-]/', '', trim($inData['banner_group_name'][1]));
         } else {
             $inData['banner_group_name'] = $inData['banner_group_name'][0];
@@ -652,7 +655,7 @@ class ControllerPagesExtensionBannerManager extends AController
 
         $lm = new ALayoutManager();
         $block = $lm->getBlockByTxtId('banner_block');
-        $this->data['block_id'] = $block['block_id'];
+        $this->data['block_id'] = (int)$block['block_id'];
         unset($lm);
 
         if ($this->request->is_POST() && $this->validateBlockForm($this->request->post)) {
@@ -758,7 +761,7 @@ class ControllerPagesExtensionBannerManager extends AController
 
         $lm = new ALayoutManager();
         $block = $lm->getBlockByTxtId('banner_block');
-        $this->data['block_id'] = $block['block_id'];
+        $this->data['block_id'] = (int)$block['block_id'];
         $custom_block_id = (int)$this->request->get['custom_block_id'];
         if (!$custom_block_id) {
             abc_redirect($this->html->getSecureURL('extension/banner_manager/insert_block'));
@@ -1128,7 +1131,7 @@ class ControllerPagesExtensionBannerManager extends AController
         $this->data['form']['text']['block_description'] = $this->language->get('entry_block_description');
 
         // groups of banners
-        $groups = ['0' => $this->language->get('text_select')]
+        $groups = ['' => $this->language->get('text_select')]
             + Banner::select('banner_group_name')
                 ->orderBy('banner_group_name')
                 ->distinct()

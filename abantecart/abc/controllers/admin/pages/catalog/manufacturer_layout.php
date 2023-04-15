@@ -37,8 +37,6 @@ use H;
  */
 class ControllerPagesCatalogManufacturerLayout extends AController
 {
-    public $data = [];
-
     public function main()
     {
         $page_controller = 'pages/product/manufacturer';
@@ -110,16 +108,13 @@ class ControllerPagesCatalogManufacturerLayout extends AController
 
         $this->data['active'] = 'layout';
 
-        $layout = new ALayoutManager();
+        $tmpl_id = $this->request->get['tmpl_id'] ?? $this->config->get('config_storefront_template');
+        $layout = new ALayoutManager($tmpl_id);
         //get existing page layout or generic
         $page_layout = $layout->getPageLayoutIDs($page_controller, $page_key_param, $manufacturer_id);
-        $page_id = $page_layout['page_id'];
-        $layout_id = $page_layout['layout_id'];
-        if (isset($this->request->get['tmpl_id'])) {
-            $tmpl_id = $this->request->get['tmpl_id'];
-        } else {
-            $tmpl_id = $this->config->get('config_storefront_template');
-        }
+        $page_id = (int)$page_layout['page_id'];
+        $layout_id = (int)$page_layout['layout_id'];
+
         $params = [
             'manufacturer_id' => $manufacturer_id,
             'page_id'         => $page_id,
@@ -233,10 +228,10 @@ class ControllerPagesCatalogManufacturerLayout extends AController
             abc_redirect($this->html->getSecureURL('catalog/manufacturer/update'));
         }
 
-        $post_data = $this->request->post;
-        $tmpl_id = $post_data['tmpl_id'];
+        $post = $this->request->post;
+        $templateTextId = $post['tmpl_id'];
         // need to know unique page existing
-        $layout = new ALayoutManager();
+        $layout = new ALayoutManager($templateTextId);
         $pages = $layout->getPages($page_controller, $page_key_param, $manufacturer_id);
         if (count($pages)) {
             $page_id = $pages[0]['page_id'];
@@ -258,21 +253,21 @@ class ControllerPagesCatalogManufacturerLayout extends AController
                 }
             }
             $page_id = $layout->savePage($page_info);
-            $layout_id = '';
+            $layout_id = null;
 
             // need to generate layout name
-            $post_data['layout_name'] = 'Manufacturer: '.$manufacturer_info['name'];
+            $post['layout_name'] = 'Manufacturer: ' . $manufacturer_info['name'];
         }
 
         //create new instance with specific template/page/layout data
-        $layout = new ALayoutManager($tmpl_id, $page_id, $layout_id);
-        if (H::has_value($post_data['layout_change'])) {
+        $layout = new ALayoutManager($templateTextId, $page_id, $layout_id);
+        if (H::has_value($post['layout_change'])) {
             //update layout request. Clone source layout
-            $layout->clonePageLayout($post_data['layout_change'], $layout_id, $post_data['layout_name']);
+            $layout->clonePageLayout($post['layout_change'], $layout_id, $post['layout_name']);
             $this->session->data['success'] = $this->language->get('text_success_layout');
         } else {
             //save new layout
-            $layout_data = $layout->prepareInput($post_data);
+            $layout_data = $layout->prepareInput($post);
             if ($layout_data) {
                 $layout->savePageLayout($layout_data);
                 $this->session->data['success'] = $this->language->get('text_success_layout');
@@ -280,5 +275,4 @@ class ControllerPagesCatalogManufacturerLayout extends AController
         }
         abc_redirect($this->html->getSecureURL('catalog/manufacturer_layout', '&manufacturer_id='.$manufacturer_id));
     }
-
 }

@@ -33,12 +33,10 @@ use Carbon\Carbon;
 use Dyrynda\Database\Support\GeneratesUuid;
 use Error;
 use Exception;
-use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -68,7 +66,7 @@ use ReflectionException;
  */
 class Category extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes, GeneratesUuid;
+    use GeneratesUuid;
 
     protected $cascadeDeletes = [
         'descriptions',
@@ -678,7 +676,7 @@ class Category extends BaseModel
 
         $params['order'] = $params['order'] ?: 'ASC';
         $params['start'] = max($params['start'], 0);
-        $params['limit'] = isset($params['limit']) ? abs($params['limit']) : null;
+        $params['limit'] = isset($params['limit']) ? abs((int)$params['limit']) : null;
         $filter = (array)$params['filter'];
 
         $store_id = (int)$filter['store_id'] ?: (int)Registry::config()->get('config_store_id');

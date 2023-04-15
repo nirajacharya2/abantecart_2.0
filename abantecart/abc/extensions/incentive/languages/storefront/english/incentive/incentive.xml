@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<definitions>
+    <definition>
+        <key>incentive_heading_title</key>
+        <value><![CDATA[My Incentives]]></value>
+    </definition>
+    <definition>
+        <key>incentive_text_empty_list</key>
+        <value><![CDATA[You have no incentives yet.]]></value>
+    </definition>
+
+</definitions>

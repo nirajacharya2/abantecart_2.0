@@ -142,7 +142,7 @@ class Content extends BaseModel
         $params['sort'] = $params['sort'] ?: 'contents.sort_order';
         $params['order'] = $params['order'] ?: 'ASC';
         $params['start'] = max($params['start'], 0);
-        $params['limit'] = abs($params['limit']) ?: 200;
+        $params['limit'] = abs((int)$params['limit']) ?: 200;
 
         $db = Registry::db();
         $b_table = $db->table_name('contents');

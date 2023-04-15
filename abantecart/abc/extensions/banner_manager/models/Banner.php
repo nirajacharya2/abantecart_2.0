@@ -22,8 +22,8 @@ use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\models\BaseModel;
 use abc\models\catalog\ResourceMap;
-use abc\models\QueryBuilder;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -113,6 +113,8 @@ class Banner extends BaseModel
         'banner_group_name' => [
             'checks'   => [
                 'string',
+                'required',
+                'sometimes',
                 'max:255',
             ],
             'messages' => [
@@ -207,12 +209,17 @@ class Banner extends BaseModel
     public static function addBanner(array $data = [])
     {
 
-        $data['start_date'] = isset($data['start_date'])
-            ? date("Y-m-d 00:00:00", strtotime($data['start_date']))
-            : null;
-        $data['end_date'] = isset($data['end_date'])
-            ? date("Y-m-d 23:59:59", strtotime($data['end_date']))
-            : null;
+        if (isset($data['start_date'])) {
+            $data['start_date'] = $data['start_date']
+                ? Carbon::parse($data['start_date'])->startOfDay()->toDateTimeString()
+                : null;
+        }
+
+        if (isset($data['end_date'])) {
+            $data['end_date'] = $data['end_date']
+                ? Carbon::parse($data['end_date'])->endOfDay()->toDateTimeString()
+                : null;
+        }
 
         Registry::db()->beginTransaction();
         try {
@@ -244,7 +251,7 @@ class Banner extends BaseModel
             Registry::db()->commit();
             Registry::cache()->flush('banner');
             return $bannerId;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Registry::log()->error($e->getMessage());
             Registry::db()->rollback();
             return false;
@@ -263,21 +270,22 @@ class Banner extends BaseModel
 
         if (isset($data['start_date'])) {
             $data['start_date'] = $data['start_date']
-                ? date("Y-m-d 00:00:00", strtotime($data['start_date']))
+                ? Carbon::parse($data['start_date'])->startOfDay()->toDateTimeString()
                 : null;
         }
 
         if (isset($data['end_date'])) {
             $data['end_date'] = $data['end_date']
-                ? date("Y-m-d 23:59:59", strtotime($data['end_date']))
+                ? Carbon::parse($data['end_date'])->endOfDay()->toDateTimeString()
                 : null;
         }
+
         Registry::db()->beginTransaction();
         try {
             $banner = Banner::find($banner_id);
 
             if (!$banner) {
-                throw new \Exception(__FUNCTION__ . ': Banner #' . $banner_id . ' not found');
+                throw new Exception(__FUNCTION__ . ': Banner #' . $banner_id . ' not found');
             }
 
             $banner->update($data);
@@ -298,7 +306,7 @@ class Banner extends BaseModel
                     [$language->getContentLanguageID() => $update]);
             }
             Registry::db()->commit();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Registry::db()->rollback();
             Registry::log()->error($e->getMessage());
             return false;
@@ -310,12 +318,12 @@ class Banner extends BaseModel
 
     /**
      * @param array $params
-     * @return array|\Illuminate\Support\Collection
+     * @return \Illuminate\Support\Collection
      */
     public static function getBanners(array $params)
     {
         $params['language_id'] = $params['language_id'] ?: static::$current_language_id;
-        $params['sort'] = $params['sort'] ?? 'banners.sort_order';
+        $params['sort'] = $params['sort'] ?? 'sort_order';
         $params['order'] = $params['order'] ?? 'ASC';
         $params['start'] = max($params['start'], 0);
         $params['limit'] = $params['limit'] >= 1 ? $params['limit'] : 20;
@@ -355,16 +363,16 @@ class Banner extends BaseModel
         if (ABC::env('IS_ADMIN') !== true) {
             if ($filter['date']) {
                 if ($filter['date'] instanceof Carbon) {
-                    $now = $filter['date']->toIso8601String();
+                    $now = $filter['date']->toDateTimeString();
                 } else {
-                    $now = Carbon::parse($filter['date'])->toIso8601String();
+                    $now = Carbon::parse($filter['date'])->toDateTimeString();
                 }
             } else {
-                $now = Carbon::now()->toIso8601String();
+                $now = Carbon::now()->toDateTimeString();
             }
 
-            $query->where('banners.start_date', '<=', $now)
-                ->where('banners.end_date', '>=', $now)
+            $query->whereRaw("COALESCE(" . $db->table_name('banners') . ".start_date, NOW()) <= '" . $now . "'")
+                ->whereRaw("COALESCE(" . $db->table_name('banners') . ".end_date, NOW()) >= '" . $now . "'")
                 ->active('banners');
         }
 
@@ -376,7 +384,12 @@ class Banner extends BaseModel
         }
 
         if ($filter['banner_group_name']) {
-            $query->where('banner_group_name', '=', $filter['banner_group_name']);
+            $op = $filter['search_operator'] == 'like' ? 'like' : '=';
+            if ($op != 'like') {
+                $query->where('banner_group_name', '=', $filter['banner_group_name']);
+            } else {
+                $query->where('banner_group_name', 'like', '%' . $filter['banner_group_name'] . '%');
+            }
         }
 
         if ($filter['keyword']) {
@@ -396,10 +409,13 @@ class Banner extends BaseModel
                 }
             );
         }
+        $query->distinct();
 
         //NOTE: order by must be raw sql string
         $sort_data = [
-            'name'              => "LCASE(" . $bd_table . ".name)",
+            'banner_id'         => $b_table . ".banner_id",
+            'name'              => "LOWER(" . $bd_table . ".name)",
+            'status'            => $b_table . ".status",
             'sort_order'        => $b_table . ".sort_order",
             'date_modified'     => $b_table . ".date_modified",
             'banner_type'       => $b_table . ".banner_type",
@@ -431,12 +447,7 @@ class Banner extends BaseModel
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
         $output = $query->useCache('banner')->get();
-        //add total number of rows into each row
-        $totalNumRows = $db->sql_get_row_count();
-        for ($i = 0; $i < $output->count(); $i++) {
-            $output[$i]['total_num_rows'] = $totalNumRows;
-        }
-
+        $output->total = $db->sql_get_row_count();
         return $output;
     }
 

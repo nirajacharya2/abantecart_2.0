@@ -38,32 +38,28 @@ class ControllerPagesDesignLayout extends AController
 
         $this->document->setTitle($this->language->get('heading_title'));
 
-        $tmpl_id = $this->request->get['tmpl_id'];
-        if (!$tmpl_id) {
+        $templateTextId = $this->request->get['tmpl_id'];
+        if (!$templateTextId) {
             //get current storefront template
             $this->loadModel('setting/setting');
-            if ($this->request->get['store_id']) {
-                $store_id = $this->request->get['store_id'];
-            } else {
-                $store_id = $this->config->get('config_store_id');
-            }
+            $store_id = $this->request->get['store_id'] ?? $this->config->get('config_store_id');
             $settings = $this->model_setting_setting->getSetting('appearance', $store_id);
-            $tmpl_id = $settings['config_storefront_template'];
+            $templateTextId = $settings['config_storefront_template'];
         }
-        $page_id = $this->request->get['page_id'];
-        $layout_id = $this->request->get['layout_id'];
+        $page_id = (int)$this->request->get['page_id'];
+        $layout_id = (int)$this->request->get['layout_id'];
 
         //Note yet implemented
         if (isset($this->request->get['preview_id'])) {
             $preview_id = $this->request->get['preview_id'];
             $layout_data['preview_id'] = $preview_id;
             $layout_data['preview_url'] = ABC::env('HTTP_CATALOG')
-                .'?preview='.$preview_id
-                .'&layout_id='.$preview_id
-                .'&page_id='.$page_id;
+                . '?preview=' . $preview_id
+                . '&layout_id=' . $preview_id
+                . '&page_id=' . $page_id;
         }
 
-        $layout = new ALayoutManager($tmpl_id, $page_id, $layout_id);
+        $layout = new ALayoutManager($templateTextId, $page_id, $layout_id);
         $layout_data['pages'] = $layout->getAllPages();
         $layout_data['current_page'] = $layout->getPageData();
 
@@ -153,8 +149,8 @@ class ControllerPagesDesignLayout extends AController
             unset($this->session->data['success']);
         }
 
-        $layoutform = $this->dispatch('common/page_layout', ['layout' => $layout]);
-        $layout_data['layoutform'] = $layoutform->dispatchGetOutput();
+        $layoutForm = $this->dispatch('common/page_layout', ['layout' => $layout]);
+        $layout_data['layoutform'] = $layoutForm->dispatchGetOutput('common/page_layout');
 
         $this->view->batchAssign($layout_data);
         $this->processTemplate('pages/design/layout.tpl');
@@ -170,19 +166,19 @@ class ControllerPagesDesignLayout extends AController
         $url = '';
 
         if ($this->request->is_POST()) {
-            $tmpl_id = $this->request->post['tmpl_id'];
-            $page_id = $this->request->post['page_id'];
-            $layout_id = $this->request->post['layout_id'];
+            $templateTextId = $this->request->post['tmpl_id'];
+            $pageId = (int)$this->request->post['page_id'];
+            $layoutId = (int)$this->request->post['layout_id'];
 
-            $url = '&'.$this->html->buildURI(
+            $url = '&' . $this->html->buildURI(
                     [
-                        'tmpl_id'   => $tmpl_id,
-                        'page_id'   => $page_id,
-                        'layout_id' => $layout_id,
+                        'tmpl_id'   => $templateTextId,
+                        'page_id'   => $pageId,
+                        'layout_id' => $layoutId,
                     ]
                 );
 
-            $layout = new ALayoutManager($tmpl_id, $page_id, $layout_id);
+            $layout = new ALayoutManager($templateTextId, $pageId, $layoutId);
             $layout_data = $layout->prepareInput($this->request->post);
             if ($layout_data) {
                 $layout->savePageLayout($layout_data);
@@ -203,8 +199,8 @@ class ControllerPagesDesignLayout extends AController
 
         if ($this->request->is_POST()) {
             $tmpl_id = $this->request->post['tmpl_id'];
-            $page_id = $this->request->post['page_id'];
-            $layout_id = $this->request->post['layout_id'];
+            $page_id = (int)$this->request->post['page_id'];
+            $layout_id = (int)$this->request->post['layout_id'];
             $section = $this->request->post['section'];
             $block = $this->request->post['block'];
             $parentBlock = $this->request->post['parentBlock'];
@@ -247,19 +243,19 @@ class ControllerPagesDesignLayout extends AController
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-        $tmpl_id = $this->request->get['tmpl_id'] ?? null;
-        $page_id = $this->request->get['page_id'];
-        $layout_id = $this->request->get['layout_id'];
+        $templateTextId = $this->request->get['tmpl_id'] ?? null;
+        $pageId = (int)$this->request->get['page_id'];
+        $layoutId = (int)$this->request->get['layout_id'];
 
         $success = false;
-        if (($this->request->is_GET() && $this->request->get['confirmed_delete'] == 'yes')) {
-            $layout = new ALayoutManager($tmpl_id, $page_id, $layout_id);
+        if ($this->request->is_GET() && $this->request->get['confirmed_delete'] == 'yes') {
+            $layout = new ALayoutManager($templateTextId, $pageId, $layoutId);
             //do delete this page/layout validate that it is allowed to delete
             $page = $layout->getPageData();
             if ($page['restricted']) {
                 $this->session->data['warning'] = $this->language->get('text_delete_restricted');
             } else {
-                if ($layout->deletePageLayoutByID($page_id, $layout_id)) {
+                if ($layout->deletePageLayoutByID($pageId, $layoutId)) {
                     $this->session->data['success'] = $this->language->get('text_delete_success');
                     $success = true;
                 } else {
@@ -270,14 +266,14 @@ class ControllerPagesDesignLayout extends AController
 
         $url = '';
         if (!$success) {
-            if ($tmpl_id) {
-                $url .= '&tmpl_id='.$tmpl_id;
+            if ($templateTextId) {
+                $url .= '&tmpl_id=' . $templateTextId;
             }
-            if ($layout_id) {
-                $url .= '&layout_id='.$layout_id;
+            if ($layoutId) {
+                $url .= '&layout_id=' . $layoutId;
             }
-            if ($page_id) {
-                $url .= '&page_id='.$page_id;
+            if ($pageId) {
+                $url .= '&page_id=' . $pageId;
             }
         }
 

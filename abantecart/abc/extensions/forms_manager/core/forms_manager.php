@@ -1,7 +1,25 @@
 <?php
+/*------------------------------------------------------------------------------
+  $Id$
 
+  AbanteCart, Ideal OpenSource Ecommerce Solution
+  http://www.AbanteCart.com
+
+  Copyright © 2011-2023 Belavier Commerce LLC
+
+  This source file is subject to Open Software License (OSL 3.0)
+  License details is bundled with this package in the file LICENSE.txt.
+  It is also available at this URL:
+  <http://www.opensource.org/licenses/OSL-3.0>
+
+ UPGRADE NOTE:
+   Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+   versions in the future. If you wish to customize AbanteCart for your
+   needs please refer to http://www.AbanteCart.com for more information.
+------------------------------------------------------------------------------*/
 namespace abc\core\extension;
 
+use abc\controllers\admin\ControllerPagesDesignBlocks;
 use abc\controllers\admin\ControllerResponsesCommonTabs;
 use abc\core\engine\AHtml;
 use abc\core\engine\Extension;
@@ -38,7 +56,7 @@ class ExtensionFormsManager extends Extension
     {
 
         if ( $this->baseObject_method != 'block_info' ) {
-            return null;
+            return;
         }
 
         if ( $this->baseObject->data['block_txt_id'] == 'custom_form_block' ) {
@@ -89,9 +107,10 @@ class ExtensionFormsManager extends Extension
     public function onControllerPagesDesignBlocks_UpdateData()
     {
         $method_name = $this->baseObject_method;
+        /** @var ControllerPagesDesignBlocks $that */
         $that = $this->baseObject;
         if ( $method_name != 'main' ) {
-            return null;
+            return;
         }
         $lm = new ALayoutManager();
         $block = $lm->getBlockByTxtId( 'custom_form_block' );
@@ -129,7 +148,6 @@ class ExtensionFormsManager extends Extension
     {
         /** @var ControllerResponsesCommonTabs $that */
         $that = $this->baseObject;
-
         if ($that->group == 'block' && !$that->request->get['custom_block_id']) {
             $lm = new ALayoutManager();
             $that->loadLanguage('forms_manager/forms_manager');
@@ -145,5 +163,4 @@ class ExtensionFormsManager extends Extension
             ];
         }
     }
-
 }

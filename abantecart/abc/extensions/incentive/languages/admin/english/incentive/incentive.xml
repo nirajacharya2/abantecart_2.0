@@ -1,0 +1,482 @@
+<?xml version="1.0"?>
+<definitions>
+    <definition>
+        <key>incentive_name</key>
+        <value><![CDATA[Incentives]]></value>
+    </definition>
+    <definition>
+        <key>total_name</key>
+        <value><![CDATA[Incentives Total]]></value>
+    </definition>
+    <definition>
+        <key>incentive_status</key>
+        <value><![CDATA[Status]]></value>
+    </definition>
+    <definition>
+        <key>incentive_cart</key>
+        <value><![CDATA[Run Incentives in the Customer Cart]]></value>
+    </definition>
+    <definition>
+        <key>incentive_note</key>
+        <value>
+            <![CDATA[With this extension you can create new incentives for customers. Go to menu <a href="#admin#rt=sale/incentive">Sales->Incentives</a> to do this now. Also don't forget to enable extension <a href="#admin#rt=total/incentive_total">Incentives Total</a><br>Important! Incentives Total calculation order in extension totals must be after subtotal. Subtotal calculation should precede this extension total calculation. Check this in extensions total settings.]]></value>
+    </definition>
+    <definition>
+        <key>column_name</key>
+        <value><![CDATA[ Name ]]></value>
+    </definition>
+    <definition>
+        <key>column_priority</key>
+        <value><![CDATA[ Priority ]]></value>
+    </definition>
+    <definition>
+        <key>column_status</key>
+        <value><![CDATA[ Status ]]></value>
+    </definition>
+    <definition>
+        <key>column_daterange</key>
+        <value><![CDATA[ Date Range ]]></value>
+    </definition>
+    <definition>
+        <key>column_run_side</key>
+        <value><![CDATA[ Run Side ]]></value>
+    </definition>
+    <definition>
+        <key>column_update_date</key>
+        <value><![CDATA[ Update Date ]]></value>
+    </definition>
+    <definition>
+        <key>text_create</key>
+        <value><![CDATA[ Create New Incentive ]]></value>
+    </definition>
+    <definition>
+        <key>text_general</key>
+        <value><![CDATA[ General ]]></value>
+    </definition>
+    <definition>
+        <key>text_conditions</key>
+        <value><![CDATA[ Conditions ]]></value>
+    </definition>
+    <definition>
+        <key>text_bonuses</key>
+        <value><![CDATA[ Bonuses ]]></value>
+    </definition>
+    <definition>
+        <key>text_product_incentive</key>
+        <value><![CDATA[ Product Level ]]></value>
+    </definition>
+    <definition>
+        <key>text_global_incentive</key>
+        <value><![CDATA[ Global Level ]]></value>
+    </definition>
+    <definition>
+        <key>entry_incentive_type</key>
+        <value><![CDATA[ Type: ]]></value>
+    </definition>
+    <definition>
+        <key>entry_incentive_name</key>
+        <value><![CDATA[ Name: ]]></value>
+    </definition>
+    <definition>
+        <key>entry_incentive_priority</key>
+        <value><![CDATA[ Priority: ]]></value>
+    </definition>
+    <definition>
+        <key>entry_incentive_description_short</key>
+        <value><![CDATA[ Short Description: ]]></value>
+    </definition>
+    <definition>
+        <key>entry_incentive_description</key>
+        <value><![CDATA[ Detailed Description: ]]></value>
+    </definition>
+    <definition>
+        <key>entry_incentive_stop</key>
+        <value><![CDATA[ Stop other rules: ]]></value>
+    </definition>
+    <definition>
+        <key>entry_incentive_daterange</key>
+        <value><![CDATA[ Start and end dates: ]]></value>
+    </definition>
+    <definition>
+        <key>text_all</key>
+        <value><![CDATA[ All ]]></value>
+    </definition>
+    <definition>
+        <key>text_any</key>
+        <value><![CDATA[ Any ]]></value>
+    </definition>
+    <definition>
+        <key>text_if_1</key>
+        <value><![CDATA[ If ]]></value>
+    </definition>
+    <definition>
+        <key>text_if_2</key>
+        <value><![CDATA[ of these conditions are ]]></value>
+    </definition>
+    <definition>
+        <key>text_true</key>
+        <value><![CDATA[ True ]]></value>
+    </definition>
+    <definition>
+        <key>text_false</key>
+        <value><![CDATA[ False ]]></value>
+    </definition>
+    <definition>
+        <key>text_product_price</key>
+        <value><![CDATA[ Product Price ]]></value>
+    </definition>
+    <definition>
+        <key>entry_products</key>
+        <value><![CDATA[ Products: ]]></value>
+    </definition>
+    <definition>
+        <key>entry_product_price</key>
+        <value><![CDATA[ Product Price: ]]></value>
+    </definition>
+    <definition>
+        <key>text_equal</key>
+        <value><![CDATA[ equal ]]></value>
+    </definition>
+    <definition>
+        <key>text_not_equal</key>
+        <value><![CDATA[ not equal ]]></value>
+    </definition>
+    <definition>
+        <key>text_equal_or_less</key>
+        <value><![CDATA[ equal or less ]]></value>
+    </definition>
+    <definition>
+        <key>text_equal_or_greater</key>
+        <value><![CDATA[ equal or greater ]]></value>
+    </definition>
+    <definition>
+        <key>text_less</key>
+        <value><![CDATA[ less ]]></value>
+    </definition>
+    <definition>
+        <key>text_greater</key>
+        <value><![CDATA[ greater ]]></value>
+    </definition>
+    <definition>
+        <key>text_categories</key>
+        <value><![CDATA[ Categories ]]></value>
+    </definition>
+    <definition>
+        <key>entry_categories</key>
+        <value><![CDATA[ Categories: ]]></value>
+    </definition>
+    <definition>
+        <key>text_brands</key>
+        <value><![CDATA[ Brands ]]></value>
+    </definition>
+    <definition>
+        <key>entry_brands</key>
+        <value><![CDATA[ Brands: ]]></value>
+    </definition>
+    <definition>
+        <key>text_in</key>
+        <value><![CDATA[ in ]]></value>
+    </definition>
+    <definition>
+        <key>text_in_comma</key>
+        <value><![CDATA[ in (comma separated)]]></value>
+    </definition>
+    <definition>
+        <key>text_not_in</key>
+        <value><![CDATA[ not in ]]></value>
+    </definition>
+    <definition>
+        <key>text_not_in_comma</key>
+        <value><![CDATA[ not in (comma separated)]]></value>
+    </definition>
+    <definition>
+        <key>text_products</key>
+        <value><![CDATA[ Products ]]></value>
+    </definition>
+    <definition>
+        <key>text_product_option</key>
+        <value><![CDATA[ Product Options ]]></value>
+    </definition>
+    <definition>
+        <key>text_customers</key>
+        <value><![CDATA[ Customers ]]></value>
+    </definition>
+    <definition>
+        <key>entry_customers</key>
+        <value><![CDATA[ Customers: ]]></value>
+    </definition>
+    <definition>
+        <key>text_customer_groups</key>
+        <value><![CDATA[ Customer Groups ]]></value>
+    </definition>
+    <definition>
+        <key>entry_customer_groups</key>
+        <value><![CDATA[ Customer Groups: ]]></value>
+    </definition>
+    <definition>
+        <key>text_customer_country</key>
+        <value><![CDATA[ Customer Country ]]></value>
+    </definition>
+    <definition>
+        <key>entry_customer_country</key>
+        <value><![CDATA[ Customer Country: ]]></value>
+    </definition>
+    <definition>
+        <key>text_customer_zone</key>
+        <value><![CDATA[ Customer Zone ]]></value>
+    </definition>
+    <definition>
+        <key>text_customer_postcode</key>
+        <value><![CDATA[ Customer Zip/Postal Code ]]></value>
+    </definition>
+    <definition>
+        <key>entry_customer_postcode</key>
+        <value><![CDATA[ Customer Zip/Postal Code: ]]></value>
+    </definition>
+    <definition>
+        <key>text_contain</key>
+        <value><![CDATA[ contain ]]></value>
+    </definition>
+    <definition>
+        <key>text_not_contain</key>
+        <value><![CDATA[ doesn't contain ]]></value>
+    </definition>
+    <definition>
+        <key>entry_order_subtotal</key>
+        <value><![CDATA[ Order Subtotal: ]]></value>
+    </definition>
+    <definition>
+        <key>text_order_subtotal</key>
+        <value><![CDATA[ Order Subtotal ]]></value>
+    </definition>
+    <definition>
+        <key>text_order_product_count</key>
+        <value><![CDATA[ Total quantity of products in the cart ]]></value>
+    </definition>
+    <definition>
+        <key>entry_order_product_count</key>
+        <value><![CDATA[ Total quantity of products in the cart: ]]></value>
+    </definition>
+    <definition>
+        <key>text_order_product_weight</key>
+        <value><![CDATA[ Total products weight in the cart ]]></value>
+    </definition>
+    <definition>
+        <key>entry_order_product_weight</key>
+        <value><![CDATA[ Total products weight in the cart: ]]></value>
+    </definition>
+    <definition>
+        <key>text_payment_method</key>
+        <value><![CDATA[ Payment Method ]]></value>
+    </definition>
+    <definition>
+        <key>entry_payment_method</key>
+        <value><![CDATA[ Payment Method: ]]></value>
+    </definition>
+    <definition>
+        <key>text_shipping_method</key>
+        <value><![CDATA[ Shipping Method ]]></value>
+    </definition>
+    <definition>
+        <key>entry_shipping_method</key>
+        <value><![CDATA[ Shipping Method: ]]></value>
+    </definition>
+    <definition>
+        <key>text_coupon_code</key>
+        <value><![CDATA[ Coupon Code ]]></value>
+    </definition>
+    <definition>
+        <key>entry_coupon_code</key>
+        <value><![CDATA[ Coupon Code: ]]></value>
+    </definition>
+    <definition>
+        <key>entry_condition_object</key>
+        <value><![CDATA[ Add Condition: ]]></value>
+    </definition>
+    <definition>
+        <key>entry_bonus_object</key>
+        <value><![CDATA[ Add Bonus: ]]></value>
+    </definition>
+    <definition>
+        <key>text_order_discount</key>
+        <value><![CDATA[ Order Discount ]]></value>
+    </definition>
+    <definition>
+        <key>entry_order_discount</key>
+        <value><![CDATA[ Order Discount: ]]></value>
+    </definition>
+    <definition>
+        <key>text_by_prc</key>
+        <value><![CDATA[ by percentage of the original price ]]></value>
+    </definition>
+    <definition>
+        <key>text_to_prc</key>
+        <value><![CDATA[ to percentage of the original price ]]></value>
+    </definition>
+    <definition>
+        <key>text_by_fixed</key>
+        <value><![CDATA[ by fixed amount ]]></value>
+    </definition>
+    <definition>
+        <key>text_to_fixed</key>
+        <value><![CDATA[ to fixed amount ]]></value>
+    </definition>
+    <definition>
+        <key>text_free_shipping</key>
+        <value><![CDATA[ Free Shipping ]]></value>
+    </definition>
+    <definition>
+        <key>entry_free_shipping</key>
+        <value><![CDATA[ Free Shipping: ]]></value>
+    </definition>
+    <definition>
+        <key>text_free_products</key>
+        <value><![CDATA[ Free Products ]]></value>
+    </definition>
+    <definition>
+        <key>entry_free_products</key>
+        <value><![CDATA[ Free Products: ]]></value>
+    </definition>
+    <definition>
+        <key>text_discount_products</key>
+        <value><![CDATA[ Discount Products ]]></value>
+    </definition>
+    <definition>
+        <key>entry_discount_products</key>
+        <value><![CDATA[ Discount Products: ]]></value>
+    </definition>
+    <definition>
+        <key>text_success_edit</key>
+        <value><![CDATA[ Success: Your incentive modified successfully.]]></value>
+    </definition>
+    <definition>
+        <key>text_success_create</key>
+        <value>
+            <![CDATA[ Success: New incentive created successfully. Now you need to set conditions and bonuses for it. ]]></value>
+    </definition>
+    <definition>
+        <key>error_empty</key>
+        <value><![CDATA[Please Fill All Required Fields!]]></value>
+    </definition>
+    <definition>
+        <key>text_incentive_total</key>
+        <value><![CDATA[Incentive]]></value>
+    </definition>
+    <definition>
+        <key>entry_status</key>
+        <value><![CDATA[Status]]></value>
+    </definition>
+    <definition>
+        <key>entry_status</key>
+        <value><![CDATA[Status:]]></value>
+    </definition>
+    <definition>
+        <key>entry_sort_order</key>
+        <value><![CDATA[Sort Order:]]></value>
+    </definition>
+    <definition>
+        <key>entry_calculation_order</key>
+        <value><![CDATA[Calculation Order:]]></value>
+    </definition>
+    <definition>
+        <key>text_select_category</key>
+        <value><![CDATA[- Select Category -]]></value>
+    </definition>
+    <definition>
+        <key>text_select_product</key>
+        <value><![CDATA[- Select Product -]]></value>
+    </definition>
+    <definition>
+        <key>text_select_manufacturer</key>
+        <value><![CDATA[- Select Brand -]]></value>
+    </definition>
+    <definition>
+        <key>incentive_error_empty_conditions</key>
+        <value><![CDATA[Error: Incentive must have at least one condition!]]></value>
+    </definition>
+    <definition>
+        <key>incentive_error_empty_bonuses</key>
+        <value><![CDATA[Error: Incentive must have at least one bonus!]]></value>
+    </definition>
+    <definition>
+        <key>incentive_no_expiration</key>
+        <value><![CDATA[No Expiration]]></value>
+    </definition>
+    <definition>
+        <key>text_incentive_products</key>
+        <value><![CDATA[Incentive Purchased Products]]></value>
+    </definition>
+    <definition>
+        <key>text_incentive_product_quantity</key>
+        <value><![CDATA[Incentive Purchased Product Quantity]]></value>
+    </definition>
+    <definition>
+        <key>text_consolidation_status</key>
+        <value><![CDATA[Buyer Consolidation Status]]></value>
+    </definition>
+    <definition>
+        <key>text_buyer_country</key>
+        <value><![CDATA[Buyer Country]]></value>
+    </definition>
+    <definition>
+        <key>text_award_points</key>
+        <value><![CDATA[Award Points]]></value>
+    </definition>
+    <definition>
+        <key>text_award_points_auto</key>
+        <value><![CDATA[Award Points Auto Amount (value takes from sale_import table )]]></value>
+    </definition>
+    <definition>
+        <key>text_award_points</key>
+        <value><![CDATA[Fixed Award Points Amount]]></value>
+    </definition>
+    <definition>
+        <key>incentive_type_storefront</key>
+        <value><![CDATA[Run on Storefront Side]]></value>
+    </definition>
+    <definition>
+        <key>incentive_type_background</key>
+        <value><![CDATA[Run on Background]]></value>
+    </definition>
+    <definition>
+        <key>entry_incentive_limit_of_usages</key>
+        <value><![CDATA[Limit of usage per buyer]]></value>
+    </definition>
+
+    <definition>
+        <key>incentive_name_applied</key>
+        <value><![CDATA[Applied Incentives]]></value>
+    </definition>
+    <definition>
+        <key>incentive_text_customer</key>
+        <value><![CDATA[Customer]]></value>
+    </definition>
+    <definition>
+        <key>incentive_text_incentive</key>
+        <value><![CDATA[Incentive]]></value>
+    </definition>
+    <definition>
+        <key>incentive_text_bonus_amount</key>
+        <value><![CDATA[Bonus Amount]]></value>
+    </definition>
+    <definition>
+        <key>incentive_text_date</key>
+        <value><![CDATA[Date]]></value>
+    </definition>
+    <definition>
+        <key>incentive_text_result</key>
+        <value><![CDATA[Result]]></value>
+    </definition>
+    <definition>
+        <key>incentive_text_all_incentives</key>
+        <value><![CDATA[All Incentives]]></value>
+    </definition>
+    <definition>
+        <key>incentive_text_match_conditions</key>
+        <value><![CDATA[Matched Conditions]]></value>
+    </definition>
+    <definition>
+        <key>incentive_text_match_items</key>
+        <value><![CDATA[Matched Items]]></value>
+    </definition>
+</definitions>

@@ -35,8 +35,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class DownloadDescription extends BaseModel
 {
-    use SoftDeletes;
-
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'download_id',

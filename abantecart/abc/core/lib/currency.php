@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,11 +22,10 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use Exception;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
-
-/**
- * Class ACurrency
- */
 class ACurrency
 {
     protected $code;
@@ -46,8 +45,8 @@ class ACurrency
     /**
      * @param $registry Registry
      *
-     * @throws \Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws Exception
+     * @throws InvalidArgumentException
      */
     public function __construct($registry)
     {
@@ -57,11 +56,7 @@ class ACurrency
         $this->request = $registry->get('request');
         $this->session = $registry->get('session');
         $this->log = $registry->get('log');
-        /**
-         * @var AMessage
-         */
         $this->message = $registry->get('messages');
-        /** @var AbcCache $cache */
         $cache = Registry::cache();
         $cache_key = 'localization.currencies';
         $cache_data = $cache->get($cache_key);
@@ -166,11 +161,14 @@ class ACurrency
     /**
      * Format only number part (digit based)
      *
-     * @param float  $number
+     * @param float $number
      * @param string $currency
      * @param string $crr_value
      *
-     * @return float
+     * @return string
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function format_number($number, $currency = '', $crr_value = '')
     {
@@ -180,12 +178,15 @@ class ACurrency
     /**
      * Format total number part and/or currency symbol based on original price and quantity
      *
-     * @param float  $price
-     * @param float  $qty
+     * @param float $price
+     * @param float $qty
      * @param string $currency
      * @param string $crr_value
-     *
+     * @param bool $format
      * @return string
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function format_total($price, $qty, $currency = '', $crr_value = '', $format = true)
     {
@@ -205,12 +206,15 @@ class ACurrency
     /**
      * Format number part and/or currency symbol
      *
-     * @param float  $number
+     * @param float $number
      * @param string $currency
      * @param string $crr_value
-     * @param bool   $format
+     * @param bool $format
      *
-     * @return string|float
+     * @return string
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function format($number, $currency = '', $crr_value = '', $format = true)
     {
@@ -247,10 +251,13 @@ class ACurrency
     /**
      * Format number part and/or currency symbol
      *
-     * @param float  $number
+     * @param float $number
      * @param string $currency
      *
      * @return string
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      * @internal param bool $format
      */
     public function wrap_display_format($number, $currency = '')
@@ -270,32 +277,33 @@ class ACurrency
     }
 
     /**
-     * @param float  $value
+     * @param float $value
      * @param string $code_from
      * @param string $code_to
      *
      * @return float|bool
+     * @throws Exception
      */
     public function convert($value, $code_from, $code_to)
     {
-        $from = isset($this->currencies[$code_from]['value']) ? $this->currencies[$code_from]['value'] : 0;
-        $to = isset($this->currencies[$code_to]['value']) ? $this->currencies[$code_to]['value'] : 0;
+        $from = $this->currencies[$code_from]['value'] ?? 0;
+        $to = $this->currencies[$code_to]['value'] ?? 0;
         $to_decimal = isset($this->currencies[$code_to]['decimal_place'])
-                    ? (int)$this->currencies[$code_to]['decimal_place']
-                    : 2;
+            ? (int)$this->currencies[$code_to]['decimal_place']
+            : 2;
 
         $error = false;
         if (!$to) {
-            $msg = 'Error: tried to convert into inaccessible currency! Currency code is "'.$code_to.'"';
+            $msg = 'Error: tried to convert into inaccessible currency! Currency code is "' . $code_to . '"';
             $dbg = debug_backtrace();
-            $this->log->write("ACurrency ".$msg."\nCalled from ".$dbg[0]['file'].":".$dbg[0]['line']);
+            $this->log->error("ACurrency " . $msg . "\nCalled from " . $dbg[0]['file'] . ":" . $dbg[0]['line']);
             $this->message->saveError('Currency conversion error', $msg);
             $error = true;
         }
         if (!$from) {
             $dbg = debug_backtrace();
-            $msg = 'Error: tried to convert from inaccessible currency! Currency code is '.$code_from;
-            $this->log->write("ACurrency ".$msg."\nCalled from ".$dbg[0]['file'].":".$dbg[0]['line']);
+            $msg = 'Error: tried to convert from inaccessible currency! Currency code is ' . $code_from;
+            $this->log->error("ACurrency " . $msg . "\nCalled from " . $dbg[0]['file'] . ":" . $dbg[0]['line']);
             $this->message->saveError('Currency conversion error .', $msg);
             $error = true;
         }
