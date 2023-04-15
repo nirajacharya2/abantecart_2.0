@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -19,7 +19,6 @@
 namespace abc\controllers\storefront;
 
 use abc\core\ABC;
-use abc\core\engine\AControllerAPI;
 use abc\core\engine\AResource;
 use abc\core\engine\ASecureControllerAPI;
 use abc\models\order\Order;
@@ -28,6 +27,7 @@ use abc\models\order\OrderProduct;
 use abc\models\order\OrderStatusDescription;
 use abc\models\order\OrderTotal;
 use H;
+use Illuminate\Support\Collection;
 
 
 class ControllerApiOrderDetails extends ASecureControllerAPI
@@ -38,8 +38,6 @@ class ControllerApiOrderDetails extends ASecureControllerAPI
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->loadLanguage('sale/order');
-
         $request = $this->rest->getRequestParams();
 
         if (!H::has_value($request['order_id'])) {
@@ -49,7 +47,7 @@ class ControllerApiOrderDetails extends ASecureControllerAPI
                 'error_text' => 'Order ID is missing'
             ]);
             $this->rest->sendResponse(400);
-            return null;
+            return;
         }
         $orderId = $request['order_id'];
 
@@ -121,8 +119,10 @@ class ControllerApiOrderDetails extends ASecureControllerAPI
         unset($this->data['order_status_name']);
 
         $products = [];
+        /** @var OrderProduct|Collection $orderProducts */
         $orderProducts = OrderProduct::where('order_id', '=', $orderId)->get();
         $orderStatuses = OrderStatusDescription::where('language_id', '=', $this->language->getLanguageID())
+            ->useCache('order_status')
             ->get()
             ->toArray();
         $orderStatuses = array_column($orderStatuses, 'name', 'order_status_id');
