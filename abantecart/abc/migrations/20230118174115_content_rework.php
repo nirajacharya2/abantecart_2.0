@@ -37,8 +37,7 @@ class ContentRework extends AbstractMigration
             $this->query($sql);
             $sql = "drop index tims_contents_fk_1_idx on tims_contents;";
             $this->query($sql);
-        } catch (Exception $e) {
-        }
+        } catch (Exception $e) { }
 
         if ($this->table('contents')->hasColumn('parent_content_id')) {
             $sql = "alter table tims_contents change parent_content_id parent_id int null;";
@@ -50,8 +49,7 @@ class ContentRework extends AbstractMigration
             $this->query($sql);
             $sql = "alter table tims_contents modify content_id int auto_increment;";
             $this->query($sql);
-        } catch (Exception $e) {
-        }
+        } catch (Exception $e) { }
         try {
             $sql = "alter table tims_contents
                     add constraint tims_contents_tims_contents_content_id_fk
@@ -61,13 +59,17 @@ class ContentRework extends AbstractMigration
         } catch (Exception $e) {
         }
 
+
         $sql = "alter table tims_contents modify content_id int auto_increment;";
         $this->query($sql);
-        $sql = "alter table tims_contents
+
+        if( !$this->table('contents')->hasForeignKey('parent_id') ) {
+            $sql = "alter table tims_contents
                     add constraint tims_contents_tims_contents_content_id_fk
                         foreign key (parent_id) references tims_contents (content_id)
                             on update cascade on delete set null;";
-        $this->query($sql);
+            $this->query($sql);
+        }
     }
 
     public function down()

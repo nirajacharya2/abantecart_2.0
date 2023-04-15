@@ -215,6 +215,12 @@ class ControllerPagesCatalogProduct extends AController
             ],
         ];
 
+        //if auditLog storage not found - disable menu item
+        if (!$this->registry->get('AuditLogStorage') && !ABC::getObjectByAlias('AuditLogStorage')) {
+            unset($grid_settings['actions']['edit']['children']['audit_log']);
+        }
+
+
         $grid_settings['colNames'] = [
             '',
             $this->language->get('column_name'),
