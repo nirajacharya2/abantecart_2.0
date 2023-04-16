@@ -893,7 +893,7 @@ class ControllerPagesExtensionBannerManager extends AController
 
             $this->data['banner_group_name'] = $content['banner_group_name'];
             $lm = new AListingManager($custom_block_id);
-            $list = $lm->getCustomList();
+            $list = $lm->getCustomList((int)$this->config->get('current_store_id'));
 
             if ($list) {
                 foreach ($list as $row) {

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2021 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -444,7 +444,7 @@ class ControllerResponsesListingGridBlocksGrid extends AController
 
             if ($content['listing_datasource'] == $listing_datasource) {
                 $lm = new AListingManager($custom_block_id);
-                $list = $lm->getCustomList($this->config->get('current_store_id'));
+                $list = $lm->getCustomList((int)$this->config->get('current_store_id'));
 
                 if ($list) {
                     foreach ($list as $row) {

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -20,35 +20,17 @@
 
 namespace abc\core\lib;
 
-use abc\core\engine\Registry;
 use abc\models\catalog\Category;
 use abc\models\catalog\Manufacturer;
 use abc\models\catalog\Product;
-use Psr\SimpleCache\InvalidArgumentException;
+use abc\models\layout\CustomList;
 
-/**
- * Class AListing
- *
- * @property \abc\core\lib\AbcCache $cache
- * @property ADB $db
- */
 class AListing
 {
-    /**
-     * @var Registry
-     */
-    protected $registry;
-    /**
-     * @var int
-     */
-    public $errors = 0;
-    /**
-     * @var int
-     */
+
+    /** @var int */
     protected $custom_block_id;
-    /**
-     * @var array
-     */
+    /** @var array */
     public $data_sources = [];
 
     /**
@@ -56,9 +38,8 @@ class AListing
      */
     public function __construct($custom_block_id)
     {
-        $this->registry = Registry::getInstance();
-        $this->custom_block_id = (int) $custom_block_id;
-        // datasources
+        $this->custom_block_id = (int)$custom_block_id;
+        // data-sources
         $this->data_sources = [
             'catalog_product_getPopularProducts' => [
                 'text'                 => 'text_products_popular',
@@ -163,48 +144,22 @@ class AListing
         ];
     }
 
-    public function __get($key)
-    {
-        return $this->registry->get($key);
-    }
-
-    public function __set($key, $value)
-    {
-        $this->registry->set($key, $value);
-    }
-
     /**
      * @param int $store_id
-     *
      * @return array
-     * @throws \Exception
-     * @throws InvalidArgumentException
      */
-    public function getCustomList($store_id = 0)
+    public function getCustomList(int $store_id)
     {
-        $store_id = (int) $store_id;
-        if (!(int) $this->custom_block_id) {
+        if (!$this->custom_block_id) {
             return [];
         }
 
-        $custom_block_id = (int) $this->custom_block_id;
-        $cache_key = 'blocks.custom.'.$custom_block_id.$store_id;
-        $output = false;//$this->cache->get($cache_key);
-
-        if ($output !== false) {
-            return $output;
-        }
-
-        $result = $this->db->query(
-            "SELECT *
-            FROM `".$this->db->table_name('custom_lists')."`
-            WHERE custom_block_id = '".$custom_block_id."'
-             AND store_id = '".$store_id."'
-            ORDER BY sort_order"
-        );
-        $output = $result->rows;
-        $this->cache->put($cache_key, $output);
-        return $output;
+        return (array)CustomList::where(
+            [
+                'custom_block_id' => $this->custom_block_id,
+                'store_id'        => $store_id
+            ]
+        )->orderBy('sort_order')->useCache('layout')->get()?->toArray();
     }
 
     /**
@@ -240,7 +195,6 @@ class AListing
      * @param array $args
      *
      * @return array|false
-     * @throws InvalidArgumentException
      */
     public function getListingMethodArguments($model, $method, $args = [])
     {
@@ -333,7 +287,7 @@ class AListing
 
     protected function getCustomListIds($storeId, $keyName)
     {
-        $list = $this->getCustomList($storeId);
+        $list = $this->getCustomList((int)$storeId);
         if (!$list) {
             return false;
         }
