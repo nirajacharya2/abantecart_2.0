@@ -2440,25 +2440,23 @@ class Product extends BaseModel
     }
 
     /**
-     * @param array $data
+     * @param array|null $params
      *
      * @return Collection|stdClass
      */
-    public static function getBestSellerProducts(array $data)
+    public static function getBestSellerProducts(?array $params = [])
     {
-        $limit = (int)$data['limit'] ?: 20;
-        $start = (int)$data['start'];
 
-        $bestSellerIds = self::getBestSellerProductIds($data);
+        $bestSellerIds = self::getBestSellerProductIds($params);
         $searchParams = [
             'initiator'    => __METHOD__,
             'filter'       => [
                 'include'     => $bestSellerIds,
-                'language_id' => $data['language_id'] ?: Registry::language()->getContentLanguageID(),
-                'store_id'    => $data['store_id'] ?? (int)Registry::config()->get('config_store_id')
+                'language_id' => $params['language_id'] ?: Registry::language()->getContentLanguageID(),
+                'store_id'    => $params['store_id'] ?? (int)Registry::config()->get('config_store_id')
             ],
-            'start'        => $start,
-            'limit'        => $limit,
+            'start'        => (int)$params['start'],
+            'limit'        => (int)$params['limit'] ?: 20,
             //NOTE: sorting by giver product_ids sequence (see $bestSellerIds var)
             'sort'         => 'include',
             'only_enabled' => true,
@@ -2624,7 +2622,9 @@ class Product extends BaseModel
             $where['group_id'] = (int)$group_id;
         }
 
-        $options = ProductOption::where($where)->orderBy('sort_order')->get();
+        $options = ProductOption::where($where)->orderBy('sort_order')
+            ->useCache('product')
+            ->get();
 
         if ($options) {
             foreach ($options as $product_option) {
@@ -2638,7 +2638,7 @@ class Product extends BaseModel
     public static function getProductOption($option_id)
     {
         $option = ProductOption::with('descriptions')
-            ->useCache('product')->find($option_id)
+            ->find($option_id)
             ?->toArray();
 
         $optionData = [];
@@ -2696,7 +2696,7 @@ class Product extends BaseModel
         $params['sort'] = $params['sort'] ?: 'sort_order';
         $params['order'] = $params['order'] ?? 'ASC';
         $params['start'] = max($params['start'], 0);
-        $params['limit'] = $params['limit'] >= 1 ? $params['limit'] : 20;
+        $params['limit'] = abs((int)$params['limit']) ?: 20;;
 
         $filter = (array)$params['filter'];
         $filter['include'] = $filter['include'] ?? [];
@@ -2971,79 +2971,79 @@ class Product extends BaseModel
     /**
      * Wrapper. Needs to be used in the abstract calls for listing blocks etc
      *
-     * @param int $limit
-     * @param array $filter
+     * @param array|null $params
      *
      * @return Collection
      */
-    public static function getPopularProducts($limit = 0, $filter = [])
+    public static function getPopularProducts(?array $params = [])
     {
-        $limit = (int)$limit;
         return static::getProducts(
             [
                 'with_all' => true,
                 'sort'     => 'viewed',
                 'order'    => 'DESC',
-                'limit'    => $limit,
-                'filter'   => $filter,
+                'limit'    => $params['limit'] ?: 20,
+                'filter'   => $params['filter'],
             ]
         );
     }
 
     /**
-     * @param $limit
-     * @param $filter
+     * @param array|null $params
      *
      * @return Collection
      */
-    public static function getLatestProducts($limit = 0, $filter = [])
+    public static function getLatestProducts(?array $params = [])
     {
-        $limit = (int)$limit;
         return static::getProducts(
             [
                 'with_all' => true,
                 'sort'     => 'date_modified',
                 'order'    => 'DESC',
-                'limit'    => $limit ?: 20,
-                'filter'   => $filter,
+                'limit'    => $params['limit'] ?: 20,
+                'filter'   => $params['filter'],
             ]
         );
     }
 
     /**
-     * @param array $data
+     * @param array|null $params
      *
      * @return Collection
      *
      */
-    public static function getProductSpecials($data = [])
+    public static function getProductSpecials(?array $params = [])
     {
         return static::getProducts(
             [
                 'with_all' => true,
-                'sort'     => $data['sort'] ?: 'sort_order',
-                'order'    => $data['order'] ?: 'ASC',
-                'start'    => (int)$data['start'],
-                'limit'    => (int)$data['limit'],
+                'sort'     => $params['sort'] ?: 'sort_order',
+                'order'    => $params['order'] ?: 'ASC',
+                'start'    => (int)$params['start'],
+                'limit'    => (int)$params['limit'],
                 'filter'   => array_merge(
-                    (array)$data['filter'],
+                    (array)$params['filter'],
                     ['only_specials' => true]
                 ),
             ]
         );
     }
 
-    public static function getFeaturedProducts($data = [])
+    /**
+     * @param array|null $params
+     * @return Collection|stdClass
+     */
+    public static function getFeaturedProducts(?array $params = [])
     {
         return static::getProducts(
             [
                 'with_all' => true,
-                'sort'     => $data['sort'] ?: 'sort_order',
-                'order'    => $data['order'] ?: 'ASC',
-                'start'    => (int)$data['start'],
-                'limit'    => (int)$data['limit'] ?: 20,
+                'sort'     => $params['sort'] ?: 'sort_order',
+                'order'    => $params['order'] ?: 'ASC',
+                'start'    => (int)$params['start'],
+                'limit'    => (int)$params['limit'] ?: 20,
                 'filter'   => array_merge(
-                    (array)$data['filter'],
+                    (array)$params['filter'],
                     ['only_featured' => true]
                 ),
             ]

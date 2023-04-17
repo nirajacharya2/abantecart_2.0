@@ -369,42 +369,42 @@ class Manufacturer extends BaseModel
 
     public function getManufacturers($params = [])
     {
+        $params['sort'] = $params['sort'] ?: 'sort_order';
+        $params['order'] = $params['order'] ?? 'ASC';
+        $params['start'] = max($params['start'], 0);
+        $params['limit'] = abs((int)$params['limit']) ?: 20;
+
+        $filter = (array)$params['filter'];
+        $filter['include'] = $filter['include'] ?? [];
+        $filter['exclude'] = $filter['exclude'] ?? [];
         $db = Registry::db();
         $storeId = $params['store_id'] ?? (int)Registry::config()->get('config_store_id');
         $manTable = $db->table_name('manufacturers');
 
-        $query = self::selectRaw(Registry::db()->raw_sql_row_count() . ' ' . $manTable . '.*')
-            ->leftJoin(
-                'manufacturers_to_stores',
-                         'manufacturers_to_stores.manufacturer_id',
-                         '=',
-                         'manufacturers.manufacturer_id'
-                     );
-        $query->where('manufacturers_to_stores.store_id', '=', $storeId);
+        $query = self::selectRaw(
+            Registry::db()->raw_sql_row_count() . ' ' . $manTable . '.*'
+        )->leftJoin(
+            'manufacturers_to_stores',
+            'manufacturers_to_stores.manufacturer_id',
+            '=',
+            'manufacturers.manufacturer_id'
+        )->where('manufacturers_to_stores.store_id', '=', $storeId);
         //include ids set
-        if (H::has_value($params['include'])) {
-            $filter['include'] = array_map('intval', (array) $params['include']);
+        if ($filter['include']) {
+            $filter['include'] = array_map('intval', (array)$filter['include']);
             $query->whereIn('manufacturers.manufacturer_id', $filter['include']);
         }
         //exclude already selected in chosen element
-        if (H::has_value($params['exclude'])) {
-            $filter['exclude'] = array_map('intval', (array) $params['exclude']);
+        if ($filter['exclude']) {
+            $filter['exclude'] = array_map('intval', (array)$filter['exclude']);
             $query->whereNotIn('manufacturers.manufacturer_id', $filter['exclude']);
         }
 
-        if (H::has_value($params['name'])) {
+        if ($filter['name']) {
             if ($params['search_operator'] == 'equal') {
-                $query->orWhere(
-                    'manufacturers.name',
-                    '=',
-                    mb_strtolower($params['name'])
-                );
+                $query->where('manufacturers.name', '=', $filter['name']);
             } else {
-                $query->orWhere(
-                    'manufacturers.name',
-                    'like',
-                    "%".mb_strtolower($params['name'])."%"
-                );
+                $query->where('manufacturers.name', 'like', "%" . mb_strtolower($filter['name']) . "%");
             }
         }
 
@@ -426,15 +426,7 @@ class Manufacturer extends BaseModel
         }
         $query->orderByRaw($orderBy." ".$sorting);
         //pagination
-        if (isset($params['start']) || isset($params['limit'])) {
-            if ($params['start'] < 0) {
-                $params['start'] = 0;
-            }
-            if ($params['limit'] < 1) {
-                $params['limit'] = 20;
-            }
-            $query->offset((int)$params['start'])->limit((int)$params['limit']);
-        }
+        $query->offset((int)$params['start'])->limit((int)$params['limit']);
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
 
