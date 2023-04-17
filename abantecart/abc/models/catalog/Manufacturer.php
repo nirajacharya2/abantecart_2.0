@@ -268,7 +268,7 @@ class Manufacturer extends BaseModel
         return $images;
     }
 
-    public function getManufacturer($manufacturerId)
+    public static function getManufacturer($manufacturerId)
     {
         $manufacturerId = (int)$manufacturerId;
         if (!$manufacturerId) {
@@ -367,7 +367,7 @@ class Manufacturer extends BaseModel
         return parent::delete();
     }
 
-    public function getManufacturers($params = [])
+    public static function getManufacturers($params = [])
     {
         $params['sort'] = $params['sort'] ?: 'sort_order';
         $params['order'] = $params['order'] ?? 'ASC';

@@ -24,13 +24,14 @@ use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\engine\AResource;
 use abc\core\lib\AError;
-use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
 use abc\core\lib\ALayoutManager;
 use abc\core\lib\AListingManager;
 use abc\core\lib\AResourceManager;
 use abc\core\view\AView;
 use abc\models\catalog\Category;
+use abc\models\catalog\Manufacturer;
+use abc\models\catalog\Product;
 use abc\models\layout\Block;
 use stdClass;
 
@@ -139,7 +140,7 @@ class ControllerResponsesListingGridBlocksGrid extends AController
 
         if (!$this->user->canModify('listing_grid/blocks_grid')) {
             $error = new AError('');
-            return $error->toJSONResponse(
+            $error->toJSONResponse(
                 'NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf(
@@ -149,6 +150,7 @@ class ControllerResponsesListingGridBlocksGrid extends AController
                     'reset_value' => true,
                 ]
             );
+            return;
         }
 
         $this->loadLanguage('design/blocks');
@@ -208,13 +210,14 @@ class ControllerResponsesListingGridBlocksGrid extends AController
                 $info = $layout->getBlockDescriptions($custom_block_id);
                 if ($info[$tmp['language_id']]['status'] != $tmp['status']) {
                     $error = new AError('');
-                    return $error->toJSONResponse(
+                    $error->toJSONResponse(
                         'NO_PERMISSIONS_406',
                         [
                             'error_text'  => $this->language->get('error_text_status'),
                             'reset_value' => true,
                         ]
                     );
+                    return;
                 }
             }
         }
@@ -392,30 +395,32 @@ class ControllerResponsesListingGridBlocksGrid extends AController
             $resource_types[$type['type_name']] = $type['type_name'];
         }
         $view = new AView($this->registry, 0);
-        $view->batchAssign([
-                               'entry_media_resource_type'  => $this->language->get('entry_resource_type'),
-                               'media_resource_type'        => $form->getFieldHtml(
-                                   [
-                                       'type'     => 'selectbox',
-                                       'name'     => 'resource_type',
-                                       'value'    => (string) $content['resource_type'],
-                                       'options'  => $resource_types,
-                                       'style'    => 'no-save',
-                                       'help_url' => $this->gen_help_url('block_resource_type'),
-                                   ]
-                               ),
-                               'entry_media_resource_limit' => $this->language->get('entry_limit'),
-                               'media_resource_limit'       => $form->getFieldHtml(
-                                   [
-                                       'type'     => 'input',
-                                       'name'     => 'limit',
-                                       'value'    => $content['limit'],
-                                       'style'    => 'no-save',
-                                       'help_url' => $this->gen_help_url('block_limit'),
-                                   ]
-                               ),
+        $view->batchAssign(
+            [
+                'entry_media_resource_type'  => $this->language->get('entry_resource_type'),
+                'media_resource_type'        => $form->getFieldHtml(
+                    [
+                        'type'     => 'selectbox',
+                        'name'     => 'resource_type',
+                        'value'    => (string)$content['resource_type'],
+                        'options'  => $resource_types,
+                        'style'    => 'no-save',
+                        'help_url' => $this->gen_help_url('block_resource_type'),
+                    ]
+                ),
+                'entry_media_resource_limit' => $this->language->get('entry_limit'),
+                'media_resource_limit'       => $form->getFieldHtml(
+                    [
+                        'type'     => 'input',
+                        'name'     => 'limit',
+                        'value'    => $content['limit'],
+                        'style'    => 'no-save',
+                        'help_url' => $this->gen_help_url('block_limit'),
+                    ]
+                ),
 
-                           ]);
+            ]
+        );
         $this->data['response'] = $view->fetch('responses/design/block_media_listing_subform.tpl');
 
         //update controller data
@@ -443,36 +448,30 @@ class ControllerResponsesListingGridBlocksGrid extends AController
             $content = unserialize($content);
 
             if ($content['listing_datasource'] == $listing_datasource) {
-                $lm = new AListingManager($custom_block_id);
-                $list = $lm->getCustomList((int)$this->config->get('current_store_id'));
+                $lisMan = new AListingManager($custom_block_id);
+                $list = $lisMan->getCustomList((int)$this->config->get('current_store_id'));
 
                 if ($list) {
                     foreach ($list as $row) {
-                        $options_list[(int) $row['id']] = [];
+                        $options_list[(int)$row['id']] = [];
                     }
                     $ids = array_keys($options_list);
                     switch ($listing_datasource) {
                         case 'custom_products':
-                            $this->loadModel('catalog/product');
-                            $filter = ['subsql_filter' => 'p.product_id in ('.implode(',', $ids).')'];
-                            $results = $this->model_catalog_product->getProducts($filter);
-
+                            $filter = ['filter' => ['include' => $ids]];
+                            $results = Product::getProducts($filter);
                             $id_name = 'product_id';
                             $rl_object_name = 'products';
-
                             break;
                         case 'custom_categories':
                             $filter = ['filter' => ['include' => $ids]];
                             $results = Category::getCategoriesData($filter);
-
                             $id_name = 'category_id';
                             $rl_object_name = 'categories';
                             break;
                         case 'custom_manufacturers':
-                            $this->loadModel('catalog/manufacturer');
-                            $filter = ['subsql_filter' => 'm.manufacturer_id in ('.implode(',', $ids).')'];
-                            $results = $this->model_catalog_manufacturer->getManufacturers($filter);
-
+                            $filter = ['filter' => ['include' => $ids]];
+                            $results = Manufacturer::getManufacturers($filter);
                             $id_name = 'manufacturer_id';
                             $rl_object_name = 'manufacturers';
                             break;
@@ -523,15 +522,17 @@ class ControllerResponsesListingGridBlocksGrid extends AController
         $form = new AForm ('ST');
         $form->setForm(['form_name' => $form_name]);
 
-        $multivalue_html = $form->getFieldHtml([
-                                                   'type'        => 'multiselectbox',
-                                                   'name'        => 'selected[]',
-                                                   'value'       => $ids,
-                                                   'options'     => $options_list,
-                                                   'style'       => 'chosen',
-                                                   'ajax_url'    => $ajax_url,
-                                                   'placeholder' => $this->language->get('text_select_from_lookup'),
-                                               ]);
+        $multivalue_html = $form->getFieldHtml(
+            [
+                'type'        => 'multiselectbox',
+                'name'        => 'selected[]',
+                'value'       => $ids,
+                'options'     => $options_list,
+                'style'       => 'chosen',
+                'ajax_url'    => $ajax_url,
+                'placeholder' => $this->language->get('text_select_from_lookup'),
+            ]
+        );
 
         $this->view->assign('multivalue_html', $multivalue_html);
         $this->view->assign('form_name', $form_name);
