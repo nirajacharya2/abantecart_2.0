@@ -353,7 +353,8 @@ class ProductOptionValue extends BaseModel
                 'product_option_id' => $product_option_id,
             ]
         )->orderBy('sort_order')
-            ->useCache('product')->get();
+            ->useCache('product')
+            ->get();
 
         $result = [];
         if ($values) {
@@ -361,7 +362,6 @@ class ProductOptionValue extends BaseModel
                 $result[] = static::getProductOptionValue($option_value->product_option_value_id);
             }
         }
-
         return $result;
     }
 
@@ -384,7 +384,8 @@ class ProductOptionValue extends BaseModel
                     'group_id'                => 0,
                 ]
             )
-            ->useCache('product')->first();
+            ->useCache('product')
+            ->first();
 
         if (!$option_value) {
             return [];
@@ -416,5 +417,4 @@ class ProductOptionValue extends BaseModel
         }
         return $result;
     }
-
 }

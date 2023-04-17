@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -85,7 +85,6 @@ $class_list = [
         'menu_control_storefront',
         'rest',
         'filter',
-        'listing',
         'task_manager',
         'im',
         'csrf_token',

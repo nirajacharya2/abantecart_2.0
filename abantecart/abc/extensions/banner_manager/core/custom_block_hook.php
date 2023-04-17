@@ -72,8 +72,9 @@ class ExtensionBannerManager extends Extension
                         $language_id
                     );
                 }
-            )->get()
-            ?->toArray();
+            )
+            ->useCache('banner')
+            ->get()?->toArray();
 
         $result = [];
         foreach ($resourceObjects as $row) {

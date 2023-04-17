@@ -23,6 +23,7 @@ namespace abc\controllers\admin;
 use abc\core\engine\AController;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
+use abc\models\catalog\Product;
 use stdClass;
 
 class ControllerResponsesListingGridStockStatus extends AController
@@ -216,7 +217,7 @@ class ControllerResponsesListingGridStockStatus extends AController
         if ($this->config->get('config_stock_status_id') == $stock_status_id) {
             return $this->language->get('error_default');
         }
-        $product_total = $this->model_catalog_product->getTotalProductsByStockStatusId($stock_status_id);
+        $product_total = Product::where('stock_status_id', '=', $stock_status_id)->count();
         if ($product_total) {
             return sprintf($this->language->get('error_product'), $product_total);
         }
