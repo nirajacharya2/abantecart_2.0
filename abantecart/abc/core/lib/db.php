@@ -22,6 +22,7 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
+use abc\models\QueryBuilder;
 use Closure;
 use DebugBar\DebugBarException;
 use Error;
@@ -393,7 +394,7 @@ class ADB
     /**
      * @param string $table_name - table name without prefix
      *
-     * @return Builder
+     * @return QueryBuilder
      */
     public function table($table_name)
     {

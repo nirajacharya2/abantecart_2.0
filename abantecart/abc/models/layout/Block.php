@@ -18,12 +18,9 @@
 namespace abc\models\layout;
 
 use abc\core\engine\Registry;
-use abc\models\AbcCollection;
 use abc\models\BaseModel;
-use abc\models\QueryBuilder;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\JoinClause;
 
 /**
@@ -91,7 +88,7 @@ class Block extends BaseModel
 
     /**
      * @param $params
-     * @return AbcCollection
+     * @return \Illuminate\Support\Collection
      */
     public static function getBlocks($params)
     {
@@ -159,7 +156,7 @@ class Block extends BaseModel
 
     /**
      * @param int $blockId
-     * @return QueryBuilder|Model|object|null
+     * @return \Illuminate\Support\Collection
      */
     public static function getBlockInfo(int $blockId)
     {

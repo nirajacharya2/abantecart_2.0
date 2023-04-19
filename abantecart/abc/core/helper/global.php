@@ -7,7 +7,6 @@
 use abc\core\ABC;
 use abc\core\helper\AHelperHtml;
 use abc\core\helper\AHelperUtils;
-use abc\models\AbcCollection;
 
 /**
  * Class H
@@ -78,15 +77,4 @@ function abc_js_encode($text)
 function abc_echo_html2view($html)
 {
     echo htmlspecialchars($html, ENT_QUOTES, ABC::env('APP_CHARSET'));
-}
-
-/**
- * Create a collection from the given value.
- *
- * @param mixed $value
- * @return AbcCollection
- */
-function abc_collect($value = null)
-{
-    return new AbcCollection($value);
 }

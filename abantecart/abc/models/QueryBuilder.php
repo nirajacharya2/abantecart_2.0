@@ -24,6 +24,7 @@ use abc\core\lib\AbcCache;
 use Illuminate\Cache\RedisTaggedCache;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 
 class QueryBuilder extends Builder
 {
@@ -77,20 +78,26 @@ class QueryBuilder extends Builder
      * Execute the query as a "select" statement.
      *
      * @param array|string $columns
-     * @return AbcCollection
+     * @return Collection
      */
     public function get($columns = ['*'])
     {
-        $collection = abc_collect($this->onceWithColumns(Arr::wrap($columns), function () {
+        $collection = collect($this->onceWithColumns(Arr::wrap($columns), function () {
             return $this->processor->processSelect($this, $this->runSelect());
         }));
+
 
         //add additional property into collection (total found rows count)
         if (str_contains($this->toSql(), Registry::db()->raw_sql_row_count())) {
             $foundRowsCount = $this->cacheKey
                 ? Registry::cache()->get($this->cacheKey . '_total_rows_count')
                 : Registry::db()->sql_get_row_count();
-            $collection::setFoundRowsCount($foundRowsCount);
+            $collection::macro(
+                'getFoundRowsCount',
+                function () use ($foundRowsCount) {
+                    return $foundRowsCount;
+                }
+            );
         }
 
         return $collection;

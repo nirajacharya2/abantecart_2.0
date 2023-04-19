@@ -69,7 +69,7 @@ use ReflectionMethod;
  * @method static OrmModel|static firstOrCreate(array $attributes = [], array $values = [])
  * @method static static create(array $values)
  * @method static static insert(array $multiRowValues)
- * @method static AbcCollection|static first()
+ * @method static Collection|static first()
  * @method static QueryBuilder active(string $tableName = '')
  * @method static QueryBuilder join(string $table, Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
  * @method static QueryBuilder leftJoin(string $table, Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
@@ -263,7 +263,7 @@ abstract class BaseModel extends OrmModel
      *
      * @param array $searchParams
      *
-     * @return AbcCollection
+     * @return \Illuminate\Support\Collection|null
      */
     public static function search($searchParams = [])
     {
@@ -781,17 +781,6 @@ abstract class BaseModel extends OrmModel
         return new QueryBuilder(
             $connection, $connection->getQueryGrammar(), $connection->getPostProcessor()
         );
-    }
-
-    /**
-     * Create a new Eloquent Collection instance.
-     *
-     * @param array $models
-     * @return AbcCollection
-     */
-    public function newCollection(array $models = [])
-    {
-        return new AbcCollection($models);
     }
 
     /**

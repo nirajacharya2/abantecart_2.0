@@ -27,13 +27,6 @@ use Tests\unit\ATestCase;
 class BaseModelTest extends ATestCase
 {
 
-
-    public function testAbcCollection()
-    {
-        $query = Product::limit(1)->get();
-        $this->assertStringContainsString('AbcCollection', get_class($query), get_class($query));
-    }
-
     public function testValidationPassed()
     {
         $productId = null;

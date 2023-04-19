@@ -17,8 +17,9 @@
  */
 namespace abc\modules\injections\models;
 
-use abc\models\AbcCollection;
 use abc\models\BaseModel;
+use Exception;
+use Illuminate\Support\Collection;
 
 class ModelSearch
 {
@@ -30,10 +31,10 @@ class ModelSearch
     public function __construct(BaseModel $model)
     {
         if (!$model::$searchMethod) {
-            throw new \Exception('Model '.$model->getClass().' does not support searching.');
+            throw new Exception('Model ' . $model->getClass() . ' does not support searching.');
         }
         if (!method_exists($model, $model::$searchMethod)) {
-            throw new \Exception('Model '.$model->getClass().' does not have search method '.$model::$searchMethod.'.');
+            throw new Exception('Model ' . $model->getClass() . ' does not have search method ' . $model::$searchMethod . '.');
         }
         $this->modelObj = $model;
     }
@@ -46,7 +47,7 @@ class ModelSearch
     /**
      * @param array $params
      *
-     * @return AbcCollection|null
+     * @return Collection|null
      */
     public function search(array $params)
     {
