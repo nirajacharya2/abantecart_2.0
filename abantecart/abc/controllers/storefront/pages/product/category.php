@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2022 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -30,6 +30,7 @@ use abc\models\catalog\Product;
 use abc\modules\traits\ProductListingTrait;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
+use Illuminate\Support\Collection;
 
 /**
  * Class ControllerPagesProductCategory
