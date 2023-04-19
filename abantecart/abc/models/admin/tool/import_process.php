@@ -717,7 +717,7 @@ class ModelToolImportProcess extends Model
         }
         $result = null;
         foreach ($updateBy as $colName => $colValue) {
-            $result = ProductOptionValue::select('product_option_values.*, product_option_value_descriptions.*')
+            $result = ProductOptionValue::select(['product_option_values.*', 'product_option_value_descriptions.*'])
                 ->leftJoin(
                     'product_option_value_descriptions',
                     'product_option_value_descriptions.product_option_value_id',
