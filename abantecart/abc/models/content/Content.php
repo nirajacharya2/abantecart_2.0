@@ -21,7 +21,6 @@ namespace abc\models\content;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\ALayoutManager;
-use abc\models\AbcCollection;
 use abc\models\BaseModel;
 use abc\models\casts\Html;
 use abc\models\casts\Json;
@@ -32,6 +31,7 @@ use Illuminate\Contracts\Database\Eloquent\Castable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Collection;
 use Psr\SimpleCache\InvalidArgumentException;
 
 /**
@@ -43,8 +43,8 @@ use Psr\SimpleCache\InvalidArgumentException;
  * @property int $status
  *
  * @property ContentDescription $description
- * @property ContentDescription|AbcCollection $descriptions
- * @property ContentsToStore|AbcCollection $stores
+ * @property ContentDescription|Collection $descriptions
+ * @property ContentsToStore|Collection $stores
  *
  * @package abc\models
  */
@@ -134,7 +134,7 @@ class Content extends BaseModel
 
     /**
      * @param $params
-     * @return AbcCollection
+     * @return Collection
      */
     public static function getContents($params = [])
     {

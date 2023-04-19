@@ -25,7 +25,6 @@ use abc\core\engine\Registry;
 use abc\core\lib\AException;
 use abc\core\lib\ALayoutManager;
 use abc\core\lib\AResourceManager;
-use abc\models\AbcCollection;
 use abc\models\BaseModel;
 use abc\models\QueryBuilder;
 use abc\models\system\Setting;
@@ -663,7 +662,7 @@ class Category extends BaseModel
     /**
      * @param $params
      *
-     * @return AbcCollection
+     * @return Collection
      * @throws ReflectionException
      * @throws AException
      * @throws InvalidArgumentException

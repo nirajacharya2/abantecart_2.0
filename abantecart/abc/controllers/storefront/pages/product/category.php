@@ -23,9 +23,7 @@ namespace abc\controllers\storefront;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
-use abc\core\engine\Registry;
 use abc\core\lib\AException;
-use abc\models\AbcCollection;
 use abc\models\catalog\Category;
 use abc\models\catalog\CategoryDescription;
 use abc\models\catalog\Product;
@@ -241,13 +239,13 @@ class ControllerPagesProductCategory extends AController
     }
 
     /**
-     * @param AbcCollection $productsList
+     * @param Collection $productsList
      * @return void
      * @throws InvalidArgumentException
      * @throws ReflectionException
      * @throws AException
      */
-    protected function prepareProductList(AbcCollection $productsList)
+    protected function prepareProductList(Collection $productsList)
     {
         $this->data['button_add_to_cart'] = $this->language->get('button_add_to_cart');
         $this->processList($productsList);

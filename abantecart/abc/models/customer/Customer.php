@@ -22,7 +22,6 @@ use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AException;
-use abc\models\AbcCollection;
 use abc\models\BaseModel;
 use abc\models\casts\Serialized;
 use abc\models\order\Order;
@@ -753,7 +752,7 @@ class Customer extends BaseModel
     /**
      * @param array $inputData
      *
-     * @return AbcCollection|int
+     * @return Collection|int
      * @throws AException
      */
     public static function getCustomers($inputData = [])
