@@ -101,7 +101,7 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
         $results = CustomerTransaction::getTransactions($data);
         //push result into public scope to get access from extensions
         $this->data['results'] = $results;
-        $total = $results[0]['total_num_rows'];
+        $total = $results::getFoundRowsCount();
         if ($total > 0) {
             $total_pages = ceil($total / $limit);
         } else {

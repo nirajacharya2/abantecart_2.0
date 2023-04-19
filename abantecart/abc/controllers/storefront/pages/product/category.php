@@ -24,10 +24,14 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
 use abc\core\engine\Registry;
+use abc\core\lib\AException;
+use abc\models\AbcCollection;
 use abc\models\catalog\Category;
 use abc\models\catalog\CategoryDescription;
 use abc\models\catalog\Product;
 use abc\modules\traits\ProductListingTrait;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 /**
  * Class ControllerPagesProductCategory
@@ -236,7 +240,14 @@ class ControllerPagesProductCategory extends AController
         }
     }
 
-    protected function prepareProductList($productsList)
+    /**
+     * @param AbcCollection $productsList
+     * @return void
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
+     */
+    protected function prepareProductList(AbcCollection $productsList)
     {
         $this->data['button_add_to_cart'] = $this->language->get('button_add_to_cart');
         $this->processList($productsList);
@@ -262,7 +273,7 @@ class ControllerPagesProductCategory extends AController
                 'name'       => 'pagination',
                 'text'       => $this->language->get('text_pagination'),
                 'text_limit' => $this->language->get('text_per_page'),
-                'total'      => $productsList[0]->total_num_rows,
+                'total'      => $productsList::getFoundRowsCount(),
                 'page'       => $this->data['page'],
                 'limit'      => $this->data['limit'],
                 'url'        => $this->html->getSEOURL(

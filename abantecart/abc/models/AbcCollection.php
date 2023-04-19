@@ -1,6 +1,4 @@
 <?php
-
-namespace abc;
 /**
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
@@ -18,17 +16,24 @@ namespace abc;
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-use abc\core\ABC;
+namespace abc\models;
 
-ob_start();
+use Illuminate\Support\Collection;
 
-define('DS', DIRECTORY_SEPARATOR);
-require dirname(__DIR__) . DS . 'abc' . DS . 'core' . DS . 'ABC.php';
+class AbcCollection extends Collection
+{
+    /**
+     * Total FOUNDED ROWS COUNT property (See SQL_CALC_FOUND_ROWS in the MYSQL documentation)
+     */
+    protected static $found_rows_count;
 
-// Windows IIS Compatibility
-if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-    ABC::env('IS_WINDOWS', true);
+    public static function getFoundRowsCount()
+    {
+        return static::$found_rows_count;
+    }
+
+    public static function setFoundRowsCount($value)
+    {
+        static::$found_rows_count = $value;
+    }
 }
-ABC::env('INDEX_FILE', basename(__FILE__));
-$app = new ABC();
-$app->run();

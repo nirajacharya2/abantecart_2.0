@@ -22,6 +22,7 @@ use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AException;
+use abc\models\AbcCollection;
 use abc\models\BaseModel;
 use abc\models\casts\Serialized;
 use abc\models\order\Order;
@@ -752,7 +753,7 @@ class Customer extends BaseModel
     /**
      * @param array $inputData
      *
-     * @return Collection|int
+     * @return AbcCollection|int
      * @throws AException
      */
     public static function getCustomers($inputData = [])
@@ -1066,10 +1067,8 @@ class Customer extends BaseModel
             return $result_rows->count();
         }
         //finally, decrypt data and return result
-        $totalNumRows = $db->sql_get_row_count();
         for ($i = 0; $i < $result_rows->count(); $i++) {
             $result_rows[$i] = $dCrypt->decrypt_data($result_rows[$i], 'customers');
-            $result_rows[$i]['total_num_rows'] = $totalNumRows;
         }
 
         return $result_rows;

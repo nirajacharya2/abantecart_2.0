@@ -100,7 +100,7 @@ class ControllerPagesProductSpecial extends AController
         }
 
         $results = Product::getProductSpecials($this->data['search_parameters']);
-        $product_total = $results->total;
+        $product_total = $results::getFoundRowsCount();
 
         if ($product_total) {
             $this->data['button_add_to_cart'] = $this->language->get('button_add_to_cart');
