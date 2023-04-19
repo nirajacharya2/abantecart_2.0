@@ -119,7 +119,7 @@ class ControllerResponsesListingGridOrder extends AController
         }
         /** @see Order::getOrders() */
         $results = Order::search($data);
-        $total = $results[0]['total_num_rows'];
+        $total = $results::getFoundRowsCount();
         if ($total > 0) {
             $total_pages = ceil($total / $limit);
         } else {

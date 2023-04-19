@@ -400,17 +400,9 @@ class CustomerTransaction extends BaseModel
          }
 
         //allow to extend this method from extensions
-        Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query, $data);
-        $query->useCache('customer_transactions');
-        $result_rows = $query->get();
-
-        //finally decrypt data and return result
-        $totalNumRows = $db->sql_get_row_count();
-        for ($i = 0; $i < $result_rows->count(); $i++) {
-            $result_rows[$i]['total_num_rows'] = $totalNumRows;
-        }
-
-        return $result_rows;
+        Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $data);
+        $query->useCache('customer');
+        return $query->get();
     }
 
     /**
@@ -420,10 +412,10 @@ class CustomerTransaction extends BaseModel
     {
         /** @var QueryBuilder $query */
         $query = self::withTrashed()
-                     ->select(['transaction_type'])
-                     ->distinct(['transaction_type'])
-                     ->orderBy('transaction_type')
-                     ->useCache('customer_transaction');
+            ->select(['transaction_type'])
+            ->distinct(['transaction_type'])
+            ->orderBy('transaction_type')
+            ->useCache('customer');
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
         return $query->get();
