@@ -120,21 +120,21 @@
                                             $sel_title = "{$sel_title} *required";
                                         }
                                         echo '<option value="' . $cname . '" data-mvalue="' . $det["multivalue"]
-                                            . '" data-split="' . $det["split"] . '" data-splitter="' . $det["splitter"] . '" data-update="' . $det["update"] . '" ' . $selected . '>' . $sel_title . '</option>';
-                                    }
-                                    ?>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group field_splitter hidden">
-                            <div class="input-group">
-                                <label class="control-label"><?php echo $text_import_split; ?></label>
-                                <input type="text" size="5" name="split_col[<?php echo $i ?>]"
-                                       value="<?php echo $map['split_col'][$i]; ?>" disabled="disabled">
-                            </div>
-                        </div>
-                    </div>
-                    <?php } ?>
+											. '" data-split="' . $det["split"] . '" data-splitter="' . $det["splitter"] . '" data-update="' . $det["update"] . '" ' . $selected . '>' . $sel_title . '</option>';
+									}
+									?>
+								</select>
+							</div>
+						</div>
+						<div class="form-group field_splitter hidden">
+							<div class="input-group">
+								<label class="control-label"><?php echo $text_import_split; ?></label>
+								<input type="text" size="5" name="split_col[<?php echo $i ?>]"
+									   value="<?php echo $map['split_col'][$i] ?: ','; ?>" disabled="disabled">
+							</div>
+						</div>
+					</div>
+					<?php } ?>
 				</td>
 				<td class="col-md-2 update-field">
 					<div class="form-group field_updater hidden">
