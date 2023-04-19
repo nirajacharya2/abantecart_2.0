@@ -46,8 +46,8 @@ class ControllerResponsesListingGridBannerManagerStat extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $results = (array)BannerStat::getStatistic($this->data['banner_stat_search_parameters'])?->toArray();
-        $total = (int)$results[0]['total_num_rows'];
+        $results = BannerStat::getStatistic($this->data['banner_stat_search_parameters']);
+        $total = $results::getFoundRowsCount();
         $total_pages = $total > 0 ? ceil($total / $limit) : 0;
 
         $response = new stdClass();

@@ -1774,10 +1774,8 @@ class Order extends BaseModel
         $result_rows = $query->useCache('order')->get();
 
         //finally decrypt data and return result
-        $totalNumRows = $db->sql_get_row_count();
         for ($i = 0; $i < $result_rows->count(); $i++) {
             $result_rows[$i] = $dcrypt->decrypt_data($result_rows[$i], 'orders');
-            $result_rows[$i]['total_num_rows'] = $totalNumRows;
         }
 
         return $result_rows;
