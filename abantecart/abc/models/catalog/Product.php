@@ -24,6 +24,7 @@ use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use abc\core\lib\AException;
 use abc\core\lib\AttributeManager;
+use abc\models\AbcCollection;
 use abc\models\BaseModel;
 use abc\core\engine\AResource;
 use abc\models\casts\Serialized;
@@ -92,7 +93,7 @@ use stdClass;
  * @property Carbon $date_modified
  * @property ProductDescription $description
  * @property ProductDescription $descriptions
- * @property Collection $categories
+ * @property AbcCollection $categories
  * @property ProductOption $options
  * @property ProductDescription $product_descriptions
  * @property ProductDiscount $product_discounts
@@ -105,9 +106,9 @@ use stdClass;
  * @property Review $reviews
  * @property int $product_type_id
  *
- * @method static Product|Collection find(int|array $product_id) Product
+ * @method static Product|AbcCollection find(int|array $product_id) Product
  * @method static Product select(mixed $select) Builder
- * @method static Collection search(array $filterParams) - see getProducts() method
+ * @method static AbcCollection search(array $filterParams) - see getProducts() method
  * @method static WithFinalPrice(int $customer_group_id, Carbon|string $toDate = null) - adds "final_price" column into selected fields
  * @method static WithFirstSpecialPrice(int $customer_group_id, Carbon|string $toDate = null) - adds "special_price" column into selected fields
  * @method static WithFirstDiscountPrice(int $customer_group_id, Carbon|string $toDate = null) - adds "discount_price" column into selected fields
@@ -2442,7 +2443,7 @@ class Product extends BaseModel
     /**
      * @param array|null $params
      *
-     * @return Collection|stdClass
+     * @return AbcCollection|stdClass
      */
     public static function getBestSellerProducts(?array $params = [])
     {
@@ -2486,7 +2487,7 @@ class Product extends BaseModel
     /**
      * Destroy the models for the given IDs.
      *
-     * @param Collection|array|int $ids
+     * @param AbcCollection|array|int $ids
      *
      * @return int
      */
@@ -2688,7 +2689,7 @@ class Product extends BaseModel
      *              - with_rating
      *              - with_stock_info
      *
-     * @return Collection|stdClass
+     * @return AbcCollection|stdClass
      */
     public static function getProducts(array $params = [])
     {
@@ -2958,14 +2959,7 @@ class Product extends BaseModel
 
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
-        $output = $query->useCache('product')->get();
-        //add total number of rows into each row
-        $output->total = $totalNumRows = $db->sql_get_row_count();
-        foreach ($output as &$item) {
-            $item->total_num_rows = $totalNumRows;
-        }
-
-        return $output;
+        return $query->useCache('product')->get();
     }
 
     /**

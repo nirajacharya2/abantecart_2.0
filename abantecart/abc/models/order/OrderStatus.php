@@ -20,6 +20,7 @@ namespace abc\models\order;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\AException;
+use abc\models\AbcCollection;
 use abc\models\BaseModel;
 use abc\models\QueryBuilder;
 use Carbon\Carbon;
@@ -156,7 +157,7 @@ class OrderStatus extends BaseModel
      * @param array $inputData
      * @param string $mode - can be empty or "total_only" (for counting rows)
      *
-     * @return \Illuminate\Support\Collection|int
+     * @return AbcCollection|int
      */
     public static function getOrderStatuses($inputData = [], $mode = '')
     {
@@ -231,7 +232,5 @@ class OrderStatus extends BaseModel
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $inputData);
         $query->useCache('order_status');
         return $query->get();
-
     }
-
 }

@@ -152,8 +152,9 @@ class ControllerPagesAccountTransactions extends AController
         ];
 
         $results = CustomerTransaction::getTransactions($data);
+        $trans_total = $results::getFoundRowsCount();
         $results = $results->toArray();
-        $trans_total = $results[0]['total_num_rows'];
+
         if (count($results)) {
             foreach ($results as $result) {
                 $result['date_added'] = Carbon::parse($result['date_added'])

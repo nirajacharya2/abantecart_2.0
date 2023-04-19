@@ -78,9 +78,11 @@ class ControllerResponsesListingGridContent extends AController
             $new_level = (int)$this->request->post["n_level"] + 1;
         }
 
-        $results = Content::getContents($this->data['search_parameters'])?->toArray();
+        $results = Content::getContents($this->data['search_parameters']);
+        $total = $results::getFoundRowsCount();
+        $results = $results?->toArray();
 
-        $total = (int)$results[0]['total_num_rows'];
+
         $total_pages = $total > 0 ? ceil($total / $limit) : 0;
 
         $response = new stdClass();

@@ -90,8 +90,10 @@ class ControllerResponsesListingGridCategory extends AController
             $new_level = (int)$this->request->post["n_level"] + 1;
         }
 
-        $results = Category::getCategoriesData($this->data['search_parameters'])->toArray();
-        $total = $results[0]['total_num_rows'];
+        $results = Category::getCategoriesData($this->data['search_parameters']);
+        $total = $results::getFoundRowsCount();
+        $results = $results->toArray();
+
         $response = new stdClass();
         $response->page = $filter->getParam('page');
         $response->total = $filter->calcTotalPages($total);

@@ -96,8 +96,7 @@ class ControllerResponsesListingGridProduct extends AController
         $this->loadModel('tool/image');
 
         $results = Product::getProducts($this->data['search_parameters']);
-
-        $total = $results[0]['total_num_rows'];
+        $total = $results::getFoundRowsCount();
         $total_pages = $total > 0 ? ceil($total / $limit) : 0;
         $response = new stdClass();
         $response->page = $page;

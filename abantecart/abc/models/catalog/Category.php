@@ -25,6 +25,7 @@ use abc\core\engine\Registry;
 use abc\core\lib\AException;
 use abc\core\lib\ALayoutManager;
 use abc\core\lib\AResourceManager;
+use abc\models\AbcCollection;
 use abc\models\BaseModel;
 use abc\models\QueryBuilder;
 use abc\models\system\Setting;
@@ -662,7 +663,7 @@ class Category extends BaseModel
     /**
      * @param $params
      *
-     * @return Collection
+     * @return AbcCollection
      * @throws ReflectionException
      * @throws AException
      * @throws InvalidArgumentException
@@ -816,9 +817,7 @@ class Category extends BaseModel
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
         $items = $query->useCache('category')->get();
-        $items->total = $total_num_rows = Registry::db()->sql_get_row_count();
         foreach ($items as &$item) {
-            $item['total_num_rows'] = $total_num_rows;
             if ($params['basename']) {
                 $item->name = $item->basename;
             } else {

@@ -4,6 +4,7 @@ namespace abc\modules\traits;
 
 use abc\core\engine\AResource;
 use abc\core\lib\AException;
+use abc\models\AbcCollection;
 use abc\models\catalog\Product;
 use Illuminate\Support\Collection;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -42,11 +43,13 @@ trait ProductListingTrait
 
 
     /**
-     * @param Collection|array $list
+     * @param AbcCollection|array $list
      * @return void
-     * @throws InvalidArgumentException|ReflectionException|AException
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
-    public function processList(Collection|array $list)
+    public function processList(AbcCollection|array $list)
     {
         $cart_rt = $this->config->get('embed_mode') ? 'r/checkout/cart/embed' : 'checkout/cart';
 

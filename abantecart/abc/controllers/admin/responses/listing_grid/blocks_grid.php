@@ -74,7 +74,7 @@ class ControllerResponsesListingGridBlocksGrid extends AController
         );
 
         $blocks = Block::getBlocks($this->data['search_parameters']);
-        $total = $blocks->total;
+        $total = $blocks::getFoundRowsCount();
 
         $tmp = [];
         // prepare block list (delete template duplicates)

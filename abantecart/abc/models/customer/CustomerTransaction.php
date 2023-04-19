@@ -18,13 +18,13 @@
 namespace abc\models\customer;
 
 use abc\core\engine\Registry;
+use abc\models\AbcCollection;
 use abc\models\BaseModel;
 use abc\models\QueryBuilder;
 use Carbon\Carbon;
 use Exception;
 use H;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Collection;
 
 /**
  * Class CustomerTransaction
@@ -291,7 +291,7 @@ class CustomerTransaction extends BaseModel
      * @param $data
      * @param string $mode
      *
-     * @return Collection | integer
+     * @return AbcCollection | integer
      */
     public static function getTransactions($data, $mode = 'default')
     {
@@ -413,7 +413,7 @@ class CustomerTransaction extends BaseModel
     }
 
     /**
-     * @return Collection
+     * @return AbcCollection
      */
     public static function getTransactionTypes()
     {

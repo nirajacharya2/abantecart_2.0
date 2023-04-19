@@ -430,14 +430,7 @@ class Manufacturer extends BaseModel
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
 
-        $output = $query->useCache('manufacturer')->get();
-
-        //add total number of rows into each row
-        $totalNumRows = $db->sql_get_row_count();
-        for ($i = 0; $i < $output->count(); $i++) {
-            $output[$i]['total_num_rows'] = $totalNumRows;
-        }
-        return $output;
+        return $query->useCache('manufacturer')->get();
     }
 
     /**

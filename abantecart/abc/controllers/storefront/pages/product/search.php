@@ -227,8 +227,7 @@ class ControllerPagesProductSearch extends AController
         if (isset($request['keyword'])) {
             /** @see Product::getProducts() */
             $productsList = Product::search($this->data['search_parameters']);
-
-            $product_total = $productsList[0]['total_num_rows'];
+            $product_total = $productsList::getFoundRowsCount();
             if ($product_total) {
                 $url = '';
                 if (isset($request['category_id'])) {

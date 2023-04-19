@@ -185,7 +185,7 @@ class ControllerPagesProductManufacturer extends AController
                         'name'       => 'pagination',
                         'text'       => $this->language->get('text_pagination'),
                         'text_limit' => $this->language->get('text_per_page'),
-                        'total'      => $manufacturerInfo['product_count'],
+                        'total'      => $results::getFoundRowsCount(),
                         'page'       => $page,
                         'limit'      => $limit,
                         'url'        => $pagination_url,

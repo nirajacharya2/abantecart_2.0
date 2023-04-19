@@ -82,9 +82,10 @@ class ControllerApiCustomerSearch extends AControllerAPI
         if (!$data['store_id'] && !$this->model_setting_store->isDefaultStore()) {
             $data['store_id'] = $this->config->get('config_store_id');
         }
+        /** @see Customer::getCustomers() $results */
         $results = Customer::search($data);
 
-        $total = $results[0]['total_num_rows'];
+        $total = $results::getFoundRowsCount();
         if ($total > 0) {
             $total_pages = ceil($total / $filter->getParam('rows'));
         } else {
