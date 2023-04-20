@@ -43,18 +43,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class TaskStep extends BaseModel
 {
-    use SoftDeletes;
-
     protected $primaryKey = 'step_id';
-    public $timestamps = false;
 
     protected $casts = [
         'task_id'            => 'int',
         'sort_order'         => 'int',
         'status'             => 'int',
+        'last_time_run'      => 'datetime',
         'last_result'        => 'int',
         'max_execution_time' => 'int',
-        'last_time_run'      => 'datetime',
+        'controller'         => 'string',
         'settings'           => Serialized::class,
         'date_added'         => 'datetime',
         'date_modified'      => 'datetime'
@@ -68,8 +66,8 @@ class TaskStep extends BaseModel
         'last_result',
         'max_execution_time',
         'controller',
-        'settings',
-        'date_added',
-        'date_modified',
+        'settings'
     ];
+
+
 }

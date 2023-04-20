@@ -64,7 +64,6 @@ use ReflectionMethod;
  * @method static QueryBuilder with(string|array ...$relations) QueryBuilder
  * @method static QueryBuilder selectRaw(string $sql, $bindings = []) QueryBuilder
  * @method static QueryBuilder distinct(array $columns) QueryBuilder
- * @method static QueryBuilder|Builder withTrashed()
  * @method static OrmModel|static updateOrCreate(array $attributes = [], array $values = [])
  * @method static OrmModel|static firstOrCreate(array $attributes = [], array $values = [])
  * @method static static create(array $values)

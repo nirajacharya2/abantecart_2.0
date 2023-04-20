@@ -19,6 +19,7 @@
 namespace abc\models\system;
 
 use abc\models\BaseModel;
+use abc\models\casts\Serialized;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -35,20 +36,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class TaskDetail extends BaseModel
 {
-    use SoftDeletes;
-
     protected $primaryKey = 'task_id';
-    public $timestamps = false;
 
     protected $casts = [
+        'created_by'    => 'int',
+        'settings'      => Serialized::class,
         'date_added'    => 'datetime',
         'date_modified' => 'datetime'
     ];
 
     protected $fillable = [
+        'task_id',
         'created_by',
-        'settings',
-        'date_added',
-        'date_modified',
+        'settings'
     ];
 }
