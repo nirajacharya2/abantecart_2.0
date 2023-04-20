@@ -794,9 +794,9 @@ class ControllerPagesCatalogProduct extends AController
         }
 
         if (isset($this->request->post['featured'])) {
-            $this->data['featured'] = $this->request->post['featured'];
+            $this->data['featured'] = (int)$this->request->post['featured'];
         } elseif (isset($product_info)) {
-            $this->data['featured'] = $product_info['featured'];
+            $this->data['featured'] = (int)$product_info['featured'];
         } else {
             $this->data['featured'] = 0;
         }
@@ -939,7 +939,7 @@ class ControllerPagesCatalogProduct extends AController
             [
                 'type'  => 'checkbox',
                 'name'  => 'featured',
-                'value' => $this->data['featured'],
+                'value' => (int)$this->data['featured'],
                 'style' => 'btn_switch btn-group-sm',
             ]
         );
