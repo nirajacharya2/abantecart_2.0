@@ -20,7 +20,6 @@ namespace abc\models\order;
 
 use abc\models\BaseModel;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class OrderHistory
@@ -39,8 +38,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class OrderHistory extends BaseModel
 {
-    use SoftDeletes;
-
     protected $table = 'order_history';
     protected $primaryKey = 'order_history_id';
     protected $mainClassName = Order::class;

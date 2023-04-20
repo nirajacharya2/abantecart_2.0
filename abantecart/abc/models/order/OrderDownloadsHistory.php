@@ -20,7 +20,6 @@ namespace abc\models\order;
 use abc\models\BaseModel;
 use abc\models\catalog\Download;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class OrderDownloadsHistory
@@ -44,8 +43,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class OrderDownloadsHistory extends BaseModel
 {
-    use SoftDeletes;
-
     protected $primaryKey = 'order_download_history_id';
 
     protected $table = 'order_downloads_history';

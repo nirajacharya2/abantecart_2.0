@@ -20,7 +20,6 @@ namespace abc\models\order;
 use abc\models\BaseModel;
 use abc\models\casts\Serialized;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class OrderTotal
@@ -44,8 +43,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class OrderTotal extends BaseModel
 {
-    use SoftDeletes;
-
     protected $primaryKey = 'order_total_id';
 
     protected $mainClassName = Order::class;
