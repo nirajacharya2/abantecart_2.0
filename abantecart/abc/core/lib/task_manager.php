@@ -224,8 +224,10 @@ class ATaskManager
 
         $all_steps = $this->getTaskSteps($task_id);
         if (!$all_steps) {
-            $this->toLog('Error: Tried to check is step_id: '.$step_id.' of task_id: '.$task_id
-                ." last, but steps list empty!");
+            $this->toLog(
+                'Error: Tried to check is step_id: ' . $step_id
+                . ' of task_id: ' . $task_id . " last, but steps list empty!"
+            );
             return false;
         }
 
@@ -248,6 +250,7 @@ class ATaskManager
 
         $task_id = (int)$step_details['task_id'];
         $step_id = (int)$step_details['step_id'];
+
         if (!$step_id || !$task_id) {
             return false;
         }
@@ -261,7 +264,6 @@ class ATaskManager
                 'status'        => self::STATUS_READY,
             ]
         );
-
         //call event
         H::event(__CLASS__.'@runStepPre', [new ABaseEvent($task_id, $step_id)]);
 
@@ -291,7 +293,7 @@ class ATaskManager
                 $response_message = $response['error_text'] ?? '';
             }
         } catch (Exception|Error $e) {
-            $this->log->error($e);
+            $this->log->error($e->getMessage());
             $result = false;
         }
 
@@ -448,6 +450,7 @@ class ATaskManager
                 $data[$fld_name] = $state[$fld_name];
             }
         }
+
         return $this->updateStep($step_id, $data);
     }
 
@@ -541,44 +544,24 @@ class ATaskManager
      * @param int $task_id
      * @param array $data
      *
-     * @return bool
      * @throws Exception
      */
     public function updateTaskDetails($task_id, $data = [])
     {
-        $task_id = (int)$task_id;
-        if (!$task_id) {
+        if (!$task_id && !$data) {
             return false;
         }
 
-        if (gettype($data['settings']) != 'string') {
-            $data['settings'] = serialize($data['settings']);
+        if (isset($data['created_by'])) {
+            $data['created_by'] = (int)$data['created_by'] ?: 1;
         }
 
-        $sql = "SELECT *
-                FROM ".$this->db->table_name('task_details')."
-                WHERE task_id = ".$task_id;
-        $result = $this->db->query($sql);
-        if ($result->num_rows) {
-            foreach ($result->row as $k => $ov) {
-                if (!H::has_value($data[$k])) {
-                    $data[$k] = $ov;
-                }
-            }
-            $sql = "UPDATE ".$this->db->table_name('task_details')."
-                    SET settings = '".$this->db->escape($data['settings'])."'
-                    WHERE task_id = ".$task_id;
-        } else {
-            $data['created_by'] = $data['created_by'] ?? 1;
-            $sql = "INSERT INTO ".$this->db->table_name('task_details')."
-                    (task_id, created_by, settings, date_modified)
-                     VALUES (   '".$task_id."',
-                                '".$this->db->escape($data['created_by'])."',
-                                '".$this->db->escape($data['settings'])."',
-                                NOW())";
-        }
-        $this->db->query($sql);
-        return true;
+        return TaskDetail::updateOrCreate(
+            [
+                'task_id' => $task_id
+            ],
+            $data
+        );
     }
 
     /**
@@ -615,16 +598,10 @@ class ATaskManager
         $step = TaskStep::find($step_id);
         if (!$step) {
             $this->errors[] = __FUNCTION__ . ': Step #' . $step_id . ' not found';
-            return false;
+            return;
         }
 
-        try {
-            $step->update($data);
-        } catch (Exception $e) {
-            $this->errors[] = $e->getMessage();
-            return false;
-        }
-        return true;
+        $step->update($data);
     }
 
     /**
@@ -636,9 +613,9 @@ class ATaskManager
     {
         Registry::db()->beginTransaction();
         try {
-            TaskStep::where('task_id', '=', $task_id)->delete();
-            TaskDetail::where('task_id', '=', $task_id)->delete();
-            Task::find($task_id)->delete();
+            TaskStep::where('task_id', '=', $task_id)?->delete();
+            TaskDetail::where('task_id', '=', $task_id)?->delete();
+            Task::find($task_id)?->delete();
             Registry::db()->commit();
             //call event
             H::event(__CLASS__ . '@deleteTask', [new ABaseEvent($task_id)]);
@@ -659,7 +636,7 @@ class ATaskManager
     {
         Registry::db()->beginTransaction();
         try {
-            TaskStep::find($step_id)->delete();
+            TaskStep::find($step_id)?->delete();
             Registry::db()->commit();
             return true;
         } catch (Exception $e) {
@@ -681,21 +658,18 @@ class ATaskManager
         if (!$task_id) {
             return [];
         }
-        $sql = "SELECT *
-                FROM ".$this->db->table_name('tasks')." t
-                LEFT JOIN ".$this->db->table_name('task_details')." td 
-                    ON td.task_id = t.task_id
-                WHERE t.task_id = '".$task_id."'";
-        $result = $this->db->query($sql);
-        $output = $result->row;
+        $output = Task::select(['tasks.*', 'task_details.*'])
+            ->leftJoin(
+                'task_details',
+                'task_details.task_id',
+                '=',
+                'tasks.task_id'
+            )->where('tasks.task_id', '=', $task_id)
+            ->first()->toArray();
+
         if ($output) {
             $output['steps'] = $this->getTaskSteps($output['task_id']);
         }
-
-        if ($output['settings']) {
-            $output['settings'] = unserialize($output['settings']);
-        }
-
         return $output;
     }
 
@@ -705,28 +679,24 @@ class ATaskManager
      * @return array
      * @throws Exception
      */
-    public function getTaskByName($task_name)
+    public function getTaskByName(string $task_name)
     {
-        $task_name = $this->db->escape($task_name);
         if (!$task_name) {
             return [];
         }
 
-        $sql = "SELECT *
-                FROM ".$this->db->table_name('tasks')." t
-                LEFT JOIN ".$this->db->table_name('task_details')." td 
-                    ON td.task_id = t.task_id
-                WHERE t.name = '".$task_name."'";
-        $result = $this->db->query($sql);
-        $output = $result->row;
+        $output = Task::select(['tasks.*', 'task_details.*'])
+            ->leftJoin(
+                'task_details',
+                'task_details.task_id',
+                '=',
+                'tasks.task_id'
+            )->where('tasks.name', '=', $task_name)
+            ->first()->toArray();
+
         if ($output) {
-            $output['steps'] = $this->getReadyTaskSteps($output['task_id']);
+            $output['steps'] = $this->getTaskSteps($output['task_id']);
         }
-
-        if ($output['settings']) {
-            $output['settings'] = unserialize($output['settings']);
-        }
-
         return $output;
     }
 
@@ -744,13 +714,11 @@ class ATaskManager
         }
         $output = [];
         try {
-            $sql = "SELECT *
-                FROM ".$this->db->table_name('task_steps')."
-                WHERE task_id = ".$task_id."
-                ORDER BY sort_order";
-            $result = $this->db->query($sql);
+            $result = TaskStep::select()
+                ->where('task_id', '=', $task_id)
+                ->get()?->toArray();
             $memory_limit = H::getMemoryLimitInBytes();
-            foreach ($result->rows as $row) {
+            foreach ($result as $row) {
                 $used = memory_get_usage();
                 if ($memory_limit - $used <= 204800) {
                     $this->log->error(
@@ -758,10 +726,9 @@ class ATaskManager
                         . 'Task you should to increase memory_limit_size in your php.ini'
                     );
                 }
-                $row['settings'] = $row['settings'] ? unserialize($row['settings']) : '';
                 $output[(string)$row['step_id']] = $row;
             }
-        } catch (AException $e) {
+        } catch (\Exception $e) {
             $this->log->error(
                 'Error: Task Manager Memory overflow! To Get all Steps of Task '
                 . 'you should to increase memory_limit_size in your php.ini'
@@ -785,15 +752,9 @@ class ATaskManager
             return [];
         }
 
-        $sql = "SELECT *
-                FROM ".$this->db->table_name('task_steps')."
-                WHERE task_id = ".$task_id." AND step_id = ".$step_id;
-        $result = $this->db->query($sql);
-        $output = $result->row;
-        if ($output) {
-            $output['settings'] = $output['settings'] ? unserialize($output['settings']) : '';
-        }
-        return $output;
+        return TaskStep::where('task_id', '=', $task_id)
+            ->where('step_id', '=', $step_id)
+            ->first()?->toArray();
     }
 
     /**

@@ -924,7 +924,7 @@ class Category extends BaseModel
                 $data['parent_id'] = (int)$data['parent_id'] > 0 ? (int)$data['parent_id'] : null;
             }
 
-            $category = self::withTrashed()->find($categoryId);
+            $category = self::find($categoryId);
             $category->update($data);
 
             if (!empty($data['category_description'])) {

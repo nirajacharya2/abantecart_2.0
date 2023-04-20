@@ -172,10 +172,7 @@ class AuditLogTest extends ATestCase
         /**
          * @var Product $mdl
          */
-        $product = Product::withTrashed()
-                          ->where('product_id', $productId)
-                          ->first();
-        $product?->forceDelete();
+        $product = Product::find($productId)?->delete();
         return $productId;
     }
 

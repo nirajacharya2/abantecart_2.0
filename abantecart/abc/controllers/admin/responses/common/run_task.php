@@ -54,7 +54,7 @@ class ControllerResponsesCommonRunTask extends AController
             ];
         } else {
             $task_obj = new ATaskManager();
-            $this->data['output'] = $task_obj->getTaskByName($this->request->get['task_name']);
+            $this->data['output'] = $task_obj->getTaskByName((string)$this->request->get['task_name']);
         }
 
         //init controller data
