@@ -150,12 +150,7 @@ class ControllerTaskToolImportProcess extends AController
                     $method = "process_".$type."_record";
                     try {
                         $result = $this->model_tool_import_process->$method($task_id, $vals, $import_details);
-                    } catch (\PDOException $e) {
-                        $error_text = $e->getMessage();
-                        $this->errors[] = $error_text;
-                        $this->log->write($error_text);
-                        $result = false;
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         $error_text = $e->getMessage();
                         $this->errors[] = $error_text;
                         $this->log->write($error_text);
@@ -202,7 +197,7 @@ class ControllerTaskToolImportProcess extends AController
         //sends always true as result
         $tm->updateStep($step_id, ['last_result' => !$this->failed_count]);
         //all done, clear cache
-        $this->cache->flush('*');
+        $this->cache->flush();
         //return always true fo import process only. we think one failed row cannot block task
         return true;
     }
