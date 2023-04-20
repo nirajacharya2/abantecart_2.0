@@ -208,7 +208,7 @@ class ControllerResponsesListingGridOrder extends AController
                 $this->db->beginTransaction();
                 try {
                     if (!empty($ids)) {
-                        Order::whereIn('order_id', $ids)->forceDelete();
+                        Order::whereIn('order_id', $ids)->delete();
                     }
                     $this->db->commit();
                 } catch (Exception $e) {

@@ -4,7 +4,6 @@ namespace abc\models\order;
 
 use abc\models\BaseModel;
 use abc\models\locale\Language;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class OrderStatusDescription
@@ -20,8 +19,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class OrderStatusDescription extends BaseModel
 {
-    use SoftDeletes;
-
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'order_status_id',

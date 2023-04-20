@@ -23,10 +23,8 @@ use abc\models\casts\Serialized;
 use abc\models\catalog\Download;
 use abc\models\QueryBuilder;
 use Carbon\Carbon;
-use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class OrderDownload
@@ -58,8 +56,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class OrderDownload extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
-
     protected $cascadeDeletes = ['history'];
 
     protected $primaryKey = 'order_download_id';

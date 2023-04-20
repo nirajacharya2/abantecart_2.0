@@ -21,9 +21,7 @@ namespace abc\models\order;
 use abc\models\BaseModel;
 use abc\models\catalog\Product;
 use Carbon\Carbon;
-use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Coupon
@@ -52,8 +50,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Coupon extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
-
     protected $cascadeDeletes = ['descriptions', 'products'];
     protected $primaryKey = 'coupon_id';
     protected $casts = [

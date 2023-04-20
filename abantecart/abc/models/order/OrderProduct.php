@@ -22,9 +22,7 @@ use abc\core\engine\Registry;
 use abc\models\BaseModel;
 use abc\models\catalog\Product;
 use Carbon\Carbon;
-use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class OrderProduct
@@ -68,8 +66,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class OrderProduct extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
-
     protected $cascadeDeletes = ['order_downloads'];
 
     protected $primaryKey = 'order_product_id';
