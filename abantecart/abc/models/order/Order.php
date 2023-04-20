@@ -38,8 +38,6 @@ use abc\modules\events\ABaseEvent;
 use Carbon\Carbon;
 use Exception;
 use H;
-use Dyrynda\Database\Support\CascadeSoftDeletes;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -118,8 +116,6 @@ use Psr\SimpleCache\InvalidArgumentException;
  */
 class Order extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
-
     protected $cascadeDeletes = [
         'data',
         'order_products',

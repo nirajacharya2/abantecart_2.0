@@ -20,9 +20,7 @@ namespace abc\models\order;
 use abc\models\BaseModel;
 use abc\models\locale\Language;
 use Carbon\Carbon;
-use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class OrderDataType
@@ -40,8 +38,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class OrderDataType extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
-
     protected $cascadeDeletes = ['order_data'];
 
     protected $primaryKey = 'type_id';
