@@ -55,8 +55,6 @@ use Illuminate\Support\Collection;
  */
 class CustomerTransaction extends BaseModel
 {
-    use SoftDeletes;
-
     public $restrictUpdate = true;
 
     protected $primaryKey = 'customer_transaction_id';
@@ -411,8 +409,7 @@ class CustomerTransaction extends BaseModel
     public static function getTransactionTypes()
     {
         /** @var QueryBuilder $query */
-        $query = self::withTrashed()
-            ->select(['transaction_type'])
+        $query = self::select(['transaction_type'])
             ->distinct(['transaction_type'])
             ->orderBy('transaction_type')
             ->useCache('customer');

@@ -39,7 +39,7 @@ class ControllerApiCatalogCategory extends AControllerAPI
         } else {
             $languageId = $this->language->getLanguageCodeByLocale('en');
             Category::setCurrentLanguageID($languageId);
-            $categories = Category::withTrashed()->get();
+            $categories = Category::all();
 
             foreach ($categories as $findCategory) {
                 $pathTree = Category::getPath($findCategory->category_id);
@@ -156,7 +156,7 @@ class ControllerApiCatalogCategory extends AControllerAPI
                 } else {
                     $languageId = $this->language->getLanguageCodeByLocale('en');
                     Category::setCurrentLanguageID($languageId);
-                    $categories = Category::withTrashed()->get();
+                    $categories = Category::all();
                     foreach ($categories as $findCategory) {
                         $pathTree = Category::getPath($findCategory->category_id);
                         if ($pathTree === $request[$updateBy]) {
@@ -247,8 +247,8 @@ class ControllerApiCatalogCategory extends AControllerAPI
             }
 
             if ($deleteBy) {
-                Category::withTrashed()->where($deleteBy, $request[$deleteBy])
-                    ->forceDelete();
+                Category::where($deleteBy, $request[$deleteBy])
+                    ?->delete();
                 Registry::cache()->flush();
 
             } else {
