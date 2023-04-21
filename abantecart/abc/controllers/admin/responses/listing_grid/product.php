@@ -189,12 +189,12 @@ class ControllerResponsesListingGridProduct extends AController
         switch ($this->request->post['oper']) {
             case 'del':
                 $ids = array_unique(explode(',', $this->request->post['id']));
-                if (!empty($ids)) {
+                if ($ids) {
                     $this->db->beginTransaction();
                     try {
                         foreach ($ids as $id) {
                             $err = $this->validateDelete($id);
-                            if (!empty($err)) {
+                            if ($err) {
                                 $error = new AError('');
                                 $error->toJSONResponse(
                                     'VALIDATION_ERROR_406',
@@ -517,6 +517,6 @@ class ControllerResponsesListingGridProduct extends AController
         $this->data['error'] = '';
         $this->extensions->hk_ValidateData($this, __FUNCTION__, $id);
 
-        return (!$this->data['error']);
+        return $this->data['error'];
     }
 }
