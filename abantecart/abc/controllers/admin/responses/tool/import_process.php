@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -23,25 +23,17 @@ use abc\core\engine\AController;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\core\lib\ATaskManager;
+use abc\models\admin\ModelToolImportProcess;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 
 if (ABC::env('IS_DEMO')) {
     header('Location: static_pages/demo_mode.php');
 }
 
-/**
- * Class ControllerResponsesToolImportProcess
- *
- * @package abc\controllers\admin
- * @property \abc\models\admin\ModelToolImportProcess $model_tool_import_process
- */
+
 class ControllerResponsesToolImportProcess extends AController
 {
-    public $data = array();
-    public $errors = array();
+    public $errors = [];
 
     public function __construct($registry, $instance_id, $controller, $parent_controller = '')
     {
@@ -51,7 +43,7 @@ class ControllerResponsesToolImportProcess extends AController
 
     public function buildTask()
     {
-        $this->data['output'] = array();
+        $this->data['output'] = [];
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $file_format = $this->session->data['import']['format'];
@@ -66,26 +58,27 @@ class ControllerResponsesToolImportProcess extends AController
             $imp_data['store_id'] = $this->session->data['current_store_id'];
             $imp_data['language_id'] = $this->language->getContentLanguageID();
 
-            $this->loadModel('tool/import_process');
-            $task_details = $this->model_tool_import_process->createTask('import_wizard_'.date('Ymd-H:i:s'), $imp_data);
+            /** @var ModelToolImportProcess $mdl */
+            $mdl = $this->loadModel('tool/import_process');
+            $task_details = $mdl->createTask('import_wizard_' . date('Ymd-H:i:s'), $imp_data);
             $task_api_key = $this->config->get('task_api_key');
 
             if (!$task_details) {
-                $this->errors = array_merge($this->errors, $this->model_tool_import_process->errors);
-                $error = new AError("File Import Error: \n ".implode(' ', $this->errors));
+                $this->errors = array_merge($this->errors, $mdl->errors);
+                $error = new AError("File Import Error: \n " . implode(' ', $this->errors));
                 return $error->toJSONResponse('APP_ERROR_402',
-                    array(
+                    [
                         'error_text'  => implode(' ', $this->errors),
                         'reset_value' => true,
-                    )
+                    ]
                 );
             } elseif (!$task_api_key) {
                 $error = new AError('files import error');
                 return $error->toJSONResponse('APP_ERROR_402',
-                    array(
+                    [
                         'error_text'  => 'Please set up Task API Key in the settings!',
                         'reset_value' => true,
-                    )
+                    ]
                 );
             } else {
                 $task_details['task_api_key'] = $task_api_key;
@@ -96,10 +89,10 @@ class ControllerResponsesToolImportProcess extends AController
         } else {
             $error = new AError(implode('<br>', $this->errors));
             return $error->toJSONResponse('VALIDATION_ERROR_406',
-                array(
+                [
                     'error_text'  => implode('<br>', $this->errors),
                     'reset_value' => true,
-                )
+                ]
             );
         }
 
@@ -113,13 +106,14 @@ class ControllerResponsesToolImportProcess extends AController
 
     public function complete()
     {
+        $result_text = true;
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $this->loadLanguage('tool/import_export');
 
         $task_id = (int)$this->request->post['task_id'];
         if (!$task_id) {
-            return null;
+            return;
         }
 
         //check task result
@@ -132,20 +126,19 @@ class ControllerResponsesToolImportProcess extends AController
         }
 
         $log_file = $task_info['settings']['logfile'];
-        if (is_file(ABC::env('DIR_LOGS').$log_file)) {
-            $result_text .= '<br>'.sprintf($this->language->get('text_see_log'),
-                    $this->html->getSecureURL('tool/error_log', '&filename='.$log_file), $log_file);
+        if (is_file(ABC::env('DIR_LOGS') . $log_file)) {
+            $result_text .= '<br>' . sprintf($this->language->get('text_see_log'),
+                    $this->html->getSecureURL('tool/error_log', '&filename=' . $log_file), $log_file);
         }
+        $this->data['output'] = [
+            'result'      => $task_result,
+            'result_text' => $result_text,
+        ];
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-        $this->load->library('json');
         $this->response->addJSONHeader();
-        $this->response->setOutput(AJson::encode(array(
-            'result'      => $task_result,
-            'result_text' => $result_text,
-        ))
-        );
+        $this->response->setOutput(AJson::encode($this->data['output']));
     }
 
     public function abort()
@@ -155,7 +148,7 @@ class ControllerResponsesToolImportProcess extends AController
 
         $task_id = (int)$this->request->post['task_id'];
         if (!$task_id) {
-            return null;
+            return;
         }
 
         //check task result
@@ -166,28 +159,25 @@ class ControllerResponsesToolImportProcess extends AController
             $tm->deleteTask($task_id);
             $result_text = $this->language->get('text_success_abort');
         } else {
-            $error_text = 'Task #'.$task_id.' not found!';
+            $error_text = 'Task #' . $task_id . ' not found!';
             $error = new AError($error_text);
-            return $error->toJSONResponse('APP_ERROR_402',
-                array(
+            $error->toJSONResponse('APP_ERROR_402',
+                [
                     'error_text'  => $error_text,
                     'reset_value' => true,
-                ));
+                ]
+            );
+            return;
         }
-
+        $this->data['output'] = [
+            'result'      => true,
+            'result_text' => $result_text,
+        ];
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-        $this->load->library('json');
         $this->response->addJSONHeader();
-        $this->response->setOutput(
-            AJson::encode(
-                array(
-                    'result'      => true,
-                    'result_text' => $result_text,
-                )
-            )
-        );
+        $this->response->setOutput(AJson::encode($this->data['output']));
     }
 
     protected function _validate()

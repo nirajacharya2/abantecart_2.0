@@ -2125,7 +2125,7 @@ class Product extends BaseModel
             self::updateProductAttributes($product_id, $product_data['product_type_id'], $attributes);
         }
         self::updateProductLinks($product, $product_data);
-
+        Registry::cache()->flush('product');
         return true;
     }
 
@@ -2236,11 +2236,12 @@ class Product extends BaseModel
                             'language_id' => $languageId,
                         ]
                     )->whereNotIn('id', $productTags)
-                        ->forceDelete();
+                        ->delete();
                 }
             }
         }
         $model->touch();
+        Registry::cache()->flush('product');
         return true;
     }
 
@@ -2267,6 +2268,7 @@ class Product extends BaseModel
             }
         }
 
+        Registry::cache()->flush('product');
         return true;
     }
 
@@ -2329,8 +2331,7 @@ class Product extends BaseModel
             $customer_group_id = (int)Registry::config()?->get('config_customer_group_id');
         }
 
-        $sql
-            = " ( SELECT p2sp.price
+        $sql = " ( SELECT p2sp.price
                     FROM " . $db->table_name("product_specials") . " p2sp
                     WHERE p2sp.product_id = " . $db->table_name("products") . ".product_id
                             AND p2sp.customer_group_id = '" . $customer_group_id . "'
@@ -2511,13 +2512,13 @@ class Product extends BaseModel
     }
 
     /**
-     * @return bool|null
      * @throws Exception
      */
     public function delete()
     {
         UrlAlias::where('query', '=', 'product_id=' . $this->getKey())->delete();
-        return parent::delete();
+        parent::delete();
+        Registry::cache()->flush('product');
     }
 
     /**
@@ -2601,6 +2602,7 @@ class Product extends BaseModel
 
             $this->touch();
             $db->commit();
+            Registry::cache()->flush('product');
         } catch (Exception $e) {
             Registry::log()->error($e->getMessage() . "\n\n" . $e->getTraceAsString());
             $db->rollback();
@@ -2938,7 +2940,22 @@ class Product extends BaseModel
                 : $productTable . ".sort_order"
         ];
 
-        $orderBy = $sort_data[$params['sort']] ?: 'name';
+        if ($sort_data[$params['sort']]) {
+            $orderBy = $sort_data[$params['sort']];
+        } else {
+            $fillable = (new Product())->getFillable();
+            if (in_array($params['sort'], $fillable)) {
+                $orderBy = $productTable . "." . $params['sort'];
+            } else {
+                $fillable = (new ProductDescription())->getFillable();
+                if (in_array($params['sort'], $fillable)) {
+                    $orderBy = $pDescTable . "." . $params['sort'];
+                } else {
+                    $orderBy = "name";
+                }
+            }
+        }
+
         if (isset($params['order']) && (strtoupper($params['order']) == 'DESC')) {
             $sorting = "desc";
         } else {

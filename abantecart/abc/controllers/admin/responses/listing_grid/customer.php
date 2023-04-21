@@ -23,6 +23,7 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\ALanguage;
+use abc\core\engine\Registry;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
@@ -203,11 +204,11 @@ class ControllerResponsesListingGridCustomer extends AController
             case 'del':
                 $ids = explode(',', $this->request->post['id']);
                 if (!empty($ids)) {
-                    Customer::whereIn('customer_id', $ids)->forceDelete();
+                    Customer::whereIn('customer_id', $ids)->delete();
+                    Registry::cache()->flush('customer');
                 }
                 break;
             case 'save':
-
                 $ids = explode(',', $this->request->post['id']);
                 $ids = array_unique($ids);
                 if (!empty($ids)) {
@@ -248,6 +249,7 @@ class ControllerResponsesListingGridCustomer extends AController
                             return;
                         }
                     }
+                    Registry::cache()->flush('customer');
                 }
                 break;
             default:

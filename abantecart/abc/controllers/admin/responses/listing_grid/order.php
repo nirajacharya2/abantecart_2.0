@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2021 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,6 +22,7 @@ namespace abc\controllers\admin;
 
 use abc\core\ABC;
 use abc\core\engine\AController;
+use abc\core\engine\Registry;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AJson;
@@ -204,13 +205,14 @@ class ControllerResponsesListingGridOrder extends AController
 
         switch ($this->request->post['oper']) {
             case 'del':
-                $ids = explode(',', $this->request->post['id']);
+                $ids = array_unique(explode(',', $this->request->post['id']));
                 $this->db->beginTransaction();
                 try {
-                    if (!empty($ids)) {
+                    if ($ids) {
                         Order::whereIn('order_id', $ids)->delete();
                     }
                     $this->db->commit();
+                    Registry::cache()->flush(['order', 'customer']);
                 } catch (Exception $e) {
                     $this->db->rollback();
                     $error = new AError('');
@@ -218,10 +220,11 @@ class ControllerResponsesListingGridOrder extends AController
                         'APP_ERROR_402',
                         [
                             'error_text'  => 'Application Error occurred. Probably some of '
-                                .'orders cannot be removed by cause data dependency. Please see error log for details.',
+                                . 'orders cannot be removed by cause data dependency. Please see error log for details.',
                             'reset_value' => true,
                         ]
                     );
+                    $this->log->error($e->getMessage() . "\n\n" . $e->getTraceAsString());
                     return;
                 }
                 break;

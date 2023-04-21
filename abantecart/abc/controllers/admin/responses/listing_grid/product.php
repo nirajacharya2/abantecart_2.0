@@ -22,6 +22,7 @@ namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
+use abc\core\engine\Registry;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AJson;
@@ -187,9 +188,8 @@ class ControllerResponsesListingGridProduct extends AController
 
         switch ($this->request->post['oper']) {
             case 'del':
-                $ids = explode(',', $this->request->post['id']);
+                $ids = array_unique(explode(',', $this->request->post['id']));
                 if (!empty($ids)) {
-                    $ids = array_unique($ids);
                     $this->db->beginTransaction();
                     try {
                         foreach ($ids as $id) {
@@ -207,13 +207,14 @@ class ControllerResponsesListingGridProduct extends AController
                             $product = Product::with('categories')->find($id);
                             $categories = $product->categories;
 
-                            $product->forceDelete();
+                            $product->delete();
                             //run products count recalculation
                             foreach ($categories as $item) {
                                 $item->touch();
                             }
                         }
                         $this->db->commit();
+                        Registry::cache()->flush('product');
                     } catch (Exception $e) {
                         $this->db->rollback();
                         $error = new AError($e->getMessage());

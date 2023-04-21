@@ -592,7 +592,7 @@ class ModelToolImportProcess extends Model
 
         //delete existing options and values.
         if ($product->options->count()) {
-            $product->options?->delete();
+            ProductOption::where('product_id', '=', $productId)?->delete();
         }
 
         //add new options for each option
