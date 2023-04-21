@@ -672,6 +672,7 @@ class ATaskManager
             ->first()->toArray();
 
         if ($output) {
+            $output['settings'] = $output['settings'] ? unserialize($output['settings']) : [];
             $output['steps'] = $this->getTaskSteps($output['task_id']);
         }
         return $output;
@@ -700,6 +701,7 @@ class ATaskManager
 
         if ($output) {
             $output['steps'] = $this->getTaskSteps($output['task_id']);
+            $output['settings'] = $output['settings'] ? unserialize($output['settings']) : [];
         }
         return $output;
     }
