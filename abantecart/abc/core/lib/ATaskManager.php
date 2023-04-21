@@ -595,13 +595,17 @@ class ATaskManager
      */
     public function updateStep($step_id, $data = [])
     {
+        if (!$data) {
+            return false;
+        }
         $step = TaskStep::find($step_id);
         if (!$step) {
             $this->errors[] = __FUNCTION__ . ': Step #' . $step_id . ' not found';
-            return;
+            return false;
         }
 
         $step->update($data);
+        return true;
     }
 
     /**

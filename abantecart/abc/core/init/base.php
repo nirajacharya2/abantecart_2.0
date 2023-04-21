@@ -85,7 +85,6 @@ $class_list = [
         'menu_control_storefront',
         'rest',
         'filter',
-        'task_manager',
         'im',
         'csrf_token',
         'promotion',
