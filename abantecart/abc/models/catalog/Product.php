@@ -2940,7 +2940,22 @@ class Product extends BaseModel
                 : $productTable . ".sort_order"
         ];
 
-        $orderBy = $sort_data[$params['sort']] ?: 'name';
+        if ($sort_data[$params['sort']]) {
+            $orderBy = $sort_data[$params['sort']];
+        } else {
+            $fillable = (new Product())->getFillable();
+            if (in_array($params['sort'], $fillable)) {
+                $orderBy = $productTable . "." . $params['sort'];
+            } else {
+                $fillable = (new ProductDescription())->getFillable();
+                if (in_array($params['sort'], $fillable)) {
+                    $orderBy = $pDescTable . "." . $params['sort'];
+                } else {
+                    $orderBy = "name";
+                }
+            }
+        }
+
         if (isset($params['order']) && (strtoupper($params['order']) == 'DESC')) {
             $sorting = "desc";
         } else {
