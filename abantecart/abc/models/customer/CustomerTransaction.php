@@ -337,11 +337,10 @@ class CustomerTransaction extends BaseModel
         $filter = $data['filter'] ?? [];
 
         if (H::has_value($filter['date_start']) && H::has_value($filter['date_end'])) {
-            $query->whereRaw( $aliasC.".date_added 
-                                BETWEEN '".$db->escape($filter['date_start'])."' 
-                                    AND '".$db->escape($filter['date_end'])." 23:59:59'" );
+            $query->whereRaw($aliasC . ".date_added 
+                                BETWEEN '" . $db->escape($filter['date_start']) . "' 
+                                    AND '" . $db->escape($filter['date_end']) . "'");
         }
-
         if (H::has_value($filter['debit'])) {
             $query->whereRaw( "ROUND(".$aliasC.".debit,2) = '".round((float)$filter['debit'], 2)."'" );
         }
