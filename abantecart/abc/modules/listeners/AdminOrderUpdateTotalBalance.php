@@ -75,6 +75,7 @@ class AdminOrderUpdateTotalBalance
         try {
             $transaction->validate();
             $transaction->save();
+            Registry::cache()->flush('customer');
         } catch (ValidationException $e) {
             $errors = [];
             \H::SimplifyValidationErrors($transaction->errors()['validation'], $errors);
