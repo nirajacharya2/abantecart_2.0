@@ -58,8 +58,7 @@ class ControllerResponsesListingGridProduct extends AController
                     'search_by' => [
                         'name',
                         'model',
-                        'sku',
-                        'supplier'
+                        'sku'
                     ]
                 ]
             ],
@@ -96,7 +95,11 @@ class ControllerResponsesListingGridProduct extends AController
         $this->loadLanguage('catalog/product');
         $this->loadModel('tool/image');
 
+
         $results = Product::getProducts($this->data['search_parameters']);
+        //push result into public scope to get access from extensions
+        $this->data['results'] = $results;
+
         $total = $results::getFoundRowsCount();
         $total_pages = $total > 0 ? ceil($total / $limit) : 0;
         $response = new stdClass();
@@ -205,12 +208,14 @@ class ControllerResponsesListingGridProduct extends AController
                                 return;
                             }
                             $product = Product::with('categories')->find($id);
-                            $categories = $product->categories;
-
-                            $product->delete();
-                            //run products count recalculation
-                            foreach ($categories as $item) {
-                                $item->touch();
+                            if ($product) {
+                                $this->extensions->hk_ProcessData($this, 'deleting', ['product_id' => $id]);
+                                $categories = $product->categories;
+                                $product->delete();
+                                //run products count recalculation
+                                foreach ($categories as $item) {
+                                    $item->touch();
+                                }
                             }
                         }
                         $this->db->commit();
@@ -271,7 +276,6 @@ class ControllerResponsesListingGridProduct extends AController
                     Product::relateProducts($ids);
                 }
                 break;
-            default:
         }
 
         //update controller data

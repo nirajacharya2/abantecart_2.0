@@ -23,6 +23,7 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
+use abc\core\engine\Registry;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\models\customer\CustomerTransaction;
@@ -227,6 +228,7 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
         if (!$this->error) {
             $transaction = new CustomerTransaction($valid_data);
             $transaction->save();
+            Registry::cache()->flush('customer');
             $result['result'] = true;
             $result['result_text'] = $this->language->get('text_transaction_success');
             $balance = CustomerTransaction::getBalance($this->request->get['customer_id']);
