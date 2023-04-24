@@ -208,12 +208,14 @@ class ControllerResponsesListingGridProduct extends AController
                                 return;
                             }
                             $product = Product::with('categories')->find($id);
-                            $categories = $product->categories;
-
-                            $product->delete();
-                            //run products count recalculation
-                            foreach ($categories as $item) {
-                                $item->touch();
+                            if ($product) {
+                                $this->extensions->hk_ProcessData($this, 'deleting', ['product_id' => $id]);
+                                $categories = $product->categories;
+                                $product->delete();
+                                //run products count recalculation
+                                foreach ($categories as $item) {
+                                    $item->touch();
+                                }
                             }
                         }
                         $this->db->commit();
@@ -274,7 +276,6 @@ class ControllerResponsesListingGridProduct extends AController
                     Product::relateProducts($ids);
                 }
                 break;
-            default:
         }
 
         //update controller data
