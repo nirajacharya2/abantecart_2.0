@@ -398,7 +398,7 @@ class CustomerTransaction extends BaseModel
 
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $data);
-        $query->useCache('customer');
+        //$query->useCache('customer');
         return $query->get();
     }
 

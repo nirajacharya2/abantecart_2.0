@@ -1548,6 +1548,7 @@ class Product extends BaseModel
             $data['options'][] = $option->getAllData();
         }
         $data['keywords'] = $this->keywords();
+        $data['images'] = $this->images();
         return $data;
     }
 
