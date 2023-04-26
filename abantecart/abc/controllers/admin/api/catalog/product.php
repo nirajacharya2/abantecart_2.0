@@ -277,13 +277,13 @@ class ControllerApiCatalogProduct extends AControllerAPI
      * @throws InvalidArgumentException
      * @throws ReflectionException
      */
-    protected function prepareData($data)
+    protected function prepareData(array $data)
     {
         //assign product to store we requests
         $data['stores'] = [(int)$this->config->get('config_store_id')];
         //trick for unique sku. null is allowed  for unique index
-        if(isset($data['sku'])) {
-           $data['sku'] = $data['sku'] === '' ? null : $data['sku'];
+        if (isset($data['sku'])) {
+            $data['sku'] = $data['sku'] === '' ? null : $data['sku'];
         }
 
         if ($data['category_uuids']) {
