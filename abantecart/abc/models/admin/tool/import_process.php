@@ -418,7 +418,7 @@ class ModelToolImportProcess extends Model
         $this->data['product_data']['product_id'] = $product_id;
         if ($status) {
             H::event(
-                str_replace('::', '@', __METHOD__),
+                __CLASS__ . '@' . __FUNCTION__,
                 [new ABaseEvent($this->task_id, $product_id, $data, $record)]
             );
         }
@@ -501,7 +501,7 @@ class ModelToolImportProcess extends Model
         $this->migrateImages($data['images'], 'categories', $category_id, $category_desc['name'], $language_id);
 
         H::event(
-            str_replace('::', '@', __METHOD__),
+            __CLASS__ . '@' . __FUNCTION__,
             [new ABaseEvent($this->task_id, $category_id, $category_data, $record)]
         );
 
@@ -559,7 +559,7 @@ class ModelToolImportProcess extends Model
         if ($status) {
             //call event
             H::event(
-                str_replace('::', '@', __METHOD__),
+                __CLASS__ . '@' . __FUNCTION__,
                 [new ABaseEvent($this->task_id, $manufacturer_id, $manufacturer, $record)]
             );
         }
