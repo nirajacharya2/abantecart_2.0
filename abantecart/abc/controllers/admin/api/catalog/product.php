@@ -277,20 +277,19 @@ class ControllerApiCatalogProduct extends AControllerAPI
      * @throws InvalidArgumentException
      * @throws ReflectionException
      */
-    protected function prepareData($data)
+    protected function prepareData(array $data)
     {
         //assign product to store we requests
-        $data['stores'] = [$this->config->get('config_store_id')];
+        $data['stores'] = [(int)$this->config->get('config_store_id')];
         //trick for unique sku. null is allowed  for unique index
-        if(isset($data['sku'])) {
-           $data['sku'] = $data['sku'] === '' ? null : $data['sku'];
+        if (isset($data['sku'])) {
+            $data['sku'] = $data['sku'] === '' ? null : $data['sku'];
         }
 
         if ($data['category_uuids']) {
-            $categories = Category::select(['category_id'])
+            $data['categories'] = (array)Category::select(['category_id'])
                 ->whereIn('uuid', $data['category_uuids'])
-                ->get()?->toArray();
-            $data['categories'] = array_column((array)$categories,'category_id');
+                ->get()?->pluck('category_id')->toArray();
         }else{
             //if product does not assigned to any category
             $data['categories'] = [];
