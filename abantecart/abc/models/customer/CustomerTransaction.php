@@ -398,7 +398,7 @@ class CustomerTransaction extends BaseModel
 
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $data);
-        //$query->useCache('customer');
+        $query->useCache('customer');
         return $query->get();
     }
 
@@ -410,11 +410,10 @@ class CustomerTransaction extends BaseModel
         /** @var QueryBuilder $query */
         $query = self::select(['transaction_type'])
             ->distinct(['transaction_type'])
-            ->orderBy('transaction_type')
-            ->useCache('customer');
+            ->orderBy('transaction_type');
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query);
-        return $query->get();
+        return $query->useCache('customer')->get();
     }
 
 }
