@@ -176,8 +176,10 @@ $session_id = 'CLI';
 registerClass($registry, 'session', 'ASession', [$session_id], ASession::class, [$session_id]);
 
 
-// Config
 if (ABC::env('DB_CURRENT_DRIVER')) {
+    // Config
+    registerClass($registry, 'config', 'AConfig', [$registry], AConfig::class, [$registry]);
+
     // Cache
     registerClass(
         $registry,
@@ -187,7 +189,7 @@ if (ABC::env('DB_CURRENT_DRIVER')) {
         AbcCache::class,
         []
     );
-    registerClass($registry, 'config', 'AConfig', [$registry], AConfig::class, [$registry]);
+
     registerClass(
         $registry,
         'language',
