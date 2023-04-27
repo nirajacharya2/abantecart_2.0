@@ -644,6 +644,7 @@ class Customer extends BaseModel
             //enable notification setting for newsletter via email
             $this->saveCustomerNotificationSettings(['newsletter' => ['email' => (int)$data['newsletter']]]);
         }
+        Registry::cache()->flush('customer');
     }
 
     /**
