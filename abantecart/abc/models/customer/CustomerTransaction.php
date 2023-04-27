@@ -23,7 +23,6 @@ use abc\models\QueryBuilder;
 use Carbon\Carbon;
 use Exception;
 use H;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 
 /**
@@ -56,9 +55,7 @@ use Illuminate\Support\Collection;
 class CustomerTransaction extends BaseModel
 {
     public $restrictUpdate = true;
-
     protected $primaryKey = 'customer_transaction_id';
-
     protected $mainClassName = Customer::class;
     protected $mainClassKey = 'customer_id';
 
@@ -363,8 +360,8 @@ class CustomerTransaction extends BaseModel
         //If for total, we're done building the query
         if ($mode == 'total_only') {
             //allow to extend this method from extensions
-            Registry::extensions()->hk_extendQuery(new static,__FUNCTION__, $query, $data);
-            $result = $query->first();
+            Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $data);
+            $result = $query->useCache('customer')->first();
             return (int)$result->total;
         }
 
@@ -407,7 +404,6 @@ class CustomerTransaction extends BaseModel
      */
     public static function getTransactionTypes()
     {
-        /** @var QueryBuilder $query */
         $query = self::select(['transaction_type'])
             ->distinct(['transaction_type'])
             ->orderBy('transaction_type');

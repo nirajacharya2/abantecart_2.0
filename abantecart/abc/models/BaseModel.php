@@ -74,6 +74,8 @@ use ReflectionMethod;
  * @method static QueryBuilder leftJoin(string $table, Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
  * @method static QueryBuilder rightJoin(string $table, Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
  * @method static QueryBuilder|Builder OrderBy(string $column, string $order = 'asc') QueryBuilder
+ * @method static QueryBuilder|Builder withoutGlobalScopes()
+ *
  * @const  string DELETED_AT
  */
 abstract class BaseModel extends OrmModel

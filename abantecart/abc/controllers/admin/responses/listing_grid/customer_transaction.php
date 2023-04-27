@@ -232,8 +232,8 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
             $result['result'] = true;
             $result['result_text'] = $this->language->get('text_transaction_success');
             $balance = CustomerTransaction::getBalance($this->request->get['customer_id']);
-            $result['balance'] = $this->language->get('text_balance')
-                .' '.$this->currency->format($balance, $this->config->get('config_currency'));
+            $result['balance'] = $this->currency->format($balance, $this->config->get('config_currency'));
+            $result['balance_text'] = $this->language->get('text_balance') . ' ' . $result['balance'];
             //call event
             H::event(
                 'admin\sendNewCustomerTransactionNotifyEmail',
