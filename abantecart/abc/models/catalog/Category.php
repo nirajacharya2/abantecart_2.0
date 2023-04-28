@@ -248,17 +248,41 @@ class Category extends BaseModel
      */
     public function getAllData()
     {
-        $cache_key = 'category.alldata.' . $this->getKey();
-        $data = Registry::cache()->get($cache_key);
-        if ($data === null) {
-            $this->load('descriptions', 'stores');
-            $data = $this->toArray();
-            $data['images'] = $this->getImages();
-            if ($this->getKey()) {
-                $data['keywords'] = UrlAlias::getKeyWordsArray($this->getKeyName(), $this->getKey());
-            }
-            Registry::cache()->put($cache_key, $data);
+        if (!$this->getKey()) {
+            return false;
         }
+        $cacheKey = 'category.alldata.' . $this->getKey();
+        $data = Registry::cache()->tags('category')->get($cacheKey);
+        if ($data !== null) {
+            return $data;
+        }
+
+        // eagerLoading!
+        $toLoad = $nested = [];
+        $rels = $this->getRelationships('HasMany', 'HasOne', 'belongsToMany');
+        foreach ($rels as $relName => $rel) {
+            if (in_array($relName, ['products', 'description'])) {
+                continue;
+            }
+            if ($rel['getAllData']) {
+                $nested[] = $relName;
+            } else {
+                $toLoad[] = $relName;
+            }
+        }
+
+        $this->load($toLoad);
+        $data = $this->toArray();
+        foreach ($nested as $prop) {
+            foreach ($this->{$prop} as $option) {
+                /** @var ProductOption $option */
+                $data[$prop][] = $option->getAllData();
+            }
+        }
+
+        $data['images'] = $this->images();
+        $data['keywords'] = UrlAlias::getKeyWordsArray($this->getKeyName(), $this->getKey());
+        Registry::cache()->tags('category')->put($cacheKey, $data);
         return $data;
     }
 
@@ -268,7 +292,7 @@ class Category extends BaseModel
      * @throws AException
      * @throws InvalidArgumentException
      */
-    public function getImages()
+    public function images()
     {
         $config = Registry::config();
         $images = [];
