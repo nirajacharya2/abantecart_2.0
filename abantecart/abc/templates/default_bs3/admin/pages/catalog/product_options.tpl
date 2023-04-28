@@ -91,7 +91,7 @@ $modal_content = '<div class="add-option-modal" >
             <div class="panel-footer">
                 <div class="row">
                    <div class="center">
-                     <button class="btn btn-primary">
+                     <button class="btn btn-primary lock-on-click">
                      <i class="fa fa-save"></i> '.$form['submit']->text.'
                      </button>&nbsp;
                      <button type="button" class="btn btn-default" data-dismiss="modal">
@@ -411,6 +411,9 @@ echo $this->html->buildElement(
                 url: $(that).closest('form').attr('action'),
                 type: 'POST',
                 data: $(that).closest('form').serializeArray(),
+                beforeSend: function () {
+                    $('#option_values_save_btn').button('loading');
+                },
                 success: function (html) {
                     $('#option_values').html(html);
                 },
@@ -422,6 +425,7 @@ echo $this->html->buildElement(
                     bindAform($("input, textarea, select", '#option_edit_form'));
                     bindAform($("input, textarea, select", '#update_option_values'));
                     bindCustomEvents('#option_values');
+                    resetLockBtn();
                 }
             });
             return false;

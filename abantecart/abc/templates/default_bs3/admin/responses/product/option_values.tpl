@@ -73,8 +73,8 @@
 	<div class="panel-footer">
 		<div class="center">
             <?php if($button_save){ ?>
-			 <button id="update_option" class="btn btn-primary">
-			 <i class="fa fa-save"></i> <?php echo $button_save->text; ?>
+                <button id="update_option" class="btn btn-primary lock-on-click">
+                    <i class="fa fa-save"></i> <?php echo $button_save->text; ?>
 			 </button>
 			 &nbsp;
 			 <a id="reset_option" class="btn btn-default" href="<?php echo $button_reset->href; ?>">
@@ -134,7 +134,7 @@
                                 <i class="fa fa-plus-circle fa-lg"></i>
                             </a>&nbsp;&nbsp;
                         <?php } ?>
-                        <button type="submit" class="btn btn-primary">
+                        <button id="option_values_save_btn" type="submit" class="btn btn-primary">
                             <i class="fa fa-save"></i> <?php echo $button_save->text; ?>
                         </button>
                         <a id="reset_option" class="btn btn-default" href="<?php echo $button_reset->href; ?>">
