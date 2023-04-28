@@ -335,8 +335,27 @@ class ProductOptionValue extends BaseModel
      */
     public function getAllData()
     {
-        $this->load('descriptions');
+        if (!$this->getKey()) {
+            return false;
+        }
+        // eagerLoading!
+        $toLoad = $nested = [];
+        $rels = $this->getRelationships('HasMany', 'HasOne', 'belongsToMany');
+        foreach ($rels as $relName => $rel) {
+            if ($rel['getAllData']) {
+                $nested[] = $relName;
+            } else {
+                $toLoad[] = $relName;
+            }
+        }
+
+        $this->load($toLoad);
         $data = $this->toArray();
+        foreach ($nested as $prop) {
+            foreach ($this->{$prop} as $option) {
+                $data[$prop][] = $option->getAllData();
+            }
+        }
         $data['images'] = $this->images();
         return $data;
     }

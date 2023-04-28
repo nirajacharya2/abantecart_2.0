@@ -244,9 +244,9 @@ abstract class BaseModel extends OrmModel
 
         //process validation rules
         if ($this->actor['user_type_name']) {
-            $userTypeRulesModel = (array)$this->{'rules'.ucfirst($this->actor['user_type_name'])};
-            $ruleAlias = 'rules'.ucfirst($this->actor['user_type_name']);
-            $userTypeRulesEnv = (array) ABC::env('MODEL')['INITIALIZE'][$this->getClass()]['properties'][$ruleAlias];
+            $userTypeRulesModel = (array)$this->{'rules' . ucfirst($this->actor['user_type_name'])};
+            $ruleAlias = 'rules' . ucfirst($this->actor['user_type_name']);
+            $userTypeRulesEnv = (array)ABC::env('MODEL')['INITIALIZE'][$this->getClass()]['properties'][$ruleAlias];
             $userTypeRules = array_merge($userTypeRulesModel, $userTypeRulesEnv);
 
             if ($userTypeRules) {
@@ -255,7 +255,8 @@ abstract class BaseModel extends OrmModel
         }
     }
 
-    public function getActorDetails(){
+    public function getActorDetails()
+    {
         return $this->actor;
     }
 
@@ -317,7 +318,7 @@ abstract class BaseModel extends OrmModel
     public function isUser()
     {
         return isset ($this->actor['user_type'])
-                && ($this->actor['user_type'] == self::USER || $this->actor['user_type'] == self::CLI);
+            && ($this->actor['user_type'] == self::USER || $this->actor['user_type'] == self::CLI);
     }
 
     /**
@@ -327,10 +328,10 @@ abstract class BaseModel extends OrmModel
      */
     public static function setCurrentLanguageID($language_id)
     {
-        if (!(int) $language_id) {
+        if (!(int)$language_id) {
             return false;
         }
-        static::$current_language_id = (int) $language_id;
+        static::$current_language_id = (int)$language_id;
         return true;
     }
 
@@ -415,7 +416,7 @@ abstract class BaseModel extends OrmModel
         if ($this->hasPermission('update')) {
             parent::save();
         } else {
-            throw new Exception('No permission for object (class '.$this->getClass().') to save the model.');
+            throw new Exception('No permission for object (class ' . $this->getClass() . ') to save the model.');
         }
     }
 
@@ -470,7 +471,7 @@ abstract class BaseModel extends OrmModel
                 if ($rule['lambda'] instanceof Closure) {
                     $lambdaResult = $rule['lambda']($this);
                     if (!($lambdaResult instanceof Rule)) {
-                        throw new Exception('Lambda-function as model rule must return instance of '.Rule::class.'!');
+                        throw new Exception('Lambda-function as model rule must return instance of ' . Rule::class . '!');
                     }
                     $validateRules[$key] = [$lambdaResult];
                 }
@@ -479,18 +480,18 @@ abstract class BaseModel extends OrmModel
             if (!$messages) {
                 foreach ($rules as $attributeName => $item) {
                     //check data for confirmation such as password
-                    if (isset($rules[$attributeName.'_confirmation'])) {
-                        $data[$attributeName.'_confirmation'] = $data[$attributeName];
+                    if (isset($rules[$attributeName . '_confirmation'])) {
+                        $data[$attributeName . '_confirmation'] = $data[$attributeName];
                     }
                     $msg = $item['messages'];
                     if (!is_array($msg)) {
                         throw new AException(
-                            'Validation messages not found for attribute '.$attributeName.' of model '
-                            .$this->getClass()
+                            'Validation messages not found for attribute ' . $attributeName . ' of model '
+                            . $this->getClass()
                         );
                     }
                     foreach ($msg as $subRule => $langParams) {
-                        $subRule = $attributeName.'.'.$subRule;
+                        $subRule = $attributeName . '.' . $subRule;
                         if ($langParams['language_key']) {
                             $messages[$subRule] = H::lng(
                                 $langParams['language_key'],
@@ -706,7 +707,7 @@ abstract class BaseModel extends OrmModel
     public static function getRelationships($typesOnly = null)
     {
         $typesOnly = is_string($typesOnly) ? func_get_args() : $typesOnly;
-        $typesOnly = (array) $typesOnly;
+        $typesOnly = (array)$typesOnly;
         foreach ($typesOnly as &$t) {
             $t = strtolower($t);
         }
@@ -729,13 +730,16 @@ abstract class BaseModel extends OrmModel
                 if ($return instanceof Relation) {
                     $type = (new ReflectionClass($return))->getShortName();
                     if (!$typesOnly || in_array(strtolower($type), $typesOnly)) {
+                        $related = new ReflectionClass($return->getRelated());
                         $relationships[$method->getName()] = [
-                            'type'  => $type,
-                            'model' => (new ReflectionClass($return->getRelated()))->getName(),
+                            'type'       => $type,
+                            'model'      => $related->getName(),
+                            'getAllData' => $related->hasMethod('getAllData')
                         ];
                     }
                 }
-            } catch (Exception $e) {}
+            } catch (Exception $e) {
+            }
         }
         return $relationships;
     }

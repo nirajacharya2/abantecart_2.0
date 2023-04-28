@@ -1278,34 +1278,6 @@ class Product extends BaseModel
     }
 
     /**
-     * TODO: ???is needed?
-     *
-     * @return HasMany
-     */
-    public function option_descriptions()
-    {
-        return $this->hasMany(ProductOptionDescription::class, 'product_id');
-    }
-
-    /**TODO: ???is needed?
-     *
-     * @return HasMany
-     */
-    public function option_values()
-    {
-        return $this->hasMany(ProductOptionValue::class, 'product_id');
-    }
-
-    /**TODO: ???is needed?
-     *
-     * @return HasMany
-     */
-    public function option_value_descriptions()
-    {
-        return $this->hasMany(ProductOptionValueDescription::class, 'product_id');
-    }
-
-    /**
      * @return HasMany
      */
     public function specials()
@@ -1535,20 +1507,44 @@ class Product extends BaseModel
 
     /**
      * @return array
-     * @throws ReflectionException|Exception
+     * @throws ReflectionException|Exception|InvalidArgumentException
      */
     public function getAllData()
     {
+        if (!$this->getKey()) {
+            return false;
+        }
+
+        $cacheKey = 'product.alldata.' . $this->getKey();
+        $data = Registry::cache()->tags('product')->get($cacheKey);
+        if ($data !== null) {
+            return $data;
+        }
         // eagerLoading!
-        $rels = array_keys(static::getRelationships('HasMany', 'HasOne', 'belongsToMany'));
-        unset($rels['options']);
-        $this->load($rels);
+        $toLoad = $nested = [];
+        $rels = $this->getRelationships('HasMany', 'HasOne', 'belongsToMany');
+        foreach ($rels as $relName => $rel) {
+            if (in_array($relName, ['categories', 'related', 'manufacturer'])) {
+                continue;
+            }
+            if ($rel['getAllData']) {
+                $nested[] = $relName;
+            } else {
+                $toLoad[] = $relName;
+            }
+        }
+
+        $this->load($toLoad);
         $data = $this->toArray();
-        foreach ($this->options as $option) {
-            $data['options'][] = $option->getAllData();
+        foreach ($nested as $prop) {
+            foreach ($this->{$prop} as $option) {
+                /** @var ProductOption $option */
+                $data[$prop][] = $option->getAllData();
+            }
         }
         $data['keywords'] = $this->keywords();
         $data['images'] = $this->images();
+        Registry::cache()->tags('product')->put($cacheKey, $data);
         return $data;
     }
 

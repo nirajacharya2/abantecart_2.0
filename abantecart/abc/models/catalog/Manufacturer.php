@@ -171,15 +171,42 @@ class Manufacturer extends BaseModel
      */
     public function getAllData()
     {
-        $cache_key = 'manufacturer.alldata.'.$this->getKey();
-        $data = Registry::cache()->get($cache_key);
-        if ($data === null) {
-            $this->load('stores');
-            $data = $this->toArray();
-            $data['images'] = $this->getImages();
-            $data['keyword'] = UrlAlias::getManufacturerKeyword($this->getKey(), static::$current_language_id);
-            Registry::cache()->put($cache_key, $data);
+        if (!$this->getKey()) {
+            return false;
         }
+        $cacheKey = 'manufacturer.alldata.' . $this->getKey();
+        $data = Registry::cache()->tags('manufacturer')->get($cacheKey);
+        if ($data !== null) {
+            return $data;
+        }
+
+        // eagerLoading!
+        $toLoad = $nested = [];
+        $rels = $this->getRelationships('HasMany', 'HasOne', 'belongsToMany');
+        foreach ($rels as $relName => $rel) {
+            if (in_array($relName, ['product'])) {
+                continue;
+            }
+            if ($rel['getAllData']) {
+                $nested[] = $relName;
+            } else {
+                $toLoad[] = $relName;
+            }
+        }
+
+        $this->load($toLoad);
+        $data = $this->toArray();
+        foreach ($nested as $prop) {
+            foreach ($this->{$prop} as $option) {
+                /** @var ProductOption $option */
+                $data[$prop][] = $option->getAllData();
+            }
+        }
+
+        $data['images'] = $this->images();
+        $data['keyword'] = UrlAlias::getManufacturerKeyword($this->getKey(), static::$current_language_id);
+        Registry::cache()->tags('manufacturer')->put($cacheKey, $data);
+
         return $data;
     }
 
@@ -189,7 +216,7 @@ class Manufacturer extends BaseModel
      * @throws AException
      * @throws InvalidArgumentException
      */
-    public function getImages()
+    public function images()
     {
         $config = Registry::config();
         $images = [];
