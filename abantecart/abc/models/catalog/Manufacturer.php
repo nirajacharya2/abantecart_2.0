@@ -175,7 +175,7 @@ class Manufacturer extends BaseModel
             return false;
         }
         $cacheKey = 'manufacturer.alldata.' . $this->getKey();
-        $data = Registry::cache()->tags('manufacturer')->get($cacheKey);
+        $data = Registry::cache()->get($cacheKey);
         if ($data !== null) {
             return $data;
         }
@@ -205,7 +205,7 @@ class Manufacturer extends BaseModel
 
         $data['images'] = $this->images();
         $data['keyword'] = UrlAlias::getManufacturerKeyword($this->getKey(), static::$current_language_id);
-        Registry::cache()->tags('manufacturer')->put($cacheKey, $data);
+        Registry::cache()->put($cacheKey, $data);
 
         return $data;
     }

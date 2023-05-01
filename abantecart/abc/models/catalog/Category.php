@@ -252,7 +252,7 @@ class Category extends BaseModel
             return false;
         }
         $cacheKey = 'category.alldata.' . $this->getKey();
-        $data = Registry::cache()->tags('category')->get($cacheKey);
+        $data = Registry::cache()->get($cacheKey);
         if ($data !== null) {
             return $data;
         }
@@ -282,7 +282,7 @@ class Category extends BaseModel
 
         $data['images'] = $this->images();
         $data['keywords'] = UrlAlias::getKeyWordsArray($this->getKeyName(), $this->getKey());
-        Registry::cache()->tags('category')->put($cacheKey, $data);
+        Registry::cache()->put($cacheKey, $data);
         return $data;
     }
 

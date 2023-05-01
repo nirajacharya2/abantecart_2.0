@@ -293,7 +293,7 @@ class ATaskManager
                 $response_message = $response['error_text'] ?? '';
             }
         } catch (Exception|Error $e) {
-            $this->log->error($e->getMessage());
+            $this->log->error($e->getMessage() . "\n" . $e->getTraceAsString());
             $result = false;
         }
 
