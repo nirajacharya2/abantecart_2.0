@@ -1506,7 +1506,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return array
+     * @return array|false
      * @throws ReflectionException|Exception|InvalidArgumentException
      */
     public function getAllData()
@@ -1516,18 +1516,21 @@ class Product extends BaseModel
         }
 
         $cacheKey = 'product.alldata.' . $this->getKey();
-        $data = Registry::cache()->tags('product')->get($cacheKey);
+        $data = Registry::cache()->get($cacheKey);
         if ($data !== null) {
             return $data;
         }
         // eagerLoading!
         $toLoad = $nested = [];
         $rels = $this->getRelationships('HasMany', 'HasOne', 'belongsToMany');
+
+        $exclude = ['categories', 'manufacturer'];
+        $ignore = ['related'];
         foreach ($rels as $relName => $rel) {
-            if (in_array($relName, ['categories', 'related', 'manufacturer'])) {
+            if (in_array($relName, $ignore)) {
                 continue;
             }
-            if ($rel['getAllData']) {
+            if ($rel['getAllData'] && !in_array($relName, $exclude)) {
                 $nested[] = $relName;
             } else {
                 $toLoad[] = $relName;
@@ -1544,7 +1547,7 @@ class Product extends BaseModel
         }
         $data['keywords'] = $this->keywords();
         $data['images'] = $this->images();
-        Registry::cache()->tags('product')->put($cacheKey, $data);
+        Registry::cache()->put($cacheKey, $data);
         return $data;
     }
 
