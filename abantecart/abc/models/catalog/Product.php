@@ -2095,11 +2095,11 @@ class Product extends BaseModel
         }
 
         $product->update($product_data);
-        $descriptionFields = $product->description()->getModel()->getFillable();
+        $descriptionFields = (new ProductDescription())->getFillable();
         $update = [];
         foreach ($descriptionFields as $fieldName) {
-            if (isset($product_data[$fieldName])) {
-                $update[$fieldName] = $product_data[$fieldName];
+            if (isset($product_data['product_description'][$fieldName])) {
+                $update[$fieldName] = $product_data['product_description'][$fieldName];
             }
         }
         $productDescriptionId = ProductDescription::where('product_id', '=', $product->product_id)
