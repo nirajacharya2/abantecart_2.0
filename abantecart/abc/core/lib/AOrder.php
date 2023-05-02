@@ -559,6 +559,10 @@ class AOrder extends ALibBase
             foreach ($product['option'] as $option) {
                 $option['order_id'] = $order_id;
                 $option['order_product_id'] = $order_product_id;
+                $option['name'] = $option['name'] ?: 'n/a';
+                if ($option['name'] == 'n/a') {
+                    Registry::log()->error('Product option name is empty! Order Product Data (id ' . $order_product_id . '): ' . var_export($product, true));
+                }
                 $orderOption = new OrderOption($option);
                 $orderOption->save();
             }
