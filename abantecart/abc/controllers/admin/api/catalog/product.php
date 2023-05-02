@@ -97,8 +97,12 @@ class ControllerApiCatalogProduct extends AControllerAPI
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request = $this->rest->getRequestParams();
-        if(!$request){
+        if (!$request) {
             return;
+        }
+
+        if (!is_array($request)) {
+            throw new Exception('Request parameters are not in array: ' . var_export($request, true));
         }
 
         try {
