@@ -226,8 +226,7 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
         $valid_data['customer_id'] = $this->request->get['customer_id'];
         $valid_data = $this->preFormatAndValidate($valid_data);
         if (!$this->error) {
-            $transaction = new CustomerTransaction($valid_data);
-            $transaction->save();
+            $transaction = CustomerTransaction::create($valid_data);
             Registry::cache()->flush('customer');
             $result['result'] = true;
             $result['result_text'] = $this->language->get('text_transaction_success');

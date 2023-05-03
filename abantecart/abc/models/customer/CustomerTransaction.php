@@ -276,7 +276,7 @@ class CustomerTransaction extends BaseModel
             ->selectRaw('sum(credit) as credit')
             ->selectRaw('sum(debit) as debit')
             ->where('customer_id', '=', $customer_id)
-            ->whereRaw( $transTable.".date_added > '".$customer->running_balance_datetime."' AND ".$transTable.".date_added < '".$now."'" )
+            ->whereRaw($transTable . ".date_added > '" . $customer->running_balance_datetime . "' AND " . $transTable . ".date_added <= '" . $now . "'")
             ->first();
         return $query->balance + $customer->running_balance;
     }
