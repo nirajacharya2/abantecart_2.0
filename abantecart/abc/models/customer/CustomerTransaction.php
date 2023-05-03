@@ -89,8 +89,6 @@ class CustomerTransaction extends BaseModel
         'transaction_type',
         'comment',
         'description',
-        'date_added',
-        'date_modified',
         'stage_id',
     ];
 
