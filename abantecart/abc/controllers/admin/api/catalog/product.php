@@ -221,7 +221,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
 
         //touch category to run recalculation of products count in it
         foreach( (array)$data['category_uuids'] as $uuid ){
-            $category = Category::where( [ 'uuid' => $uuid ] )->first();
+            $category = Category::where('uuid', '=', $uuid)->first();
             $category?->touch();
         }
 
@@ -292,13 +292,13 @@ class ControllerApiCatalogProduct extends AControllerAPI
 
         if ($data['category_uuids']) {
             $data['categories'] = (array)Category::select(['category_id'])
-                ->whereIn('uuid', $data['category_uuids'])
+                ->whereIn('uuid', (array)$data['category_uuids'])
                 ->get()?->pluck('category_id')->toArray();
-        }else{
+        } else {
             //if product does not assigned to any category
             $data['categories'] = [];
         }
-        if ($data['manufacturer']['uuid']) {
+        if ($data['manufacturer'] && $data['manufacturer']['uuid']) {
             $manufacturer = Manufacturer::where('uuid', '=', $data['manufacturer']['uuid'])
                 ->get()?->first();
             if ($manufacturer) {
