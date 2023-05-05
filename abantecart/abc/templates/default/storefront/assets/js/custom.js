@@ -219,6 +219,8 @@ function openModalRemote(id, url){
 	var modal = $(id);
 	var modalBody = $(id +' .modal-body');
 	modal.on('show.bs.modal', function () {
-	    modalBody.load(url)
-	}).modal();
+        modalBody.load(url)
+    }).on('hidden.bs.modal', function () {
+        modalBody.html('');
+    }).modal();
 }
