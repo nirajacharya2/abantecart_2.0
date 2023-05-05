@@ -2107,10 +2107,12 @@ class ControllerPagesSaleOrder extends AController
             ]
         );
 
-        $this->data['transactions_url'] =
-            $this->html->getSecureURL('sale/customer_transaction', '&customer_id='.$customer_id);
-        //get currencies
+        $this->data['transactions_url'] = $this->html->getSecureURL(
+            'sale/customer_transaction',
+            '&customer_id=' . $customer_id
+        );
 
+        //get currencies
         if (isset($this->request->get['order_currency'])) {
             $order_info['currency'] = $this->request->get['order_currency'];
         }
@@ -2322,7 +2324,7 @@ class ControllerPagesSaleOrder extends AController
         $checkout = $this->initCheckout($this->session->data['admin_order']);
         $this->data['product_key'] = $checkout->getCart()->add(
             $post['product_id'],
-            $post['quantity'],
+            $post['quantity'] ?: 1,
             $post['option'],
             H::preformatFloat($post['price'])
         );
@@ -2340,5 +2342,4 @@ class ControllerPagesSaleOrder extends AController
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
         abc_redirect($this->html->getSecureURL('sale/order/createOrder'));
     }
-
 }
