@@ -185,9 +185,9 @@ if (ABC::env('DB_CURRENT_DRIVER')) {
         $registry,
         'cache',
         'AbcCache',
-        [],
+        [ABC::env('CACHE')['driver']],
         AbcCache::class,
-        []
+        ['file']
     );
 
     registerClass(
