@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2022 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -20,16 +20,19 @@
 
 namespace abc\core\engine;
 
+use abc\core\ABC;
+
 class ASecureControllerAPI extends AControllerAPI
 {
     public function main()
     {
-        if ($this->config->get('config_maintenance')) {
+        //disable api only SF when maintenance mode is ON
+        if ($this->config->get('config_maintenance') && !ABC::env('IS_ADMIN')) {
             $this->rest->setResponseData([
-                'error_code'=> 503,
-                'error_text'=>'Maintenance mode'
+                'error_code' => 503,
+                'error_text' => 'Maintenance mode'
             ]);
-            $this->rest->sendResponse( 503 );
+            $this->rest->sendResponse(503);
             return null;
         }
 
@@ -37,7 +40,7 @@ class ASecureControllerAPI extends AControllerAPI
             $this->rest->setResponseData([
                 'error_code'  => 401,
                 'error_title' => 'Unauthorized',
-                'error_text' => 'Not logged in or Login attempt failed!'
+                'error_text'  => 'Not logged in or Login attempt failed!'
             ]);
             $this->rest->sendResponse(401);
             return null;
