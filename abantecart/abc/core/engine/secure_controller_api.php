@@ -30,7 +30,7 @@ class ASecureControllerAPI extends AControllerAPI
         if ($this->config->get('config_maintenance') && !ABC::env('IS_ADMIN')) {
             $this->rest->setResponseData([
                 'error_code' => 503,
-                'error_text' => 'Maintenance mode'
+                'error_text' => 'Maintenance mode' . var_export(ABC::env('IS_ADMIN'), true)
             ]);
             $this->rest->sendResponse(503);
             return null;
