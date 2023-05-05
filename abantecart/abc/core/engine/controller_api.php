@@ -20,6 +20,7 @@
 
 namespace abc\core\engine;
 
+use abc\core\ABC;
 use abc\core\lib\ARest;
 
 /**
@@ -73,16 +74,17 @@ class AControllerAPI extends AController
 
     public function main()
     {
-        if ($this->config->get('config_maintenance')) {
+        //disable api only SF when maintenance mode is ON
+        if ($this->config->get('config_maintenance') && !ABC::env('IS_ADMIN')) {
             $this->rest->setResponseData([
-                'error_code'=> 503,
-                'error_text'=>'Maintenance mode'
+                'error_code' => 503,
+                'error_text' => 'Maintenance mode'
             ]);
-            $this->rest->sendResponse( 503 );
+            $this->rest->sendResponse(503);
             return null;
         }
         //call methods based on REST re	quest type
-        switch ( $this->rest->getRequestMethod() ) {
+        switch ($this->rest->getRequestMethod()) {
             case 'get':
                 return $this->get();
                 break;
@@ -132,7 +134,7 @@ class AControllerAPI extends AController
         $result = [];
         foreach ($errors as $key=> $value) {
             $result[] = [
-                'id'=> $key,
+                'id'          => $key,
                 'description' => $value
             ];
         }
