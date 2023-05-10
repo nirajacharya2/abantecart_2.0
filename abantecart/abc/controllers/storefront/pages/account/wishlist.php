@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2022 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,14 +21,14 @@
 namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
-use abc\core\engine\AResource;
 use abc\core\engine\HtmlElementFactory;
 use abc\models\catalog\Product;
+use abc\modules\traits\ProductListingTrait;
 use H;
-use Illuminate\Support\Collection;
 
 class ControllerPagesAccountWishlist extends AController
 {
+    use ProductListingTrait;
     public function main()
     {
         //init controller data
@@ -88,42 +88,25 @@ class ControllerPagesAccountWishlist extends AController
 
         if ($wishList && count($wishList) > 0) {
             $this->loadModel('tool/seo_url');
-            $results = Product::search(
+            $productsList = Product::search(
                 [
-                    'filter' => ['include' => array_keys($wishList)],
-                    'with_final_price' => true,
+                    'filter'            => ['include' => array_keys($wishList)],
+                    'with_final_price'  => true,
                     'with_option_count' => true,
-//                    'limit'             => $this->config->get('config_latest_limit'),
-                    'sort' => 'date_added',
-                    'order' => 'desc',
+                    'sort'              => 'date_added',
+                    'order'             => 'desc',
                 ]
             );
-            if ($results) {
-                $product_ids = $results->pluck('product_id')->toArray();
-                //get thumbnails by one pass
-                $resource = new AResource('image');
-                $thumbnails = $resource->getMainThumbList(
-                    'products',
-                    $product_ids,
-                    $this->config->get('config_image_product_width'),
-                    $this->config->get('config_image_product_height')
+            if ($productsList) {
+                $this->processList(
+                    $productsList,
+                    [
+                        'image_width'  => $this->config->get('config_image_cart_width'),
+                        'image_height' => $this->config->get('config_image_cart_height')
+                    ]
                 );
-
-                /** @var Collection|Product $result */
-                foreach ($results as $i => $result) {
-                    $this->data['products'][$i] = $result->toArray();
-                    $this->data['products'][$i]['thumbnails'] = $thumbnails[$result->product_id];
-                    $this->data['products'][$i]['added'] = H::dateInt2Display($wishList[$result->product_id]);
-                    $this->data['products'][$i]['add'] = $this->html->getSEOURL(
-                        $result->option_count ? 'product/product' : $cart_rt,
-                        '&product_id=' . $result->product_id,
-                        true
-                    );
-                    $this->data['products'][$i]['href'] = $this->html->getSEOURL(
-                        'product/product',
-                        '&product_id=' . $result->product_id,
-                        true
-                    );
+                foreach ($this->data['products'] as &$product) {
+                    $product['added'] = H::dateInt2Display($wishList[$product['product_id']]);
                 }
             }
 
