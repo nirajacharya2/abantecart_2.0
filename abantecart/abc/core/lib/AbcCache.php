@@ -27,7 +27,9 @@ use DateInterval;
 use DateTimeInterface;
 use Exception;
 use Illuminate\Cache\CacheManager;
+use Illuminate\Cache\FileStore;
 use Illuminate\Cache\MemcachedConnector;
+use Illuminate\Cache\TaggedCache;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Contracts\Foundation\Application;
@@ -370,8 +372,10 @@ class AbcCache
         $tags = is_array($tags) ? $tags : func_get_args();
         $storage = $this->getStorage($store);
         if (method_exists($storage->getStore(), 'tags') && $tags) {
+            /** @var TaggedCache $storage */
             return $storage->tags($tags)->flush();
         }
+        /** @var FileStore $storage */
         return $storage->flush();
     }
 

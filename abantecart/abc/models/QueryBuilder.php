@@ -21,6 +21,7 @@ namespace abc\models;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\AbcCache;
+use Illuminate\Cache\FileStore;
 use Illuminate\Cache\RedisTaggedCache;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
@@ -49,9 +50,11 @@ class QueryBuilder extends Builder
         }
 
         $key = 'sql_' . md5($this->toSql() . '~' . var_export($this->getBindings(), true));
-        /** @var RedisTaggedCache $repository */
+        /** @var RedisTaggedCache|FileStore $repository */
         $repository = $cache->tags($this->cacheTags);
-        $this->cacheKey = $cacheKey = method_exists($repository, 'taggedItemKey') ? $repository->taggedItemKey($key) : $key;
+        $this->cacheKey = $cacheKey = method_exists($repository, 'taggedItemKey')
+            ? $repository->taggedItemKey($key)
+            : ($this->cacheTags ? implode('.', $this->cacheTags).'.' : '') .$key;
         $ttl = (int)ABC::env('CACHE')['stores'][$cache::$currentStore]['ttl'] ?: 777;
         $output = $cache->remember(
             $cacheKey,
