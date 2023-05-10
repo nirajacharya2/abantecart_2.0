@@ -38,12 +38,13 @@
 			       data-original-title="<?php echo $actas->text; ?>"><i class="fa fa-male"></i></a>
 				<?php echo  $this->getHookVar('toolbar_post'); ?>
 			</div>
-
+			<?php if($insert_href){ ?>
 			<div class="btn-group mr10 toolbar">
 				<a class="btn btn-primary tooltips" title="<?php echo $button_add; ?>" href="<?php echo $insert_href; ?>" data-toggle="modal" data-target="#transaction_modal">
 				<i class="fa fa-plus"></i>
 				</a>
 			</div>
+			<?php } ?>
 			<div class="btn-group mr10 toolbar">
 			<?php if (!empty($search_form)) { ?>
 			    <form id="<?php echo $search_form['form_open']->name; ?>"
