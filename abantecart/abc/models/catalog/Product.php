@@ -1896,9 +1896,13 @@ class Product extends BaseModel
     public static function createProduct(array $product_data)
     {
         $product_data['new_product'] = true;
-        if (empty($product_data['product_store'])) {
+        if (!$product_data['product_store']) {
             $product_data['product_store'] = [0 => 0];
         }
+        if (!$product_data['date_available']) {
+            $product_data['date_available'] = date("Y-m-d");
+        }
+
         $product = new Product($product_data);
         $product->save();
         $productId = $product->product_id;
