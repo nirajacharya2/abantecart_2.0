@@ -2086,6 +2086,9 @@ class Product extends BaseModel
      */
     public static function updateProduct(int $product_id, array $product_data)
     {
+        $language = Registry::language();
+        $languageId = $product_data['language_id'] ?: static::$current_language_id;
+
         $product = Product::find($product_id);
         if (!$product) {
             return false;
@@ -2099,16 +2102,22 @@ class Product extends BaseModel
         }
 
         $product->update($product_data);
-        $descriptionFields = (new ProductDescription())->getFillable();
+        $pd = new ProductDescription();
+        $fillable = $pd->getFillable();
+
         $update = [];
-        foreach ($descriptionFields as $fieldName) {
-            if (isset($product_data['product_description'][$fieldName])) {
-                $update[$fieldName] = $product_data['product_description'][$fieldName];
+        foreach ($fillable as $field_name) {
+            if (isset($data[$field_name])) {
+                $update[$field_name] = $data[$field_name];
             }
         }
-        $productDescriptionId = ProductDescription::where('product_id', '=', $product->product_id)
-            ->where('language_id', '=', Product::$current_language_id)->first()?->id;
-        ProductDescription::find($productDescriptionId)?->update($update);
+
+        if (count($update)) {
+            $language->replaceDescriptions('product_descriptions',
+                ['product_id' => $product_id],
+                [$languageId => $update]);
+        }
+
 
         if (trim($product_data['keyword'])) {
             UrlAlias::setProductKeyword(
