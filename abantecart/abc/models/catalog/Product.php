@@ -1896,9 +1896,13 @@ class Product extends BaseModel
     public static function createProduct(array $product_data)
     {
         $product_data['new_product'] = true;
-        if (empty($product_data['product_store'])) {
+        if (!$product_data['product_store']) {
             $product_data['product_store'] = [0 => 0];
         }
+        if (!$product_data['date_available']) {
+            $product_data['date_available'] = date("Y-m-d");
+        }
+
         $product = new Product($product_data);
         $product->save();
         $productId = $product->product_id;
@@ -2082,6 +2086,9 @@ class Product extends BaseModel
      */
     public static function updateProduct(int $product_id, array $product_data)
     {
+        $language = Registry::language();
+        $languageId = $product_data['language_id'] ?: static::$current_language_id;
+
         $product = Product::find($product_id);
         if (!$product) {
             return false;
@@ -2095,16 +2102,22 @@ class Product extends BaseModel
         }
 
         $product->update($product_data);
-        $descriptionFields = (new ProductDescription())->getFillable();
+        $pd = new ProductDescription();
+        $fillable = $pd->getFillable();
+
         $update = [];
-        foreach ($descriptionFields as $fieldName) {
-            if (isset($product_data['product_description'][$fieldName])) {
-                $update[$fieldName] = $product_data['product_description'][$fieldName];
+        foreach ($fillable as $field_name) {
+            if (isset($product_data[$field_name])) {
+                $update[$field_name] = $product_data[$field_name];
             }
         }
-        $productDescriptionId = ProductDescription::where('product_id', '=', $product->product_id)
-            ->where('language_id', '=', Product::$current_language_id)->first()?->id;
-        ProductDescription::find($productDescriptionId)?->update($update);
+
+        if (count($update)) {
+            $language->replaceDescriptions('product_descriptions',
+                ['product_id' => $product_id],
+                [$languageId => $update]);
+        }
+
 
         if (trim($product_data['keyword'])) {
             UrlAlias::setProductKeyword(
