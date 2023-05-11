@@ -2107,8 +2107,8 @@ class Product extends BaseModel
 
         $update = [];
         foreach ($fillable as $field_name) {
-            if (isset($data[$field_name])) {
-                $update[$field_name] = $data[$field_name];
+            if (isset($product_data[$field_name])) {
+                $update[$field_name] = $product_data[$field_name];
             }
         }
 
