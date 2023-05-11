@@ -127,7 +127,7 @@ class CustomerModelTest extends ATestCase{
         $rows = Customer::getCustomers();
         $total = $rows->count();
         $this->assertEquals($total_count, $total);
-        $this->assertEquals($total_count, $rows[0]['total_num_rows']);
+        $this->assertEquals($total_count, $rows::getFoundRowsCount());
 
         //not approved
         $total = Customer::getCustomers(['filter' => ['approved' => 0], 'mode' => 'total_only']);

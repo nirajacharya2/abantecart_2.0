@@ -547,6 +547,9 @@ class AImage
     protected function isMemoryEnough($x, $y, $rgb = 4)
     {
         $memory_limit = trim(ini_get('memory_limit'));
+        if ($memory_limit == '-1') {
+            return true;
+        }
         $last = strtolower($memory_limit[strlen($memory_limit) - 1]);
         switch ($last) {
             case 'g':

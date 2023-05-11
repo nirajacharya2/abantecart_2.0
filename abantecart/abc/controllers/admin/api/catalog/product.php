@@ -97,8 +97,12 @@ class ControllerApiCatalogProduct extends AControllerAPI
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request = $this->rest->getRequestParams();
-        if(!$request){
+        if (!$request) {
             return;
+        }
+
+        if (!is_array($request)) {
+            throw new Exception('Request parameters are not in array: ' . var_export($request, true));
         }
 
         try {
@@ -217,7 +221,7 @@ class ControllerApiCatalogProduct extends AControllerAPI
 
         //touch category to run recalculation of products count in it
         foreach( (array)$data['category_uuids'] as $uuid ){
-            $category = Category::where( [ 'uuid' => $uuid ] )->first();
+            $category = Category::where('uuid', '=', $uuid)->first();
             $category?->touch();
         }
 
@@ -277,25 +281,24 @@ class ControllerApiCatalogProduct extends AControllerAPI
      * @throws InvalidArgumentException
      * @throws ReflectionException
      */
-    protected function prepareData($data)
+    protected function prepareData(array $data)
     {
         //assign product to store we requests
-        $data['stores'] = [$this->config->get('config_store_id')];
+        $data['stores'] = [(int)$this->config->get('config_store_id')];
         //trick for unique sku. null is allowed  for unique index
-        if(isset($data['sku'])) {
-           $data['sku'] = $data['sku'] === '' ? null : $data['sku'];
+        if (isset($data['sku'])) {
+            $data['sku'] = $data['sku'] === '' ? null : $data['sku'];
         }
 
         if ($data['category_uuids']) {
-            $categories = Category::select(['category_id'])
-                ->whereIn('uuid', $data['category_uuids'])
-                ->get()?->toArray();
-            $data['categories'] = array_column((array)$categories,'category_id');
-        }else{
+            $data['categories'] = (array)Category::select(['category_id'])
+                ->whereIn('uuid', (array)$data['category_uuids'])
+                ->get()?->pluck('category_id')->toArray();
+        } else {
             //if product does not assigned to any category
             $data['categories'] = [];
         }
-        if ($data['manufacturer']['uuid']) {
+        if ($data['manufacturer'] && $data['manufacturer']['uuid']) {
             $manufacturer = Manufacturer::where('uuid', '=', $data['manufacturer']['uuid'])
                 ->get()?->first();
             if ($manufacturer) {

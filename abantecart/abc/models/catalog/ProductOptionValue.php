@@ -335,8 +335,27 @@ class ProductOptionValue extends BaseModel
      */
     public function getAllData()
     {
-        $this->load('descriptions');
+        if (!$this->getKey()) {
+            return false;
+        }
+        // eagerLoading!
+        $toLoad = $nested = [];
+        $rels = $this->getRelationships('HasMany', 'HasOne', 'belongsToMany');
+        foreach ($rels as $relName => $rel) {
+            if ($rel['getAllData']) {
+                $nested[] = $relName;
+            } else {
+                $toLoad[] = $relName;
+            }
+        }
+
+        $this->load($toLoad);
         $data = $this->toArray();
+        foreach ($nested as $prop) {
+            foreach ($this->{$prop} as $option) {
+                $data[$prop][] = $option->getAllData();
+            }
+        }
         $data['images'] = $this->images();
         return $data;
     }
@@ -353,7 +372,8 @@ class ProductOptionValue extends BaseModel
                 'product_option_id' => $product_option_id,
             ]
         )->orderBy('sort_order')
-            ->useCache('product')->get();
+            ->useCache('product')
+            ->get();
 
         $result = [];
         if ($values) {
@@ -361,7 +381,6 @@ class ProductOptionValue extends BaseModel
                 $result[] = static::getProductOptionValue($option_value->product_option_value_id);
             }
         }
-
         return $result;
     }
 
@@ -384,7 +403,8 @@ class ProductOptionValue extends BaseModel
                     'group_id'                => 0,
                 ]
             )
-            ->useCache('product')->first();
+            ->useCache('product')
+            ->first();
 
         if (!$option_value) {
             return [];
@@ -416,5 +436,4 @@ class ProductOptionValue extends BaseModel
         }
         return $result;
     }
-
 }

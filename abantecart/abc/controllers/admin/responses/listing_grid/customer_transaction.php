@@ -23,10 +23,12 @@ namespace abc\controllers\admin;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
+use abc\core\engine\Registry;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\models\customer\CustomerTransaction;
 use abc\modules\events\ABaseEvent;
+use Carbon\Carbon;
 use H;
 use Illuminate\Validation\ValidationException;
 use stdClass;
@@ -76,11 +78,14 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
                 mktime(0, 0, 0, date("m") - 1, date("d"), date("Y"))
             );
         }
+        $data['filter']['date_start'] = Carbon::parse($data['filter']['date_start'])->startOfDay()->toDateTimeString();
+
         if (H::has_value($this->request->get['date_end'])) {
             $data['filter']['date_end'] = H::dateDisplay2ISO($this->request->get['date_end']);
         } else {
             $data['filter']['date_end'] = date('Y-m-d');
         }
+        $data['filter']['date_end'] = Carbon::parse($data['filter']['date_end'])->endOfDay()->toDateTimeString();
 
         $allowedFields = array_merge(
             ['user', 'credit', 'debit', 'transaction_type', 'date_start', 'date_end'],
@@ -101,7 +106,7 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
         $results = CustomerTransaction::getTransactions($data);
         //push result into public scope to get access from extensions
         $this->data['results'] = $results;
-        $total = $results[0]['total_num_rows'];
+        $total = $results::getFoundRowsCount();
         if ($total > 0) {
             $total_pages = ceil($total / $limit);
         } else {
@@ -221,13 +226,13 @@ class ControllerResponsesListingGridCustomerTransaction extends AController
         $valid_data['customer_id'] = $this->request->get['customer_id'];
         $valid_data = $this->preFormatAndValidate($valid_data);
         if (!$this->error) {
-            $transaction = new CustomerTransaction($valid_data);
-            $transaction->save();
+            $transaction = CustomerTransaction::create($valid_data);
+            Registry::cache()->flush('customer');
             $result['result'] = true;
             $result['result_text'] = $this->language->get('text_transaction_success');
             $balance = CustomerTransaction::getBalance($this->request->get['customer_id']);
-            $result['balance'] = $this->language->get('text_balance')
-                .' '.$this->currency->format($balance, $this->config->get('config_currency'));
+            $result['balance'] = $this->currency->format($balance, $this->config->get('config_currency'));
+            $result['balance_text'] = $this->language->get('text_balance') . ' ' . $result['balance'];
             //call event
             H::event(
                 'admin\sendNewCustomerTransactionNotifyEmail',

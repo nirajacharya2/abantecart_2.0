@@ -644,6 +644,7 @@ class Customer extends BaseModel
             //enable notification setting for newsletter via email
             $this->saveCustomerNotificationSettings(['newsletter' => ['email' => (int)$data['newsletter']]]);
         }
+        Registry::cache()->flush('customer');
     }
 
     /**
@@ -1066,10 +1067,8 @@ class Customer extends BaseModel
             return $result_rows->count();
         }
         //finally, decrypt data and return result
-        $totalNumRows = $db->sql_get_row_count();
         for ($i = 0; $i < $result_rows->count(); $i++) {
             $result_rows[$i] = $dCrypt->decrypt_data($result_rows[$i], 'customers');
-            $result_rows[$i]['total_num_rows'] = $totalNumRows;
         }
 
         return $result_rows;
@@ -1182,12 +1181,9 @@ class Customer extends BaseModel
 
         $result_rows = $query->useCache('customer')->get();
 
-        $totalNumRows = $db->sql_get_row_count();
         for ($i = 0; $i < count($result_rows); $i++) {
             $result_rows[$i] = $dcrypt->decrypt_data($result_rows[$i], 'customers');
-            $result_rows[$i]['total_num_rows'] = $totalNumRows;
         }
-
         return $result_rows;
     }
 

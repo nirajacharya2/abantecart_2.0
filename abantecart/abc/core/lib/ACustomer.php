@@ -314,11 +314,12 @@ class ACustomer extends ALibBase
         //insert new record
         $customer = Customer::find($customer_id);
         $customer->update(['last_login' => date('Y-m-d H:i:s')]);
-
+        Registry::cache()->flush('customer');
         //call event
         H::event(
             'abc\core\lib\customer@login',
-            [new ABaseEvent($customer_id)]);
+            [new ABaseEvent($customer_id)]
+        );
         return true;
     }
 
@@ -624,12 +625,12 @@ class ACustomer extends ALibBase
 
         $cart['store_'.$store_id] = $this->session->data['cart'];
         $customer->update(
-                [
-                    'cart' => $cart,
-                    'ip' => $this->request->getRemoteIP()
-                ]
+            [
+                'cart' => $cart,
+                'ip'   => $this->request->getRemoteIP()
+            ]
         );
-
+        Registry::cache()->flush('customer');
         return true;
     }
 
@@ -792,7 +793,8 @@ class ACustomer extends ALibBase
             return false;
         }
         $customer = $this->model();
-        $customer->update( ['cart' => [] ]);
+        $customer->update(['cart' => []]);
+        Registry::cache()->flush('customer');
         return true;
     }
 
@@ -831,9 +833,9 @@ class ACustomer extends ALibBase
         if (!H::has_value($product_id) || !is_numeric($product_id)) {
             return null;
         }
-        $whishlist = $this->getWishList();
-        $whishlist[$product_id] = time();
-        $this->saveWishList($whishlist);
+        $wishList = $this->getWishList();
+        $wishList[$product_id] = time();
+        $this->saveWishList($wishList);
 
         return null;
     }
@@ -851,9 +853,9 @@ class ACustomer extends ALibBase
         if (!H::has_value($product_id) || !is_numeric($product_id)) {
             return null;
         }
-        $whishlist = $this->getWishList();
-        unset($whishlist[$product_id]);
-        $this->saveWishList($whishlist);
+        $wishList = $this->getWishList();
+        unset($wishList[$product_id]);
+        $this->saveWishList($wishList);
 
         return null;
     }
@@ -861,12 +863,12 @@ class ACustomer extends ALibBase
     /**
      * Record wish list content
      *
-     * @param array $whishlist
+     * @param array $wishList
      *
      * @return null
      * @throws Exception
      */
-    public function saveWishList($whishlist = [])
+    public function saveWishList($wishList = [])
     {
         $customer_id = $this->customer_id;
         if (!$customer_id) {
@@ -875,7 +877,13 @@ class ACustomer extends ALibBase
         if (!$customer_id) {
             return false;
         }
-        $this->model()->update( ['wishlist' => $whishlist, 'ip' =>  $this->request->getRemoteIP() ] );
+        $this->model()->update(
+            [
+                'wishlist' => $wishList,
+                'ip'       => $this->request->getRemoteIP()
+            ]
+        );
+        Registry::cache()->flush('customer');
         return true;
     }
 
@@ -933,6 +941,7 @@ class ACustomer extends ALibBase
             //use firstOrNew to prevent duplicates
             $transaction = CustomerTransaction::updateOrCreate($data);
             $transaction_id = $transaction->customer_transaction_id;
+            Registry::cache()->flush('customer');
         } catch (ValidationException $e) {
             $errors = [];
             H::SimplifyValidationErrors($transaction->errors()['validation'], $errors);
@@ -982,8 +991,8 @@ class ACustomer extends ALibBase
 
         // delete subscription accounts for given email
         Customer::where('email', '=', mb_strtolower($data['email']))
-                ->where('customer_group_id', '=', Customer::getSubscribersGroupId())
-                ->forceDelete();
+            ->where('customer_group_id', '=', Customer::getSubscribersGroupId())
+            ->delete();
 
         try {
             $db->beginTransaction();
@@ -1026,8 +1035,8 @@ class ACustomer extends ALibBase
                 $msg = new AMessage();
                 $msg->saveNotice($language->get('text_new_customer'), $msg_text);
             }
-
             $db->commit();
+            Registry::cache()->flush('customer');
         } catch (Exception $e) {
             $db->rollback();
             throw new AException(__CLASS__.': '.$e->getMessage(), 0, __FILE__);
@@ -1103,6 +1112,7 @@ class ACustomer extends ALibBase
         }
 
         $customer->update($data);
+        Registry::cache()->flush('customer');
 
         //call event
         H::event(
@@ -1132,7 +1142,8 @@ class ACustomer extends ALibBase
         }
 
         $customer->update(['password' => $password]);
-        $language = new ALanguage( Registry::getInstance() );
+        Registry::cache()->flush('customer');
+        $language = new ALanguage(Registry::getInstance());
         $language->load( $language->language_details['directory'] );
         $language->load( 'common/im' );
         $message_arr = [

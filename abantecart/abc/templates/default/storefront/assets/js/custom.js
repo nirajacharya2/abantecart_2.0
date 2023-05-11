@@ -216,9 +216,10 @@ $(window).scroll(function () {
 
 
 function openModalRemote(id, url){
-	var modal = $(id);
-	var modalBody = $(id +' .modal-body');
-	modal.on('show.bs.modal', function () {
-	    modalBody.load(url)
-	}).modal();
+    var modal = $(id);
+    var modalBody = $(id + ' .modal-body');
+    modal.unbind('show.bs.modal').on('show.bs.modal', function () {
+        modalBody.html('');
+        modalBody.load(url)
+    }).modal();
 }

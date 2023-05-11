@@ -22,7 +22,6 @@ use abc\models\casts\Serialized;
 use abc\models\catalog\ProductOption;
 use abc\models\catalog\ProductOptionValue;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class OrderOption
@@ -50,8 +49,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class OrderOption extends BaseModel
 {
-    use SoftDeletes;
-
     protected $primaryKey = 'order_option_id';
     protected $mainClassName = Order::class;
     protected $mainClassKey = 'order_id';

@@ -19,10 +19,8 @@ namespace abc\models\layout;
 
 use abc\core\engine\Registry;
 use abc\models\BaseModel;
-use abc\models\QueryBuilder;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\JoinClause;
 
 /**
@@ -153,14 +151,12 @@ class Block extends BaseModel
 
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static(), __FUNCTION__, $query, $params);
-        $items = $query->useCache('layout')->get();
-        $items->total = Registry::db()->sql_get_row_count();
-        return $items;
+        return $query->useCache('layout')->get();
     }
 
     /**
      * @param int $blockId
-     * @return QueryBuilder|Model|object|null
+     * @return \Illuminate\Support\Collection
      */
     public static function getBlockInfo(int $blockId)
     {

@@ -19,7 +19,6 @@ namespace abc\models\order;
 
 use abc\models\BaseModel;
 use abc\models\locale\Language;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class CouponDescription
@@ -36,7 +35,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class CouponDescription extends BaseModel
 {
-    use SoftDeletes;
 
     protected $primaryKey = 'id';
     protected $primaryKeySet = [

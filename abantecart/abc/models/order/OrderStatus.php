@@ -23,9 +23,7 @@ use abc\core\lib\AException;
 use abc\models\BaseModel;
 use abc\models\QueryBuilder;
 use Carbon\Carbon;
-use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -51,7 +49,6 @@ use ReflectionException;
  */
 class OrderStatus extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
 
     protected $primaryKey = 'order_status_id';
     protected $cascadeDeletes = ['descriptions'];
@@ -231,7 +228,5 @@ class OrderStatus extends BaseModel
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $inputData);
         $query->useCache('order_status');
         return $query->get();
-
     }
-
 }

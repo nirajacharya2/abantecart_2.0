@@ -20,6 +20,7 @@
 
 namespace abc\controllers\admin;
 
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\models\admin\ModelCatalogManufacturer;
@@ -52,16 +53,16 @@ class ControllerPagesCatalogManufacturer extends AController
         $this->document->setTitle($this->language->get('heading_title'));
 
         $this->document->initBreadcrumb([
-                                            'href'      => $this->html->getSecureURL('index/home'),
-                                            'text'      => $this->language->get('text_home'),
-                                            'separator' => false,
-                                        ]);
+            'href'      => $this->html->getSecureURL('index/home'),
+            'text'      => $this->language->get('text_home'),
+            'separator' => false,
+        ]);
         $this->document->addBreadcrumb([
-                                           'href'      => $this->html->getSecureURL('catalog/manufacturer'),
-                                           'text'      => $this->language->get('heading_title'),
-                                           'separator' => ' :: ',
-                                           'current'   => true,
-                                       ]);
+            'href'      => $this->html->getSecureURL('catalog/manufacturer'),
+            'text'      => $this->language->get('heading_title'),
+            'separator' => ' :: ',
+            'current'   => true,
+        ]);
 
         $this->view->assign('error_warning', $this->error['warning']);
         $this->view->assign('success', $this->session->data['success']);
@@ -82,41 +83,41 @@ class ControllerPagesCatalogManufacturer extends AController
                     'text'     => $this->language->get('text_edit'),
                     'href'     => $this->html->getSecureURL('catalog/manufacturer/update', '&manufacturer_id=%ID%'),
                     'children' => array_merge(
-                                                                                                               [
-                                                                                                                   'quickview' => [
-                                                                                                                       'text'  => $this->language->get(
-                                                                                                                           'text_quick_view'
-                                                                                                                       ),
-                                                                                                                       'href'  => $this->html->getSecureURL(
-                                                                                                                           'catalog/manufacturer/update',
-                                                                                                                           '&manufacturer_id=%ID%'
-                                                                                                                       ),
-                                                                                                                       //quick view port URL
-                                                                                                                       'vhref' => $this->html->getSecureURL(
-                                                                                                                           'r/common/viewport/modal',
-                                                                                                                           '&viewport_rt=catalog/manufacturer/update&manufacturer_id=%ID%'
-                                                                                                                       ),
-                                                                                                                   ],
-                                                                                                                   'general'   => [
-                                                                                                                       'text' => $this->language->get(
-                                                                                                                           'entry_edit'
-                                                                                                                       ),
-                                                                                                                       'href' => $this->html->getSecureURL(
-                                                                                                                           'catalog/manufacturer/update',
-                                                                                                                           '&manufacturer_id=%ID%'
-                                                                                                                       ),
-                                                                                                                   ],
-                                                                                                                   'layout'    => [
-                                                                                                                       'text' => $this->language->get(
-                                                                                                                           'entry_layout'
-                                                                                                                       ),
-                                                                                                                       'href' => $this->html->getSecureURL(
-                                                                                                                           'catalog/manufacturer_layout',
-                                                                                                                           '&manufacturer_id=%ID%'
-                                                                                                                       ),
-                                                                                                                   ],
-                                                                                                               ],
-                                                                                                               (array) $this->data['grid_edit_expand']
+                        [
+                            'quickview' => [
+                                'text'  => $this->language->get(
+                                    'text_quick_view'
+                                ),
+                                'href'  => $this->html->getSecureURL(
+                                    'catalog/manufacturer/update',
+                                    '&manufacturer_id=%ID%'
+                                ),
+                                //quick view port URL
+                                'vhref' => $this->html->getSecureURL(
+                                    'r/common/viewport/modal',
+                                    '&viewport_rt=catalog/manufacturer/update&manufacturer_id=%ID%'
+                                ),
+                            ],
+                            'general'   => [
+                                'text' => $this->language->get(
+                                    'entry_edit'
+                                ),
+                                'href' => $this->html->getSecureURL(
+                                    'catalog/manufacturer/update',
+                                    '&manufacturer_id=%ID%'
+                                ),
+                            ],
+                            'layout'    => [
+                                'text' => $this->language->get(
+                                    'entry_layout'
+                                ),
+                                'href' => $this->html->getSecureURL(
+                                    'catalog/manufacturer_layout',
+                                    '&manufacturer_id=%ID%'
+                                ),
+                            ],
+                        ],
+                        (array) $this->data['grid_edit_expand']
                     ),
                 ],
                 'save'   => [
@@ -231,25 +232,29 @@ class ControllerPagesCatalogManufacturer extends AController
         if ($this->config->get('config_embed_status')) {
             $this->view->assign(
                 'embed_url',
-                $this->html->getSecureURL('common/do_embed/manufacturers', '&manufacturer_id='.$manufacturer_id)
+                $this->html->getSecureURL('common/do_embed/manufacturers', '&manufacturer_id=' . $manufacturer_id)
             );
         }
 
-        $this->data['auditLog'] = $this->html->buildElement([
-                                                                'type'  => 'button',
-                                                                'text'  => $this->language->get('text_audit_log'),
-                                                                'href'  => $this->html->getSecureURL(
-                                                                    'tool/audit_log',
-                                                                    '&modal_mode=1&auditable_type=Manufacturer&auditable_id='
-                                                                    .$manufacturer_id
-                                                                ),
-                                                                //quick view port URL
-                                                                'vhref' => $this->html->getSecureURL(
-                                                                    'r/common/viewport/modal',
-                                                                    '&viewport_rt=tool/audit_log&modal_mode=1&auditable_type=Manufacturer&auditable_id='
-                                                                    .$manufacturer_id
-                                                                ),
-                                                            ]);
+        if ($this->registry->get('AuditLogStorage') || ABC::getObjectByAlias('AuditLogStorage')) {
+            $this->data['auditLog'] = $this->html->buildElement(
+                [
+                    'type'  => 'button',
+                    'text'  => $this->language->get('text_audit_log'),
+                    'href'  => $this->html->getSecureURL(
+                        'tool/audit_log',
+                        '&modal_mode=1&auditable_type=Manufacturer&auditable_id='
+                        . $manufacturer_id
+                    ),
+                    //quick view port URL
+                    'vhref' => $this->html->getSecureURL(
+                        'r/common/viewport/modal',
+                        '&viewport_rt=tool/audit_log&modal_mode=1&auditable_type=Manufacturer&auditable_id='
+                        . $manufacturer_id
+                    ),
+                ]
+            );
+        }
         $this->getForm($args);
 
         //update controller data
@@ -265,15 +270,15 @@ class ControllerPagesCatalogManufacturer extends AController
         $this->view->assign('error_name', $this->error['name']);
 
         $this->document->initBreadcrumb([
-                                            'href'      => $this->html->getSecureURL('index/home'),
-                                            'text'      => $this->language->get('text_home'),
-                                            'separator' => false,
-                                        ]);
+            'href'      => $this->html->getSecureURL('index/home'),
+            'text'      => $this->language->get('text_home'),
+            'separator' => false,
+        ]);
         $this->document->addBreadcrumb([
-                                           'href'      => $this->html->getSecureURL('catalog/manufacturer'),
-                                           'text'      => $this->language->get('heading_title'),
-                                           'separator' => ' :: ',
-                                       ]);
+            'href'      => $this->html->getSecureURL('catalog/manufacturer'),
+            'text'      => $this->language->get('heading_title'),
+            'separator' => ' :: ',
+        ]);
 
         $this->view->assign('cancel', $this->html->getSecureURL('catalog/manufacturer'));
 
@@ -345,83 +350,83 @@ class ControllerPagesCatalogManufacturer extends AController
         }
 
         $this->document->addBreadcrumb([
-                                           'href'      => $this->data['action'],
-                                           'text'      => $this->data['heading_title'],
-                                           'separator' => ' :: ',
-                                           'current'   => true,
-                                       ]);
+            'href'      => $this->data['action'],
+            'text'      => $this->data['heading_title'],
+            'separator' => ' :: ',
+            'current'   => true,
+        ]);
 
         $form->setForm([
-                           'form_name' => 'editFrm',
-                           'update'    => $this->data['update'],
-                       ]);
+            'form_name' => 'editFrm',
+            'update'    => $this->data['update'],
+        ]);
 
         $this->data['form']['id'] = 'editFrm';
         $this->data['form']['form_open'] = $form->getFieldHtml([
-                                                                   'type'   => 'form',
-                                                                   'name'   => 'editFrm',
-                                                                   'attr'   => 'data-confirm-exit="true" class="aform form-horizontal"',
-                                                                   'action' => $this->data['action'],
-                                                               ]);
+            'type'   => 'form',
+            'name'   => 'editFrm',
+            'attr'   => 'data-confirm-exit="true" class="aform form-horizontal"',
+            'action' => $this->data['action'],
+        ]);
         $this->data['form']['submit'] = $form->getFieldHtml([
-                                                                'type'  => 'button',
-                                                                'name'  => 'submit',
-                                                                'text'  => $this->language->get('button_save'),
-                                                                'style' => 'button1',
-                                                            ]);
+            'type'  => 'button',
+            'name'  => 'submit',
+            'text'  => $this->language->get('button_save'),
+            'style' => 'button1',
+        ]);
         $this->data['form']['cancel'] = $form->getFieldHtml([
-                                                                'type'  => 'button',
-                                                                'name'  => 'cancel',
-                                                                'text'  => $this->language->get('button_cancel'),
-                                                                'style' => 'button2',
-                                                            ]);
+            'type'  => 'button',
+            'name'  => 'cancel',
+            'text'  => $this->language->get('button_cancel'),
+            'style' => 'button2',
+        ]);
 
         $this->data['form']['fields']['general']['name'] = $form->getFieldHtml([
-                                                                                   'type'     => 'input',
-                                                                                   'name'     => 'name',
-                                                                                   'value'    => $this->data['name'],
-                                                                                   'required' => true,
-                                                                                   'style'    => 'large-field',
-                                                                               ]);
+            'type'     => 'input',
+            'name'     => 'name',
+            'value'    => $this->data['name'],
+            'required' => true,
+            'style'    => 'large-field',
+        ]);
         $this->data['form']['fields']['general']['manufacturer_store'] = $form->getFieldHtml([
-                                                                                                 'type'    => 'checkboxgroup',
-                                                                                                 'name'    => 'manufacturer_store[]',
-                                                                                                 'value'   => $this->data['manufacturer_store'],
-                                                                                                 'options' => $stores,
-                                                                                                 'style'   => 'chosen',
-                                                                                             ]);
+            'type'    => 'checkboxgroup',
+            'name'    => 'manufacturer_store[]',
+            'value'   => $this->data['manufacturer_store'],
+            'options' => $stores,
+            'style'   => 'chosen',
+        ]);
 
         $this->data['keyword_button'] = $form->getFieldHtml([
-                                                                'type'  => 'button',
-                                                                'name'  => 'generate_seo_keyword',
-                                                                'text'  => $this->language->get('button_generate'),
-                                                                'attr'  => 'type="button"',
-                                                                'style' => 'btn btn-info',
-                                                            ]);
+            'type'  => 'button',
+            'name'  => 'generate_seo_keyword',
+            'text'  => $this->language->get('button_generate'),
+            'attr'  => 'type="button"',
+            'style' => 'btn btn-info',
+        ]);
         $this->data['generate_seo_url'] = $this->html->getSecureURL(
             'common/common/getseokeyword',
             '&object_key_name=manufacturer_id&id='.$manufacturer_id
         );
 
         $this->data['form']['fields']['general']['keyword'] = $form->getFieldHtml([
-                                                                                      'type'     => 'input',
-                                                                                      'name'     => 'keyword',
-                                                                                      'value'    => $this->data['keyword'],
-                                                                                      'attr'     => ' gen-value="'
-                                                                                          .H::SEOEncode(
-                                                                                              $this->data['category_description']['name']
-                                                                                          ).'" ',
-                                                                                      'help_url' => $this->gen_help_url(
-                                                                                          'seo_keyword'
-                                                                                      ),
-                                                                                  ]);
+            'type'     => 'input',
+            'name'     => 'keyword',
+            'value'    => $this->data['keyword'],
+            'attr'     => ' gen-value="'
+                .H::SEOEncode(
+                    $this->data['category_description']['name']
+                ).'" ',
+            'help_url' => $this->gen_help_url(
+                'seo_keyword'
+            ),
+        ]);
 
         $this->data['form']['fields']['general']['sort_order'] = $form->getFieldHtml([
-                                                                                         'type'  => 'input',
-                                                                                         'name'  => 'sort_order',
-                                                                                         'value' => $this->data['sort_order'],
-                                                                                         'style' => 'small-field',
-                                                                                     ]);
+            'type'  => 'input',
+            'name'  => 'sort_order',
+            'value' => $this->data['sort_order'],
+            'style' => 'small-field',
+        ]);
 
         $this->view->assign('help_url', $this->gen_help_url('manufacturer_edit'));
 

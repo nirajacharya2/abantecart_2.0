@@ -777,7 +777,7 @@ class ControllerPagesToolFormsManager extends AController
 
             $this->data['form_id'] = $content['form_id'];
             $lm = new AListingManager($this->request->get ['custom_block_id']);
-            $list = $lm->getCustomList();
+            $list = $lm->getCustomList((int)$this->config->get('current_store_id'));
             if ($list) {
                 foreach ($list as $row) {
                     $listing_data[$row['id']] = [

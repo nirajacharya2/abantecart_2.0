@@ -67,9 +67,9 @@ class ControllerResponsesListingGridIncentive extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $results = (array)Incentive::getIncentives($this->data['incentive_search_parameters'])?->toArray();
-
-        $total = (int)$results[0]['total_num_rows'];
+        $results = Incentive::getIncentives($this->data['incentive_search_parameters']);
+        $total = $results::getFoundRowsCount();
+        $results = $results->toArray();
         $total_pages = $total > 0 ? ceil($total / $limit) : 0;
 
         $response = new stdClass();

@@ -229,15 +229,26 @@ class ProductOption extends BaseModel
      */
     public function getAllData()
     {
-        $cache_key = 'product.alldata.'.$this->getKey();
-        $data = Registry::cache()->get($cache_key);
-        if ($data === null) {
-            $this->load('descriptions', 'values');
-            $data = $this->toArray();
-            foreach ($this->values as $optionValue) {
-                $data['values'][] = $optionValue->getAllData();
+        if (!$this->getKey()) {
+            return false;
+        }
+        // eagerLoading!
+        $toLoad = $nested = [];
+        $rels = $this->getRelationships('HasMany', 'HasOne', 'belongsToMany');
+        foreach ($rels as $relName => $rel) {
+            if ($rel['getAllData']) {
+                $nested[] = $relName;
+            } else {
+                $toLoad[] = $relName;
             }
-            Registry::cache()->put($cache_key, $data);
+        }
+        $this->load($toLoad);
+        $data = $this->toArray();
+        foreach ($nested as $prop) {
+            foreach ($this->{$prop} as $option) {
+                /** @var ProductOptionValue $option */
+                $data[$prop][] = $option->getAllData();
+            }
         }
         return $data;
     }

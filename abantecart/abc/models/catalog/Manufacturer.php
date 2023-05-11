@@ -171,15 +171,42 @@ class Manufacturer extends BaseModel
      */
     public function getAllData()
     {
-        $cache_key = 'manufacturer.alldata.'.$this->getKey();
-        $data = Registry::cache()->get($cache_key);
-        if ($data === null) {
-            $this->load('stores');
-            $data = $this->toArray();
-            $data['images'] = $this->getImages();
-            $data['keyword'] = UrlAlias::getManufacturerKeyword($this->getKey(), static::$current_language_id);
-            Registry::cache()->put($cache_key, $data);
+        if (!$this->getKey()) {
+            return false;
         }
+        $cacheKey = 'manufacturer.alldata.' . $this->getKey();
+        $data = Registry::cache()->get($cacheKey);
+        if ($data !== null) {
+            return $data;
+        }
+
+        // eagerLoading!
+        $toLoad = $nested = [];
+        $rels = $this->getRelationships('HasMany', 'HasOne', 'belongsToMany');
+        foreach ($rels as $relName => $rel) {
+            if (in_array($relName, ['product'])) {
+                continue;
+            }
+            if ($rel['getAllData']) {
+                $nested[] = $relName;
+            } else {
+                $toLoad[] = $relName;
+            }
+        }
+
+        $this->load($toLoad);
+        $data = $this->toArray();
+        foreach ($nested as $prop) {
+            foreach ($this->{$prop} as $option) {
+                /** @var ProductOption $option */
+                $data[$prop][] = $option->getAllData();
+            }
+        }
+
+        $data['images'] = $this->images();
+        $data['keyword'] = UrlAlias::getManufacturerKeyword($this->getKey(), static::$current_language_id);
+        Registry::cache()->put($cacheKey, $data);
+
         return $data;
     }
 
@@ -189,7 +216,7 @@ class Manufacturer extends BaseModel
      * @throws AException
      * @throws InvalidArgumentException
      */
-    public function getImages()
+    public function images()
     {
         $config = Registry::config();
         $images = [];
@@ -268,7 +295,7 @@ class Manufacturer extends BaseModel
         return $images;
     }
 
-    public function getManufacturer($manufacturerId)
+    public static function getManufacturer($manufacturerId)
     {
         $manufacturerId = (int)$manufacturerId;
         if (!$manufacturerId) {
@@ -367,44 +394,44 @@ class Manufacturer extends BaseModel
         return parent::delete();
     }
 
-    public function getManufacturers($params = [])
+    public static function getManufacturers($params = [])
     {
+        $params['sort'] = $params['sort'] ?: 'sort_order';
+        $params['order'] = $params['order'] ?? 'ASC';
+        $params['start'] = max($params['start'], 0);
+        $params['limit'] = abs((int)$params['limit']) ?: 20;
+
+        $filter = (array)$params['filter'];
+        $filter['include'] = $filter['include'] ?? [];
+        $filter['exclude'] = $filter['exclude'] ?? [];
         $db = Registry::db();
         $storeId = $params['store_id'] ?? (int)Registry::config()->get('config_store_id');
         $manTable = $db->table_name('manufacturers');
 
-        $query = self::selectRaw(Registry::db()->raw_sql_row_count() . ' ' . $manTable . '.*')
-            ->leftJoin(
-                'manufacturers_to_stores',
-                         'manufacturers_to_stores.manufacturer_id',
-                         '=',
-                         'manufacturers.manufacturer_id'
-                     );
-        $query->where('manufacturers_to_stores.store_id', '=', $storeId);
+        $query = self::selectRaw(
+            Registry::db()->raw_sql_row_count() . ' ' . $manTable . '.*'
+        )->leftJoin(
+            'manufacturers_to_stores',
+            'manufacturers_to_stores.manufacturer_id',
+            '=',
+            'manufacturers.manufacturer_id'
+        )->where('manufacturers_to_stores.store_id', '=', $storeId);
         //include ids set
-        if (H::has_value($params['include'])) {
-            $filter['include'] = array_map('intval', (array) $params['include']);
+        if ($filter['include']) {
+            $filter['include'] = array_map('intval', (array)$filter['include']);
             $query->whereIn('manufacturers.manufacturer_id', $filter['include']);
         }
         //exclude already selected in chosen element
-        if (H::has_value($params['exclude'])) {
-            $filter['exclude'] = array_map('intval', (array) $params['exclude']);
+        if ($filter['exclude']) {
+            $filter['exclude'] = array_map('intval', (array)$filter['exclude']);
             $query->whereNotIn('manufacturers.manufacturer_id', $filter['exclude']);
         }
 
-        if (H::has_value($params['name'])) {
+        if ($filter['name']) {
             if ($params['search_operator'] == 'equal') {
-                $query->orWhere(
-                    'manufacturers.name',
-                    '=',
-                    mb_strtolower($params['name'])
-                );
+                $query->where('manufacturers.name', '=', $filter['name']);
             } else {
-                $query->orWhere(
-                    'manufacturers.name',
-                    'like',
-                    "%".mb_strtolower($params['name'])."%"
-                );
+                $query->where('manufacturers.name', 'like', "%" . mb_strtolower($filter['name']) . "%");
             }
         }
 
@@ -426,26 +453,11 @@ class Manufacturer extends BaseModel
         }
         $query->orderByRaw($orderBy." ".$sorting);
         //pagination
-        if (isset($params['start']) || isset($params['limit'])) {
-            if ($params['start'] < 0) {
-                $params['start'] = 0;
-            }
-            if ($params['limit'] < 1) {
-                $params['limit'] = 20;
-            }
-            $query->offset((int)$params['start'])->limit((int)$params['limit']);
-        }
+        $query->offset((int)$params['start'])->limit((int)$params['limit']);
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
 
-        $output = $query->useCache('manufacturer')->get();
-
-        //add total number of rows into each row
-        $totalNumRows = $db->sql_get_row_count();
-        for ($i = 0; $i < $output->count(); $i++) {
-            $output[$i]['total_num_rows'] = $totalNumRows;
-        }
-        return $output;
+        return $query->useCache('manufacturer')->get();
     }
 
     /**

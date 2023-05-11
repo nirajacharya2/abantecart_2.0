@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2022 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -25,12 +25,14 @@ use abc\core\engine\AResource;
 use abc\core\lib\AException;
 use abc\core\lib\AListing;
 use abc\models\catalog\Product;
+use abc\modules\traits\ProductListingTrait;
 use Illuminate\Database\Eloquent\Collection;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 
 class ControllerBlocksListingBlock extends AController
 {
+    use ProductListingTrait;
     public function __construct($registry, $instance_id, $controller, $parent_controller = '')
     {
         parent::__construct($registry, $instance_id, $controller, $parent_controller);
@@ -106,87 +108,18 @@ class ControllerBlocksListingBlock extends AController
     }
 
     /**
-     * @param array $data
+     * @param Collection $productList
      * @param string $block_wrapper
      *
+     * @throws AException
      * @throws InvalidArgumentException
      * @throws ReflectionException
-     * @throws AException
      */
-    protected function prepareProducts(array &$data, $block_wrapper = '')
+    protected function prepareProducts(Collection &$productList, $block_wrapper = '')
     {
         $this->loadLanguage('product/product');
-        $products = [];
-        $productImages = array_column($data, 'image', 'product_id');
-
-        foreach ($data as $k => $result) {
-            $product_id = $result['product_id'];
-            if ($result['option_count']) {
-                $add_to_cart = $this->html->getSEOURL(
-                    'product/product',
-                    '&product_id='.$result['product_id'],
-                    '&encode'
-                );
-            } else {
-                if ($this->config->get('config_cart_ajax')) {
-                    $add_to_cart = '#';
-                } else {
-                    $add_to_cart = $this->html->getSecureURL(
-                        'checkout/cart',
-                        '&product_id='.$product_id,
-                        '&encode'
-                    );
-                }
-            }
-
-            if ($result['special_price']) {
-                $special_price = $this->currency->format(
-                    $this->tax->calculate(
-                        $result['special_price'],
-                        $result['tax_class_id'],
-                        $this->config->get('config_tax')
-                    )
-                );
-            } else {
-                $special_price = null;
-            }
-            $products[$k] = $result;
-            $products[$k]['stars'] = sprintf($this->language->get('text_stars'), $result['rating']);
-            $products[$k]['options'] = $result['option_count'];
-            $products[$k]['special'] = $special_price;
-            $products[$k]['href'] = $this->html->getSEOURL(
-                'product/product',
-                '&product_id='.$product_id,
-                '&encode'
-            );
-            $products[$k]['add'] = $add_to_cart;
-            $products[$k]['item_name'] = 'product';
-            $products[$k]['image'] = $productImages[$product_id];
-            $products[$k]['thumb'] = $products[$k]['image'];
-        }
-        if (!current($products)['thumb']) {
-            $data_source = [
-                'rl_object_name' => 'products',
-                'data_type'      => 'product_id',
-            ];
-            //add thumbnails to list of products. 1 thumbnail per product
-            $products = $this->prepareCustomItems($data_source, $products);
-        } else {
-            foreach ($products as &$item) {
-                if (isset($item['price']) && preg_match('/^[0-9.]/', $item['price'])) {
-                    $item['price'] =
-                        $this->currency->format(
-                            $this->tax->calculate(
-                                $item['price'],
-                                $item['tax_class_id'],
-                                $this->config->get('config_tax')
-                            )
-                        );
-                }
-            }
-        }
-        //need to override reference (see params)
-        $data = $products;
+        $this->processList($productList);
+        $productList = $this->data['products'];
 
         // set sign of displaying prices on storefront
         if ($this->config->get('config_customer_price')) {
@@ -199,7 +132,7 @@ class ControllerBlocksListingBlock extends AController
         $this->view->assign('display_price', $display_price);
         $this->view->assign('review_status', $this->config->get('enable_reviews'));
 
-        $this->view->assign('products', $products);
+        $this->view->assign('products', $this->data['products']);
         $vertical_tpl = [
             'blocks/listing_block_column_left.tpl',
             'blocks/listing_block_column_right.tpl',
@@ -213,14 +146,13 @@ class ControllerBlocksListingBlock extends AController
                 : 'blocks/special_home.tpl';
         }
         $this->view->setTemplate($template);
-        ##### TEST!!!
     }
 
     /**
      * @param array $content
      *
      * @return array
-     * @throws AException|ReflectionException
+     * @throws AException|InvalidArgumentException
      */
     protected function prepareItems($content = [])
     {
@@ -343,17 +275,18 @@ class ControllerBlocksListingBlock extends AController
             if ($route == 'collection' && $content['collection_id']) {
                 $args['collection_id'] = $content['collection_id'];
             }
-            if (class_exists($data_source['storefront_model'])) {
-                $mdl = new $data_source['storefront_model'];
+            if (class_exists($data_source['model'])) {
+                $mdl = new $data_source['model'];
             } else {
-                $mdl = $this->load->model($data_source['storefront_model']);
+                return false;
             }
 
             $args = $listing->getListingMethodArguments(
-                $data_source['storefront_model'],
-                $data_source['storefront_method'],
+                $data_source['model'],
+                $content['listing_datasource'],
                 $args
             );
+
             if ($args === false) {
                 return false;
             }
@@ -361,15 +294,16 @@ class ControllerBlocksListingBlock extends AController
             $result = call_user_func_array(
                 [
                     $mdl,
-                    $data_source['storefront_method'],
+                    $data_source['method'],
                 ],
                 $args
             );
-            $result = $result instanceof Collection ? $result->toArray() : (array) $result;
+
+            $result = $result instanceof Collection ? $result : (array)$result;
             if ($result) {
                 $desc = $listing->getListingDataSources();
                 foreach ($desc as $d) {
-                    if ($d['storefront_method'] == $data_source['storefront_method']) {
+                    if ($d['method'] == $data_source['method']) {
                         $data_source = $d;
                         break;
                     }
@@ -377,7 +311,7 @@ class ControllerBlocksListingBlock extends AController
             }
         }
 
-        if ($result && !current($result)['thumb']) {
+        if ($result && $data_source['model'] != Product::class && !current($result)['thumb']) {
             //add thumbnails to custom list of items. 1 thumbnail per item
             $result = $this->prepareCustomItems($data_source, $result);
         }
@@ -500,19 +434,12 @@ class ControllerBlocksListingBlock extends AController
         if (!$data_source['rl_object_name']) {
             return $inData;
         }
+        $inData = $inData instanceof Collection ? $inData->toArray() : $inData;
         $resource = new AResource('image');
         $image_sizes = [];
         if ($inData) {
             if ($data_source['rl_object_name']) {
                 switch ($data_source['rl_object_name']) {
-                    case 'products':
-                        $image_sizes = [
-                            'thumb' => [
-                                'width'  => $this->config->get('config_image_product_width'),
-                                'height' => $this->config->get('config_image_product_height'),
-                            ],
-                        ];
-                        break;
                     case 'categories':
                         $image_sizes = [
                             'thumb' => [
@@ -554,16 +481,6 @@ class ControllerBlocksListingBlock extends AController
             foreach ($inData as &$item) {
                 $thumbnail = $thumbnails[$item[$data_source['data_type']]];
                 $item['image'] = $item['thumb'] = $thumbnail;
-                if (isset($item['price']) && preg_match('/^[0-9.]/', $item['price'])) {
-                    $item['price'] =
-                        $this->currency->format(
-                            $this->tax->calculate(
-                                $item['price'],
-                                $item['tax_class_id'],
-                                $this->config->get('config_tax')
-                            )
-                        );
-                }
             }
         }
         return $inData;

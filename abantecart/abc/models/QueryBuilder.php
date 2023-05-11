@@ -21,8 +21,11 @@ namespace abc\models;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\AbcCache;
+use Illuminate\Cache\FileStore;
 use Illuminate\Cache\RedisTaggedCache;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 
 class QueryBuilder extends Builder
 {
@@ -30,19 +33,7 @@ class QueryBuilder extends Builder
     protected $cacheStatus = false;
     protected $cacheStore = '';
     protected $cacheTags = [];
-
-    /**
-     * Returns a Unique String that can identify this Query.
-     *
-     * @return string
-     */
-    protected function getCacheKey(AbcCache $cache)
-    {
-        $key = 'sql_' . md5($this->toSql() . '~' . var_export($this->getBindings(), true));
-        /** @var RedisTaggedCache $repository */
-        $repository = $cache->tags($this->cacheTags);
-        return method_exists($repository, 'taggedItemKey') ? $repository->taggedItemKey($key) : $key;
-    }
+    protected $cacheKey = '';
 
     /**
      * Wrapper to use cache for some generated queries
@@ -54,20 +45,65 @@ class QueryBuilder extends Builder
     {
         $cache = Registry::cache();
         if (!$this->cacheStatus || !$cache instanceof AbcCache) {
+            $this->cacheKey = '';
             return parent::runSelect();
         }
 
+        $key = 'sql_' . md5($this->toSql() . '~' . var_export($this->getBindings(), true));
+        /** @var RedisTaggedCache|FileStore $repository */
+        $repository = $cache->tags($this->cacheTags);
+        $this->cacheKey = $cacheKey = method_exists($repository, 'taggedItemKey')
+            ? $repository->taggedItemKey($key)
+            : ($this->cacheTags ? implode('.', $this->cacheTags).'.' : '') .$key;
+        $ttl = (int)ABC::env('CACHE')['stores'][$cache::$currentStore]['ttl'] ?: 777;
         $output = $cache->remember(
-            $this->getCacheKey($cache),
-            //ttl
-            (int)ABC::env('CACHE')['stores'][$cache::$currentStore]['ttl'] ?: 777,
-            function () {
-                return parent::runSelect();
+            $cacheKey,
+            $ttl,
+            function () use ($cacheKey, $ttl) {
+                $result = parent::runSelect();
+                //NOTE: saving of total founded rows count
+                if (str_contains($this->toSql(), Registry::db()->raw_sql_row_count())) {
+                    Registry::cache()->put(
+                        $cacheKey . '_total_rows_count',
+                        Registry::db()->sql_get_row_count(),
+                        $ttl
+                    );
+                }
+                return $result;
             }
         );
 
         $this->cacheStatus = false;
         return $output;
+    }
+
+    /**
+     * Execute the query as a "select" statement.
+     *
+     * @param array|string $columns
+     * @return Collection
+     */
+    public function get($columns = ['*'])
+    {
+        $collection = collect($this->onceWithColumns(Arr::wrap($columns), function () {
+            return $this->processor->processSelect($this, $this->runSelect());
+        }));
+
+
+        //add additional property into collection (total found rows count)
+        if (str_contains($this->toSql(), Registry::db()->raw_sql_row_count())) {
+            $foundRowsCount = $this->cacheKey
+                ? Registry::cache()->get($this->cacheKey . '_total_rows_count')
+                : Registry::db()->sql_get_row_count();
+            $collection::macro(
+                'getFoundRowsCount',
+                function () use ($foundRowsCount) {
+                    return $foundRowsCount;
+                }
+            );
+        }
+
+        return $collection;
     }
 
     public function setGridRequest($data = [])

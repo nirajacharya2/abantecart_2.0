@@ -22,6 +22,7 @@ namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
+use abc\core\engine\Registry;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AJson;
@@ -57,8 +58,7 @@ class ControllerResponsesListingGridProduct extends AController
                     'search_by' => [
                         'name',
                         'model',
-                        'sku',
-                        'supplier'
+                        'sku'
                     ]
                 ]
             ],
@@ -95,9 +95,12 @@ class ControllerResponsesListingGridProduct extends AController
         $this->loadLanguage('catalog/product');
         $this->loadModel('tool/image');
 
-        $results = Product::getProducts($this->data['search_parameters']);
 
-        $total = $results[0]['total_num_rows'];
+        $results = Product::getProducts($this->data['search_parameters']);
+        //push result into public scope to get access from extensions
+        $this->data['results'] = $results;
+
+        $total = $results::getFoundRowsCount();
         $total_pages = $total > 0 ? ceil($total / $limit) : 0;
         $response = new stdClass();
         $response->page = $page;
@@ -188,14 +191,13 @@ class ControllerResponsesListingGridProduct extends AController
 
         switch ($this->request->post['oper']) {
             case 'del':
-                $ids = explode(',', $this->request->post['id']);
-                if (!empty($ids)) {
-                    $ids = array_unique($ids);
+                $ids = array_unique(explode(',', $this->request->post['id']));
+                if ($ids) {
                     $this->db->beginTransaction();
                     try {
                         foreach ($ids as $id) {
                             $err = $this->validateDelete($id);
-                            if (!empty($err)) {
+                            if ($err) {
                                 $error = new AError('');
                                 $error->toJSONResponse(
                                     'VALIDATION_ERROR_406',
@@ -206,15 +208,18 @@ class ControllerResponsesListingGridProduct extends AController
                                 return;
                             }
                             $product = Product::with('categories')->find($id);
-                            $categories = $product->categories;
-
-                            $product->forceDelete();
-                            //run products count recalculation
-                            foreach ($categories as $item) {
-                                $item->touch();
+                            if ($product) {
+                                $this->extensions->hk_ProcessData($this, 'deleting', ['product_id' => $id]);
+                                $categories = $product->categories;
+                                $product->delete();
+                                //run products count recalculation
+                                foreach ($categories as $item) {
+                                    $item->touch();
+                                }
                             }
                         }
                         $this->db->commit();
+                        Registry::cache()->flush('product');
                     } catch (Exception $e) {
                         $this->db->rollback();
                         $error = new AError($e->getMessage());
@@ -271,7 +276,6 @@ class ControllerResponsesListingGridProduct extends AController
                     Product::relateProducts($ids);
                 }
                 break;
-            default:
         }
 
         //update controller data
@@ -517,6 +521,6 @@ class ControllerResponsesListingGridProduct extends AController
         $this->data['error'] = '';
         $this->extensions->hk_ValidateData($this, __FUNCTION__, $id);
 
-        return (!$this->data['error']);
+        return $this->data['error'];
     }
 }

@@ -64,6 +64,8 @@ class ControllerResponsesListingGridTask extends AController
             $total_pages = 0;
         }
         $results = $tm->getTasks($filter_data);
+        //push result into public scope to get access from extensions
+        $this->data['results'] = $results;
 
         $response = new stdClass ();
         $response->page = $page;

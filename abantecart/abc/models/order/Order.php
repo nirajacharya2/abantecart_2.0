@@ -38,8 +38,6 @@ use abc\modules\events\ABaseEvent;
 use Carbon\Carbon;
 use Exception;
 use H;
-use Dyrynda\Database\Support\CascadeSoftDeletes;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -118,15 +116,6 @@ use Psr\SimpleCache\InvalidArgumentException;
  */
 class Order extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
-
-    protected $cascadeDeletes = [
-        'data',
-        'order_products',
-        'downloads', //see Download model. there cascade deleting too
-        'totals',
-    ];
-
     protected $primaryKey = 'order_id';
 
     /**
@@ -838,7 +827,7 @@ class Order extends BaseModel
 
         $this->attributes = $data;
         Registry::cache()->flush('order');
-        return parent::save($options);
+        parent::save($options);
     }
 
     public function store()
@@ -898,9 +887,7 @@ class Order extends BaseModel
 
     public function delete()
     {
-
         if (Registry::config()->get('config_stock_subtract') && $this->attributes['order_status_id'] > 0) {
-
             $orderProducts = OrderProduct::where('order_id', '=', $this->order_id)->get();
             if ($orderProducts) {
                 foreach ($orderProducts as $orderProduct) {
@@ -933,8 +920,9 @@ class Order extends BaseModel
                 }
             }
         }
+
         parent::delete();
-        Registry::cache()->flush('order');
+        Registry::cache()->flush(['order', 'customer']);
 
     }
 
@@ -1771,13 +1759,11 @@ class Order extends BaseModel
 
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $inputData);
-        $result_rows = $query->useCache('order')->get();
+        $result_rows = $query->useCache(['order', 'customer'])->get();
 
         //finally decrypt data and return result
-        $totalNumRows = $db->sql_get_row_count();
         for ($i = 0; $i < $result_rows->count(); $i++) {
             $result_rows[$i] = $dcrypt->decrypt_data($result_rows[$i], 'orders');
-            $result_rows[$i]['total_num_rows'] = $totalNumRows;
         }
 
         return $result_rows;
@@ -1810,6 +1796,6 @@ class Order extends BaseModel
             ->groupBy('customer_id');
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $customers_ids);
-        return $query->useCache('order')->get()?->pluck('count', 'customer_id')->toArray();
+        return $query->useCache(['order', 'customer'])->get()?->pluck('count', 'customer_id')->toArray();
     }
 }

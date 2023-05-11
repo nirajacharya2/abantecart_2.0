@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -18,7 +18,8 @@
 namespace abc\modules\injections\models;
 
 use abc\models\BaseModel;
-use Illuminate\Database\Eloquent\Collection;
+use Exception;
+use Illuminate\Support\Collection;
 
 class ModelSearch
 {
@@ -30,10 +31,10 @@ class ModelSearch
     public function __construct(BaseModel $model)
     {
         if (!$model::$searchMethod) {
-            throw new \Exception('Model '.$model->getClass().' does not support searching.');
+            throw new Exception('Model ' . $model->getClass() . ' does not support searching.');
         }
         if (!method_exists($model, $model::$searchMethod)) {
-            throw new \Exception('Model '.$model->getClass().' does not have search method '.$model::$searchMethod.'.');
+            throw new Exception('Model ' . $model->getClass() . ' does not have search method ' . $model::$searchMethod . '.');
         }
         $this->modelObj = $model;
     }

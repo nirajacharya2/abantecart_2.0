@@ -248,17 +248,41 @@ class Category extends BaseModel
      */
     public function getAllData()
     {
-        $cache_key = 'category.alldata.' . $this->getKey();
-        $data = Registry::cache()->get($cache_key);
-        if ($data === null) {
-            $this->load('descriptions', 'stores');
-            $data = $this->toArray();
-            $data['images'] = $this->getImages();
-            if ($this->getKey()) {
-                $data['keywords'] = UrlAlias::getKeyWordsArray($this->getKeyName(), $this->getKey());
-            }
-            Registry::cache()->put($cache_key, $data);
+        if (!$this->getKey()) {
+            return false;
         }
+        $cacheKey = 'category.alldata.' . $this->getKey();
+        $data = Registry::cache()->get($cacheKey);
+        if ($data !== null) {
+            return $data;
+        }
+
+        // eagerLoading!
+        $toLoad = $nested = [];
+        $rels = $this->getRelationships('HasMany', 'HasOne', 'belongsToMany');
+        foreach ($rels as $relName => $rel) {
+            if (in_array($relName, ['products', 'description'])) {
+                continue;
+            }
+            if ($rel['getAllData']) {
+                $nested[] = $relName;
+            } else {
+                $toLoad[] = $relName;
+            }
+        }
+
+        $this->load($toLoad);
+        $data = $this->toArray();
+        foreach ($nested as $prop) {
+            foreach ($this->{$prop} as $option) {
+                /** @var ProductOption $option */
+                $data[$prop][] = $option->getAllData();
+            }
+        }
+
+        $data['images'] = $this->images();
+        $data['keywords'] = UrlAlias::getKeyWordsArray($this->getKeyName(), $this->getKey());
+        Registry::cache()->put($cacheKey, $data);
         return $data;
     }
 
@@ -268,7 +292,7 @@ class Category extends BaseModel
      * @throws AException
      * @throws InvalidArgumentException
      */
-    public function getImages()
+    public function images()
     {
         $config = Registry::config();
         $images = [];
@@ -816,9 +840,7 @@ class Category extends BaseModel
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
         $items = $query->useCache('category')->get();
-        $items->total = $total_num_rows = Registry::db()->sql_get_row_count();
         foreach ($items as &$item) {
-            $item['total_num_rows'] = $total_num_rows;
             if ($params['basename']) {
                 $item->name = $item->basename;
             } else {
@@ -926,7 +948,7 @@ class Category extends BaseModel
                 $data['parent_id'] = (int)$data['parent_id'] > 0 ? (int)$data['parent_id'] : null;
             }
 
-            $category = self::withTrashed()->find($categoryId);
+            $category = self::find($categoryId);
             $category->update($data);
 
             if (!empty($data['category_description'])) {

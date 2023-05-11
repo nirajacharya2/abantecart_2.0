@@ -44,9 +44,11 @@ trait ProductListingTrait
     /**
      * @param Collection|array $list
      * @return void
-     * @throws InvalidArgumentException|ReflectionException|AException
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
-    public function processList(Collection|array $list)
+    public function processList(Collection|array $list, ?array $options = [])
     {
         $cart_rt = $this->config->get('embed_mode') ? 'r/checkout/cart/embed' : 'checkout/cart';
 
@@ -64,8 +66,8 @@ trait ProductListingTrait
         $thumbnails = $resource->getMainThumbList(
             'products',
             $productIds,
-            $this->config->get('config_image_product_width'),
-            $this->config->get('config_image_product_height')
+            $options['image_width'] ?: $this->config->get('config_image_product_width'),
+            $options['image_height'] ?: $this->config->get('config_image_product_height')
         );
 
         /** @var stdClass|Collection|Product $result */

@@ -122,7 +122,7 @@ class ARest
 
     public function clearRequestParams()
     {
-        $this->request['params'] = null;
+        $this->request['params'] = [];
     }
 
     /*

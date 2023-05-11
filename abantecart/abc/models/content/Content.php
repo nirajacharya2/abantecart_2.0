@@ -28,10 +28,10 @@ use abc\models\catalog\UrlAlias;
 use Exception;
 use H;
 use Illuminate\Contracts\Database\Eloquent\Castable;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Collection;
 use Psr\SimpleCache\InvalidArgumentException;
 
 /**
@@ -134,7 +134,7 @@ class Content extends BaseModel
 
     /**
      * @param $params
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
     public static function getContents($params = [])
     {
@@ -280,12 +280,9 @@ class Content extends BaseModel
             $params['start'] = max(0, $params['start']);
             $query->offset((int)$params['start'])->limit((int)$params['limit']);
         }
-
         $output = $query->useCache('content')->get();
 
-
         //add total number of rows into each row
-        $totalNumRows = $db->sql_get_row_count();
         $cd = new ContentDescription();
         $casts = $cd->getCasts();
         foreach ($output as &$item) {
@@ -298,7 +295,6 @@ class Content extends BaseModel
                     }
                 }
             }
-            $item->total_num_rows = $totalNumRows;
         }
         return $output;
     }
@@ -400,7 +396,7 @@ class Content extends BaseModel
             $content = static::find($contentId);
 
             if (!$content) {
-                throw new \Exception(__FUNCTION__ . ': Content #' . $contentId . ' not found');
+                throw new Exception(__FUNCTION__ . ': Content #' . $contentId . ' not found');
             }
 
             $content->update($data);
@@ -448,7 +444,7 @@ class Content extends BaseModel
             }
 
             $db->commit();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $db->rollback();
             Registry::log()->error($e->getMessage());
             return false;

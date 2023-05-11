@@ -417,8 +417,10 @@ class ModelToolImportProcess extends Model
 
         $this->data['product_data']['product_id'] = $product_id;
         if ($status) {
-            //call event
-            H::event(__CLASS__ . '@' . __FUNCTION__, [new ABaseEvent($this->task_id, $product_id, $data, $record)]);
+            H::event(
+                __CLASS__ . '@' . __FUNCTION__,
+                [new ABaseEvent($this->task_id, $product_id, $data, $record)]
+            );
         }
 
         return $status;
@@ -592,7 +594,7 @@ class ModelToolImportProcess extends Model
 
         //delete existing options and values.
         if ($product->options->count()) {
-            $product->options?->delete();
+            ProductOption::where('product_id', '=', $productId)?->delete();
         }
 
         //add new options for each option
@@ -662,9 +664,13 @@ class ModelToolImportProcess extends Model
             $optionValues = (array)$dataRow['product_option_values'];
 
             //find the largest key by count
-            $counts = @array_map('count', $optionValues);
+            $counts = [];
+            foreach ($optionValues as $optValue) {
+                $counts[] = is_array($optValue) ? count($optValue) : 0;
+            }
+            $counts = array_unique($counts);
             $ids = [];
-            if (max($counts) == 1) {
+            if (max($counts) < 2) {
                 //single option value case
                 $ids[] = $this->saveOptionValue($productId, $weightClassId, $optionId, $optionValues);
             } else {
@@ -717,7 +723,7 @@ class ModelToolImportProcess extends Model
         }
         $result = null;
         foreach ($updateBy as $colName => $colValue) {
-            $result = ProductOptionValue::select('product_option_values.*, product_option_value_descriptions.*')
+            $result = ProductOptionValue::select(['product_option_values.*', 'product_option_value_descriptions.*'])
                 ->leftJoin(
                     'product_option_value_descriptions',
                     'product_option_value_descriptions.product_option_value_id',

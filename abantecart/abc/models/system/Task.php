@@ -43,20 +43,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Task extends BaseModel
 {
-    use SoftDeletes;
-
     protected $primaryKey = 'task_id';
-    public $timestamps = false;
 
     protected $casts = [
+        'name'               => 'string',
         'starter'            => 'int',
         'status'             => 'int',
+        'start_time'         => 'datetime',
+        'last_time_run'      => 'datetime',
         'progress'           => 'int',
         'last_result'        => 'int',
         'run_interval'       => 'int',
         'max_execution_time' => 'int',
-        'start_time'         => 'datetime',
-        'last_time_run'      => 'datetime',
         'date_added'         => 'datetime',
         'date_modified'      => 'datetime'
     ];
@@ -70,8 +68,6 @@ class Task extends BaseModel
         'progress',
         'last_result',
         'run_interval',
-        'max_execution_time',
-        'date_added',
-        'date_modified',
+        'max_execution_time'
     ];
 }

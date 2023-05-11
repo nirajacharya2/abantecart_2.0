@@ -20,6 +20,7 @@
 
 namespace abc\controllers\admin;
 
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\models\order\Order;
 use abc\models\order\OrderStatus;
@@ -78,10 +79,10 @@ class ControllerPagesSaleOrderSummary extends AController
                 $this->data['customer'] = [
                     'name'  => $this->data['order']['customer_name'],
                     'href'  => $this->html->getSecureURL('sale/customer/update',
-                        '&customer_id='.$order_info['customer_id']),
+                        '&customer_id='. $order_info['customer_id']),
                     //viewport URL
                     'vhref' => $this->html->getSecureURL('r/common/viewport',
-                        '&viewport_rt=sale/customer/update&customer_id='.$order_info['customer_id']),
+                        '&viewport_rt=sale/customer/update&customer_id=' . $order_info['customer_id']),
                 ];
             } else {
                 $this->data['customer'] = [
@@ -89,17 +90,20 @@ class ControllerPagesSaleOrderSummary extends AController
                 ];
             }
 
-            $this->data['auditLog'] = $this->html->buildElement([
-                'type'  => 'button',
-                'text'  => $this->language->get('text_audit_log'),
-                'href'  => $this->html->getSecureURL('tool/audit_log',
-                    '&modal_mode=1&auditable_type=Order&auditable_id='.$order_info['order_id']),
-                //quick view port URL
-                'vhref' => $this->html->getSecureURL(
-                    'r/common/viewport/modal',
-                    '&viewport_rt=tool/audit_log&modal_mode=1&auditable_type=Order&auditable_id='
-                    .$order_info['order_id']),
-            ]);
+            if ($this->registry->get('AuditLogStorage') || ABC::getObjectByAlias('AuditLogStorage')) {
+                $this->data['auditLog'] = $this->html->buildElement([
+                        'type'  => 'button',
+                        'text'  => $this->language->get('text_audit_log'),
+                        'href'  => $this->html->getSecureURL('tool/audit_log',
+                            '&modal_mode=1&auditable_type=Order&auditable_id=' . $order_info['order_id']),
+                        //quick view port URL
+                        'vhref' => $this->html->getSecureURL(
+                            'r/common/viewport/modal',
+                            '&viewport_rt=tool/audit_log&modal_mode=1&auditable_type=Order&auditable_id='
+                            . $order_info['order_id']),
+                    ]
+                );
+            }
 
             $status = OrderStatus::with('description')->find($order_info['order_status_id']);
             if ($status) {

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -23,7 +23,6 @@ namespace abc\controllers\storefront;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\models\customer\CustomerTransaction;
-use Cake\Database\Exception;
 use Carbon\Carbon;
 use H;
 
@@ -139,21 +138,18 @@ class ControllerPagesAccountTransactions extends AController
             'start'       => ($page - 1) * $limit,
             'limit'       => $limit,
             'filter'      => [
-                'date_start' => date(
-                    'Y-m-d',
-                    strtotime(H::dateDisplay2ISO($this->data['date_start']->value))
-                ),
-                'date_end'   => date(
-                    'Y-m-d',
-                    strtotime(H::dateDisplay2ISO($this->data['date_end']->value))
-                ),
+                'date_start' => Carbon::parse(H::dateDisplay2ISO($this->data['date_start']->value))
+                    ->startOfDay()->toDateTimeString(),
+                'date_end'   => Carbon::parse(H::dateDisplay2ISO($this->data['date_end']->value))
+                    ->endOfDay()->toDateTimeString(),
             ],
             'customer_id' => (int) $this->customer->getId(),
         ];
 
         $results = CustomerTransaction::getTransactions($data);
+        $trans_total = $results::getFoundRowsCount();
         $results = $results->toArray();
-        $trans_total = $results[0]['total_num_rows'];
+
         if (count($results)) {
             foreach ($results as $result) {
                 $result['date_added'] = Carbon::parse($result['date_added'])
@@ -203,5 +199,4 @@ class ControllerPagesAccountTransactions extends AController
         //init controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
-
 }

@@ -143,7 +143,10 @@ if ($mode == 'ajax') {
         $err = new AError('task run error');
         $err->toJSONResponse(
             'APP_ERROR_402',
-            ['error_text' => implode("\n", $run_log)]
+            [
+                'error_text' => implode("\n", $run_log),
+                'request'    => $_GET
+            ]
         );
         exit;
     }
