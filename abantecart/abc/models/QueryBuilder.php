@@ -98,7 +98,7 @@ class QueryBuilder extends Builder
             $collection::macro(
                 'getFoundRowsCount',
                 function () use ($foundRowsCount) {
-                    return $foundRowsCount;
+                    return (int)$foundRowsCount;
                 }
             );
         }
