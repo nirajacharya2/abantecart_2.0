@@ -224,12 +224,13 @@ class ControllerResponsesCommonExportTask extends AController
         $task_result = $task_info['last_result'];
         if ($task_result) {
             $tm->deleteTask($task_id);
-            rename($this->getExportFile($task_id), $this->getPublicExportFile($task_id));
-            @unlink($this->getExportFile($task_id));
-            $downloadLink = $this->html->getHomeURL().'export/'.$this->zipFile;
+            $resultFile = $this->getExportFile($task_id);
+            $tmpFile = $this->getPublicExportFilePath($task_id);
+            rename($resultFile, ABC::env('DIR_SYSTEM').$tmpFile);
+            @unlink($resultFile);
+            $downloadLink = $this->html->getSecureURL('r/common/export_task/downloadFile', '&file='.$tmpFile);
             $result_text = '<a href="'.$downloadLink.'">'
-                .$this->language->get('text_export_task_download')
-                .'</a>';
+                .$this->language->get('text_export_task_download').'</a>';
         } else {
             $result_text = $this->language->get('text_export_task_failed');
         }
@@ -302,7 +303,10 @@ class ControllerResponsesCommonExportTask extends AController
 
         if ($this->user->canAccess('tool/backup')) {
             $filename = str_replace(['../', '..\\',], '', $this->request->get['file']);
-            $file = ABC::env('DIR_SYSTEM').'export'.DS.$filename;
+            //look into temporary directory first, then dig into system/export directory
+            $file = is_file(ABC::env('DIR_SYSTEM').$filename) &&  str_starts_with($filename, 'temp')
+                ? ABC::env('DIR_SYSTEM').$filename
+                : ABC::env('DIR_SYSTEM').'export'.DS.$filename;
             if (file_exists($file)) {
                 header('Content-Description: File Transfer');
                 header('Content-Type: application/x-gzip');
@@ -350,10 +354,10 @@ class ControllerResponsesCommonExportTask extends AController
         return ABC::env('DIR_SYSTEM').'export'.DS.'export_'.$taskId.'.csv';
     }
 
-    private function getPublicExportFile($taskId)
+    private function getPublicExportFilePath($taskId)
     {
-        if (!file_exists(ABC::env('DIR_PUBLIC').'export')) {
-            if (!mkdir($concurrentDirectory = ABC::env('DIR_PUBLIC').'export', 0775, true)
+        if (!file_exists(ABC::env('DIR_SYSTEM').'temp'.DS.'export')) {
+            if (!mkdir($concurrentDirectory = ABC::env('DIR_SYSTEM').'temp'.DS.'export', 0775, true)
                 && !is_dir($concurrentDirectory)
             ) {
                 throw new RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
@@ -362,6 +366,6 @@ class ControllerResponsesCommonExportTask extends AController
 
         $this->zipFile = 'export_'.$taskId.microtime(true).'.csv';
 
-        return ABC::env('DIR_PUBLIC').'export'.DS.$this->zipFile;
+        return 'temp'.DS.'export'.DS.$this->zipFile;
     }
 }
