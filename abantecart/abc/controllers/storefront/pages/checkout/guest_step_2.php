@@ -366,7 +366,7 @@ class ControllerPagesCheckoutGuestStep2 extends AController
             ]);
 
         if ($this->config->get('config_checkout_id')) {
-            $content_info = Content::getContent($this->config->get('config_checkout_id'))?->toArray();
+            $content_info = Content::getContent((int)$this->config->get('config_checkout_id'))?->toArray();
             if ($content_info) {
                 $this->data['text_agree'] = $this->language->get('text_agree');
                 $this->data['text_agree_href'] = $this->html->getURL(
@@ -443,7 +443,7 @@ class ControllerPagesCheckoutGuestStep2 extends AController
             }
         }
         if ($this->config->get('config_checkout_id')) {
-            $content_info = Content::getContent($this->config->get('config_checkout_id'))?->toArray();
+            $content_info = Content::getContent((int)$this->config->get('config_checkout_id'))?->toArray();
             if ($content_info) {
                 if (!isset($post['agree'])) {
                     $this->error['warning'] = sprintf($this->language->get('error_agree'), $content_info['title']);

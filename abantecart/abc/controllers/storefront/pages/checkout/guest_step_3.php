@@ -254,7 +254,7 @@ class ControllerPagesCheckoutGuestStep3 extends AController
         }
 
         if ($this->config->get('config_checkout_id')) {
-            $content_info = Content::getContent($this->config->get('config_checkout_id'))?->toArray();
+            $content_info = Content::getContent((int)$this->config->get('config_checkout_id'))?->toArray();
             if ($content_info) {
                 $this->data['text_accept_agree'] = $this->language->get('text_accept_agree');
                 $this->data['text_accept_agree_href'] = $this->html->getURL(

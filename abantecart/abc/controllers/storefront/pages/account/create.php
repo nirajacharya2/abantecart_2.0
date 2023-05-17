@@ -387,7 +387,7 @@ class ControllerPagesAccountCreate extends AController
         $this->data['newsletter'] = $this->request->post['newsletter'];
 
         if ($this->config->get('config_account_id')) {
-            $content_info = Content::getContent($this->config->get('config_account_id'))?->toArray();
+            $content_info = Content::getContent((int)$this->config->get('config_account_id'))?->toArray();
             if ($content_info) {
                 $text_agree = $this->language->get('text_agree');
                 $this->data['text_agree_href'] = $this->html->getURL(
