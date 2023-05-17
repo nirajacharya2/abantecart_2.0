@@ -34,7 +34,7 @@ class ExtensionGdpr extends Extension
     {
         $that = $this->baseObject;
         $that->view->batchAssign($that->language->getASet('gdpr/gdpr'));
-        $content_info = Content::getContent($that->config->get('config_account_id'))?->toArray();
+        $content_info = Content::getContent((int)$that->config->get('config_account_id'))?->toArray();
         $gdpr_expiration_days = $that->config->get('gdpr_expiration_days');
 
         $agree_href = $content_info
@@ -123,7 +123,7 @@ class ExtensionGdpr extends Extension
         $that = $this->baseObject;
         $that->loadLanguage('account/create');
         $that->loadLanguage('gdpr/gdpr');
-        $content_info = Content::getContent($that->config->get('config_account_id'))?->toArray();
+        $content_info = Content::getContent((int)$that->config->get('config_account_id'))?->toArray();
         if ($content_info){
             $text_agree_href = $that->html->getURL(
                 'r/content/content/loadInfo',
@@ -251,7 +251,7 @@ $("#gdpr_erase")
         $that->loadLanguage('account/create');
         $that->loadLanguage('account/edit');
         $that->loadLanguage('gdpr/gdpr');
-        $content_info = Content::getContent($that->config->get('config_account_id'))?->toArray();
+        $content_info = Content::getContent((int)$that->config->get('config_account_id'))?->toArray();
         if ($content_info){
             $text_agree_href = $that->html->getURL(
                 'r/content/content/loadInfo',

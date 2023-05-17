@@ -52,7 +52,7 @@ class ControllerResponsesContentContent extends AController {
 				$content_id = $this->config->get('config_checkout_id');
 			}
 		}
-        $content_info = Content::getContent($content_id)?->toArray();
+        $content_info = Content::getContent((int)$content_id)?->toArray();
         $this->view->assign('title', $content_info['title']);
 		$this->view->assign('description', html_entity_decode($content_info['description']) );
 		$this->view->assign('content', html_entity_decode($content_info['content']) );

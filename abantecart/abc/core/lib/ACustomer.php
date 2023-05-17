@@ -1246,7 +1246,7 @@ class ACustomer extends ALibBase
         }
 
         if (!$isLogged && $config->get('config_account_id')) {
-            $content_info = Content::getContent($config->get('config_account_id'))?->toArray();
+            $content_info = Content::getContent((int)$config->get('config_account_id'))?->toArray();
             if ($content_info) {
                 if (!isset($data['agree'])) {
                     static::$errors['warning'] = sprintf($language->get('error_agree'), $content_info['title']);

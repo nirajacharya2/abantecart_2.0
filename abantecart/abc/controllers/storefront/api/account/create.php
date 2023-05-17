@@ -322,7 +322,7 @@ class ControllerApiAccountCreate extends AControllerAPI
         ];
 
         if ($this->config->get('config_account_id')) {
-            $content_info = Content::getContent($this->config->get('config_account_id'))?->toArray();
+            $content_info = Content::getContent((int)$this->config->get('config_account_id'))?->toArray();
             if ($content_info) {
                 $text_agree = sprintf($this->language->get('text_agree'),
                     $this->html->getURL(
