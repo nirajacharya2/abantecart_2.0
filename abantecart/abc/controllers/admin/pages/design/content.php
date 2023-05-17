@@ -293,7 +293,7 @@ class ControllerPagesDesignContent extends AController
         $content_info = [];
         if ($content_id) {
             Content::setCurrentLanguageID($this->data['language_id']);
-            $content_info = (array)Content::getContent($content_id)?->toArray();
+            $content_info = (array)Content::getContent((int)$content_id)?->toArray();
         }
 
         $this->document->initBreadcrumb(
@@ -611,8 +611,8 @@ class ControllerPagesDesignContent extends AController
         $this->loadLanguage('design/layout');
         $this->document->setTitle($this->language->get('update_title'));
 
-        $content_id = $this->request->get['content_id'];
-        if (!H::has_value($content_id)) {
+        $content_id = (int)$this->request->get['content_id'];
+        if (!$content_id) {
             abc_redirect($this->html->getSecureURL('design/content'));
         }
 
@@ -778,7 +778,7 @@ class ControllerPagesDesignContent extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        if (!H::has_value($content_id)) {
+        if (!$content_id) {
             abc_redirect($this->html->getSecureURL('design/content'));
         }
 
@@ -801,7 +801,7 @@ class ControllerPagesDesignContent extends AController
 
                 $default_language_id = $this->language->getDefaultLanguageID();
                 Content::setCurrentLanguageID($default_language_id);
-                $content_info = Content::getContent($content_id);
+                $content_info = Content::getContent((int)$content_id);
                 if ($content_info) {
                     $page_info['page_descriptions'][$default_language_id]['name'] = $content_info['name'];
                 }

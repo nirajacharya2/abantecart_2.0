@@ -156,7 +156,7 @@ class ControllerApiCheckoutConfirm extends ASecureControllerAPI
         }
 
         if ($this->config->get('config_checkout_id')) {
-            $contentInfo = Content::getContent($this->config->get('config_checkout_id'))?->toArray();
+            $contentInfo = Content::getContent((int)$this->config->get('config_checkout_id'))?->toArray();
             if ($contentInfo) {
                 $this->data['text_accept_agree'] = sprintf(
                     $this->language->get('text_accept_agree'),
